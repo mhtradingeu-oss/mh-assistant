@@ -1839,35 +1839,13 @@ select {
 .workflows-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.workflows-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.12), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(31, 111, 235, 0.15);
-}
-
-.workflows-hero-copy {
-  min-width: 0;
-}
-
-.workflows-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 16px;
 }
 
 .workflows-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.35fr) minmax(320px, 0.9fr);
-  gap: 20px;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
 }
 
@@ -1878,12 +1856,19 @@ select {
 .workflow-routing-list,
 .workflow-history-list {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.workflow-section-copy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .workflow-card {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text);
@@ -1903,6 +1888,10 @@ select {
   border-color: rgba(31, 111, 235, 0.28);
 }
 
+.workflow-card-title-group {
+  min-width: 0;
+}
+
 .workflow-card-head {
   display: flex;
   justify-content: space-between;
@@ -1920,7 +1909,7 @@ select {
   line-height: 1.6;
 }
 
-.workflow-card-section {
+.workflow-card-summary {
   margin-top: 12px;
 }
 
@@ -1947,21 +1936,62 @@ select {
   width: 100%;
 }
 
-.workflow-source-strip,
+.workflow-overview-grid,
+.workflow-detail-grid,
 .workflow-input-actions,
-.workflow-execution-grid {
+.workflow-action-row,
+.workflow-route-actions {
   display: grid;
   gap: 12px;
 }
 
-.workflow-source-strip,
-.workflow-execution-grid {
+.workflow-overview-grid,
+.workflow-detail-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-overview-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workflow-detail-stack,
+.workflow-route-block {
+  display: grid;
+  gap: 14px;
+}
+
+.workflow-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workflow-input-actions,
+.workflow-action-row {
+  margin: 14px 0 18px;
 }
 
 .workflow-input-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 14px 0 18px;
+}
+
+.workflow-action-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.workflow-route-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workflow-subsection-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.workflow-subsection-head h4 {
+  font-size: 13px;
 }
 
 .workflow-source-item,
@@ -1992,42 +2022,65 @@ select {
 .campaign-studio-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.campaign-studio-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.12), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(31, 111, 235, 0.15);
-}
-
-.campaign-studio-hero-copy {
-  min-width: 0;
-}
-
-.campaign-studio-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 16px;
 }
 
 .campaign-studio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
-  gap: 20px;
+  gap: 16px;
   align-items: start;
 }
 
 .campaign-studio-main,
 .campaign-studio-side {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.campaign-section-copy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.campaign-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.campaign-overview-item {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.campaign-overview-item span,
+.campaign-helper-note {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.campaign-overview-item span {
+  margin-bottom: 5px;
+}
+
+.campaign-overview-item strong {
+  display: block;
+  line-height: 1.5;
+}
+
+.campaign-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .campaign-wave-grid {
@@ -2416,55 +2469,59 @@ select {
 .publishing-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.publishing-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.12), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(31, 111, 235, 0.15);
-}
-
-.publishing-hero-copy {
-  min-width: 0;
-}
-
-.publishing-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.publishing-layout {
+.publishing-workspace-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.9fr);
+  gap: 16px;
   align-items: start;
 }
 
-.publishing-command-grid {
+.publishing-section-copy {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.publishing-overview-grid {
   display: grid;
-  grid-template-columns: minmax(300px, 0.95fr) minmax(360px, 1.05fr) minmax(320px, 0.9fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
   align-items: start;
 }
 
-.publishing-secondary-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-  gap: 20px;
-  align-items: start;
+.publishing-overview-item {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.publishing-overview-item span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.publishing-overview-item strong {
+  display: block;
+  line-height: 1.5;
 }
 
 .publishing-side-stack {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.publishing-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .publishing-calendar-grid {
@@ -3914,21 +3971,11 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .workflows-hero {
-    flex-direction: column;
-  }
-
-  .workflows-hero .setup-hero-actions {
-    width: 100%;
-  }
-
-  .workflows-hero .setup-hero-actions .btn {
-    width: 100%;
-  }
-
-  .workflow-source-strip,
+  .workflow-overview-grid,
+  .workflow-detail-grid,
   .workflow-input-actions,
-  .workflow-execution-grid {
+  .workflow-action-row,
+  .workflow-route-actions {
     grid-template-columns: 1fr;
   }
 
@@ -3953,15 +4000,15 @@ select {
     align-items: stretch;
   }
 
-  .campaign-studio-hero {
+  .campaign-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-toolbar {
     flex-direction: column;
   }
 
-  .campaign-studio-hero .setup-hero-actions {
-    width: 100%;
-  }
-
-  .campaign-studio-hero .setup-hero-actions .btn {
+  .campaign-toolbar .btn {
     width: 100%;
   }
 
@@ -4735,12 +4782,8 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .publishing-hero {
-    flex-direction: column;
-  }
-
-  .publishing-command-grid,
-  .publishing-secondary-grid,
+  .publishing-workspace-grid,
+  .publishing-overview-grid,
   .publishing-preview-layout,
   .ads-manager-layout,
   .ads-platform-grid,

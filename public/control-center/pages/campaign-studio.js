@@ -1388,146 +1388,49 @@ export const campaignStudioRoute = {
 
     root.innerHTML = `
       <div class="campaign-studio-wrapper">
-        <div class="campaign-studio-hero">
-          <div class="campaign-studio-hero-copy">
-            <div class="setup-kicker">Campaign Planning Workspace</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Campaign Studio` : "Campaign Studio")}</h3>
-            <p class="setup-hero-text">
-              Keep the strong campaign planning flow, but layer in intelligence, readiness checks, and downstream routing so the plan can move into execution with fewer surprises.
-            </p>
-            <div class="campaign-studio-status">
-              <div class="setup-status-chip">
-                <span>Active campaign</span>
-                <strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Intelligence</span>
-                <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Execution readiness</span>
-                <strong>${escapeHtml(executionReadiness.status)}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Open blockers</span>
-                <strong>${escapeHtml(String(executionReadiness.total))}</strong>
-              </div>
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Campaign Planning Workspace</div>
+              <h3>Campaign Overview</h3>
+              <p class="campaign-section-copy">Define the campaign, choose products, audience, and channels, plan the waves, then review readiness before sending the plan downstream or to AI.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(safeText(state.context.activeCampaign, projectName || "Campaign Studio"))}</span>
+          </div>
+          <div class="campaign-overview-grid">
+            <div class="campaign-overview-item">
+              <span>Active campaign</span>
+              <strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong>
+            </div>
+            <div class="campaign-overview-item">
+              <span>Intelligence</span>
+              <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
+            </div>
+            <div class="campaign-overview-item">
+              <span>Readiness</span>
+              <strong>${escapeHtml(executionReadiness.status)}</strong>
+            </div>
+            <div class="campaign-overview-item">
+              <span>Open blockers</span>
+              <strong>${escapeHtml(String(executionReadiness.total))}</strong>
             </div>
           </div>
-
-          <div class="setup-hero-actions">
+          <div class="campaign-toolbar">
             <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
             <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Finalize Plan</button>
+            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Build Campaign</button>
           </div>
-        </div>
+        </section>
 
         <div class="campaign-studio-layout">
           <form id="campaignStudioForm" class="campaign-studio-main">
             <section class="card">
               <div class="card-head">
-                <h3>Team Operations Layer</h3>
-                <span class="card-badge neutral">${escapeHtml(titleCase(CAMPAIGN_ROLE_DEFAULTS.ownerRole))}</span>
+                <h3>Campaign Basics</h3>
+                <span class="card-badge neutral">Define</span>
               </div>
-              ${renderTeamOpsSummary(model, escapeHtml)}
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Intelligence Input Panel</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : intelligenceStatus === "loading" ? "warning" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Live inputs" : intelligenceStatus === "loading" ? "Loading" : "Guided fallback")}</span>
-              </div>
-              <div class="insights-section-copy">
-                Use current system intelligence to shape the campaign before execution starts. When data is missing, the page stays usable and tells the operator what to connect next.
-              </div>
-              ${
-                intelligenceError
-                  ? `<div class="empty-box">${escapeHtml(`Intelligence refresh warning: ${intelligenceError}`)}</div>`
-                  : ""
-              }
-              <div class="campaign-studio-panel-grid">
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Strongest platforms</h4>
-                  ${renderIntelligenceList(
-                    platformSignals.strongest,
-                    escapeHtml,
-                    "No strong platform signal yet",
-                    "Connect content and campaign performance data to reveal where the campaign already has momentum."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Weak platforms</h4>
-                  ${renderIntelligenceList(
-                    platformSignals.weak,
-                    escapeHtml,
-                    "No weak platform signal yet",
-                    "Weak platform signals will appear after more content, publishing, or channel performance data is connected."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Top-performing content patterns</h4>
-                  ${renderIntelligenceList(
-                    topPatterns,
-                    escapeHtml,
-                    "No winning content pattern yet",
-                    "Ingest post and campaign performance to discover which hooks, formats, and topics should be repeated."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Weak content patterns</h4>
-                  ${renderIntelligenceList(
-                    weakPatterns,
-                    escapeHtml,
-                    "No weak content pattern yet",
-                    "Weak content patterns will show up once underperforming content and improvement notes are available."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Best publishing windows</h4>
-                  ${renderIntelligenceList(
-                    publishingWindows,
-                    escapeHtml,
-                    "No timing signal yet",
-                    "Connect timestamped publishing performance so the system can recommend when to launch each wave."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">SEO opportunities</h4>
-                  ${renderIntelligenceList(
-                    seoOpportunities,
-                    escapeHtml,
-                    "No SEO opportunity feed yet",
-                    "Connect website and search data to surface query, page, and CTR opportunities before launch."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Paid performance signals</h4>
-                  ${renderIntelligenceList(
-                    paidSignals,
-                    escapeHtml,
-                    "No paid signal yet",
-                    "Connect paid channels so scaling, pausing, and creative recommendations are based on live results."
-                  )}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Missing critical integrations</h4>
-                  ${renderIntelligenceList(
-                    missingIntegrations,
-                    escapeHtml,
-                    "No critical integration gap detected",
-                    "Connected sources look healthy. Keep monitoring as more campaign destinations are added."
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Campaign Goal and Basics</h3>
-                <span class="card-badge neutral">Section 1</span>
-              </div>
-              <div class="insights-section-copy">
-                Lock the core operating context first so downstream teams and AI outputs are working from the same campaign definition.
+              <div class="campaign-section-copy">
+                Lock the core campaign definition first so planning, routing, and AI prompts all reference the same structure.
               </div>
               <div class="setup-form-grid setup-form-grid-2">
                 ${renderField({
@@ -1563,15 +1466,41 @@ export const campaignStudioRoute = {
                   escapeHtml
                 })}
               </div>
+              <div class="setup-form-grid setup-form-grid-3">
+                ${renderField({
+                  name: "startDate",
+                  label: "Start date",
+                  value: values.startDate,
+                  helper: "When should the campaign start going live?",
+                  placeholder: "2026-05-01",
+                  escapeHtml
+                })}
+                ${renderField({
+                  name: "endDate",
+                  label: "End date",
+                  value: values.endDate,
+                  helper: "Optional hard stop or review date.",
+                  placeholder: "2026-05-21",
+                  escapeHtml
+                })}
+                ${renderField({
+                  name: "budget",
+                  label: "Budget",
+                  value: values.budget,
+                  helper: "Use one working budget number even if later split by channel.",
+                  placeholder: "5000",
+                  escapeHtml
+                })}
+              </div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Product and Audience</h3>
-                <span class="card-badge neutral">Section 2</span>
+                <h3>Product / Audience / Channel Selection</h3>
+                <span class="card-badge neutral">Plan inputs</span>
               </div>
-              <div class="insights-section-copy">
-                Keep audience, problem, and product angle explicit so campaign guidance, approvals, and creative routing stay aligned.
+              <div class="campaign-section-copy">
+                Keep product, audience, offer, and channel choices explicit so downstream teams do not have to reinterpret the plan.
               </div>
               <div class="setup-form-grid">
                 ${renderField({
@@ -1610,26 +1539,6 @@ export const campaignStudioRoute = {
                   multiline: true
                 })}
                 ${renderField({
-                  name: "audienceStage",
-                  label: "Audience stage",
-                  value: values.audienceStage,
-                  helper: "Cold prospect, warm prospect, repeat buyer, or retention audience.",
-                  placeholder: "Warm prospect",
-                  escapeHtml
-                })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Channels and Offer</h3>
-                <span class="card-badge neutral">Section 3</span>
-              </div>
-              <div class="insights-section-copy">
-                Keep the free-text planning fields, but support them with recommendation panels so channel decisions are easier to operationalize.
-              </div>
-              <div class="setup-form-grid">
-                ${renderField({
                   name: "channelPlan",
                   label: "Channel plan",
                   value: values.channelPlan,
@@ -1655,64 +1564,12 @@ export const campaignStudioRoute = {
                   escapeHtml,
                   multiline: true
                 })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Channel Mix Recommendations</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Readiness-assisted")}</span>
-              </div>
-              <div class="insights-section-copy">
-                Recommended channel mix based on current performance learning, connected systems, and campaign readiness. Use this to validate or tighten the free-text channel plan.
-              </div>
-              <div class="campaign-recommendation-grid">
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended organic channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.organic, escapeHtml)}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended paid channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.paid, escapeHtml)}
-                </div>
-                <div class="campaign-studio-panel-block">
-                  <h4 class="insights-subtitle">Recommended support channels</h4>
-                  ${renderChannelRecommendationCards(channelMix.support, escapeHtml)}
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Dates and Budget</h3>
-                <span class="card-badge neutral">Section 4</span>
-              </div>
-              <div class="insights-section-copy">
-                These fields drive launch timing, budget allocation, and execution routing across publishing and ads workflows.
-              </div>
-              <div class="setup-form-grid setup-form-grid-3">
                 ${renderField({
-                  name: "startDate",
-                  label: "Start date",
-                  value: values.startDate,
-                  helper: "When should the campaign start going live?",
-                  placeholder: "2026-05-01",
-                  escapeHtml
-                })}
-                ${renderField({
-                  name: "endDate",
-                  label: "End date",
-                  value: values.endDate,
-                  helper: "Optional hard stop or review date.",
-                  placeholder: "2026-05-21",
-                  escapeHtml
-                })}
-                ${renderField({
-                  name: "budget",
-                  label: "Budget",
-                  value: values.budget,
-                  helper: "Use one working budget number even if later split by channel.",
-                  placeholder: "5000",
+                  name: "audienceStage",
+                  label: "Audience stage",
+                  value: values.audienceStage,
+                  helper: "Cold prospect, warm prospect, repeat buyer, or retention audience.",
+                  placeholder: "Warm prospect",
                   escapeHtml
                 })}
               </div>
@@ -1720,11 +1577,11 @@ export const campaignStudioRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Launch Waves</h3>
-                <span class="card-badge neutral">Section 5</span>
+                <h3>Wave Planning</h3>
+                <span class="card-badge neutral">${escapeHtml(String(waves.length))} waves</span>
               </div>
-              <div class="insights-section-copy">
-                Keep the current wave structure, but use the added status, role, allocation, and asset guidance to make each wave execution-ready.
+              <div class="campaign-section-copy">
+                Plan each wave separately so launch, education, and conversion work stay clear before routing into execution workspaces.
               </div>
               <div class="campaign-wave-grid">
                 ${waves.map((wave) => `
@@ -1790,11 +1647,52 @@ export const campaignStudioRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Required Assets</h3>
-                <span class="card-badge ${missingAssets.length ? "danger" : "success"}">${escapeHtml(missingAssets.length ? `${missingAssets.length} missing` : "Ready")}</span>
+                <h3>Campaign Outputs / Readiness</h3>
+                <span class="card-badge ${executionReadiness.total ? "warning" : "success"}">${escapeHtml(executionReadiness.status)}</span>
               </div>
-              <div class="insights-section-copy">
-                Keep the core asset checklist, but use the readiness and routing panels to see which gaps actually block launch.
+              <div class="campaign-section-copy">
+                Review the recommended campaign direction, required assets, and real blockers before sending the plan into downstream work.
+              </div>
+              ${
+                intelligenceError
+                  ? `<div class="empty-box">${escapeHtml(`Intelligence refresh warning: ${intelligenceError}`)}</div>`
+                  : ""
+              }
+              <div class="campaign-strategy-stack">
+                <div class="campaign-strategy-item">
+                  <span>Recommended campaign angle</span>
+                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended offer focus</span>
+                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended audience emphasis</span>
+                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended channel emphasis</span>
+                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
+                </div>
+                <div class="campaign-strategy-item">
+                  <span>Recommended next action</span>
+                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
+                </div>
+              </div>
+              <div class="campaign-recommendation-grid">
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended organic channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.organic, escapeHtml)}
+                </div>
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended paid channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.paid, escapeHtml)}
+                </div>
+                <div class="campaign-studio-panel-block">
+                  <h4 class="insights-subtitle">Recommended support channels</h4>
+                  ${renderChannelRecommendationCards(channelMix.support, escapeHtml)}
+                </div>
               </div>
               <div class="setup-form-grid">
                 ${renderField({
@@ -1815,16 +1713,6 @@ export const campaignStudioRoute = {
                   escapeHtml,
                   multiline: true
                 })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Execution Readiness Panel</h3>
-                <span class="card-badge ${executionReadiness.total ? "warning" : "success"}">${escapeHtml(executionReadiness.status)}</span>
-              </div>
-              <div class="insights-section-copy">
-                This is the go-live gate. It shows whether the campaign can actually move into content, media, publishing, ads, and measurement without avoidable breakage.
               </div>
               <div class="campaign-readiness-grid">
                 ${renderBlockerGroup(
@@ -1876,46 +1764,11 @@ export const campaignStudioRoute = {
           <aside class="campaign-studio-side">
             <section class="card">
               <div class="card-head">
-                <h3>AI Strategy Guidance</h3>
-                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">Embedded guidance</span>
+                <h3>Campaign AI Assistant</h3>
+                <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>
               </div>
-              <div class="insights-section-copy">
-                Keep Ask AI available, but use this embedded strategy layer to guide the draft continuously while the operator is still in the page.
-              </div>
-              <div class="campaign-strategy-stack">
-                <div class="campaign-strategy-item">
-                  <span>Recommended campaign angle</span>
-                  <strong>${escapeHtml(strategyGuidance.angle)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended offer focus</span>
-                  <strong>${escapeHtml(strategyGuidance.offer)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended audience emphasis</span>
-                  <strong>${escapeHtml(strategyGuidance.audience)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended channel emphasis</span>
-                  <strong>${escapeHtml(strategyGuidance.channels)}</strong>
-                </div>
-                <div class="campaign-strategy-item">
-                  <span>Recommended next action</span>
-                  <strong>${escapeHtml(strategyGuidance.nextAction)}</strong>
-                </div>
-              </div>
-              <div class="quick-actions">
-                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Ask AI to refine plan</span>
-                  <span class="home-action-meta">Turn the current draft, blockers, and intelligence into a sharper execution brief.</span>
-                </button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Campaign Summary</h3>
-                <span class="card-badge neutral">Live draft</span>
+              <div class="campaign-section-copy">
+                Send to AI Command prefills the current campaign draft and then navigates there. Open actions below only navigate to the linked workspace.
               </div>
               <div class="data-stack">
                 ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
@@ -1925,93 +1778,39 @@ export const campaignStudioRoute = {
                 ${renderSummaryItem("Channels", values.channelPlan, escapeHtml)}
                 ${renderSummaryItem("Budget", formatCurrency(values.budget, overviewData.currency || "USD"), escapeHtml)}
               </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Execution Signals</h3>
-                <span class="card-badge neutral">Current state</span>
-              </div>
-              <div class="data-stack">
-                ${renderSummaryItem("Connected channels", connectedChannels.map((item) => channelLabel(item)).join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Scheduled jobs", String(scheduledJobs.length), escapeHtml)}
-                ${renderSummaryItem("Available asset types", assetTypesPresent.join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Missing required assets", missingAssets.join(", ") || "None", escapeHtml)}
-                ${renderSummaryItem("Open recommendations", String(recommendations.length), escapeHtml)}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Required Assets</h3>
-                <span class="card-badge neutral">${escapeHtml(String(requiredAssetTypes.length))} types</span>
-              </div>
-              ${
-                requiredAssetTypes.length
-                  ? `
-                    <ul class="simple-list">
-                      ${requiredAssetTypes.map((item) => `<li>${escapeHtml(titleCase(item))}</li>`).join("")}
-                    </ul>
-                  `
-                  : renderEmptyState(
-                    "No required asset catalog yet",
-                    "Load or define the required asset types so launch readiness can identify exact execution gaps.",
-                    escapeHtml
-                  )
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Downstream Routing</h3>
-                <span class="card-badge neutral">Execution next</span>
-              </div>
-              <div class="insights-section-copy">
-                Route the draft into the right downstream workspace once the blockers you care about are closed.
+              <div class="quick-actions">
+                <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
+                  <span class="home-action-title">Send to AI Command</span>
+                  <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
+                </button>
               </div>
               <div class="campaign-routing-grid">
                 <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to Content Studio</span>
-                  <span class="home-action-meta">Turn strategy and wave planning into copy, scripts, blog, and social drafts.</span>
+                  <span class="home-action-title">Open Content Studio</span>
+                  <span class="home-action-meta">Navigation only. Open content planning for this campaign.</span>
                 </button>
                 <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to Media Studio</span>
-                  <span class="home-action-meta">Route the campaign into visual production and creative package generation.</span>
+                  <span class="home-action-title">Open Media Studio</span>
+                  <span class="home-action-meta">Navigation only. Open media planning for this campaign.</span>
                 </button>
                 <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to Publishing</span>
-                  <span class="home-action-meta">Move the channel mix and wave plan into scheduling and launch operations.</span>
+                  <span class="home-action-title">Open Publishing</span>
+                  <span class="home-action-meta">Navigation only. Open publishing setup for this campaign.</span>
                 </button>
                 <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to Ads Manager</span>
-                  <span class="home-action-meta">Carry the budget, offer, and channel emphasis into paid activation planning.</span>
-                </button>
-                <button id="campaignGeneratePackageBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Generate Campaign Execution Package</span>
-                  <span class="home-action-meta">Package the draft for operators. Generated in this session: ${escapeHtml(String(session.generatedPackages))}.</span>
+                  <span class="home-action-title">Open Ads Manager</span>
+                  <span class="home-action-meta">Navigation only. Open paid activation planning for this campaign.</span>
                 </button>
                 <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Review Missing Dependencies</span>
                   <span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>
                 </button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Quick Actions</h3>
-                <span class="card-badge neutral">Operator shortcuts</span>
-              </div>
-              <div class="quick-actions">
                 <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review assets</span>
-                  <span class="home-action-meta">Open the library and close any missing asset gaps before execution starts.</span>
-                </button>
-                <button id="campaignRefreshIntelligenceBtnSecondary" class="quick-action-btn" type="button" disabled>
-                  <span class="home-action-title">Intelligence state</span>
-                  <span class="home-action-meta">${escapeHtml(hasLiveIntelligence ? "Live signals are informing this page." : "The page is using current readiness plus graceful intelligence fallbacks.")}</span>
+                  <span class="home-action-title">Open Library</span>
+                  <span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>
                 </button>
               </div>
+              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
             </section>
           </aside>
         </div>

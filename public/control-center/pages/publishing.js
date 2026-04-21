@@ -1,4 +1,4 @@
-import { renderDurableSystemSummary } from "../durable-ui.js";
+import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const publishingSessions = new Map();
 
@@ -678,7 +678,7 @@ function renderChannelStatus(cards, escapeHtml) {
 
 function renderActionSummary(selectedItem, checks, escapeHtml) {
   if (!selectedItem) {
-    return `<div class="empty-box">Select a queue item to approve, publish, fail, or reschedule it from here.</div>`;
+    return `<div class="empty-box">Select a queue item to approve it, publish it immediately, or send it back to the scheduled queue.</div>`;
   }
 
   return `
@@ -690,6 +690,33 @@ function renderActionSummary(selectedItem, checks, escapeHtml) {
       <div class="data-row"><span>Next slot</span><strong>${escapeHtml(selectedItem.scheduledFor ? formatDateTime(selectedItem.scheduledFor) : "Not scheduled")}</strong></div>
     </div>
   `;
+}
+
+function buildSchedulePayload(session, status = "scheduled") {
+  return {
+    title: session.form.title,
+    wave_name: session.form.waveName,
+    channel: session.form.channel,
+    scheduled_for: session.form.scheduledDate
+      ? `${session.form.scheduledDate}T${session.form.scheduledTime || "09:00"}:00Z`
+      : "",
+    status,
+    mode: session.form.mode,
+    offer: session.form.offer,
+    notes: session.form.notes
+  };
+}
+
+function buildPublishingAiPrompt(projectName, selectedItem, session) {
+  const title = asString(session.form.title || selectedItem?.title || "publishing item");
+  const channel = titleCase(session.form.channel || selectedItem?.channel || "channel");
+  const schedule = session.form.scheduledDate
+    ? `${session.form.scheduledDate} ${session.form.scheduledTime || "09:00"}`
+    : (selectedItem?.scheduledFor ? formatDateTime(selectedItem.scheduledFor) : "not scheduled");
+  const offer = asString(session.form.offer || selectedItem?.offer || "not defined");
+  const notes = asString(session.form.notes || normalizeNotes(selectedItem?.notes).join("; ") || "none");
+
+  return `Review this publishing plan for ${projectName || "the current project"}.\n\nTitle: ${title}\nChannel: ${channel}\nSchedule: ${schedule}\nStatus: ${titleCase(selectedItem?.status || "draft")}\nOffer: ${offer}\nNotes: ${notes}\n\nHelp improve the publish plan, approval notes, and operator handoff.`;
 }
 
 async function runAndRefresh(action, { projectName, reloadProjectData, showMessage, showError, successMessage }) {
@@ -812,16 +839,7 @@ function bindPublishingWorkspace({
         return;
       }
 
-      const payload = {
-        title: session.form.title,
-        wave_name: session.form.waveName,
-        channel: session.form.channel,
-        scheduled_for: `${session.form.scheduledDate}T${session.form.scheduledTime || "09:00"}:00Z`,
-        status: "scheduled",
-        mode: session.form.mode,
-        offer: session.form.offer,
-        notes: session.form.notes
-      };
+      const payload = buildSchedulePayload(session, "scheduled");
 
       const action = selectedItem
         ? () => reschedulePublishingItem(projectName, selectedItem.jobId, payload)
@@ -840,6 +858,35 @@ function bindPublishingWorkspace({
         session.formSourceId = response.job.job_id;
         session.isCreatingNew = false;
       }
+    };
+  }
+
+  const requeueBtn = $("publishingRequeueBtn");
+  if (requeueBtn) {
+    requeueBtn.onclick = async () => {
+      if (!selectedItem) {
+        showError?.("Select a publishing item before requeueing it.");
+        return;
+      }
+      if (!asString(session.form.channel).trim()) {
+        showError?.("Choose a channel before requeueing.");
+        return;
+      }
+      if (!asString(session.form.scheduledDate).trim()) {
+        showError?.("Choose a schedule date before requeueing.");
+        return;
+      }
+
+      await runAndRefresh(
+        () => reschedulePublishingItem(projectName, selectedItem.jobId, buildSchedulePayload(session, "scheduled")),
+        {
+          projectName,
+          reloadProjectData,
+          showMessage,
+          showError,
+          successMessage: "Publishing item returned to the scheduled queue."
+        }
+      );
     };
   }
 
@@ -916,6 +963,51 @@ function bindPublishingWorkspace({
   if (manageChannelsBtn) {
     manageChannelsBtn.onclick = () => navigateTo("integrations");
   }
+
+  const pushAiBtn = $("publishingPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      const prompt = buildPublishingAiPrompt(projectName, selectedItem, session);
+      const aiDraft = {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: selectedItem?.title || session.form.title || "Publishing Review",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "publishing",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "publishing_job",
+          entity_id: selectedItem?.jobId || ""
+        },
+        payload: {
+          prompt,
+          publishing_item_id: selectedItem?.jobId || "",
+          publishing_title: selectedItem?.title || session.form.title || "",
+          draft_context: aiDraft,
+          selection: {
+            status: selectedItem?.status || "draft",
+            channel: session.form.channel || selectedItem?.channel || "",
+            scheduled_for: session.form.scheduledDate
+              ? `${session.form.scheduledDate}T${session.form.scheduledTime || "09:00"}:00Z`
+              : (selectedItem?.scheduledFor || ""),
+            notes: session.form.notes
+          }
+        }
+      });
+
+      navigateTo("ai-command");
+      const globalInput = $("quickCommandInput");
+      if (globalInput) {
+        globalInput.value = prompt;
+      }
+      showMessage?.("Publishing context sent to AI Command.");
+    };
+  }
 }
 
 export const publishingRoute = {
@@ -975,43 +1067,149 @@ export const publishingRoute = {
 
     root.innerHTML = `
       <div class="publishing-wrapper">
-        <div class="publishing-hero">
-          <div class="publishing-hero-copy">
-            <div class="setup-kicker">Publishing Command Center</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Publishing` : "Publishing")}</h3>
-            <p class="setup-hero-text">
-              Review the queue, preview the channel payload, approve confidently, and control schedule changes without losing operational clarity.
-            </p>
-            <div class="publishing-status">
-              <div class="setup-status-chip">
-                <span>Ready now</span>
-                <strong>${escapeHtml(String(statusCounts.ready))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Scheduled</span>
-                <strong>${escapeHtml(String(statusCounts.scheduled))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Published</span>
-                <strong>${escapeHtml(String(statusCounts.published))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Failed</span>
-                <strong>${escapeHtml(String(statusCounts.failed))}</strong>
-              </div>
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Publishing Control Workspace</div>
+              <h3>Publishing Overview</h3>
+              <p class="publishing-section-copy">Use this page in order: review the schedule, inspect the queue, confirm channel state, then approve, publish, or requeue the selected item.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Publishing"))}</span>
+          </div>
+          <div class="publishing-overview-grid">
+            <div class="publishing-overview-item">
+              <span>Ready now</span>
+              <strong>${escapeHtml(String(statusCounts.ready))}</strong>
+            </div>
+            <div class="publishing-overview-item">
+              <span>Scheduled</span>
+              <strong>${escapeHtml(String(statusCounts.scheduled))}</strong>
+            </div>
+            <div class="publishing-overview-item">
+              <span>Connected channels</span>
+              <strong>${escapeHtml(String(channelCards.filter((card) => card.connected).length))}</strong>
+            </div>
+            <div class="publishing-overview-item">
+              <span>Selected item</span>
+              <strong>${escapeHtml(selectedItem ? selectedItem.title : "No item selected")}</strong>
             </div>
           </div>
+        </section>
 
-          <div class="setup-hero-actions">
-            <button id="publishingManageChannelsBtn" class="btn btn-secondary" type="button">Manage Channels</button>
-            <button id="publishingNewItemBtn" class="btn btn-primary" type="button">New Publishing Item</button>
-          </div>
-        </div>
-
-        <div class="publishing-command-grid">
+        <div class="publishing-workspace-grid">
           <section class="card">
             <div class="card-head">
-              <h3>Publish Queue</h3>
+              <div>
+                <h3>Schedule / Calendar</h3>
+                <p class="publishing-section-copy">Schedule updates timing only. New Item opens a fresh draft. Open Integrations is navigation only.</p>
+              </div>
+              <span class="card-badge neutral">${escapeHtml(queue.filter((item) => item.scheduledFor).length ? `${queue.filter((item) => item.scheduledFor).length} scheduled` : "No scheduled slots")}</span>
+            </div>
+            <div class="publishing-toolbar">
+              <button id="publishingManageChannelsBtn" class="btn btn-secondary" type="button">Open Integrations</button>
+              <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Item</button>
+            </div>
+            <form id="publishingScheduleForm" class="setup-form-grid">
+              <div class="setup-field-group">
+                <div class="setup-field-head">
+                  <label class="setup-label" for="publishingTitleInput">Publishing title</label>
+                  <span class="setup-field-state is-optional">Required</span>
+                </div>
+                <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Wave 1 hero post">
+                <div class="setup-helper">Use the title operators should recognize in the queue and approval flow.</div>
+              </div>
+
+              <div class="setup-form-grid setup-form-grid-2">
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingWaveInput">Campaign / wave</label>
+                    <span class="setup-field-state is-optional">Optional</span>
+                  </div>
+                  <input id="publishingWaveInput" name="waveName" class="setup-input" type="text" value="${escapeHtml(session.form.waveName)}" placeholder="wave1_beard">
+                  <div class="setup-helper">Attach the schedule to a campaign wave when that context matters.</div>
+                </div>
+
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingChannelInput">Channel</label>
+                    <span class="setup-field-state is-optional">${escapeHtml(checks[toChannelKey(session.form.channel)] ? "Connected" : "Planning")}</span>
+                  </div>
+                  <select id="publishingChannelInput" name="channel" class="setup-input">
+                    ${channels.map((channel) => `
+                      <option value="${escapeHtml(channel)}"${channel === session.form.channel ? " selected" : ""}>${escapeHtml(titleCase(channel))}</option>
+                    `).join("")}
+                  </select>
+                  <div class="setup-helper">Choose the delivery channel for this schedule slot.</div>
+                </div>
+              </div>
+
+              <div class="setup-form-grid setup-form-grid-2">
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingDateInput">Publish date</label>
+                    <span class="setup-field-state is-optional">Calendar</span>
+                  </div>
+                  <input id="publishingDateInput" name="scheduledDate" class="setup-input" type="date" value="${escapeHtml(session.form.scheduledDate)}">
+                  <div class="setup-helper">Set the day this item should be queued to publish.</div>
+                </div>
+
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingTimeInput">Publish time</label>
+                    <span class="setup-field-state is-optional">Slot</span>
+                  </div>
+                  <input id="publishingTimeInput" name="scheduledTime" class="setup-input" type="time" value="${escapeHtml(session.form.scheduledTime)}">
+                  <div class="setup-helper">Use the exact release time the queue should follow.</div>
+                </div>
+              </div>
+
+              <div class="setup-form-grid setup-form-grid-2">
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingModeInput">Mode</label>
+                    <span class="setup-field-state is-optional">Execution</span>
+                  </div>
+                  <select id="publishingModeInput" name="mode" class="setup-input">
+                    ${["manual", "semi_auto", "full_auto"].map((mode) => `
+                      <option value="${escapeHtml(mode)}"${mode === session.form.mode ? " selected" : ""}>${escapeHtml(titleCase(mode))}</option>
+                    `).join("")}
+                  </select>
+                  <div class="setup-helper">Keep the timing plan aligned with the intended publish mode.</div>
+                </div>
+
+                <div class="setup-field-group">
+                  <div class="setup-field-head">
+                    <label class="setup-label" for="publishingOfferInput">Offer / angle</label>
+                    <span class="setup-field-state is-optional">Commercial focus</span>
+                  </div>
+                  <input id="publishingOfferInput" name="offer" class="setup-input" type="text" value="${escapeHtml(session.form.offer)}" placeholder="Premium beard routine with stronger results">
+                  <div class="setup-helper">Keep the commercial angle visible while setting timing.</div>
+                </div>
+              </div>
+
+              <div class="setup-field-group">
+                <div class="setup-field-head">
+                  <label class="setup-label" for="publishingNotesInput">Operator notes</label>
+                  <span class="setup-field-state is-optional">Context</span>
+                </div>
+                <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="CTA, review notes, manual publish steps, asset references, or risk notes">${escapeHtml(session.form.notes)}</textarea>
+                <div class="setup-helper">Keep notes short and operator-focused.</div>
+              </div>
+            </form>
+
+            <div class="publishing-form-actions">
+              <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+              <button id="publishingScheduleBtn" class="btn btn-primary" type="button">${escapeHtml(selectedItem ? "Update Timing" : "Schedule")}</button>
+            </div>
+            ${renderCalendar(queue, escapeHtml)}
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h3>Publish Queue</h3>
+                <p class="publishing-section-copy">Review queue items here. Selecting an item loads it into the schedule and action panels without publishing it.</p>
+              </div>
               <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
             </div>
             ${renderFilterRow(session.filter, queue, escapeHtml)}
@@ -1020,183 +1218,58 @@ export const publishingRoute = {
 
           <section class="card">
             <div class="card-head">
-              <h3>Approval Preview</h3>
+              <div>
+                <h3>Approval / Publish Actions</h3>
+                <p class="publishing-section-copy">Approve marks the item ready. Publish Now records an immediate publish. Requeue sends the item back to the scheduled queue using the current timing fields.</p>
+              </div>
               <span class="card-badge ${getStatusBadgeClass(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft view")}</span>
             </div>
             ${renderPreview(previewModel, selectedItem, escapeHtml)}
-          </section>
-
-          <div class="publishing-side-stack">
-            <section class="card">
-              <div class="card-head">
-                <h3>Schedule Controls</h3>
-                <span class="card-badge neutral">${escapeHtml(selectedItem ? "Editing selected" : "New schedule")}</span>
-              </div>
-              <form id="publishingScheduleForm" class="setup-form-grid">
-                <div class="setup-field-group">
-                  <div class="setup-field-head">
-                    <label class="setup-label" for="publishingTitleInput">Publishing title</label>
-                    <span class="setup-field-state is-optional">Required</span>
-                  </div>
-                  <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Wave 1 hero post">
-                  <div class="setup-helper">Use the operating title the queue, preview, and team should all recognize instantly.</div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingWaveInput">Campaign / wave</label>
-                      <span class="setup-field-state is-optional">Optional</span>
-                    </div>
-                    <input id="publishingWaveInput" name="waveName" class="setup-input" type="text" value="${escapeHtml(session.form.waveName)}" placeholder="wave1_beard">
-                    <div class="setup-helper">If this matches a launch wave, the preview can inherit the existing channel payload automatically.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingChannelInput">Channel</label>
-                      <span class="setup-field-state is-optional">${escapeHtml(checks[toChannelKey(session.form.channel)] ? "Connected" : "Planning")}</span>
-                    </div>
-                    <select id="publishingChannelInput" name="channel" class="setup-input">
-                      ${channels.map((channel) => `
-                        <option value="${escapeHtml(channel)}"${channel === session.form.channel ? " selected" : ""}>${escapeHtml(titleCase(channel))}</option>
-                      `).join("")}
-                    </select>
-                    <div class="setup-helper">Choose the exact delivery channel. Missing connectors can still be planned, but approval will surface the gap clearly.</div>
-                  </div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingDateInput">Publish date</label>
-                      <span class="setup-field-state is-optional">Calendar</span>
-                    </div>
-                    <input id="publishingDateInput" name="scheduledDate" class="setup-input" type="date" value="${escapeHtml(session.form.scheduledDate)}">
-                    <div class="setup-helper">This drives the scheduling calendar and operational run sheet.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingTimeInput">Publish time</label>
-                      <span class="setup-field-state is-optional">Slot</span>
-                    </div>
-                    <input id="publishingTimeInput" name="scheduledTime" class="setup-input" type="time" value="${escapeHtml(session.form.scheduledTime)}">
-                    <div class="setup-helper">Use the intended release time so the team can monitor the queue accurately.</div>
-                  </div>
-                </div>
-
-                <div class="setup-form-grid setup-form-grid-2">
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingModeInput">Mode</label>
-                      <span class="setup-field-state is-optional">Execution</span>
-                    </div>
-                    <select id="publishingModeInput" name="mode" class="setup-input">
-                      ${["manual", "semi_auto", "full_auto"].map((mode) => `
-                        <option value="${escapeHtml(mode)}"${mode === session.form.mode ? " selected" : ""}>${escapeHtml(titleCase(mode))}</option>
-                      `).join("")}
-                    </select>
-                    <div class="setup-helper">Keep manual for human-controlled publishing, or use automation-ready modes as the backend grows.</div>
-                  </div>
-
-                  <div class="setup-field-group">
-                    <div class="setup-field-head">
-                      <label class="setup-label" for="publishingOfferInput">Offer / angle</label>
-                      <span class="setup-field-state is-optional">Commercial focus</span>
-                    </div>
-                    <input id="publishingOfferInput" name="offer" class="setup-input" type="text" value="${escapeHtml(session.form.offer)}" placeholder="Premium beard routine with stronger results">
-                    <div class="setup-helper">Keep the commercial promise visible so scheduling stays aligned with the campaign objective.</div>
-                  </div>
-                </div>
-
-                <div class="setup-field-group">
-                  <div class="setup-field-head">
-                    <label class="setup-label" for="publishingNotesInput">Operator notes</label>
-                    <span class="setup-field-state is-optional">Approval context</span>
-                  </div>
-                  <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="CTA, review notes, manual publish steps, asset references, or risk notes">${escapeHtml(session.form.notes)}</textarea>
-                  <div class="setup-helper">Use short notes that help an operator understand what matters before approval or publish.</div>
-                </div>
-              </form>
-
-              <div class="publishing-form-actions">
-                <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-                <button id="publishingScheduleBtn" class="btn btn-primary" type="button">${escapeHtml(selectedItem ? "Reschedule Item" : "Save Schedule")}</button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Manual Override Actions</h3>
-                <span class="card-badge ${getStatusBadgeClass(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Awaiting selection")}</span>
-              </div>
-              ${renderActionSummary(selectedItem, checks, escapeHtml)}
-              <div class="publishing-manual-actions">
-                <button id="publishingApproveBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Approve for publish</span>
-                  <span class="home-action-meta">Move the item into a ready state after preview and review.</span>
-                </button>
-                <button id="publishingPublishNowBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Publish now</span>
-                  <span class="home-action-meta">Record the publish outcome immediately and mark it complete.</span>
-                </button>
-                <button id="publishingFailBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Mark failed</span>
-                  <span class="home-action-meta">Flag the item for intervention if delivery failed or needs recovery.</span>
-                </button>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <div class="publishing-secondary-grid">
-          <section class="card">
-            <div class="card-head">
-              <h3>Team Ownership</h3>
-              <span class="card-badge neutral">${escapeHtml(titleCase(PUBLISHING_ROLE_DEFAULTS.ownerRole))}</span>
+            ${renderActionSummary(selectedItem, checks, escapeHtml)}
+            <div class="publishing-manual-actions">
+              <button id="publishingApproveBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Approve</span>
+                <span class="home-action-meta">Move the selected item into a ready state after review.</span>
+              </button>
+              <button id="publishingPublishNowBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Publish Now</span>
+                <span class="home-action-meta">Trigger the immediate publish action for the selected item.</span>
+              </button>
+              <button id="publishingRequeueBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Requeue</span>
+                <span class="home-action-meta">Send the selected item back to the scheduled queue using the current timing fields.</span>
+              </button>
             </div>
-            ${renderTeamOwnership(state, queue, selectedItem, escapeHtml)}
-          </section>
-
-          ${renderDurableSystemSummary(state.data.operations, escapeHtml, {
-            title: "Durable Publishing Links",
-            kicker: selectedItem ? "Selected Job" : "Shared Backbone",
-            entityType: selectedItem ? "publishing_job" : "",
-            entityId: selectedItem?.jobId || "",
-            emptyText: "Publishing tasks, approvals, jobs, and handoffs will appear here once the shared operations model is loaded."
-          })}
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Publishing Calendar</h3>
-              <span class="card-badge neutral">${escapeHtml(queue.filter((item) => item.scheduledFor).length ? `${queue.filter((item) => item.scheduledFor).length} scheduled` : "No scheduled slots")}</span>
-            </div>
-            ${renderCalendar(queue, escapeHtml)}
           </section>
 
           <section class="card">
             <div class="card-head">
-              <h3>Channel Status</h3>
+              <div>
+                <h3>Channel Status</h3>
+                <p class="publishing-section-copy">Use this section to understand connector readiness and queue pressure by channel before publishing.</p>
+              </div>
               <span class="card-badge neutral">${escapeHtml(`${channelCards.filter((card) => card.connected).length} connected`)}</span>
             </div>
             ${renderChannelStatus(channelCards, escapeHtml)}
           </section>
-        </div>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Publishing Snapshot</h3>
-            <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
-          </div>
-          <div class="data-stack">
-            <div class="data-row"><span>Project</span><strong>${escapeHtml(safeText(overview.project_name, projectName || "Not selected"))}</strong></div>
-            <div class="data-row"><span>Market</span><strong>${escapeHtml(safeText(state.context.currentMarket, overview.market || "Not set"))}</strong></div>
-            <div class="data-row"><span>Language</span><strong>${escapeHtml(safeText(state.context.currentLanguage, overview.language || "Not set"))}</strong></div>
-            <div class="data-row"><span>Execution mode</span><strong>${escapeHtml(titleCase(state.context.executionMode || overview.execution_mode || "semi_auto"))}</strong></div>
-            <div class="data-row"><span>Current campaign</span><strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong></div>
-          </div>
-        </section>
+          <aside class="publishing-side-stack">
+            <section class="card">
+              <div class="card-head">
+                <h3>Publishing AI Assistant</h3>
+                <span class="card-badge neutral">Assist</span>
+              </div>
+              <p class="publishing-section-copy">Send to AI Command prefills the current publishing context and then navigates there. It does not schedule or publish anything.</p>
+              <div class="publishing-manual-actions">
+                <button id="publishingPushAiBtn" class="quick-action-btn" type="button">
+                  <span class="home-action-title">Send to AI Command</span>
+                  <span class="home-action-meta">Prefill AI Command with the selected publishing item or current draft and open that page.</span>
+                </button>
+              </div>
+              <div class="publishing-helper-note">Open Integrations is navigation only. Schedule updates timing. Publish Now is immediate. Requeue returns the selected item to the scheduled queue.</div>
+            </section>
+          </aside>
+        </div>
       </div>
     `;
 
