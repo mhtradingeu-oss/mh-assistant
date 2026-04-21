@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MH Assistant OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MH Assistant OS - Marketing Operating System">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- Global feedback -->
+    <div id="globalMessage" class="global-message" aria-live="polite"></div>
+    <div id="globalError" class="global-error" aria-live="assertive"></div>
+
+    <!-- Global loading -->
+    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+      <div class="loading-card">
+        <div class="loading-spinner"></div>
+        <h3 id="loadingTitle">Loading project</h3>
+        <p id="loadingText">Please wait while the system loads the workspace.</p>
+      </div>
+    </div>
+
+    <div class="os-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="sidebar-brand">
+          <div class="brand-badge">AI OS</div>
+          <h1>MH Assistant</h1>
+          <p>Marketing, launch, content, ads, insights, and operations.</p>
+        </div>
+
+        <div class="sidebar-project">
+          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+            <option value="">Select project</option>
+          </select>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+          <div class="nav-group">
+            <div class="nav-group-title">Start</div>
+            <button class="nav-item is-active" data-route="home" type="button">Home</button>
+            <button class="nav-item" data-route="setup" type="button">Setup</button>
+            <button class="nav-item" data-route="library" type="button">Library</button>
+            <button class="nav-item" data-route="integrations" type="button">Integrations</button>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">AI & Build</div>
+            <button class="nav-item" data-route="ai-command" type="button">AI Command</button>
+            <button class="nav-item" data-route="workflows" type="button">Workflows</button>
+            <button class="nav-item" data-route="campaign-studio" type="button">Campaign Studio</button>
+            <button class="nav-item" data-route="content-studio" type="button">Content Studio</button>
+            <button class="nav-item" data-route="media-studio" type="button">Media Studio</button>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">Execute & Grow</div>
+            <button class="nav-item" data-route="publishing" type="button">Publishing</button>
+            <button class="nav-item" data-route="ads-manager" type="button">Ads Manager</button>
+            <button class="nav-item" data-route="insights" type="button">Insights</button>
+            <button class="nav-item" data-route="research" type="button">Research</button>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">Operate</div>
+            <button class="nav-item" data-route="task-center" type="button">Task Center</button>
+            <button class="nav-item" data-route="queue-center" type="button">Queue Center</button>
+            <button class="nav-item" data-route="job-monitor" type="button">Job Monitor</button>
+            <button class="nav-item" data-route="notification-center" type="button">Notifications</button>
+          </div>
+
+          <div class="nav-group">
+            <div class="nav-group-title">System</div>
+            <button class="nav-item" data-route="governance" type="button">Governance</button>
+            <button class="nav-item" data-route="settings" type="button">Settings</button>
+          </div>
+        </nav>
+
+        <div class="sidebar-actions">
+          <button id="refreshAllBtn" class="btn btn-primary" type="button">Refresh All</button>
+          <button id="openAiBtn" class="btn btn-secondary" type="button">Open AI Command</button>
+        </div>
+      </aside>
+
+      <!-- Main shell -->
+      <div class="main-shell">
+        <header class="topbar">
+          <button id="sidebarToggleBtn" class="sidebar-toggle" type="button" aria-label="Toggle sidebar">
+            ☰
+          </button>
+
+          <div class="topbar-left">
+            <div class="page-context">
+              <div id="pageEyebrow" class="page-eyebrow">Start</div>
+              <h2 id="pageTitle" class="page-title">Home</h2>
+              <p id="pageDescription" class="page-description">
+                Executive overview for project status, readiness, actions, and launch flow.
+              </p>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <div class="context-cards">
+              <div class="context-card">
+                <span class="context-label">Project</span>
+                <strong id="ctxProject">-</strong>
+              </div>
+              <div class="context-card">
+                <span class="context-label">Market</span>
+                <strong id="ctxMarket">-</strong>
+              </div>
+              <div class="context-card">
+                <span class="context-label">Mode</span>
+                <strong id="ctxMode">-</strong>
+              </div>
+              <div class="context-card">
+                <span class="context-label">Campaign</span>
+                <strong id="ctxCampaign">-</strong>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="command-bar" aria-label="Global command bar">
+          <div class="command-bar-left">
+            <input
+              id="globalSearch"
+              class="command-input"
+              type="text"
+              placeholder="Search pages, assets, campaigns, workflows..."
+              aria-label="Global search"
+            >
+          </div>
+
+          <div class="command-bar-center">
+            <input
+              id="quickCommandInput"
+              class="command-input"
+              type="text"
+              placeholder="Talk to the system: e.g. build a launch campaign for Germany"
+              aria-label="Quick command"
+            >
+          </div>
+
+          <div class="command-bar-right">
+            <button id="runSearchBtn" class="btn btn-secondary" type="button">Search</button>
+            <button id="runQuickCommandBtn" class="btn btn-primary" type="button">Run</button>
+            <button id="newCampaignBtn" class="btn btn-secondary" type="button">New Campaign</button>
+            <button id="scheduleBtn" class="btn btn-secondary" type="button">Schedule</button>
+          </div>
+        </section>
+
+        <main id="workspace" class="workspace" aria-live="polite">
+          <div id="pageRoot"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
