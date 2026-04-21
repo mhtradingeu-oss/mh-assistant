@@ -1768,7 +1768,7 @@ export const campaignStudioRoute = {
                 <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>
               </div>
               <div class="campaign-section-copy">
-                Send to AI Command prefills the current campaign draft and then navigates there. Open actions below only navigate to the linked workspace.
+                Send to AI Command prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
               </div>
               <div class="data-stack">
                 ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
@@ -1786,20 +1786,20 @@ export const campaignStudioRoute = {
               </div>
               <div class="campaign-routing-grid">
                 <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Content Studio</span>
-                  <span class="home-action-meta">Navigation only. Open content planning for this campaign.</span>
+                  <span class="home-action-title">Send to Content Studio</span>
+                  <span class="home-action-meta">Open content planning with the current campaign context attached.</span>
                 </button>
                 <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Media Studio</span>
-                  <span class="home-action-meta">Navigation only. Open media planning for this campaign.</span>
+                  <span class="home-action-title">Send to Media Studio</span>
+                  <span class="home-action-meta">Open media planning with the current campaign context attached.</span>
                 </button>
                 <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Publishing</span>
-                  <span class="home-action-meta">Navigation only. Open publishing setup for this campaign.</span>
+                  <span class="home-action-title">Send to Publishing</span>
+                  <span class="home-action-meta">Open publishing setup with the current campaign context attached.</span>
                 </button>
                 <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Ads Manager</span>
-                  <span class="home-action-meta">Navigation only. Open paid activation planning for this campaign.</span>
+                  <span class="home-action-title">Send to Ads Manager</span>
+                  <span class="home-action-meta">Open paid activation planning with the current campaign context attached.</span>
                 </button>
                 <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Review Missing Dependencies</span>

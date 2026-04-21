@@ -2207,42 +2207,77 @@ select {
 .media-studio-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.media-studio-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.12), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(31, 111, 235, 0.15);
-}
-
-.media-studio-hero-copy {
-  min-width: 0;
-}
-
-.media-studio-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 16px;
 }
 
 .media-studio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
-  gap: 20px;
+  gap: 16px;
   align-items: start;
 }
 
 .media-studio-main,
 .media-studio-side {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.media-section-copy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.media-overview-grid,
+.media-selected-grid,
+.media-linked-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.media-overview-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.media-selected-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-overview-item,
+.media-selected-block {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.media-overview-item span,
+.media-selected-label,
+.media-helper-note {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.media-overview-item span,
+.media-selected-label {
+  margin-bottom: 5px;
+}
+
+.media-overview-item strong {
+  display: block;
+  line-height: 1.5;
+}
+
+.media-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .media-output-layout {
@@ -2303,42 +2338,66 @@ select {
 .content-studio-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.content-studio-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.12), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(31, 111, 235, 0.15);
-}
-
-.content-studio-hero-copy {
-  min-width: 0;
-}
-
-.content-studio-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 16px;
 }
 
 .content-studio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
-  gap: 20px;
+  gap: 16px;
   align-items: start;
 }
 
 .content-studio-main,
 .content-studio-side {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.content-section-copy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.content-overview-grid,
+.content-linked-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.content-overview-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.content-overview-item,
+.content-selected-block {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.content-overview-item span,
+.content-selected-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.content-overview-item strong {
+  display: block;
+  line-height: 1.5;
+}
+
+.content-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .content-type-tabs {
@@ -4016,15 +4075,17 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .media-studio-hero {
+  .media-overview-grid,
+  .media-selected-grid,
+  .media-linked-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .media-toolbar {
     flex-direction: column;
   }
 
-  .media-studio-hero .setup-hero-actions {
-    width: 100%;
-  }
-
-  .media-studio-hero .setup-hero-actions .btn {
+  .media-toolbar .btn {
     width: 100%;
   }
 
@@ -4044,15 +4105,16 @@ select {
     width: 100%;
   }
 
-  .content-studio-hero {
+  .content-overview-grid,
+  .content-linked-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content-toolbar {
     flex-direction: column;
   }
 
-  .content-studio-hero .setup-hero-actions {
-    width: 100%;
-  }
-
-  .content-studio-hero .setup-hero-actions .btn {
+  .content-toolbar .btn {
     width: 100%;
   }
 

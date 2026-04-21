@@ -12,6 +12,7 @@ import {
   listProjectTasks,
   saveProjectMediaJob
 } from "../api.js";
+import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const mediaStudioSessions = new Map();
 const REQUEST_TYPES = ["image", "video"];
@@ -105,7 +106,8 @@ function ensureSession(projectName) {
       selectedId: "",
       previewNoteDraft: "",
       commentDraft: "",
-      outputLabelDraft: ""
+      outputLabelDraft: "",
+      aiDraft: ""
     });
   }
   return mediaStudioSessions.get(key);
@@ -240,6 +242,10 @@ function renderLinkedList(items, emptyText, escapeHtml, formatter) {
       ${items.map((item) => `<div class="ops-mini-item">${formatter(item, escapeHtml)}</div>`).join("")}
     </div>
   `;
+}
+
+function buildMediaAiPrompt(projectName, selectedItem, noteDraft) {
+  return `Help improve this media job for ${projectName || "the current project"}.\n\nTitle: ${asString(selectedItem?.title || "Untitled media job")}\nType: ${titleCase(selectedItem?.request_type || "media")}\nStatus: ${titleCase(selectedItem?.status || "requested")}\nProvider: ${asString(selectedItem?.provider || "provider")}\nModel: ${asString(selectedItem?.model || "model")}\n\nPrompt:\n${asString(selectedItem?.prompt || "(empty prompt)")}\n\nBrief:\n${asString(selectedItem?.brief || "(empty brief)")}\n\nRequested help:\n${asString(noteDraft || "Improve the prompt, output direction, and review readiness.")}`;
 }
 
 function bindMediaStudio({
@@ -486,6 +492,57 @@ function bindMediaStudio({
     };
   }
 
+  const sendAiBtn = document.getElementById("mediaSendAiCommandBtn");
+  if (sendAiBtn) {
+    sendAiBtn.onclick = () => {
+      const selectedItem = getSelectedItem(session);
+      if (!selectedItem) {
+        showError?.("Select a media job before sending context to AI Command.");
+        return;
+      }
+
+      const prompt = buildMediaAiPrompt(projectName, selectedItem, session.aiDraft);
+      const aiDraft = {
+        projectName,
+        modeId: "content",
+        lastCommand: prompt,
+        lastResponseTitle: selectedItem.title || "Media Review",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "media-studio",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "media_job",
+          entity_id: selectedItem.id
+        },
+        payload: {
+          prompt,
+          media_job_id: selectedItem.id,
+          title: selectedItem.title,
+          draft_context: aiDraft,
+          media: {
+            request_type: selectedItem.request_type,
+            provider: selectedItem.provider,
+            model: selectedItem.model,
+            prompt: selectedItem.prompt,
+            brief: selectedItem.brief
+          }
+        },
+        status: "available"
+      });
+
+      const input = document.getElementById("quickCommandInput");
+      if (input) {
+        input.value = prompt;
+      }
+      navigateTo("ai-command");
+      showMessage?.("Media context sent to AI Command.");
+    };
+  }
+
   const taskBtn = document.getElementById("mediaCreateTaskBtn");
   if (taskBtn) {
     taskBtn.onclick = async () => {
@@ -719,23 +776,38 @@ export const mediaStudioRoute = {
 
     root.innerHTML = `
       <div class="media-studio-wrapper">
-        <div class="media-studio-hero">
-          <div class="media-studio-hero-copy">
-            <h2>Durable Media Job Operations</h2>
-            <p>Media requests are now backend-backed jobs with provider metadata, output versions, preview history, asset lineage, approvals, and publishing linkage.</p>
-            <div class="media-studio-status">
-              <span class="metric-pill">Jobs ${escapeHtml(formatCount(session.items.length))}</span>
-              <span class="metric-pill">Pending Approval ${escapeHtml(formatCount(pendingApprovals.length))}</span>
-              <span class="metric-pill">Queue ${escapeHtml(formatCount(queueItems.length))}</span>
-              <span class="metric-pill">Linked Content ${escapeHtml(formatCount(session.contentItems.length))}</span>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Media Overview</h3>
+              <p class="media-section-copy">Browse the queue, review one selected media job, manage real outputs and approvals, then send task or handoff actions only when the job is ready.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(projectName)}</span>
+          </div>
+          <div class="media-overview-grid">
+            <div class="media-overview-item">
+              <span>Jobs</span>
+              <strong>${escapeHtml(formatCount(session.items.length))}</strong>
+            </div>
+            <div class="media-overview-item">
+              <span>Pending approval</span>
+              <strong>${escapeHtml(formatCount(pendingApprovals.length))}</strong>
+            </div>
+            <div class="media-overview-item">
+              <span>Queue</span>
+              <strong>${escapeHtml(formatCount(queueItems.length))}</strong>
+            </div>
+            <div class="media-overview-item">
+              <span>Selected item</span>
+              <strong>${escapeHtml(selectedItem?.title || "No item selected")}</strong>
             </div>
           </div>
-          <div class="setup-hero-actions">
+          <div class="media-toolbar">
             ${REQUEST_TYPES.map((type) => `
               <button class="btn btn-primary" type="button" data-new-media-job="${escapeHtml(type)}">New ${escapeHtml(titleCase(type))} Job</button>
             `).join("")}
           </div>
-        </div>
+        </section>
 
         ${session.error ? `<div class="empty-box">${escapeHtml(session.error)}</div>` : ""}
         ${session.loading ? `<div class="empty-box">Loading durable media jobs, approvals, queue items, lineage, and preview history...</div>` : ""}
@@ -745,8 +817,8 @@ export const mediaStudioRoute = {
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Media Job Queue</h3>
-                  <p>Backend-backed image and video requests with queue status, model metadata, and approval state.</p>
+                  <h3>Media Queue</h3>
+                  <p class="media-section-copy">Browse backend-backed image and video jobs and select one item at a time for review and production updates.</p>
                 </div>
               </div>
               ${renderMediaQueue(session.items, selectedItem?.id || "", escapeHtml)}
@@ -755,8 +827,41 @@ export const mediaStudioRoute = {
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Job Workspace</h3>
-                  <p>Manage request details, link the job to content or publishing, and store durable output state.</p>
+                  <h3>Selected Media Item</h3>
+                  <p class="media-section-copy">Review the current durable media job before editing, approving, or sending it downstream.</p>
+                </div>
+              </div>
+              ${
+                selectedItem
+                  ? `
+                    <div class="data-stack">
+                      <div class="data-row"><span>Title</span><strong>${escapeHtml(selectedItem.title || "Untitled media job")}</strong></div>
+                      <div class="data-row"><span>Request type</span><strong>${escapeHtml(titleCase(selectedItem.request_type || "media"))}</strong></div>
+                      <div class="data-row"><span>Status</span><strong>${escapeHtml(titleCase(selectedItem.status || "requested"))}</strong></div>
+                      <div class="data-row"><span>Approval state</span><strong>${escapeHtml(titleCase(selectedItem.approval_state || "not requested"))}</strong></div>
+                      <div class="data-row"><span>Provider / model</span><strong>${escapeHtml(`${selectedItem.provider || "provider"} / ${selectedItem.model || "model"}`)}</strong></div>
+                      <div class="data-row"><span>Linked content</span><strong>${escapeHtml(linkedContent?.title || selectedItem.content_item_id || "None linked")}</strong></div>
+                    </div>
+                    <div class="media-selected-grid">
+                      <div class="media-selected-block">
+                        <span class="media-selected-label">Prompt</span>
+                        <div class="code-block">${escapeHtml(asString(selectedItem.prompt || "No prompt saved yet."))}</div>
+                      </div>
+                      <div class="media-selected-block">
+                        <span class="media-selected-label">Execution brief</span>
+                        <div class="code-block">${escapeHtml(asString(selectedItem.brief || "No execution brief saved yet."))}</div>
+                      </div>
+                    </div>
+                  `
+                  : `<div class="empty-box">Select a media job to review its current state.</div>`
+              }
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Review / Approval / Output</h3>
+                  <p class="media-section-copy">Save updates the real media job. Approve and Reject only act when a real linked approval exists. Output actions append real output and preview history records.</p>
                 </div>
               </div>
               ${
@@ -776,29 +881,16 @@ export const mediaStudioRoute = {
                       ${renderField("mediaPromptInput", "Prompt", selectedItem.prompt, escapeHtml, "Stored on the durable media job.", true, 5)}
                       ${renderField("mediaBriefInput", "Execution Brief", selectedItem.brief, escapeHtml, "Use for shot list, video beats, or quality constraints.", true, 6)}
                     </div>
+                    <div class="ops-inline-form">
+                      <textarea id="mediaCommentInput" class="setup-input setup-textarea" rows="4" placeholder="Add review note or revision request">${escapeHtml(session.commentDraft)}</textarea>
+                      <button id="mediaCommentBtn" class="btn btn-secondary" type="button">Add Comment</button>
+                    </div>
                     <div class="ops-action-row">
-                      <button id="mediaSaveBtn" class="btn btn-primary" type="button">Save Job</button>
-                      <button id="mediaCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
+                      <button id="mediaSaveBtn" class="btn btn-primary" type="button">Save</button>
                       <button id="mediaRequestApprovalBtn" class="btn btn-secondary" type="button">Request Approval</button>
                       <button id="mediaApproveBtn" class="btn btn-secondary" type="button">Approve</button>
                       <button id="mediaRejectBtn" class="btn btn-secondary" type="button">Reject</button>
-                      <button id="mediaSendToPublishingBtn" class="btn btn-secondary" type="button">Send To Publishing</button>
                     </div>
-                  `
-                  : `<div class="empty-box">Create or select a media job to manage durable execution state.</div>`
-              }
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>Outputs And Preview History</h3>
-                  <p>Version outputs, keep preview history, and capture what changed between revisions.</p>
-                </div>
-              </div>
-              ${
-                selectedItem
-                  ? `
                     <div class="ops-record-grid">
                       ${renderField("mediaOutputLabelInput", "Output Version Label", session.outputLabelDraft, escapeHtml, "Example: V2 approved crop")}
                       ${renderField("mediaPreviewUrlInput", "Preview URL / File Path", "", escapeHtml, "Use durable asset paths or preview URLs.")}
@@ -808,18 +900,34 @@ export const mediaStudioRoute = {
                       <button id="mediaAddOutputBtn" class="btn btn-primary" type="button">Add Output Version</button>
                       <button id="mediaPreviewHistoryBtn" class="btn btn-secondary" type="button">Record Preview History</button>
                     </div>
-                    ${renderLinkedList(asArray(selectedItem.output_versions), "No output versions recorded yet.", escapeHtml, (item) => `
-                      <strong>${escapeHtml(item.label || "Output version")}</strong>
-                      <span>${escapeHtml(item.preview_url || item.file_path || "No preview path saved")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
-                    ${renderLinkedList(asArray(selectedItem.preview_history), "No preview history recorded yet.", escapeHtml, (item) => `
-                      <strong>${escapeHtml(item.preview_label || "Preview")}</strong>
-                      <span>${escapeHtml(item.note || item.preview_url || "")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
+                    <div class="media-linked-grid">
+                      <div>
+                        <span class="media-selected-label">Output versions</span>
+                        ${renderLinkedList(asArray(selectedItem.output_versions), "No output versions recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.label || "Output version")}</strong>
+                          <span>${escapeHtml(item.preview_url || item.file_path || "No preview path saved")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Preview history</span>
+                        ${renderLinkedList(asArray(selectedItem.preview_history), "No preview history recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.preview_label || "Preview")}</strong>
+                          <span>${escapeHtml(item.note || item.preview_url || "")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Comments</span>
+                        ${renderLinkedList(asArray(selectedItem.comments), "No comments recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.author || "operator")}</strong>
+                          <span>${escapeHtml(item.text || "")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
+                        `)}
+                      </div>
+                    </div>
                   `
-                  : `<div class="empty-box">Select a media job to manage output versions and preview history.</div>`
+                  : `<div class="empty-box">Select a media job to edit it, review outputs, or work through approval.</div>`
               }
             </section>
           </div>
@@ -828,78 +936,78 @@ export const mediaStudioRoute = {
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Team Ownership</h3>
-                  <p>Keep design, video, review, and publishing responsibility visible while the job moves through execution.</p>
+                  <h3>Handoff / Task Actions</h3>
+                  <p class="media-section-copy">Send actions create handoffs with context and then navigate. Task creation records a real linked task.</p>
                 </div>
               </div>
-              ${renderMediaOwnershipCard(session, selectedItem, escapeHtml)}
+              ${
+                selectedItem
+                  ? `
+                    <div class="ops-action-row">
+                      <button id="mediaCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
+                      <button id="mediaSendToPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
+                    </div>
+                    <div class="media-linked-grid">
+                      <div>
+                        <span class="media-selected-label">Linked tasks</span>
+                        ${renderLinkedList(linkedTasks, "No linked tasks yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || "Task")}</strong>
+                          <span>${escapeHtml(item.status || "open")} • ${escapeHtml(item.owner_role ? titleCase(item.owner_role) : (item.owner || item.assignee || "unassigned"))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Linked approvals</span>
+                        ${renderLinkedList(linkedApprovals, "No linked approvals yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || "Approval")}</strong>
+                          <span>${escapeHtml(item.status || "pending")} • ${escapeHtml(item.reviewer_role ? titleCase(item.reviewer_role) : (item.reviewer || "operator"))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Linked handoffs</span>
+                        ${renderLinkedList(linkedHandoffs, "No linked handoffs yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.destination_page || "handoff")}</strong>
+                          <span>${escapeHtml(item.status || "available")} • ${escapeHtml(item.destination_role ? titleCase(item.destination_role) : formatDateTime(item.updated_at || item.created_at))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Recent events</span>
+                        ${renderLinkedList(linkedEvents, "No events recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || item.type || "Event")}</strong>
+                          <span>${escapeHtml(item.summary || "")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.timestamp))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="media-selected-label">Asset lineage</span>
+                        ${renderLinkedList(asArray(selectedItem?.asset_lineage), "No asset lineage recorded yet.", escapeHtml, (item) => `
+                          <strong>Lineage</strong>
+                          <span>${escapeHtml(item)}</span>
+                        `)}
+                      </div>
+                    </div>
+                  `
+                  : `<div class="empty-box">Select a media job before creating a task or sending a handoff.</div>`
+              }
             </section>
 
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Comments And Workflow Links</h3>
-                  <p>Keep review notes close to the job, and track linked tasks, approvals, and handoffs.</p>
+                  <h3>Media AI Assistant</h3>
+                  <p class="media-section-copy">Send to AI Command prefills the selected media context and then navigates there. It does not generate or approve outputs itself.</p>
                 </div>
               </div>
               ${
                 selectedItem
                   ? `
                     <div class="ops-inline-form">
-                      <textarea id="mediaCommentInput" class="setup-input setup-textarea" rows="4" placeholder="Add review note or revision request">${escapeHtml(session.commentDraft)}</textarea>
-                      <button id="mediaCommentBtn" class="btn btn-secondary" type="button">Add Comment</button>
+                      <textarea id="mediaAiHelpInput" class="setup-input setup-textarea" rows="4" placeholder="Describe the visual or media help you want">${escapeHtml(session.aiDraft)}</textarea>
+                      <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Send to AI Command</button>
                     </div>
-                    ${renderLinkedList(asArray(selectedItem.comments), "No comments recorded yet.", escapeHtml, (item) => `
-                      <strong>${escapeHtml(item.author || "operator")}</strong>
-                      <span>${escapeHtml(item.text || "")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
+                    <div class="media-helper-note">${escapeHtml(`Owner: ${roleLabel(session, getMediaOwnerRole(selectedItem), asString(selectedItem.request_type) === "video" ? "Video Lead" : "Designer")} • Review: ${roleLabel(session, MEDIA_ROLE_DEFAULTS.reviewRole, "Compliance Reviewer")} • Next handoff: ${roleLabel(session, MEDIA_ROLE_DEFAULTS.handoffRole, "Publisher")}`)}</div>
                   `
-                  : `<div class="empty-box">Select a media job to manage comments and workflow links.</div>`
+                  : `<div class="empty-box">Select a media job before asking AI for visual or media help.</div>`
               }
-              ${renderLinkedList(linkedTasks, "No linked tasks yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Task")}</strong>
-                <span>${escapeHtml(item.status || "open")} • ${escapeHtml(item.owner_role ? titleCase(item.owner_role) : (item.owner || item.assignee || "unassigned"))}</span>
-              `)}
-              ${renderLinkedList(linkedApprovals, "No linked approvals yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Approval")}</strong>
-                <span>${escapeHtml(item.status || "pending")} • ${escapeHtml(item.reviewer_role ? titleCase(item.reviewer_role) : (item.reviewer || "operator"))}</span>
-              `)}
-              ${renderLinkedList(linkedHandoffs, "No linked handoffs yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.destination_page || "handoff")}</strong>
-                <span>${escapeHtml(item.status || "available")} • ${escapeHtml(item.destination_role ? titleCase(item.destination_role) : formatDateTime(item.updated_at || item.created_at))}</span>
-              `)}
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>Asset Lineage And Queue</h3>
-                  <p>Keep source lineage visible and check how the durable queue is routing current work.</p>
-                </div>
-              </div>
-              ${renderLinkedList(asArray(selectedItem?.asset_lineage), "No asset lineage recorded yet.", escapeHtml, (item) => `
-                <strong>Lineage</strong>
-                <span>${escapeHtml(item)}</span>
-              `)}
-              ${renderLinkedList(queueItems.slice(0, 8), "No media queue items yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Queue item")}</strong>
-                <span>${escapeHtml(item.status || "queued")} • ${escapeHtml(item.route || "media-studio")}</span>
-              `)}
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>Event History</h3>
-                  <p>Recent durable events for the selected media job.</p>
-                </div>
-              </div>
-              ${renderLinkedList(linkedEvents, "No events recorded yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || item.type || "Event")}</strong>
-                <span>${escapeHtml(item.summary || "")}</span>
-                <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.timestamp))}</span>
-              `)}
             </section>
           </aside>
         </div>
@@ -924,6 +1032,13 @@ export const mediaStudioRoute = {
     if (commentInput) {
       commentInput.oninput = (event) => {
         session.commentDraft = event.target.value || "";
+      };
+    }
+
+    const aiInput = document.getElementById("mediaAiHelpInput");
+    if (aiInput) {
+      aiInput.oninput = (event) => {
+        session.aiDraft = event.target.value || "";
       };
     }
 

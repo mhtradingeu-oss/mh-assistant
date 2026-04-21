@@ -12,6 +12,7 @@ import {
   decideProjectApproval,
   executeProjectAiCommand
 } from "../api.js";
+import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const CONTENT_TYPES = ["posts", "captions", "emails", "blogs", "scripts", "general"];
 const contentStudioSessions = new Map();
@@ -244,6 +245,10 @@ function renderField(name, label, value, escapeHtml, helper = "", multiline = fa
   `;
 }
 
+function buildContentAiPrompt(projectName, selectedItem, aiDraft) {
+  return `Help improve this content item for ${projectName || "the current project"}.\n\nTitle: ${asString(selectedItem?.title || "Untitled content")}\nType: ${titleCase(selectedItem?.type || "general")}\nDestination: ${asString(selectedItem?.destination || selectedItem?.publishing_destination || "unrouted")}\nApproval status: ${titleCase(selectedItem?.approval_status || "not requested")}\n\nCurrent draft:\n${asString(selectedItem?.draft || "(empty draft)")}\n\nRequested help:\n${asString(aiDraft || "Improve the draft, strengthen the hook, and prepare it for review.")}`;
+}
+
 async function refreshContentWorkspace(projectName, session, rerender, showError) {
   session.loaded = false;
   await loadContentWorkspace(projectName, session, rerender);
@@ -439,6 +444,55 @@ function bindContentStudio({
       } catch (error) {
         showError?.(error.message || "Failed to route AI rewrite request.");
       }
+    };
+  }
+
+  const sendAiBtn = document.getElementById("contentSendAiCommandBtn");
+  if (sendAiBtn) {
+    sendAiBtn.onclick = () => {
+      const selectedItem = getSelectedItem(session);
+      if (!selectedItem) {
+        showError?.("Select a content record before sending context to AI Command.");
+        return;
+      }
+
+      const prompt = buildContentAiPrompt(projectName, selectedItem, session.aiDraft);
+      const aiDraft = {
+        projectName,
+        modeId: "content",
+        lastCommand: prompt,
+        lastResponseTitle: selectedItem.title || "Content Revision",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "content-studio",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "content_item",
+          entity_id: selectedItem.id
+        },
+        payload: {
+          prompt,
+          content_item_id: selectedItem.id,
+          title: selectedItem.title,
+          draft_context: aiDraft,
+          content: {
+            type: selectedItem.type,
+            destination: selectedItem.destination || selectedItem.publishing_destination,
+            draft: selectedItem.draft
+          }
+        },
+        status: "available"
+      });
+
+      const input = document.getElementById("quickCommandInput");
+      if (input) {
+        input.value = prompt;
+      }
+      navigateTo("ai-command");
+      showMessage?.("Content context sent to AI Command.");
     };
   }
 
@@ -674,21 +728,36 @@ export const contentStudioRoute = {
 
     root.innerHTML = `
       <div class="content-studio-wrapper">
-        <div class="content-studio-hero">
-          <div class="content-studio-hero-copy">
-            <h2>Durable Content Operations</h2>
-            <p>Every draft in this workspace is a backend-backed entity with revisions, approvals, comments, ownership, routing, and publishing handoff state.</p>
-            <div class="content-studio-status">
-              <span class="metric-pill">Records ${escapeHtml(formatCount(session.items.length))}</span>
-              <span class="metric-pill">Pending Approval ${escapeHtml(formatCount(pendingApprovals.length))}</span>
-              <span class="metric-pill">Queue ${escapeHtml(formatCount(queueItems.length))}</span>
-              <span class="metric-pill">Tasks ${escapeHtml(formatCount(session.tasks.length))}</span>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Content Overview</h3>
+              <p class="content-section-copy">Browse the queue, inspect one selected item, edit and review it, then send task or handoff actions only when the content is ready.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(projectName)}</span>
+          </div>
+          <div class="content-overview-grid">
+            <div class="content-overview-item">
+              <span>Records</span>
+              <strong>${escapeHtml(formatCount(session.items.length))}</strong>
+            </div>
+            <div class="content-overview-item">
+              <span>Pending approval</span>
+              <strong>${escapeHtml(formatCount(pendingApprovals.length))}</strong>
+            </div>
+            <div class="content-overview-item">
+              <span>Queue</span>
+              <strong>${escapeHtml(formatCount(queueItems.length))}</strong>
+            </div>
+            <div class="content-overview-item">
+              <span>Selected item</span>
+              <strong>${escapeHtml(selectedItem?.title || "No item selected")}</strong>
             </div>
           </div>
-          <div class="setup-hero-actions">
+          <div class="content-toolbar">
             <button id="contentNewRecordBtn" class="btn btn-primary" type="button"${session.saving ? " disabled" : ""}>New Content Record</button>
           </div>
-        </div>
+        </section>
 
         ${session.error ? `<div class="empty-box">${escapeHtml(session.error)}</div>` : ""}
         ${session.loading ? `<div class="empty-box">Loading durable content records, approvals, tasks, handoffs, and event history...</div>` : ""}
@@ -699,7 +768,7 @@ export const contentStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Content Queue</h3>
-                  <p>View durable records by content type and jump directly into revisions, routing, and approvals.</p>
+                  <p class="content-section-copy">Browse durable content items by type and select one item at a time for review and editing.</p>
                 </div>
               </div>
               <div class="content-type-tabs">
@@ -714,8 +783,35 @@ export const contentStudioRoute = {
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Record Workspace</h3>
-                  <p>Edit the current durable content entity, then save a new revision into the backend.</p>
+                  <h3>Selected Content Item</h3>
+                  <p class="content-section-copy">Review the current durable content record before editing or sending any downstream action.</p>
+                </div>
+              </div>
+              ${
+                selectedItem
+                  ? `
+                    <div class="data-stack">
+                      <div class="data-row"><span>Title</span><strong>${escapeHtml(selectedItem.title || "Untitled content")}</strong></div>
+                      <div class="data-row"><span>Type</span><strong>${escapeHtml(titleCase(selectedItem.type || "general"))}</strong></div>
+                      <div class="data-row"><span>Destination</span><strong>${escapeHtml(selectedItem.destination || selectedItem.publishing_destination || "Unrouted")}</strong></div>
+                      <div class="data-row"><span>Approval status</span><strong>${escapeHtml(titleCase(selectedItem.approval_status || "not requested"))}</strong></div>
+                      <div class="data-row"><span>Publish status</span><strong>${escapeHtml(titleCase(selectedItem.publish_status || "draft"))}</strong></div>
+                      <div class="data-row"><span>Owner / review</span><strong>${escapeHtml(`${roleLabel(session, getContentOwnerRole(selectedItem), "Writer")} / ${roleLabel(session, getContentReviewRole(selectedItem), "Compliance Reviewer")}`)}</strong></div>
+                    </div>
+                    <div class="content-selected-block">
+                      <span class="content-selected-label">Current draft</span>
+                      <div class="code-block">${escapeHtml(asString(selectedItem.draft || "No draft content saved yet."))}</div>
+                    </div>
+                  `
+                  : `<div class="empty-box">Select a content record to review its current state.</div>`
+              }
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Edit / Review / Approval</h3>
+                  <p class="content-section-copy">Save creates a real revision. Approval buttons only act when a real approval is already linked to the selected content item.</p>
                 </div>
               </div>
               ${
@@ -731,42 +827,36 @@ export const contentStudioRoute = {
                       ${renderField("contentDraftInput", "Draft Body", selectedItem.draft, escapeHtml, "Stored durably with revision history.", true, 12)}
                       ${renderField("contentRevisionNoteInput", "Revision Note", session.noteDraft, escapeHtml, "Explain what changed in this revision.", true, 3)}
                     </div>
+                    <div class="ops-inline-form">
+                      <textarea id="contentCommentInput" class="setup-input setup-textarea" rows="4" placeholder="Add review note or operator comment">${escapeHtml(session.commentDraft)}</textarea>
+                      <button id="contentCommentBtn" class="btn btn-secondary" type="button">Add Comment</button>
+                    </div>
                     <div class="ops-action-row">
-                      <button id="contentSaveBtn" class="btn btn-primary" type="button"${session.saving ? " disabled" : ""}>Save Revision</button>
-                      <button id="contentCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
+                      <button id="contentSaveBtn" class="btn btn-primary" type="button"${session.saving ? " disabled" : ""}>Save</button>
                       <button id="contentRequestApprovalBtn" class="btn btn-secondary" type="button">Request Approval</button>
                       <button id="contentApproveBtn" class="btn btn-secondary" type="button">Approve</button>
                       <button id="contentRejectBtn" class="btn btn-secondary" type="button">Reject</button>
-                      <button id="contentSendToPublishingBtn" class="btn btn-secondary" type="button">Send To Publishing</button>
+                    </div>
+                    <div class="content-linked-grid">
+                      <div>
+                        <span class="content-selected-label">Revisions</span>
+                        ${renderLinkedList(asArray(selectedItem.revisions), "No revisions recorded yet.", escapeHtml, (item) => `
+                          <strong>Revision ${escapeHtml(item.revision || "")}</strong>
+                          <span>${escapeHtml(item.note || "No revision note")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="content-selected-label">Comments</span>
+                        ${renderLinkedList(asArray(selectedItem.comments), "No comments recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.author || "operator")}</strong>
+                          <span>${escapeHtml(item.text || "")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
+                        `)}
+                      </div>
                     </div>
                   `
-                  : `<div class="empty-box">Create or select a content record to start editing durable content entities.</div>`
-              }
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>AI Rewrite Requests</h3>
-                  <p>Record rewrite or improvement asks on the content entity and route them into AI execution.</p>
-                </div>
-              </div>
-              ${
-                selectedItem
-                  ? `
-                    <div class="ops-record-grid">
-                      ${renderField("contentAiRequestInput", "Rewrite / Improvement Request", session.aiDraft, escapeHtml, "Example: tighten the hook for Instagram and keep the CTA more premium.", true, 4)}
-                    </div>
-                    <div class="ops-action-row">
-                      <button id="contentAiRewriteBtn" class="btn btn-primary" type="button">Record And Route AI Request</button>
-                    </div>
-                    ${renderLinkedList(asArray(selectedItem.ai_requests), "No AI rewrite requests recorded yet.", escapeHtml, (item) => `
-                      <strong>${escapeHtml(titleCase(item.type || "request"))}</strong>
-                      <span>${escapeHtml(item.prompt || "")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(item.status || "open")} • ${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
-                  `
-                  : `<div class="empty-box">Select a content record to manage AI rewrite requests.</div>`
+                  : `<div class="empty-box">Select a content record to edit it, save revisions, or work through review and approval.</div>`
               }
             </section>
           </div>
@@ -775,79 +865,78 @@ export const contentStudioRoute = {
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Team Ownership</h3>
-                  <p>Keep content responsibility, review ownership, and the next role handoff visible on every record.</p>
-                </div>
-              </div>
-              ${renderTeamOwnershipCard(session, selectedItem, escapeHtml)}
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>Revisions And Comments</h3>
-                  <p>Track what changed, who changed it, and the notes attached to the record.</p>
+                  <h3>Handoff / Task Actions</h3>
+                  <p class="content-section-copy">Send actions create handoffs with context and then navigate. Task creation records a real linked task.</p>
                 </div>
               </div>
               ${
                 selectedItem
                   ? `
-                    ${renderLinkedList(asArray(selectedItem.revisions), "No revisions recorded yet.", escapeHtml, (item) => `
-                      <strong>Revision ${escapeHtml(item.revision || "")}</strong>
-                      <span>${escapeHtml(item.note || "No revision note")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
-                    <div class="ops-inline-form">
-                      <textarea id="contentCommentInput" class="setup-input setup-textarea" rows="4" placeholder="Add review note or operator comment">${escapeHtml(session.commentDraft)}</textarea>
-                      <button id="contentCommentBtn" class="btn btn-secondary" type="button">Add Comment</button>
+                    <div class="ops-action-row">
+                      <button id="contentCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
+                      <button id="contentSendToPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
                     </div>
-                    ${renderLinkedList(asArray(selectedItem.comments), "No comments recorded yet.", escapeHtml, (item) => `
-                      <strong>${escapeHtml(item.author || "operator")}</strong>
-                      <span>${escapeHtml(item.text || "")}</span>
-                      <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.created_at))}</span>
-                    `)}
+                    <div class="content-linked-grid">
+                      <div>
+                        <span class="content-selected-label">Linked tasks</span>
+                        ${renderLinkedList(linkedTasks, "No linked tasks yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || "Task")}</strong>
+                          <span>${escapeHtml(item.status || "open")} • ${escapeHtml(item.owner_role ? titleCase(item.owner_role) : (item.owner || item.assignee || "unassigned"))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="content-selected-label">Linked approvals</span>
+                        ${renderLinkedList(linkedApprovals, "No linked approvals yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || "Approval")}</strong>
+                          <span>${escapeHtml(item.status || "pending")} • ${escapeHtml(item.reviewer_role ? titleCase(item.reviewer_role) : (item.reviewer || "operator"))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="content-selected-label">Linked handoffs</span>
+                        ${renderLinkedList(linkedHandoffs, "No publishing handoffs yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.destination_page || "handoff")}</strong>
+                          <span>${escapeHtml(item.status || "available")} • ${escapeHtml(item.destination_role ? titleCase(item.destination_role) : formatDateTime(item.updated_at || item.created_at))}</span>
+                        `)}
+                      </div>
+                      <div>
+                        <span class="content-selected-label">Recent events</span>
+                        ${renderLinkedList(linkedEvents, "No events recorded yet.", escapeHtml, (item) => `
+                          <strong>${escapeHtml(item.title || item.type || "Event")}</strong>
+                          <span>${escapeHtml(item.summary || "")}</span>
+                          <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.timestamp))}</span>
+                        `)}
+                      </div>
+                    </div>
                   `
-                  : `<div class="empty-box">Revision history appears after a content record is selected.</div>`
+                  : `<div class="empty-box">Select a content record before creating a task or sending a handoff.</div>`
               }
             </section>
 
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Routing And Workflow Links</h3>
-                  <p>See linked tasks, approvals, handoffs, and the shared queue state for this workspace.</p>
+                  <h3>Content AI Assistant</h3>
+                  <p class="content-section-copy">Send to AI Command prefills the selected content context and then navigates there. Recording an AI request keeps the request on the durable content item and routes it through the current AI execution path.</p>
                 </div>
               </div>
-              ${renderLinkedList(linkedTasks, "No linked tasks yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Task")}</strong>
-                <span>${escapeHtml(item.status || "open")} • ${escapeHtml(item.owner_role ? titleCase(item.owner_role) : (item.owner || item.assignee || "unassigned"))}</span>
-              `)}
-              ${renderLinkedList(linkedApprovals, "No linked approvals yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Approval")}</strong>
-                <span>${escapeHtml(item.status || "pending")} • ${escapeHtml(item.reviewer_role ? titleCase(item.reviewer_role) : (item.reviewer || "operator"))}</span>
-              `)}
-              ${renderLinkedList(linkedHandoffs, "No publishing handoffs yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.destination_page || "handoff")}</strong>
-                <span>${escapeHtml(item.status || "available")} • ${escapeHtml(item.destination_role ? titleCase(item.destination_role) : formatDateTime(item.updated_at || item.created_at))}</span>
-              `)}
-              ${renderLinkedList(queueItems.slice(0, 8), "No queue items yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || "Queue item")}</strong>
-                <span>${escapeHtml(item.status || "queued")} • ${escapeHtml(item.route || "content-studio")}</span>
-              `)}
-            </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <h3>Event History</h3>
-                  <p>Recent durable events for the selected content entity.</p>
-                </div>
-              </div>
-              ${renderLinkedList(linkedEvents, "No events recorded yet.", escapeHtml, (item) => `
-                <strong>${escapeHtml(item.title || item.type || "Event")}</strong>
-                <span>${escapeHtml(item.summary || "")}</span>
-                <span class="ops-mini-meta">${escapeHtml(formatDateTime(item.timestamp))}</span>
-              `)}
+              ${
+                selectedItem
+                  ? `
+                    <div class="ops-record-grid">
+                      ${renderField("contentAiRequestInput", "Writing Help Request", session.aiDraft, escapeHtml, "Example: tighten the hook for Instagram and keep the CTA more premium.", true, 4)}
+                    </div>
+                    <div class="ops-action-row">
+                      <button id="contentSendAiCommandBtn" class="btn btn-secondary" type="button">Send to AI Command</button>
+                      <button id="contentAiRewriteBtn" class="btn btn-primary" type="button">Record AI Request</button>
+                    </div>
+                    ${renderLinkedList(asArray(selectedItem.ai_requests), "No AI rewrite requests recorded yet.", escapeHtml, (item) => `
+                      <strong>${escapeHtml(titleCase(item.type || "request"))}</strong>
+                      <span>${escapeHtml(item.prompt || "")}</span>
+                      <span class="ops-mini-meta">${escapeHtml(item.status || "open")} • ${escapeHtml(formatDateTime(item.created_at))}</span>
+                    `)}
+                  `
+                  : `<div class="empty-box">Select a content record before asking AI for writing help.</div>`
+              }
             </section>
           </aside>
         </div>
