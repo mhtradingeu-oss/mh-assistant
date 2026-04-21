@@ -154,6 +154,7 @@ const BASE_DIR = '/opt/mh-assistant';
 const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
 const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
 const DATA_DIR = path.join(BASE_DIR, 'data');
+const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
 const LEGACY_BRAND_ASSETS_DIR = path.join(DATA_DIR, 'brand-assets');
 const EXECUTION_DIR = path.join(DATA_DIR, 'execution');
 const HAIROTICMEN_BACKUP_DIR = path.join(
@@ -5040,6 +5041,106 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
   };
 }
 
+function normalizeSetupTextValue(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function normalizeSetupListValue(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeSetupTextValue(item))
+      .filter(Boolean);
+  }
+
+  return normalizeSetupTextValue(value)
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeProjectSetupPayload(payload = {}) {
+  const input = payload && typeof payload === 'object' ? payload : {};
+
+  return {
+    project_type: normalizeSetupTextValue(input.project_type),
+    website_url: normalizeSetupTextValue(input.website_url),
+    status: normalizeSetupTextValue(input.project_status || input.status),
+    execution_mode: normalizeSetupTextValue(input.execution_mode),
+    brand_name: normalizeSetupTextValue(input.brand_name),
+    brand_promise: normalizeSetupTextValue(input.brand_promise),
+    brand_voice: normalizeSetupTextValue(input.brand_voice),
+    visual_identity: normalizeSetupTextValue(input.visual_identity),
+    offer_positioning: normalizeSetupTextValue(input.offer_positioning),
+    market: normalizeSetupTextValue(input.market),
+    language: normalizeSetupTextValue(input.language),
+    currency: normalizeSetupTextValue(input.currency),
+    primary_goal: normalizeSetupTextValue(input.primary_goal),
+    secondary_goal: normalizeSetupTextValue(input.secondary_goal),
+    launch_window: normalizeSetupTextValue(input.launch_window),
+    audience_primary: normalizeSetupTextValue(input.audience_primary),
+    audience_problem: normalizeSetupTextValue(input.audience_problem),
+    audience_geography: normalizeSetupTextValue(input.audience_geography),
+    competitors: normalizeSetupListValue(input.competitors),
+    differentiation: normalizeSetupTextValue(input.differentiation),
+    operator_notes: normalizeSetupListValue(input.operator_notes)
+  };
+}
+
+function updateProjectSetup(projectName, payload = {}) {
+  const safeProject = String(projectName || '').trim().toLowerCase();
+  const requestedProjectName = String(payload.project_name || '').trim().toLowerCase();
+
+  if (!safeProject) {
+    throw new Error('Project name is required');
+  }
+
+  if (requestedProjectName && requestedProjectName !== safeProject) {
+    throw new Error('Project rename is not supported by Setup persistence');
+  }
+
+  const paths = getProjectBasePaths(safeProject);
+
+  if (!fs.existsSync(paths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const registry = getProjectRegistryPaths();
+  const projects = readJsonFile(registry.registryPath, []);
+  const current = readJsonFile(paths.projectFilePath, {});
+  const normalized = normalizeProjectSetupPayload(payload);
+  const updatedAt = new Date().toISOString();
+  const nextProject = {
+    ...current,
+    ...normalized,
+    updated_at: updatedAt
+  };
+
+  writeJsonFile(paths.projectFilePath, nextProject);
+
+  const projectIndex = projects.findIndex(
+    (project) => String(project?.project_name || '').trim().toLowerCase() === safeProject
+  );
+
+  if (projectIndex >= 0) {
+    projects[projectIndex] = {
+      ...projects[projectIndex],
+      ...normalized,
+      updated_at: updatedAt
+    };
+    writeJsonFile(registry.registryPath, projects);
+  }
+
+  return {
+    project: safeProject,
+    saved_fields: Object.keys(normalized),
+    updated_at: updatedAt,
+    project_file: paths.projectFilePath,
+    registry_path: registry.registryPath,
+    record: nextProject
+  };
+}
+
 function listProjects() {
   const registry = getProjectRegistryPaths();
   return readJsonFile(registry.registryPath, []);
@@ -6849,6 +6950,26 @@ app.get('/public/media-manager/project/:project', (req, res) => {
   }
 });
 
+app.post('/media-manager/project/:project/setup', (req, res) => {
+  try {
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
+app.post('/public/media-manager/project/:project/setup', (req, res) => {
+  try {
+    return res.json(updateProjectSetup(req.params.project, req.body || {}));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to save project setup'
+    });
+  }
+});
+
 function handleGetProjectOperations(req, res) {
   try {
     return res.json(buildProjectOperationsPayload(req.params.project));
@@ -8108,7 +8229,16 @@ app.get('/media-manager/', (req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
 });
 
-  app.use('/public', express.static(path.join(__dirname, 'public')));
+app.get('/control-center', (req, res) => {
+  return res.redirect(302, '/control-center/');
+});
+
+app.get('/control-center/', (req, res) => {
+  return res.sendFile(path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html'));
+});
+
+app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('/generated-output/:project/:filename', (req, res) => {
   const project = String(req.params.project || '').trim().toLowerCase();
@@ -9207,6 +9337,7 @@ function reviewProjectDashboard(projectName) {
       folder_health: folderHealth
     },
     priorities,
+    operator_notes: Array.isArray(project.operator_notes) ? project.operator_notes : [],
     next_best_actions: [
       ...(priorities.critical || []).slice(0, 5),
       ...(priorities.important || []).slice(0, 3)
@@ -9232,6 +9363,28 @@ function buildProjectControlCenterOverview(projectName) {
       website_url: project.website_url,
       execution_mode: project.execution_mode,
       status: project.status,
+      project_status: project.status,
+      brand_name: project.brand_name,
+      brand_promise: project.brand_promise,
+      brand_voice: project.brand_voice,
+      visual_identity: project.visual_identity,
+      offer_positioning: project.offer_positioning,
+      currency: project.currency,
+      primary_goal: project.primary_goal,
+      goal: project.primary_goal,
+      secondary_goal: project.secondary_goal,
+      launch_window: project.launch_window,
+      audience_primary: project.audience_primary,
+      target_audience: project.audience_primary,
+      audience_problem: project.audience_problem,
+      customer_problem: project.audience_problem,
+      audience_geography: project.audience_geography,
+      competitors: Array.isArray(project.competitors) ? project.competitors : [],
+      differentiation: project.differentiation,
+      operator_notes: Array.isArray(project.operator_notes) ? project.operator_notes : [],
+      brand_positioning: project.brand_promise,
+      value_prop: project.brand_promise,
+      positioning: project.offer_positioning || project.differentiation,
       readiness_score: dashboard.readiness_score,
       readiness_status: dashboard.readiness_status,
       alignment_status: alignment.status,

@@ -1,4 +1,15 @@
+import { uploadProjectAsset } from "../api.js";
+
 const librarySessionStore = new Map();
+const SAFE_UPLOAD_ASSET_TYPES = [
+  { value: "logo", label: "Logo" },
+  { value: "product", label: "Product" },
+  { value: "packaging", label: "Packaging" },
+  { value: "reference", label: "Reference" },
+  { value: "video", label: "Video" },
+  { value: "image", label: "Image" },
+  { value: "document", label: "Document" }
+];
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -103,7 +114,11 @@ function ensureLibrarySession(projectName) {
       searchQuery: "",
       metadataDrafts: {},
       hiddenAssetIds: new Set(),
-      uploads: []
+      uploadType: "product",
+      customUploadType: "",
+      recentUploads: [],
+      lastUploadedFilenames: [],
+      uploading: false
     });
   }
   return librarySessionStore.get(key);
@@ -154,25 +169,7 @@ function normalizeAssets({
     };
   });
 
-  const queuedUploads = asArray(session.uploads).map((upload) => ({
-    ...upload,
-    id: upload.id,
-    asset_id: upload.id,
-    filename: upload.filename,
-    file_path: upload.file_path || upload.filename,
-    folder: upload.folder || "uploads",
-    exists: true,
-    routed: false,
-    inExpectedFolder: false,
-    routeMeta: null,
-    registryMeta: null,
-    registryKnown: false,
-    localOnly: true,
-    preview_url: upload.preview_url || "",
-    source_signal: upload.source_signal || "Queued upload"
-  }));
-
-  return [...queuedUploads, ...baseAssets].filter((asset) => !session.hiddenAssetIds.has(asset.id));
+  return baseAssets.filter((asset) => !session.hiddenAssetIds.has(asset.id));
 }
 
 function buildFolderItems(tree, folderHealth, assets) {
@@ -240,6 +237,8 @@ function renderAssetPreviewBody(asset, escapeHtml) {
       <div class="library-preview-frame">
         <img src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.filename || asset.asset_type || "asset preview")}" class="library-preview-image">
       </div>
+      <div class="setup-helper" style="margin-top: 12px;">If the preview does not load, use the open action below to inspect the asset directly.</div>
+      <div style="margin-top: 10px;"><a class="btn btn-secondary library-link-btn" href="${escapeHtml(asset.preview_url)}" target="_blank" rel="noreferrer">Open Asset In New Tab</a></div>
     `;
   }
 
@@ -248,6 +247,8 @@ function renderAssetPreviewBody(asset, escapeHtml) {
       <div class="library-preview-frame">
         <video class="library-preview-video" controls src="${escapeHtml(asset.preview_url)}"></video>
       </div>
+      <div class="setup-helper" style="margin-top: 12px;">If the preview does not load, use the open action below to inspect the asset directly.</div>
+      <div style="margin-top: 10px;"><a class="btn btn-secondary library-link-btn" href="${escapeHtml(asset.preview_url)}" target="_blank" rel="noreferrer">Open Asset In New Tab</a></div>
     `;
   }
 
@@ -286,11 +287,44 @@ function buildSourceIndicators(asset, registryTotal) {
   ];
 }
 
+function normalizeCustomAssetType(value = "") {
+  return asString(value)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_-]/g, "");
+}
+
+function getValidatedUploadAssetType(selection = "", customValue = "") {
+  const normalizedSelection = asString(selection).trim().toLowerCase();
+  const safeValues = new Set(SAFE_UPLOAD_ASSET_TYPES.map((item) => item.value));
+
+  if (safeValues.has(normalizedSelection)) {
+    return normalizedSelection;
+  }
+
+  if (normalizedSelection !== "custom") {
+    throw new Error("Choose a valid asset type before uploading.");
+  }
+
+  const normalizedCustom = normalizeCustomAssetType(customValue);
+  if (!normalizedCustom) {
+    throw new Error("Enter a custom asset type before uploading.");
+  }
+
+  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(normalizedCustom)) {
+    throw new Error("Custom asset type must use letters, numbers, underscores, or hyphens only.");
+  }
+
+  return normalizedCustom;
+}
+
 function bindLibraryWorkspace({
   $,
   navigateTo,
   showMessage,
   showError,
+  reloadProjectData,
   escapeHtml,
   projectName,
   session,
@@ -305,6 +339,123 @@ function bindLibraryWorkspace({
   const registryAssets = asArray(registry?.assets);
   const registryTotal = Number(registry?.total_assets || registryAssets.length || 0);
 
+  const syncSelectionToLatestUpload = (allAssets) => {
+    const uploadedNames = asArray(session.lastUploadedFilenames);
+    if (!uploadedNames.length) return;
+
+    const match = allAssets.find((asset) => uploadedNames.includes(asset.filename));
+    if (match) {
+      session.selectedAssetId = match.id;
+      session.lastUploadedFilenames = [];
+    }
+  };
+
+  const uploadSelectedFiles = async () => {
+    if (!projectName) {
+      showError?.("Select a project before uploading files.");
+      return;
+    }
+
+    if (session.uploading) {
+      showError?.("Upload already in progress.");
+      return;
+    }
+
+    const fileInput = $("libraryUploadInput");
+    const assetTypeSelect = $("libraryUploadTypeSelect");
+    const customAssetTypeInput = $("libraryUploadCustomTypeInput");
+    const notesInput = $("libraryUploadNotesInput");
+    const sourceModeInput = $("libraryUploadSourceInput");
+    const files = asArray(fileInput?.files ? Array.from(fileInput.files) : []);
+
+    if (!files.length) {
+      showError?.("Choose at least one file before uploading.");
+      return;
+    }
+
+    let assetType = "";
+    try {
+      assetType = getValidatedUploadAssetType(
+        assetTypeSelect?.value || session.uploadType,
+        customAssetTypeInput?.value || session.customUploadType
+      );
+    } catch (error) {
+      showError?.(error.message || "Choose a valid asset type before uploading.");
+      return;
+    }
+
+    const sourceMode = sourceModeInput?.value?.trim() || "Uploaded asset";
+    const notes = notesInput?.value?.trim() || "";
+    const uploaded = [];
+    const failed = [];
+
+    session.uploading = true;
+    renderWorkspace();
+
+    try {
+      for (const file of files) {
+        try {
+          const result = await uploadProjectAsset(projectName, assetType, file);
+          uploaded.push({
+            id: `uploaded-${Date.now()}-${uploaded.length}`,
+            filename: result?.filename || file.name,
+            asset_type: assetType,
+            status: "success",
+            size: file.size,
+            source_signal: sourceMode,
+            notes,
+            upload_mode: result?.upload_mode || "",
+            target_folder: result?.target_folder || "",
+            saved_to: result?.saved_to || "",
+            message: `Uploaded successfully${result?.target_folder ? ` to ${result.target_folder}` : ""}.`,
+            preview_url: `/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(result?.filename || file.name)}`
+          });
+        } catch (error) {
+          failed.push({
+            filename: file.name,
+            error: error.message || "Upload failed"
+          });
+        }
+      }
+
+      session.recentUploads = [
+        ...uploaded,
+        ...failed.map((item, index) => ({
+          id: `failed-${Date.now()}-${index}`,
+          filename: item.filename,
+          asset_type: assetType,
+          status: "failed",
+          size: 0,
+          source_signal: sourceMode,
+          notes,
+          message: item.error,
+          preview_url: ""
+        })),
+        ...session.recentUploads
+      ].slice(0, 12);
+      session.lastUploadedFilenames = uploaded.map((item) => item.filename);
+      session.selectedFolder = "all";
+
+      if (fileInput) fileInput.value = "";
+      if (notesInput) notesInput.value = "";
+
+      if (uploaded.length && typeof reloadProjectData === "function") {
+        await reloadProjectData(projectName);
+      }
+
+      if (uploaded.length && !failed.length) {
+        showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"} to ${projectName}.`);
+      } else if (uploaded.length && failed.length) {
+        showError?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, but ${failed.length} failed.`);
+      } else if (failed.length) {
+        showError?.(`Upload failed for ${failed.map((item) => item.filename).join(", ")}.`);
+      }
+    } finally {
+      session.uploading = false;
+      renderWorkspace();
+    }
+  };
+
   const renderWorkspace = () => {
     const allAssets = normalizeAssets({
       projectName,
@@ -313,6 +464,7 @@ function bindLibraryWorkspace({
       registryAssets,
       session
     });
+    syncSelectionToLatestUpload(allAssets);
 
     const folderItems = buildFolderItems(tree, folderHealth, allAssets);
     const activeFolder = session.selectedFolder || "all";
@@ -471,21 +623,31 @@ function bindLibraryWorkspace({
 
     const uploadQueue = $("libraryUploadQueue");
     if (uploadQueue) {
-      uploadQueue.innerHTML = session.uploads.length
+      uploadQueue.innerHTML = session.recentUploads.length
         ? `
           <div class="library-upload-queue">
-            ${session.uploads.map((upload) => `
+            ${session.recentUploads.map((upload) => `
               <div class="library-upload-item">
                 <div>
                   <div class="library-asset-title">${escapeHtml(upload.filename)}</div>
-                  <div class="library-asset-meta">${escapeHtml(upload.asset_type || "unclassified")} • ${escapeHtml(formatBytes(upload.size))}</div>
+                  <div class="library-asset-meta">${escapeHtml(upload.asset_type || "unclassified")} • ${escapeHtml(upload.size ? formatBytes(upload.size) : "-")}${upload.target_folder ? ` • ${escapeHtml(upload.target_folder)}` : ""}</div>
+                  <div class="setup-helper" style="margin-top: 4px;">${escapeHtml(upload.message || (upload.status === "success" ? "Uploaded successfully." : "Upload failed."))}</div>
                 </div>
-                <button class="quick-action-btn" type="button" data-library-remove-upload="${escapeHtml(upload.id)}">Remove</button>
+                ${
+                  upload.status === "success" && upload.preview_url
+                    ? `<a class="quick-action-btn library-link-btn" href="${escapeHtml(upload.preview_url)}" target="_blank" rel="noreferrer">Open</a>`
+                    : `<span class="quick-action-btn" aria-disabled="true">${escapeHtml(upload.status === "failed" ? "Failed" : "No preview")}</span>`
+                }
               </div>
             `).join("")}
           </div>
         `
-        : renderEmpty("No files queued yet. Add files here to prepare upload classification and review.", escapeHtml);
+        : renderEmpty(
+          session.uploading
+            ? "Uploading files to the active project..."
+            : "No uploads completed in this session yet. Select files and upload them to refresh the Library.",
+          escapeHtml
+        );
     }
 
     const missingAssetsBox = $("libraryMissingAssets");
@@ -538,6 +700,23 @@ function bindLibraryWorkspace({
       };
     }
 
+    const uploadTypeSelect = $("libraryUploadTypeSelect");
+    const uploadCustomTypeInput = $("libraryUploadCustomTypeInput");
+    if (uploadTypeSelect) {
+      uploadTypeSelect.value = session.uploadType || "product";
+      uploadTypeSelect.onchange = (event) => {
+        session.uploadType = event.target.value || "product";
+        renderWorkspace();
+      };
+    }
+
+    if (uploadCustomTypeInput) {
+      uploadCustomTypeInput.value = session.customUploadType || "";
+      uploadCustomTypeInput.oninput = (event) => {
+        session.customUploadType = event.target.value || "";
+      };
+    }
+
     const saveDraftBtn = $("librarySaveAssetDraftBtn");
     if (saveDraftBtn && selectedAsset) {
       saveDraftBtn.onclick = () => {
@@ -557,85 +736,20 @@ function bindLibraryWorkspace({
       deleteAssetBtn.onclick = () => {
         session.hiddenAssetIds.add(selectedAsset.id);
         session.selectedAssetId = "";
-        showMessage?.(
-          selectedAsset.localOnly
-            ? "Queued upload removed from the workspace."
-            : "Asset removed from the current Library view. Backend delete is not wired yet."
-        );
+        showMessage?.("TODO: backend delete is not wired yet. This only hides the asset from the current Library view.");
         renderWorkspace();
       };
     }
-
-    const removeUploadButtons = Array.from(document.querySelectorAll("[data-library-remove-upload]"));
-    removeUploadButtons.forEach((button) => {
-      button.onclick = () => {
-        const uploadId = button.getAttribute("data-library-remove-upload") || "";
-        const upload = session.uploads.find((item) => item.id === uploadId);
-        if (upload?.preview_url && upload.preview_url.startsWith("blob:")) {
-          URL.revokeObjectURL(upload.preview_url);
-        }
-        session.uploads = session.uploads.filter((item) => item.id !== uploadId);
-        if (session.selectedAssetId === uploadId) {
-          session.selectedAssetId = "";
-        }
-        renderWorkspace();
-      };
-    });
   };
 
   const addQueueBtn = $("libraryAddQueueBtn");
   if (addQueueBtn) {
-    addQueueBtn.onclick = () => {
-      const fileInput = $("libraryUploadInput");
-      const assetTypeInput = $("libraryUploadTypeInput");
-      const notesInput = $("libraryUploadNotesInput");
-      const sourceModeInput = $("libraryUploadSourceInput");
-      const files = asArray(fileInput?.files ? Array.from(fileInput.files) : []);
-
-      if (!files.length) {
-        showError?.("Choose at least one file before adding to the upload queue.");
-        return;
-      }
-
-      const assetType = assetTypeInput?.value?.trim() || "unclassified_asset";
-      const sourceMode = sourceModeInput?.value?.trim() || "Queued upload";
-      const notes = notesInput?.value?.trim() || "";
-
-      const queued = files.map((file, index) => {
-        const previewUrl = file.type.startsWith("image/") || file.type.startsWith("video/")
-          ? URL.createObjectURL(file)
-          : "";
-
-        return {
-          id: `upload-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
-          filename: file.name,
-          asset_type: assetType,
-          file_path: file.name,
-          folder: "uploads",
-          size: file.size,
-          notes,
-          source_signal: sourceMode,
-          preview_url: previewUrl
-        };
-      });
-
-      session.uploads = [...queued, ...session.uploads];
-      fileInput.value = "";
-      if (notesInput) notesInput.value = "";
-      showMessage?.(`Added ${queued.length} file${queued.length === 1 ? "" : "s"} to the local upload queue. Backend upload is not connected yet.`);
-      renderWorkspace();
-    };
+    addQueueBtn.onclick = uploadSelectedFiles;
   }
 
   const stageUploadBtn = $("libraryStageUploadBtn");
   if (stageUploadBtn) {
-    stageUploadBtn.onclick = () => {
-      if (!session.uploads.length) {
-        showError?.("Add files to the queue first.");
-        return;
-      }
-      showMessage?.("Upload backend is not wired yet. The queue is prepared so classification and review can continue.");
-    };
+    stageUploadBtn.onclick = uploadSelectedFiles;
   }
 
   const goSetupBtn = $("libraryOpenSetupBtn");
@@ -670,7 +784,8 @@ export const libraryRoute = {
     safeText,
     navigateTo,
     showMessage,
-    showError
+    showError,
+    reloadProjectData
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
@@ -765,7 +880,7 @@ export const libraryRoute = {
                     <span class="setup-field-state is-optional">Multi-select</span>
                   </div>
                   <input id="libraryUploadInput" class="setup-input" type="file" multiple>
-                  <div class="setup-helper">Queue files here first so they can be classified and reviewed before backend upload is connected.</div>
+                  <div class="setup-helper">Select files here and upload them into the active project using the existing backend endpoint.</div>
                 </div>
 
                 <div class="setup-field-group">
@@ -773,8 +888,18 @@ export const libraryRoute = {
                     <label class="setup-label" for="libraryUploadTypeInput">Default asset type</label>
                     <span class="setup-field-state is-optional">Applies to queue</span>
                   </div>
-                  <input id="libraryUploadTypeInput" class="setup-input" type="text" placeholder="e.g. product_image">
-                  <div class="setup-helper">Use a broad classification now. You can refine asset metadata after selecting an item.</div>
+                  <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+                    ${SAFE_UPLOAD_ASSET_TYPES.map((item) => `
+                      <option value="${escapeHtml(item.value)}"${session.uploadType === item.value ? " selected" : ""}>${escapeHtml(item.label)}</option>
+                    `).join("")}
+                    <option value="custom"${session.uploadType === "custom" ? " selected" : ""}>Custom type (advanced)</option>
+                  </select>
+                  ${
+                    session.uploadType === "custom"
+                      ? `<input id="libraryUploadCustomTypeInput" class="setup-input" type="text" value="${escapeHtml(session.customUploadType || "")}" placeholder="custom_type" style="margin-top: 10px;">`
+                      : ""
+                  }
+                  <div class="setup-helper">Use a known safe type when possible. Custom type is available for advanced cases and is validated before upload.</div>
                 </div>
 
                 <div class="setup-field-group">
@@ -783,7 +908,7 @@ export const libraryRoute = {
                     <span class="setup-field-state is-optional">Operational</span>
                   </div>
                   <input id="libraryUploadSourceInput" class="setup-input" type="text" placeholder="Project-owned, reference only, source candidate">
-                  <div class="setup-helper">Capture how the team should treat these files when the backend upload endpoint is ready.</div>
+                  <div class="setup-helper">Capture how the team should treat these files operationally after upload.</div>
                 </div>
 
                 <div class="setup-field-group">
@@ -795,13 +920,13 @@ export const libraryRoute = {
                 </div>
 
                 <div class="library-preview-actions">
-                  <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Add To Queue</button>
+                  <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Upload Selected</button>
                   <button id="libraryStageUploadBtn" class="btn btn-primary" type="button">Prepare Upload</button>
                 </div>
               </div>
 
               <div style="margin-top: 16px;">
-                <h4 class="setup-mini-title">Upload queue</h4>
+                <h4 class="setup-mini-title">Recent uploads</h4>
                 <div id="libraryUploadQueue"></div>
               </div>
             </section>
@@ -839,6 +964,7 @@ export const libraryRoute = {
       navigateTo,
       showMessage,
       showError,
+      reloadProjectData,
       escapeHtml,
       projectName,
       session,

@@ -224,6 +224,32 @@ function readSetupFormValues(form) {
   return values;
 }
 
+function buildSetupPersistencePayload(values) {
+  return {
+    project_type: values.project_type,
+    website_url: values.website_url,
+    project_status: values.project_status,
+    execution_mode: values.execution_mode,
+    brand_name: values.brand_name,
+    brand_promise: values.brand_promise,
+    brand_voice: values.brand_voice,
+    visual_identity: values.visual_identity,
+    offer_positioning: values.offer_positioning,
+    market: values.market,
+    language: values.language,
+    currency: values.currency,
+    primary_goal: values.primary_goal,
+    secondary_goal: values.secondary_goal,
+    launch_window: values.launch_window,
+    audience_primary: values.audience_primary,
+    audience_problem: values.audience_problem,
+    audience_geography: values.audience_geography,
+    competitors: values.competitors,
+    differentiation: values.differentiation,
+    operator_notes: values.operator_notes
+  };
+}
+
 function updateSetupFieldIndicators(form, values) {
   const groups = Array.from(form.querySelectorAll("[data-setup-field]"));
   groups.forEach((group) => {
@@ -328,8 +354,11 @@ function bindSetupActions({
   $,
   navigateTo,
   showMessage,
+  showError,
   escapeHtml,
   projectName,
+  reloadProjectData,
+  saveProjectSetup,
   missingAssets,
   missingConnectors,
   readinessScore,
@@ -391,8 +420,34 @@ function bindSetupActions({
 
   const saveBackendBtn = $("setupSaveBackendBtn");
   if (saveBackendBtn) {
-    saveBackendBtn.onclick = () => {
-      saveLocal(`Backend save is not connected yet. Draft stored locally for ${draftKeyName}.`);
+    saveBackendBtn.onclick = async () => {
+      if (!projectName) {
+        showError?.("Select a project before saving Setup changes.");
+        return;
+      }
+
+      const values = refreshSummary();
+      const requestedProjectName = asString(values.project_name).trim().toLowerCase();
+      const payload = buildSetupPersistencePayload(values);
+
+      saveBackendBtn.disabled = true;
+
+      try {
+        await saveProjectSetup?.(projectName, payload);
+        clearSetupDraft(projectName);
+        await reloadProjectData?.(projectName);
+
+        const renameWarning =
+          requestedProjectName && requestedProjectName !== asString(projectName).trim().toLowerCase()
+            ? " Project name remains local-only until project rename support exists."
+            : "";
+
+        showMessage?.(`Setup changes saved for ${draftKeyName}.${renameWarning}`);
+      } catch (error) {
+        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
+      } finally {
+        saveBackendBtn.disabled = false;
+      }
     };
   }
 
@@ -443,7 +498,10 @@ export const setupRoute = {
     safeText,
     renderSimpleList,
     navigateTo,
-    showMessage
+    showMessage,
+    showError,
+    reloadProjectData,
+    saveProjectSetup
   }) {
     const state = getState();
     const overviewData = asObject(state.data.overview?.overview);
@@ -497,7 +555,7 @@ export const setupRoute = {
             <div class="setup-kicker">Project Setup Workspace</div>
             <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Setup` : "Project Setup")}</h3>
             <p class="setup-hero-text">
-              Tighten the information that drives campaign quality, brand consistency, and launch readiness. This form is editable now, and draft saving stays local until the backend save endpoint is wired.
+              Tighten the information that drives campaign quality, brand consistency, and launch readiness. Save Changes now writes project setup metadata durably, while Save Draft still preserves in-progress browser-only work.
             </p>
             <div class="setup-hero-status">
               <div class="setup-status-chip">
@@ -838,7 +896,7 @@ export const setupRoute = {
                   name: "operator_notes",
                   label: "Operator notes",
                   value: values.operator_notes,
-                  helper: "Use this to capture local setup context, approvals, and follow-ups until backend save is connected.",
+                  helper: "Use this to capture setup context, approvals, and follow-ups that should stay with the project record.",
                   placeholder: "Notes for the next operator or launch review",
                   escapeHtml,
                   multiline: true,
@@ -962,8 +1020,11 @@ export const setupRoute = {
       $,
       navigateTo,
       showMessage,
+      showError,
       escapeHtml,
       projectName,
+      reloadProjectData,
+      saveProjectSetup,
       missingAssets,
       missingConnectors,
       readinessScore,

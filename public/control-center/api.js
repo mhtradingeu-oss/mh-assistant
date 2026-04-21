@@ -55,6 +55,15 @@ async function sendJson(path, method, body, fallbackMessage) {
   return parseJson(response, fallbackMessage);
 }
 
+async function sendForm(path, formData, fallbackMessage) {
+  const response = await fetch(buildUrl(path), {
+    method: "POST",
+    body: formData
+  });
+
+  return parseJson(response, fallbackMessage);
+}
+
 /* =========================
    NORMALIZERS
 ========================= */
@@ -164,6 +173,19 @@ export async function fetchProjectOperations(projectName) {
   return getJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
     "Failed to load project operations"
+  );
+}
+
+export async function saveProjectSetup(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/setup`,
+    "POST",
+    payload,
+    "Failed to save project setup"
   );
 }
 
@@ -819,5 +841,36 @@ export async function markProjectNotification(projectName, notificationId, paylo
     "PATCH",
     payload,
     "Failed to update notification"
+  );
+}
+
+export async function uploadProjectAsset(projectName, assetType, file) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  const normalizedAssetType = String(assetType || "").trim().toLowerCase();
+
+  if (!normalizedAssetType) {
+    throw new Error("Missing asset type");
+  }
+
+  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(normalizedAssetType)) {
+    throw new Error("Invalid asset type");
+  }
+
+  if (!(file instanceof File)) {
+    throw new Error("Missing file");
+  }
+
+  const formData = new FormData();
+  formData.append("project", projectName);
+  formData.append("type", normalizedAssetType);
+  formData.append("file", file);
+
+  return sendForm(
+    "/media/upload",
+    formData,
+    "Failed to upload asset"
   );
 }
