@@ -604,7 +604,8 @@ function ensureSession(projectName) {
   const key = projectName || "__default__";
   if (!integrationSessions.has(key)) {
     integrationSessions.set(key, {
-      drafts: {}
+      drafts: {},
+      selectedIntegrationId: ""
     });
   }
   return integrationSessions.get(key);
@@ -1113,6 +1114,42 @@ function renderField(integrationId, field, value, escapeHtml) {
 }
 
 function renderIntegrationCard(card, session, escapeHtml) {
+  const isSelected = asString(session.selectedIntegrationId) === card.id;
+  const primaryActionLabel =
+    card.statusLabel === "Connected"
+      ? "Manage"
+      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+        ? "Fix Connection"
+        : "Connect";
+  const primaryAction =
+    card.statusLabel === "Connected"
+      ? "manage"
+      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+        ? "reconnect"
+        : "connect";
+
+  return `
+    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
+      <div class="integration-simple-head">
+        <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
+        <div class="integration-simple-copy">
+          <strong>${escapeHtml(card.label)}</strong>
+        </div>
+        <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(
+          card.statusLabel === "Partial" || card.statusLabel === "Token expired" || card.statusLabel === "Error"
+            ? "Needs Attention"
+            : card.statusLabel
+        )}</span>
+      </div>
+      <div class="integration-simple-actions">
+        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primaryActionLabel)}</button>
+        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">View Details</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderIntegrationDetailsPanel(card, session, escapeHtml) {
   const fields = card.fields
     .map((field) => renderField(
       card.id,
@@ -1141,12 +1178,12 @@ function renderIntegrationCard(card, session, escapeHtml) {
 
       <div class="integration-hub-intro">
         <div class="integration-hub-why">
-          <strong>Why this matters</strong>
-          <span>${escapeHtml(card.whyItMatters)}</span>
+          <strong>Status</strong>
+          <span>${escapeHtml(card.healthSummary)}</span>
         </div>
         <div class="integration-hub-why">
-          <strong>What MH Assistant can do</strong>
-          <span>${escapeHtml(card.enablesSummary)}</span>
+          <strong>Connection value</strong>
+          <span>${escapeHtml(card.sourceValue || "Not set")}</span>
         </div>
       </div>
 
@@ -1154,15 +1191,6 @@ function renderIntegrationCard(card, session, escapeHtml) {
         <div>
           <div class="integration-field-grid">
             ${fields}
-          </div>
-          <div class="integration-scope-row">
-            ${card.dataScopes.map((item) => `<span class="integration-scope-pill">${escapeHtml(item)}</span>`).join("")}
-          </div>
-          <div class="integration-scope-row">
-            ${card.readScopes.map((item) => `<span class="integration-scope-pill">${escapeHtml(`Read: ${titleCase(item)}`)}</span>`).join("")}
-          </div>
-          <div class="integration-scope-row">
-            ${card.writeScopes.map((item) => `<span class="integration-scope-pill">${escapeHtml(`Write: ${titleCase(item)}`)}</span>`).join("")}
           </div>
           ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
           <div class="integration-side-note">
@@ -1172,9 +1200,7 @@ function renderIntegrationCard(card, session, escapeHtml) {
 
         <div class="integration-side-panel">
           <div class="data-stack">
-            <div class="data-row"><span>Connection value</span><strong>${escapeHtml(card.sourceValue || "Not set")}</strong></div>
-            <div class="data-row"><span>Data scope</span><strong>${escapeHtml(card.dataScopeSummary || "Not defined")}</strong></div>
-            <div class="data-row"><span>Permission scope</span><strong>${escapeHtml(card.permissionScopeSummary)}</strong></div>
+            <div class="data-row"><span>Status</span><strong>${escapeHtml(card.statusLabel)}</strong></div>
             <div class="data-row"><span>Last test</span><strong>${escapeHtml(formatDateTime(card.lastTest))}</strong></div>
             <div class="data-row"><span>Last sync</span><strong>${escapeHtml(formatDateTime(card.lastSync))}</strong></div>
             <div class="data-row"><span>Last import</span><strong>${escapeHtml(formatDateTime(card.lastImport))}</strong></div>
@@ -1221,6 +1247,109 @@ function renderDomainSection(domain, session, escapeHtml) {
   `;
 }
 
+function summarizeSectionCards(cards) {
+  return {
+    connected: cards.filter((card) => card.statusLabel === "Connected").length,
+    notConnected: cards.filter((card) => card.statusLabel === "Not Connected").length,
+    needsAttention: cards.filter((card) => ["Partial", "Token expired", "Error"].includes(card.statusLabel)).length
+  };
+}
+
+function buildSectionGroups(domainModels) {
+  const byId = new Map(domainModels.map((domain) => [domain.id, domain]));
+
+  return [
+    {
+      id: "sales-channels",
+      title: "Sales Channels",
+      description: "Commerce and marketplace connections that support products, orders, revenue signals, and conversion-aware sales intelligence.",
+      domains: [byId.get("website-commerce")].filter(Boolean)
+    },
+    {
+      id: "social-channels",
+      title: "Social Channels",
+      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
+      domains: [byId.get("social")].filter(Boolean)
+    },
+    {
+      id: "marketing-tracking-tools",
+      title: "Marketing & Tracking Tools",
+      description: "Analytics, paid media, and attribution systems that improve measurement, optimization, and traffic visibility.",
+      domains: [byId.get("analytics"), byId.get("ads")].filter(Boolean)
+    },
+    {
+      id: "support-operations-tools",
+      title: "Support / Operations Tools",
+      description: "Lifecycle, CRM, automation, and coordination tools that support execution, alerts, and internal operating flow.",
+      domains: [byId.get("email-crm"), byId.get("automation")].filter(Boolean)
+    }
+  ].map((section) => {
+    const cards = section.domains.flatMap((domain) => domain.cards);
+    return {
+      ...section,
+      cards,
+      summary: summarizeSectionCards(cards)
+    };
+  });
+}
+
+function renderIntegrationSection(section, session, escapeHtml) {
+  const { connected, notConnected, needsAttention } = section.summary;
+  const tone = notConnected || needsAttention ? (connected ? "warning" : "danger") : "success";
+  const selectedCard = section.cards.find((card) => card.id === asString(session.selectedIntegrationId)) || section.cards[0] || null;
+  const connectedCards = section.cards.filter((card) => card.statusLabel === "Connected");
+  const attentionCards = section.cards.filter((card) => ["Partial", "Token expired", "Error"].includes(card.statusLabel));
+  const notConnectedCards = section.cards.filter((card) => card.statusLabel === "Not Connected");
+
+  return `
+    <section class="card integration-domain-card">
+      <div class="card-head">
+        <div>
+          <h3>${escapeHtml(section.title)}</h3>
+          <p class="home-section-copy" style="margin:6px 0 0;">${escapeHtml(section.description)}</p>
+        </div>
+        <span class="card-badge ${tone}">${escapeHtml(`${connected} connected • ${notConnected} not connected • ${needsAttention} needs attention`)}</span>
+      </div>
+      <div class="integration-coverage-grid integration-section-status-grid">
+        <div class="integration-coverage-item">
+          <strong>Connected</strong>
+          <span class="card-badge success">${escapeHtml(String(connected))}</span>
+          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
+        </div>
+        <div class="integration-coverage-item">
+          <strong>Not connected</strong>
+          <span class="card-badge danger">${escapeHtml(String(notConnected))}</span>
+          <div class="integration-coverage-meta">No complete connection record is available yet.</div>
+        </div>
+          <div class="integration-coverage-item">
+            <strong>Needs attention / blocked</strong>
+            <span class="card-badge warning">${escapeHtml(String(needsAttention))}</span>
+            <div class="integration-coverage-meta">Partial setup, token issues, or server-reported errors need review.</div>
+          </div>
+        </div>
+      <div class="integration-status-group">
+        <div class="integration-mini-heading">Connected</div>
+        <div class="integration-simple-grid">
+          ${connectedCards.length ? connectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No connected integrations in this group yet.</div>`}
+        </div>
+      </div>
+      <div class="integration-status-group">
+        <div class="integration-mini-heading">Needs Attention</div>
+        <div class="integration-simple-grid">
+          ${attentionCards.length ? attentionCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No integrations need attention in this group right now.</div>`}
+        </div>
+      </div>
+      <div class="integration-status-group">
+        <div class="integration-mini-heading">Not Connected</div>
+        <div class="integration-simple-grid">
+          ${notConnectedCards.length ? notConnectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">All integrations in this group already have a connection state.</div>`}
+        </div>
+      </div>
+      ${selectedCard ? renderIntegrationDetailsPanel(selectedCard, session, escapeHtml) : ""}
+    </section>
+  `;
+}
+
 function bindIntegrationActions({
   getState,
   $,
@@ -1238,6 +1367,35 @@ function bindIntegrationActions({
   session,
   render
 }) {
+  Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
+    button.onclick = () => {
+      session.selectedIntegrationId = button.getAttribute("data-integration-select") || "";
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-primary]")).forEach((button) => {
+    button.onclick = async () => {
+      const action = button.getAttribute("data-integration-primary") || "";
+      const integrationId = button.getAttribute("data-integration-id") || "";
+      session.selectedIntegrationId = integrationId;
+
+      if (action === "manage") {
+        render();
+        return;
+      }
+
+      if (action === "connect") {
+        await persistPrimary(integrationId, false);
+        return;
+      }
+
+      if (action === "reconnect") {
+        await persistPrimary(integrationId, true);
+      }
+    };
+  });
+
   Array.from(document.querySelectorAll("[data-integration-field]")).forEach((input) => {
     input.oninput = (event) => {
       const integrationId = input.getAttribute("data-integration-field") || "";
@@ -1466,7 +1624,11 @@ export const integrationsRoute = {
     const projectName = state.context.currentProject || "";
     const session = ensureSession(projectName);
     const domainModels = buildDomainModels(state, session);
+    const sectionGroups = buildSectionGroups(domainModels);
     const allCards = domainModels.flatMap((domain) => domain.cards);
+    if (!session.selectedIntegrationId || !allCards.find((card) => card.id === session.selectedIntegrationId)) {
+      session.selectedIntegrationId = allCards[0]?.id || "";
+    }
     const coverageMap = buildCoverageMap(domainModels);
     const criticalMissing = buildCriticalMissing(domainModels);
     const recommendations = buildRecommendations(domainModels, coverageMap);
@@ -1475,6 +1637,8 @@ export const integrationsRoute = {
     const partialTotal = allCards.filter((card) => card.statusLabel === "Partial").length;
     const errorTotal = allCards.filter((card) => card.statusLabel === "Error").length;
     const expiredTotal = allCards.filter((card) => card.statusLabel === "Token expired").length;
+    const notConnectedTotal = allCards.filter((card) => card.statusLabel === "Not Connected").length;
+    const attentionTotal = partialTotal + errorTotal + expiredTotal;
     const criticalMissingCount = criticalMissing.length;
     const lastGlobalSync =
       asString(controlCenter.summary?.last_global_sync) ||
@@ -1488,89 +1652,47 @@ export const integrationsRoute = {
 
     root.innerHTML = `
       <div class="integrations-wrapper integration-control-center">
-        <div class="integrations-hero">
-          <div class="integrations-hero-copy">
-            <div class="setup-kicker">Integration Control Center</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Integration Control Center` : "Integration Control Center")}</h3>
-            <p class="setup-hero-text">
-              Connect, manage, test, sync, and control every external platform MH Assistant OS depends on for publishing, analytics, SEO, paid optimization, commerce, and automation.
-            </p>
-            <div class="integrations-hero-status">
-              <div class="setup-status-chip">
-                <span>Connected integrations</span>
-                <strong>${escapeHtml(String(connectedTotal))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Partial integrations</span>
-                <strong>${escapeHtml(String(partialTotal))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Errors</span>
-                <strong>${escapeHtml(String(errorTotal))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Token expired</span>
-                <strong>${escapeHtml(String(expiredTotal))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Last global sync</span>
-                <strong>${escapeHtml(formatDateTime(lastGlobalSync))}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="integrations-control-top">
-          <section class="card">
-            <div class="card-head">
-              <h3>Integration Readiness Overview</h3>
-              <span class="card-badge ${criticalMissingCount ? "warning" : "success"}">${escapeHtml(criticalMissingCount ? "Action needed" : "Healthy")}</span>
-            </div>
-            <div class="integrations-overview-grid integration-overview-grid-4">
-              <div class="data-card">
-                <span class="data-label">Connected</span>
-                <strong>${escapeHtml(String(connectedTotal))}</strong>
-              </div>
-              <div class="data-card">
-                <span class="data-label">Critical missing</span>
-                <strong>${escapeHtml(String(criticalMissingCount))}</strong>
-              </div>
-              <div class="data-card">
-                <span class="data-label">Partial or blocked</span>
-                <strong>${escapeHtml(String(partialTotal + errorTotal + expiredTotal))}</strong>
-              </div>
-              <div class="data-card">
-                <span class="data-label">Health summary</span>
-                <strong>${escapeHtml(errorTotal || expiredTotal ? "Attention required" : criticalMissingCount ? "Partial coverage" : "Operationally ready")}</strong>
-              </div>
-            </div>
-          </section>
-
-          <section class="card">
-            <div class="card-head">
-              <h3>Critical Missing Integrations</h3>
-              <span class="card-badge ${criticalMissingCount ? "danger" : "success"}">${escapeHtml(criticalMissingCount ? `${criticalMissingCount} missing` : "Covered")}</span>
-            </div>
-            ${renderCriticalMissing(criticalMissing, escapeHtml)}
-          </section>
-        </div>
-
         <section class="card">
           <div class="card-head">
-            <h3>Data Coverage Map</h3>
-            <span class="card-badge neutral">${escapeHtml(`${coverageMap.length} intelligence domains`)}</span>
+            <div>
+              <div class="setup-kicker">Connection Management</div>
+              <h3>Connection Overview</h3>
+              <p class="home-section-copy" style="margin:6px 0 0;">Track which integrations are connected, which are still missing, and which need attention before sync and intelligence can be trusted.</p>
+            </div>
+            <span class="card-badge ${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
-          ${renderCoverageMap(coverageMap, escapeHtml)}
+          <div class="integrations-overview-grid integration-overview-grid-4">
+            <div class="data-card">
+              <span class="data-label">Connected</span>
+              <strong>${escapeHtml(String(connectedTotal))}</strong>
+            </div>
+            <div class="data-card">
+              <span class="data-label">Not connected</span>
+              <strong>${escapeHtml(String(notConnectedTotal))}</strong>
+            </div>
+            <div class="data-card">
+              <span class="data-label">Needs attention / blocked</span>
+              <strong>${escapeHtml(String(attentionTotal))}</strong>
+            </div>
+            <div class="data-card">
+              <span class="data-label">Last global sync</span>
+              <strong>${escapeHtml(formatDateTime(lastGlobalSync))}</strong>
+            </div>
+          </div>
         </section>
 
-        ${domainModels.map((domain) => renderDomainSection(domain, session, escapeHtml)).join("")}
+        ${sectionGroups.map((section) => renderIntegrationSection(section, session, escapeHtml)).join("")}
 
         <section class="card">
           <div class="card-head">
-            <h3>AI Recommendation Panel</h3>
-            <span class="card-badge neutral">${escapeHtml(`${recommendations.prompts.length} prompts`)}</span>
+            <h3>Integration Actions / Status</h3>
+            <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>
           </div>
           <div class="integration-ai-grid">
+            <div>
+              <h4 class="integration-mini-heading">Critical missing integrations</h4>
+              ${renderCriticalMissing(criticalMissing, escapeHtml)}
+            </div>
             <div>
               <h4 class="integration-mini-heading">Recommended next actions</h4>
               <div class="integration-critical-list">
@@ -1582,22 +1704,27 @@ export const integrationsRoute = {
                 `).join("")}
               </div>
             </div>
-            <div>
-              <h4 class="integration-mini-heading">Recommendation prompts</h4>
-              <div class="integration-ai-prompt-list">
-                ${recommendations.prompts.map((item) => `
-                  <button
-                    class="quick-action-btn"
-                    type="button"
-                    data-integration-prompt="1"
-                    data-integration-prompt-text="${escapeHtml(item.prompt)}"
-                  >
-                    <span class="home-action-title">${escapeHtml(item.label)}</span>
-                    <span class="home-action-meta">${escapeHtml(item.prompt)}</span>
-                  </button>
-                `).join("")}
-              </div>
-            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Integrations AI Assistant</h3>
+            <span class="card-badge neutral">${escapeHtml(`${recommendations.prompts.length} prompts`)}</span>
+          </div>
+          <p class="setup-side-copy">These prompts send integration context to AI Command. They do not change any connection state until you run actions from this page.</p>
+          <div class="integration-ai-prompt-list">
+            ${recommendations.prompts.map((item) => `
+              <button
+                class="quick-action-btn"
+                type="button"
+                data-integration-prompt="1"
+                data-integration-prompt-text="${escapeHtml(item.prompt)}"
+              >
+                <span class="home-action-title">${escapeHtml(item.label)}</span>
+                <span class="home-action-meta">${escapeHtml(item.prompt)}</span>
+              </button>
+            `).join("")}
           </div>
         </section>
       </div>

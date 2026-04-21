@@ -1237,9 +1237,7 @@ function bindWorkflowCatalog({
     };
   }
 
-  const pushAiBtn = $("workflowPushAiBtn");
-  if (pushAiBtn) {
-    pushAiBtn.onclick = async () => {
+  const handlePushToAi = async () => {
       const activeWorkflow = getWorkflowDef(session.selectedWorkflowId);
       const inputs = session.inputsByWorkflow[activeWorkflow.id];
       const output = session.runsByWorkflow[activeWorkflow.id].output;
@@ -1292,7 +1290,16 @@ function bindWorkflowCatalog({
         globalInput.value = prompt;
       }
       showMessage?.("Workflow context pushed to AI Command.");
-    };
+  };
+
+  const pushAiBtn = $("workflowPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = handlePushToAi;
+  }
+
+  const pushAiSecondaryBtn = $("workflowPushAiBtnSecondary");
+  if (pushAiSecondaryBtn) {
+    pushAiSecondaryBtn.onclick = handlePushToAi;
   }
 }
 
@@ -1338,7 +1345,6 @@ export const workflowsRoute = {
       const selectedWorkflow = getWorkflowDef(session.selectedWorkflowId);
       const currentInputs = session.inputsByWorkflow[selectedWorkflow.id];
       const currentRun = session.runsByWorkflow[selectedWorkflow.id];
-      const summary = buildContextSummary(state);
       const workflowContext = buildWorkflowContext(state, session);
       const roleRouting = buildRoleAwareRouting(state.data.operations, session.activeRole, selectedWorkflow);
       const campaignDraft = getCampaignDraft(projectName, state.data.operations);
@@ -1383,44 +1389,15 @@ export const workflowsRoute = {
 
       root.innerHTML = `
         <div class="workflows-wrapper">
-          <div class="workflows-hero">
-            <div class="workflows-hero-copy">
-              <div class="setup-kicker">Workflow Catalog</div>
-              <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Workflows` : "Workflows")}</h3>
-              <p class="setup-hero-text">
-                Keep the stable workflow catalog as the entry point, then layer in structured inputs, execution, outputs, and routing so each workflow can move from planning into action.
-              </p>
-              <div class="workflows-status">
-                <div class="setup-status-chip">
-                  <span>Project</span>
-                  <strong>${escapeHtml(summary.project)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Campaign</span>
-                  <strong>${escapeHtml(summary.campaign)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Intelligence</span>
-                  <strong>${escapeHtml(intelligenceLabel)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Selected workflow</span>
-                  <strong>${escapeHtml(selectedWorkflow.title)}</strong>
-                </div>
-              </div>
-            </div>
-            <div class="setup-hero-actions">
-              <button id="workflowRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
-              <button id="workflowPushAiBtn" class="btn btn-secondary" type="button">Push to AI Command</button>
-              <button id="workflowRunBtn" class="btn btn-primary" type="button">${escapeHtml(currentRun.status === "running" ? "Running..." : "Run Workflow")}</button>
-            </div>
-          </div>
-
           <div class="workflows-layout">
             <section class="workflows-catalog">
               <div class="card">
                 <div class="card-head">
-                  <h3>Workflow Catalog</h3>
+                  <div>
+                    <div class="setup-kicker">Execution Orchestration</div>
+                    <h3>Workflow Catalog</h3>
+                    <p class="home-section-copy" style="margin:6px 0 0;">Browse and select a workflow first. Running from the catalog still switches the page to that workflow before execution.</p>
+                  </div>
                   <span class="card-badge neutral">${escapeHtml(`${WORKFLOW_CATALOG.length} workflows`)}</span>
                 </div>
                 <div class="workflows-card-list">
@@ -1455,11 +1432,48 @@ export const workflowsRoute = {
             <section class="workflows-main">
               <div class="card">
                 <div class="card-head">
-                  <h3>Workflow Input System</h3>
-                  <span class="card-badge neutral">Step 1</span>
+                  <h3>Workflow Overview</h3>
+                  <span class="card-badge ${currentRun.status === "completed" ? "success" : currentRun.status === "running" ? "warning" : "neutral"}">${escapeHtml(titleCase(currentRun.status))}</span>
+                </div>
+                <div class="workflow-source-strip">
+                  <div class="workflow-source-item">
+                    <span>Selected workflow</span>
+                    <strong>${escapeHtml(selectedWorkflow.title)}</strong>
+                  </div>
+                  <div class="workflow-source-item">
+                    <span>Intelligence</span>
+                    <strong>${escapeHtml(intelligenceLabel)}</strong>
+                  </div>
+                  <div class="workflow-source-item">
+                    <span>Last run</span>
+                    <strong>${escapeHtml(formatDateTime(currentRun.lastRun))}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <h3>Selected Workflow Details</h3>
+                  <span class="card-badge neutral">Review</span>
+                </div>
+                <div class="ai-response-grid">
+                  <div class="ai-output-card ai-output-span">
+                    <span class="ai-output-label">What this workflow does</span>
+                    <strong>${escapeHtml(selectedWorkflow.title)}</strong>
+                    <p>${escapeHtml(selectedWorkflow.description)}</p>
+                  </div>
+                  ${renderOutputBlock("Required Inputs", selectedWorkflow.requiredInputs, escapeHtml, "No required inputs defined.")}
+                  ${renderOutputBlock("Expected Output", [selectedWorkflow.expectedOutput], escapeHtml, "No expected output defined.")}
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <h3>Required Inputs</h3>
+                  <span class="card-badge neutral">Provide inputs</span>
                 </div>
                 <div class="insights-section-copy">
-                  Inputs can come from Campaign Studio, AI Command, or manual entry. The page keeps the fallback path simple so workflows stay usable even when some intelligence is missing.
+                  Inputs can come from Campaign Studio, AI Command, or manual entry. Copying from those sources prepares the form only. The workflow runs when you explicitly use Run Workflow.
                 </div>
                 <div class="workflow-source-strip">
                   <div class="workflow-source-item">
@@ -1553,8 +1567,27 @@ export const workflowsRoute = {
 
               <div class="card">
                 <div class="card-head">
-                  <h3>Structured Output</h3>
+                  <h3>Execution Actions / Status</h3>
                   <span class="card-badge ${currentRun.status === "completed" ? "success" : currentRun.status === "running" ? "warning" : "neutral"}">${escapeHtml(titleCase(currentRun.status))}</span>
+                </div>
+                <div class="workflow-input-actions" style="margin-top:0;">
+                  <button id="workflowRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
+                  <button id="workflowPushAiBtn" class="btn btn-secondary" type="button">Push to AI Command</button>
+                  <button id="workflowRunBtn" class="btn btn-primary" type="button">${escapeHtml(currentRun.status === "running" ? "Running..." : "Run Workflow")}</button>
+                </div>
+                <div class="workflow-execution-grid">
+                  <div class="workflow-execution-item">
+                    <span>Status</span>
+                    <strong>${escapeHtml(titleCase(currentRun.status))}</strong>
+                  </div>
+                  <div class="workflow-execution-item">
+                    <span>Output preview</span>
+                    <strong>${escapeHtml(currentRun.output?.summary ? "Available" : "Empty")}</strong>
+                  </div>
+                  <div class="workflow-execution-item">
+                    <span>History entries</span>
+                    <strong>${escapeHtml(String(currentRun.history.length))}</strong>
+                  </div>
                 </div>
                 ${
                   session.intelligence.error
@@ -1586,12 +1619,37 @@ export const workflowsRoute = {
             </section>
 
             <aside class="workflows-side">
-              ${renderTeamOpsCard(state.data.operations, session.activeRole, roleRouting, escapeHtml)}
+              <div class="card">
+                <div class="card-head">
+                  <h3>Workflow AI Assistant</h3>
+                  <span class="card-badge neutral">Assist</span>
+                </div>
+                <div class="workflow-routing-list">
+                  <button id="workflowPushAiBtnSecondary" class="quick-action-btn" type="button">
+                    <span class="home-action-title">Push to AI Command</span>
+                    <span class="home-action-meta">Send the current workflow context and latest output to AI Command for refinement.</span>
+                  </button>
+                </div>
+                <div class="workflow-history-list">
+                  <div class="workflow-history-item">
+                    <strong>Browse / select</strong>
+                    <span>Choose a workflow from the catalog without running it.</span>
+                  </div>
+                  <div class="workflow-history-item">
+                    <strong>Provide inputs</strong>
+                    <span>Use source buttons or fill the form manually before execution.</span>
+                  </div>
+                  <div class="workflow-history-item">
+                    <strong>Run / monitor</strong>
+                    <span>Use Run Workflow to execute and watch the current status and output here.</span>
+                  </div>
+                </div>
+              </div>
 
               <div class="card">
                 <div class="card-head">
                   <h3>Execution Routing</h3>
-                  <span class="card-badge neutral">Step 2</span>
+                  <span class="card-badge neutral">Route output</span>
                 </div>
                 <div class="workflow-routing-list">
                   ${roleRouting.targets.map((target) => `
@@ -1604,19 +1662,6 @@ export const workflowsRoute = {
                     <span class="home-action-title">Save as Structured Task</span>
                     <span class="home-action-meta">Keep the workflow output in a lightweight local history for follow-through.</span>
                   </button>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-head">
-                  <h3>Workflow State</h3>
-                  <span class="card-badge neutral">Current</span>
-                </div>
-                <div class="data-stack">
-                  <div class="data-row"><span>Status</span><strong>${escapeHtml(titleCase(currentRun.status))}</strong></div>
-                  <div class="data-row"><span>Last run</span><strong>${escapeHtml(formatDateTime(currentRun.lastRun))}</strong></div>
-                  <div class="data-row"><span>Output preview</span><strong>${escapeHtml(currentRun.output?.summary ? "Available" : "Empty")}</strong></div>
-                  <div class="data-row"><span>History entries</span><strong>${escapeHtml(String(currentRun.history.length))}</strong></div>
                 </div>
               </div>
 
@@ -1638,27 +1683,6 @@ export const workflowsRoute = {
                       </div>
                     `
                     : `<div class="empty-box">No workflow history yet. Run the selected workflow to start a lightweight execution trail.</div>`
-                }
-              </div>
-
-              <div class="card">
-                <div class="card-head">
-                  <h3>Saved Tasks</h3>
-                  <span class="card-badge neutral">${escapeHtml(String(session.savedTasks.length))}</span>
-                </div>
-                ${
-                  session.savedTasks.length
-                    ? `
-                      <div class="workflow-history-list">
-                        ${session.savedTasks.map((item) => `
-                          <div class="workflow-history-item">
-                            <strong>${escapeHtml(item.title)}</strong>
-                            <span>${escapeHtml(formatDateTime(item.createdAt))}</span>
-                          </div>
-                        `).join("")}
-                      </div>
-                    `
-                    : `<div class="empty-box">Structured tasks saved from workflow outputs will appear here.</div>`
                 }
               </div>
             </aside>
