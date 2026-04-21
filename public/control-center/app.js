@@ -222,35 +222,35 @@ function renderProjectSwitcher() {
 
 function renderPlaceholders() {
   const placeholders = [
-    ["aiCommandChat", "AI Command chat will be connected here next."],
-    ["aiCommandSuggestions", "Suggested high-value commands will appear here."],
-    ["aiCommandHistory", "Command history and results will appear here."],
+    ["aiCommandChat", "Feature not connected."],
+    ["aiCommandSuggestions", "Not implemented yet."],
+    ["aiCommandHistory", "Not implemented yet."],
 
-    ["workflowsCatalog", "Workflow catalog will appear here."],
+    ["workflowsCatalog", "Not implemented yet."],
 
-    ["campaignBuilder", "Campaign builder will appear here."],
-    ["campaignWaves", "Launch waves and hero product controls will appear here."],
-    ["campaignAssets", "Campaign assets, packages, and finalization status will appear here."],
+    ["campaignBuilder", "Not implemented yet."],
+    ["campaignWaves", "Not implemented yet."],
+    ["campaignAssets", "Feature not connected."],
 
-    ["contentQueue", "Content queue will appear here."],
-    ["contentPreview", "Content preview and edit controls will appear here."],
+    ["contentQueue", "Not implemented yet."],
+    ["contentPreview", "Feature not connected."],
 
-    ["mediaImages", "Image generation and render jobs will appear here."],
-    ["mediaVideoAudio", "Video and future audio workflows will appear here."],
-    ["mediaOutputs", "Generated outputs and approvals will appear here."],
+    ["mediaImages", "Feature not connected."],
+    ["mediaVideoAudio", "Feature not connected."],
+    ["mediaOutputs", "Not implemented yet."],
 
-    ["publishingCalendar", "Publishing calendar will appear here."],
-    ["publishingQueue", "Publish queue will appear here."],
-    ["publishingChannels", "Channel publishing status will appear here."],
+    ["publishingCalendar", "Not implemented yet."],
+    ["publishingQueue", "Feature not connected."],
+    ["publishingChannels", "Feature not connected."],
 
-    ["adsBudget", "Budget controls will appear here."],
-    ["adsPerformance", "Paid media performance will appear here."],
+    ["adsBudget", "Feature not connected."],
+    ["adsPerformance", "Feature not connected."],
 
-    ["insightsOverview", "Insights overview will appear here."],
-    ["insightsReports", "Reports and learning loops will appear here."],
+    ["insightsOverview", "Feature not connected."],
+    ["insightsReports", "Not implemented yet."],
 
-    ["settingsProject", "Project and brand settings will appear here."],
-    ["settingsSystem", "System defaults and AI settings will appear here."]
+    ["settingsProject", "Feature not connected."],
+    ["settingsSystem", "Not implemented yet."]
   ];
 
   placeholders.forEach(([id, text]) => {
@@ -519,26 +519,7 @@ function bindResponsiveUi() {
 ========================= */
 
 function executeSearch() {
-  const value = $("globalSearch")?.value?.trim() || "";
-  if (!value) {
-    showError("Please enter something to search.");
-    return;
-  }
-
-  showMessage(`Search captured: ${value}`);
-  navigateTo("library");
-
-  const preview = $("libraryPreview");
-  if (preview) {
-    preview.innerHTML = `
-      <div class="simple-banner">
-        <strong>Search Query:</strong> ${escapeHtml(value)}
-      </div>
-      <div class="empty-box" style="margin-top:12px;">
-        Search results UI will be connected next.
-      </div>
-    `;
-  }
+  showMessage("Search is not available yet");
 }
 
 function executeQuickCommand() {
@@ -548,7 +529,6 @@ function executeQuickCommand() {
     return;
   }
 
-  showMessage(`Command received: ${value}`);
   navigateTo("ai-command");
 
   window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
@@ -559,23 +539,6 @@ function executeQuickCommand() {
       }
     }
   }));
-
-  const chat = $("aiCommandChat");
-  if (chat) {
-    chat.innerHTML = `
-      <div class="data-stack">
-        <div class="data-row">
-          <span>You</span>
-          <strong>${escapeHtml(value)}</strong>
-        </div>
-        <div class="data-row">
-          <span>System</span>
-          <strong>Command captured successfully. AI execution UI will be connected next.</strong>
-        </div>
-      </div>
-    `;
-    chat.dataset.bound = "true";
-  }
 }
 
 function bindCommandInputs() {
@@ -585,6 +548,7 @@ function bindCommandInputs() {
   const searchBtn = $("runSearchBtn");
 
   if (searchInput) {
+    searchInput.placeholder = "Search not available yet";
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -603,10 +567,12 @@ function bindCommandInputs() {
   }
 
   if (runBtn) {
+    runBtn.textContent = "Send to AI Command";
     runBtn.onclick = executeQuickCommand;
   }
 
   if (searchBtn) {
+    searchBtn.textContent = "Search Unavailable";
     searchBtn.onclick = executeSearch;
   }
 }
@@ -622,6 +588,7 @@ function bindGlobalButtons() {
   const scheduleBtn = $("scheduleBtn");
 
   if (refreshBtn) {
+    refreshBtn.textContent = "Run Refresh";
     refreshBtn.addEventListener("click", async () => {
       const projectName = getState().context.currentProject;
       if (!projectName) {
@@ -641,12 +608,14 @@ function bindGlobalButtons() {
   }
 
   if (newCampaignBtn) {
+    newCampaignBtn.textContent = "Open Campaign Studio";
     newCampaignBtn.addEventListener("click", () => {
       navigateTo("campaign-studio");
     });
   }
 
   if (scheduleBtn) {
+    scheduleBtn.textContent = "Open Publishing";
     scheduleBtn.addEventListener("click", () => {
       navigateTo("publishing");
     });

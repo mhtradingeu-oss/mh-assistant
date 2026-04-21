@@ -564,7 +564,7 @@ function bindLibraryWorkspace({
                 <span class="setup-field-state is-optional">${escapeHtml(selectedAsset.localOnly ? "Queued" : "Editable")}</span>
               </div>
               <input id="libraryAssetTypeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.asset_type || selectedAsset.asset_type || "")}" placeholder="e.g. product_image">
-              <div class="setup-helper">Adjust the logical asset type used by workflows. This remains local until backend asset editing is wired.</div>
+              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this in the current browser session only.</div>
             </div>
 
             <div class="setup-field-group">
@@ -587,9 +587,9 @@ function bindLibraryWorkspace({
           </div>
 
           <div class="library-preview-actions">
-            <button id="librarySaveAssetDraftBtn" class="btn btn-secondary" type="button">Save Metadata Draft</button>
+            <button id="librarySaveAssetDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
             ${selectedAsset.preview_url ? `<a class="btn btn-primary library-link-btn" href="${escapeHtml(selectedAsset.preview_url)}" target="_blank" rel="noreferrer">Open Asset</a>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
-            <button id="libraryDeleteAssetBtn" class="btn btn-secondary" type="button">Delete From View</button>
+            <button id="libraryDeleteAssetBtn" class="btn btn-secondary" type="button">Hide In This Session</button>
           </div>
         `
         : renderEmpty("Select an asset to edit local metadata, open the file, or stage a deletion review.", escapeHtml);
@@ -731,15 +731,15 @@ function bindLibraryWorkspace({
       };
     }
 
-    const deleteAssetBtn = $("libraryDeleteAssetBtn");
-    if (deleteAssetBtn && selectedAsset) {
-      deleteAssetBtn.onclick = () => {
-        session.hiddenAssetIds.add(selectedAsset.id);
-        session.selectedAssetId = "";
-        showMessage?.("TODO: backend delete is not wired yet. This only hides the asset from the current Library view.");
-        renderWorkspace();
-      };
-    }
+      const deleteAssetBtn = $("libraryDeleteAssetBtn");
+      if (deleteAssetBtn && selectedAsset) {
+        deleteAssetBtn.onclick = () => {
+          session.hiddenAssetIds.add(selectedAsset.id);
+          session.selectedAssetId = "";
+          showMessage?.("This only hides the asset in this session. It is not deleted from the backend.");
+          renderWorkspace();
+        };
+      }
   };
 
   const addQueueBtn = $("libraryAddQueueBtn");
@@ -880,7 +880,7 @@ export const libraryRoute = {
                     <span class="setup-field-state is-optional">Multi-select</span>
                   </div>
                   <input id="libraryUploadInput" class="setup-input" type="file" multiple>
-                  <div class="setup-helper">Select files here and upload them into the active project using the existing backend endpoint.</div>
+                  <div class="setup-helper">Select files here and run the upload into the active project using the existing backend endpoint.</div>
                 </div>
 
                 <div class="setup-field-group">
@@ -920,9 +920,10 @@ export const libraryRoute = {
                 </div>
 
                 <div class="library-preview-actions">
-                  <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Upload Selected</button>
-                  <button id="libraryStageUploadBtn" class="btn btn-primary" type="button">Prepare Upload</button>
+                  <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Run Upload</button>
+                  <button id="libraryStageUploadBtn" class="btn btn-primary" type="button">Run Upload</button>
                 </div>
+                <div class="setup-helper">Run Upload sends the selected files to the backend immediately.</div>
               </div>
 
               <div style="margin-top: 16px;">

@@ -442,7 +442,7 @@ function bindSetupActions({
             ? " Project name remains local-only until project rename support exists."
             : "";
 
-        showMessage?.(`Setup changes saved for ${draftKeyName}.${renameWarning}`);
+        showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
       } catch (error) {
         showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
       } finally {
@@ -473,7 +473,7 @@ function bindSetupActions({
       }
       navigateTo("ai-command");
       if (typeof showMessage === "function") {
-        showMessage("Setup review prompt added to AI Command.");
+        showMessage("Prompt sent to AI Command.");
       }
     };
   }
@@ -555,7 +555,7 @@ export const setupRoute = {
             <div class="setup-kicker">Project Setup Workspace</div>
             <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Setup` : "Project Setup")}</h3>
             <p class="setup-hero-text">
-              Tighten the information that drives campaign quality, brand consistency, and launch readiness. Save Changes now writes project setup metadata durably, while Save Draft still preserves in-progress browser-only work.
+              Tighten the information that drives campaign quality, brand consistency, and launch readiness. Save writes project setup metadata durably, while Save Draft preserves in-progress browser-only work.
             </p>
             <div class="setup-hero-status">
               <div class="setup-status-chip">
@@ -575,9 +575,10 @@ export const setupRoute = {
 
           <div class="setup-hero-actions">
             <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-            <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Changes</button>
+            <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save</button>
           </div>
         </div>
+        <p class="setup-helper" style="margin-top: 10px;">Save persists to the backend. Save Draft stays in this browser only.</p>
 
         <form id="setupProjectForm" class="setup-layout">
           <div class="setup-main">
@@ -977,23 +978,23 @@ export const setupRoute = {
               </div>
               <div class="quick-actions">
                 <button id="setupOpenLibraryBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review assets</span>
+                  <span class="home-action-title">Open Library</span>
                   <span class="home-action-meta">Inspect library gaps and file coverage.</span>
                 </button>
                 <button id="setupOpenIntegrationsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review integrations</span>
+                  <span class="home-action-title">Open Integrations</span>
                   <span class="home-action-meta">Check connectors before launch planning.</span>
                 </button>
                 <button id="setupQuickLibraryBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open library view</span>
+                  <span class="home-action-title">Open Library</span>
                   <span class="home-action-meta">Stay in setup mode while reviewing asset structure.</span>
                 </button>
                 <button id="setupQuickIntegrationsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open integration view</span>
+                  <span class="home-action-title">Open Integrations</span>
                   <span class="home-action-meta">Inspect platform readiness and missing sources.</span>
                 </button>
                 <button id="setupAskAiBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Ask AI for completion plan</span>
+                  <span class="home-action-title">Send to AI Command</span>
                   <span class="home-action-meta">Stage a setup-gap prompt in AI Command.</span>
                 </button>
               </div>

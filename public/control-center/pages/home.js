@@ -280,7 +280,7 @@ function bindHomeActions({
       }
       navigateTo("ai-command");
       if (typeof showMessage === "function") {
-        showMessage("Executive prompt added to AI Command.");
+        showMessage("Prompt sent to AI Command.");
       }
     };
   });
@@ -305,8 +305,8 @@ export const homeRoute = {
           </div>
 
           <div class="home-hero-actions">
-            <button id="homeOpenSetupBtn" class="btn btn-secondary" type="button">Review Setup</button>
-            <button id="homeOpenAiBtn" class="btn btn-primary" type="button">Ask AI</button>
+            <button id="homeOpenSetupBtn" class="btn btn-secondary" type="button">Open Setup</button>
+            <button id="homeOpenAiBtn" class="btn btn-primary" type="button">Send to AI Command</button>
           </div>
         </div>
 
@@ -675,7 +675,7 @@ export const homeRoute = {
       $("homeQuickActions").innerHTML = `
         <div class="quick-actions">
           <button id="homeQuickSetupBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Review setup</span>
+            <span class="home-action-title">Open Setup</span>
             <span class="home-action-meta">Check project basics, readiness, and onboarding gaps.</span>
           </button>
           <button id="homeQuickLibraryBtn" class="quick-action-btn" type="button">
@@ -683,19 +683,19 @@ export const homeRoute = {
             <span class="home-action-meta">Inspect assets, folders, and missing required files.</span>
           </button>
           <button id="homeQuickIntegrationsBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Check integrations</span>
+            <span class="home-action-title">Open Integrations</span>
             <span class="home-action-meta">Review connector readiness and missing platform links.</span>
           </button>
           <button id="homeQuickCampaignBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Plan campaign</span>
+            <span class="home-action-title">Open Campaign Studio</span>
             <span class="home-action-meta">Move into campaign design, launch waves, and execution planning.</span>
           </button>
           <button id="homeQuickPublishingBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Go to publishing</span>
+            <span class="home-action-title">Open Publishing</span>
             <span class="home-action-meta">Review schedule, queue, and channel delivery status.</span>
           </button>
           <button id="homeQuickAiBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Ask AI</span>
+            <span class="home-action-title">Send to AI Command</span>
             <span class="home-action-meta">Open AI Command with project context ready to use.</span>
           </button>
         </div>
