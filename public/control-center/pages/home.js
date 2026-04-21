@@ -1,4 +1,3 @@
-import { renderDurableSystemSummary } from "../durable-ui.js";
 import { setSharedHandoff } from "../shared-context.js";
 
 function asArray(value) {
@@ -7,11 +6,6 @@ function asArray(value) {
 
 function asObject(value) {
   return value && typeof value === "object" ? value : {};
-}
-
-function toNumber(value, fallback = 0) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function formatPercent(value) {
@@ -69,32 +63,8 @@ function statusTone(status, score) {
   return "neutral";
 }
 
-function countConnectedSources(sources) {
-  return Object.values(asObject(sources)).filter((entry) => {
-    if (entry == null) return false;
-    if (typeof entry === "object") {
-      const value = entry.value ?? entry.status ?? entry.connected ?? "";
-      return Boolean(String(value).trim());
-    }
-    return Boolean(String(entry).trim());
-  }).length;
-}
-
-function countReadyChecks(checks) {
-  return Object.values(asObject(checks)).filter(Boolean).length;
-}
-
 function renderEmpty(message, escapeHtml) {
   return `<div class="empty-box">${escapeHtml(message)}</div>`;
-}
-
-function renderOverviewField(label, value, escapeHtml) {
-  return `
-    <div class="home-overview-item">
-      <span>${escapeHtml(label)}</span>
-      <strong>${escapeHtml(String(value))}</strong>
-    </div>
-  `;
 }
 
 function renderPriorityItems(items, emptyText, escapeHtml) {
@@ -228,8 +198,8 @@ function bindHomeActions({
   createProjectHandoff
 }) {
   const routeButtons = [
-    ["homeOpenSetupBtn", "setup"],
     ["homeOpenAiBtn", "ai-command"],
+    ["homeOpenPublishingBtn", "publishing"],
     ["homeQuickSetupBtn", "setup"],
     ["homeQuickLibraryBtn", "library"],
     ["homeQuickIntegrationsBtn", "integrations"],
@@ -296,86 +266,73 @@ export const homeRoute = {
   template: `
     <section class="page is-active" data-page="home">
       <div class="home-wrapper">
-        <div class="home-hero">
-          <div class="home-hero-content">
-            <div class="home-kicker">MH Assistant OS</div>
-            <h3 id="homeHeroTitle" class="home-hero-title">Executive Home</h3>
-            <p id="homeHeroText" class="home-hero-text"></p>
-            <div id="homeHeroStatus" class="home-status-strip"></div>
-          </div>
-
-          <div class="home-hero-actions">
-            <button id="homeOpenSetupBtn" class="btn btn-secondary" type="button">Open Setup</button>
-            <button id="homeOpenAiBtn" class="btn btn-primary" type="button">Send to AI Command</button>
-          </div>
-        </div>
-
-        <div id="homeKpiStrip" class="kpi-grid"></div>
-
-        <div class="home-main-grid">
-          <div class="home-main-left">
-            <section class="card">
-              <div class="card-head">
-                <h3>Project Overview</h3>
-                <span id="homeOverviewBadge" class="card-badge">Summary</span>
-              </div>
-              <div id="homeProjectOverview"></div>
-            </section>
-
-            <div class="grid-2">
-              <section class="card">
-                <div class="card-head">
-                  <h3>Critical Gaps</h3>
-                  <span id="homeCriticalBadge" class="card-badge">0 items</span>
-                </div>
-                <div id="homeCriticalGaps"></div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
-                  <h3>Next Best Actions</h3>
-                  <span id="homeActionsBadge" class="card-badge">Recommended</span>
-                </div>
-                <div id="homeNextActions"></div>
-              </section>
+        <section class="card home-summary-card">
+          <div class="home-hero">
+            <div class="home-hero-content">
+              <div class="home-kicker">Executive Summary</div>
+              <h3 id="homeHeroTitle" class="home-hero-title">Executive Home</h3>
+              <p id="homeHeroText" class="home-hero-text"></p>
+              <div id="homeSummaryPriority" class="simple-banner home-summary-priority"></div>
             </div>
 
-            <section class="card">
-              <div class="card-head">
-                <h3>Recent Activity</h3>
-                <span id="homeActivityBadge" class="card-badge">Activity</span>
-              </div>
-              <div id="homeRecentActivity"></div>
-            </section>
+            <div class="home-hero-actions">
+              <button id="homeOpenAiBtn" class="btn btn-primary" type="button">Send to AI Command</button>
+            </div>
           </div>
+        </section>
 
-          <aside class="home-main-right">
-            <section class="card">
-              <div class="card-head">
-                <h3>Launch Status</h3>
-                <span id="homeLaunchBadge" class="card-badge">Status</span>
-              </div>
-              <div id="homeLaunchStatus"></div>
-            </section>
+        <div class="home-section-grid">
+          <section class="card">
+            <div class="card-head">
+              <h3>Critical Gaps</h3>
+              <span id="homeCriticalBadge" class="card-badge">0 items</span>
+            </div>
+            <div id="homeCriticalGaps"></div>
+          </section>
 
-            <div id="homeDurableSystem"></div>
+          <section class="card">
+            <div class="card-head">
+              <h3>Next Best Actions</h3>
+              <span id="homeActionsBadge" class="card-badge">Recommended</span>
+            </div>
+            <div id="homeNextActions"></div>
+          </section>
+        </div>
 
-            <section class="card">
-              <div class="card-head">
-                <h3>Quick Actions</h3>
-                <span class="card-badge neutral">Navigate</span>
-              </div>
-              <div id="homeQuickActions"></div>
-            </section>
+        <div class="home-section-grid">
+          <section class="card">
+            <div class="card-head">
+              <h3>Active Campaign / Launch Status</h3>
+              <span id="homeLaunchBadge" class="card-badge">Status</span>
+            </div>
+            <div id="homeLaunchStatus"></div>
+          </section>
 
-            <section class="card">
-              <div class="card-head">
-                <h3>Executive AI Prompts</h3>
-                <span class="card-badge neutral">Assist</span>
-              </div>
-              <div id="homeExecutivePrompts"></div>
-            </section>
-          </aside>
+          <section class="card">
+            <div class="card-head">
+              <h3>Recent Activity</h3>
+              <span id="homeActivityBadge" class="card-badge">Activity</span>
+            </div>
+            <div id="homeRecentActivity"></div>
+          </section>
+        </div>
+
+        <div class="home-section-grid">
+          <section class="card">
+            <div class="card-head">
+              <h3>Quick Actions</h3>
+              <span class="card-badge neutral">Navigate</span>
+            </div>
+            <div id="homeQuickActions"></div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3>Ask Executive AI</h3>
+              <span class="card-badge neutral">Assist</span>
+            </div>
+            <div id="homeExecutivePrompts"></div>
+          </section>
         </div>
       </div>
     </section>
@@ -399,8 +356,6 @@ export const homeRoute = {
     const overviewData = asObject(overview.overview);
     const readinessDashboard = asObject(readiness.dashboard);
     const priorities = asObject(readinessDashboard.priorities || readiness.priorities);
-    const sources = asObject(integrations.sources?.sources);
-    const checks = asObject(integrations.readiness?.checks);
 
     const projectName =
       state.context.currentProject ||
@@ -419,8 +374,6 @@ export const homeRoute = {
       overviewData.connector_readiness_score ??
       0;
 
-    const assetsList = asArray(assets.assets);
-    const routedAssets = asArray(assets.routes?.routed_assets);
     const missingAssets = asArray(assets.missing_assets?.missing);
     const missingConnectors = asArray(integrations.readiness?.missing);
     const criticalGaps = asArray(priorities.critical);
@@ -445,20 +398,6 @@ export const homeRoute = {
           Number(readinessScore) < 80 ? "Review readiness blockers and assign owners." : "Review the latest launch wave and confirm execution."
         ].filter(Boolean);
 
-    const connectedSourcesCount = countConnectedSources(sources);
-    const connectorSlots = Math.max(
-      Object.keys(sources).length,
-      Object.keys(checks).length,
-      missingConnectors.length + connectedSourcesCount
-    );
-    const readyChecksCount = countReadyChecks(checks);
-    const totalAssets =
-      assetsList.length ||
-      toNumber(overviewData.total_assets, 0);
-    const scheduledCount = activity.total_scheduled_jobs ?? scheduledJobs.length;
-    const executionCount = activity.total_execution_results ?? executionResults.length;
-    const totalJobs = toNumber(scheduledCount, 0) + toNumber(executionCount, 0);
-
     const latestExecution = executionResults[0] || null;
     const latestScheduled = scheduledJobs[0] || null;
     const activeCampaign =
@@ -476,6 +415,17 @@ export const homeRoute = {
       : latestScheduled
         ? `Next scheduled wave is ${safeText(latestScheduled.wave_name, "unnamed")} on ${safeText(latestScheduled.channel, "unknown channel")}.`
         : "No launches have been scheduled yet.";
+    const summaryTone = statusTone(readinessStatus, readinessScore);
+    const primaryGap = fallbackCriticalGaps[0] || "";
+    const primaryAction = fallbackActions[0] || "";
+    const executiveSummary = projectName
+      ? `${safeText(overviewData.alignment_status || overviewData.status, "Current alignment is not yet assessed")}. Readiness is ${formatPercent(readinessScore)} and connector readiness is ${formatPercent(connectorsScore)}. ${launchSummary}`
+      : "Select a project to load a live executive summary, launch status, recent activity, and next actions.";
+    const executivePriority = primaryGap
+      ? `Priority now: ${primaryGap}`
+      : primaryAction
+        ? `Priority now: ${primaryAction}`
+        : "Priority now: No critical gaps are classified yet.";
 
     const executivePrompts = buildExecutivePrompts({
       projectName,
@@ -489,9 +439,7 @@ export const homeRoute = {
     const heroTitle = projectName
       ? `${projectName} Executive Home`
       : "MH Assistant OS Executive Home";
-    const heroText = projectName
-      ? `Review readiness, resolve launch blockers, and keep ${projectName} moving with a compact decision-first view.`
-      : "Select a project to load readiness, launch status, activity, and recommended next actions.";
+    const heroText = executiveSummary;
 
     if ($("homeHeroTitle")) {
       $("homeHeroTitle").textContent = heroTitle;
@@ -501,82 +449,9 @@ export const homeRoute = {
       $("homeHeroText").textContent = heroText;
     }
 
-    if ($("homeHeroStatus")) {
-      $("homeHeroStatus").innerHTML = `
-        <div class="home-status-chip">
-          <span>Readiness</span>
-          <strong>${escapeHtml(formatPercent(readinessScore))} • ${escapeHtml(safeText(readinessStatus))}</strong>
-        </div>
-        <div class="home-status-chip">
-          <span>Campaign</span>
-          <strong>${escapeHtml(safeText(activeCampaign))}</strong>
-        </div>
-        <div class="home-status-chip">
-          <span>Launch focus</span>
-          <strong>${escapeHtml(safeText(launchStatusText))}</strong>
-        </div>
-      `;
-    }
-
-    if ($("homeKpiStrip")) {
-      const kpis = [
-        {
-          title: "Readiness",
-          value: formatPercent(readinessScore),
-          meta: `${safeText(readinessStatus)} • ${formatCount(fallbackCriticalGaps.length)} critical gaps`
-        },
-        {
-          title: "Connectors",
-          value: `${formatCount(Math.max(connectedSourcesCount, readyChecksCount))}/${formatCount(connectorSlots)}`,
-          meta: `${formatPercent(connectorsScore)} readiness • ${formatCount(missingConnectors.length)} missing`
-        },
-        {
-          title: "Assets",
-          value: formatCount(totalAssets),
-          meta: `${formatCount(routedAssets.length)} routed • ${formatCount(missingAssets.length)} required missing`
-        },
-        {
-          title: "Jobs",
-          value: formatCount(totalJobs),
-          meta: `${formatCount(scheduledCount)} scheduled • ${formatCount(executionCount)} execution records`
-        }
-      ];
-
-      $("homeKpiStrip").innerHTML = kpis.map((item) => `
-        <div class="kpi-card">
-          <div class="kpi-title">${escapeHtml(item.title)}</div>
-          <div class="kpi-value">${escapeHtml(item.value)}</div>
-          <div class="kpi-meta">${escapeHtml(item.meta)}</div>
-        </div>
-      `).join("");
-    }
-
-    if ($("homeOverviewBadge")) {
-      const tone = statusTone(overviewData.status || overviewData.alignment_status, readinessScore);
-      $("homeOverviewBadge").className = `card-badge ${tone}`;
-      $("homeOverviewBadge").textContent = safeText(overviewData.status || overviewData.alignment_status, "Live");
-    }
-
-    if ($("homeProjectOverview")) {
-      const overviewSummary = projectName
-        ? `${safeText(overviewData.project_type, "Project")} for ${safeText(state.context.currentMarket, "unknown market")} in ${safeText(state.context.currentLanguage, "unknown language")}. ${formatCount(totalAssets)} registered assets and ${formatCount(Math.max(connectedSourcesCount, readyChecksCount))} active connectors are currently in view.`
-        : "Project context will appear here once a workspace is selected.";
-
-      $("homeProjectOverview").innerHTML = projectName
-        ? `
-          <p class="home-section-copy">${escapeHtml(overviewSummary)}</p>
-          <div class="home-overview-grid">
-            ${renderOverviewField("Project", safeText(projectName), escapeHtml)}
-            ${renderOverviewField("Market", safeText(state.context.currentMarket), escapeHtml)}
-            ${renderOverviewField("Language", safeText(state.context.currentLanguage), escapeHtml)}
-            ${renderOverviewField("Execution mode", safeText(state.context.executionMode), escapeHtml)}
-            ${renderOverviewField("Project type", safeText(overviewData.project_type), escapeHtml)}
-            ${renderOverviewField("Website", safeText(overviewData.website_url), escapeHtml)}
-            ${renderOverviewField("Alignment", safeText(overviewData.alignment_status), escapeHtml)}
-            ${renderOverviewField("Connected sources", formatCount(Math.max(connectedSourcesCount, readyChecksCount)), escapeHtml)}
-          </div>
-        `
-        : renderEmpty("Select a project to view the executive summary.", escapeHtml);
+    if ($("homeSummaryPriority")) {
+      $("homeSummaryPriority").className = `simple-banner home-summary-priority ${summaryTone}`;
+      $("homeSummaryPriority").textContent = executivePriority;
     }
 
     if ($("homeCriticalBadge")) {
@@ -627,22 +502,18 @@ export const homeRoute = {
       $("homeLaunchStatus").innerHTML = projectName
         ? `
           <p class="home-section-copy">${escapeHtml(launchSummary)}</p>
+          <div class="simple-banner home-launch-banner">${escapeHtml(`Current launch focus: ${safeText(launchStatusText)}.`)}</div>
           <div class="data-stack">
             <div class="data-row"><span>Active campaign</span><strong>${escapeHtml(safeText(activeCampaign))}</strong></div>
-            <div class="data-row"><span>Last execution</span><strong>${escapeHtml(safeText(latestExecution?.execution_status || latestExecution?.wave_name, "No execution yet"))}</strong></div>
-            <div class="data-row"><span>Scheduled next</span><strong>${escapeHtml(safeText(latestScheduled?.wave_name || latestScheduled?.status, "Nothing scheduled"))}</strong></div>
-            <div class="data-row"><span>Execution channel</span><strong>${escapeHtml(safeText(latestExecution?.channel || latestScheduled?.channel, "Not available"))}</strong></div>
+            <div class="data-row"><span>Latest execution</span><strong>${escapeHtml(safeText(latestExecution?.wave_name || latestExecution?.execution_status, "No execution yet"))}</strong></div>
+            <div class="data-row"><span>Next scheduled wave</span><strong>${escapeHtml(safeText(latestScheduled?.wave_name || latestScheduled?.status, "Nothing scheduled"))}</strong></div>
+            <div class="data-row"><span>Channel focus</span><strong>${escapeHtml(safeText(latestExecution?.channel || latestScheduled?.channel, "Not available"))}</strong></div>
+          </div>
+          <div class="home-section-cta">
+            <button id="homeOpenPublishingBtn" class="btn btn-secondary" type="button">Open Publishing</button>
           </div>
         `
         : renderEmpty("Launch status will appear after a project is selected.", escapeHtml);
-    }
-
-    if ($("homeDurableSystem")) {
-      $("homeDurableSystem").innerHTML = renderDurableSystemSummary(state.data.operations, escapeHtml, {
-        title: "Cross-Page Durable Handoff Model",
-        kicker: "Shared Backbone",
-        emptyText: "Durable cross-page counts will appear once the project operations snapshot is loaded."
-      });
     }
 
     if ($("homeActivityBadge")) {
@@ -679,7 +550,7 @@ export const homeRoute = {
             <span class="home-action-meta">Check project basics, readiness, and onboarding gaps.</span>
           </button>
           <button id="homeQuickLibraryBtn" class="quick-action-btn" type="button">
-            <span class="home-action-title">Open library</span>
+            <span class="home-action-title">Open Library</span>
             <span class="home-action-meta">Inspect assets, folders, and missing required files.</span>
           </button>
           <button id="homeQuickIntegrationsBtn" class="quick-action-btn" type="button">

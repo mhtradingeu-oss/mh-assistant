@@ -12,13 +12,11 @@ const REQUIRED_FIELDS = [
 ];
 
 const SECTION_FIELDS = {
-  basics: ["project_name", "project_type", "website_url", "project_status", "execution_mode"],
+  project_information: ["project_name", "project_type", "website_url", "project_status"],
+  business_context: ["audience_primary", "audience_problem", "audience_geography", "competitors", "differentiation"],
   brand: ["brand_name", "brand_promise", "brand_voice", "visual_identity", "offer_positioning"],
-  locale: ["market", "language", "currency"],
-  goals: ["primary_goal", "secondary_goal", "launch_window"],
-  audience: ["audience_primary", "audience_problem", "audience_geography"],
-  competitors: ["competitors", "differentiation"],
-  readiness: ["operator_notes"]
+  market_language: ["market", "language", "currency"],
+  goals_readiness: ["primary_goal", "secondary_goal", "operator_notes"]
 };
 
 function asArray(value) {
@@ -35,10 +33,7 @@ function asString(value) {
 }
 
 function toListText(value) {
-  if (Array.isArray(value)) {
-    return value.join(", ");
-  }
-  return asString(value);
+  return Array.isArray(value) ? value.join(", ") : asString(value);
 }
 
 function formatPercent(value) {
@@ -52,9 +47,7 @@ function getSetupDraftKey(projectName) {
 }
 
 function loadSetupDraft(projectName) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return null;
-  }
+  if (typeof window === "undefined" || !window.localStorage) return null;
 
   try {
     const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
@@ -67,9 +60,7 @@ function loadSetupDraft(projectName) {
 }
 
 function saveSetupDraft(projectName, data) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return false;
-  }
+  if (typeof window === "undefined" || !window.localStorage) return false;
 
   try {
     window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
@@ -80,9 +71,7 @@ function saveSetupDraft(projectName, data) {
 }
 
 function clearSetupDraft(projectName) {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return false;
-  }
+  if (typeof window === "undefined" || !window.localStorage) return false;
 
   try {
     window.localStorage.removeItem(getSetupDraftKey(projectName));
@@ -96,7 +85,6 @@ function buildSetupValues(state) {
   const overviewData = asObject(state.data.overview?.overview);
   const readinessDashboard = asObject(state.data.readiness?.dashboard);
   const context = asObject(state.context);
-
   const projectName = context.currentProject || overviewData.project_name || "";
 
   return {
@@ -105,32 +93,22 @@ function buildSetupValues(state) {
     website_url: overviewData.website_url || "",
     project_status: overviewData.status || "",
     execution_mode: context.executionMode || overviewData.execution_mode || "",
-
     brand_name: overviewData.brand_name || projectName,
-    brand_promise:
-      overviewData.brand_promise ||
-      overviewData.brand_positioning ||
-      overviewData.value_prop ||
-      "",
+    brand_promise: overviewData.brand_promise || overviewData.brand_positioning || overviewData.value_prop || "",
     brand_voice: overviewData.brand_voice || "",
     visual_identity: overviewData.visual_identity || "",
     offer_positioning: overviewData.offer_positioning || overviewData.positioning || "",
-
     market: context.currentMarket || overviewData.market || "",
     language: context.currentLanguage || overviewData.language || "",
     currency: overviewData.currency || "",
-
     primary_goal: overviewData.primary_goal || overviewData.goal || "",
     secondary_goal: overviewData.secondary_goal || "",
     launch_window: overviewData.launch_window || context.activeCampaign || "",
-
     audience_primary: overviewData.audience_primary || overviewData.target_audience || "",
     audience_problem: overviewData.audience_problem || overviewData.customer_problem || "",
     audience_geography: overviewData.audience_geography || context.currentMarket || "",
-
     competitors: toListText(overviewData.competitors),
     differentiation: overviewData.differentiation || "",
-
     operator_notes: toListText(readinessDashboard.operator_notes)
   };
 }
@@ -141,19 +119,17 @@ function getMissingRequiredFields(values) {
 
 function getCompletionPercent(values) {
   const missing = getMissingRequiredFields(values).length;
-  const total = REQUIRED_FIELDS.length || 1;
-  return Math.round(((total - missing) / total) * 100);
+  return Math.round(((REQUIRED_FIELDS.length - missing) / REQUIRED_FIELDS.length) * 100);
 }
 
 function getSectionStatus(sectionName, values, extras = {}) {
-  if (sectionName === "readiness") {
+  if (sectionName === "goals_readiness") {
     const score = Number(extras.readinessScore);
     if (Number.isFinite(score)) {
       if (score >= 80) return { tone: "success", label: `${Math.round(score)}% ready` };
       if (score >= 50) return { tone: "warning", label: `${Math.round(score)}% in progress` };
       return { tone: "danger", label: `${Math.round(score)}% needs work` };
     }
-    return { tone: "neutral", label: "Review" };
   }
 
   const fields = SECTION_FIELDS[sectionName] || [];
@@ -178,12 +154,8 @@ function renderField({
   required = false
 }) {
   const filled = Boolean(asString(value).trim());
-  const indicatorClass = required
-    ? (filled ? "is-ready" : "is-missing")
-    : (filled ? "is-ready" : "is-optional");
-  const indicatorText = required
-    ? (filled ? "Ready" : "Missing")
-    : (filled ? "Loaded" : "Optional");
+  const indicatorClass = required ? (filled ? "is-ready" : "is-missing") : (filled ? "is-ready" : "is-optional");
+  const indicatorText = required ? (filled ? "Ready" : "Missing") : (filled ? "Loaded" : "Optional");
 
   return `
     <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
@@ -206,11 +178,7 @@ function renderIndicatorList(items, escapeHtml, emptyText) {
     return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
   }
 
-  return `
-    <ul class="simple-list">
-      ${items.map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("")}
-    </ul>
-  `;
+  return `<ul class="simple-list">${items.map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("")}</ul>`;
 }
 
 function readSetupFormValues(form) {
@@ -275,54 +243,34 @@ function applySectionBadge(id, status) {
   badge.textContent = status.label;
 }
 
-function updateSetupDashboard({
-  form,
-  values,
-  escapeHtml,
-  missingAssets,
-  missingConnectors,
-  readinessScore,
-  nextActions,
-  criticalGaps
-}) {
+function updateSetupDashboard({ form, values, escapeHtml, missingAssets, missingConnectors, readinessScore, nextActions, criticalGaps }) {
   const missingFields = getMissingRequiredFields(values);
   const completionPercent = getCompletionPercent(values);
 
   updateSetupFieldIndicators(form, values);
 
   const completionText = document.getElementById("setupCompletionPercent");
-  if (completionText) {
-    completionText.textContent = `${completionPercent}%`;
-  }
+  if (completionText) completionText.textContent = `${completionPercent}%`;
 
   const completionBar = document.getElementById("setupCompletionBar");
-  if (completionBar) {
-    completionBar.style.width = `${completionPercent}%`;
-  }
+  if (completionBar) completionBar.style.width = `${completionPercent}%`;
 
   const missingCount = document.getElementById("setupMissingCount");
-  if (missingCount) {
-    missingCount.textContent = String(missingFields.length);
-  }
+  if (missingCount) missingCount.textContent = String(missingFields.length);
 
   const missingList = document.getElementById("setupMissingFields");
   if (missingList) {
-    missingList.innerHTML = renderIndicatorList(
-      missingFields.map((field) => field.label),
-      escapeHtml,
-      "Core setup fields are in good shape."
-    );
+    missingList.innerHTML = renderIndicatorList(missingFields.map((field) => field.label), escapeHtml, "Core setup fields are in good shape.");
   }
 
-  const systemGaps = document.getElementById("setupSystemGaps");
-  if (systemGaps) {
-    const combined = [
-      ...missingConnectors.map((item) => `Connect ${item}`),
-      ...missingAssets.map((item) => `Provide ${item}`),
-      ...criticalGaps
-    ];
-    systemGaps.innerHTML = renderIndicatorList(
-      combined,
+  const blockerList = document.getElementById("setupSystemGaps");
+  if (blockerList) {
+    blockerList.innerHTML = renderIndicatorList(
+      [
+        ...missingConnectors.map((item) => `Connect ${item}`),
+        ...missingAssets.map((item) => `Provide ${item}`),
+        ...criticalGaps
+      ],
       escapeHtml,
       "No system blockers detected from the loaded readiness data."
     );
@@ -337,17 +285,14 @@ function updateSetupDashboard({
 
   const nextActionsBox = document.getElementById("setupNextActionSummary");
   if (nextActionsBox) {
-    const firstAction = nextActions[0] || "No next-best action is currently suggested by the backend.";
-    nextActionsBox.innerHTML = `<div class="simple-banner">${escapeHtml(firstAction)}</div>`;
+    nextActionsBox.innerHTML = `<div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested by the backend.")}</div>`;
   }
 
-  applySectionBadge("setupBasicsBadge", getSectionStatus("basics", values));
+  applySectionBadge("setupProjectInfoBadge", getSectionStatus("project_information", values));
+  applySectionBadge("setupBusinessBadge", getSectionStatus("business_context", values));
   applySectionBadge("setupBrandBadge", getSectionStatus("brand", values));
-  applySectionBadge("setupLocaleBadge", getSectionStatus("locale", values));
-  applySectionBadge("setupGoalsBadge", getSectionStatus("goals", values));
-  applySectionBadge("setupAudienceBadge", getSectionStatus("audience", values));
-  applySectionBadge("setupCompetitorsBadge", getSectionStatus("competitors", values));
-  applySectionBadge("setupReadinessBadge", getSectionStatus("readiness", values, { readinessScore }));
+  applySectionBadge("setupMarketBadge", getSectionStatus("market_language", values));
+  applySectionBadge("setupGoalsBadge", getSectionStatus("goals_readiness", values, { readinessScore }));
 }
 
 function bindSetupActions({
@@ -396,20 +341,6 @@ function bindSetupActions({
   form.oninput = refreshSummary;
   form.onchange = refreshSummary;
   refreshSummary();
-
-  const routeButtons = [
-    ["setupOpenLibraryBtn", "library"],
-    ["setupOpenIntegrationsBtn", "integrations"],
-    ["setupBackHomeBtn", "home"],
-    ["setupQuickLibraryBtn", "library"],
-    ["setupQuickIntegrationsBtn", "integrations"]
-  ];
-
-  routeButtons.forEach(([id, route]) => {
-    const element = $(id);
-    if (!element) return;
-    element.onclick = () => navigateTo(route);
-  });
 
   const saveDraftBtn = $("setupSaveDraftBtn");
   if (saveDraftBtn) {
@@ -496,7 +427,6 @@ export const setupRoute = {
     $,
     escapeHtml,
     safeText,
-    renderSimpleList,
     navigateTo,
     showMessage,
     showError,
@@ -513,10 +443,7 @@ export const setupRoute = {
 
     const projectName = state.context.currentProject || overviewData.project_name || "";
     const draft = loadSetupDraft(projectName);
-    const values = {
-      ...buildSetupValues(state),
-      ...(draft || {})
-    };
+    const values = { ...buildSetupValues(state), ...(draft || {}) };
 
     const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
     const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "Not ready";
@@ -528,66 +455,40 @@ export const setupRoute = {
       : asArray(state.data.overview?.next_best_actions);
     const missingFields = getMissingRequiredFields(values);
     const completionPercent = getCompletionPercent(values);
-
-    const allAssets = asArray(assets.assets);
-    const hasLogo = allAssets.some((asset) => asString(asset?.asset_type).toLowerCase() === "logo");
-    const hasProductAssets = allAssets.some((asset) => asString(asset?.asset_type).toLowerCase() === "product");
     const connectedCount = Object.keys(sources).filter((key) => {
       const source = sources[key];
       return Boolean(asString(source?.value || source).trim());
     }).length;
 
-    const basicsStatus = getSectionStatus("basics", values);
+    const projectInfoStatus = getSectionStatus("project_information", values);
+    const businessStatus = getSectionStatus("business_context", values);
     const brandStatus = getSectionStatus("brand", values);
-    const localeStatus = getSectionStatus("locale", values);
-    const goalsStatus = getSectionStatus("goals", values);
-    const audienceStatus = getSectionStatus("audience", values);
-    const competitorsStatus = getSectionStatus("competitors", values);
-    const readinessStatusBadge = getSectionStatus("readiness", values, { readinessScore });
+    const marketStatus = getSectionStatus("market_language", values);
+    const goalsStatus = getSectionStatus("goals_readiness", values, { readinessScore });
 
     const root = $("setupRoot");
     if (!root) return;
 
     root.innerHTML = `
       <div class="setup-wrapper">
-        <div class="setup-hero">
+        <section class="card setup-hero">
           <div class="setup-hero-copy">
-            <div class="setup-kicker">Project Setup Workspace</div>
+            <div class="setup-kicker">Source Of Truth Definition</div>
             <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Setup` : "Project Setup")}</h3>
             <p class="setup-hero-text">
-              Tighten the information that drives campaign quality, brand consistency, and launch readiness. Save writes project setup metadata durably, while Save Draft preserves in-progress browser-only work.
+              Define the durable project baseline that downstream planning, asset work, and AI assistance should rely on. Setup is for project definition, not campaign orchestration or workflow control.
             </p>
-            <div class="setup-hero-status">
-              <div class="setup-status-chip">
-                <span>Completion</span>
-                <strong>${escapeHtml(String(completionPercent))}% of core fields</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Readiness</span>
-                <strong>${escapeHtml(formatPercent(readinessScore))} • ${escapeHtml(safeText(readinessStatus))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Draft state</span>
-                <strong>${draft ? "Local draft loaded" : "Using loaded project data"}</strong>
-              </div>
-            </div>
           </div>
-
-          <div class="setup-hero-actions">
-            <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-            <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save</button>
-          </div>
-        </div>
-        <p class="setup-helper" style="margin-top: 10px;">Save persists to the backend. Save Draft stays in this browser only.</p>
+        </section>
 
         <form id="setupProjectForm" class="setup-layout">
           <div class="setup-main">
             <section class="card">
               <div class="card-head">
-                <h3>Project Basics</h3>
-                <span id="setupBasicsBadge" class="card-badge ${basicsStatus.tone}">${escapeHtml(basicsStatus.label)}</span>
+                <h3>Project Information</h3>
+                <span id="setupProjectInfoBadge" class="card-badge ${projectInfoStatus.tone}">${escapeHtml(projectInfoStatus.label)}</span>
               </div>
-              <p class="home-section-copy">Anchor the project with the fields that propagate into assets, briefs, exports, and operator workflows.</p>
+              <p class="home-section-copy">Anchor the canonical project record used across briefs, exports, and setup decisions.</p>
               <div class="setup-form-grid setup-form-grid-2">
                 ${renderField({
                   name: "project_name",
@@ -602,7 +503,7 @@ export const setupRoute = {
                   name: "project_type",
                   label: "Project type",
                   value: values.project_type,
-                  helper: "Used to tune positioning, offers, and launch recommendations.",
+                  helper: "Use the broad business type this project belongs to.",
                   placeholder: "e.g. Ecommerce brand",
                   escapeHtml,
                   required: true
@@ -611,7 +512,7 @@ export const setupRoute = {
                   name: "website_url",
                   label: "Website URL",
                   value: values.website_url,
-                  helper: "Primary storefront or destination used for links, offers, and QA.",
+                  helper: "Primary storefront or destination for the project.",
                   placeholder: "https://example.com",
                   escapeHtml,
                   type: "url",
@@ -621,179 +522,25 @@ export const setupRoute = {
                   name: "project_status",
                   label: "Project status",
                   value: values.project_status,
-                  helper: "Useful for operators deciding whether this is draft, active, or launch-ready.",
+                  helper: "Use a high-level lifecycle state for the project record.",
                   placeholder: "e.g. Active",
                   escapeHtml
                 })}
-                ${renderField({
-                  name: "execution_mode",
-                  label: "Execution mode",
-                  value: values.execution_mode,
-                  helper: "Defines how aggressively the OS should move from planning into execution.",
-                  placeholder: "e.g. Guided",
-                  escapeHtml
-                })}
               </div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Brand Identity</h3>
-                <span id="setupBrandBadge" class="card-badge ${brandStatus.tone}">${escapeHtml(brandStatus.label)}</span>
+                <h3>Business Context</h3>
+                <span id="setupBusinessBadge" class="card-badge ${businessStatus.tone}">${escapeHtml(businessStatus.label)}</span>
               </div>
-              <div class="setup-signal-strip">
-                <div class="setup-signal-card">
-                  <span>Logo asset</span>
-                  <strong>${hasLogo ? "Available" : "Missing"}</strong>
-                </div>
-                <div class="setup-signal-card">
-                  <span>Product assets</span>
-                  <strong>${hasProductAssets ? "Available" : "Missing"}</strong>
-                </div>
-                <div class="setup-signal-card">
-                  <span>Alignment</span>
-                  <strong>${escapeHtml(safeText(overviewData.alignment_status, "Not assessed"))}</strong>
-                </div>
-              </div>
-              <div class="setup-form-grid">
-                ${renderField({
-                  name: "brand_name",
-                  label: "Brand / display name",
-                  value: values.brand_name,
-                  helper: "Use the public-facing brand name that should appear in messaging and creative.",
-                  placeholder: "Brand name",
-                  escapeHtml
-                })}
-                ${renderField({
-                  name: "brand_promise",
-                  label: "Brand promise",
-                  value: values.brand_promise,
-                  helper: "A crisp statement of what this brand delivers. AI uses this to keep messaging coherent.",
-                  placeholder: "What the brand is known for and why it matters",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3,
-                  required: true
-                })}
-                ${renderField({
-                  name: "brand_voice",
-                  label: "Brand voice",
-                  value: values.brand_voice,
-                  helper: "Describe tone, posture, and any words the system should favor or avoid.",
-                  placeholder: "Confident, practical, premium, direct...",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3
-                })}
-                ${renderField({
-                  name: "visual_identity",
-                  label: "Visual identity notes",
-                  value: values.visual_identity,
-                  helper: "Capture visual rules that matter for thumbnails, ad creative, and packaging.",
-                  placeholder: "Color, photography style, layout rules, brand cues...",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3
-                })}
-                ${renderField({
-                  name: "offer_positioning",
-                  label: "Offer positioning",
-                  value: values.offer_positioning,
-                  helper: "Summarize the commercial angle the system should reinforce in campaigns.",
-                  placeholder: "Why this offer wins and how it should be framed",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3
-                })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Market / Language / Currency</h3>
-                <span id="setupLocaleBadge" class="card-badge ${localeStatus.tone}">${escapeHtml(localeStatus.label)}</span>
-              </div>
-              <p class="home-section-copy">These fields drive localization, channel assumptions, timing, and pricing context.</p>
-              <div class="setup-form-grid setup-form-grid-3">
-                ${renderField({
-                  name: "market",
-                  label: "Primary market",
-                  value: values.market,
-                  helper: "Country or region this project is optimized for first.",
-                  placeholder: "e.g. US",
-                  escapeHtml,
-                  required: true
-                })}
-                ${renderField({
-                  name: "language",
-                  label: "Primary language",
-                  value: values.language,
-                  helper: "Main language for copy, prompts, and publishing.",
-                  placeholder: "e.g. English",
-                  escapeHtml,
-                  required: true
-                })}
-                ${renderField({
-                  name: "currency",
-                  label: "Currency",
-                  value: values.currency,
-                  helper: "Important for pricing references, reporting, and revenue framing.",
-                  placeholder: "e.g. USD",
-                  escapeHtml,
-                  required: true
-                })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Goals</h3>
-                <span id="setupGoalsBadge" class="card-badge ${goalsStatus.tone}">${escapeHtml(goalsStatus.label)}</span>
-              </div>
-              <div class="setup-form-grid">
-                ${renderField({
-                  name: "primary_goal",
-                  label: "Primary goal",
-                  value: values.primary_goal,
-                  helper: "The main business outcome this project should optimize for right now.",
-                  placeholder: "Increase qualified sales, grow email list, validate offer...",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3,
-                  required: true
-                })}
-                ${renderField({
-                  name: "secondary_goal",
-                  label: "Secondary goal",
-                  value: values.secondary_goal,
-                  helper: "Useful when growth, retention, and creative testing need a clear tie-breaker.",
-                  placeholder: "A supporting objective",
-                  escapeHtml,
-                  multiline: true,
-                  rows: 3
-                })}
-                ${renderField({
-                  name: "launch_window",
-                  label: "Launch window / wave",
-                  value: values.launch_window,
-                  helper: "Capture the campaign wave, season, or commercial timing that matters most.",
-                  placeholder: "e.g. Spring launch wave 1",
-                  escapeHtml
-                })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Audience</h3>
-                <span id="setupAudienceBadge" class="card-badge ${audienceStatus.tone}">${escapeHtml(audienceStatus.label)}</span>
-              </div>
+              <p class="home-section-copy">Capture the customer, problem space, and competitive baseline this project should consistently reflect.</p>
               <div class="setup-form-grid">
                 ${renderField({
                   name: "audience_primary",
                   label: "Primary audience",
                   value: values.audience_primary,
-                  helper: "Define who this brand is selling to before asking the system for campaign ideas.",
+                  helper: "Define the buyer or customer segment this project is built for.",
                   placeholder: "Who is the buyer or customer segment?",
                   escapeHtml,
                   multiline: true,
@@ -804,7 +551,7 @@ export const setupRoute = {
                   name: "audience_problem",
                   label: "Core problem / need",
                   value: values.audience_problem,
-                  helper: "Clarifies the pain, desire, or outcome the product is solving for.",
+                  helper: "Clarify the pain, desire, or outcome the offer is solving for.",
                   placeholder: "What does the audience want fixed or improved?",
                   escapeHtml,
                   multiline: true,
@@ -814,24 +561,15 @@ export const setupRoute = {
                   name: "audience_geography",
                   label: "Audience geography",
                   value: values.audience_geography,
-                  helper: "Use this when targeting differs from the primary market or needs nuance.",
+                  helper: "Use this if the target audience geography differs from the primary market.",
                   placeholder: "Region, city clusters, or geography notes",
                   escapeHtml
                 })}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Competitors</h3>
-                <span id="setupCompetitorsBadge" class="card-badge ${competitorsStatus.tone}">${escapeHtml(competitorsStatus.label)}</span>
-              </div>
-              <div class="setup-form-grid">
                 ${renderField({
                   name: "competitors",
                   label: "Competitor set",
                   value: values.competitors,
-                  helper: "Comma-separated or line-separated competitors the system should understand and benchmark against.",
+                  helper: "List the competitors this project should benchmark and position against.",
                   placeholder: "Competitor A, Competitor B, Competitor C",
                   escapeHtml,
                   multiline: true,
@@ -853,10 +591,106 @@ export const setupRoute = {
 
             <section class="card">
               <div class="card-head">
-                <h3>Readiness Review</h3>
-                <span id="setupReadinessBadge" class="card-badge ${readinessStatusBadge.tone}">${escapeHtml(readinessStatusBadge.label)}</span>
+                <h3>Brand & Positioning</h3>
+                <span id="setupBrandBadge" class="card-badge ${brandStatus.tone}">${escapeHtml(brandStatus.label)}</span>
               </div>
-              <p class="home-section-copy">This section blends backend readiness signals with operator notes so setup work stays tied to launch reality.</p>
+              <p class="home-section-copy">Set the durable brand baseline that messaging, creative, and AI-generated output should follow.</p>
+              <div class="setup-form-grid">
+                ${renderField({
+                  name: "brand_name",
+                  label: "Brand / display name",
+                  value: values.brand_name,
+                  helper: "Use the public-facing brand name that should appear in messaging and creative.",
+                  placeholder: "Brand name",
+                  escapeHtml
+                })}
+                ${renderField({
+                  name: "brand_promise",
+                  label: "Brand promise",
+                  value: values.brand_promise,
+                  helper: "A concise statement of what the brand delivers and why it matters.",
+                  placeholder: "What the brand is known for and why it matters",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3,
+                  required: true
+                })}
+                ${renderField({
+                  name: "brand_voice",
+                  label: "Brand voice",
+                  value: values.brand_voice,
+                  helper: "Describe the tone and language guardrails the system should follow.",
+                  placeholder: "Confident, practical, premium, direct...",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3
+                })}
+                ${renderField({
+                  name: "visual_identity",
+                  label: "Visual identity notes",
+                  value: values.visual_identity,
+                  helper: "Capture visual cues that should remain stable across creative output.",
+                  placeholder: "Color, photography style, layout rules, brand cues...",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3
+                })}
+                ${renderField({
+                  name: "offer_positioning",
+                  label: "Offer positioning",
+                  value: values.offer_positioning,
+                  helper: "Summarize the commercial angle the brand should consistently reinforce.",
+                  placeholder: "Why this offer wins and how it should be framed",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3
+                })}
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h3>Market & Language</h3>
+                <span id="setupMarketBadge" class="card-badge ${marketStatus.tone}">${escapeHtml(marketStatus.label)}</span>
+              </div>
+              <p class="home-section-copy">Set the localization baseline other parts of the system should inherit rather than override.</p>
+              <div class="setup-form-grid setup-form-grid-3">
+                ${renderField({
+                  name: "market",
+                  label: "Primary market",
+                  value: values.market,
+                  helper: "Country or region this project is optimized for first.",
+                  placeholder: "e.g. US",
+                  escapeHtml,
+                  required: true
+                })}
+                ${renderField({
+                  name: "language",
+                  label: "Primary language",
+                  value: values.language,
+                  helper: "Main language for copy and AI-generated output.",
+                  placeholder: "e.g. English",
+                  escapeHtml,
+                  required: true
+                })}
+                ${renderField({
+                  name: "currency",
+                  label: "Currency",
+                  value: values.currency,
+                  helper: "Use the primary commercial currency for pricing references and reporting context.",
+                  placeholder: "e.g. USD",
+                  escapeHtml,
+                  required: true
+                })}
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h3>Goals & Readiness</h3>
+                <span id="setupGoalsBadge" class="card-badge ${goalsStatus.tone}">${escapeHtml(goalsStatus.label)}</span>
+              </div>
+              <p class="home-section-copy">Keep Setup tied to the project goal and the readiness inputs that should live with the project definition.</p>
               <div class="setup-review-grid">
                 <div class="data-card">
                   <span class="data-label">Readiness score</span>
@@ -871,33 +705,37 @@ export const setupRoute = {
                   <strong>${escapeHtml(String(missingConnectors.length))}</strong>
                 </div>
                 <div class="data-card">
-                  <span class="data-label">Missing assets</span>
-                  <strong>${escapeHtml(String(missingAssets.length))}</strong>
+                  <span class="data-label">Connected sources</span>
+                  <strong>${escapeHtml(String(connectedCount))}</strong>
                 </div>
               </div>
-
-              <div class="setup-review-columns">
-                <div>
-                  <h4 class="setup-mini-title">Critical gaps</h4>
-                  ${renderSimpleList(criticalGaps, "No critical readiness gaps were returned by the backend.")}
-                </div>
-                <div>
-                  <h4 class="setup-mini-title">Next best actions</h4>
-                  <div id="setupNextActionSummary">
-                    <div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested by the backend.")}</div>
-                  </div>
-                  <div style="margin-top: 12px;">
-                    ${renderSimpleList(nextActions, "No readiness actions available yet.")}
-                  </div>
-                </div>
-              </div>
-
-              <div class="setup-form-grid" style="margin-top: 16px;">
+              <div class="setup-form-grid">
+                ${renderField({
+                  name: "primary_goal",
+                  label: "Primary goal",
+                  value: values.primary_goal,
+                  helper: "Capture the main business outcome this project should optimize for.",
+                  placeholder: "Increase qualified sales, grow email list, validate offer...",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3,
+                  required: true
+                })}
+                ${renderField({
+                  name: "secondary_goal",
+                  label: "Secondary goal",
+                  value: values.secondary_goal,
+                  helper: "Optional supporting goal when this project needs a secondary success measure.",
+                  placeholder: "A supporting objective",
+                  escapeHtml,
+                  multiline: true,
+                  rows: 3
+                })}
                 ${renderField({
                   name: "operator_notes",
                   label: "Operator notes",
                   value: values.operator_notes,
-                  helper: "Use this to capture setup context, approvals, and follow-ups that should stay with the project record.",
+                  helper: "Use this for durable setup notes, approvals, and readiness context that should stay with the project record.",
                   placeholder: "Notes for the next operator or launch review",
                   escapeHtml,
                   multiline: true,
@@ -910,9 +748,10 @@ export const setupRoute = {
           <aside class="setup-side">
             <section class="card">
               <div class="card-head">
-                <h3>Setup Control</h3>
-                <span class="card-badge neutral">Local draft</span>
+                <h3>Save / Draft / Validation</h3>
+                <span class="card-badge neutral">Source of truth</span>
               </div>
+              <p class="setup-side-copy">Save persists the project definition to the backend. Save Draft keeps in-progress edits in this browser only.</p>
               <div class="setup-progress">
                 <div class="setup-progress-head">
                   <span>Completion</span>
@@ -927,89 +766,67 @@ export const setupRoute = {
                   ? `${escapeHtml(String(missingFields.length))} required field${missingFields.length === 1 ? "" : "s"} still need attention before this setup is complete.`
                   : "Required project setup fields are covered. You can move on to readiness and launch planning."}
               </p>
+              <div class="setup-hero-actions">
+                <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+                <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save</button>
+              </div>
               <div class="quick-actions">
                 <button id="setupResetDraftBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Reset local draft</span>
                   <span class="home-action-meta">Return to the currently loaded project values.</span>
                 </button>
-                <button id="setupBackHomeBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Back to Home</span>
-                  <span class="home-action-meta">Return to the executive dashboard.</span>
-                </button>
+              </div>
+
+              <div class="setup-validation-block">
+                <div class="card-head">
+                  <h3>Validation</h3>
+                  <span class="card-badge danger"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> open</span>
+                </div>
+                <div id="setupMissingFields">
+                  ${renderIndicatorList(missingFields.map((field) => field.label), escapeHtml, "Core setup fields are in good shape.")}
+                </div>
+              </div>
+
+              <div class="setup-validation-block">
+                <div class="card-head">
+                  <h3>Readiness blockers</h3>
+                  <span class="card-badge warning">Operational</span>
+                </div>
+                <div id="setupSystemGaps">
+                  ${renderIndicatorList(
+                    [
+                      ...missingConnectors.map((item) => `Connect ${item}`),
+                      ...missingAssets.map((item) => `Provide ${item}`),
+                      ...criticalGaps
+                    ],
+                    escapeHtml,
+                    "No system blockers detected from the loaded readiness data."
+                  )}
+                </div>
+              </div>
+
+              <div class="setup-validation-block">
+                <div class="card-head">
+                  <h3>Next best action</h3>
+                  <span class="card-badge neutral">Priority</span>
+                </div>
+                <div id="setupNextActionSummary">
+                  <div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested by the backend.")}</div>
+                </div>
               </div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Missing Core Fields</h3>
-                <span class="card-badge danger"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> open</span>
+                <h3>Setup AI Assistant</h3>
+                <span class="card-badge neutral">Assist</span>
               </div>
-              <div id="setupMissingFields">
-                ${renderIndicatorList(
-                  missingFields.map((field) => field.label),
-                  escapeHtml,
-                  "Core setup fields are in good shape."
-                )}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>System Gaps</h3>
-                <span class="card-badge warning">Operational</span>
-              </div>
-              <div id="setupSystemGaps">
-                ${renderIndicatorList(
-                  [
-                    ...missingConnectors.map((item) => `Connect ${item}`),
-                    ...missingAssets.map((item) => `Provide ${item}`),
-                    ...criticalGaps
-                  ],
-                  escapeHtml,
-                  "No system blockers detected from the loaded readiness data."
-                )}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Quick Actions</h3>
-                <span class="card-badge neutral">Navigate</span>
-              </div>
+              <p class="setup-side-copy">Send the current setup gaps and readiness context to AI Command for a structured completion plan.</p>
               <div class="quick-actions">
-                <button id="setupOpenLibraryBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Library</span>
-                  <span class="home-action-meta">Inspect library gaps and file coverage.</span>
-                </button>
-                <button id="setupOpenIntegrationsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Integrations</span>
-                  <span class="home-action-meta">Check connectors before launch planning.</span>
-                </button>
-                <button id="setupQuickLibraryBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Library</span>
-                  <span class="home-action-meta">Stay in setup mode while reviewing asset structure.</span>
-                </button>
-                <button id="setupQuickIntegrationsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Integrations</span>
-                  <span class="home-action-meta">Inspect platform readiness and missing sources.</span>
-                </button>
                 <button id="setupAskAiBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to AI Command</span>
                   <span class="home-action-meta">Stage a setup-gap prompt in AI Command.</span>
                 </button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Operational Snapshot</h3>
-                <span class="card-badge neutral">Signals</span>
-              </div>
-              <div class="data-stack">
-                <div class="data-row"><span>Connected sources</span><strong>${escapeHtml(String(connectedCount))}</strong></div>
-                <div class="data-row"><span>Total assets</span><strong>${escapeHtml(String(allAssets.length))}</strong></div>
-                <div class="data-row"><span>Current market</span><strong>${escapeHtml(safeText(values.market))}</strong></div>
-                <div class="data-row"><span>Current language</span><strong>${escapeHtml(safeText(values.language))}</strong></div>
               </div>
             </section>
           </aside>

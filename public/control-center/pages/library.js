@@ -287,6 +287,15 @@ function buildSourceIndicators(asset, registryTotal) {
   ];
 }
 
+function buildLibraryAiPrompt(projectName, selectedAsset, missingRequiredAssets) {
+  const projectLabel = asString(projectName).trim() || "this project";
+  const assetLabel = selectedAsset
+    ? `${selectedAsset.filename || "selected asset"} (${selectedAsset.asset_type || "asset"})`
+    : "no asset selected";
+  const missingLabel = missingRequiredAssets.length ? missingRequiredAssets.join(", ") : "none";
+  return `Review the library for ${projectLabel}. Selected asset: ${assetLabel}. Missing required asset types: ${missingLabel}. Recommend the next best asset cleanup or upload actions.`;
+}
+
 function normalizeCustomAssetType(value = "") {
   return asString(value)
     .trim()
@@ -561,28 +570,28 @@ function bindLibraryWorkspace({
             <div class="setup-field-group">
               <div class="setup-field-head">
                 <label class="setup-label" for="libraryAssetTypeInput">Asset classification</label>
-                <span class="setup-field-state is-optional">${escapeHtml(selectedAsset.localOnly ? "Queued" : "Editable")}</span>
+                <span class="setup-field-state is-optional">${escapeHtml(selectedAsset.localOnly ? "Queued" : "Save Draft only")}</span>
               </div>
               <input id="libraryAssetTypeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.asset_type || selectedAsset.asset_type || "")}" placeholder="e.g. product_image">
-              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this in the current browser session only.</div>
+              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this metadata in the current browser session only.</div>
             </div>
 
             <div class="setup-field-group">
               <div class="setup-field-head">
                 <label class="setup-label" for="librarySourceModeInput">Source of truth mode</label>
-                <span class="setup-field-state is-optional">Local note</span>
+                <span class="setup-field-state is-optional">Session-only</span>
               </div>
               <input id="librarySourceModeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.source_signal || selectedAsset.source_signal || "")}" placeholder="Project-owned, reference only, source candidate">
-              <div class="setup-helper">Use this to annotate how the team should treat this asset operationally.</div>
+              <div class="setup-helper">Use this to annotate how the team should treat this asset operationally. This note is local to the current browser session.</div>
             </div>
 
             <div class="setup-field-group">
               <div class="setup-field-head">
                 <label class="setup-label" for="libraryAssetNotesInput">Operator notes</label>
-                <span class="setup-field-state is-optional">Draft</span>
+                <span class="setup-field-state is-optional">Save Draft only</span>
               </div>
               <textarea id="libraryAssetNotesInput" class="setup-input setup-textarea" rows="3" placeholder="Notes for upload, cleanup, replacement, or usage rules">${escapeHtml(currentDraft.notes || "")}</textarea>
-              <div class="setup-helper">Useful for handoff before full registry editing is connected.</div>
+              <div class="setup-helper">Useful for handoff before full registry editing is connected. These notes are not saved to the backend.</div>
             </div>
           </div>
 
@@ -592,7 +601,7 @@ function bindLibraryWorkspace({
             <button id="libraryDeleteAssetBtn" class="btn btn-secondary" type="button">Hide In This Session</button>
           </div>
         `
-        : renderEmpty("Select an asset to edit local metadata, open the file, or stage a deletion review.", escapeHtml);
+        : renderEmpty("Select an asset to review backend-backed file details or stage session-only metadata notes.", escapeHtml);
     }
 
     const sourceTruth = $("librarySourceTruth");
@@ -659,20 +668,6 @@ function bindLibraryWorkspace({
           </ul>
         `
         : renderEmpty("All required asset types are currently present.", escapeHtml);
-    }
-
-    const summary = $("librarySummary");
-    if (summary) {
-      const offRouteCount = allAssets.filter((asset) => asset.routed && !asset.inExpectedFolder).length;
-      const legacyCount = allAssets.filter((asset) => !asset.localOnly && asset.source_signal === "Legacy library").length;
-      summary.innerHTML = `
-        <div class="data-stack">
-          <div class="data-row"><span>Visible assets</span><strong>${escapeHtml(formatCount(filteredAssets.length))}</strong></div>
-          <div class="data-row"><span>Registry count</span><strong>${escapeHtml(formatCount(registryTotal))}</strong></div>
-          <div class="data-row"><span>Off-route assets</span><strong>${escapeHtml(formatCount(offRouteCount))}</strong></div>
-          <div class="data-row"><span>Legacy-path assets</span><strong>${escapeHtml(formatCount(legacyCount))}</strong></div>
-        </div>
-      `;
     }
 
     const folderButtons = Array.from(document.querySelectorAll("[data-library-folder]"));
@@ -752,14 +747,24 @@ function bindLibraryWorkspace({
     stageUploadBtn.onclick = uploadSelectedFiles;
   }
 
-  const goSetupBtn = $("libraryOpenSetupBtn");
-  if (goSetupBtn) {
-    goSetupBtn.onclick = () => navigateTo("setup");
-  }
-
-  const goIntegrationsBtn = $("libraryOpenIntegrationsBtn");
-  if (goIntegrationsBtn) {
-    goIntegrationsBtn.onclick = () => navigateTo("integrations");
+  const askAiBtn = $("libraryAskAiBtn");
+  if (askAiBtn) {
+    askAiBtn.onclick = () => {
+      const allAssets = normalizeAssets({
+        projectName,
+        assets,
+        routes,
+        registryAssets,
+        session
+      });
+      const selectedAsset = allAssets.find((asset) => asset.id === session.selectedAssetId) || null;
+      const input = $("quickCommandInput");
+      if (input) {
+        input.value = buildLibraryAiPrompt(projectName, selectedAsset, missingRequiredAssets);
+      }
+      navigateTo("ai-command");
+      showMessage?.("Prompt sent to AI Command.");
+    };
   }
 
   renderWorkspace();
@@ -795,69 +800,30 @@ export const libraryRoute = {
     const folderHealth = asObject(assetsData.folder_health);
     const session = ensureLibrarySession(projectName);
 
-    const allAssets = asArray(assetsData.assets);
-    const routedAssets = asArray(assetsData.routes?.routed_assets);
     const missingRequiredAssets = asArray(assetsData.missing_assets?.missing);
     const root = $("libraryRoot");
     if (!root) return;
 
     root.innerHTML = `
       <div class="library-wrapper">
-        <div class="library-hero">
-          <div class="library-hero-copy">
-            <div class="setup-kicker">Asset Management Workspace</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Library` : "Library Workspace")}</h3>
-            <p class="setup-hero-text">
-              Review folder structure, inspect assets, understand truth signals, and prepare uploads before they hit the backend pipeline.
-            </p>
-            <div class="library-hero-status">
-              <div class="setup-status-chip">
-                <span>Registered assets</span>
-                <strong>${escapeHtml(formatCount(allAssets.length))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Routed assets</span>
-                <strong>${escapeHtml(formatCount(routedAssets.length))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Missing required</span>
-                <strong>${escapeHtml(formatCount(missingRequiredAssets.length))}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="setup-hero-actions">
-            <button id="libraryOpenSetupBtn" class="btn btn-secondary" type="button">Open Setup</button>
-            <button id="libraryOpenIntegrationsBtn" class="btn btn-primary" type="button">Open Integrations</button>
-          </div>
-        </div>
-
         <div class="library-layout">
           <div class="library-main">
             <section class="card">
               <div class="card-head">
-                <h3>Folder Tree</h3>
-                <span class="card-badge neutral">Structure</span>
-              </div>
-              <div id="libraryFolderTree"></div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
                 <div>
+                  <div class="setup-kicker">Production Asset Management</div>
                   <h3>Asset Explorer</h3>
-                  <p class="home-section-copy" style="margin: 6px 0 0;">Filter by folder, search by filename or type, and inspect operational asset health.</p>
+                  <p class="home-section-copy" style="margin: 6px 0 0;">Browse the scanned library by folder, search by asset details, and select the file you want to inspect or manage.</p>
                 </div>
                 <span class="card-badge neutral">Explorer</span>
               </div>
+              <div id="libraryFolderTree" class="library-toolbar"></div>
               <div class="library-toolbar">
                 <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search assets by name, type, path, or source mode">
               </div>
               <div id="libraryAssetExplorer"></div>
             </section>
-          </div>
 
-          <aside class="library-side">
             <section class="card">
               <div class="card-head">
                 <h3>Asset Preview</h3>
@@ -865,9 +831,27 @@ export const libraryRoute = {
               </div>
               <div id="libraryPreviewVisual"></div>
               <div id="libraryPreviewMeta" style="margin-top: 16px;"></div>
-              <div id="libraryAssetEditor" style="margin-top: 16px;"></div>
             </section>
 
+            <section class="card">
+              <div class="card-head">
+                <h3>Asset Details / Metadata</h3>
+                <span class="card-badge neutral">Mixed actions</span>
+              </div>
+              <p class="setup-side-copy">Open Asset uses the current backend-backed file path. Save Draft and Hide In This Session are local to this browser session only.</p>
+              <div id="librarySourceTruth"></div>
+              <div id="libraryAssetEditor" style="margin-top: 16px;"></div>
+              <div class="setup-validation-block">
+                <div class="card-head">
+                  <h3>Missing required asset types</h3>
+                  <span class="card-badge ${missingRequiredAssets.length ? "danger" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Complete")}</span>
+                </div>
+                <div id="libraryMissingAssets"></div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="library-side">
             <section class="card">
               <div class="card-head">
                 <h3>Upload Center</h3>
@@ -923,37 +907,31 @@ export const libraryRoute = {
                   <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Run Upload</button>
                   <button id="libraryStageUploadBtn" class="btn btn-primary" type="button">Run Upload</button>
                 </div>
-                <div class="setup-helper">Run Upload sends the selected files to the backend immediately.</div>
-              </div>
-
-              <div style="margin-top: 16px;">
-                <h4 class="setup-mini-title">Recent uploads</h4>
-                <div id="libraryUploadQueue"></div>
+                <div class="setup-helper">Run Upload sends the selected files to the backend immediately using the existing upload endpoint.</div>
               </div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Missing Required Assets</h3>
-                <span class="card-badge ${missingRequiredAssets.length ? "danger" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Complete")}</span>
+                <h3>Recent Uploads</h3>
+                <span class="card-badge neutral">This session</span>
               </div>
-              <div id="libraryMissingAssets"></div>
+              <p class="setup-side-copy">Successful uploads are backend-backed and reload the project library. This list only reflects uploads from the current session.</p>
+              <div id="libraryUploadQueue"></div>
             </section>
 
             <section class="card">
               <div class="card-head">
-                <h3>Source Of Truth Indicators</h3>
-                <span class="card-badge neutral">Trust</span>
+                <h3>Library AI Assistant</h3>
+                <span class="card-badge neutral">Assist</span>
               </div>
-              <div id="librarySourceTruth"></div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Workspace Summary</h3>
-                <span class="card-badge neutral">Signals</span>
+              <p class="setup-side-copy">Send the current asset selection and missing-asset context to AI Command for cleanup or upload planning.</p>
+              <div class="quick-actions">
+                <button id="libraryAskAiBtn" class="quick-action-btn" type="button">
+                  <span class="home-action-title">Send to AI Command</span>
+                  <span class="home-action-meta">Stage a library review prompt with the current selection.</span>
+                </button>
               </div>
-              <div id="librarySummary"></div>
             </section>
           </aside>
         </div>

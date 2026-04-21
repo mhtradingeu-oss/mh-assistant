@@ -1511,84 +1511,84 @@ export const aiCommandRoute = {
               : "Waiting for intelligence";
 
       root.innerHTML = `
-        <div class="ai-command-wrapper ai-command-brain">
-          <div class="ai-command-hero">
-            <div class="ai-command-hero-copy">
-              <div class="setup-kicker">MH Assistant OS System Brain</div>
-              <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} AI Command` : "AI Command")}</h3>
-              <p class="setup-hero-text">
-                This is the live orchestration layer for project intelligence. Ask what is happening, why it matters, what should be improved next, and where execution should move.
-              </p>
-              <div class="ai-command-status">
-                <div class="setup-status-chip">
-                  <span>Mode</span>
-                  <strong>${escapeHtml(mode.label)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Readiness</span>
-                  <strong>${escapeHtml(aiContext.readinessScore == null ? "--" : `${aiContext.readinessScore}/100`)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Coverage</span>
-                  <strong>${escapeHtml(`${aiContext.coveredCount}/${aiContext.coverageTotal || 0} covered`)}</strong>
-                </div>
-                <div class="setup-status-chip">
-                  <span>Recommendations</span>
-                  <strong>${escapeHtml(String(aiContext.recommendations.length))}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div class="setup-hero-actions">
-              <button id="aiCommandUseGlobalBtn" class="btn btn-secondary" type="button">Copy To Global Bar</button>
-              <button id="aiCommandRefreshBtn" class="btn btn-primary" type="button">Refresh Intelligence</button>
-            </div>
-          </div>
-
+        <div class="ai-command-wrapper">
           <div class="ai-command-layout">
-            <section class="card ai-command-main">
-              <div class="card-head">
-                <div>
-                  <h3>Main AI Chat Area</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Each response is structured around summary, findings, recommendations, next actions, and route suggestions.</p>
+            <div class="ai-command-side">
+              <section class="card">
+                <div class="card-head">
+                  <div>
+                    <div class="setup-kicker">Central AI Workspace</div>
+                    <h3>Command Input</h3>
+                    <p class="home-section-copy" style="margin:6px 0 0;">Prefilled commands appear here first. Nothing runs until you send the command from this page.</p>
+                  </div>
+                  <span class="card-badge ${escapeHtml(
+                    session.intelligence.status === "ready"
+                      ? "success"
+                      : session.intelligence.status === "loading"
+                        ? "warning"
+                        : session.intelligence.status === "error"
+                          ? "danger"
+                          : "neutral"
+                  )}">${escapeHtml(intelligenceStatusLabel)}</span>
                 </div>
-                <span class="card-badge ${escapeHtml(
-                  session.intelligence.status === "ready"
-                    ? "success"
-                    : session.intelligence.status === "loading"
-                      ? "warning"
-                      : session.intelligence.status === "error"
-                        ? "danger"
-                        : "neutral"
-                )}">${escapeHtml(intelligenceStatusLabel)}</span>
-              </div>
 
-              ${
-                session.intelligence.error
-                  ? `<div class="ai-intelligence-banner warning">${escapeHtml(session.intelligence.error)}</div>`
-                  : ""
-              }
+                ${
+                  session.intelligence.error
+                    ? `<div class="ai-intelligence-banner warning">${escapeHtml(session.intelligence.error)}</div>`
+                    : ""
+                }
 
-              <div id="aiCommandChat" class="ai-chat-stream">
-                ${renderMessages(session.messages, escapeHtml)}
-              </div>
-
-              <div class="ai-composer">
-                <textarea id="aiCommandComposerInput" class="setup-input setup-textarea" rows="4" placeholder="Ask what to do next, what content is working, why SEO is weak, which campaign to scale, or where the system should route the next action.">${escapeHtml(session.draftMessage)}</textarea>
-                <div class="ai-composer-actions">
-                  <div class="setup-helper">Press Ctrl/Cmd + Enter to send. AI Command will classify intent and answer from live project intelligence.</div>
-                  <div class="ai-composer-buttons">
-                    <button id="aiCommandClearBtn" class="btn btn-secondary" type="button">Clear Session</button>
-                    <button id="aiCommandSendBtn" class="btn btn-primary" type="button">Send Command</button>
+                <div class="ai-context-grid" style="margin-bottom:16px;">
+                  <div class="ai-context-item">
+                    <span>Current mode</span>
+                    <strong>${escapeHtml(mode.label)}</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>Readiness</span>
+                    <strong>${escapeHtml(aiContext.readinessScore == null ? "--" : `${aiContext.readinessScore}/100`)}</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>Coverage</span>
+                    <strong>${escapeHtml(`${aiContext.coveredCount}/${aiContext.coverageTotal || 0} covered`)}</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>Recommendations</span>
+                    <strong>${escapeHtml(String(aiContext.recommendations.length))}</strong>
                   </div>
                 </div>
-              </div>
-            </section>
+
+                <div class="ai-composer" style="margin-top:0;padding-top:0;border-top:none;">
+                  <textarea id="aiCommandComposerInput" class="setup-input setup-textarea" rows="4" placeholder="Ask what to do next, what content is working, why SEO is weak, which campaign to scale, or where the system should route the next action.">${escapeHtml(session.draftMessage)}</textarea>
+                  <div class="ai-composer-actions">
+                    <div class="setup-helper">Use Send Command or Ctrl/Cmd + Enter to execute now. Copy To Global Bar only mirrors the current draft to the shell input.</div>
+                    <div class="ai-composer-buttons">
+                      <button id="aiCommandClearBtn" class="btn btn-secondary" type="button">Clear Session</button>
+                      <button id="aiCommandUseGlobalBtn" class="btn btn-secondary" type="button">Copy To Global Bar</button>
+                      <button id="aiCommandRefreshBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
+                      <button id="aiCommandSendBtn" class="btn btn-primary" type="button">Send Command</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card ai-command-main">
+                <div class="card-head">
+                  <div>
+                    <h3>Current Result / Response Area</h3>
+                    <p class="home-section-copy" style="margin:6px 0 0;">Responses below reflect executed commands only. Prefilled drafts and history selections do not generate a result until you send them.</p>
+                  </div>
+                  <span class="card-badge neutral">Live output</span>
+                </div>
+                <div id="aiCommandChat" class="ai-chat-stream">
+                  ${renderMessages(session.messages, escapeHtml)}
+                </div>
+              </section>
+            </div>
 
             <aside class="ai-command-side">
               <section class="card">
                 <div class="card-head">
-                  <h3>Specialist Mode Picker</h3>
+                  <h3>Specialist / Mode Selection</h3>
                   <span class="card-badge neutral">Modes</span>
                 </div>
                 <div class="ai-specialist-grid">
@@ -1603,46 +1603,10 @@ export const aiCommandRoute = {
 
               <section class="card">
                 <div class="card-head">
-                  <h3>Context Panel</h3>
-                  <span class="card-badge neutral">Live Context</span>
-                </div>
-                <div class="ai-context-grid">
-                  <div class="ai-context-item">
-                    <span>Current project</span>
-                    <strong>${escapeHtml(aiContext.projectName || "Not selected")}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Market</span>
-                    <strong>${escapeHtml(aiContext.market || "Unknown")}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Mode</span>
-                    <strong>${escapeHtml(mode.label)}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Campaign</span>
-                    <strong>${escapeHtml(aiContext.campaign || "Not selected yet")}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Insights coverage</span>
-                    <strong>${escapeHtml(`${aiContext.coveredCount} covered / ${aiContext.partialCount} partial / ${aiContext.missingCount} missing`)}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Recommendation count</span>
-                    <strong>${escapeHtml(String(aiContext.recommendations.length))}</strong>
-                  </div>
-                </div>
-                <div class="ai-context-section">
-                  <div class="ai-context-heading">Coverage map</div>
-                  ${renderCoverageBadges(aiContext, escapeHtml)}
-                </div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
                   <h3>Suggested Prompts</h3>
-                  <span class="card-badge neutral">Jumpstarts</span>
+                  <span class="card-badge neutral">Prefill only</span>
                 </div>
+                <p class="setup-side-copy">Choosing a prompt fills the command input. It does not execute until you send it.</p>
                 <div id="aiCommandSuggestions" class="ai-prompt-grid">
                   ${renderSuggestedPrompts(prompts, escapeHtml)}
                 </div>
@@ -1650,11 +1614,41 @@ export const aiCommandRoute = {
 
               <section class="card">
                 <div class="card-head">
-                  <h3>Command History</h3>
+                  <h3>History / Previous Commands</h3>
                   <span class="card-badge neutral">${escapeHtml(`${session.history.length} recent`)}</span>
                 </div>
+                <p class="setup-side-copy">History is reference-only until you restore a command into the input and send it again.</p>
                 <div id="aiCommandHistory">
                   ${renderHistory(session.history, escapeHtml)}
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-head">
+                  <h3>AI Command Assistant Notes</h3>
+                  <span class="card-badge neutral">Guide</span>
+                </div>
+                <div class="ai-context-grid">
+                  <div class="ai-context-item">
+                    <span>Execute now</span>
+                    <strong>Send Command</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>Prefilled behavior</span>
+                    <strong>Draft only</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>History behavior</span>
+                    <strong>Reference only</strong>
+                  </div>
+                  <div class="ai-context-item">
+                    <span>Project context</span>
+                    <strong>${escapeHtml(aiContext.projectName || "Not selected")}</strong>
+                  </div>
+                </div>
+                <div class="ai-context-section">
+                  <div class="ai-context-heading">Coverage map</div>
+                  ${renderCoverageBadges(aiContext, escapeHtml)}
                 </div>
               </section>
             </aside>
