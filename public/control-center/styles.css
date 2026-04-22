@@ -4359,7 +4359,12 @@ select {
 
 .settings-shell {
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.settings-workspace {
+  display: grid;
+  gap: 16px;
 }
 
 .settings-layout {
@@ -4372,6 +4377,71 @@ select {
 .settings-main {
   display: grid;
   gap: 20px;
+}
+
+.settings-section-copy {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.settings-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settings-overview-item,
+.settings-group-block,
+.settings-risk-panel {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-overview-item span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.settings-overview-item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.settings-group-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.settings-group-head h4 {
+  margin-bottom: 4px;
+}
+
+.settings-group-head p {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.settings-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .settings-intro {
@@ -5004,11 +5074,18 @@ select {
     align-items: stretch;
   }
 
+  .settings-group-head,
+  .settings-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .settings-section-meta {
     justify-items: start;
   }
 
   .settings-fields-grid,
+  .settings-overview-grid,
   .settings-summary-grid,
   .settings-choice-grid,
   .settings-role-grid {
@@ -5670,5 +5747,245 @@ select {
 
   .ops-toolbar {
     grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   PHASE 3A CONSISTENCY + RESPONSIVE HARDENING
+========================= */
+
+.home-wrapper,
+.setup-wrapper,
+.library-wrapper,
+.integrations-wrapper,
+.workflows-wrapper,
+.campaign-studio-wrapper,
+.media-studio-wrapper,
+.content-studio-wrapper,
+.publishing-wrapper,
+.insights-wrapper,
+.insights-workspace,
+.research-lab-wrapper,
+.ai-command-wrapper,
+.settings-shell,
+.settings-workspace,
+.governance-shell,
+.governance-workspace,
+.ops-shell,
+.ops-workspace {
+  gap: 18px;
+}
+
+.home-main-left,
+.home-main-right,
+.setup-main,
+.setup-side,
+.library-main,
+.library-side,
+.workflows-catalog,
+.workflows-main,
+.workflows-side,
+.campaign-studio-main,
+.campaign-studio-side,
+.media-studio-main,
+.media-studio-side,
+.content-studio-main,
+.content-studio-side,
+.publishing-side-stack,
+.insights-main,
+.insights-side,
+.insights-stack,
+.research-lab-main,
+.research-lab-side,
+.research-stack,
+.settings-main {
+  gap: 18px;
+}
+
+.card-head,
+.workflow-subsection-head,
+.home-list-item-head,
+.library-asset-head,
+.integration-item-head,
+.integration-simple-head,
+.workflow-card-head,
+.campaign-channel-head,
+.campaign-readiness-head,
+.campaign-wave-head,
+.publishing-day-head,
+.publishing-queue-head,
+.publishing-channel-head,
+.insights-list-head,
+.insights-platform-head,
+.insights-ranked-head,
+.research-signal-head,
+.content-queue-head,
+.governance-card-head,
+.governance-meta,
+.governance-actions,
+.ops-lane-head,
+.ops-alert-head,
+.ops-log-meta,
+.ops-list-item {
+  flex-wrap: wrap;
+}
+
+.card-head > :first-child,
+.workflow-card-head > :first-child,
+.publishing-day-head > :first-child,
+.publishing-queue-head > :first-child,
+.publishing-channel-head > :first-child,
+.insights-list-head > :first-child,
+.insights-platform-head > :first-child,
+.insights-ranked-head > :first-child,
+.research-signal-head > :first-child,
+.campaign-channel-head > :first-child,
+.campaign-readiness-head > :first-child,
+.campaign-wave-head > :first-child,
+.governance-card-head > :first-child,
+.ops-lane-head > :first-child {
+  min-width: 0;
+}
+
+.quick-action-btn {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  white-space: normal;
+}
+
+.card-badge,
+.settings-badge,
+.publishing-status-pill {
+  max-width: 100%;
+  text-align: center;
+}
+
+.home-action-title,
+.home-action-meta,
+.workflow-card-copy,
+.workflow-history-item span,
+.publishing-queue-meta,
+.publishing-helper-note,
+.publishing-channel-issues,
+.insights-list-meta,
+.insights-section-copy,
+.research-section-copy,
+.settings-section-copy {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .home-overview-grid,
+  .setup-review-grid,
+  .integrations-overview-grid,
+  .integration-summary-grid,
+  .integration-overview-grid-4,
+  .integration-coverage-grid,
+  .workflow-overview-grid,
+  .campaign-overview-grid,
+  .media-overview-grid,
+  .content-overview-grid,
+  .publishing-overview-grid,
+  .insights-overview-grid,
+  .insights-kpi-strip,
+  .insights-ranked-grid,
+  .insights-learning-grid,
+  .research-overview-grid,
+  .settings-overview-grid,
+  .governance-policy-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-notes-grid,
+  .publishing-preview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .publishing-calendar-item {
+    grid-template-columns: minmax(68px, auto) minmax(0, 1fr);
+  }
+
+  .publishing-calendar-item .publishing-status-pill {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-main-grid,
+  .setup-layout,
+  .library-layout,
+  .campaign-studio-layout,
+  .media-studio-layout,
+  .content-studio-layout,
+  .publishing-workspace-grid,
+  .insights-layout,
+  .insights-workspace-grid,
+  .research-lab-layout,
+  .research-workspace-grid,
+  .research-findings-grid,
+  .ai-command-layout,
+  .governance-workspace-grid,
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-section-grid,
+  .integrations-grid,
+  .integrations-control-top,
+  .integration-ai-grid,
+  .integration-domain-grid,
+  .integration-field-grid,
+  .campaign-studio-panel-grid,
+  .campaign-recommendation-grid,
+  .campaign-readiness-grid,
+  .media-selected-grid,
+  .media-linked-grid,
+  .content-linked-grid,
+  .insights-domain-grid,
+  .insights-triple-grid,
+  .insights-platform-grid,
+  .research-detail-grid,
+  .research-opportunity-meta,
+  .settings-fields-grid,
+  .settings-summary-grid,
+  .settings-choice-grid,
+  .settings-role-grid,
+  .governance-grid,
+  .governance-policy-grid,
+  .governance-selected-grid,
+  .ops-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .context-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .context-card {
+    min-width: 0;
+  }
+
+  .card-badge,
+  .settings-badge,
+  .publishing-status-pill {
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  .publishing-filter-chip,
+  .integration-quick-pick,
+  .settings-chip,
+  .content-type-tab {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

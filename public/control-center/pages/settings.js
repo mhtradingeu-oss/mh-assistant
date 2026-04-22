@@ -617,6 +617,33 @@ const SECTION_DEFINITIONS = [
   }
 ];
 
+const SETTINGS_GROUPS = [
+  {
+    id: "project-config",
+    title: "Project Settings",
+    description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",
+    sectionIds: ["project", "publishing", "presets"]
+  },
+  {
+    id: "ai-automation",
+    title: "AI / Automation Settings",
+    description: "Control system mode, AI behavior, automation routing, and safety rules in one execution-focused workspace.",
+    sectionIds: ["operating", "ai", "automation", "safety"]
+  },
+  {
+    id: "team-permissions",
+    title: "Team / Permissions",
+    description: "Keep approval ownership, publishing permissions, and team-role authority together so governance stays understandable.",
+    sectionIds: ["approval", "team"]
+  },
+  {
+    id: "integration-sync",
+    title: "Integration / Sync Settings",
+    description: "Review connector refresh behavior, import policy, and alert routing without turning Settings into a sync control center.",
+    sectionIds: ["sync", "alerts"]
+  }
+];
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -1406,6 +1433,160 @@ function renderSectionExtension(section, session, escapeHtml) {
   return "";
 }
 
+function getSectionDefinition(sectionId) {
+  return SECTION_DEFINITIONS.find((section) => section.id === sectionId) || null;
+}
+
+function buildSettingsPrompts(session) {
+  const summary = buildSummary(session);
+  const projectLabel = session.projectName || "this project";
+  const topRisk = summary.risks[0] || "the biggest current configuration gap";
+  return [
+    {
+      label: "Summarize settings",
+      preview: "Explain the current project, AI, approval, publishing, and sync posture in one concise review.",
+      prompt: `Summarize the current settings for ${projectLabel}. Cover project defaults, AI behavior, approvals, permissions, integrations, sync posture, and the main configuration tradeoffs.`
+    },
+    {
+      label: "Find highest-risk gap",
+      preview: "Identify the most important settings gap and the safest next fix.",
+      prompt: `Review the current settings for ${projectLabel}. Identify the highest-risk configuration gap, starting with ${topRisk}, and explain the safest next fix.`
+    },
+    {
+      label: "Recommend automation posture",
+      preview: "Advise on AI and automation settings based on current risk and approval posture.",
+      prompt: `Review the AI, automation, safety, approval, and sync settings for ${projectLabel}. Recommend the best operating posture and what should be tightened or relaxed next.`
+    }
+  ];
+}
+
+function renderGroupedSection(group, session, escapeHtml) {
+  const definitions = group.sectionIds.map(getSectionDefinition).filter(Boolean);
+
+  return `
+    <article class="settings-section panel" id="settings-group-${group.id}">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">${escapeHtml(group.title)}</div>
+          <h3>${escapeHtml(group.title)}</h3>
+          <p class="settings-section-copy">${escapeHtml(group.description)}</p>
+        </div>
+      </div>
+      <div class="settings-group-grid">
+        ${definitions.map((section) => `
+          <div class="settings-group-block" id="settings-section-${section.id}">
+            <div class="settings-group-head">
+              <div>
+                <h4>${escapeHtml(section.title)}</h4>
+                <p>${escapeHtml(section.description)}</p>
+              </div>
+              <span class="settings-badge">${escapeHtml(section.backendLabel)}</span>
+            </div>
+            <div class="settings-fields-grid">
+              ${section.fields
+                .map((field) => renderField(field, getPathValue(session.form, field.path), escapeHtml))
+                .join("")}
+            </div>
+            ${renderSectionExtension(section, session, escapeHtml)}
+          </div>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderSettingsOverview(summary, session, escapeHtml) {
+  const riskItems = summary.risks.length
+    ? summary.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+    : `<li>Critical controls are populated. Backend persistence is the main remaining readiness gap.</li>`;
+
+  return `
+    <section class="panel settings-overview">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Settings Overview</div>
+          <h3>System configuration for ${escapeHtml(session.projectName || "this project")}</h3>
+          <p class="settings-section-copy">Keep project setup, AI behavior, approvals, team access, and sync policy readable from one consistent workspace.</p>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+      </div>
+      <div class="settings-overview-grid">
+        <div class="settings-overview-item">
+          <span>Project mode</span>
+          <strong>${escapeHtml(summary.projectMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>AI mode</span>
+          <strong>${escapeHtml(summary.aiMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Approval mode</span>
+          <strong>${escapeHtml(summary.approvalMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Publishing mode</span>
+          <strong>${escapeHtml(summary.publishingMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Sync mode</span>
+          <strong>${escapeHtml(summary.syncMode)}</strong>
+        </div>
+        <div class="settings-overview-item">
+          <span>Save status</span>
+          <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <div class="settings-actions-copy">
+          <div class="panel-kicker">Control Actions</div>
+          <h3>Save or review this configuration</h3>
+          <p>${escapeHtml(session.dirty ? "Unsaved changes are present. Saving writes this configuration into the durable team and governance records used across the system." : "All changes captured. The shared durable governance and team records are in sync.")}</p>
+        </div>
+        <div class="settings-actions-buttons">
+          <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
+          <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
+          <button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>
+        </div>
+      </div>
+      <div class="settings-risk-panel">
+        <div class="settings-risk-head">
+          <h4>Current configuration risks</h4>
+          <span class="card-badge ${summary.risks.length ? "danger" : "success"}">
+            ${summary.risks.length ? `${summary.risks.length} open` : "Ready"}
+          </span>
+        </div>
+        <ul class="simple-list settings-risk-list">${riskItems}</ul>
+      </div>
+    </section>
+  `;
+}
+
+function renderSettingsAssistant(session, escapeHtml) {
+  const prompts = buildSettingsPrompts(session);
+  return `
+    <section class="panel settings-ai-assistant">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Settings AI Assistant</div>
+          <h3>Settings AI Assistant</h3>
+          <p class="settings-section-copy">Use AI for configuration review and recommendations after you inspect the actual settings above.</p>
+        </div>
+      </div>
+      <div class="settings-toolbar">
+        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI Command</button>
+      </div>
+      <div class="quick-actions">
+        ${prompts.map((item, index) => `
+          <button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">
+            <span class="home-action-title">${escapeHtml(item.label)}</span>
+            <span class="home-action-meta">${escapeHtml(item.preview)}</span>
+          </button>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderSection(section, session, escapeHtml) {
   return `
     <article class="settings-section panel" id="settings-section-${section.id}">
@@ -1515,34 +1696,24 @@ function buildPageMarkup(session, escapeHtml) {
 
   return `
     <section class="page is-active" data-page="settings">
-      <div class="settings-shell">
-        ${renderActions(session, escapeHtml)}
-
-        <div class="settings-intro panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">Configuration Center</div>
-              <h3>Operational settings for ${escapeHtml(session.projectName || "this project")}</h3>
-              <p>These controls shape how MH Assistant behaves across generation, approvals, publishing, synchronization, and governance. The page now syncs them into shared durable records so other pages inherit the same model.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-layout">
-          <div class="settings-main">
-            ${SECTION_DEFINITIONS.map((section) => renderSection(section, session, escapeHtml)).join("")}
-          </div>
-          ${renderSummary(summary, session, escapeHtml)}
-        </div>
+      <div class="settings-shell settings-workspace">
+        ${renderSettingsOverview(summary, session, escapeHtml)}
+        ${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}
+        ${renderSettingsAssistant(session, escapeHtml)}
       </div>
     </section>
   `;
 }
 
 function refreshSummary(root, session, escapeHtml) {
-  const summaryHost = root.querySelector(".settings-summary");
-  if (!summaryHost) return;
-  summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);
+  const overviewHost = root.querySelector(".settings-overview");
+  if (overviewHost) {
+    overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);
+  }
+  const aiHost = root.querySelector(".settings-ai-assistant");
+  if (aiHost) {
+    aiHost.outerHTML = renderSettingsAssistant(session, escapeHtml);
+  }
 }
 
 function refreshActionState(root, session) {
@@ -1561,39 +1732,9 @@ function replacePage(context, session) {
   root.innerHTML = buildPageMarkup(session, context.escapeHtml);
 }
 
-function bindFormEvents(context, session) {
+function bindSettingsActionButtons(context, session) {
   const root = context.$("pageRoot");
   if (!root) return;
-
-  root.querySelectorAll("[data-setting-path]").forEach((control) => {
-    const eventName =
-      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
-        ? "input"
-        : "change";
-
-    control.addEventListener(eventName, () => {
-      const path = control.dataset.settingPath;
-      if (!path) return;
-
-      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
-        const checkedValues = Array.from(
-          root.querySelectorAll(`input[type="checkbox"][data-setting-path="${path}"]:checked`)
-        ).map((item) => item.value);
-        setPathValue(session.form, path, checkedValues);
-      } else if (control.type === "radio") {
-        if (!control.checked) return;
-        setPathValue(session.form, path, control.value);
-      } else if (control.type === "checkbox") {
-        setPathValue(session.form, path, Boolean(control.checked));
-      } else {
-        setPathValue(session.form, path, control.value);
-      }
-
-      session.dirty = true;
-      refreshSummary(root, session, context.escapeHtml);
-      refreshActionState(root, session);
-    });
-  });
 
   root.querySelectorAll("[data-settings-action]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -1685,6 +1826,70 @@ function bindFormEvents(context, session) {
       }
     });
   });
+}
+
+function bindSettingsAiButtons(context, session) {
+  const root = context.$("pageRoot");
+  if (!root) return;
+
+  root.querySelectorAll("[data-settings-open-ai]").forEach((button) => {
+    button.addEventListener("click", () => {
+      context.navigateTo("ai-command");
+    });
+  });
+
+  root.querySelectorAll("[data-settings-ai-prompt]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const prompt = buildSettingsPrompts(session)[Number(button.dataset.settingsAiPrompt)];
+      if (!prompt) return;
+      const input = context.$("quickCommandInput");
+      if (input) {
+        input.value = prompt.prompt;
+      }
+      context.navigateTo("ai-command");
+      context.showMessage("Settings prompt added to AI Command.");
+    });
+  });
+}
+
+function bindFormEvents(context, session) {
+  const root = context.$("pageRoot");
+  if (!root) return;
+
+  root.querySelectorAll("[data-setting-path]").forEach((control) => {
+    const eventName =
+      control.tagName === "TEXTAREA" || (control.tagName === "INPUT" && !["checkbox", "radio"].includes(control.type))
+        ? "input"
+        : "change";
+
+    control.addEventListener(eventName, () => {
+      const path = control.dataset.settingPath;
+      if (!path) return;
+
+      if (control.type === "checkbox" && control.closest(".settings-checklist")) {
+        const checkedValues = Array.from(
+          root.querySelectorAll(`input[type="checkbox"][data-setting-path="${path}"]:checked`)
+        ).map((item) => item.value);
+        setPathValue(session.form, path, checkedValues);
+      } else if (control.type === "radio") {
+        if (!control.checked) return;
+        setPathValue(session.form, path, control.value);
+      } else if (control.type === "checkbox") {
+        setPathValue(session.form, path, Boolean(control.checked));
+      } else {
+        setPathValue(session.form, path, control.value);
+      }
+
+      session.dirty = true;
+      refreshSummary(root, session, context.escapeHtml);
+      refreshActionState(root, session);
+      bindSettingsActionButtons(context, session);
+      bindSettingsAiButtons(context, session);
+    });
+  });
+
+  bindSettingsActionButtons(context, session);
+  bindSettingsAiButtons(context, session);
 }
 
 export const settingsRoute = {
