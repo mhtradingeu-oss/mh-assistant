@@ -52,7 +52,9 @@ function ensureSession(projectName) {
       loaded: false,
       loading: false,
       error: "",
-      summary: null
+      summary: null,
+      focus: "all",
+      selectedKey: ""
     });
   }
   return governanceSessions.get(key);
@@ -311,7 +313,6 @@ function renderPolicyControls(summary, settingsDraft, escapeHtml) {
   const policy = asObject(summary?.policy);
   const rules = asObject(policy.policy_rules);
   const owners = asObject(policy.approval_owners);
-  const settingsBridge = asObject(policy.settings_bridge);
 
   return `
     <div class="governance-policy-grid">
@@ -358,14 +359,125 @@ function renderPolicyControls(summary, settingsDraft, escapeHtml) {
         <input id="governance-owner-publishing" class="settings-control" type="text" data-governance-owner="publishing" value="${escapeHtml(owners.publishing || "")}" />
       </div>
     </div>
-    <div class="governance-actions">
-      <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
-      <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Sync Settings Rules</button>
-    </div>
-    <div class="simple-banner">
-      <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
-    </div>
   `;
+}
+
+function savePromptToQuickCommand(context, prompt) {
+  const input = context.$?.("quickCommandInput");
+  if (input) {
+    input.value = prompt;
+  }
+}
+
+function buildDecisionQueue(summary) {
+  const sections = asObject(summary.sections);
+
+  const approvals = asArray(sections.approval_queue).map((item) => ({
+    ...item,
+    queue_kind: "approval",
+    selected_key: `approval:${asString(item.id)}`,
+    queue_title: item.title || "Approval item",
+    queue_summary: item.summary || "Awaiting review and decision.",
+    queue_status: item.status || "pending",
+    queue_risk: item.risk_level || "medium",
+    queue_owner: item.reviewer || item.requested_for || "Operator",
+    queue_created: item.created_at,
+    queue_flags: [
+      ...asArray(item.policy_flags),
+      ...asArray(item.claim_flags),
+      ...asArray(item.brand_safety_flags),
+      ...asArray(item.publish_guardrails)
+    ],
+    linked_approval: item
+  }));
+
+  const claims = asArray(sections.claim_review).map((item) => {
+    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+    return {
+      ...item,
+      queue_kind: "claim",
+      selected_key: `claim:${asString(item.entity_id || item.id)}`,
+      queue_title: item.title || "Claim review item",
+      queue_summary: asArray(item.claim_flags).map((flag) => flag.message).join(" | ") || "No claim issues detected.",
+      queue_status: approval?.status || item.status || "open",
+      queue_risk: asArray(item.claim_flags)[0]?.severity || "medium",
+      queue_owner: approval?.reviewer || "Compliance Reviewer",
+      queue_created: approval?.created_at || item.updated_at || item.created_at,
+      queue_flags: asArray(item.claim_flags),
+      linked_approval: approval
+    };
+  });
+
+  const brand = asArray(sections.brand_safety_review).map((item) => {
+    const approval = findApprovalForEntity(summary, item.entity_type, item.entity_id);
+    return {
+      ...item,
+      queue_kind: "brand",
+      selected_key: `brand:${asString(item.entity_id || item.id)}`,
+      queue_title: item.title || "Brand safety review",
+      queue_summary: asArray(item.brand_safety_flags).map((flag) => flag.message).join(" | ") || "No brand issues detected.",
+      queue_status: approval?.status || item.status || "open",
+      queue_risk: asArray(item.brand_safety_flags)[0]?.severity || "medium",
+      queue_owner: approval?.reviewer || "Brand Reviewer",
+      queue_created: approval?.created_at || item.updated_at || item.created_at,
+      queue_flags: asArray(item.brand_safety_flags),
+      linked_approval: approval
+    };
+  });
+
+  const publish = asArray(sections.publish_guardrails).map((item) => {
+    const approval = findApprovalForEntity(summary, "publishing_job", item.entity_id);
+    return {
+      ...item,
+      queue_kind: "publish",
+      selected_key: `publish:${asString(item.entity_id || item.id)}`,
+      queue_title: item.title || "Publish guardrail",
+      queue_summary: asArray(item.publish_guardrails).map((flag) => flag.message).join(" | ") || "No publish blockers detected.",
+      queue_status: approval?.status || item.status || "open",
+      queue_risk: asArray(item.publish_guardrails)[0]?.severity || "medium",
+      queue_owner: approval?.reviewer || "Publishing Reviewer",
+      queue_created: approval?.created_at || item.updated_at || item.created_at,
+      queue_flags: asArray(item.publish_guardrails),
+      linked_approval: approval
+    };
+  });
+
+  const escalations = asArray(sections.escalation_queue).map((item) => ({
+    ...item,
+    queue_kind: "escalation",
+    selected_key: `escalation:${asString(item.entity_id || item.id || item.title)}`,
+    queue_title: item.title || "Escalation item",
+    queue_summary: item.description || item.summary || "Escalated for follow-up.",
+    queue_status: item.status || "open",
+    queue_risk: "high",
+    queue_owner: item.assignee || item.owner || item.reviewer || "Admin",
+    queue_created: item.updated_at || item.created_at,
+    queue_flags: []
+  }));
+
+  return [...approvals, ...claims, ...brand, ...publish, ...escalations];
+}
+
+function buildGovernancePrompts(projectName, selectedItem, focusLabel) {
+  const projectLabel = projectName || "this project";
+  const itemLabel = asString(selectedItem?.queue_title || selectedItem?.title || "the selected governance item");
+  return [
+    {
+      label: "Summarize governance state",
+      preview: "Explain the current approval pressure, risk level, and next governance priority.",
+      prompt: `Summarize the current governance state for ${projectLabel}. Cover policy pressure, pending approvals, risky claims, brand safety issues, publish blockers, and the next governance priority.`
+    },
+    {
+      label: "Review selected decision",
+      preview: "Explain the selected governance item and what decision path is safest.",
+      prompt: `Review ${itemLabel} in Governance for ${projectLabel}. Explain the risk, what policy is implicated, and what decision path is safest next.`
+    },
+    {
+      label: "Find governance gaps",
+      preview: "Identify the highest-risk governance gaps and what rules or ownership need tightening.",
+      prompt: `Review Governance for ${projectLabel} with focus on ${focusLabel}. Identify the highest-risk governance gaps, where approval ownership is weak, and what rules need tightening next.`
+    }
+  ];
 }
 
 function renderPage(projectName, session, escapeHtml) {
@@ -402,129 +514,336 @@ function renderPage(projectName, session, escapeHtml) {
   const summary = asObject(session.summary);
   const sections = asObject(summary.sections);
   const settingsDraft = getSettingsDraftFromPolicy(summary);
+  const queueItems = buildDecisionQueue(summary);
+  const focusCounts = {
+    all: queueItems.length,
+    approvals: queueItems.filter((item) => item.queue_kind === "approval").length,
+    claims: queueItems.filter((item) => item.queue_kind === "claim").length,
+    brand: queueItems.filter((item) => item.queue_kind === "brand").length,
+    publish: queueItems.filter((item) => item.queue_kind === "publish").length,
+    escalations: queueItems.filter((item) => item.queue_kind === "escalation").length
+  };
+  let visibleQueue = queueItems;
+  if (session.focus !== "all") {
+    const focusMap = {
+      approvals: "approval",
+      claims: "claim",
+      brand: "brand",
+      publish: "publish",
+      escalations: "escalation"
+    };
+    visibleQueue = queueItems.filter((item) => item.queue_kind === focusMap[session.focus]);
+  }
+  const selectedItem = visibleQueue.find((item) => item.selected_key === session.selectedKey) || visibleQueue[0] || null;
+  session.selectedKey = selectedItem?.selected_key || "";
+  const prompts = buildGovernancePrompts(projectName, selectedItem, titleCase(session.focus || "all"));
+  const policy = asObject(summary.policy);
+  const rules = asObject(policy.policy_rules);
+  const owners = asObject(policy.approval_owners);
+  const settingsBridge = asObject(policy.settings_bridge);
+  const recentTimeline = asArray(sections.audit_timeline).slice(0, 4);
 
   return `
     <section class="page is-active" data-page="governance">
-      <div class="governance-shell">
-        <div class="governance-hero panel">
+      <div class="governance-shell governance-workspace">
+        <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">Operational Governance</div>
-              <h3>Governance console for ${escapeHtml(projectName)}</h3>
-              <p>Enforce policy, review approvals, inspect risky claims and brand safety issues, manage overrides, and keep a durable audit trail.</p>
+              <div class="panel-kicker">1. Governance Overview</div>
+              <h3>Governance workspace for ${escapeHtml(projectName)}</h3>
+              <p>Review policy pressure, current approval demand, recent governance activity, and what needs a decision next.</p>
             </div>
-            <div class="governance-hero-actions">
-              <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
-            </div>
+            <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
           </div>
-          <div class="governance-metrics">
+          <div class="governance-overview-grid">
             ${renderMetric("Approval Queue", asArray(sections.approval_queue).length, "Awaiting decision", escapeHtml)}
             ${renderMetric("Policy Violations", asArray(sections.policy_violations).length, "Needs review", escapeHtml)}
             ${renderMetric("Claim Review", asArray(sections.claim_review).length, "Risky AI claims", escapeHtml)}
             ${renderMetric("Brand Safety", asArray(sections.brand_safety_review).length, "Creative flags", escapeHtml)}
             ${renderMetric("Publish Guardrails", asArray(sections.publish_guardrails).length, "Release blockers", escapeHtml)}
-            ${renderMetric("Escalation Queue", asArray(sections.escalation_queue).length, "Open escalations", escapeHtml)}
+            ${renderMetric("Escalations", asArray(sections.escalation_queue).length, "Higher-level review", escapeHtml)}
           </div>
-        </div>
+          <div class="governance-activity-list">
+            ${recentTimeline.length
+              ? recentTimeline.map((item) => `
+                <div class="governance-activity-item">
+                  <strong>${escapeHtml(item.title || titleCase(item.type || "event"))}</strong>
+                  <span>${escapeHtml(item.actor || "MH Assistant")} • ${escapeHtml(formatDateTime(item.timestamp))}</span>
+                </div>
+              `).join("")
+              : `<div class="empty-box">No audit history is available yet.</div>`}
+          </div>
+        </section>
 
-        <div class="governance-grid">
-          ${renderReviewOwnership(summary, escapeHtml)}
-
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">1. Approval Queue</div><h3>Pending decisions</h3></div></div>
-            <div class="governance-card-list">
-              ${asArray(sections.approval_queue).length
-                ? asArray(sections.approval_queue).map((item) => renderApprovalCard(item, escapeHtml)).join("")
-                : `<div class="empty-box">No approval items are currently waiting in the queue.</div>`}
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker">2. Policy / Rule Summary</div>
+              <h3>Policy visibility</h3>
+              <p>Keep the active rules, ownership, and settings bridge visible without duplicating separate governance cards.</p>
             </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">2. Policy Violations</div><h3>Detected risk and rule breaks</h3></div></div>
-            ${renderFlagList(asArray(sections.policy_violations), "No policy violations are currently open.", escapeHtml)}
-          </article>
-
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">3. Claim Review</div><h3>Risky AI-generated claims</h3></div></div>
-            <div class="governance-card-list">
-              ${asArray(sections.claim_review).length
-                ? asArray(sections.claim_review).map((item) => renderReviewCard(item, "claim", escapeHtml, findApprovalForEntity(summary, item.entity_type, item.entity_id))).join("")
-                : `<div class="empty-box">No claim review items are currently flagged.</div>`}
+          </div>
+          <div class="governance-policy-summary-grid">
+            <div class="governance-policy-block">
+              <h4>Active rules</h4>
+              <div class="governance-rule-list">
+                ${Object.entries(rules).map(([key, value]) => `
+                  <div class="governance-rule-item">
+                    <strong>${escapeHtml(titleCase(key))}</strong>
+                    <span>${escapeHtml(value ? "Enabled" : "Disabled")}</span>
+                  </div>
+                `).join("")}
+              </div>
             </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">4. Brand Safety Review</div><h3>Creative and media safety flags</h3></div></div>
-            <div class="governance-card-list">
-              ${asArray(sections.brand_safety_review).length
-                ? asArray(sections.brand_safety_review).map((item) => renderReviewCard(item, "brand", escapeHtml, findApprovalForEntity(summary, item.entity_type, item.entity_id))).join("")
-                : `<div class="empty-box">No brand safety flags are currently open.</div>`}
+            <div class="governance-policy-block">
+              <h4>Approval owners</h4>
+              <div class="governance-rule-list">
+                ${Object.entries(owners).map(([key, value]) => `
+                  <div class="governance-rule-item">
+                    <strong>${escapeHtml(titleCase(key))}</strong>
+                    <span>${escapeHtml(asString(value) || "Unassigned")}</span>
+                  </div>
+                `).join("")}
+              </div>
             </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">5. Publish Guardrails</div><h3>Release blockers and preflight checks</h3></div></div>
-            <div class="governance-card-list">
-              ${asArray(sections.publish_guardrails).length
-                ? asArray(sections.publish_guardrails).map((item) => renderReviewCard(item, "publish", escapeHtml, findApprovalForEntity(summary, "publishing_job", item.entity_id))).join("")
-                : `<div class="empty-box">Publishing guardrails are clear right now.</div>`}
+            <div class="governance-policy-block">
+              <h4>Editable policy controls</h4>
+              ${renderPolicyControls(summary, settingsDraft, escapeHtml)}
             </div>
-          </article>
+            <div class="governance-policy-block">
+              <h4>Open policy signal</h4>
+              ${renderFlagList(asArray(sections.policy_violations), "No policy violations are currently open.", escapeHtml)}
+              <div class="simple-banner">
+                <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">6. Audit Timeline</div><h3>Who decided what, and why</h3></div></div>
-            ${renderTimeline(asArray(sections.audit_timeline), escapeHtml)}
-          </article>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker">3. Approval / Decision Queue</div>
+              <h3>Pending approvals and governance decisions</h3>
+              <p>Browse the combined governance queue, then inspect one selected item before taking action.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
+          </div>
+          <div class="governance-focus-tabs">
+            ${[
+              ["all", "All", focusCounts.all],
+              ["approvals", "Approvals", focusCounts.approvals],
+              ["claims", "Claims", focusCounts.claims],
+              ["brand", "Brand", focusCounts.brand],
+              ["publish", "Publish", focusCounts.publish],
+              ["escalations", "Escalations", focusCounts.escalations]
+            ].map(([value, label, count]) => `
+              <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+                <strong>${escapeHtml(label)}</strong>
+                <span>${escapeHtml(asString(count))}</span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="ops-table-wrap">
+            <table class="ops-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Item</th>
+                  <th>Risk</th>
+                  <th>Owner</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${visibleQueue.length
+                  ? visibleQueue.map((item) => `
+                    <tr class="${selectedItem?.selected_key === item.selected_key ? "is-selected" : ""}">
+                      <td><span class="card-badge neutral">${escapeHtml(titleCase(item.queue_kind || "item"))}</span></td>
+                      <td>
+                        <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+                          <strong>${escapeHtml(item.queue_title)}</strong>
+                          <span>${escapeHtml(item.queue_summary)}</span>
+                        </button>
+                      </td>
+                      <td><span class="card-badge ${severityClass(item.queue_risk)}">${escapeHtml(titleCase(item.queue_risk || "medium"))}</span></td>
+                      <td>${escapeHtml(item.queue_owner || "-")}</td>
+                      <td><span class="card-badge ${severityClass(item.queue_status)}">${escapeHtml(titleCase(item.queue_status || "open"))}</span></td>
+                      <td>${escapeHtml(formatDateTime(item.queue_created))}</td>
+                    </tr>
+                  `).join("")
+                  : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">7. Override Controls</div><h3>Policy locks and active overrides</h3></div></div>
-            ${renderPolicyControls(summary, settingsDraft, escapeHtml)}
-            <div class="governance-card-list">
-              ${asArray(sections.override_controls?.active_overrides).length
-                ? asArray(sections.override_controls.active_overrides).map((item) => `
-                  <div class="governance-card">
-                    <div class="governance-card-head">
-                      <div>
-                        <div class="panel-kicker">${escapeHtml(titleCase(item.action || "override"))}</div>
-                        <h4>${escapeHtml(`${item.entity_type || "entity"} ${item.entity_id || ""}`)}</h4>
-                      </div>
-                      <span class="card-badge warning">${escapeHtml(titleCase(item.status || "active"))}</span>
+        <div class="governance-workspace-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">4. Selected Decision Details</div>
+                <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
+                <p>${escapeHtml(selectedItem ? "Review the selected item, its flags, and linked approval history before deciding." : "Choose a governance item from the queue to inspect it.")}</p>
+              </div>
+            </div>
+            ${
+              selectedItem
+                ? `
+                  <div class="governance-selected-summary">
+                    <strong>${escapeHtml(selectedItem.queue_title)}</strong>
+                    <p>${escapeHtml(selectedItem.queue_summary)}</p>
+                  </div>
+                  <div class="governance-selected-grid">
+                    <div class="governance-selected-item">
+                      <span>Type</span>
+                      <strong>${escapeHtml(titleCase(selectedItem.queue_kind || "item"))}</strong>
                     </div>
-                    <p class="governance-copy">${escapeHtml(item.reason || "Manual override recorded.")}</p>
-                    <div class="governance-meta">
-                      <span>${escapeHtml(item.actor || "Operator")}</span>
-                      <span>${escapeHtml(formatDateTime(item.created_at))}</span>
+                    <div class="governance-selected-item">
+                      <span>Risk</span>
+                      <strong>${escapeHtml(titleCase(selectedItem.queue_risk || "medium"))}</strong>
+                    </div>
+                    <div class="governance-selected-item">
+                      <span>Owner</span>
+                      <strong>${escapeHtml(selectedItem.queue_owner || "-")}</strong>
+                    </div>
+                    <div class="governance-selected-item">
+                      <span>Status</span>
+                      <strong>${escapeHtml(titleCase(selectedItem.queue_status || "open"))}</strong>
+                    </div>
+                    <div class="governance-selected-item">
+                      <span>Entity</span>
+                      <strong>${escapeHtml(selectedItem.entity_type || selectedItem.source_type || "-")}</strong>
+                    </div>
+                    <div class="governance-selected-item">
+                      <span>Created</span>
+                      <strong>${escapeHtml(formatDateTime(selectedItem.queue_created))}</strong>
                     </div>
                   </div>
-                `).join("")
-                : `<div class="empty-box">No active overrides are currently open.</div>`}
-            </div>
-          </article>
+                  ${renderFlagList(asArray(selectedItem.queue_flags), "No policy flags were attached to this item.", escapeHtml)}
+                  ${
+                    selectedItem.linked_approval
+                      ? `
+                        <div class="simple-banner">
+                          <strong>Linked approval:</strong> ${escapeHtml(selectedItem.linked_approval.title || selectedItem.linked_approval.id)} • ${escapeHtml(titleCase(selectedItem.linked_approval.status || "pending"))}
+                        </div>
+                      `
+                      : ""
+                  }
+                  ${
+                    asArray(selectedItem.history).length
+                      ? `
+                        <div class="governance-activity-list">
+                          ${asArray(selectedItem.history).slice(0, 4).map((entry) => `
+                            <div class="governance-activity-item">
+                              <strong>${escapeHtml(titleCase(entry.action || "updated"))}</strong>
+                              <span>${escapeHtml(entry.actor || "MH Assistant")} • ${escapeHtml(formatDateTime(entry.at))}</span>
+                            </div>
+                          `).join("")}
+                        </div>
+                      `
+                      : ""
+                  }
+                `
+                : `<div class="empty-box">No governance item is selected.</div>`
+            }
+          </section>
 
-          <article class="panel">
-            <div class="panel-header"><div><div class="panel-kicker">8. Escalation Queue</div><h3>Items routed for higher-level review</h3></div></div>
-            <div class="governance-card-list">
-              ${asArray(sections.escalation_queue).length
-                ? asArray(sections.escalation_queue).map((item) => `
-                  <div class="governance-card">
-                    <div class="governance-card-head">
-                      <div>
-                        <div class="panel-kicker">${escapeHtml(titleCase(item.source_type || item.entity_type || "escalation"))}</div>
-                        <h4>${escapeHtml(item.title || "Escalation item")}</h4>
-                      </div>
-                      <span class="card-badge danger">${escapeHtml(titleCase(item.status || "open"))}</span>
-                    </div>
-                    <p class="governance-copy">${escapeHtml(item.description || item.summary || "Escalated for follow-up.")}</p>
-                    <div class="governance-meta">
-                      <span>${escapeHtml(item.assignee || item.owner || item.reviewer || "Admin")}</span>
-                      <span>${escapeHtml(formatDateTime(item.updated_at || item.created_at))}</span>
-                    </div>
-                  </div>
-                `).join("")
-                : `<div class="empty-box">No escalations are currently active.</div>`}
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">5. Governance Actions</div>
+                <h3>Review, decide, and maintain policy controls</h3>
+                <p>Only real governance actions are shown here. Approve and reject actions appear only for real approvals.</p>
+              </div>
             </div>
-          </article>
+            <div class="governance-action-stack">
+              <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
+              <div class="governance-actions">
+                <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
+                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
+                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Sync Settings Rules</button>
+                ${
+                  selectedItem?.queue_kind === "approval"
+                    ? `
+                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Approve</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Reject</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Override</button>
+                    `
+                    : ""
+                }
+                ${
+                  selectedItem && selectedItem.queue_kind !== "approval" && !selectedItem.linked_approval
+                    ? `
+                      <button
+                        class="btn btn-secondary"
+                        type="button"
+                        data-governance-request-approval="true"
+                        data-entity-type="${escapeHtml(selectedItem.entity_type || "content_item")}"
+                        data-entity-id="${escapeHtml(selectedItem.entity_id || selectedItem.id)}"
+                        data-title="${escapeHtml(selectedItem.queue_title || "Governance review")}"
+                        data-risk="${escapeHtml(selectedItem.queue_risk || "medium")}"
+                        data-summary="${escapeHtml(selectedItem.queue_summary || "Governance review requested.")}"
+                      >
+                        Request Approval
+                      </button>
+                    `
+                    : ""
+                }
+              </div>
+              <div class="governance-policy-summary-grid">
+                <div class="governance-policy-block">
+                  <h4>Active overrides</h4>
+                  <div class="governance-activity-list">
+                    ${asArray(sections.override_controls?.active_overrides).length
+                      ? asArray(sections.override_controls.active_overrides).slice(0, 4).map((item) => `
+                        <div class="governance-activity-item">
+                          <strong>${escapeHtml(`${titleCase(item.action || "override")} • ${item.entity_type || "entity"}`)}</strong>
+                          <span>${escapeHtml(item.actor || "Operator")} • ${escapeHtml(formatDateTime(item.created_at))}</span>
+                        </div>
+                      `).join("")
+                      : `<div class="empty-box">No active overrides are currently open.</div>`}
+                  </div>
+                </div>
+                <div class="governance-policy-block">
+                  <h4>Escalation chain</h4>
+                  <div class="governance-rule-list">
+                    ${Object.entries(asObject(summary.review_model?.escalation_chain)).map(([risk, roles]) => `
+                      <div class="governance-rule-item">
+                        <strong>${escapeHtml(titleCase(risk))}</strong>
+                        <span>${escapeHtml(asArray(roles).map(titleCase).join(" -> ") || "No escalation path")}</span>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker">6. Governance AI Assistant</div>
+              <h3>Governance AI Assistant</h3>
+              <p>Ask AI for governance help after you review the current state and selected decision item.</p>
+            </div>
+          </div>
+          <div class="governance-ai-toolbar">
+            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Command</button>
+          </div>
+          <div class="quick-actions">
+            ${prompts.map((item, index) => `
+              <button class="quick-action-btn" type="button" data-governance-ai-prompt="${index}">
+                <span class="home-action-title">${escapeHtml(item.label)}</span>
+                <span class="home-action-meta">${escapeHtml(item.preview)}</span>
+              </button>
+            `).join("")}
+          </div>
+        </section>
       </div>
     </section>
   `;
@@ -543,7 +862,7 @@ function bindGovernance(context, projectName, session) {
     button.onclick = async () => {
       const approvalId = button.getAttribute("data-approval-id") || "";
       const decision = button.getAttribute("data-governance-decision") || "";
-      const note = document.getElementById(`gov-note-${approvalId}`)?.value?.trim() || `${titleCase(decision)} from Governance console.`;
+      const note = root.querySelector("#governanceDecisionNote")?.value?.trim() || `${titleCase(decision)} from Governance console.`;
       const escalationChain = asObject(session.summary?.review_model?.escalation_chain);
       const escalateTo = asArray(escalationChain.high)[1] || asArray(escalationChain.high)[0] || "admin";
 
@@ -559,6 +878,20 @@ function bindGovernance(context, projectName, session) {
       } catch (error) {
         context.showError(error.message || "Failed to update approval.");
       }
+    };
+  });
+
+  Array.from(root.querySelectorAll("[data-governance-focus]")).forEach((button) => {
+    button.onclick = () => {
+      session.focus = button.getAttribute("data-governance-focus") || "all";
+      rerender();
+    };
+  });
+
+  Array.from(root.querySelectorAll("[data-governance-select]")).forEach((button) => {
+    button.onclick = () => {
+      session.selectedKey = button.getAttribute("data-governance-select") || "";
+      rerender();
     };
   });
 
@@ -639,6 +972,25 @@ function bindGovernance(context, projectName, session) {
           context.showError(error.message || "Failed to sync Settings into Governance.");
         }
       }
+    };
+  });
+
+  Array.from(root.querySelectorAll("[data-governance-open-ai]")).forEach((button) => {
+    button.onclick = () => {
+      context.navigateTo("ai-command");
+    };
+  });
+
+  const queueItems = buildDecisionQueue(asObject(session.summary));
+  const selectedItem = queueItems.find((item) => item.selected_key === session.selectedKey) || queueItems[0] || null;
+  const prompts = buildGovernancePrompts(projectName, selectedItem, titleCase(session.focus || "all"));
+  Array.from(root.querySelectorAll("[data-governance-ai-prompt]")).forEach((button) => {
+    button.onclick = () => {
+      const prompt = prompts[Number(button.getAttribute("data-governance-ai-prompt"))];
+      if (!prompt) return;
+      savePromptToQuickCommand(context, prompt.prompt);
+      context.navigateTo("ai-command");
+      context.showMessage?.("Governance prompt added to AI Command.");
     };
   });
 }
