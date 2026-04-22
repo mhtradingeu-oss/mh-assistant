@@ -57,7 +57,7 @@ function pickRouteForIntent(intent, modeId) {
   if (intent === 'media') return 'media-studio';
   if (intent === 'approval') return 'governance';
   if (intent === 'workflow') return 'workflows';
-  if (intent === 'task') return 'tasks';
+  if (intent === 'task') return 'task-center';
   if (modeId === 'ads') return 'ads-manager';
   if (modeId === 'research') return 'research';
   return 'insights';
@@ -184,7 +184,7 @@ function buildResponseFromContext(command, context, classified) {
     routeSuggestions: [
       normalizeRouteSuggestion(routeTarget, `This command is best actioned in ${titleCase(routeTarget)}.`),
       normalizeRouteSuggestion('workflows', 'Use Workflows when this needs structured repeatable execution.'),
-      normalizeRouteSuggestion('tasks', 'Save a durable execution task if an operator follow-up is needed.')
+      normalizeRouteSuggestion('task-center', 'Save a durable execution task if an operator follow-up is needed.')
     ],
     missingData: context.research.missing_signals,
     recommendationObjects: baseRecommendations.slice(0, 3).map((item, index) => ({
@@ -241,7 +241,7 @@ function buildWorkflowOutput(workflowId, inputs, context) {
     ],
     routeSuggestions: [
       normalizeRouteSuggestion(routeTarget, 'Primary downstream page for this workflow output.'),
-      normalizeRouteSuggestion('tasks', 'Convert the run into a durable task if manual execution is required.')
+      normalizeRouteSuggestion('task-center', 'Convert the run into a durable task if manual execution is required.')
     ],
     routeTarget
   };
@@ -308,14 +308,14 @@ function createAiOrchestrationService(deps) {
         const task = createTask(projectName, {
           title: response.taskBlock.title,
           description: response.summary,
-          route_target: 'tasks',
+          route_target: 'task-center',
           source_type: 'ai_command',
           source_id: artifact.id,
           output: response,
           notes: response.nextActions,
           actor: input.actor
         });
-        linkedEntities.push({ entity_type: 'task', entity_id: task.id, route: 'tasks', label: task.title });
+        linkedEntities.push({ entity_type: 'task', entity_id: task.id, route: 'task-center', label: task.title });
       }
 
       if (classified.actionType === 'workflow') {
@@ -349,7 +349,7 @@ function createAiOrchestrationService(deps) {
           risk_level: 'medium',
           actor: input.actor
         });
-        linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'approvals', label: approval.title });
+        linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
       }
 
       let handoff = null;

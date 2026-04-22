@@ -1,4 +1,5 @@
 const integrationSessions = new Map();
+const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);
 
 const INTEGRATION_DOMAINS = [
   {
@@ -62,6 +63,8 @@ const INTEGRATION_DOMAINS = [
       {
         id: "amazon",
         sourceKey: "amazon",
+        backendSupported: false,
+        unavailableReason: "Backend provider support is not configured yet.",
         label: "Amazon",
         icon: "AM",
         purpose: "Marketplace performance, product-driven commerce signals, and listing intelligence.",
@@ -310,6 +313,8 @@ const INTEGRATION_DOMAINS = [
       {
         id: "smtp",
         sourceKey: "email",
+        backendSupported: false,
+        unavailableReason: "Backend provider support is not configured yet.",
         label: "SMTP / Email Sending",
         icon: "SM",
         purpose: "Transactional and campaign email sending through SMTP or relay infrastructure.",
@@ -328,6 +333,8 @@ const INTEGRATION_DOMAINS = [
       {
         id: "mailer",
         sourceKey: "email",
+        backendSupported: false,
+        unavailableReason: "Backend provider support is not configured yet.",
         label: "Mailer Integration",
         icon: "ML",
         purpose: "Provider-specific email platform integration for campaigns and audience workflows.",
@@ -362,6 +369,8 @@ const INTEGRATION_DOMAINS = [
       {
         id: "crm",
         sourceKey: "analytics",
+        backendSupported: false,
+        unavailableReason: "Backend provider support is not configured yet.",
         label: "CRM Integration",
         icon: "CR",
         purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
@@ -829,6 +838,7 @@ function getRequiredMissing(session, integration, record, sourceValue) {
 function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
   const normalized = asString(statusLabel).trim().toLowerCase();
 
+  if (normalized === "unavailable") return "Unavailable";
   if (normalized === "connected") return "Connected";
   if (normalized === "partial") return "Partial";
   if (normalized === "error") return "Error";
@@ -839,6 +849,10 @@ function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {
 }
 
 function getHealthSummary(statusLabel, record, integration) {
+  if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+    return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";
+  }
+
   if (asString(record.health_summary).trim()) {
     return asString(record.health_summary).trim();
   }
@@ -861,7 +875,10 @@ function getHealthSummary(statusLabel, record, integration) {
 function buildIntegrationCardModel(integration, session, state) {
   const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
   const record = getServerRecord(state, integration);
-  const statusLabel = normalizeStatusLabel(record.status_label || record.status);
+  const backendSupported = integration.backendSupported !== false && !UNSUPPORTED_INTEGRATION_IDS.has(integration.id);
+  const statusLabel = backendSupported
+    ? normalizeStatusLabel(record.status_label || record.status)
+    : "Unavailable";
   const localFillCount = getLocalFillCount(session, integration, record, sourceValue);
   const missingRequired = getRequiredMissing(session, integration, record, sourceValue);
   const totalFields = integration.fields.length;
@@ -872,12 +889,14 @@ function buildIntegrationCardModel(integration, session, state) {
 
   return {
     ...integration,
+    backendSupported,
     record,
     sourceValue: asString(record.primary_value || sourceValue),
     statusLabel,
     statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
     statusTone:
       statusLabel === "Connected" ? "success" :
+      statusLabel === "Unavailable" ? "danger" :
       statusLabel === "Partial" ? "warning" :
       statusLabel === "Token expired" ? "warning" :
       statusLabel === "Error" ? "danger" :
@@ -887,12 +906,14 @@ function buildIntegrationCardModel(integration, session, state) {
     readScopes: asArray(record.read_scopes).length ? asArray(record.read_scopes) : accessModel.read,
     writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
     credentialState: asObject(record.credential_state),
-    missingRequired,
+    missingRequired: backendSupported ? missingRequired : [],
     lastSync: asString(record.last_sync_at),
     lastImport: asString(record.last_import_at),
     lastTest: asString(record.last_test_at),
     healthSummary: getHealthSummary(statusLabel, record, integration),
-    notes: asString(record.notes) || (integration.critical && statusLabel !== "Connected"
+    notes: !backendSupported
+      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
       ? "Critical integration missing for full system capability."
       : "Credentials are saved server-side and only masked status returns to the UI."),
     localFillCount,
@@ -984,7 +1005,7 @@ function buildCoverageMap(domainModels) {
 function buildCriticalMissing(domainModels) {
   return domainModels
     .flatMap((domain) => domain.cards)
-    .filter((card) => card.critical && card.statusLabel !== "Connected")
+    .filter((card) => card.backendSupported && card.critical && card.statusLabel !== "Connected")
     .slice(0, 8)
     .map((card) => ({
       title: card.label,
@@ -994,9 +1015,10 @@ function buildCriticalMissing(domainModels) {
 
 function buildRecommendations(domainModels, coverageMap) {
   const cards = domainModels.flatMap((domain) => domain.cards);
-  const missingCritical = cards.filter((card) => card.critical && card.statusLabel !== "Connected");
-  const reconnectNeeded = cards.filter((card) => ["Token expired", "Error"].includes(card.statusLabel));
-  const partial = cards.filter((card) => card.statusLabel === "Partial");
+  const actionableCards = cards.filter((card) => card.backendSupported);
+  const missingCritical = actionableCards.filter((card) => card.critical && card.statusLabel !== "Connected");
+  const reconnectNeeded = actionableCards.filter((card) => ["Token expired", "Error"].includes(card.statusLabel));
+  const partial = actionableCards.filter((card) => card.statusLabel === "Partial");
   const missingCoverage = coverageMap.filter((item) => item.status !== "Covered");
 
   const recommendations = [];
@@ -1116,13 +1138,17 @@ function renderField(integrationId, field, value, escapeHtml) {
 function renderIntegrationCard(card, session, escapeHtml) {
   const isSelected = asString(session.selectedIntegrationId) === card.id;
   const primaryActionLabel =
-    card.statusLabel === "Connected"
+    card.backendSupported === false
+      ? "Unavailable"
+      : card.statusLabel === "Connected"
       ? "Manage"
       : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
         ? "Fix Connection"
         : "Connect";
   const primaryAction =
-    card.statusLabel === "Connected"
+    card.backendSupported === false
+      ? "unavailable"
+      : card.statusLabel === "Connected"
       ? "manage"
       : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
         ? "reconnect"
@@ -1142,7 +1168,7 @@ function renderIntegrationCard(card, session, escapeHtml) {
         )}</span>
       </div>
       <div class="integration-simple-actions">
-        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primaryActionLabel)}</button>
+        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}" ${card.backendSupported === false ? "disabled" : ""}>${escapeHtml(primaryActionLabel)}</button>
         <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">View Details</button>
       </div>
     </section>
@@ -1216,12 +1242,18 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml) {
       </div>
 
       <div class="integration-action-row">
-        <button class="quick-action-btn" type="button" data-integration-action="connect" data-integration-id="${escapeHtml(card.id)}">Connect</button>
-        <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
-        <button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>
-        <button class="quick-action-btn" type="button" data-integration-action="import" data-integration-id="${escapeHtml(card.id)}">Import Data</button>
-        <button class="quick-action-btn integration-disconnect-btn" type="button" data-integration-action="disconnect" data-integration-id="${escapeHtml(card.id)}">Disconnect</button>
-        <button class="quick-action-btn" type="button" data-integration-action="reconnect" data-integration-id="${escapeHtml(card.id)}">Reconnect</button>
+        ${
+          card.backendSupported === false
+            ? `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`
+            : `
+              <button class="quick-action-btn" type="button" data-integration-action="connect" data-integration-id="${escapeHtml(card.id)}">Connect</button>
+              <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
+              <button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>
+              <button class="quick-action-btn" type="button" data-integration-action="import" data-integration-id="${escapeHtml(card.id)}">Import Data</button>
+              <button class="quick-action-btn integration-disconnect-btn" type="button" data-integration-action="disconnect" data-integration-id="${escapeHtml(card.id)}">Disconnect</button>
+              <button class="quick-action-btn" type="button" data-integration-action="reconnect" data-integration-id="${escapeHtml(card.id)}">Reconnect</button>
+            `
+        }
       </div>
     </section>
   `;
@@ -1385,6 +1417,11 @@ function bindIntegrationActions({
         return;
       }
 
+      if (action === "unavailable") {
+        showError?.("This integration is unavailable because backend provider support is not configured yet.");
+        return;
+      }
+
       if (action === "connect") {
         await persistPrimary(integrationId, false);
         return;
@@ -1487,6 +1524,10 @@ function bindIntegrationActions({
   async function persistPrimary(integrationId, reconnect = false) {
     const integration = getIntegrationById(integrationId);
     if (!integration) return;
+    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+      return;
+    }
     const payload = buildConnectionPayload(integrationId);
     const primaryField = integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0];
     const value = asString(payload?.primary_value).trim();
@@ -1514,6 +1555,10 @@ function bindIntegrationActions({
   async function disconnect(integrationId) {
     const integration = getIntegrationById(integrationId);
     if (!integration) return;
+    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+      return;
+    }
 
     try {
       await disconnectProjectIntegration(projectName, integrationId, {
@@ -1531,6 +1576,10 @@ function bindIntegrationActions({
   async function runServerAction(integrationId, type) {
     const integration = getIntegrationById(integrationId);
     if (!integration) return;
+    if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
+      showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
+      return;
+    }
 
     try {
       if (type === "test") {

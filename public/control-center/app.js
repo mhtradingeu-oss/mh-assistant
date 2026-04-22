@@ -4,7 +4,8 @@ import {
   initRouter,
   navigateTo,
   renderRouteTemplate,
-  getRouteDefinition
+  getRouteDefinition,
+  setRouteAccessResolver
 } from "./router.js";
 import {
   getState,
@@ -58,6 +59,152 @@ import {
 ========================= */
 
 setApiBaseUrl("");
+
+const CONTROL_WRITE_KEY_STORAGE_KEY = "mh-control-write-key";
+const CONTROL_WRITE_HEADER = "x-mh-control-key";
+const DEFAULT_ACTIVE_ROLE = "strategist";
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: [
+    "strategist",
+    "writer",
+    "designer",
+    "video_lead",
+    "publisher",
+    "ads_operator",
+    "analyst",
+    "compliance_reviewer",
+    "admin"
+  ],
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function getControlWriteKey() {
+  if (typeof window === "undefined") return "";
+
+  const runtimeValue = typeof window.__MH_CONTROL_WRITE_KEY__ === "string"
+    ? window.__MH_CONTROL_WRITE_KEY__.trim()
+    : "";
+
+  if (runtimeValue) {
+    return runtimeValue;
+  }
+
+  try {
+    return String(window.localStorage?.getItem(CONTROL_WRITE_KEY_STORAGE_KEY) || "").trim();
+  } catch (_) {
+    return "";
+  }
+}
+
+function isProtectedControlWriteRequest(input, init = {}) {
+  const method = String(
+    init.method ||
+    (input instanceof Request ? input.method : "") ||
+    "GET"
+  ).trim().toUpperCase();
+
+  if (!["POST", "PATCH", "DELETE"].includes(method)) {
+    return false;
+  }
+
+  try {
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const url = new URL(
+      input instanceof Request ? input.url : String(input || ""),
+      base
+    );
+
+    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+function installProtectedWriteFetch() {
+  if (typeof window === "undefined" || typeof window.fetch !== "function" || window.fetch.__mhProtectedWriteFetch) {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+
+  async function protectedWriteFetch(input, init = {}) {
+    if (!isProtectedControlWriteRequest(input, init)) {
+      return originalFetch(input, init);
+    }
+
+    const headers = new Headers(
+      init.headers ||
+      (input instanceof Request ? input.headers : undefined) ||
+      {}
+    );
+    const controlKey = getControlWriteKey();
+
+    if (controlKey) {
+      headers.set(CONTROL_WRITE_HEADER, controlKey);
+    }
+
+    const nextInit = {
+      ...init,
+      headers
+    };
+    const nextInput = input instanceof Request
+      ? new Request(input, { headers })
+      : input;
+
+    return originalFetch(nextInput, nextInit);
+  }
+
+  protectedWriteFetch.__mhProtectedWriteFetch = true;
+  window.fetch = protectedWriteFetch;
+}
+
+function resolveRouteAccess(route) {
+  const operations = getState().data.operations;
+  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
+    ? operations.team_service_model.route_permissions
+    : [];
+  const activeRole = String(
+    operations?.team_service_model?.active_role || DEFAULT_ACTIVE_ROLE
+  ).trim().toLowerCase();
+  const explicitRule = routePermissions.find((item) => item?.route === route);
+
+  if (!explicitRule) {
+    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+    if (!Array.isArray(fallbackRoles)) {
+      return {
+        allowed: true,
+        reason: ""
+      };
+    }
+
+    return {
+      allowed: fallbackRoles.includes(activeRole),
+      reason: `Route ${route} is restricted for role ${activeRole}.`
+    };
+  }
+
+  const allowed = Array.isArray(explicitRule.roles)
+    && explicitRule.roles.map((item) => String(item || "").trim().toLowerCase()).includes(activeRole);
+
+  return {
+    allowed,
+    reason: `Route ${route} is restricted for role ${activeRole}.`
+  };
+}
+
+installProtectedWriteFetch();
+setRouteAccessResolver(resolveRouteAccess);
 
 /* =========================
    DOM HELPERS

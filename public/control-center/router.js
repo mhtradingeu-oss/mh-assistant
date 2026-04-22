@@ -22,6 +22,33 @@ import { integrationsRoute } from "./pages/integrations.js";
 import { settingsRoute } from "./pages/settings.js";
 import { governanceRoute } from "./pages/governance.js";
 
+const DEFAULT_ROLE = "strategist";
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: [
+    "strategist",
+    "writer",
+    "designer",
+    "video_lead",
+    "publisher",
+    "ads_operator",
+    "analyst",
+    "compliance_reviewer",
+    "admin"
+  ],
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
 const routeRegistry = {
   [homeRoute.id]: homeRoute,
   [aiCommandRoute.id]: aiCommandRoute,
@@ -43,6 +70,8 @@ const routeRegistry = {
   [settingsRoute.id]: settingsRoute,
   [governanceRoute.id]: governanceRoute
 };
+
+let routeAccessResolver = null;
 
 function getPageRoot() {
   return document.getElementById("pageRoot");
@@ -68,6 +97,80 @@ function getFallbackRoute(route) {
   };
 }
 
+function getAccessDeniedRoute(route, reason = "") {
+  const detail = reason || "This route is not available for the current role.";
+  return {
+    id: "__access-denied__",
+    meta: {
+      eyebrow: "Access",
+      title: "Restricted",
+      description: "This workspace route is blocked by role access rules."
+    },
+    template: `
+      <section class="page is-active" data-page="access-denied">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="empty-box">
+              Route blocked: ${route}. ${detail}
+            </div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function normalizeRouteAccessResult(result, route) {
+  if (typeof result === "boolean") {
+    return {
+      allowed: result,
+      reason: result ? "" : `Access to ${route} is restricted.`
+    };
+  }
+
+  if (result && typeof result === "object") {
+    return {
+      allowed: result.allowed !== false,
+      reason: String(result.reason || "")
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: ""
+  };
+}
+
+function getDefaultRouteAccess(route) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return {
+      allowed: true,
+      reason: ""
+    };
+  }
+
+  const allowed = allowedRoles.includes(DEFAULT_ROLE);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : `Access to ${route} is restricted until a permitted role is active.`
+  };
+}
+
+function getRouteAccess(route) {
+  if (typeof routeAccessResolver !== "function") {
+    return getDefaultRouteAccess(route);
+  }
+
+  try {
+    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+  } catch (_) {
+    return getDefaultRouteAccess(route);
+  }
+}
+
 function updatePageHeader(route) {
   const routeDef = getRouteDefinition(route);
   const meta = routeDef.meta;
@@ -91,7 +194,16 @@ function updateActiveNav(route) {
 }
 
 export function getRouteDefinition(route) {
+  const access = getRouteAccess(route);
+  if (!access.allowed) {
+    return getAccessDeniedRoute(route, access.reason);
+  }
+
   return routeRegistry[route] || getFallbackRoute(route);
+}
+
+export function setRouteAccessResolver(resolver) {
+  routeAccessResolver = typeof resolver === "function" ? resolver : null;
 }
 
 export function renderRouteTemplate(route) {

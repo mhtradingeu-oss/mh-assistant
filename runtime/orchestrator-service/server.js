@@ -1,4 +1,5 @@
 const axios = require('axios');
+const crypto = require('crypto');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -60,6 +61,70 @@ const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 
 const app = express();
 app.use(express.json());
+
+const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
+const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+
+function isProtectedControlWriteRequest(req) {
+  const method = String(req.method || '').trim().toUpperCase();
+  if (!['POST', 'PATCH', 'DELETE'].includes(method)) {
+    return false;
+  }
+
+  return /^\/(?:public\/)?media-manager\//.test(String(req.path || '').trim());
+}
+
+function readProvidedControlWriteKey(req) {
+  const explicitHeader = String(req.get(CONTROL_WRITE_KEY_HEADER) || '').trim();
+  if (explicitHeader) {
+    return explicitHeader;
+  }
+
+  const authorization = String(req.get('authorization') || '').trim();
+  const bearerMatch = authorization.match(/^Bearer\s+(.+)$/i);
+  return bearerMatch ? String(bearerMatch[1] || '').trim() : '';
+}
+
+function controlWriteKeyMatches(expected, provided) {
+  const expectedBuffer = Buffer.from(String(expected || ''), 'utf8');
+  const providedBuffer = Buffer.from(String(provided || ''), 'utf8');
+
+  if (!expectedBuffer.length || expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function requireProtectedControlWriteKey(req, res, next) {
+  if (!isProtectedControlWriteRequest(req)) {
+    return next();
+  }
+
+  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  if (!expectedKey) {
+    return res.status(503).json({
+      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+    });
+  }
+
+  const providedKey = readProvidedControlWriteKey(req);
+  if (!providedKey) {
+    return res.status(401).json({
+      error: `Missing protected write key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+    });
+  }
+
+  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+    return res.status(403).json({
+      error: 'Invalid protected write key.'
+    });
+  }
+
+  return next();
+}
+
+app.use(requireProtectedControlWriteKey);
 const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: console });
 const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
   resolver: unifiedDataPathResolver,
@@ -7995,8 +8060,13 @@ app.post('/public/media-manager/project/:project/integrations/:integrationId/dis
   await handleProjectIntegrationAction(req, res, 'disconnect');
 });
 
+// TODO(phase4a): Keep `/public/media-manager/...` write aliases for active frontend compatibility.
+// They remain protected by the same centralized write-key middleware as `/media-manager/...`.
 app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
     const result = upsertScheduledJob(req.params.project, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -8015,14 +8085,18 @@ app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to save publishing schedule'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+      status: req.body?.status
+    });
     const result = upsertScheduledJob(req.params.project, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -8041,14 +8115,19 @@ app.post('/public/media-manager/project/:project/publishing/schedule', (req, res
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to save publishing schedule'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to save publishing schedule',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
     const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -8065,14 +8144,19 @@ app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, r
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to reschedule publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+      jobId: req.params.jobId,
+      status: req.body?.status || 'scheduled'
+    });
     const result = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       title: req.body?.title,
       wave_name: req.body?.wave_name,
@@ -8089,14 +8173,19 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', 
       job: result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to reschedule publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to reschedule publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'ready',
       notes: req.body?.notes
@@ -8106,14 +8195,19 @@ app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) =
       job
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to approve publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'ready', {
+      jobId: req.params.jobId,
+      status: 'ready'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'ready',
       notes: req.body?.notes
@@ -8123,14 +8217,19 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req,
       job
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to approve publishing item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to approve publishing item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'publish', {
+      jobId: req.params.jobId,
+      status: 'published'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'published',
       notes: req.body?.notes
@@ -8146,14 +8245,19 @@ app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res)
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to publish item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to publish item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'publish', {
+      jobId: req.params.jobId,
+      status: 'published'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'published',
       notes: req.body?.notes
@@ -8169,14 +8273,19 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (re
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to publish item'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to publish item',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'fail', {
+      jobId: req.params.jobId,
+      status: 'failed'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'failed',
       notes: req.body?.notes
@@ -8192,14 +8301,19 @@ app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) =>
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to mark publishing item as failed'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to mark publishing item as failed',
+      details: error.details || undefined
     });
   }
 });
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    assertPublishingMutationAllowed(req.params.project, 'fail', {
+      jobId: req.params.jobId,
+      status: 'failed'
+    });
     const job = updateScheduledJobRecord(req.params.project, req.params.jobId, {
       status: 'failed',
       notes: req.body?.notes
@@ -8215,8 +8329,9 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, 
       result
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to mark publishing item as failed'
+    return res.status(error.statusCode || 400).json({
+      error: error.message || 'Failed to mark publishing item as failed',
+      details: error.details || undefined
     });
   }
 });
@@ -9150,6 +9265,77 @@ function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
     ...result,
     file_path: filePath
   };
+}
+
+function buildPublishingGovernanceError(message, details = {}) {
+  const error = new Error(message);
+  error.statusCode = 409;
+  error.details = details;
+  return error;
+}
+
+function getLatestPublishingApproval(projectName, jobId) {
+  return listApprovals(projectName, { limit: 500 })
+    .filter((item) =>
+      String(item?.entity_type || '').trim() === 'publishing_job'
+      && String(item?.entity_id || '').trim() === String(jobId || '').trim()
+    )
+    .sort((a, b) => {
+      const aTime = new Date(a?.updated_at || a?.created_at || 0).getTime();
+      const bTime = new Date(b?.updated_at || b?.created_at || 0).getTime();
+      return bTime - aTime;
+    })[0] || null;
+}
+
+function assertPublishingMutationAllowed(projectName, action, options = {}) {
+  const governance = getGovernancePolicy(projectName);
+  const policyRules = governance && typeof governance === 'object'
+    ? governance.policy_rules || {}
+    : {};
+  const jobId = String(options.jobId || '').trim();
+  const requestedStatus = normalizePublishingJobStatus(options.status, '');
+  const actionKey = String(action || '').trim().toLowerCase();
+  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+    || ['ready', 'published'].includes(requestedStatus);
+  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+    || ['ready', 'published'].includes(requestedStatus);
+
+  if (freezeSensitiveAction && Boolean(policyRules.freeze_publishing)) {
+    throw buildPublishingGovernanceError(
+      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+      {
+        action: actionKey,
+        rule: 'freeze_publishing'
+      }
+    );
+  }
+
+  if (approvalSensitiveAction && Boolean(policyRules.approval_before_publish)) {
+    if (!jobId) {
+      throw buildPublishingGovernanceError(
+        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+        {
+          action: actionKey,
+          rule: 'approval_before_publish'
+        }
+      );
+    }
+
+    const approval = getLatestPublishingApproval(projectName, jobId);
+    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+
+    if (!['approved', 'overridden'].includes(approvalStatus)) {
+      throw buildPublishingGovernanceError(
+        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+        {
+          action: actionKey,
+          rule: 'approval_before_publish',
+          job_id: jobId,
+          approval_status: approvalStatus || 'missing'
+        }
+      );
+    }
+  }
 }
 
 function hydratePublishingExecutionResult(projectName, result, scheduledJobs = []) {
