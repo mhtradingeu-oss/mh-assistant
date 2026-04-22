@@ -573,16 +573,16 @@ function bindLibraryWorkspace({
                 <span class="setup-field-state is-optional">${escapeHtml(selectedAsset.localOnly ? "Queued" : "Save Draft only")}</span>
               </div>
               <input id="libraryAssetTypeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.asset_type || selectedAsset.asset_type || "")}" placeholder="e.g. product_image">
-              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this metadata in the current browser session only.</div>
+              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this metadata in a temporary local draft.</div>
             </div>
 
             <div class="setup-field-group">
               <div class="setup-field-head">
                 <label class="setup-label" for="librarySourceModeInput">Source of truth mode</label>
-                <span class="setup-field-state is-optional">Session-only</span>
+                <span class="setup-field-state is-optional">Temporary</span>
               </div>
               <input id="librarySourceModeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.source_signal || selectedAsset.source_signal || "")}" placeholder="Project-owned, reference only, source candidate">
-              <div class="setup-helper">Use this to annotate how the team should treat this asset operationally. This note is local to the current browser session.</div>
+              <div class="setup-helper">Use this to annotate how the team should treat this asset operationally. This note stays in a temporary local draft.</div>
             </div>
 
             <div class="setup-field-group">
@@ -591,17 +591,17 @@ function bindLibraryWorkspace({
                 <span class="setup-field-state is-optional">Save Draft only</span>
               </div>
               <textarea id="libraryAssetNotesInput" class="setup-input setup-textarea" rows="3" placeholder="Notes for upload, cleanup, replacement, or usage rules">${escapeHtml(currentDraft.notes || "")}</textarea>
-              <div class="setup-helper">Useful for handoff before full registry editing is connected. These notes are not saved to the backend.</div>
+              <div class="setup-helper">Useful for handoff before full registry editing is connected. These notes stay in a local draft.</div>
             </div>
           </div>
 
           <div class="library-preview-actions">
             <button id="librarySaveAssetDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
             ${selectedAsset.preview_url ? `<a class="btn btn-primary library-link-btn" href="${escapeHtml(selectedAsset.preview_url)}" target="_blank" rel="noreferrer">Open Asset</a>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
-            <button id="libraryDeleteAssetBtn" class="btn btn-secondary" type="button">Hide In This Session</button>
+            <button id="libraryDeleteAssetBtn" class="btn btn-secondary" type="button">Hide In This View</button>
           </div>
         `
-        : renderEmpty("Select an asset to review backend-backed file details or stage session-only metadata notes.", escapeHtml);
+        : renderEmpty("Select an asset to review saved file details or stage a local draft.", escapeHtml);
     }
 
     const sourceTruth = $("librarySourceTruth");
@@ -654,7 +654,7 @@ function bindLibraryWorkspace({
         : renderEmpty(
           session.uploading
             ? "Uploading files to the active project..."
-            : "No uploads completed in this session yet. Select files and upload them to refresh the Library.",
+            : "No uploads completed in the current view yet. Select files and upload them to refresh the Library.",
           escapeHtml
         );
     }
@@ -726,25 +726,20 @@ function bindLibraryWorkspace({
       };
     }
 
-      const deleteAssetBtn = $("libraryDeleteAssetBtn");
-      if (deleteAssetBtn && selectedAsset) {
-        deleteAssetBtn.onclick = () => {
-          session.hiddenAssetIds.add(selectedAsset.id);
-          session.selectedAssetId = "";
-          showMessage?.("This only hides the asset in this session. It is not deleted from the backend.");
-          renderWorkspace();
-        };
-      }
+    const deleteAssetBtn = $("libraryDeleteAssetBtn");
+    if (deleteAssetBtn && selectedAsset) {
+      deleteAssetBtn.onclick = () => {
+        session.hiddenAssetIds.add(selectedAsset.id);
+        session.selectedAssetId = "";
+        showMessage?.("This only hides the asset in this view. It is not deleted from the library.");
+        renderWorkspace();
+      };
+    }
   };
 
-  const addQueueBtn = $("libraryAddQueueBtn");
-  if (addQueueBtn) {
-    addQueueBtn.onclick = uploadSelectedFiles;
-  }
-
-  const stageUploadBtn = $("libraryStageUploadBtn");
-  if (stageUploadBtn) {
-    stageUploadBtn.onclick = uploadSelectedFiles;
+  const uploadBtn = $("libraryUploadBtn");
+  if (uploadBtn) {
+    uploadBtn.onclick = uploadSelectedFiles;
   }
 
   const askAiBtn = $("libraryAskAiBtn");
@@ -838,7 +833,7 @@ export const libraryRoute = {
                 <h3>Asset Details / Metadata</h3>
                 <span class="card-badge neutral">Mixed actions</span>
               </div>
-              <p class="setup-side-copy">Open Asset uses the current backend-backed file path. Save Draft and Hide In This Session are local to this browser session only.</p>
+              <p class="setup-side-copy">Open Asset uses the current saved file path. Save Draft and Hide In This View are temporary local actions.</p>
               <div id="librarySourceTruth"></div>
               <div id="libraryAssetEditor" style="margin-top: 16px;"></div>
               <div class="setup-validation-block">
@@ -864,7 +859,7 @@ export const libraryRoute = {
                     <span class="setup-field-state is-optional">Multi-select</span>
                   </div>
                   <input id="libraryUploadInput" class="setup-input" type="file" multiple>
-                  <div class="setup-helper">Select files here and run the upload into the active project using the existing backend endpoint.</div>
+                  <div class="setup-helper">Select files here and upload them into the active project using the existing file endpoint.</div>
                 </div>
 
                 <div class="setup-field-group">
@@ -904,19 +899,18 @@ export const libraryRoute = {
                 </div>
 
                 <div class="library-preview-actions">
-                  <button id="libraryAddQueueBtn" class="btn btn-secondary" type="button">Run Upload</button>
-                  <button id="libraryStageUploadBtn" class="btn btn-primary" type="button">Run Upload</button>
+                  <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Files</button>
                 </div>
-                <div class="setup-helper">Run Upload sends the selected files to the backend immediately using the existing upload endpoint.</div>
+                <div class="setup-helper">Upload Files sends the selected files to the project library immediately using the existing upload endpoint.</div>
               </div>
             </section>
 
             <section class="card">
               <div class="card-head">
                 <h3>Recent Uploads</h3>
-                <span class="card-badge neutral">This session</span>
+                <span class="card-badge neutral">Current view</span>
               </div>
-              <p class="setup-side-copy">Successful uploads are backend-backed and reload the project library. This list only reflects uploads from the current session.</p>
+              <p class="setup-side-copy">Successful uploads are saved and reload the project library. This list only reflects uploads from the current view.</p>
               <div id="libraryUploadQueue"></div>
             </section>
 

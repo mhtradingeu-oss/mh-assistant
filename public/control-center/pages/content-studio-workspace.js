@@ -197,7 +197,7 @@ async function loadContentWorkspace(projectName, session, rerender) {
 
 function renderContentQueue(items, selectedId, escapeHtml) {
   if (!items.length) {
-    return `<div class="empty-box">No durable content records match the current view yet.</div>`;
+    return `<div class="empty-box">No saved content records match the current view yet.</div>`;
   }
 
   return `
@@ -336,7 +336,7 @@ function bindContentStudio({
         const result = await saveProjectContentItem(projectName, payload);
         session.selectedId = result.content_item?.id || session.selectedId;
         session.noteDraft = "";
-        showMessage?.("Content record saved to the durable backend.");
+        showMessage?.("Content record saved.");
         await refreshContentWorkspace(projectName, session, rerender, showError);
       } catch (error) {
         showError?.(error.message || "Failed to save content item.");
@@ -493,6 +493,47 @@ function bindContentStudio({
       }
       navigateTo("ai-command");
       showMessage?.("Content context sent to AI Command.");
+    };
+  }
+
+  const mediaBtn = document.getElementById("contentSendToMediaStudioBtn");
+  if (mediaBtn) {
+    mediaBtn.onclick = () => {
+      const selectedItem = getSelectedItem(session);
+      if (!selectedItem) {
+        showError?.("Select a content record before sending it to Media Studio.");
+        return;
+      }
+
+      setSharedHandoff(projectName, "media-studio", {
+        source_page: "content-studio",
+        destination_page: "media-studio",
+        linked_entity: {
+          entity_type: "content_item",
+          entity_id: selectedItem.id,
+          route: "content-studio",
+          label: selectedItem.title
+        },
+        payload: {
+          content_item_id: selectedItem.id,
+          title: selectedItem.title,
+          draft: selectedItem.draft,
+          campaign_id: selectedItem.campaign_id,
+          destination: selectedItem.destination || selectedItem.publishing_destination,
+          owner_role: getContentOwnerRole(selectedItem),
+          review_role: getContentReviewRole(selectedItem),
+          draft_context: {
+            origin: "content-studio",
+            projectName,
+            contentTitle: selectedItem.title,
+            contentType: selectedItem.type
+          }
+        },
+        status: "available"
+      });
+
+      navigateTo("media-studio");
+      showMessage?.("Content context sent to Media Studio.");
     };
   }
 
@@ -670,7 +711,7 @@ export const contentStudioRoute = {
   meta: {
     eyebrow: "Operations",
     title: "Content Studio",
-    description: "Create, revise, approve, route, and hand off durable content records."
+    description: "Create, revise, approve, route, and hand off saved content records."
   },
   template: `
     <section class="page is-active" data-page="content-studio">
@@ -760,7 +801,7 @@ export const contentStudioRoute = {
         </section>
 
         ${session.error ? `<div class="empty-box">${escapeHtml(session.error)}</div>` : ""}
-        ${session.loading ? `<div class="empty-box">Loading durable content records, approvals, tasks, handoffs, and event history...</div>` : ""}
+        ${session.loading ? `<div class="empty-box">Loading saved content records, approvals, tasks, handoffs, and activity history...</div>` : ""}
 
         <div class="content-studio-layout">
           <div class="content-studio-main">
@@ -768,7 +809,7 @@ export const contentStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Content Queue</h3>
-                  <p class="content-section-copy">Browse durable content items by type and select one item at a time for review and editing.</p>
+                  <p class="content-section-copy">Browse saved content items by type and select one item at a time for review and editing.</p>
                 </div>
               </div>
               <div class="content-type-tabs">
@@ -784,7 +825,7 @@ export const contentStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Selected Content Item</h3>
-                  <p class="content-section-copy">Review the current durable content record before editing or sending any downstream action.</p>
+                  <p class="content-section-copy">Review the current saved content record before editing or sending any downstream action.</p>
                 </div>
               </div>
               ${
@@ -821,10 +862,10 @@ export const contentStudioRoute = {
                       ${renderField("contentTitleInput", "Title", selectedItem.title, escapeHtml)}
                       ${renderField("contentTypeInput", "Type", selectedItem.type, escapeHtml)}
                       ${renderField("contentOwnerInput", "Owner", selectedItem.owner, escapeHtml)}
-                      ${renderField("contentCampaignInput", "Campaign Link", selectedItem.campaign_id, escapeHtml, "Link this record to a durable campaign id when available.")}
+                      ${renderField("contentCampaignInput", "Campaign Link", selectedItem.campaign_id, escapeHtml, "Link this record to a saved campaign when available.")}
                       ${renderField("contentDestinationInput", "Publishing Destination", selectedItem.destination || selectedItem.publishing_destination, escapeHtml, "Examples: instagram, email, publishing")}
                       ${renderField("contentNotesInput", "Notes", asArray(selectedItem.notes).join("\n"), escapeHtml, "Operator notes, review reminders, or handoff context.", true, 4)}
-                      ${renderField("contentDraftInput", "Draft Body", selectedItem.draft, escapeHtml, "Stored durably with revision history.", true, 12)}
+                      ${renderField("contentDraftInput", "Draft Body", selectedItem.draft, escapeHtml, "Saved with revision history.", true, 12)}
                       ${renderField("contentRevisionNoteInput", "Revision Note", session.noteDraft, escapeHtml, "Explain what changed in this revision.", true, 3)}
                     </div>
                     <div class="ops-inline-form">
@@ -874,6 +915,7 @@ export const contentStudioRoute = {
                   ? `
                     <div class="ops-action-row">
                       <button id="contentCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
+                      <button id="contentSendToMediaStudioBtn" class="btn btn-secondary" type="button">Send to Media Studio</button>
                       <button id="contentSendToPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
                     </div>
                     <div class="content-linked-grid">
@@ -916,7 +958,7 @@ export const contentStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Content AI Assistant</h3>
-                  <p class="content-section-copy">Send to AI Command prefills the selected content context and then navigates there. Recording an AI request keeps the request on the durable content item and routes it through the current AI execution path.</p>
+                  <p class="content-section-copy">Send to AI Command prefills the selected content context and then navigates there. Recording an AI request keeps the request on the saved content item and routes it through the current AI execution path.</p>
                 </div>
               </div>
               ${

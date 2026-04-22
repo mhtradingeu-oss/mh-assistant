@@ -546,15 +546,24 @@ function bindCommandInputs() {
   const commandInput = $("quickCommandInput");
   const runBtn = $("runQuickCommandBtn");
   const searchBtn = $("runSearchBtn");
+  const searchLeft = searchInput?.closest(".command-bar-left");
+  const searchRight = searchBtn?.closest(".command-bar-right");
 
   if (searchInput) {
-    searchInput.placeholder = "Search not available yet";
-    searchInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        executeSearch();
-      }
-    });
+    searchInput.value = "";
+    searchInput.style.display = "none";
+  }
+
+  if (searchBtn) {
+    searchBtn.style.display = "none";
+  }
+
+  if (searchLeft) {
+    searchLeft.style.display = "none";
+  }
+
+  if (searchRight) {
+    searchRight.style.gap = "12px";
   }
 
   if (commandInput) {
@@ -569,11 +578,6 @@ function bindCommandInputs() {
   if (runBtn) {
     runBtn.textContent = "Send to AI Command";
     runBtn.onclick = executeQuickCommand;
-  }
-
-  if (searchBtn) {
-    searchBtn.textContent = "Search Unavailable";
-    searchBtn.onclick = executeSearch;
   }
 }
 

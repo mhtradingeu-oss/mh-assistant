@@ -12,7 +12,7 @@ import {
   listProjectTasks,
   saveProjectMediaJob
 } from "../api.js";
-import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const mediaStudioSessions = new Map();
 const REQUEST_TYPES = ["image", "video"];
@@ -137,6 +137,36 @@ function defaultMediaJob(state, requestType = "image") {
   };
 }
 
+function applyMediaHandoff(projectName, session) {
+  const handoff = getSharedHandoff(projectName, "media-studio", session.operations, "content-studio");
+  if (!handoff) return;
+
+  const payload = asObject(handoff.payload);
+  const contentItemId = asString(payload.content_item_id);
+  if (!contentItemId) return;
+
+  const existing = session.items.find((item) => asString(item.content_item_id) === contentItemId);
+  if (existing) {
+    session.selectedId = existing.id;
+    return;
+  }
+
+  const linkedContent = session.contentItems.find((item) => asString(item.id) === contentItemId);
+  const draftJob = {
+    ...defaultMediaJob({ context: { currentProject: projectName, activeCampaign: payload.title || "" } }, "image"),
+    id: `draft-${contentItemId}`,
+    title: asString(payload.title || linkedContent?.title || "Media request"),
+    campaign_id: asString(payload.campaign_id),
+    content_item_id: contentItemId,
+    prompt: asString(payload.draft || linkedContent?.draft || ""),
+    brief: `Create media support for ${asString(payload.title || linkedContent?.title || "this content item")}.`,
+    status: "draft"
+  };
+
+  session.items = [draftJob, ...session.items];
+  session.selectedId = draftJob.id;
+}
+
 function getSelectedItem(session) {
   return session.items.find((item) => item.id === session.selectedId) || null;
 }
@@ -180,6 +210,7 @@ async function loadMediaWorkspace(projectName, session, rerender) {
     session.events = asArray(events.items);
     session.operations = operations || null;
     session.loaded = true;
+    applyMediaHandoff(projectName, session);
     if (!session.selectedId) {
       session.selectedId = session.items[0]?.id || "";
     }
@@ -201,7 +232,7 @@ async function refreshMediaWorkspace(projectName, session, rerender, showError) 
 
 function renderMediaQueue(items, selectedId, escapeHtml) {
   if (!items.length) {
-    return `<div class="empty-box">No durable media jobs are in the queue yet.</div>`;
+    return `<div class="empty-box">No saved media jobs are in the queue yet.</div>`;
   }
 
   return `
@@ -274,7 +305,7 @@ function bindMediaStudio({
           actor: "media-studio"
         });
         session.selectedId = result.media_job?.id || session.selectedId;
-        showMessage?.("Durable media job created.");
+        showMessage?.("Media job created.");
         await refreshMediaWorkspace(projectName, session, rerender, showError);
       } catch (error) {
         showError?.(error.message || "Failed to create media job.");
@@ -324,7 +355,7 @@ function bindMediaStudio({
 
         const result = await saveProjectMediaJob(projectName, payload);
         session.selectedId = result.media_job?.id || session.selectedId;
-        showMessage?.("Media job saved to the durable backend.");
+        showMessage?.("Media job saved.");
         await refreshMediaWorkspace(projectName, session, rerender, showError);
       } catch (error) {
         showError?.(error.message || "Failed to save media job.");
@@ -381,7 +412,7 @@ function bindMediaStudio({
           actor: "media-studio"
         });
         session.outputLabelDraft = "";
-        showMessage?.("Output version appended to the durable media job.");
+        showMessage?.("Output version added to the media job.");
         await refreshMediaWorkspace(projectName, session, rerender, showError);
       } catch (error) {
         showError?.(error.message || "Failed to add output version.");
@@ -718,7 +749,7 @@ export const mediaStudioRoute = {
   meta: {
     eyebrow: "Operations",
     title: "Media Studio",
-    description: "Run durable image and video jobs with outputs, lineage, approvals, and publishing routing."
+    description: "Run saved image and video jobs with outputs, lineage, approvals, and publishing routing."
   },
   template: `
     <section class="page is-active" data-page="media-studio">
@@ -810,7 +841,7 @@ export const mediaStudioRoute = {
         </section>
 
         ${session.error ? `<div class="empty-box">${escapeHtml(session.error)}</div>` : ""}
-        ${session.loading ? `<div class="empty-box">Loading durable media jobs, approvals, queue items, lineage, and preview history...</div>` : ""}
+        ${session.loading ? `<div class="empty-box">Loading saved media jobs, approvals, queue items, lineage, and preview history...</div>` : ""}
 
         <div class="media-studio-layout">
           <div class="media-studio-main">
@@ -818,7 +849,7 @@ export const mediaStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Media Queue</h3>
-                  <p class="media-section-copy">Browse backend-backed image and video jobs and select one item at a time for review and production updates.</p>
+                  <p class="media-section-copy">Browse saved image and video jobs and select one item at a time for review and production updates.</p>
                 </div>
               </div>
               ${renderMediaQueue(session.items, selectedItem?.id || "", escapeHtml)}
@@ -828,7 +859,7 @@ export const mediaStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Selected Media Item</h3>
-                  <p class="media-section-copy">Review the current durable media job before editing, approving, or sending it downstream.</p>
+                  <p class="media-section-copy">Review the current saved media job before editing, approving, or sending it downstream.</p>
                 </div>
               </div>
               ${
@@ -861,7 +892,7 @@ export const mediaStudioRoute = {
               <div class="panel-header">
                 <div>
                   <h3>Review / Approval / Output</h3>
-                  <p class="media-section-copy">Save updates the real media job. Approve and Reject only act when a real linked approval exists. Output actions append real output and preview history records.</p>
+                  <p class="media-section-copy">Save updates the selected media job. Approve and Reject only act when a linked approval exists. Output actions append output and preview history records.</p>
                 </div>
               </div>
               ${
@@ -875,10 +906,10 @@ export const mediaStudioRoute = {
                       ${renderField("mediaProviderInput", "Provider", selectedItem.provider, escapeHtml)}
                       ${renderField("mediaModelInput", "Model", selectedItem.model, escapeHtml)}
                       ${renderField("mediaCampaignInput", "Campaign Link", selectedItem.campaign_id, escapeHtml)}
-                      ${renderField("mediaContentInput", "Content Link", selectedItem.content_item_id, escapeHtml, linkedContent ? `Linked content: ${linkedContent.title}` : "Attach a durable content item id for asset linkage.")}
+                      ${renderField("mediaContentInput", "Content Link", selectedItem.content_item_id, escapeHtml, linkedContent ? `Linked content: ${linkedContent.title}` : "Attach a saved content item for asset linkage.")}
                       ${renderField("mediaPublishingInput", "Publishing Link", selectedItem.publishing_job_id, escapeHtml, "Attach a publishing job id or leave blank until handoff.")}
                       ${renderField("mediaLineageInput", "Asset Lineage", asArray(selectedItem.asset_lineage).join("\n"), escapeHtml, "One lineage source per line: upstream asset ids, prompts, or source files.", true, 4)}
-                      ${renderField("mediaPromptInput", "Prompt", selectedItem.prompt, escapeHtml, "Stored on the durable media job.", true, 5)}
+                      ${renderField("mediaPromptInput", "Prompt", selectedItem.prompt, escapeHtml, "Saved on the media job.", true, 5)}
                       ${renderField("mediaBriefInput", "Execution Brief", selectedItem.brief, escapeHtml, "Use for shot list, video beats, or quality constraints.", true, 6)}
                     </div>
                     <div class="ops-inline-form">
@@ -893,7 +924,7 @@ export const mediaStudioRoute = {
                     </div>
                     <div class="ops-record-grid">
                       ${renderField("mediaOutputLabelInput", "Output Version Label", session.outputLabelDraft, escapeHtml, "Example: V2 approved crop")}
-                      ${renderField("mediaPreviewUrlInput", "Preview URL / File Path", "", escapeHtml, "Use durable asset paths or preview URLs.")}
+                      ${renderField("mediaPreviewUrlInput", "Preview URL / File Path", "", escapeHtml, "Use saved asset paths or preview URLs.")}
                       ${renderField("mediaPreviewNoteInput", "Preview Note", session.previewNoteDraft, escapeHtml, "Why this preview matters or what changed.", true, 3)}
                     </div>
                     <div class="ops-action-row">

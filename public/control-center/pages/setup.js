@@ -285,7 +285,7 @@ function updateSetupDashboard({ form, values, escapeHtml, missingAssets, missing
 
   const nextActionsBox = document.getElementById("setupNextActionSummary");
   if (nextActionsBox) {
-    nextActionsBox.innerHTML = `<div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested by the backend.")}</div>`;
+    nextActionsBox.innerHTML = `<div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested yet.")}</div>`;
   }
 
   applySectionBadge("setupProjectInfoBadge", getSectionStatus("project_information", values));
@@ -408,6 +408,22 @@ function bindSetupActions({
       }
     };
   }
+
+  const openCampaignBtn = $("setupOpenCampaignBtn");
+  if (openCampaignBtn) {
+    openCampaignBtn.onclick = () => {
+      navigateTo("campaign-studio");
+      showMessage?.("Opened Campaign Studio.");
+    };
+  }
+
+  const openIntegrationsBtn = $("setupOpenIntegrationsBtn");
+  if (openIntegrationsBtn) {
+    openIntegrationsBtn.onclick = () => {
+      navigateTo("integrations");
+      showMessage?.("Opened Integrations.");
+    };
+  }
 }
 
 export const setupRoute = {
@@ -476,7 +492,7 @@ export const setupRoute = {
             <div class="setup-kicker">Source Of Truth Definition</div>
             <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Setup` : "Project Setup")}</h3>
             <p class="setup-hero-text">
-              Define the durable project baseline that downstream planning, asset work, and AI assistance should rely on. Setup is for project definition, not campaign orchestration or workflow control.
+              Define the saved project baseline that downstream planning, asset work, and AI assistance should rely on. Setup is for project definition, not campaign orchestration or workflow control.
             </p>
           </div>
         </section>
@@ -594,7 +610,7 @@ export const setupRoute = {
                 <h3>Brand & Positioning</h3>
                 <span id="setupBrandBadge" class="card-badge ${brandStatus.tone}">${escapeHtml(brandStatus.label)}</span>
               </div>
-              <p class="home-section-copy">Set the durable brand baseline that messaging, creative, and AI-generated output should follow.</p>
+              <p class="home-section-copy">Set the saved brand baseline that messaging, creative, and AI-generated output should follow.</p>
               <div class="setup-form-grid">
                 ${renderField({
                   name: "brand_name",
@@ -735,7 +751,7 @@ export const setupRoute = {
                   name: "operator_notes",
                   label: "Operator notes",
                   value: values.operator_notes,
-                  helper: "Use this for durable setup notes, approvals, and readiness context that should stay with the project record.",
+                  helper: "Use this for saved setup notes, approvals, and readiness context that should stay with the project record.",
                   placeholder: "Notes for the next operator or launch review",
                   escapeHtml,
                   multiline: true,
@@ -751,7 +767,7 @@ export const setupRoute = {
                 <h3>Save / Draft / Validation</h3>
                 <span class="card-badge neutral">Source of truth</span>
               </div>
-              <p class="setup-side-copy">Save persists the project definition to the backend. Save Draft keeps in-progress edits in this browser only.</p>
+              <p class="setup-side-copy">Save stores the project definition for the workspace. Save Draft keeps in-progress edits in this browser only.</p>
               <div class="setup-progress">
                 <div class="setup-progress-head">
                   <span>Completion</span>
@@ -767,10 +783,24 @@ export const setupRoute = {
                   : "Required project setup fields are covered. You can move on to readiness and launch planning."}
               </p>
               <div class="setup-hero-actions">
-                <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
                 <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save</button>
+                <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
               </div>
               <div class="quick-actions">
+                <button id="setupOpenCampaignBtn" class="quick-action-btn" type="button">
+                  <span class="home-action-title">Open Campaign Studio</span>
+                  <span class="home-action-meta">Move from setup into campaign planning when the core project details are ready.</span>
+                </button>
+                ${
+                  missingConnectors.length
+                    ? `
+                      <button id="setupOpenIntegrationsBtn" class="quick-action-btn" type="button">
+                        <span class="home-action-title">Open Integrations</span>
+                        <span class="home-action-meta">Reconnect missing data sources before launch planning goes further.</span>
+                      </button>
+                    `
+                    : ""
+                }
                 <button id="setupResetDraftBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Reset local draft</span>
                   <span class="home-action-meta">Return to the currently loaded project values.</span>
@@ -811,7 +841,7 @@ export const setupRoute = {
                   <span class="card-badge neutral">Priority</span>
                 </div>
                 <div id="setupNextActionSummary">
-                  <div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested by the backend.")}</div>
+                  <div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested yet.")}</div>
                 </div>
               </div>
             </section>

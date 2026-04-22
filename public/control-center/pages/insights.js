@@ -924,6 +924,37 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
     };
   });
 
+  Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {
+    button.onclick = () => {
+      const route = button.getAttribute("data-insights-route") || "";
+      if (!route) return;
+
+      if (projectName) {
+        setSharedHandoff(projectName, route, {
+          source_page: "insights",
+          destination_page: route,
+          linked_entity: {
+            entity_type: "project",
+            entity_id: projectName,
+            route: "insights",
+            label: projectName
+          },
+          payload: {
+            draft_context: {
+              origin: "insights",
+              projectName,
+              optimizationFocus: "next-action"
+            }
+          },
+          status: "available"
+        });
+      }
+
+      navigateTo(route);
+      showMessage?.(`Opened ${button.textContent?.trim() || "next workspace"}.`);
+    };
+  });
+
   Array.from(document.querySelectorAll("[data-insights-prompt]")).forEach((button) => {
     button.onclick = () => {
       const index = Number(button.getAttribute("data-insights-prompt"));
@@ -1269,6 +1300,12 @@ export const insightsRoute = {
                 }
               </div>
             </div>
+          </div>
+          <div class="insights-assistant-toolbar" style="margin-top: 16px;">
+            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing</button>
           </div>
         </section>
 
