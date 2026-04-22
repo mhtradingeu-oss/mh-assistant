@@ -3022,7 +3022,13 @@ select {
 .insights-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+.insights-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .insights-hero {
@@ -3072,6 +3078,62 @@ select {
   font-size: 13px;
   line-height: 1.65;
   color: var(--muted);
+}
+
+.insights-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.insights-overview-item,
+.insights-domain-summary {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.insights-overview-item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.insights-workspace-grid,
+.insights-compact-grid,
+.insights-domain-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 16px;
+}
+
+.insights-compact-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.insights-domain-summary-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.insights-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.insights-domain-summary-metrics {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.insights-assistant-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .insights-list,
@@ -3269,7 +3331,14 @@ select {
 .research-lab-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+.research-section-copy {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
 }
 
 .research-lab-hero {
@@ -3337,8 +3406,24 @@ select {
   align-items: start;
 }
 
+.research-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.research-workspace-grid,
+.research-findings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 16px;
+  align-items: start;
+}
+
 .research-lab-main,
 .research-lab-side,
+.research-stack,
 .research-note-composer,
 .research-saved-column,
 .research-saved-list,
@@ -3357,10 +3442,11 @@ select {
 }
 
 .research-overview-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .research-overview-panel,
+.research-overview-item,
 .research-signal-card,
 .research-opportunity-card,
 .research-note-card,
@@ -3373,6 +3459,7 @@ select {
 }
 
 .research-overview-panel span,
+.research-overview-item span,
 .research-detail-item span,
 .research-opportunity-meta span,
 .research-note-footer span {
@@ -3386,6 +3473,13 @@ select {
   margin-top: 8px;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.research-overview-item strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.15;
 }
 
 .research-card-grid {
@@ -4853,6 +4947,8 @@ select {
   .campaign-recommendation-grid,
   .campaign-readiness-grid,
   .research-lab-layout,
+  .research-workspace-grid,
+  .research-findings-grid,
   .research-kpi-strip,
   .research-overview-grid,
   .research-card-grid,
@@ -4861,6 +4957,10 @@ select {
   .research-seo-grid,
   .research-detail-grid,
   .insights-layout,
+  .insights-overview-grid,
+  .insights-workspace-grid,
+  .insights-compact-grid,
+  .insights-domain-summary-grid,
   .insights-metric-grid,
   .insights-dual-grid,
   .insights-kpi-strip,
@@ -4877,6 +4977,15 @@ select {
   .integration-coverage-grid,
   .integration-overview-grid-4 {
     grid-template-columns: 1fr;
+  }
+
+  .research-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .research-toolbar .btn {
+    width: 100%;
   }
 
   .integration-hub-intro,
@@ -5134,6 +5243,11 @@ select {
   gap: 18px;
 }
 
+.ops-workspace {
+  display: grid;
+  gap: 16px;
+}
+
 .ops-hero {
   display: flex;
   align-items: flex-start;
@@ -5190,10 +5304,29 @@ select {
   gap: 12px;
 }
 
+.ops-toolbar-compact {
+  grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(160px, 1fr));
+  margin-bottom: 16px;
+}
+
 .ops-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
   gap: 18px;
+}
+
+.ops-workspace-grid,
+.ops-resolution-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.ops-workspace-grid {
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+}
+
+.ops-resolution-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .ops-lane-grid {
@@ -5220,6 +5353,38 @@ select {
 
 .ops-lane-head h4 {
   margin: 0;
+}
+
+.ops-focus-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.ops-focus-tab {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.22);
+  color: var(--text);
+}
+
+.ops-focus-tab strong {
+  font-size: 14px;
+}
+
+.ops-focus-tab span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.ops-focus-tab.is-active {
+  border-color: rgba(14, 165, 233, 0.3);
+  background: rgba(14, 165, 233, 0.14);
 }
 
 .ops-table-wrap {
@@ -5254,11 +5419,28 @@ select {
   margin-bottom: 4px;
 }
 
+.ops-select-link {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
 .ops-table td span,
 .ops-list-item span,
 .ops-log-item p,
 .ops-alert-item p {
   color: var(--text-muted);
+}
+
+.ops-table tr.is-selected td {
+  background: rgba(14, 165, 233, 0.08);
 }
 
 .ops-list,
@@ -5297,12 +5479,59 @@ select {
   font-size: 12px;
 }
 
+.ops-detail-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.ops-detail-summary {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.ops-detail-summary p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.ops-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ops-detail-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.22);
+  display: grid;
+  gap: 6px;
+}
+
+.ops-detail-card span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ops-detail-card strong {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 @media (max-width: 1100px) {
   .ops-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ops-layout {
+  .ops-layout,
+  .ops-workspace-grid,
+  .ops-resolution-grid,
+  .ops-detail-grid {
     grid-template-columns: 1fr;
   }
 }

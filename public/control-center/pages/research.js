@@ -1,4 +1,3 @@
-import { renderDurableSystemSummary } from "../durable-ui.js";
 import { setSharedHandoff } from "../shared-context.js";
 
 const researchSessions = new Map();
@@ -890,6 +889,12 @@ function bindResearchActions({
 
   const aiButtons = Array.from(document.querySelectorAll("[data-research-ai-prompt]"));
   const prompts = buildAiPrompts({ projectName, model });
+  Array.from(document.querySelectorAll("[data-research-open]")).forEach((button) => {
+    button.onclick = () => {
+      navigateTo("ai-command");
+    };
+  });
+
   aiButtons.forEach((button) => {
     button.onclick = async () => {
       const prompt = prompts[Number(button.getAttribute("data-research-ai-prompt"))];
@@ -1147,39 +1152,62 @@ export const researchRoute = {
 
     const model = buildResearchModel(state, session);
     const aiPrompts = buildAiPrompts({ projectName, model });
-    const projectLabel = projectName ? `${projectName} Research Intelligence Lab` : "Research Intelligence Lab";
+    const projectLabel = projectName ? `${projectName} Research Intelligence` : "Research Intelligence";
+    const coveragePreview = model.sourceCoverage.slice(0, 6);
+    const topRecommendations = model.recommendations.slice(0, 4);
+    const topRisks = model.risks.slice(0, 4);
+    const topOpportunities = model.marketOpportunities.slice(0, 4);
+    const competitorMarketCards = [
+      ...model.competitors.slice(0, 2).map((item) => ({
+        title: item.title,
+        badge: titleCase(item.type || "Competitor"),
+        tone: statusTone(item.level || item.type),
+        summary: item.opportunityGap || item.positioning || item.summary || "Competitor signal pending.",
+        details: [
+          { label: "Positioning", value: item.positioning },
+          { label: "Pricing", value: item.pricing },
+          { label: "Gap", value: item.opportunityGap }
+        ]
+      })),
+      ...model.marketTrends.slice(0, 2).map((item) => ({
+        title: item.title,
+        badge: titleCase(item.type || "Trend"),
+        tone: statusTone(item.level || item.momentum || item.type),
+        summary: item.summary || item.momentum || "Market trend detail pending.",
+        details: [
+          { label: "Momentum", value: item.momentum },
+          { label: "Seasonality", value: item.seasonality || "Not mapped yet" },
+          { label: "Region", value: item.region || safeText(state.context.currentMarket, "Global") }
+        ]
+      }))
+    ];
+    const audienceKeywordCards = [
+      ...model.audienceSegments.slice(0, 2).map((item) => ({
+        title: item.title,
+        badge: "Audience",
+        tone: statusTone(item.level || item.type),
+        summary: item.summary || item.painPoints[0] || item.motivations[0] || "Audience detail pending.",
+        details: [
+          { label: "Pain points", value: item.painPoints.join(", ") || "Not mapped yet" },
+          { label: "Intent", value: item.intents.join(", ") || "Not mapped yet" },
+          { label: "Triggers", value: item.triggers.join(", ") || "Not mapped yet" }
+        ]
+      })),
+      ...model.keywordRecords.slice(0, 2).map((item) => ({
+        title: item.keyword,
+        badge: "Keyword",
+        tone: statusTone(item.level || item.type),
+        summary: item.value || item.summary || "Keyword opportunity detail pending.",
+        details: [
+          { label: "Intent", value: item.intent },
+          { label: "Difficulty", value: item.difficulty },
+          { label: "Theme", value: item.theme }
+        ]
+      }))
+    ];
 
     root.innerHTML = `
       <div class="research-lab-wrapper">
-        <div class="research-lab-hero">
-          <div class="research-lab-hero-copy">
-            <div class="setup-kicker">Strategic Research Intelligence Lab</div>
-            <h3 class="setup-hero-title">${escapeHtml(projectLabel)}</h3>
-            <p class="setup-hero-text">
-              Turn fragmented project context, performance signals, and learning loops into reusable market intelligence for strategy, content, SEO, offers, ads, and future optimization workflows.
-            </p>
-            <div class="research-lab-status">
-              <div class="setup-status-chip">
-                <span>Active research areas</span>
-                <strong>${escapeHtml(formatCount(model.activeResearchAreas.length))}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Intelligence status</span>
-                <strong>${escapeHtml(session.intelligence.status === "loading" ? "Refreshing" : model.hasLiveIntelligence ? "Live + inferred" : "Context-only")}</strong>
-              </div>
-              <div class="setup-status-chip">
-                <span>Latest update</span>
-                <strong>${escapeHtml(model.latestUpdate)}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="setup-hero-actions">
-            <button id="researchRefreshBtn" class="btn btn-secondary" type="button">Refresh Research</button>
-            <button id="researchSaveRecommendationBtn" class="btn btn-primary" type="button">Save Recommendation</button>
-          </div>
-        </div>
-
         ${
           session.intelligence.error
             ? `<div class="simple-banner research-warning-banner">
@@ -1188,456 +1216,381 @@ export const researchRoute = {
             : ""
         }
 
-        <div class="research-kpi-strip">
-          ${[
-            {
-              label: "Market opportunities",
-              value: formatCount(model.marketOpportunities.length),
-              meta: compactText(model.marketOpportunities[0]?.title || "No opportunity ranked yet", 10, "No opportunity ranked yet"),
-              tone: model.marketOpportunities.length ? "success" : "neutral"
-            },
-            {
-              label: "Biggest risks",
-              value: formatCount(model.risks.length),
-              meta: compactText(model.risks[0]?.title || "No risk classification yet", 10, "No risk classification yet"),
-              tone: model.risks.length ? "danger" : "neutral"
-            },
-            {
-              label: "Competitor signals",
-              value: formatCount(model.competitors.length),
-              meta: compactText(model.competitorSignals[0] || "Competitor feed still thin", 10, "Competitor feed still thin"),
-              tone: model.competitors.length ? "warning" : "neutral"
-            },
-            {
-              label: "Audience signals",
-              value: formatCount(model.audienceSegments.length),
-              meta: compactText(model.audienceSignals[0] || "Audience research not yet structured", 10, "Audience research not yet structured"),
-              tone: model.audienceSegments.length ? "success" : "neutral"
-            },
-            {
-              label: "SEO opportunity level",
-              value: formatPercent(model.seoOpportunityScore, 0),
-              meta: compactText(model.keywordRecords[0]?.keyword || "Keyword intelligence missing", 10, "Keyword intelligence missing"),
-              tone: model.seoOpportunityScore >= 60 ? "success" : model.seoOpportunityScore >= 30 ? "warning" : "neutral"
-            },
-            {
-              label: "Saved findings",
-              value: formatCount(session.savedFindings.length),
-              meta: compactText(session.savedFindings[0]?.title || "No saved findings yet", 10, "No saved findings yet"),
-              tone: session.savedFindings.length ? "success" : "neutral"
-            }
-          ].map((item) => renderKpiCard(item, escapeHtml)).join("")}
-        </div>
-
-        ${renderDurableSystemSummary(state.data.operations, escapeHtml, {
-          title: "Research Routing Backbone",
-          kicker: "Durable Handoffs",
-          emptyText: "Research routing, ownership, tasks, and approvals will appear here once the shared operations model is loaded."
-        })}
-
-        <div class="research-lab-layout">
-          <div class="research-lab-main">
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Research Overview</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">A strategic summary of where the market is moving, where MH Assistant can win, and what intelligence is still missing.</p>
-                </div>
-                <span class="card-badge ${model.hasLiveIntelligence ? "success" : "warning"}">${escapeHtml(model.hasLiveIntelligence ? "Live intelligence" : "Context-driven")}</span>
-              </div>
-
-              <div class="research-overview-grid">
-                <div class="research-overview-panel">
-                  <span>Active research areas</span>
-                  <strong>${escapeHtml(joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4))}</strong>
-                </div>
-                <div class="research-overview-panel">
-                  <span>Top market opportunities</span>
-                  <strong>${escapeHtml(joinPreview(model.marketOpportunities.map((item) => item.title), "No market opportunity ranked yet"))}</strong>
-                </div>
-                <div class="research-overview-panel">
-                  <span>Strongest competitor signals</span>
-                  <strong>${escapeHtml(joinPreview(model.competitorSignals, "Competitor signals are still missing"))}</strong>
-                </div>
-                <div class="research-overview-panel">
-                  <span>Strongest audience signals</span>
-                  <strong>${escapeHtml(joinPreview(model.audienceSignals, "Audience signals are still missing"))}</strong>
-                </div>
-                <div class="research-overview-panel">
-                  <span>Biggest risks</span>
-                  <strong>${escapeHtml(joinPreview(model.risks.slice(0, 3).map((item) => item.title), "No research risk classified yet"))}</strong>
-                </div>
-                <div class="research-overview-panel">
-                  <span>Missing intelligence</span>
-                  <strong>${escapeHtml(joinPreview(model.missingIntelligence, "Core research coverage is healthy", 4))}</strong>
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Competitor Intelligence</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Clarify who the real competitors are, how they position, where they are weak, and what gap MH Assistant can claim.</p>
-                </div>
-                <span class="card-badge ${model.competitors.length ? "warning" : "neutral"}">${escapeHtml(model.competitors.length ? `${model.competitors.length} tracked` : "Needs research")}</span>
-              </div>
-              ${
-                model.competitors.length
-                  ? `<div class="research-card-grid">
-                      ${model.competitors.slice(0, 6).map((item) => renderSectionCard(item, escapeHtml, [
-                        { label: "Positioning", value: item.positioning },
-                        { label: "Pricing", value: item.pricing },
-                        { label: "Category overlap", value: item.overlap },
-                        { label: "Opportunity gap", value: item.opportunityGap },
-                        { label: "Content style", value: item.contentStyle },
-                        { label: "Ad style", value: item.adStyle }
-                      ])).join("")}
-                    </div>`
-                  : renderEmptyState(
-                      "Competitor map not built yet",
-                      "Research can still operate from current project context, but pricing, positioning, and channel gap analysis will get much stronger once competitor records or APIs are attached.",
-                      ["pricing signals", "channel presence", "positioning map"],
-                      escapeHtml
-                    )
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Research Overview</h3>
+              <p class="research-section-copy">Keep this workspace focused on what was discovered, what matters most, and what should be explored next.</p>
+            </div>
+            <span class="card-badge ${model.hasLiveIntelligence ? "success" : "warning"}">${escapeHtml(model.hasLiveIntelligence ? "Live intelligence" : "Context-driven")}</span>
+          </div>
+          <div class="research-toolbar">
+            <button id="researchRefreshBtn" class="btn btn-secondary" type="button">Refresh Research</button>
+          </div>
+          <div class="research-overview-grid">
+            ${[
+              {
+                label: "Project",
+                value: projectLabel,
+                meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"
+              },
+              {
+                label: "Intelligence status",
+                value: session.intelligence.status === "loading" ? "Refreshing" : model.hasLiveIntelligence ? "Live + inferred" : "Context-only",
+                meta: `Latest update: ${model.latestUpdate}`
+              },
+              {
+                label: "Top opportunities",
+                value: formatCount(model.marketOpportunities.length),
+                meta: compactText(model.marketOpportunities[0]?.title || "No opportunity ranked yet", 12, "No opportunity ranked yet")
+              },
+              {
+                label: "Key risks",
+                value: formatCount(model.risks.length),
+                meta: compactText(model.risks[0]?.title || "No risk classification yet", 12, "No risk classification yet")
+              },
+              {
+                label: "Competitor signals",
+                value: formatCount(model.competitors.length),
+                meta: compactText(model.competitorSignals[0] || "Competitor feed still thin", 12, "Competitor feed still thin")
+              },
+              {
+                label: "Audience signals",
+                value: formatCount(model.audienceSegments.length),
+                meta: compactText(model.audienceSignals[0] || "Audience research not yet structured", 12, "Audience research not yet structured")
+              },
+              {
+                label: "SEO opportunity level",
+                value: formatPercent(model.seoOpportunityScore, 0),
+                meta: compactText(model.keywordRecords[0]?.keyword || "Keyword intelligence missing", 12, "Keyword intelligence missing")
+              },
+              {
+                label: "Missing intelligence",
+                value: formatCount(model.missingIntelligence.length),
+                meta: compactText(model.missingIntelligence[0] || "Core research coverage is healthy", 12, "Core research coverage is healthy")
               }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Audience Intelligence</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Capture pain points, motivations, objections, buying triggers, and awareness patterns so the system can speak like it understands the customer.</p>
-                </div>
-                <span class="card-badge ${model.audienceSegments.length ? "success" : "neutral"}">${escapeHtml(model.audienceSegments.length ? `${model.audienceSegments.length} segments` : "Hypotheses only")}</span>
+            ].map((item) => `
+              <div class="research-overview-item">
+                <span>${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.value)}</strong>
+                <p class="research-kpi-meta">${escapeHtml(item.meta)}</p>
               </div>
+            `).join("")}
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Competitor / Market Signals</h3>
+              <p class="research-section-copy">What the market is doing now, who is competing for attention, and where the best gaps may exist.</p>
+            </div>
+            <span class="card-badge ${competitorMarketCards.length ? "warning" : "neutral"}">${escapeHtml(competitorMarketCards.length ? `${competitorMarketCards.length} signals` : "Needs research")}</span>
+          </div>
+          <div class="research-workspace-grid">
+            <div>
               ${
-                model.audienceSegments.length
+                competitorMarketCards.length
                   ? `<div class="research-card-grid">
-                      ${model.audienceSegments.slice(0, 6).map((item) => renderSectionCard(item, escapeHtml, [
-                        { label: "Intent types", value: item.intents.join(", ") || "Not mapped yet" },
-                        { label: "Content preferences", value: item.preferences.join(", ") || "Not mapped yet" },
-                        { label: "Objections", value: item.objections.join(", ") || "Not mapped yet" },
-                        { label: "Buying triggers", value: item.triggers.join(", ") || "Not mapped yet" },
-                        { label: "Awareness stage", value: item.awareness.join(", ") || "Not mapped yet" }
-                      ])).join("")}
-                    </div>`
-                  : renderEmptyState(
-                      "Audience research is still thin",
-                      "The page is ready for real audience segmentation, but today it only has minimal project context. Add surveys, call notes, community language, or CRM signals later to tighten the messaging layer.",
-                      ["pain points", "motivations", "objections"],
-                      escapeHtml
-                    )
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Market & Trend Intelligence</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Track what is rising, slowing, seasonal, regionally specific, or worth testing before the rest of the system commits spend and production effort.</p>
-                </div>
-                <span class="card-badge ${model.marketTrends.length ? "success" : "neutral"}">${escapeHtml(model.marketTrends.length ? `${model.marketTrends.length} signals` : "Awaiting feeds")}</span>
-              </div>
-              ${
-                model.marketTrends.length
-                  ? `<div class="research-card-grid">
-                      ${model.marketTrends.slice(0, 6).map((item) => renderSectionCard(item, escapeHtml, [
-                        { label: "Momentum", value: item.momentum },
-                        { label: "Seasonality", value: item.seasonality || "Not mapped yet" },
-                        { label: "Region", value: item.region || safeText(state.context.currentMarket, "Global") },
-                        { label: "Platform", value: item.platform || "Cross-channel" }
-                      ])).join("")}
-                    </div>`
-                  : renderEmptyState(
-                      "Trend intelligence is ready for future feeds",
-                      "No trend dataset is connected yet, but the layout already supports market momentum, seasonal windows, regional signals, and future platform-specific research APIs.",
-                      ["market momentum", "seasonality", "regional insights"],
-                      escapeHtml
-                    )
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>SEO & Keyword Intelligence</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Use this to decide what topics to write about, which keywords to target, what landing pages should exist, and which clusters are still missing.</p>
-                </div>
-                <span class="card-badge ${model.keywordRecords.length ? "success" : "warning"}">${escapeHtml(model.keywordRecords.length ? `${model.keywordRecords.length} keyword signals` : "Critical gap")}</span>
-              </div>
-
-              <div class="research-seo-grid">
-                <div class="research-seo-column">
-                  <h4 class="insights-subtitle">Target and opportunity keywords</h4>
-                  ${renderSignalList(model.keywordRecords.slice(0, 6), escapeHtml, "No keyword intelligence yet. Connect search data or add manual keyword sets to prioritize SEO work.")}
-                </div>
-                <div class="research-seo-column">
-                  <h4 class="insights-subtitle">Long-tail ideas</h4>
-                  ${model.longTailIdeas.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 14).map((item) => `<span class="research-chip">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No long-tail ideas saved yet.</div>`}
-                  <h4 class="insights-subtitle" style="margin-top:16px;">Content themes</h4>
-                  ${model.contentThemes.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.contentThemes.slice(0, 12).map((item) => `<span class="research-chip success">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No content themes clustered yet.</div>`}
-                </div>
-                <div class="research-seo-column">
-                  <h4 class="insights-subtitle">Missing clusters</h4>
-                  ${model.missingClusters.length ? `<ul class="simple-list">${model.missingClusters.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No missing cluster list yet.</div>`}
-                  <h4 class="insights-subtitle" style="margin-top:16px;">Pages to optimize</h4>
-                  ${model.optimizePages.length ? `<ul class="simple-list">${model.optimizePages.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No page optimization list yet.</div>`}
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Product & Offer Research</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Shape positioning, offer angles, proof, differentiation, bundle ideas, and why-buy-now logic for later use in Campaign Studio and Content Studio.</p>
-                </div>
-                <span class="card-badge ${model.productIdeas.length ? "success" : "neutral"}">${escapeHtml(model.productIdeas.length ? `${model.productIdeas.length} ideas` : "Needs offer research")}</span>
-              </div>
-              ${
-                model.productIdeas.length
-                  ? `<div class="research-card-grid">
-                      ${model.productIdeas.slice(0, 6).map((item) => renderSectionCard(item, escapeHtml, [
-                        { label: "Offer angle", value: item.angle },
-                        { label: "Differentiation", value: item.differentiation },
-                        { label: "Bundle / upsell", value: item.bundle || "Not defined yet" },
-                        { label: "Why buy now", value: item.whyNow || "Not defined yet" }
-                      ])).join("")}
-                    </div>`
-                  : renderEmptyState(
-                      "Offer intelligence is still under-structured",
-                      "The lab is ready to store proof points, value propositions, upsells, and urgency angles, but those product signals are not yet present in the current intelligence feeds.",
-                      ["positioning ideas", "proof points", "bundle opportunities"],
-                      escapeHtml
-                    )
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Opportunity Map</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Surface the most actionable short-term, growth, SEO, ad, and content moves so research becomes execution fuel instead of shelfware.</p>
-                </div>
-                <span class="card-badge ${model.opportunityPool.length ? "success" : "neutral"}">${escapeHtml(model.opportunityPool.length ? `${model.opportunityPool.length} routed opportunities` : "No map yet")}</span>
-              </div>
-              ${
-                model.opportunityPool.length
-                  ? `<div class="research-opportunity-grid">
-                      ${model.opportunityPool.slice(0, 8).map((item, index) => `
-                        <article class="research-opportunity-card">
+                      ${competitorMarketCards.map((item) => `
+                        <article class="research-signal-card">
                           <div class="research-signal-head">
                             <div>
                               <h4>${escapeHtml(item.title)}</h4>
-                              <p>${escapeHtml(item.summary)}</p>
+                              <p>${escapeHtml(compactText(item.summary, 28, "Signal detail pending."))}</p>
                             </div>
-                            <span class="card-badge ${statusTone(item.lane)}">${escapeHtml(titleCase(item.lane))}</span>
+                            <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.badge)}</span>
                           </div>
-                          <div class="research-opportunity-meta">
-                            <span>Priority score</span>
-                            <strong>${escapeHtml(formatCount(item.score))}</strong>
-                            <span>Best route</span>
-                            <strong>${escapeHtml(item.routeTarget.label)}</strong>
+                          <div class="research-detail-grid">
+                            ${item.details.map((field) => `
+                              <div class="research-detail-item">
+                                <span>${escapeHtml(field.label)}</span>
+                                <strong>${escapeHtml(field.value || "Not mapped yet")}</strong>
+                              </div>
+                            `).join("")}
                           </div>
-                          <button class="quick-action-btn" type="button" data-research-opportunity="${index}">Route Opportunity</button>
                         </article>
                       `).join("")}
                     </div>`
                   : renderEmptyState(
-                      "Opportunity map is waiting for ranked inputs",
-                      "Once competitor, audience, SEO, or product signals arrive, the page will turn them into short-term and growth-oriented opportunities automatically.",
-                      ["short-term wins", "SEO opportunities", "ad tests"],
+                      "Competitor and market signal coverage is still thin",
+                      "Connect competitor records, pricing signals, and trend inputs to make this section more actionable.",
+                      ["pricing signals", "positioning map", "market trends"],
                       escapeHtml
                     )
               }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Research Notes / Saved Findings</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Capture structured observations, tagged notes, and reusable intelligence blocks so research compounds over time instead of getting lost.</p>
-                </div>
-                <span class="card-badge neutral">${escapeHtml(`${session.savedFindings.length} saved`)}</span>
+            </div>
+            <div class="research-stack">
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">What matters most now</h4>
+                ${renderSignalList(topOpportunities, escapeHtml, "No market opportunity ranked yet.")}
               </div>
-
-              <div class="research-notes-grid">
-                <div class="research-note-composer">
-                  <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
-                  <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
-                  <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
-                  <button id="researchSaveFindingBtn" class="btn btn-primary" type="button">Save Finding</button>
-                </div>
-
-                <div class="research-saved-column">
-                  <h4 class="insights-subtitle">Saved findings</h4>
-                  ${
-                    session.savedFindings.length
-                      ? `<div class="research-saved-list">
-                          ${session.savedFindings.slice(0, 8).map((item) => `
-                            <article class="research-note-card">
-                              <div class="research-signal-head">
-                                <div>
-                                  <h4>${escapeHtml(item.title)}</h4>
-                                  <p>${escapeHtml(item.body)}</p>
-                                </div>
-                                <span class="card-badge neutral">${escapeHtml(item.source)}</span>
-                              </div>
-                              <div class="research-note-footer">
-                                <span>${escapeHtml(formatDateTime(item.createdAt))}</span>
-                                <div class="research-chip-row">
-                                  ${asArray(item.tags).map((tag) => `<span class="research-chip">${escapeHtml(tag)}</span>`).join("")}
-                                </div>
-                              </div>
-                            </article>
-                          `).join("")}
-                        </div>`
-                      : `<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable intelligence blocks below.</div>`
-                  }
-
-                  <h4 class="insights-subtitle" style="margin-top:16px;">Reusable intelligence blocks</h4>
-                  ${
-                    model.autoFindings.length
-                      ? `<div class="research-saved-list">
-                          ${model.autoFindings.map((item, index) => `
-                            <article class="research-note-card">
-                              <div class="research-signal-head">
-                                <div>
-                                  <h4>${escapeHtml(item.title)}</h4>
-                                  <p>${escapeHtml(item.body)}</p>
-                                </div>
-                                <span class="card-badge neutral">${escapeHtml(item.source)}</span>
-                              </div>
-                              <div class="research-note-footer">
-                                <div class="research-chip-row">
-                                  ${item.tags.map((tag) => `<span class="research-chip">${escapeHtml(tag)}</span>`).join("")}
-                                </div>
-                                <button class="quick-action-btn research-inline-action" type="button" data-save-research-block="${index}">Save Block</button>
-                              </div>
-                            </article>
-                          `).join("")}
-                        </div>`
-                      : `<div class="empty-box">Reusable blocks will appear as soon as the page can infer stronger opportunities, risks, or keyword signals.</div>`
-                  }
-                </div>
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">Coverage snapshot</h4>
+                ${
+                  coveragePreview.length
+                    ? `<div class="research-coverage-list">
+                        ${coveragePreview.map((item) => `
+                          <div class="data-row">
+                            <span>${escapeHtml(item.label)}</span>
+                            <strong class="research-tone-${escapeHtml(statusTone(item.status))}">${escapeHtml(titleCase(item.status))}</strong>
+                          </div>
+                        `).join("")}
+                      </div>`
+                    : `<div class="empty-box">No intelligence coverage data is available yet.</div>`
+                }
+                ${
+                  model.missingIntelligence.length
+                    ? `<div class="research-missing-list">
+                        ${model.missingIntelligence.slice(0, 6).map((item) => `<span class="research-chip danger">${escapeHtml(item)}</span>`).join("")}
+                      </div>`
+                    : ""
+                }
               </div>
-            </section>
+            </div>
           </div>
+        </section>
 
-          <div class="research-lab-side">
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>AI Research Assistant</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Use Research as an active strategy partner with prompts for gaps, SEO, content, ads, and launch risk review.</p>
-                </div>
-                <span class="card-badge success">Active partner</span>
-              </div>
-
-              <div class="quick-actions">
-                ${aiPrompts.map((item, index) => `
-                  <button class="quick-action-btn" type="button" data-research-ai-prompt="${index}">
-                    <strong>${escapeHtml(item.label)}</strong><br />
-                    <span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>
-                  </button>
-                `).join("")}
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Team Ops Routing</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Research now routes with explicit analyst ownership, strategist review, and destination-role visibility.</p>
-                </div>
-                <span class="card-badge neutral">${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.ownerRole))}</span>
-              </div>
-              ${renderResearchTeamOps(state, escapeHtml)}
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Action Routing</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Move validated intelligence into execution pages and future workflows without rewriting the context.</p>
-                </div>
-                <span class="card-badge warning">Execution bridge</span>
-              </div>
-              <div class="quick-actions">
-                <button class="quick-action-btn" type="button" data-research-route="campaign">Send opportunity to Campaign Studio</button>
-                <button class="quick-action-btn" type="button" data-research-route="content">Send content idea to Content Studio</button>
-                <button class="quick-action-btn" type="button" data-research-route="seo">Send keyword cluster to SEO workflow</button>
-                <button class="quick-action-btn" type="button" data-research-route="ads">Send ad angle to Ads Manager</button>
-                <button class="quick-action-btn" type="button" data-research-route="ai">Save finding for AI Command</button>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Coverage & Gaps</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">This is where the page shows what it knows, what it can infer, and what data will make future recommendations sharper.</p>
-                </div>
-                <span class="card-badge ${model.missingIntelligence.length ? "warning" : "success"}">${escapeHtml(model.missingIntelligence.length ? "Partial coverage" : "Healthy coverage")}</span>
-              </div>
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Audience / Keyword Opportunities</h3>
+              <p class="research-section-copy">Which audiences, intents, and search openings are worth exploring next.</p>
+            </div>
+            <span class="card-badge ${audienceKeywordCards.length ? "success" : "warning"}">${escapeHtml(audienceKeywordCards.length ? `${audienceKeywordCards.length} signals` : "Critical gap")}</span>
+          </div>
+          <div class="research-workspace-grid">
+            <div>
               ${
-                model.sourceCoverage.length
-                  ? `<div class="research-coverage-list">
-                      ${model.sourceCoverage.slice(0, 8).map((item) => `
-                        <div class="data-row">
-                          <span>${escapeHtml(item.label)}</span>
-                          <strong class="research-tone-${escapeHtml(statusTone(item.status))}">${escapeHtml(titleCase(item.status))}</strong>
-                        </div>
-                      `).join("")}
-                    </div>`
-                  : `<div class="empty-box">No intelligence coverage data is available yet.</div>`
-              }
-              ${
-                model.missingIntelligence.length
-                  ? `<div class="research-missing-list">
-                      ${model.missingIntelligence.map((item) => `<span class="research-chip danger">${escapeHtml(item)}</span>`).join("")}
-                    </div>`
-                  : ""
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <div>
-                  <h3>Strategic Notes</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">A compact stream of the highest-signal recommendations, risks, and reusable saved recommendations.</p>
-                </div>
-                <span class="card-badge neutral">${escapeHtml(`${session.savedRecommendations.length} saved`)}</span>
-              </div>
-              <h4 class="insights-subtitle">Top recommendations</h4>
-              ${renderSignalList(model.recommendations.slice(0, 5), escapeHtml, "No recommendations surfaced yet.")}
-              <h4 class="insights-subtitle" style="margin-top:16px;">Biggest risks</h4>
-              ${renderSignalList(model.risks.slice(0, 4), escapeHtml, "No risks surfaced yet.")}
-              <h4 class="insights-subtitle" style="margin-top:16px;">Structured recommendations</h4>
-              ${
-                session.savedRecommendations.length
-                  ? `<div class="research-saved-list">
-                      ${session.savedRecommendations.slice(0, 4).map((item) => `
-                        <article class="research-note-card">
+                audienceKeywordCards.length
+                  ? `<div class="research-card-grid">
+                      ${audienceKeywordCards.map((item) => `
+                        <article class="research-signal-card">
                           <div class="research-signal-head">
                             <div>
                               <h4>${escapeHtml(item.title)}</h4>
-                              <p>${escapeHtml(item.summary)}</p>
+                              <p>${escapeHtml(compactText(item.summary, 28, "Signal detail pending."))}</p>
                             </div>
-                            <span class="card-badge neutral">${escapeHtml(item.target)}</span>
+                            <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.badge)}</span>
                           </div>
-                          <div class="research-note-footer">
-                            <span>${escapeHtml(formatDateTime(item.createdAt))}</span>
+                          <div class="research-detail-grid">
+                            ${item.details.map((field) => `
+                              <div class="research-detail-item">
+                                <span>${escapeHtml(field.label)}</span>
+                                <strong>${escapeHtml(field.value || "Not mapped yet")}</strong>
+                              </div>
+                            `).join("")}
                           </div>
                         </article>
                       `).join("")}
                     </div>`
-                  : `<div class="empty-box">Save a structured recommendation to keep the best opportunity accessible for later routing.</div>`
+                  : renderEmptyState(
+                      "Audience and keyword opportunities are still thin",
+                      "Add audience research or keyword inputs to make this section more actionable.",
+                      ["pain points", "intent mapping", "keyword clusters"],
+                      escapeHtml
+                    )
               }
-            </section>
+            </div>
+            <div class="research-stack">
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">Long-tail ideas</h4>
+                ${model.longTailIdeas.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 12).map((item) => `<span class="research-chip">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No long-tail ideas saved yet.</div>`}
+                <h4 class="insights-subtitle" style="margin-top:16px;">Content themes</h4>
+                ${model.contentThemes.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.contentThemes.slice(0, 10).map((item) => `<span class="research-chip success">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No content themes clustered yet.</div>`}
+              </div>
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">Missing clusters</h4>
+                ${model.missingClusters.length ? `<ul class="simple-list">${model.missingClusters.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No missing cluster list yet.</div>`}
+                <h4 class="insights-subtitle" style="margin-top:16px;">Pages to optimize</h4>
+                ${model.optimizePages.length ? `<ul class="simple-list">${model.optimizePages.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No page optimization list yet.</div>`}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Findings / Saved Insights</h3>
+              <p class="research-section-copy">Capture what was discovered and keep the strongest reusable insights in one place.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(`${session.savedFindings.length} saved`)}</span>
+          </div>
+          <div class="research-findings-grid">
+            <div class="research-note-composer">
+              <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
+              <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
+              <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
+              <button id="researchSaveFindingBtn" class="btn btn-primary" type="button">Save Finding</button>
+            </div>
+            <div class="research-stack">
+              <div>
+                <h4 class="insights-subtitle">Saved findings</h4>
+                ${
+                  session.savedFindings.length
+                    ? `<div class="research-saved-list">
+                        ${session.savedFindings.slice(0, 6).map((item) => `
+                          <article class="research-note-card">
+                            <div class="research-signal-head">
+                              <div>
+                                <h4>${escapeHtml(item.title)}</h4>
+                                <p>${escapeHtml(item.body)}</p>
+                              </div>
+                              <span class="card-badge neutral">${escapeHtml(item.source)}</span>
+                            </div>
+                            <div class="research-note-footer">
+                              <span>${escapeHtml(formatDateTime(item.createdAt))}</span>
+                              <div class="research-chip-row">
+                                ${asArray(item.tags).map((tag) => `<span class="research-chip">${escapeHtml(tag)}</span>`).join("")}
+                              </div>
+                            </div>
+                          </article>
+                        `).join("")}
+                      </div>`
+                    : `<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>`
+                }
+              </div>
+              <div>
+                <h4 class="insights-subtitle">Reusable insight blocks</h4>
+                ${
+                  model.autoFindings.length
+                    ? `<div class="research-saved-list">
+                        ${model.autoFindings.slice(0, 4).map((item, index) => `
+                          <article class="research-note-card">
+                            <div class="research-signal-head">
+                              <div>
+                                <h4>${escapeHtml(item.title)}</h4>
+                                <p>${escapeHtml(item.body)}</p>
+                              </div>
+                              <span class="card-badge neutral">${escapeHtml(item.source)}</span>
+                            </div>
+                            <div class="research-note-footer">
+                              <div class="research-chip-row">
+                                ${item.tags.map((tag) => `<span class="research-chip">${escapeHtml(tag)}</span>`).join("")}
+                              </div>
+                              <button class="quick-action-btn research-inline-action" type="button" data-save-research-block="${index}">Save Block</button>
+                            </div>
+                          </article>
+                        `).join("")}
+                      </div>`
+                    : `<div class="empty-box">Reusable blocks will appear as soon as stronger opportunities, risks, or keyword signals are available.</div>`
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Recommendations / Next Research Actions</h3>
+              <p class="research-section-copy">What matters most now, what should be explored next, and where validated research should go.</p>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(`${session.savedRecommendations.length} saved`)}</span>
+          </div>
+          <div class="research-workspace-grid">
+            <div class="research-stack">
+              <div>
+                <h4 class="insights-subtitle">Recommendations</h4>
+                ${renderSignalList(topRecommendations, escapeHtml, "No recommendations surfaced yet.")}
+              </div>
+              <div>
+                <h4 class="insights-subtitle">Risks to explore next</h4>
+                ${renderSignalList(topRisks, escapeHtml, "No risks surfaced yet.")}
+              </div>
+              <div>
+                <h4 class="insights-subtitle">Opportunity map</h4>
+                ${
+                  model.opportunityPool.length
+                    ? `<div class="research-opportunity-grid">
+                        ${model.opportunityPool.slice(0, 4).map((item, index) => `
+                          <article class="research-opportunity-card">
+                            <div class="research-signal-head">
+                              <div>
+                                <h4>${escapeHtml(item.title)}</h4>
+                                <p>${escapeHtml(item.summary)}</p>
+                              </div>
+                              <span class="card-badge ${statusTone(item.lane)}">${escapeHtml(titleCase(item.lane))}</span>
+                            </div>
+                            <div class="research-opportunity-meta">
+                              <span>Priority score</span>
+                              <strong>${escapeHtml(formatCount(item.score))}</strong>
+                              <span>Best route</span>
+                              <strong>${escapeHtml(item.routeTarget.label)}</strong>
+                            </div>
+                            <button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>
+                          </article>
+                        `).join("")}
+                      </div>`
+                    : renderEmptyState(
+                        "Opportunity map is waiting for ranked inputs",
+                        "Once competitor, audience, SEO, or product signals arrive, the page will turn them into short-term and growth-oriented opportunities automatically.",
+                        ["short-term wins", "SEO opportunities", "ad tests"],
+                        escapeHtml
+                      )
+                }
+              </div>
+            </div>
+            <div class="research-stack">
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">Saved recommendation</h4>
+                <button id="researchSaveRecommendationBtn" class="btn btn-primary" type="button">Save Recommendation</button>
+                ${
+                  session.savedRecommendations.length
+                    ? `<div class="research-saved-list" style="margin-top:16px;">
+                        ${session.savedRecommendations.slice(0, 4).map((item) => `
+                          <article class="research-note-card">
+                            <div class="research-signal-head">
+                              <div>
+                                <h4>${escapeHtml(item.title)}</h4>
+                                <p>${escapeHtml(item.summary)}</p>
+                              </div>
+                              <span class="card-badge neutral">${escapeHtml(item.target)}</span>
+                            </div>
+                            <div class="research-note-footer">
+                              <span>${escapeHtml(formatDateTime(item.createdAt))}</span>
+                            </div>
+                          </article>
+                        `).join("")}
+                      </div>`
+                    : `<div class="empty-box" style="margin-top:16px;">Save a structured recommendation to keep the best next move accessible for later routing.</div>`
+                }
+              </div>
+              <div class="research-seo-column">
+                <h4 class="insights-subtitle">Send to execution</h4>
+                <div class="quick-actions">
+                  <button class="quick-action-btn" type="button" data-research-route="campaign">Send to Campaign Studio</button>
+                  <button class="quick-action-btn" type="button" data-research-route="content">Send to Content Studio</button>
+                  <button class="quick-action-btn" type="button" data-research-route="seo">Send to SEO Workflow</button>
+                  <button class="quick-action-btn" type="button" data-research-route="ads">Send to Ads Manager</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Research AI Assistant</h3>
+              <p class="research-section-copy">Use AI to deepen the current research, not to replace the saved findings and next-action surfaces above.</p>
+            </div>
+            <span class="card-badge success">Active partner</span>
+          </div>
+          <div class="research-toolbar">
+            <button class="btn ghost" type="button" data-research-open>Open AI Command</button>
+            <button class="btn btn-secondary" type="button" data-research-route="ai">Send to AI Command</button>
+          </div>
+          <div class="quick-actions">
+            ${aiPrompts.map((item, index) => `
+              <button class="quick-action-btn" type="button" data-research-ai-prompt="${index}">
+                <strong>${escapeHtml(item.label)}</strong><br />
+                <span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>
+              </button>
+            `).join("")}
+          </div>
+        </section>
       </div>
     `;
 
