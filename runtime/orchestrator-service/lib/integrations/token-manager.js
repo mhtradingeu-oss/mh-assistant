@@ -59,6 +59,28 @@ function getOrCreateSecretKey() {
   return key;
 }
 
+function hasIntegrationSecretKeyConfigured() {
+  const envKey = String(process.env.MH_INTEGRATION_SECRET_KEY || '').trim();
+  if (envKey) {
+    try {
+      return Buffer.from(envKey, 'base64').length === 32;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  const existing = readJsonFile(KEY_PATH, {});
+  if (!existing?.key) {
+    return false;
+  }
+
+  try {
+    return Buffer.from(existing.key, 'base64').length === 32;
+  } catch (error) {
+    return false;
+  }
+}
+
 function encryptJson(value = {}) {
   const key = getOrCreateSecretKey();
   const iv = crypto.randomBytes(12);
@@ -125,5 +147,6 @@ function applyEncryptedCredentials(record = {}, credentials = {}) {
 
 module.exports = {
   normalizeCredentials,
-  applyEncryptedCredentials
+  applyEncryptedCredentials,
+  hasIntegrationSecretKeyConfigured
 };

@@ -7,10 +7,18 @@ const multer = require('multer');
 const FormData = require('form-data');
 const {
   normalizeCredentials,
-  applyEncryptedCredentials
+  applyEncryptedCredentials,
+  hasIntegrationSecretKeyConfigured
 } = require('./lib/integrations/token-manager');
 const { UnifiedDataPathResolver } = require('./lib/data/unified-data-path-resolver');
 const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifact-writer-adapter');
+const {
+  createLogger,
+  createConsoleLikeLogger,
+  sanitizeValue,
+  serializeErrorForLog
+} = require('./lib/observability/logger');
+const { createInMemoryRateLimiter } = require('./lib/observability/rate-limit');
 const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
 const { buildHealthState } = require('./lib/integrations/health-manager');
 const {
@@ -65,6 +73,14 @@ const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 
 const app = express();
 app.use(express.json());
+
+const appLogger = createLogger({
+  service: 'orchestrator-service'
+});
+const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
+  route: 'runtime',
+  action: 'runtime_log'
+});
 
 const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
 const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
@@ -144,10 +160,77 @@ function requireProtectedControlWriteKey(req, res, next) {
 }
 
 app.use(requireProtectedControlWriteKey);
-const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: console });
+const telegramRateLimiter = createInMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  max: 40
+});
+const aiRateLimiter = createInMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  max: 120
+});
+
+function getRateLimitIdentity(req) {
+  const forwarded = String(req.get('x-forwarded-for') || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)[0] || '';
+  return forwarded || String(req.ip || req.socket?.remoteAddress || 'anonymous');
+}
+
+function shouldApplyAiRateLimit(req) {
+  const requestPath = String(req.path || '').trim();
+  if (!requestPath) {
+    return false;
+  }
+
+  return /\/ai(?:\/|$)/i.test(requestPath);
+}
+
+function applyRouteRateLimit(req, res, next) {
+  const requestPath = String(req.path || '').trim();
+  let limiter = null;
+  let action = '';
+
+  if (/^\/telegram-command\/?$/i.test(requestPath)) {
+    limiter = telegramRateLimiter;
+    action = 'telegram_command';
+  } else if (shouldApplyAiRateLimit(req)) {
+    limiter = aiRateLimiter;
+    action = 'ai_endpoint';
+  }
+
+  if (!limiter) {
+    return next();
+  }
+
+  const identity = getRateLimitIdentity(req);
+  const decision = limiter.check(identity);
+
+  if (decision.allowed) {
+    return next();
+  }
+
+  appLogger.warn('rate_limit_exceeded', {
+    route: requestPath,
+    action,
+    method: req.method,
+    retryAfterMs: decision.retryAfterMs
+  });
+
+  res.set('Retry-After', String(Math.ceil(decision.retryAfterMs / 1000)));
+  return sendError(res, {
+    statusCode: 429,
+    code: 'RATE_LIMITED',
+    message: 'Too many requests. Please retry shortly.'
+  });
+}
+
+app.use(applyRouteRateLimit);
+
+const unifiedDataPathResolver = new UnifiedDataPathResolver({ logger: runtimeCompatLogger });
 const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
   resolver: unifiedDataPathResolver,
-  logger: console
+  logger: runtimeCompatLogger
 });
 
 let aiOrchestrator = null;
@@ -307,17 +390,139 @@ function sendError(res, {
   });
 }
 
-function buildReadinessState() {
-  const missingRequiredEnv = [];
-  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+function sanitizeErrorPayloadForClient(payload) {
+  if (payload == null) {
+    return null;
+  }
 
-  if (!configuredWriteKey) {
+  if (typeof payload === 'string') {
+    return sanitizeErrorMessage(payload, 'Request failed');
+  }
+
+  return sanitizeValue(payload);
+}
+
+function logCriticalFailure(action, req, error, context = {}) {
+  appLogger.error('critical_failure', {
+    route: req?.path || 'unknown',
+    action,
+    method: req?.method || 'unknown',
+    statusCode: getErrorStatusCode(error, 500),
+    ...sanitizeValue(context),
+    error: serializeErrorForLog(error)
+  });
+}
+
+function isDataDirectoryWritable() {
+  if (!fs.existsSync(DATA_DIR)) {
+    return false;
+  }
+
+  try {
+    fs.accessSync(DATA_DIR, fs.constants.W_OK);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function detectIntegrationSecretUsage(projects = []) {
+  for (const project of projects) {
+    const projectName = String(project?.project_name || project?.project_id || '').trim().toLowerCase();
+    if (!projectName) {
+      continue;
+    }
+
+    try {
+      const paths = getProjectIntegrationPaths(projectName);
+      const registry = readJsonFile(paths.controlCenterRegistryPath, {});
+      const records = registry && typeof registry.records === 'object'
+        ? Object.values(registry.records)
+        : [];
+
+      const hasCredentials = records.some((record) => {
+        if (!record || typeof record !== 'object') {
+          return false;
+        }
+
+        const encrypted = record.credentials_encrypted
+          && typeof record.credentials_encrypted === 'object'
+          && Object.keys(record.credentials_encrypted).length > 0;
+        const plain = record.credentials
+          && typeof record.credentials === 'object'
+          && Object.keys(record.credentials).length > 0;
+        return encrypted || plain;
+      });
+
+      if (hasCredentials) {
+        return true;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return false;
+}
+
+function buildReadinessState() {
+  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  const checks = {
+    control_write_key_configured: {
+      ok: Boolean(configuredWriteKey),
+      required: true
+    },
+    data_dir_exists: {
+      ok: fs.existsSync(DATA_DIR),
+      required: true,
+      path: DATA_DIR
+    },
+    data_dir_writable: {
+      ok: isDataDirectoryWritable(),
+      required: true,
+      path: DATA_DIR
+    },
+    project_registry_load: {
+      ok: false,
+      required: true,
+      total_projects: 0
+    }
+  };
+
+  let registryProjects = [];
+  try {
+    registryProjects = listProjects();
+    checks.project_registry_load.ok = Array.isArray(registryProjects);
+    checks.project_registry_load.total_projects = Array.isArray(registryProjects) ? registryProjects.length : 0;
+  } catch (error) {
+    checks.project_registry_load.error = sanitizeErrorMessage(error.message, 'Failed to load project registry');
+  }
+
+  const integrationSecretRequired = checks.project_registry_load.ok
+    ? detectIntegrationSecretUsage(registryProjects)
+    : false;
+  checks.integration_secret_key = {
+    ok: !integrationSecretRequired || hasIntegrationSecretKeyConfigured(),
+    required: integrationSecretRequired,
+    env: 'MH_INTEGRATION_SECRET_KEY',
+    file: '/opt/mh-assistant/data/system/integration-secret.key.json'
+  };
+
+  const missingRequiredEnv = [];
+  if (!checks.control_write_key_configured.ok) {
     missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
   }
 
+  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+    missingRequiredEnv.push('MH_INTEGRATION_SECRET_KEY');
+  }
+
+  const ready = Object.values(checks).every((check) => !check.required || check.ok);
+
   return {
     service: 'orchestrator-service',
-    ready: missingRequiredEnv.length === 0,
+    ready,
+    checks,
     protected_write_mode: {
       enabled: true,
       required_key_env: CONTROL_WRITE_KEY_ENV,
@@ -418,9 +623,13 @@ function writeReadRedirectionTelemetry(resolution, entry) {
     const logPath = path.join(telemetryDir, 'read-redirection-log.jsonl');
     fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, 'utf8');
   } catch (error) {
-    console.error(
-      `[Phase3ReadRedirect] telemetry-write-failed project=${entry.project} domain=${entry.domain} error=${error.message}`
-    );
+    appLogger.error('read_redirection_telemetry_write_failed', {
+      route: '/telemetry/read-redirection',
+      action: 'write_read_redirection_telemetry',
+      project: entry.project,
+      domain: entry.domain,
+      error: serializeErrorForLog(error)
+    });
   }
 }
 
@@ -515,9 +724,18 @@ function resolveReadCandidateFromBases(options = {}) {
 
   writeReadRedirectionTelemetry(resolution, telemetryEntry);
 
-  console.info(
-    `[Phase3ReadRedirect] project=${projectName} domain=${domain} artifact=${artifactType || 'n/a'} id=${requestedIdentifier || 'n/a'} file=${requestedFile || 'n/a'} canonical=${canonicalHit ? 'hit' : 'miss'} legacy=${legacyHit ? 'hit' : 'miss'} selected=${selectedRoot}`
-  );
+  appLogger.info('read_redirection_resolved', {
+    route: '/telemetry/read-redirection',
+    action: 'resolve_read_candidate',
+    project: projectName,
+    domain,
+    artifactType: artifactType || 'n/a',
+    requestedIdentifier: requestedIdentifier || 'n/a',
+    requestedFile: requestedFile || 'n/a',
+    canonicalHit,
+    legacyHit,
+    selectedRoot
+  });
 
   return {
     selectedPath,
@@ -4746,7 +4964,11 @@ function appendAudit(entry) {
     current.push(entry);
     fs.writeFileSync(auditPath, JSON.stringify(current, null, 2));
   } catch (error) {
-    console.error('Failed to write audit log:', error.message);
+    appLogger.error('audit_write_failed', {
+      route: '/audit',
+      action: 'append_audit',
+      error: serializeErrorForLog(error)
+    });
   }
 }
 
@@ -8131,6 +8353,11 @@ async function handleConnectProjectIntegration(req, res, options = {}) {
 
     return res.json(result);
   } catch (error) {
+    logCriticalFailure('integration_connect', req, error, {
+      project: req.params.project,
+      integrationId: req.params.integrationId,
+      reconnect: Boolean(options?.reconnect)
+    });
     return res.status(getIntegrationErrorHttpStatus(error)).json({
       error: error.message || 'Failed to save integration connection'
     });
@@ -8148,6 +8375,11 @@ async function handleProjectIntegrationAction(req, res, actionType) {
 
     return res.json(result);
   } catch (error) {
+    logCriticalFailure('integration_action', req, error, {
+      project: req.params.project,
+      integrationId: req.params.integrationId,
+      integrationAction: actionType
+    });
     return res.status(getIntegrationErrorHttpStatus(error)).json({
       error: error.message || 'Failed to update integration'
     });
@@ -8238,6 +8470,9 @@ app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
       job: result
     });
   } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to save publishing schedule',
       details: error.details || undefined
@@ -8268,6 +8503,9 @@ app.post('/public/media-manager/project/:project/publishing/schedule', (req, res
       job: result
     });
   } catch (error) {
+    logCriticalFailure('publishing_schedule', req, error, {
+      project: req.params.project
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to save publishing schedule',
       details: error.details || undefined
@@ -8398,6 +8636,10 @@ app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res)
       result
     });
   } catch (error) {
+    logCriticalFailure('publishing_publish', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to publish item',
       details: error.details || undefined
@@ -8426,6 +8668,10 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (re
       result
     });
   } catch (error) {
+    logCriticalFailure('publishing_publish', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to publish item',
       details: error.details || undefined
@@ -8454,6 +8700,10 @@ app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) =>
       result
     });
   } catch (error) {
+    logCriticalFailure('publishing_fail', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to mark publishing item as failed',
       details: error.details || undefined
@@ -8482,6 +8732,10 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, 
       result
     });
   } catch (error) {
+    logCriticalFailure('publishing_fail', req, error, {
+      project: req.params.project,
+      jobId: req.params.jobId
+    });
     return res.status(error.statusCode || 400).json({
       error: error.message || 'Failed to mark publishing item as failed',
       details: error.details || undefined
@@ -9470,7 +9724,19 @@ function assertPublishingMutationAllowed(projectName, action, options = {}) {
     ? policyRules.approval_before_publish
     : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
 
+  function logGovernanceBlock(rule, extra = {}) {
+    appLogger.warn('governance_blocked', {
+      route: '/governance/publishing',
+      action: actionKey || 'unknown',
+      project: projectName,
+      status: requestedStatus || null,
+      rule,
+      ...sanitizeValue(extra)
+    });
+  }
+
   if (freezeSensitiveAction && freezePublishing) {
+    logGovernanceBlock('freeze_publishing');
     throw buildPublishingGovernanceError(
       'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
       {
@@ -9482,6 +9748,7 @@ function assertPublishingMutationAllowed(projectName, action, options = {}) {
 
   if (approvalSensitiveAction && approvalBeforePublish) {
     if (!jobId) {
+      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
       throw buildPublishingGovernanceError(
         'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
         {
@@ -9495,6 +9762,10 @@ function assertPublishingMutationAllowed(projectName, action, options = {}) {
     const approvalStatus = String(approval?.status || '').trim().toLowerCase();
 
     if (!['approved', 'overridden'].includes(approvalStatus)) {
+      logGovernanceBlock('approval_before_publish', {
+        job_id: jobId,
+        approval_status: approvalStatus || 'missing'
+      });
       throw buildPublishingGovernanceError(
         'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
         {
@@ -11081,7 +11352,7 @@ if (command === '/attach_blog_image') {
   } catch (error) {
     return res.json({
       error: 'Upload or attach failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -11217,7 +11488,7 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Blog enhancement failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -11476,7 +11747,7 @@ if (command === '/attach_blog_image') {
   } catch (error) {
     return res.json({
       error: 'Attach email image failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -11547,7 +11818,7 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Email image generation failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -11612,7 +11883,7 @@ if (command === '/attach_blog_image') {
       } catch (error) {
         return res.json({
           error: 'Email send failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -13129,7 +13400,7 @@ if (command === '/execute_campaign_brain') {
       } catch (error) {
         return res.json({
           error: 'Campaign blog publish failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -13190,7 +13461,7 @@ if (command === '/execute_campaign_brain') {
       } catch (error) {
         return res.json({
           error: 'Campaign email send failed',
-          details: error.response?.data || error.message
+          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
         });
       }
     }
@@ -13529,7 +13800,7 @@ if (command === '/execute_campaign_brain') {
   } catch (error) {
     return res.json({
       error: 'WooCommerce media import failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -14063,7 +14334,7 @@ if (command === '/render_generation_job') {
   } catch (error) {
     return res.json({
       error: 'Render execution failed',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -14492,7 +14763,7 @@ if (command === '/sync_wc_product_intelligence') {
   } catch (error) {
     return res.json({
       error: 'Failed to sync WooCommerce product intelligence',
-      details: error.response?.data || error.message
+      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
     });
   }
 }
@@ -15991,8 +16262,11 @@ app.post('/publish-clone/:cloneId', async (req, res) => {
         'This action published a draft product. Original product was not modified.'
     });
   } catch (error) {
-    res.status(error.statusCode || 400).json({
-      error: error.response?.data || error.message
+    logCriticalFailure('publish_clone', req, error, {
+      cloneId: req.params.cloneId
+    });
+    return res.status(getErrorStatusCode(error, 502)).json({
+      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
     });
   }
 });
@@ -16075,8 +16349,12 @@ app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
         'Review the original live product page and decide whether to keep, draft, or trash the clone.'
     });
   } catch (error) {
-    res.status(error.statusCode || 400).json({
-      error: error.response?.data || error.message
+    logCriticalFailure('replace_original_product', req, error, {
+      originalId: req.params.originalId,
+      cloneId: req.params.cloneId
+    });
+    return res.status(getErrorStatusCode(error, 502)).json({
+      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to replace original product'
     });
   }
 });
@@ -16116,6 +16394,10 @@ app.post('/cleanup-clone/:cloneId', async (req, res) => {
       success: true
     });
   } catch (error) {
+    logCriticalFailure('cleanup_clone', req, error, {
+      cloneId: req.params.cloneId,
+      action: req.query.action || 'draft'
+    });
     return sendError(res, {
       statusCode: getErrorStatusCode(error, 502),
       code: 'LEGACY_CLEANUP_CLONE_FAILED',
@@ -16221,6 +16503,9 @@ app.post('/publish-blog/:draftId', async (req, res) => {
       note: 'Blog published successfully'
     });
   } catch (err) {
+    logCriticalFailure('publish_blog', req, err, {
+      draftId: req.params.draftId
+    });
     return sendError(res, {
       statusCode: getErrorStatusCode(err, 500),
       code: 'LEGACY_BLOG_PUBLISH_FAILED',
@@ -16284,6 +16569,9 @@ app.post('/rollback-product/:productId', async (req, res) => {
       note: 'Product restored from latest backup snapshot'
     });
   } catch (error) {
+    logCriticalFailure('rollback_product', req, error, {
+      productId: req.params.productId
+    });
     return sendError(res, {
       statusCode: getErrorStatusCode(error, 502),
       code: 'LEGACY_ROLLBACK_FAILED',
@@ -16291,6 +16579,46 @@ app.post('/rollback-product/:productId', async (req, res) => {
     });
   }
 });
+
+app.use((err, req, res, next) => {
+  const statusCode = getErrorStatusCode(err, 500);
+  const explicitCode = String(err?.code || '').trim();
+  const stableCode = explicitCode && /^[A-Z0-9_]+$/.test(explicitCode)
+    ? explicitCode
+    : statusCode >= 500
+    ? 'INTERNAL_ERROR'
+    : 'REQUEST_ERROR';
+
+  const isProduction = String(process.env.NODE_ENV || '').trim().toLowerCase() === 'production';
+  const responseMessage = statusCode >= 500 && isProduction
+    ? 'Internal server error'
+    : sanitizeErrorMessage(err?.message, 'Request failed');
+
+  appLogger.error('unhandled_request_error', {
+    route: req?.path || 'unknown',
+    action: 'global_error_handler',
+    method: req?.method || 'unknown',
+    statusCode,
+    error: serializeErrorForLog(err)
+  });
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(statusCode).json({
+    ok: false,
+    error: {
+      code: stableCode,
+      message: responseMessage
+    }
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`MH Orchestrator running on port ${PORT}`);
+  appLogger.info('service_started', {
+    route: '/health',
+    action: 'listen',
+    port: Number(PORT)
+  });
 });
