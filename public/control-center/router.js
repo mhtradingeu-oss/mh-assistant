@@ -23,28 +23,35 @@ import { settingsRoute } from "./pages/settings.js";
 import { governanceRoute } from "./pages/governance.js";
 
 const DEFAULT_ROLE = "strategist";
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
 const DEFAULT_ROUTE_ROLE_ACCESS = {
   home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
   "campaign-studio": ["strategist", "ads_operator", "admin"],
   "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
   "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
   publishing: ["publisher", "compliance_reviewer", "admin"],
   research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
   governance: ["compliance_reviewer", "admin", "analyst"],
   "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
   insights: ["analyst", "strategist", "ads_operator", "admin"],
   integrations: ["admin"],
-  workflows: [
-    "strategist",
-    "writer",
-    "designer",
-    "video_lead",
-    "publisher",
-    "ads_operator",
-    "analyst",
-    "compliance_reviewer",
-    "admin"
-  ],
+  workflows: ACTIVE_ROUTE_ROLES,
   library: ["designer", "video_lead", "publisher", "admin"],
   settings: ["admin"]
 };

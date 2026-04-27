@@ -43,8 +43,21 @@ function isSupportedProvider(integrationId) {
   return Boolean(adapter) && adapter.unsupported !== true;
 }
 
+function getUnsupportedProviderMessage(integrationId) {
+  const adapter = getProviderAdapter(integrationId);
+  if (!adapter || adapter.unsupported !== true) {
+    return '';
+  }
+
+  return String(
+    adapter.unsupportedMessage ||
+    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+  ).trim();
+}
+
 module.exports = {
   UNSUPPORTED_INTEGRATION_IDS,
   getProviderAdapter,
-  isSupportedProvider
+  isSupportedProvider,
+  getUnsupportedProviderMessage
 };
