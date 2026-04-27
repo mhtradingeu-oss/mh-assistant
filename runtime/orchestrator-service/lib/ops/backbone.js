@@ -9,6 +9,18 @@ const {
 const PROJECTS_DIR = '/opt/mh-assistant/data/projects';
 const BACKBONE_VERSION = 'mh-ops-backbone-v2';
 
+// Canonical defaults for policy_rules — these are the authoritative safe values.
+// Any governance file that is missing policy_rules (or missing individual keys)
+// will be merged with these at read-time so enforcement never silently bypasses.
+const DEFAULT_POLICY_RULES = {
+  approval_before_publish: true,
+  high_risk_claim_review_required: true,
+  brand_safety_review_required: true,
+  allow_admin_override: true,
+  auto_escalate_critical_risk: true,
+  freeze_publishing: false
+};
+
 const MAX_ITEMS = {
   campaigns: 150,
   contentItems: 400,
@@ -56,7 +68,7 @@ const STATUS_MODELS = {
   },
   ai_recommendations: {
     statuses: ['open', 'accepted', 'routed', 'completed', 'dismissed'],
-    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'tasks', 'governance']
+    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
   },
   ai_memory: {
     scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
@@ -1102,9 +1114,43 @@ function updateQueueEntity(projectName, entityType, entityId, patch = {}) {
   return next;
 }
 
+/**
+ * Normalizes a raw governance file object so that:
+ *  - policy_rules is always an object (never null/undefined/non-object)
+ *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+ *  - freeze_publishing and approval_before_publish are always explicit booleans
+ *
+ * This is a pure, non-mutating read-time normalization.
+ * It does NOT write back to disk.
+ */
+function normalizeGovernancePolicy(raw) {
+  const doc = asObject(raw);
+  const rawRules = doc.policy_rules;
+  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+  // treat it as empty so all defaults are applied.
+  const safeRules = (rawRules && typeof rawRules === 'object' && !Array.isArray(rawRules))
+    ? rawRules
+    : {};
+
+  const mergedRules = {
+    ...DEFAULT_POLICY_RULES,
+    ...safeRules,
+    // These two critical booleans are always coerced explicitly so
+    // string "true"/"false" or numeric 0/1 values from disk are safe.
+    freeze_publishing: asBoolean(safeRules.freeze_publishing, DEFAULT_POLICY_RULES.freeze_publishing),
+    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+  };
+
+  return {
+    ...doc,
+    policy_rules: mergedRules
+  };
+}
+
 function getGovernancePolicy(projectName) {
   const paths = getOperationsPaths(projectName);
-  return asObject(readJsonFile(paths.governancePath, {}));
+  const raw = readJsonFile(paths.governancePath, {});
+  return normalizeGovernancePolicy(raw);
 }
 
 function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {

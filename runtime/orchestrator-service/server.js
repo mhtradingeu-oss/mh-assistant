@@ -14,6 +14,10 @@ const { ExecutionArtifactWriterAdapter } = require('./lib/data/execution-artifac
 const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
 const { buildHealthState } = require('./lib/integrations/health-manager');
 const {
+  isSupportedProvider,
+  getUnsupportedProviderMessage
+} = require('./lib/integrations/provider-registry');
+const {
   buildProjectInsightsPayload,
   buildProjectLearningPayload
 } = require('./lib/insights/ingestion-service');
@@ -64,6 +68,19 @@ app.use(express.json());
 
 const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
 const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
+  /^\/task\/?$/i,
+  /^\/ingest\/?$/i,
+  /^\/backup-and-clone-product\/[^/]+\/?$/i,
+  /^\/apply-prepared-copy-to-clone\/[^/]+\/[^/]+\/?$/i,
+  /^\/telegram-command\/?$/i,
+  /^\/media\/upload\/?$/i,
+  /^\/publish-clone\/[^/]+\/?$/i,
+  /^\/replace-original-product\/[^/]+\/[^/]+\/?$/i,
+  /^\/cleanup-clone\/[^/]+\/?$/i,
+  /^\/publish-blog\/[^/]+\/?$/i,
+  /^\/rollback-product\/[^/]+\/?$/i
+];
 
 function isProtectedControlWriteRequest(req) {
   const method = String(req.method || '').trim().toUpperCase();
@@ -71,7 +88,9 @@ function isProtectedControlWriteRequest(req) {
     return false;
   }
 
-  return /^\/(?:public\/)?media-manager\//.test(String(req.path || '').trim());
+  const requestPath = String(req.path || '').trim();
+  return /^\/(?:public\/)?media-manager\//.test(requestPath)
+    || LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS.some((pattern) => pattern.test(requestPath));
 }
 
 function readProvidedControlWriteKey(req) {
@@ -2982,6 +3001,9 @@ function buildChannelConnectorPayload(projectName, waveName, channel) {
 }
 
 function scheduleLaunchJob(projectName, waveName, channel, scheduledFor) {
+  assertPublishingMutationAllowed(projectName, 'schedule', {
+    status: 'scheduled'
+  });
   const payload = buildChannelConnectorPayload(projectName, waveName, channel);
   const paths = getLaunchOpsPaths(projectName);
 
@@ -3385,6 +3407,10 @@ function updateScheduledJobRecord(projectName, jobId, updates = {}) {
 }
 
 function updateScheduledJobStatus(projectName, jobId, status) {
+  assertPublishingMutationAllowed(projectName, 'reschedule', {
+    jobId,
+    status
+  });
   return updateScheduledJobRecord(projectName, jobId, {
     status
   });
@@ -5814,6 +5840,12 @@ async function saveProjectIntegrationRecord(projectName, integrationId, payload 
     throw new Error('Missing integration id');
   }
 
+  if (!isSupportedProvider(normalizedId)) {
+    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+      status: 'unsupported_provider'
+    });
+  }
+
   const registry = readProjectIntegrationRegistry(projectName);
   const existing = asPlainObject(registry.records[normalizedId]);
   const now = new Date().toISOString();
@@ -5979,6 +6011,12 @@ async function runProjectIntegrationAction(projectName, integrationId, actionTyp
 
   if (!normalizedId || !Object.keys(existing).length) {
     throw new Error('Integration record not found');
+  }
+
+  if (actionType !== 'disconnect' && !isSupportedProvider(normalizedId)) {
+    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+      status: 'unsupported_provider'
+    });
   }
 
   if (actionType !== 'disconnect') {
@@ -7945,6 +7983,9 @@ function getIntegrationErrorHttpStatus(error) {
   if (status === 'token_expired') {
     return 401;
   }
+  if (status === 'unsupported_provider') {
+    return 422;
+  }
   if (status === 'reconnect_required') {
     return 403;
   }
@@ -9156,6 +9197,10 @@ function getScheduledJobById(projectName, jobId) {
 }
 
 function executeScheduledJob(projectName, jobId) {
+  assertPublishingMutationAllowed(projectName, 'publish', {
+    jobId,
+    status: 'published'
+  });
   const mode = readExecutionMode(projectName);
   const job = getScheduledJobById(projectName, jobId);
   const execPaths = getExecutionPaths(projectName);
@@ -9289,8 +9334,11 @@ function getLatestPublishingApproval(projectName, jobId) {
 
 function assertPublishingMutationAllowed(projectName, action, options = {}) {
   const governance = getGovernancePolicy(projectName);
-  const policyRules = governance && typeof governance === 'object'
-    ? governance.policy_rules || {}
+  // getGovernancePolicy always returns a normalized policy with policy_rules merged
+  // from DEFAULT_POLICY_RULES, so policy_rules is always a fully-populated object.
+  // We still guard defensively here in case of unexpected call paths.
+  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+    ? governance.policy_rules
     : {};
   const jobId = String(options.jobId || '').trim();
   const requestedStatus = normalizePublishingJobStatus(options.status, '');
@@ -9300,7 +9348,17 @@ function assertPublishingMutationAllowed(projectName, action, options = {}) {
   const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
     || ['ready', 'published'].includes(requestedStatus);
 
-  if (freezeSensitiveAction && Boolean(policyRules.freeze_publishing)) {
+  // Use explicit boolean coercion with safe defaults matching DEFAULT_POLICY_RULES:
+  //   freeze_publishing  → default false (permissive — freeze is opt-in)
+  //   approval_before_publish → default true (restrictive — approval is required by default)
+  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+    ? policyRules.freeze_publishing
+    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+    ? policyRules.approval_before_publish
+    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+
+  if (freezeSensitiveAction && freezePublishing) {
     throw buildPublishingGovernanceError(
       'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
       {
@@ -9310,7 +9368,7 @@ function assertPublishingMutationAllowed(projectName, action, options = {}) {
     );
   }
 
-  if (approvalSensitiveAction && Boolean(policyRules.approval_before_publish)) {
+  if (approvalSensitiveAction && approvalBeforePublish) {
     if (!jobId) {
       throw buildPublishingGovernanceError(
         'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
@@ -15076,7 +15134,7 @@ if (command === '/schedule_launch_job') {
     const result = scheduleLaunchJob(projectName, waveName, channel, scheduledFor);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to schedule launch job',
       details: error.message
     });
@@ -15112,7 +15170,7 @@ if (command === '/update_scheduled_job_status') {
     const result = updateScheduledJobStatus(projectName, jobId, status);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to update scheduled job status',
       details: error.message
     });
@@ -15165,7 +15223,7 @@ if (command === '/execute_scheduled_job') {
     const result = executeScheduledJob(projectName, jobId);
     return res.json({ command, result });
   } catch (error) {
-    return res.json({
+    return res.status(error.statusCode || 400).json({
       error: 'Failed to execute scheduled job',
       details: error.message
     });
@@ -15766,6 +15824,9 @@ if (command === '/project_control_center_activity') {
 
 app.post('/publish-clone/:cloneId', async (req, res) => {
   try {
+    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+      status: 'published'
+    });
     const cloneId = req.params.cloneId;
 
     const response = await axios.put(
@@ -15794,7 +15855,7 @@ app.post('/publish-clone/:cloneId', async (req, res) => {
         'This action published a draft product. Original product was not modified.'
     });
   } catch (error) {
-    res.json({
+    res.status(error.statusCode || 400).json({
       error: error.response?.data || error.message
     });
   }
@@ -15802,6 +15863,9 @@ app.post('/publish-clone/:cloneId', async (req, res) => {
 
 app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
   try {
+    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+      status: 'published'
+    });
     const originalId = req.params.originalId;
     const cloneId = req.params.cloneId;
 
@@ -15875,7 +15939,7 @@ app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
         'Review the original live product page and decide whether to keep, draft, or trash the clone.'
     });
   } catch (error) {
-    res.json({
+    res.status(error.statusCode || 400).json({
       error: error.response?.data || error.message
     });
   }
@@ -15924,6 +15988,9 @@ app.post('/cleanup-clone/:cloneId', async (req, res) => {
 
 app.post('/publish-blog/:draftId', async (req, res) => {
   try {
+    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+      status: 'published'
+    });
     const draftId = req.params.draftId;
 
     const queuePath = path.join(
@@ -15942,13 +16009,13 @@ app.post('/publish-blog/:draftId', async (req, res) => {
       return res.json({ error: 'Blog draft has no body content' });
     }
     
-    if (!WP_URL || !WP_USER || !WP_PASS) {
-      return res.json({ error: 'WordPress environment variables are missing' });
-    }
-
     const WP_URL = process.env.WP_BASE_URL;
     const WP_USER = process.env.WP_USER;
     const WP_PASS = process.env.WP_APP_PASSWORD;
+
+    if (!WP_URL || !WP_USER || !WP_PASS) {
+      return res.json({ error: 'WordPress environment variables are missing' });
+    }
 
     const response = await fetch(WP_URL, {
       method: 'POST',
@@ -16002,12 +16069,15 @@ app.post('/publish-blog/:draftId', async (req, res) => {
       note: 'Blog published successfully'
     });
   } catch (err) {
-    return res.json({ error: err.message });
+    return res.status(err.statusCode || 400).json({ error: err.message });
   }
 });
 
 app.post('/rollback-product/:productId', async (req, res) => {
   try {
+    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+      status: 'published'
+    });
     const productId = req.params.productId;
 
     const backupFiles = fs
@@ -16056,7 +16126,7 @@ app.post('/rollback-product/:productId', async (req, res) => {
       note: 'Product restored from latest backup snapshot'
     });
   } catch (error) {
-    res.json({
+    res.status(error.statusCode || 400).json({
       error: error.response?.data || error.message
     });
   }
