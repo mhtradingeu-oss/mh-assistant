@@ -4315,7 +4315,7 @@ function ensureJsonFile(filePath, defaultValue = []) {
   ensureDir(dir);
 
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2), 'utf8');
+    writeJsonFile(filePath, defaultValue);
   }
 }
 
@@ -4325,14 +4325,50 @@ function readJsonFile(filePath, fallback = []) {
     const raw = fs.readFileSync(filePath, 'utf8').trim();
     if (!raw) return fallback;
     return JSON.parse(raw);
-  } catch {
+  } catch (err) {
+    console.warn(`[server] readJsonFile: non-fatal read/parse error for ${filePath}, returning fallback. Error: ${err.message}`);
     return fallback;
   }
 }
 
+/**
+ * writeJsonFile (server-local) — atomic write with backup.
+ * Mirrors the hardened implementation in storage.js.
+ */
 function writeJsonFile(filePath, data) {
   ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+
+  const serialized = JSON.stringify(data, null, 2);
+  const tmpPath = filePath + '.tmp';
+  const backupPath = filePath + '.backup';
+
+  fs.writeFileSync(tmpPath, serialized, 'utf8');
+
+  let fd;
+  try {
+    fd = fs.openSync(tmpPath, 'r+');
+    fs.fsyncSync(fd);
+  } catch (_) {
+    // fsync is best-effort
+  } finally {
+    if (fd !== undefined) {
+      try { fs.closeSync(fd); } catch (_) { /* ignore */ }
+    }
+  }
+
+  if (fs.existsSync(filePath)) {
+    try { fs.copyFileSync(filePath, backupPath); } catch (_) { /* non-fatal */ }
+  }
+
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch (err) {
+    try { fs.unlinkSync(tmpPath); } catch (_) { /* ignore */ }
+    throw Object.assign(
+      new Error(`[server] Atomic rename failed for ${filePath}: ${err.message}`),
+      { filePath, tmpPath, code: 'STORAGE_RENAME_ERROR' }
+    );
+  }
 }
 
 function normalizeAssetRole(input) {

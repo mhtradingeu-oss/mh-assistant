@@ -3,6 +3,7 @@ const {
   ensureDir,
   ensureJsonFile,
   readJsonFile,
+  readJsonFileDurable,
   writeJsonFile
 } = require('../integrations/storage');
 
@@ -426,12 +427,26 @@ function mergeTeamModel(current = {}, patch = {}) {
 
 function readTeamModel(projectName) {
   const paths = getOperationsPaths(projectName);
-  return mergeTeamModel(readJsonFile(paths.teamPath, {}));
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.teamPath);
+  } catch (err) {
+    console.error(`[backbone] readTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  return mergeTeamModel(asObject(raw));
 }
 
 function updateTeamModel(projectName, patch = {}, actor = 'mh-assistant') {
   const paths = getOperationsPaths(projectName);
-  const next = mergeTeamModel(readJsonFile(paths.teamPath, {}), patch);
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.teamPath);
+  } catch (err) {
+    console.error(`[backbone] updateTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  const next = mergeTeamModel(asObject(raw), patch);
 
   writeJsonFile(paths.teamPath, next);
   updateSystem(paths);
@@ -844,7 +859,18 @@ function ensureOperationsFiles(paths) {
 }
 
 function updateSystem(paths, patch = {}) {
-  const current = asObject(readJsonFile(paths.systemPath, {}));
+  // Use readJsonFileDurable: corruption in the system file must not be silently
+  // swallowed — it would cause a silent overwrite of the entire system record.
+  // If the file does not exist yet, fall back to {} (first-time init path).
+  let currentRaw;
+  try {
+    currentRaw = readJsonFileDurable(paths.systemPath);
+  } catch (err) {
+    // System file is corrupt — log and re-throw so the caller sees a 500
+    console.error(`[backbone] updateSystem: system file is corrupt for project ${paths.project}: ${err.message}`);
+    throw err;
+  }
+  const current = asObject(currentRaw);
   const next = {
     ...current,
     ...patch,
@@ -875,8 +901,25 @@ function updateSystem(paths, patch = {}) {
   return next;
 }
 
+/**
+ * readCollection — reads a durable JSON array file.
+ *
+ * Uses readJsonFileDurable so corrupt files are quarantined and an error is
+ * thrown rather than silently returning [] and risking a subsequent write that
+ * wipes real data. Returns [] only when the file genuinely does not exist yet.
+ */
 function readCollection(filePath) {
-  return asArray(readJsonFile(filePath, []));
+  let raw;
+  try {
+    raw = readJsonFileDurable(filePath);
+  } catch (err) {
+    // File exists but is corrupt — error has already quarantined it.
+    // Re-throw so the HTTP layer returns a 500 rather than empty data.
+    console.error(`[backbone] readCollection: corrupt file quarantined: ${filePath} — ${err.message}`);
+    throw err;
+  }
+  // null means the file does not exist yet — that is a valid empty-collection state
+  return raw === null ? [] : asArray(raw);
 }
 
 function writeCollection(filePath, items, maxItems) {
@@ -1149,8 +1192,16 @@ function normalizeGovernancePolicy(raw) {
 
 function getGovernancePolicy(projectName) {
   const paths = getOperationsPaths(projectName);
-  const raw = readJsonFile(paths.governancePath, {});
-  return normalizeGovernancePolicy(raw);
+  let raw;
+  try {
+    raw = readJsonFileDurable(paths.governancePath);
+  } catch (err) {
+    // Governance file is corrupt — do not silently bypass enforcement.
+    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+    throw err;
+  }
+  // null means the file does not exist yet — normalizeGovernancePolicy({}) gives safe defaults
+  return normalizeGovernancePolicy(raw === null ? {} : raw);
 }
 
 function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
