@@ -268,6 +268,65 @@ const EMAIL_ARTIFACT_TYPES = Object.freeze({
 
 const PORT = process.env.PORT || 3000;
 
+function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+  const fallback = String(fallbackMessage || 'Request failed').trim() || 'Request failed';
+  const value = String(rawMessage || '').replace(/[\r\n\t]+/g, ' ').trim();
+  if (!value) {
+    return fallback;
+  }
+  return value.length > 300 ? `${value.slice(0, 297)}...` : value;
+}
+
+function getErrorStatusCode(error, fallbackStatus = 500) {
+  const statusCandidate = Number(
+    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+  );
+
+  if (!Number.isFinite(statusCandidate)) {
+    return fallbackStatus;
+  }
+
+  if (statusCandidate < 400 || statusCandidate > 599) {
+    return fallbackStatus;
+  }
+
+  return statusCandidate;
+}
+
+function sendError(res, {
+  statusCode = 500,
+  code = 'INTERNAL_ERROR',
+  message = 'Request failed'
+} = {}) {
+  return res.status(statusCode).json({
+    ok: false,
+    error: {
+      code: String(code || 'INTERNAL_ERROR').trim() || 'INTERNAL_ERROR',
+      message: sanitizeErrorMessage(message, 'Request failed')
+    }
+  });
+}
+
+function buildReadinessState() {
+  const missingRequiredEnv = [];
+  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+
+  if (!configuredWriteKey) {
+    missingRequiredEnv.push(CONTROL_WRITE_KEY_ENV);
+  }
+
+  return {
+    service: 'orchestrator-service',
+    ready: missingRequiredEnv.length === 0,
+    protected_write_mode: {
+      enabled: true,
+      required_key_env: CONTROL_WRITE_KEY_ENV,
+      key_configured: Boolean(configuredWriteKey)
+    },
+    missing_required_env: missingRequiredEnv
+  };
+}
+
 const EXECUTION_READ_DOMAIN_BASES = {
   generated: {
     legacy: 'generated',
@@ -6495,6 +6554,19 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'orchestrator-service',
+    pid: process.pid
+  });
+});
+
+app.get('/readyz', (req, res) => {
+  const readiness = buildReadinessState();
+  return res.status(readiness.ready ? 200 : 503).json(readiness);
+});
+
 app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
   try {
     const summary = summarizeProjectParity(req.params.project);
@@ -6822,8 +6894,10 @@ app.post('/backup-and-clone-product/:id', async (req, res) => {
         'Use the cloned draft product for safe content updates before publishing.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_BACKUP_CLONE_FAILED',
+      message: 'Failed to back up and clone product'
     });
   }
 });
@@ -6933,8 +7007,10 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
         'Review the updated draft clone in WooCommerce before any publish action.'
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_APPLY_COPY_FAILED',
+      message: 'Failed to apply prepared copy to clone'
     });
   }
 });
@@ -9837,7 +9913,11 @@ app.post('/telegram-command', async (req, res) => {
     const text = (req.body.text || '').trim();
 
     if (!text) {
-      return res.json({ error: 'No command text provided' });
+      return sendError(res, {
+        statusCode: 400,
+        code: 'COMMAND_TEXT_MISSING',
+        message: 'No command text provided'
+      });
     }
 
     const parts = text.split(/\s+/);
@@ -9867,7 +9947,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/optimize_product') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.get(`http://localhost:${PORT}/optimize-product/${productId}`);
@@ -9880,7 +9964,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/prepare_product_update') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.get(`http://localhost:${PORT}/prepare-product-update/${productId}`);
@@ -9893,7 +9981,11 @@ app.post('/telegram-command', async (req, res) => {
     if (command === '/clone_product') {
       const productId = args[0];
       if (!productId) {
-        return res.json({ error: 'Missing product_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing product_id'
+        });
       }
 
       const response = await axios.post(`http://localhost:${PORT}/backup-and-clone-product/${productId}`);
@@ -9908,7 +10000,11 @@ app.post('/telegram-command', async (req, res) => {
       const cloneId = args[1];
 
       if (!originalId || !cloneId) {
-        return res.json({ error: 'Missing original_id or clone_id' });
+        return sendError(res, {
+          statusCode: 400,
+          code: 'COMMAND_ARG_MISSING',
+          message: 'Missing original_id or clone_id'
+        });
       }
 
       const response = await axios.post(
@@ -15848,12 +15944,16 @@ if (command === '/project_control_center_activity') {
 
 
 
- return res.json({
-      error: `Unsupported command: ${command}`
+ return sendError(res, {
+      statusCode: 400,
+      code: 'UNSUPPORTED_COMMAND',
+      message: `Unsupported command: ${command}`
     });
   } catch (error) {
-    return res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'TELEGRAM_COMMAND_FAILED',
+      message: 'Failed to execute telegram command'
     });
   }
 });
@@ -16016,8 +16116,10 @@ app.post('/cleanup-clone/:cloneId', async (req, res) => {
       success: true
     });
   } catch (error) {
-    res.json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_CLEANUP_CLONE_FAILED',
+      message: 'Failed to cleanup clone product'
     });
   }
 });
@@ -16038,11 +16140,19 @@ app.post('/publish-blog/:draftId', async (req, res) => {
     const item = queue.find(x => x.id === draftId);
 
     if (!item) {
-      return res.json({ error: 'Blog draft not found' });
+      return sendError(res, {
+        statusCode: 404,
+        code: 'BLOG_DRAFT_NOT_FOUND',
+        message: 'Blog draft not found'
+      });
     }
 
     if (!item.body) {
-      return res.json({ error: 'Blog draft has no body content' });
+      return sendError(res, {
+        statusCode: 400,
+        code: 'BLOG_DRAFT_BODY_MISSING',
+        message: 'Blog draft has no body content'
+      });
     }
     
     const WP_URL = process.env.WP_BASE_URL;
@@ -16050,7 +16160,11 @@ app.post('/publish-blog/:draftId', async (req, res) => {
     const WP_PASS = process.env.WP_APP_PASSWORD;
 
     if (!WP_URL || !WP_USER || !WP_PASS) {
-      return res.json({ error: 'WordPress environment variables are missing' });
+      return sendError(res, {
+        statusCode: 503,
+        code: 'WORDPRESS_ENV_MISSING',
+        message: 'WordPress environment variables are missing'
+      });
     }
 
     const response = await fetch(WP_URL, {
@@ -16071,8 +16185,10 @@ app.post('/publish-blog/:draftId', async (req, res) => {
     const data = await response.json();
 
         if (!response.ok) {
-      return res.json({
-        error: data
+      return sendError(res, {
+        statusCode: response.status || 502,
+        code: 'WORDPRESS_PUBLISH_FAILED',
+        message: `WordPress publish failed with status ${response.status}`
       });
     }
 
@@ -16105,7 +16221,11 @@ app.post('/publish-blog/:draftId', async (req, res) => {
       note: 'Blog published successfully'
     });
   } catch (err) {
-    return res.status(err.statusCode || 400).json({ error: err.message });
+    return sendError(res, {
+      statusCode: getErrorStatusCode(err, 500),
+      code: 'LEGACY_BLOG_PUBLISH_FAILED',
+      message: 'Failed to publish blog draft'
+    });
   }
 });
 
@@ -16123,8 +16243,10 @@ app.post('/rollback-product/:productId', async (req, res) => {
       .reverse();
 
     if (backupFiles.length === 0) {
-      return res.json({
-        error: 'No backup found for this product'
+      return sendError(res, {
+        statusCode: 404,
+        code: 'PRODUCT_BACKUP_NOT_FOUND',
+        message: 'No backup found for this product'
       });
     }
 
@@ -16162,8 +16284,10 @@ app.post('/rollback-product/:productId', async (req, res) => {
       note: 'Product restored from latest backup snapshot'
     });
   } catch (error) {
-    res.status(error.statusCode || 400).json({
-      error: error.response?.data || error.message
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 502),
+      code: 'LEGACY_ROLLBACK_FAILED',
+      message: 'Failed to rollback product'
     });
   }
 });
