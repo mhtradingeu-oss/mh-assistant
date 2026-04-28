@@ -160,6 +160,62 @@ function requireProtectedControlWriteKey(req, res, next) {
 }
 
 app.use(requireProtectedControlWriteKey);
+
+const SENSITIVE_READ_ROUTE_PATTERNS = [
+  /^\/(?:public\/)?media-manager\/projects\/?$/i,
+  /^\/(?:public\/)?media-manager\/asset-catalog\/?$/i,
+  /^\/(?:public\/)?media-manager\/project\//i,
+  /^\/(?:public\/)?media-manager\/storage\//i,
+  /^\/(?:public\/)?api\//i,
+  /^\/media\/(?:tree|registry|file)\//i,
+  /^\/generated-output\//i,
+  /^\/today\/?$/i,
+  /^\/next\/?$/i,
+  /^\/products\/?$/i,
+  /^\/optimize-product\//i,
+  /^\/prepare-product-update\//i
+];
+
+function isProtectedControlReadRequest(req) {
+  const method = String(req.method || '').trim().toUpperCase();
+  if (method !== 'GET') {
+    return false;
+  }
+
+  const requestPath = String(req.path || '').trim();
+  return SENSITIVE_READ_ROUTE_PATTERNS.some((pattern) => pattern.test(requestPath));
+}
+
+function requireProtectedReadKey(req, res, next) {
+  if (!isProtectedControlReadRequest(req)) {
+    return next();
+  }
+
+  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  if (!expectedKey) {
+    return res.status(503).json({
+      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+    });
+  }
+
+  const providedKey = readProvidedControlWriteKey(req);
+  if (!providedKey) {
+    return res.status(401).json({
+      error: `Missing read key. Provide ${CONTROL_WRITE_KEY_HEADER} or Authorization: Bearer <key>.`
+    });
+  }
+
+  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+    return res.status(403).json({
+      error: 'Invalid read key.'
+    });
+  }
+
+  return next();
+}
+
+app.use(requireProtectedReadKey);
+
 const telegramRateLimiter = createInMemoryRateLimiter({
   windowMs: 60 * 1000,
   max: 40

@@ -10,6 +10,30 @@ function buildUrl(path = "") {
   return `${API_BASE_URL}${path}`;
 }
 
+function readControlKey() {
+  try {
+    if (typeof window !== "undefined" && window.__MH_CONTROL_WRITE_KEY__) {
+      return String(window.__MH_CONTROL_WRITE_KEY__);
+    }
+    if (typeof localStorage !== "undefined") {
+      const stored = localStorage.getItem("mh-control-write-key");
+      if (stored) return String(stored);
+    }
+  } catch (_) {
+    // Ignore storage access errors in restricted contexts
+  }
+  return "";
+}
+
+function buildReadHeaders() {
+  const headers = { Accept: "application/json" };
+  const key = readControlKey();
+  if (key) {
+    headers["x-mh-control-key"] = key;
+  }
+  return headers;
+}
+
 async function parseJson(response, fallbackMessage = "Request failed") {
   let payload = null;
 
@@ -34,9 +58,7 @@ async function parseJson(response, fallbackMessage = "Request failed") {
 async function getJson(path, fallbackMessage) {
   const response = await fetch(buildUrl(path), {
     method: "GET",
-    headers: {
-      Accept: "application/json"
-    }
+    headers: buildReadHeaders()
   });
 
   return parseJson(response, fallbackMessage);
