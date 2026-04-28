@@ -30,6 +30,11 @@ const {
   buildProjectLearningPayload
 } = require('./lib/insights/ingestion-service');
 const {
+  normalizeProjectSlug,
+  resolveProjectPath,
+  isProjectSlugValidationError
+} = require('./lib/security/project-isolation');
+const {
   STATUS_MODELS,
   buildOperationsSnapshot,
   buildGovernanceSummary,
@@ -304,7 +309,7 @@ function buildAssetRoleFromType(type) {
 }
 
 function resolveUploadTarget(projectName, type) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
   const legacyRole = buildAssetRoleFromType(normalizedType);
 
@@ -335,7 +340,7 @@ function resolveUploadTarget(projectName, type) {
 }
 
 function resolveMediaFilePath(projectName, type, filename) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
   const safeFilename = path.basename(String(filename || '').trim());
   const uploadTarget = resolveUploadTarget(project, normalizedType);
@@ -346,7 +351,7 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
       try {
-        const project = String(req.body.project || '').trim().toLowerCase();
+        const project = normalizeProjectSlug(req.body.project);
         const type = String(req.body.type || '').trim().toLowerCase();
 
         if (!project || !type) {
@@ -445,6 +450,93 @@ function sendError(res, {
     }
   });
 }
+
+function sendInvalidProjectSlug(res) {
+  return sendError(res, {
+    statusCode: 400,
+    code: 'INVALID_PROJECT_SLUG',
+    message: 'Invalid project slug'
+  });
+}
+
+const PROJECT_SLUG_RAW_PATH_PATTERNS = [
+  /^\/(?:public\/)?media-manager\/project\/([^/?#]+)/i,
+  /^\/(?:public\/)?api\/(?:insights|learning)\/([^/?#]+)/i,
+  /^\/media\/(?:tree|registry)\/([^/?#]+)/i,
+  /^\/media\/file\/([^/?#]+)/i,
+  /^\/generated-output\/([^/?#]+)/i
+];
+
+function getRequestRawPath(req) {
+  const rawPath = String(req.originalUrl || req.url || '').split('?')[0];
+  return rawPath || '/';
+}
+
+function extractRawProjectSlug(rawPath) {
+  for (const pattern of PROJECT_SLUG_RAW_PATH_PATTERNS) {
+    const match = rawPath.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+function validateRawProjectSlugPathSegment(req, res, next) {
+  try {
+    const rawPath = getRequestRawPath(req);
+    const rawProject = extractRawProjectSlug(rawPath);
+
+    if (!rawProject) {
+      return next();
+    }
+
+    normalizeProjectSlug(rawProject);
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+
+    return next(error);
+  }
+}
+
+app.use(validateRawProjectSlugPathSegment);
+
+app.param('project', (req, res, next, projectValue) => {
+  try {
+    req.params.project = normalizeProjectSlug(projectValue);
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+    return next(error);
+  }
+});
+
+function validateOptionalProjectSlugFields(req, res, next) {
+  try {
+    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'project')) {
+      req.body.project = normalizeProjectSlug(req.body.project);
+    }
+
+    if (req.query && Object.prototype.hasOwnProperty.call(req.query, 'project')) {
+      req.query.project = normalizeProjectSlug(req.query.project);
+    }
+
+    return next();
+  } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+    return next(error);
+  }
+}
+
+app.use(validateOptionalProjectSlugFields);
 
 function sanitizeErrorPayloadForClient(payload) {
   if (payload == null) {
@@ -4724,7 +4816,7 @@ function normalizeAssetRole(input) {
 }
 
 function getProjectBrandPaths(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
+  const safeProject = normalizeProjectSlug(projectName);
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
     domain: 'media',
     operation: 'read'
@@ -4750,8 +4842,7 @@ function uniqueValues(values) {
 }
 
 function hasProjectProfile(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-  if (!safeProject) return false;
+  const safeProject = normalizeProjectSlug(projectName);
 
   try {
     return fs.existsSync(getProjectBasePaths(safeProject).projectFilePath);
@@ -4831,7 +4922,7 @@ function listMediaManagerProjects() {
 }
 
 function buildLegacyMediaTree(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const paths = getProjectBrandPaths(project);
 
   if (!project || !fs.existsSync(paths.baseDir)) {
@@ -4856,7 +4947,7 @@ function buildLegacyMediaTree(projectName) {
 }
 
 function buildLegacyMediaRegistry(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const paths = getProjectBrandPaths(project);
 
   ensureJsonFile(paths.registryPath, []);
@@ -4870,7 +4961,7 @@ function buildLegacyMediaRegistry(projectName) {
 }
 
 function findRegisteredMediaFilePath(projectName, type, filename) {
-  const project = String(projectName || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
   const safeFilename = path.basename(String(filename || '').trim());
 
@@ -4927,11 +5018,7 @@ function findRegisteredMediaFilePath(projectName, type, filename) {
 }
 
 function buildMediaManagerProjectPayload(projectName) {
-  const project = String(projectName || '').trim().toLowerCase();
-
-  if (!project) {
-    throw new Error('Missing project name');
-  }
+  const project = normalizeProjectSlug(projectName);
 
   const brandPaths = getProjectBrandPaths(project);
   const hasProfile = hasProjectProfile(project);
@@ -5406,13 +5493,9 @@ function getProjectRegistryPaths() {
 }
 
 function getProjectBasePaths(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Invalid project name');
-  }
-
-  const baseDir = path.join('/opt/mh-assistant/data/projects', safeProject);
+  const resolved = resolveProjectPath(path.join(DATA_DIR, 'projects'), projectName);
+  const safeProject = resolved.project;
+  const baseDir = resolved.projectRoot;
 
   return {
     baseDir,
@@ -5451,11 +5534,7 @@ function ensureProjectBaseStructure(projectName) {
 }
 
 function createProject(projectName, market, language, projectType, websiteUrl) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Project name is required');
-  }
+  const safeProject = normalizeProjectSlug(projectName);
 
   const registry = getProjectRegistryPaths();
   const projects = readJsonFile(registry.registryPath, []);
@@ -5552,12 +5631,10 @@ function normalizeProjectSetupPayload(payload = {}) {
 }
 
 function updateProjectSetup(projectName, payload = {}) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-  const requestedProjectName = String(payload.project_name || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Project name is required');
-  }
+  const safeProject = normalizeProjectSlug(projectName);
+  const requestedProjectName = payload.project_name == null
+    ? ''
+    : normalizeProjectSlug(payload.project_name);
 
   if (requestedProjectName && requestedProjectName !== safeProject) {
     throw new Error('Project rename is not supported by Setup persistence');
@@ -7309,9 +7386,27 @@ app.get('/media/tree/:project', (req, res) => {
   }
 });
 
-app.post('/media/upload', upload.single('file'), (req, res) => {
+function applySingleMediaUpload(req, res, next) {
+  return upload.single('file')(req, res, (error) => {
+    if (!error) {
+      return next();
+    }
+
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
+
+    return sendError(res, {
+      statusCode: 400,
+      code: 'UPLOAD_REJECTED',
+      message: 'Upload request rejected'
+    });
+  });
+}
+
+app.post('/media/upload', applySingleMediaUpload, (req, res) => {
   try {
-    const project = String(req.body.project || '').trim().toLowerCase();
+    const project = normalizeProjectSlug(req.body.project);
     const type = String(req.body.type || '').trim().toLowerCase();
 
     if (!project || !type || !req.file) {
@@ -7368,6 +7463,9 @@ app.post('/media/upload', upload.single('file'), (req, res) => {
       registered_asset: registeredAsset
     });
   } catch (error) {
+    if (isProjectSlugValidationError(error)) {
+      return sendInvalidProjectSlug(res);
+    }
     return res.status(500).json({
       error: 'Upload failed',
       details: error.message
@@ -7380,7 +7478,7 @@ app.get('/media/registry/:project', (req, res) => {
 });
 
 app.get('/media/file/:project/:type/:filename', (req, res) => {
-  const project = String(req.params.project || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(req.params.project);
   const type = String(req.params.type || '').trim().toLowerCase();
   const filename = String(req.params.filename || '').trim();
 
@@ -8826,10 +8924,11 @@ app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('/generated-output/:project/:filename', (req, res) => {
-  const project = String(req.params.project || '').trim().toLowerCase();
+  const project = normalizeProjectSlug(req.params.project);
   const filename = String(req.params.filename || '').trim();
+  const safeFilename = path.basename(filename);
 
-  if (!project || !filename) {
+  if (!project || !safeFilename || safeFilename !== filename) {
     return res.status(400).send('Missing project or filename');
   }
 
@@ -8837,7 +8936,7 @@ app.get('/generated-output/:project/:filename', (req, res) => {
   const candidate = resolveExecutionReadCandidate({
     projectName: project,
     domain: 'generated',
-    relativePath: path.join('outputs', filename),
+    relativePath: path.join('outputs', safeFilename),
     pathType: 'file'
   });
   const filePath = candidate.selectedPath;
@@ -10131,19 +10230,21 @@ function buildProjectControlCenterReadiness(projectName) {
 }
 
 function getProjectInsightsEnginePayload(projectName) {
-  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+  const safeProject = normalizeProjectSlug(projectName);
+  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
   return buildProjectInsightsPayload({
-    projectName,
-    projectPaths: getProjectIntegrationPaths(projectName),
+    projectName: safeProject,
+    projectPaths: getProjectIntegrationPaths(safeProject),
     integrationControlCenter: controlCenter
   });
 }
 
 function getProjectLearningEnginePayload(projectName) {
-  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+  const safeProject = normalizeProjectSlug(projectName);
+  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
   return buildProjectLearningPayload({
-    projectName,
-    projectPaths: getProjectIntegrationPaths(projectName),
+    projectName: safeProject,
+    projectPaths: getProjectIntegrationPaths(safeProject),
     integrationControlCenter: controlCenter
   });
 }
@@ -10228,6 +10329,19 @@ function getAiOrchestrator() {
   }
 
   return aiOrchestrator;
+}
+
+function resolveLegacyExecutionProjectPaths(projectName) {
+  const resolved = resolveProjectPath(path.join(EXECUTION_DIR, 'projects'), projectName);
+  const projectDir = resolved.projectRoot;
+
+  return {
+    project: resolved.project,
+    projectDir,
+    profilePath: path.join(projectDir, 'project-profile.json'),
+    campaignStrategyQueuePath: path.join(projectDir, 'campaign-strategy-queue.json'),
+    campaignAssetPlanPath: path.join(projectDir, 'campaign-asset-plan.json')
+  };
 }
 
 
@@ -11952,19 +12066,17 @@ if (command === '/attach_blog_image') {
     }
 
     if (command === '/create_project_profile') {
-      const projectName = args.join(' ').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args.join(' ').trim());
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const projectDir = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const projectDir = projectPaths.projectDir;
 
       fs.mkdirSync(projectDir, { recursive: true });
 
-      const profilePath = path.join(projectDir, 'project-profile.json');
+      const profilePath = projectPaths.profilePath;
 
       const profile = {
         project_id: projectName,
@@ -12003,15 +12115,12 @@ if (command === '/attach_blog_image') {
     }
 
     if (command === '/review_project_profile') {
-      const projectName = args.join(' ').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args.join(' ').trim());
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const profilePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/project-profile.json`
-      );
+      const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
 
       if (!fs.existsSync(profilePath)) {
         return res.json({ error: 'Project profile not found' });
@@ -12026,20 +12135,18 @@ if (command === '/attach_blog_image') {
     }
 
     if (command === '/create_campaign_strategy') {
-      const projectName = (args[0] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[0] || '');
       const goal = args.slice(1).join(' ').trim() || 'sales';
 
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const projectDir = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const projectDir = projectPaths.projectDir;
 
-      const profilePath = path.join(projectDir, 'project-profile.json');
-      const queuePath = path.join(projectDir, 'campaign-strategy-queue.json');
+      const profilePath = projectPaths.profilePath;
+      const queuePath = projectPaths.campaignStrategyQueuePath;
 
       if (!fs.existsSync(profilePath)) {
         return res.json({ error: 'Project profile not found' });
@@ -12107,16 +12214,13 @@ if (command === '/attach_blog_image') {
 
     if (command === '/review_campaign_strategy') {
       const strategyId = args[0];
-      const projectName = (args[1] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[1] || '');
 
       if (!strategyId || !projectName) {
         return res.json({ error: 'Missing strategy id or project name' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
+      const queuePath = resolveLegacyExecutionProjectPaths(projectName).campaignStrategyQueuePath;
 
       if (!fs.existsSync(queuePath)) {
         return res.json({ error: 'Campaign strategy queue not found' });
@@ -12137,21 +12241,15 @@ if (command === '/attach_blog_image') {
 
     if (command === '/plan_campaign_assets') {
       const strategyId = args[0];
-      const projectName = (args[1] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[1] || '');
 
       if (!strategyId || !projectName) {
         return res.json({ error: 'Missing strategy id or project name' });
       }
 
-      const strategyQueuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
-
-      const planPath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-asset-plan.json`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
+      const planPath = projectPaths.campaignAssetPlanPath;
 
       if (!fs.existsSync(strategyQueuePath)) {
         return res.json({ error: 'Campaign strategy queue not found' });
@@ -12198,16 +12296,13 @@ if (command === '/attach_blog_image') {
     }
 
 if (command === '/enrich_project_profile') {
-  const projectName = args.join(' ').trim().toLowerCase();
+  const projectName = normalizeProjectSlug(args.join(' ').trim());
 
   if (!projectName) {
     return res.json({ error: 'Missing project name' });
   }
 
-  const profilePath = path.join(
-    EXECUTION_DIR,
-    `projects/${projectName}/project-profile.json`
-  );
+  const profilePath = resolveLegacyExecutionProjectPaths(projectName).profilePath;
 
   if (!fs.existsSync(profilePath)) {
     return res.json({ error: 'Project profile not found' });
@@ -12820,22 +12915,16 @@ if (command === '/enrich_keyword_live') {
   });
 }
     if (command === '/build_campaign_from_intelligence') {
-      const projectName = (args[0] || '').trim().toLowerCase();
+      const projectName = normalizeProjectSlug(args[0] || '');
       const goal = args.slice(1).join(' ').trim() || 'sales';
 
       if (!projectName) {
         return res.json({ error: 'Missing project name' });
       }
 
-      const profilePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/project-profile.json`
-      );
-
-      const strategyQueuePath = path.join(
-        EXECUTION_DIR,
-        `projects/${projectName}/campaign-strategy-queue.json`
-      );
+      const projectPaths = resolveLegacyExecutionProjectPaths(projectName);
+      const profilePath = projectPaths.profilePath;
+      const strategyQueuePath = projectPaths.campaignStrategyQueuePath;
 
       const trendQueuePath = path.join(
         EXECUTION_DIR,
