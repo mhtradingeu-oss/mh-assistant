@@ -8807,15 +8807,22 @@ app.get('/media-manager/', (req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
 });
 
-app.get('/control-center', (req, res) => {
+app.get(/^\/control-center$/, (req, res) => {
   return res.redirect(302, '/control-center/');
 });
 
-app.get('/control-center/', (req, res) => {
+app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
+  if (!['GET', 'HEAD'].includes(String(req.method || '').toUpperCase())) {
+    return next();
+  }
+
   return res.sendFile(path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html'));
 });
 
-app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR));
+app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
+  index: false,
+  redirect: false
+}));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.get('/generated-output/:project/:filename', (req, res) => {
