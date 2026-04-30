@@ -1,5 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const {
+  normalizeProjectSlug,
+  resolvePathWithinRoot
+} = require('../security/project-isolation');
 
 const DOMAIN_BASES = {
   generated: {
@@ -49,12 +53,7 @@ function ensureDir(dirPath) {
 }
 
 function normalizeProjectName(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-  if (!safeProject) {
-    throw new Error('Invalid project name');
-  }
-
-  return safeProject;
+  return normalizeProjectSlug(projectName);
 }
 
 function buildBasePath(rootPath, subPath) {
@@ -204,11 +203,12 @@ class ExecutionArtifactWriterAdapter {
       throw new Error(`Legacy path ${input.legacyPath} is outside expected domain roots`);
     }
 
-    const canonicalPath = path.join(canonicalBase, relativePath);
+    const canonicalPath = resolvePathWithinRoot(canonicalBase, relativePath);
+    const validatedLegacyPath = resolvePathWithinRoot(input.resolution.legacyRoot, path.relative(input.resolution.legacyRoot, input.legacyPath));
 
     return {
       canonicalPath,
-      legacyPath: input.legacyPath
+      legacyPath: validatedLegacyPath
     };
   }
 

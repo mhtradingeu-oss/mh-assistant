@@ -34,6 +34,18 @@ function buildReadHeaders() {
   return headers;
 }
 
+function buildWriteHeaders() {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+  const key = readControlKey();
+  if (key) {
+    headers["x-mh-control-key"] = key;
+  }
+  return headers;
+}
+
 async function parseJson(response, fallbackMessage = "Request failed") {
   let payload = null;
 
@@ -49,7 +61,10 @@ async function parseJson(response, fallbackMessage = "Request failed") {
       payload?.message ||
       `${fallbackMessage} (${response.status})`;
 
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
 
   return payload;
@@ -67,10 +82,7 @@ async function getJson(path, fallbackMessage) {
 async function sendJson(path, method, body, fallbackMessage) {
   const response = await fetch(buildUrl(path), {
     method,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
+    headers: buildWriteHeaders(),
     body: body == null ? undefined : JSON.stringify(body)
   });
 
@@ -78,8 +90,15 @@ async function sendJson(path, method, body, fallbackMessage) {
 }
 
 async function sendForm(path, formData, fallbackMessage) {
+  const headers = {};
+  const key = readControlKey();
+  if (key) {
+    headers["x-mh-control-key"] = key;
+  }
+
   const response = await fetch(buildUrl(path), {
     method: "POST",
+    headers,
     body: formData
   });
 

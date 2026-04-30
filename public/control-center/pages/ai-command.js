@@ -12,33 +12,39 @@ const MODE_DEFS = [
     routeHint: "home"
   },
   {
+    id: "campaign",
+    label: "Campaign Strategist",
+    summary: "Campaign concepts, launch plans, channel mix, segments, and offer strategy.",
+    routeHint: "campaign-studio"
+  },
+  {
     id: "content",
-    label: "Content",
-    summary: "Content winners, weak posts, formats, and next publishing moves.",
+    label: "Content Creator",
+    summary: "Captions, hooks, scripts, post ideas, emails, and landing page sections.",
     routeHint: "content-studio"
   },
   {
     id: "seo",
-    label: "SEO",
-    summary: "Traffic, search visibility, landing-page performance, and CTR opportunities.",
+    label: "SEO Specialist",
+    summary: "Keywords, blog topics, landing-page SEO, search intent, and metadata.",
     routeHint: "insights"
   },
   {
     id: "ads",
-    label: "Ads",
-    summary: "Paid performance, creative strength, ROAS, and scale or pause decisions.",
+    label: "Ads Specialist",
+    summary: "Ad concepts, targeting angles, platform copy, paid strategy, and budget split.",
     routeHint: "ads-manager"
   },
   {
     id: "research",
-    label: "Research",
-    summary: "Audience, market gaps, evidence gathering, and growth questions.",
-    routeHint: "setup"
+    label: "Research Analyst",
+    summary: "Competitors, market trends, audience research, and positioning gaps.",
+    routeHint: "research"
   },
   {
     id: "operations",
-    label: "Operations",
-    summary: "Routing, workflows, reconnects, campaigns, and execution planning.",
+    label: "Operations Planner",
+    summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
     routeHint: "workflows"
   }
 ];
@@ -60,6 +66,51 @@ function asString(value) {
   return String(value);
 }
 
+function humanizeValue(value, fallback = "") {
+  if (value == null) return fallback;
+  if (typeof value === "string") {
+    const clean = value.trim();
+    return clean === "[object Object]" ? fallback : clean;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+  }
+  if (typeof value === "object") {
+    const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+    const detail = humanizeValue(
+      value.action ||
+      value.summary ||
+      value.description ||
+      value.recommendation ||
+      value.reason ||
+      value.insight ||
+      value.body ||
+      value.text ||
+      value.value
+    );
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+
+    return Object.entries(value)
+      .filter(([, item]) => item != null && typeof item !== "object")
+      .slice(0, 4)
+      .map(([key, item]) => `${titleCase(key)}: ${humanizeValue(item)}`)
+      .filter(Boolean)
+      .join("; ") || fallback;
+  }
+  return fallback;
+}
+
+function normalizeDisplayList(value, limit = 8) {
+  return asArray(value)
+    .map((item) => humanizeValue(item))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
 function toNumber(value, fallback = null) {
   if (value == null || value === "") return fallback;
   const parsed = Number(value);
@@ -68,6 +119,13 @@ function toNumber(value, fallback = null) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function isMissingIntelligenceError(error) {
+  const status = Number(error?.status);
+  if (status !== 404) return false;
+  const message = asString(error?.message).toLowerCase();
+  return message.includes("insights") || message.includes("learning") || message.includes("not found");
 }
 
 function formatTime(value) {
@@ -184,35 +242,41 @@ function buildSuggestedPrompts(aiContext, modeId) {
       "What is blocking growth right now?",
       "What are the current priorities?"
     ],
+    campaign: [
+      "Build a launch campaign for HAIROTICMEN in Germany.",
+      "Create a campaign plan for Beard Kit, Beard Oil, and Hair Wax.",
+      "What offer strategy should this campaign use?",
+      "Map the launch phases and channel mix."
+    ],
     content: [
-      "What content is performing best?",
-      "What should we post next?",
-      "Which posts are weak?",
-      "Which formats should we repeat?"
+      "Generate 5 Instagram hooks for Beard Oil.",
+      "Write caption ideas for the next product push.",
+      "Draft a reel script for Beard Oil.",
+      "Create email copy for the campaign launch."
     ],
     seo: [
-      "What SEO opportunities do we have?",
-      "Why is traffic weak?",
-      "What should we improve on the website?",
-      "Which pages have low CTR opportunity?"
+      "Build an SEO keyword plan for Beard Oil.",
+      "Generate blog topics for men’s grooming in Germany.",
+      "Write a meta title and description for Beard Oil.",
+      "Map search intent for the campaign landing page."
     ],
     ads: [
-      "Which campaign should we scale?",
-      "Why is ROAS weak?",
-      "What ad creative is working?",
-      "What should we pause or fix next?"
+      "Give me 3 ad ideas for beard oil in Germany.",
+      "Write Meta ad copy for Beard Kit.",
+      "Create TikTok ad hooks for Hair Wax.",
+      "Suggest targeting angles and CTAs."
     ],
     research: [
-      "What does the current data suggest we still need to learn?",
-      "Which missing signals are limiting strategy quality?",
-      "What market questions should we investigate next?",
-      "What should we validate before launch?"
+      "Research competitor positioning for men’s grooming in Germany.",
+      "What market trends should shape this launch?",
+      "Find audience research gaps for Beard Oil.",
+      "What positioning gaps can HAIROTICMEN own?"
     ],
     operations: [
-      "Launch a new campaign.",
-      "Build a 7-day content plan.",
-      "Improve weak posts.",
-      "Reconnect missing tools."
+      "Build a task plan for campaign launch.",
+      "Create a handoff plan for content, media, publishing, and ads.",
+      "What approvals are needed before launch?",
+      "Build an execution timeline."
     ]
   };
 
@@ -377,12 +441,13 @@ function buildUnifiedAiContext(state, intelligence) {
 function scoreMode(text, modeId) {
   const query = asString(text).toLowerCase();
   const keywordMap = {
-    executive: ["next", "status", "priority", "priorities", "blocking", "growth", "summary", "do next", "project"],
-    content: ["content", "post", "caption", "blog", "script", "format", "repurpose", "weak post", "post next"],
-    seo: ["seo", "traffic", "query", "search", "ctr", "website", "landing page", "ranking"],
-    ads: ["ads", "roas", "campaign", "creative", "scale", "pause", "cpc", "cpa", "paid"],
-    research: ["research", "market", "audience", "competitor", "learn", "validate", "insight gap"],
-    operations: ["launch", "build", "improve", "reconnect", "connect", "sync", "workflow", "route", "publish", "plan"]
+    executive: ["next", "status", "priority", "priorities", "blocking", "blocker", "decision", "summary", "do next", "readiness"],
+    campaign: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy"],
+    content: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "post next"],
+    seo: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking"],
+    ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "hooks", "cta", "paid", "targeting angle"],
+    research: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate"],
+    operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish"]
   };
 
   return asArray(keywordMap[modeId]).reduce((total, keyword) => {
@@ -859,16 +924,21 @@ async function ensureIntelligenceLoaded({
           fetchProjectLearning(projectName)
         ]);
 
+        const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+        const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+
+        const intelligenceErrors = [
+          insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+          learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+        ].filter(Boolean);
+
         session.intelligence = {
           project: projectName,
           status: "ready",
           dashboard: getState().data,
-          insights: insightsResult.status === "fulfilled" ? insightsResult.value : null,
-          learning: learningResult.status === "fulfilled" ? learningResult.value : null,
-          error:
-            insightsResult.status === "rejected" && learningResult.status === "rejected"
-              ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load live intelligence")
-              : "",
+          insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+          learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+          error: intelligenceErrors[0] || "",
           loadedAt: nowIso(),
           loadingPromise: null
         };
@@ -890,61 +960,6 @@ async function ensureIntelligenceLoaded({
   return session.intelligence.loadingPromise;
 }
 
-function submitCommand({
-  aiContext,
-  session,
-  command,
-  modeId,
-  source
-}) {
-  const cleanCommand = asString(command).trim();
-  if (!cleanCommand) {
-    return false;
-  }
-
-  const classified = classifyIntent(cleanCommand, modeId || session.modeId);
-  const response = buildResponseForMode(aiContext, classified, cleanCommand);
-  const createdAt = nowIso();
-
-  session.modeId = classified.resolvedModeId;
-  session.messages.push({
-    id: `msg-user-${Date.now()}`,
-    role: "user",
-    modeId: classified.resolvedModeId,
-    content: cleanCommand,
-    createdAt,
-    source
-  });
-
-  session.messages.push({
-    id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    role: "assistant",
-    modeId: classified.resolvedModeId,
-    createdAt: nowIso(),
-    source: "intelligence-response",
-    response
-  });
-
-  session.history.unshift({
-    id: `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    modeId: classified.resolvedModeId,
-    command: cleanCommand,
-    createdAt,
-    source,
-    responseTitle: response.title
-  });
-  session.history = session.history.slice(0, 14);
-  session.draftMessage = "";
-  syncAiWorkflowBridge({
-    projectName: aiContext.projectName,
-    modeId: classified.resolvedModeId,
-    command: cleanCommand,
-    response
-  });
-
-  return true;
-}
-
 async function submitDurableCommand({
   projectName,
   aiContext,
@@ -957,32 +972,61 @@ async function submitDurableCommand({
 }) {
   const cleanCommand = asString(command).trim();
   if (!cleanCommand) {
-    return false;
+    return { accepted: false, failed: false };
   }
 
   if (typeof executeProjectAiCommand !== "function") {
-    return submitCommand({
-      aiContext,
-      session,
-      command: cleanCommand,
-      modeId,
-      source
-    });
+    throw new Error("AI command service is unavailable in this view.");
   }
 
-  const result = await executeProjectAiCommand(projectName, {
-    command: cleanCommand,
-    mode_id: modeId || session.modeId,
-    source,
-    actor: "mh-assistant"
-  });
-  const response = asObject(result?.response);
-  const classification = asObject(result?.command?.classification);
-  const resolvedModeId =
-    asString(classification.resolvedModeId) ||
-    asString(result?.command?.mode_id) ||
-    modeId ||
-    session.modeId;
+  let result = null;
+  let response = {};
+  let resolvedModeId = modeId || session.modeId;
+  let commandId = "";
+
+  try {
+    result = await executeProjectAiCommand(projectName, {
+      command: cleanCommand,
+      mode_id: modeId || session.modeId,
+      source,
+      actor: "mh-assistant"
+    });
+
+    response = asObject(result?.response);
+    const classification = asObject(result?.command?.classification);
+    resolvedModeId =
+      asString(classification.resolvedModeId) ||
+      asString(result?.command?.mode_id) ||
+      modeId ||
+      session.modeId;
+    commandId = asString(result?.command?.id);
+  } catch (error) {
+    const payload = asObject(error?.payload);
+    const payloadResponse = asObject(payload?.response);
+    const payloadCommand = asObject(payload?.command);
+    const failureReason =
+      asString(payload?.error) ||
+      asString(payloadResponse?.error) ||
+      asString(error?.message) ||
+      "AI provider failed to return output.";
+
+    resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+    commandId = asString(payloadCommand?.id);
+    response = {
+      status: "failed",
+      title: "AI command failed",
+      summary: failureReason,
+      content: "",
+      analysis: "",
+      recommendations: [],
+      findings: [failureReason],
+      nextActions: ["Fix AI provider configuration and retry."],
+      routeSuggestions: [],
+      missingData: [],
+      error: failureReason
+    };
+  }
+
   const createdAt = nowIso();
 
   session.modeId = resolvedModeId;
@@ -1005,12 +1049,12 @@ async function submitDurableCommand({
   });
 
   session.history.unshift({
-    id: asString(result?.command?.id) || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     modeId: resolvedModeId,
     command: cleanCommand,
     createdAt,
     source,
-    responseTitle: response.title
+    responseTitle: response.title || (response.status === "failed" ? "AI command failed" : "")
   });
   session.history = session.history.slice(0, 14);
   session.draftMessage = "";
@@ -1022,23 +1066,235 @@ async function submitDurableCommand({
   });
 
   await reloadProjectData?.(projectName);
-  return true;
+  return {
+    accepted: true,
+    failed: asString(response.status).toLowerCase() === "failed"
+  };
+}
+
+function normalizeAdIdeaForDisplay(item = {}) {
+  const record = asObject(item);
+  return {
+    hook: humanizeValue(record.hook || record.title || record.angle || record.headline),
+    primaryText: humanizeValue(record.primaryText || record.primary_text || record.copy || record.text || record.body || record.description),
+    headline: humanizeValue(record.headline || record.title),
+    cta: humanizeValue(record.cta || record.CTA || record.callToAction || record.call_to_action),
+    audienceSegment: humanizeValue(record.audienceSegment || record.audience_segment || record.audience || record.segment),
+    emotionalTrigger: humanizeValue(record.emotionalTrigger || record.emotional_trigger || record.trigger || record.motivation),
+    platformFit: humanizeValue(record.platformFit || record.platform_fit || record.platform || record.channel),
+    visualDirection: humanizeValue(record.visualDirection || record.visual_direction || record.visual || record.creative_direction)
+  };
+}
+
+function renderAdIdeas(response, escapeHtml) {
+  const ideas = asArray(response.adIdeas || response.ad_ideas)
+    .map((item) => typeof item === "string" ? normalizeAdIdeaForDisplay({ hook: item, primaryText: item }) : normalizeAdIdeaForDisplay(item))
+    .filter((item) => item.hook || item.primaryText || item.headline)
+    .slice(0, 5);
+
+  if (!ideas.length) return "";
+
+  return `
+    <div class="ai-output-card ai-output-span">
+      <span class="ai-output-label">Ad Ideas</span>
+      <div class="ai-marketing-card-grid">
+        ${ideas.map((idea) => `
+          <article class="ai-marketing-card">
+            <strong>${escapeHtml(idea.hook || idea.headline || "Ad idea")}</strong>
+            <p>${escapeHtml(idea.primaryText || "No primary copy returned.")}</p>
+            <div class="ai-marketing-meta">
+              ${idea.headline ? `<div><span>Headline</span><b>${escapeHtml(idea.headline)}</b></div>` : ""}
+              ${idea.cta ? `<div><span>CTA</span><b>${escapeHtml(idea.cta)}</b></div>` : ""}
+              ${idea.platformFit ? `<div><span>Platform</span><b>${escapeHtml(idea.platformFit)}</b></div>` : ""}
+              ${idea.audienceSegment ? `<div><span>Segment</span><b>${escapeHtml(idea.audienceSegment)}</b></div>` : ""}
+              ${idea.emotionalTrigger ? `<div><span>Trigger</span><b>${escapeHtml(idea.emotionalTrigger)}</b></div>` : ""}
+              ${idea.visualDirection ? `<div><span>Visual</span><b>${escapeHtml(idea.visualDirection)}</b></div>` : ""}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderListSection(label, items, escapeHtml) {
+  const values = normalizeDisplayList(items, 12);
+  if (!values.length) return "";
+  return `
+    <div class="ai-structured-section">
+      <span class="ai-output-label">${escapeHtml(label)}</span>
+      <ul class="ai-output-list">${values.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    </div>
+  `;
+}
+
+function renderCampaignPackage(response, escapeHtml) {
+  const pkg = asObject(response.campaignPackage || response.campaign_package);
+  if (!Object.keys(pkg).length) return "";
+  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+
+  return `
+    <div class="ai-output-card ai-output-span">
+      <span class="ai-output-label">Campaign Package</span>
+      <div class="ai-campaign-package">
+        <div class="ai-campaign-summary-grid">
+          <div><span>Concept</span><strong>${escapeHtml(humanizeValue(pkg.concept || pkg.campaignConcept || "Campaign concept pending"))}</strong></div>
+          <div><span>Offer</span><strong>${escapeHtml(humanizeValue(pkg.offer || "Offer pending"))}</strong></div>
+          <div><span>Audience</span><strong>${escapeHtml(humanizeValue(pkg.targetAudience || pkg.target_audience || pkg.audience || "Audience pending"))}</strong></div>
+        </div>
+        ${renderListSection("Products", pkg.products, escapeHtml)}
+        ${renderListSection("Channels", pkg.channels, escapeHtml)}
+        ${
+          phases.length
+            ? `
+              <div class="ai-structured-section">
+                <span class="ai-output-label">Launch Phases</span>
+                <div class="ai-phase-list">
+                  ${phases.map((phase, index) => {
+                    const record = asObject(phase);
+                    return `
+                      <div class="ai-phase-item">
+                        <strong>${escapeHtml(humanizeValue(record.name || record.title || `Phase ${index + 1}`))}</strong>
+                        <p>${escapeHtml(humanizeValue(record.goal || record.objective || record.focus || record.summary || ""))}</p>
+                        ${renderListSection("Actions", record.actions || record.steps || record.tasks, escapeHtml)}
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            `
+            : ""
+        }
+        ${renderListSection("Content Angles", pkg.contentAngles || pkg.content_angles, escapeHtml)}
+        ${renderListSection("Ad Angles", pkg.adAngles || pkg.ad_angles, escapeHtml)}
+        ${renderListSection("Required Assets", pkg.requiredAssets || pkg.required_assets, escapeHtml)}
+        ${renderListSection("Missing Blockers", pkg.missingBlockers || pkg.missing_blockers || pkg.blockers, escapeHtml)}
+        ${renderListSection("Next Actions", pkg.nextActions || pkg.next_actions, escapeHtml)}
+        ${renderListSection("Suggested Handoffs", pkg.suggestedHandoffs || pkg.suggested_handoffs, escapeHtml)}
+      </div>
+    </div>
+  `;
+}
+
+function renderContentPack(response, escapeHtml) {
+  const pack = asObject(response.contentPack || response.content_pack);
+  if (!Object.keys(pack).length) return "";
+  return `
+    <div class="ai-output-card ai-output-span">
+      <span class="ai-output-label">Content Pack</span>
+      <div class="ai-structured-grid">
+        ${renderListSection("Hooks", pack.hooks, escapeHtml)}
+        ${renderListSection("Captions", pack.captions, escapeHtml)}
+        ${renderListSection("Post Ideas", pack.postIdeas || pack.post_ideas || pack.ideas, escapeHtml)}
+        ${renderListSection("Scripts", pack.scripts || pack.reelScripts || pack.reel_scripts, escapeHtml)}
+        ${renderListSection("Email Copy", pack.emailCopy || pack.email_copy || pack.emails, escapeHtml)}
+        ${renderListSection("Landing Page Sections", pack.landingPageSections || pack.landing_page_sections, escapeHtml)}
+      </div>
+    </div>
+  `;
+}
+
+function renderGenericPlan(title, plan, escapeHtml) {
+  const record = asObject(plan);
+  const entries = Object.entries(record).filter(([, value]) => {
+    if (Array.isArray(value)) return value.length;
+    if (value && typeof value === "object") return Object.keys(value).length;
+    return Boolean(humanizeValue(value));
+  });
+  if (!entries.length) return "";
+
+  return `
+    <div class="ai-output-card ai-output-span">
+      <span class="ai-output-label">${escapeHtml(title)}</span>
+      <div class="ai-structured-grid">
+        ${entries.map(([key, value]) => {
+          if (Array.isArray(value)) return renderListSection(titleCase(key), value, escapeHtml);
+          if (value && typeof value === "object") {
+            const nested = Object.entries(value)
+              .map(([nestedKey, nestedValue]) => `${titleCase(nestedKey)}: ${humanizeValue(nestedValue)}`)
+              .filter((item) => !item.endsWith(": "));
+            return renderListSection(titleCase(key), nested, escapeHtml);
+          }
+          return `
+            <div class="ai-structured-section">
+              <span class="ai-output-label">${escapeHtml(titleCase(key))}</span>
+              <p>${escapeHtml(humanizeValue(value))}</p>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderOutputTypeBlock(response, outputType, escapeHtml) {
+  if (outputType === "ad_ideas") return renderAdIdeas(response, escapeHtml);
+  if (outputType === "campaign_package") return renderCampaignPackage(response, escapeHtml);
+  if (outputType === "content_pack") return renderContentPack(response, escapeHtml);
+  if (outputType === "seo_plan") return renderGenericPlan("SEO Plan", response.seoPlan || response.seo_plan, escapeHtml);
+  if (outputType === "research_report") return renderGenericPlan("Research Report", response.researchReport || response.research_report, escapeHtml);
+  if (outputType === "operations_plan") return renderGenericPlan("Operations Plan", response.operationsPlan || response.operations_plan, escapeHtml);
+  if (outputType === "executive_brief") return renderGenericPlan("Executive Brief", response.executiveBrief || response.executive_brief, escapeHtml);
+  return "";
 }
 
 function renderAssistantResponse(response, escapeHtml, ownerId) {
-  const findings = asArray(response.findings);
-  const recommendations = asArray(response.recommendations);
-  const nextActions = asArray(response.nextActions);
-  const routeSuggestions = asArray(response.routeSuggestions);
-  const missingData = asArray(response.missingData);
+  const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
+  const outputType = asString(response.outputType || response.output_type);
+  const contentText = humanizeValue(response.content);
+  const analysisText = humanizeValue(response.analysis);
+  const findings = normalizeDisplayList(response.findings, 10);
+  const recommendations = normalizeDisplayList(response.recommendations, 10);
+  const nextActions = normalizeDisplayList(response.nextActions || response.next_actions, 10);
+  const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+    const record = asObject(item);
+    return {
+      label: humanizeValue(record.label || record.title || record.route || item),
+      route: asString(record.route || record.destination || record.page),
+      reason: humanizeValue(record.reason || record.summary || record.description || item)
+    };
+  }).filter((item) => item.label || item.route || item.reason);
+  const missingData = normalizeDisplayList(response.missingData || response.missing_data, 10);
   const taskBlock = asObject(response.taskBlock);
+  const isEffectivelyEmpty =
+    !hasError &&
+    !asString(response.title) &&
+    !asString(response.summary) &&
+    !contentText &&
+    !analysisText &&
+    !findings.length &&
+    !recommendations.length &&
+    !nextActions.length;
+
+  if (isEffectivelyEmpty) {
+    return `<div class="empty-box">No output returned</div>`;
+  }
 
   return `
     <div class="ai-response-grid">
+      ${
+        hasError
+          ? `<div class="ai-output-card ai-output-span"><span class="ai-output-label">Error</span><strong>Command failed</strong><p>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</p></div>`
+          : ""
+      }
+
       <div class="ai-output-card ai-output-span">
         <span class="ai-output-label">Summary</span>
-        <strong>${escapeHtml(response.title || "AI response")}</strong>
-        <p>${escapeHtml(response.summary || "No summary available.")}</p>
+        <strong>${escapeHtml(humanizeValue(response.title, "AI response"))}</strong>
+        <p>${escapeHtml(humanizeValue(response.summary, "No summary available."))}</p>
+        ${outputType ? `<div class="card-badge neutral">${escapeHtml(titleCase(outputType))}</div>` : ""}
+      </div>
+
+      ${renderOutputTypeBlock(response, outputType, escapeHtml)}
+
+      <div class="ai-output-card">
+        <span class="ai-output-label">Content</span>
+        <p>${escapeHtml(contentText || "No output returned")}</p>
+      </div>
+
+      <div class="ai-output-card">
+        <span class="ai-output-label">Analysis</span>
+        <p>${escapeHtml(analysisText || "No analysis returned")}</p>
       </div>
 
       <div class="ai-output-card">
@@ -1087,11 +1343,11 @@ function renderAssistantResponse(response, escapeHtml, ownerId) {
           ? `
             <div class="ai-output-card ai-output-span">
               <span class="ai-output-label">Task-ready Block</span>
-              <strong>${escapeHtml(taskBlock.title)}</strong>
-              <div class="ai-task-owner">${escapeHtml(taskBlock.owner || "System")}</div>
+              <strong>${escapeHtml(humanizeValue(taskBlock.title, "Task-ready block"))}</strong>
+              <div class="ai-task-owner">${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
               ${
                 asArray(taskBlock.steps).length
-                  ? `<ul class="ai-output-list">${taskBlock.steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                  ? `<ul class="ai-output-list">${normalizeDisplayList(taskBlock.steps, 12).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
                   : ""
               }
             </div>
@@ -1237,18 +1493,23 @@ function ensureAiCommandBridge() {
     });
 
     const aiContext = buildUnifiedAiContext(getState(), session.intelligence);
-    const accepted = await submitDurableCommand({
-      projectName,
-      aiContext,
-      session,
-      command: message,
-      modeId: meta.modeId || session.modeId,
-      source: meta.source || "external-command",
-      executeProjectAiCommand,
-      reloadProjectData
-    });
+    let accepted = { accepted: false, failed: false };
+    try {
+      accepted = await submitDurableCommand({
+        projectName,
+        aiContext,
+        session,
+        command: message,
+        modeId: meta.modeId || session.modeId,
+        source: meta.source || "external-command",
+        executeProjectAiCommand,
+        reloadProjectData
+      });
+    } catch (error) {
+      lastRenderContext.showError?.(error.message || "Failed to execute AI command.");
+    }
 
-    if (accepted) {
+    if (accepted.accepted) {
       rerenderAiWorkspace();
     }
   });
@@ -1308,11 +1569,11 @@ function bindAiWorkspace({
       const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
       const route = asArray(message?.response?.routeSuggestions)[Number(button.getAttribute("data-ai-route"))];
       if (!route?.route) return;
+      const priorUserMessage = messageIndex > 0
+        ? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user")
+        : null;
+      const handoffMessage = priorUserMessage?.content || message?.response?.summary || "";
       if (route.route === "workflows") {
-        const priorUserMessage = messageIndex > 0
-          ? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user")
-          : null;
-        const handoffMessage = priorUserMessage?.content || message?.response?.summary || "";
         syncAiWorkflowBridge({
           projectName,
           modeId: priorUserMessage?.modeId || session.modeId,
@@ -1346,6 +1607,27 @@ function bindAiWorkspace({
         if (globalInput) {
           globalInput.value = handoffMessage;
         }
+      } else {
+        const handoff = {
+          source_page: "ai-command",
+          destination_page: route.route,
+          payload: {
+            prompt: handoffMessage,
+            draft_context: {
+              projectName,
+              modeId: priorUserMessage?.modeId || session.modeId,
+              lastCommand: handoffMessage,
+              lastResponseTitle: message?.response?.title || "",
+              routeSuggestions: asArray(message?.response?.routeSuggestions)
+            },
+            output: message?.response || {}
+          },
+          status: "available"
+        };
+        setSharedHandoff(projectName, route.route, handoff);
+        createProjectHandoff?.(projectName, handoff).catch((error) => {
+          console.warn("Failed to persist AI route handoff:", error.message);
+        });
       }
       navigateTo(route.route);
     };
@@ -1361,21 +1643,31 @@ function bindAiWorkspace({
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
         (async () => {
-          const submitted = await submitDurableCommand({
-            projectName,
-            aiContext,
-            session,
-            command: composerInput.value,
-            modeId: session.modeId,
-            source: "local-composer",
-            executeProjectAiCommand,
-            reloadProjectData
-          });
-          if (!submitted) {
+          let submitted = { accepted: false, failed: false };
+          try {
+            submitted = await submitDurableCommand({
+              projectName,
+              aiContext,
+              session,
+              command: composerInput.value,
+              modeId: session.modeId,
+              source: "local-composer",
+              executeProjectAiCommand,
+              reloadProjectData
+            });
+          } catch (error) {
+            showError?.(error.message || "Failed to execute AI command.");
+            return;
+          }
+          if (!submitted.accepted) {
             showError?.("Enter a command before sending.");
             return;
           }
-          showMessage?.("AI Command responded using live project intelligence.");
+          if (submitted.failed) {
+            showError?.("AI Command failed. Check the response area for details.");
+          } else {
+            showMessage?.("AI Command responded using live project intelligence.");
+          }
           render();
         })();
       }
@@ -1385,21 +1677,31 @@ function bindAiWorkspace({
   const sendBtn = $("aiCommandSendBtn");
   if (sendBtn) {
     sendBtn.onclick = async () => {
-      const submitted = await submitDurableCommand({
-        projectName,
-        aiContext,
-        session,
-        command: $("aiCommandComposerInput")?.value || "",
-        modeId: session.modeId,
-        source: "local-composer",
-        executeProjectAiCommand,
-        reloadProjectData
-      });
-      if (!submitted) {
+      let submitted = { accepted: false, failed: false };
+      try {
+        submitted = await submitDurableCommand({
+          projectName,
+          aiContext,
+          session,
+          command: $("aiCommandComposerInput")?.value || "",
+          modeId: session.modeId,
+          source: "local-composer",
+          executeProjectAiCommand,
+          reloadProjectData
+        });
+      } catch (error) {
+        showError?.(error.message || "Failed to execute AI command.");
+        return;
+      }
+      if (!submitted.accepted) {
         showError?.("Enter a command before sending.");
         return;
       }
-      showMessage?.("AI Command responded using live project intelligence.");
+      if (submitted.failed) {
+        showError?.("AI Command failed. Check the response area for details.");
+      } else {
+        showMessage?.("AI Command responded using live project intelligence.");
+      }
       render();
     };
   }
@@ -1469,7 +1771,8 @@ export const aiCommandRoute = {
       fetchProjectInsights,
       fetchProjectLearning,
       createProjectHandoff,
-      consumeProjectHandoff
+      consumeProjectHandoff,
+      executeProjectAiCommand
     } = context;
 
     const render = () => {

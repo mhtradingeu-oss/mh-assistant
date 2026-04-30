@@ -22,7 +22,7 @@ import { integrationsRoute } from "./pages/integrations.js";
 import { settingsRoute } from "./pages/settings.js";
 import { governanceRoute } from "./pages/governance.js";
 
-const DEFAULT_ROLE = "strategist";
+const DEFAULT_ROLE = "admin";
 const ACTIVE_ROUTE_ROLES = [
   "strategist",
   "writer",
@@ -104,21 +104,35 @@ function getFallbackRoute(route) {
   };
 }
 
+function escapeHtmlMin(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function getAccessDeniedRoute(route, reason = "") {
-  const detail = reason || "This route is not available for the current role.";
+  const detail = reason || `Route "${route}" is not available for the current role.`;
   return {
     id: "__access-denied__",
     meta: {
       eyebrow: "Access",
-      title: "Restricted",
+      title: "Route Blocked",
       description: "This workspace route is blocked by role access rules."
     },
     template: `
       <section class="page is-active" data-page="access-denied">
         <div class="page-grid">
           <div class="panel panel-span-2">
-            <div class="empty-box">
-              Route blocked: ${route}. ${detail}
+            <div class="access-denied-box">
+              <div class="access-denied-icon">&#128274;</div>
+              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+              <p class="access-denied-detail">${escapeHtmlMin(detail)}</p>
+              <p class="access-denied-hint">
+                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+                For full access during internal testing, select <strong>admin</strong>.
+              </p>
             </div>
           </div>
         </div>
@@ -151,10 +165,7 @@ function normalizeRouteAccessResult(result, route) {
 function getDefaultRouteAccess(route) {
   const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
   if (!Array.isArray(allowedRoles)) {
-    return {
-      allowed: true,
-      reason: ""
-    };
+    return { allowed: true, reason: "" };
   }
 
   const allowed = allowedRoles.includes(DEFAULT_ROLE);
@@ -162,7 +173,8 @@ function getDefaultRouteAccess(route) {
     allowed,
     reason: allowed
       ? ""
-      : `Access to ${route} is restricted until a permitted role is active.`
+      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
   };
 }
 

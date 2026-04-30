@@ -62,7 +62,8 @@ setApiBaseUrl("");
 
 const CONTROL_WRITE_KEY_STORAGE_KEY = "mh-control-write-key";
 const CONTROL_WRITE_HEADER = "x-mh-control-key";
-const DEFAULT_ACTIVE_ROLE = "strategist";
+const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+const DEFAULT_ACTIVE_ROLE = "admin";
 const ACTIVE_ROUTE_ROLES = [
   "strategist",
   "writer",
@@ -112,6 +113,21 @@ function getControlWriteKey() {
   } catch (_) {
     return "";
   }
+}
+
+function getActiveRole() {
+  try {
+    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+      return stored.trim().toLowerCase();
+    }
+  } catch (_) {}
+  const operations = getState().data.operations;
+  const stateRole = operations?.team_service_model?.active_role;
+  if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
+    return stateRole.trim().toLowerCase();
+  }
+  return DEFAULT_ACTIVE_ROLE;
 }
 
 function isProtectedControlWriteRequest(input, init = {}) {
@@ -181,32 +197,39 @@ function resolveRouteAccess(route) {
   const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
     ? operations.team_service_model.route_permissions
     : [];
-  const activeRole = String(
-    operations?.team_service_model?.active_role || DEFAULT_ACTIVE_ROLE
-  ).trim().toLowerCase();
+  const activeRole = getActiveRole();
+
+  function buildBlockedReason(allowedRoles) {
+    const rolesStr = allowedRoles.join(", ");
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Your current role is "${activeRole}". ` +
+      `Use the Role selector in the top bar to switch roles for internal testing.`
+    );
+  }
+
   const explicitRule = routePermissions.find((item) => item?.route === route);
 
   if (!explicitRule) {
     const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
     if (!Array.isArray(fallbackRoles)) {
-      return {
-        allowed: true,
-        reason: ""
-      };
+      return { allowed: true, reason: "" };
     }
-
+    const allowed = fallbackRoles.includes(activeRole);
     return {
-      allowed: fallbackRoles.includes(activeRole),
-      reason: `Route ${route} is restricted for role ${activeRole}.`
+      allowed,
+      reason: allowed ? "" : buildBlockedReason(fallbackRoles)
     };
   }
 
-  const allowed = Array.isArray(explicitRule.roles)
-    && explicitRule.roles.map((item) => String(item || "").trim().toLowerCase()).includes(activeRole);
+  const allowedRoles = Array.isArray(explicitRule.roles)
+    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+    : [];
+  const allowed = allowedRoles.includes(activeRole);
 
   return {
     allowed,
-    reason: `Route ${route} is restricted for role ${activeRole}.`
+    reason: allowed ? "" : buildBlockedReason(allowedRoles)
   };
 }
 
@@ -214,8 +237,225 @@ installProtectedWriteFetch();
 setRouteAccessResolver(resolveRouteAccess);
 
 /* =========================
-   DOM HELPERS
+   ACCESS KEY PANEL
 ========================= */
+
+function createAccessKeyModal() {
+  const modal = document.createElement("div");
+  modal.id = "accessKeyModal";
+  modal.className = "access-key-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Control Center Access Key");
+  modal.innerHTML = `
+    <div class="access-key-card">
+      <h2 class="access-key-title">Control Center Access</h2>
+      <p class="access-key-desc">
+        Enter the Control Center access key to unlock protected reads and writes.
+        The key is stored only in your browser's localStorage and never transmitted to
+        static routes or logged to the console.
+      </p>
+      <div class="access-key-field">
+        <input
+          id="accessKeyInput"
+          class="access-key-input"
+          type="password"
+          placeholder="Paste access key…"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Access key input"
+        >
+      </div>
+      <div class="access-key-actions">
+        <button id="accessKeySaveBtn" class="btn btn-primary" type="button">Save Key</button>
+        <button id="accessKeyTestBtn" class="btn btn-secondary" type="button">Test Key</button>
+        <button id="accessKeyClearBtn" class="btn btn-danger" type="button">Clear Key</button>
+        <button id="accessKeyCloseBtn" class="btn btn-ghost" type="button">Close</button>
+      </div>
+      <div id="accessKeyStatus" class="access-key-status" aria-live="polite"></div>
+    </div>
+  `;
+  return modal;
+}
+
+function setAccessKeyStatus(message, type) {
+  const status = document.getElementById("accessKeyStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.className = "access-key-status access-key-status--" + (type || "info");
+}
+
+function bindAccessKeyPanel(modal) {
+  const input = modal.querySelector("#accessKeyInput");
+  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+  const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const val = (input?.value || "").trim();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+      try {
+        localStorage.setItem(CONTROL_WRITE_KEY_STORAGE_KEY, val);
+      } catch (_) {
+        setAccessKeyStatus("Could not save key to localStorage.", "error");
+        return;
+      }
+      if (input) input.value = "";
+      setAccessKeyStatus("Key saved. Use Test Key to verify access.", "success");
+      updateAccessKeyButton();
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try { storedVal = localStorage.getItem(CONTROL_WRITE_KEY_STORAGE_KEY) || ""; } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — endpoint returned OK.", "success");
+        } else if (response.status === 401 || response.status === 403) {
+          setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
+        } else {
+          setAccessKeyStatus("Endpoint responded with " + response.status + ".", "warn");
+        }
+      } catch (_) {
+        setAccessKeyStatus("Request failed — check server connection.", "error");
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      if (input) input.value = "";
+      setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
+      updateAccessKeyButton();
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideAccessKeyModal);
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) hideAccessKeyModal();
+  });
+
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hideAccessKeyModal();
+  });
+}
+
+function showAccessKeyModal() {
+  let modal = document.getElementById("accessKeyModal");
+  if (!modal) {
+    modal = createAccessKeyModal();
+    document.body.appendChild(modal);
+    bindAccessKeyPanel(modal);
+  }
+  modal.classList.add("is-visible");
+  const input = document.getElementById("accessKeyInput");
+  if (input) {
+    input.value = "";
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function hideAccessKeyModal() {
+  const modal = document.getElementById("accessKeyModal");
+  if (modal) modal.classList.remove("is-visible");
+}
+
+function updateAccessKeyButton() {
+  const btn = document.getElementById("accessKeyBtn");
+  if (!btn) return;
+  const hasKey = !!getControlWriteKey();
+  btn.textContent = hasKey ? "Key: Active ✓" : "Set Access Key";
+  btn.classList.toggle("btn-key-active", hasKey);
+  btn.classList.toggle("btn-key-missing", !hasKey);
+}
+
+function injectAccessKeyButton() {
+  const topbarRight = document.querySelector(".topbar-right");
+  if (!topbarRight || document.getElementById("accessKeyBtn")) return;
+
+  const btn = document.createElement("button");
+  btn.id = "accessKeyBtn";
+  btn.className = "btn btn-secondary access-key-btn";
+  btn.type = "button";
+  btn.title = "Manage Control Center access key";
+  btn.textContent = "Set Access Key";
+
+  topbarRight.insertBefore(btn, topbarRight.firstChild);
+  btn.addEventListener("click", showAccessKeyModal);
+  updateAccessKeyButton();
+}
+
+/* =========================
+   ROLE SWITCHER
+========================= */
+
+function injectRoleSwitcher() {
+  const topbarRight = document.querySelector(".topbar-right");
+  if (!topbarRight || document.getElementById("roleSwitcherWrap")) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "roleSwitcherWrap";
+  wrapper.className = "role-switcher";
+
+  const label = document.createElement("label");
+  label.htmlFor = "roleSwitcherSelect";
+  label.className = "role-switcher-label";
+  label.textContent = "Role";
+
+  const select = document.createElement("select");
+  select.id = "roleSwitcherSelect";
+  select.className = "role-switcher-select";
+  select.title = "Internal test role override (stored in localStorage)";
+
+  ACTIVE_ROUTE_ROLES.forEach((r) => {
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.textContent = r;
+    select.appendChild(opt);
+  });
+
+  const currentRole = getActiveRole();
+  select.value = currentRole;
+
+  select.addEventListener("change", () => {
+    const role = select.value;
+    try { localStorage.setItem(CONTROL_ROLE_STORAGE_KEY, role); } catch (_) {}
+    const { currentRoute } = getState();
+    navigateTo(currentRoute, false);
+    renderCurrentPage();
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(select);
+  topbarRight.insertBefore(wrapper, topbarRight.firstChild);
+}
+
+
 
 function $(id) {
   return document.getElementById(id);
@@ -798,6 +1038,9 @@ async function init() {
     bindResponsiveUi();
     bindCommandInputs();
 
+    injectAccessKeyButton();
+    injectRoleSwitcher();
+
     renderGlobalUi();
     renderCurrentPage();
 
@@ -808,6 +1051,11 @@ async function init() {
     }
 
     markInitialized();
+
+    // Show access key panel if no key is stored — must run after DOM is ready
+    if (!getControlWriteKey()) {
+      showAccessKeyModal();
+    }
   } catch (error) {
     console.error(error);
     setError(error.message || "Application initialization failed");

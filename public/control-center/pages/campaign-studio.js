@@ -1,4 +1,4 @@
-import { getSharedCampaignRecord, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
 
 const campaignSessions = new Map();
 const campaignSaveTimers = new Map();
@@ -143,9 +143,36 @@ function uniqueBy(items, keyFn) {
 function firstNonEmpty(...values) {
   for (const value of values) {
     const normalized = asString(value).trim();
-    if (normalized) return normalized;
+    if (normalized && normalized !== "[object Object]") return normalized;
   }
   return "";
+}
+
+function readableValue(value, fallback = "") {
+  if (value == null) return fallback;
+  if (typeof value === "string") return value.trim() === "[object Object]" ? fallback : value.trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return uniqueStrings(value.map((item) => readableValue(item))).join(", ") || fallback;
+  const record = asObject(value);
+  return firstNonEmpty(
+    record.title,
+    record.label,
+    record.name,
+    record.action,
+    record.summary,
+    record.description,
+    record.recommendation,
+    record.reason,
+    record.body,
+    fallback
+  );
+}
+
+function isMissingIntelligenceError(error) {
+  const status = Number(error?.status);
+  if (status !== 404) return false;
+  const message = asString(error?.message).toLowerCase();
+  return message.includes("insights") || message.includes("learning") || message.includes("not found");
 }
 
 function parseList(value) {
@@ -164,10 +191,10 @@ function normalizeRecommendation(item) {
 
   const record = asObject(item);
   return {
-    title: firstNonEmpty(record.title, record.label, record.domain, "Recommendation"),
-    action: firstNonEmpty(record.action, record.summary, record.description, record.recommendation),
+    title: readableValue(record.title || record.label || record.domain, "Recommendation"),
+    action: readableValue(record.action || record.summary || record.description || record.recommendation),
     domain: asString(record.domain),
-    meta: firstNonEmpty(record.meta, record.reason, record.why, record.priority)
+    meta: readableValue(record.meta || record.reason || record.why || record.priority)
   };
 }
 
@@ -234,7 +261,8 @@ function ensureSession(projectName, defaults) {
         learning: null,
         error: ""
       },
-      generatedPackages: 0
+      generatedPackages: 0,
+      lastAiHandoffId: ""
     });
   } else {
     const session = campaignSessions.get(key);
@@ -247,6 +275,7 @@ function ensureSession(projectName, defaults) {
       error: asString(session.intelligence?.error)
     };
     session.generatedPackages = Number.isFinite(session.generatedPackages) ? session.generatedPackages : 0;
+    session.lastAiHandoffId = asString(session.lastAiHandoffId);
   }
 
   return campaignSessions.get(key);
@@ -321,6 +350,83 @@ function hydrateValuesFromCampaignRecord(defaults, campaign) {
     offerHeadline: asString(formValues.offerHeadline || record.offer || defaults.offerHeadline),
     budget: asString(formValues.budget || record.budget || defaults.budget)
   };
+}
+
+function joinPackageList(value) {
+  if (!Array.isArray(value)) return readableValue(value);
+  return uniqueStrings(asArray(value).map((item) => {
+    if (typeof item === "string") return item;
+    const record = asObject(item);
+    return firstNonEmpty(record.name, record.title, record.label, record.channel, record.product, record.summary, record.action);
+  })).join(", ");
+}
+
+function phaseValue(phases, index, key) {
+  const phase = asObject(asArray(phases)[index]);
+  if (!Object.keys(phase).length) return "";
+  if (key === "name") return firstNonEmpty(phase.name, phase.title, `Wave ${index + 1}`);
+  if (key === "focus") return firstNonEmpty(phase.goal, phase.objective, phase.focus, phase.summary, joinPackageList(phase.actions || phase.steps));
+  if (key === "channels") return joinPackageList(phase.channels);
+  return "";
+}
+
+function applyAiCampaignHandoff(projectName, operations, session) {
+  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+
+  const payload = asObject(handoff.payload);
+  const output = asObject(payload.output);
+  const response = asObject(output.response || output);
+  const pkg = asObject(response.campaignPackage || response.campaign_package || payload.campaignPackage || payload.campaign_package);
+  if (!Object.keys(pkg).length) return false;
+
+  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+  session.values = {
+    ...session.values,
+    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+    productFocus: firstNonEmpty(joinPackageList(pkg.products), session.values.productFocus),
+    productAngle: firstNonEmpty(joinPackageList(pkg.contentAngles || pkg.content_angles), pkg.concept, session.values.productAngle),
+    audiencePrimary: firstNonEmpty(pkg.targetAudience, pkg.target_audience, pkg.audience, session.values.audiencePrimary),
+    audienceNeed: firstNonEmpty(pkg.audienceNeed, pkg.audience_need, session.values.audienceNeed),
+    channelPlan: firstNonEmpty(joinPackageList(pkg.channels), session.values.channelPlan),
+    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+    offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),
+    wave1Name: firstNonEmpty(phaseValue(phases, 0, "name"), session.values.wave1Name),
+    wave1Focus: firstNonEmpty(phaseValue(phases, 0, "focus"), session.values.wave1Focus),
+    wave1Channels: firstNonEmpty(phaseValue(phases, 0, "channels"), session.values.wave1Channels),
+    wave2Name: firstNonEmpty(phaseValue(phases, 1, "name"), session.values.wave2Name),
+    wave2Focus: firstNonEmpty(phaseValue(phases, 1, "focus"), session.values.wave2Focus),
+    wave2Channels: firstNonEmpty(phaseValue(phases, 1, "channels"), session.values.wave2Channels),
+    wave3Name: firstNonEmpty(phaseValue(phases, 2, "name"), session.values.wave3Name),
+    wave3Focus: firstNonEmpty(phaseValue(phases, 2, "focus"), session.values.wave3Focus),
+    wave3Channels: firstNonEmpty(phaseValue(phases, 2, "channels"), session.values.wave3Channels),
+    assetChecklist: firstNonEmpty(joinPackageList(pkg.requiredAssets || pkg.required_assets), session.values.assetChecklist),
+    executionNotes: firstNonEmpty(
+      joinPackageList([
+        ...asArray(pkg.missingBlockers || pkg.missing_blockers || pkg.blockers),
+        ...asArray(pkg.nextActions || pkg.next_actions)
+      ]),
+      session.values.executionNotes
+    )
+  };
+  session.generatedPackages += 1;
+  session.lastAiHandoffId = handoffId;
+  setSharedCampaignRecord(projectName, {
+    ...(getSharedCampaignRecord(projectName, operations) || {}),
+    project: projectName,
+    source_page: "ai-command",
+    name: session.values.campaignName,
+    objective: session.values.campaignGoal,
+    audience: session.values.audiencePrimary,
+    channels: parseList(session.values.channelPlan),
+    offer: session.values.offerHeadline,
+    status: "draft",
+    form_values: { ...session.values },
+    updated_at: new Date().toISOString()
+  });
+  return true;
 }
 
 function buildCampaignRecordPayload(projectName, session) {
@@ -1081,11 +1187,17 @@ function startIntelligenceHydration({
     typeof fetchProjectLearning === "function" ? fetchProjectLearning(projectName) : Promise.resolve(null)
   ])
     .then(([insightsResult, learningResult]) => {
-      const insights = insightsResult?.status === "fulfilled" ? insightsResult.value : null;
-      const learning = learningResult?.status === "fulfilled" ? learningResult.value : null;
+      const insightsMissing = insightsResult?.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+      const learningMissing = learningResult?.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+      const insights = insightsResult?.status === "fulfilled"
+        ? insightsResult.value
+        : (insightsMissing ? { project: projectName, generated_at: new Date().toISOString(), data_coverage: {} } : null);
+      const learning = learningResult?.status === "fulfilled"
+        ? learningResult.value
+        : (learningMissing ? { project: projectName, generated_at: new Date().toISOString(), learning_patterns: {}, recommendations: [] } : null);
       const errors = [
-        insightsResult?.status === "rejected" ? insightsResult.reason?.message : "",
-        learningResult?.status === "rejected" ? learningResult.reason?.message : ""
+        insightsResult?.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+        learningResult?.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
       ].filter(Boolean);
 
       session.intelligence.status = (insights || learning) ? "loaded" : "error";
@@ -1127,6 +1239,7 @@ function bindCampaignStudio({
     session.recordId = asString(durableCampaign.id || session.recordId);
     session.values = hydrateValuesFromCampaignRecord(session.values, durableCampaign);
   }
+  applyAiCampaignHandoff(projectName, state.data.operations, session);
   syncCampaignStudioBridge(projectName, session.values);
 
   const form = $("campaignStudioForm");
@@ -1334,6 +1447,7 @@ export const campaignStudioRoute = {
     const state = getState();
     const projectName = state.context.currentProject || "";
     const session = ensureSession(projectName, buildDefaults(state));
+    applyAiCampaignHandoff(projectName, state.data.operations, session);
     const values = session.values;
     const root = $("campaignStudioRoot");
     if (!root) return;

@@ -7953,17 +7953,51 @@ function handleRunWorkflow(req, res) {
 app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
 app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
 
-function handleExecuteAiCommand(req, res) {
+async function handleExecuteAiCommand(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const source = String(req.body?.source || 'ai-command').trim();
+  const modeId = String(req.body?.mode_id || req.body?.modeId || 'executive').trim();
+
+  appLogger.info('ai_command_http_received', {
+    route: 'ai-command',
+    action: 'execute',
+    project,
+    source,
+    mode_id: modeId
+  });
+
   try {
-    const result = getAiOrchestrator().executeCommand(req.params.project, req.body || {});
+    const result = await getAiOrchestrator().executeCommand(req.params.project, req.body || {});
+    appLogger.info('ai_command_http_returned', {
+      route: 'ai-command',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || result?.response?.provider || null,
+      command_id: result?.command?.id || null
+    });
     return res.json({
       ...result,
       operations: buildProjectOperationsPayload(req.params.project)
     });
   } catch (error) {
-    return res.status(400).json({
-      error: error.message || 'Failed to execute AI command'
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI command'
+      };
+
+    appLogger.error('ai_command_http_error', {
+      route: 'ai-command',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
     });
+
+    return res.status(statusCode).json(payload);
   }
 }
 
@@ -10322,9 +10356,10 @@ function getAiOrchestrator() {
   if (!aiOrchestrator) {
     aiOrchestrator = createAiOrchestrationService({
       buildDashboard: buildMediaManagerProjectPayload,
-      buildInsights: buildProjectInsights,
-      buildLearning: buildProjectLearning,
-      buildOperations: buildProjectOperationsPayload
+      buildInsights: getProjectInsightsEnginePayload,
+      buildLearning: getProjectLearningEnginePayload,
+      buildOperations: buildProjectOperationsPayload,
+      logger: appLogger
     });
   }
 

@@ -1,5 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath,
+  isPathWithinRoot
+} = require('../security/project-isolation');
 
 const DATA_ROOT = '/opt/mh-assistant/data';
 const PROJECTS_ROOT = path.join(DATA_ROOT, 'projects');
@@ -141,13 +146,9 @@ class UnifiedDataPathResolver {
   }
 
   resolve(projectName, options = {}) {
-    const safeProject = String(projectName || '').trim().toLowerCase();
+    const safeProject = normalizeProjectSlug(projectName);
     const domain = String(options.domain || 'media').trim().toLowerCase();
     const operation = String(options.operation || 'read').trim().toLowerCase();
-
-    if (!safeProject) {
-      throw new Error('Invalid project name for UnifiedDataPathResolver');
-    }
 
     const roots = this.buildProjectRoots(safeProject);
     const hasProjectProfile = fs.existsSync(path.join(roots.projectRoot, 'project.json'));
@@ -193,10 +194,11 @@ class UnifiedDataPathResolver {
   }
 
   buildProjectRoots(projectName) {
+    const safeProject = normalizeProjectSlug(projectName);
     return {
-      projectRoot: path.join(PROJECTS_ROOT, projectName),
-      executionRoot: path.join(EXECUTION_ROOT, projectName),
-      legacyRoot: path.join(LEGACY_ROOT, projectName)
+      projectRoot: resolveProjectPath(PROJECTS_ROOT, safeProject).projectRoot,
+      executionRoot: resolveProjectPath(EXECUTION_ROOT, safeProject).projectRoot,
+      legacyRoot: resolveProjectPath(LEGACY_ROOT, safeProject).projectRoot
     };
   }
 
@@ -315,9 +317,9 @@ class UnifiedDataPathResolver {
 
   rootKind(targetPath, roots) {
     if (!targetPath) return 'mixed';
-    if (targetPath.startsWith(roots.projectRoot)) return 'project';
-    if (targetPath.startsWith(roots.executionRoot)) return 'execution';
-    if (targetPath.startsWith(roots.legacyRoot)) return 'legacy';
+    if (isPathWithinRoot(roots.projectRoot, targetPath)) return 'project';
+    if (isPathWithinRoot(roots.executionRoot, targetPath)) return 'execution';
+    if (isPathWithinRoot(roots.legacyRoot, targetPath)) return 'legacy';
     return 'mixed';
   }
 

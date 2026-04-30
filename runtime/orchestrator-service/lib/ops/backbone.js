@@ -6,6 +6,10 @@ const {
   readJsonFileDurable,
   writeJsonFile
 } = require('../integrations/storage');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath
+} = require('../security/project-isolation');
 
 const PROJECTS_DIR = '/opt/mh-assistant/data/projects';
 const BACKBONE_VERSION = 'mh-ops-backbone-v2';
@@ -248,13 +252,7 @@ const ESCALATION_CHAINS = {
 };
 
 function normalizeProjectName(projectName) {
-  const safeProject = String(projectName || '').trim().toLowerCase();
-
-  if (!safeProject) {
-    throw new Error('Invalid project name');
-  }
-
-  return safeProject;
+  return normalizeProjectSlug(projectName);
 }
 
 function nowIso() {
@@ -279,6 +277,25 @@ function asString(value) {
   }
 
   return String(value).trim();
+}
+
+function asReadableString(value, fallback = '') {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    const clean = value.trim();
+    return clean === '[object Object]' ? fallback : clean;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) {
+    return value.map((item) => asReadableString(item)).filter(Boolean).join('; ') || fallback;
+  }
+  if (typeof value === 'object') {
+    const title = asReadableString(value.title || value.label || value.name);
+    const detail = asReadableString(value.action || value.summary || value.description || value.recommendation || value.reason || value.body || value.value);
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+  }
+  return fallback;
 }
 
 function asBoolean(value, fallback = false) {
@@ -543,10 +560,10 @@ function normalizeNotes(value) {
 
 function normalizeStringList(value) {
   if (Array.isArray(value)) {
-    return value.map((item) => asString(item)).filter(Boolean);
+    return value.map((item) => asReadableString(item)).filter(Boolean);
   }
 
-  const text = asString(value);
+  const text = asReadableString(value);
   return text
     ? text.split(',').map((item) => asString(item)).filter(Boolean)
     : [];
@@ -746,7 +763,7 @@ function writeLimitedArray(filePath, items, maxItems) {
 
 function getOperationsPaths(projectName) {
   const safeProject = normalizeProjectName(projectName);
-  const projectDir = path.join(PROJECTS_DIR, safeProject);
+  const projectDir = resolveProjectPath(PROJECTS_DIR, safeProject).projectRoot;
   const opsDir = path.join(projectDir, 'ops');
 
   ensureDir(projectDir);
@@ -2202,13 +2219,13 @@ function createAiArtifact(projectName, input = {}) {
     id: asString(current.id) || asString(input.id) || createId('aiart'),
     project: paths.project,
     type: asString(input.type || current.type) || 'ai_response',
-    title: asString(input.title || current.title) || 'AI artifact',
+    title: asReadableString(input.title || current.title) || 'AI artifact',
     status: asString(input.status || current.status) || 'saved',
     route_target: asString(input.route_target || current.route_target),
     source_type: asString(input.source_type || current.source_type),
     source_id: asString(input.source_id || current.source_id),
     payload: asObject(input.payload || current.payload),
-    summary: asString(input.summary || current.summary),
+    summary: asReadableString(input.summary || current.summary),
     created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
     created_at: createdAt,
     updated_at: nowIso(),
@@ -2260,9 +2277,9 @@ function createAiRecommendation(projectName, input = {}) {
   const recommendation = {
     id: asString(current.id) || asString(input.id) || createId('aireco'),
     project: paths.project,
-    title: asString(input.title || current.title) || 'Recommendation',
-    summary: asString(input.summary || current.summary || input.action),
-    action: asString(input.action || current.action),
+    title: asReadableString(input.title || current.title) || 'Recommendation',
+    summary: asReadableString(input.summary || current.summary || input.action),
+    action: asReadableString(input.action || current.action),
     domain: asString(input.domain || current.domain),
     route_target: asString(input.route_target || current.route_target || input.route),
     source_type: asString(input.source_type || current.source_type),
