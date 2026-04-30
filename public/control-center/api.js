@@ -184,6 +184,13 @@ export async function fetchAllCoreProjectData(projectName) {
   return normalizeProjectDashboardPayload(payload);
 }
 
+export async function fetchAssetCatalog() {
+  return getJson(
+    "/media-manager/asset-catalog",
+    "Failed to load asset catalog"
+  );
+}
+
 export async function fetchProjectInsights(projectName) {
   if (!projectName) {
     throw new Error("Missing project name");

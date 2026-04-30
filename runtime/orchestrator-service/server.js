@@ -298,7 +298,6 @@ let aiOrchestrator = null;
 
 function buildAssetRoleFromType(type) {
   const map = {
-    logo: 'logo_source',
     product: 'product_source',
     packaging: 'packaging_source',
     reference: 'reference_source',
@@ -311,6 +310,26 @@ function buildAssetRoleFromType(type) {
 function resolveUploadTarget(projectName, type) {
   const project = normalizeProjectSlug(projectName);
   const normalizedType = String(type || '').trim().toLowerCase();
+  const basePaths = getProjectBasePaths(project);
+  if (!fs.existsSync(basePaths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const canonicalType = getCanonicalAssetType(normalizedType);
+
+  if (canonicalType) {
+    const { catalog_item, target_dir } = getTargetFolderForAssetType(project, canonicalType);
+
+    return {
+      mode: 'project_catalog',
+      assetType: canonicalType,
+      requestedAssetType: normalizedType,
+      target_folder: catalog_item.target_folder,
+      catalog_item,
+      dir: target_dir
+    };
+  }
+
   const legacyRole = buildAssetRoleFromType(normalizedType);
 
   if (legacyRole) {
@@ -323,20 +342,7 @@ function resolveUploadTarget(projectName, type) {
     };
   }
 
-  const basePaths = getProjectBasePaths(project);
-  if (!fs.existsSync(basePaths.projectFilePath)) {
-    throw new Error('Project not found');
-  }
-
-  const { catalog_item, target_dir } = getTargetFolderForAssetType(project, normalizedType);
-
-  return {
-    mode: 'project_catalog',
-    assetType: normalizedType,
-    target_folder: catalog_item.target_folder,
-    catalog_item,
-    dir: target_dir
-  };
+  throw new Error('Unknown asset type');
 }
 
 function resolveMediaFilePath(projectName, type, filename) {
@@ -6563,17 +6569,19 @@ function reviewProjectMissingAssets(projectName) {
   }
 
   const assets = readJsonFile(paths.assetsRegistryPath, []);
-  const assetTypes = assets.map(x => x.asset_type);
-
-  const required = [
-    'logo',
-    'brand_guideline',
-    'product_csv',
-    'pricing_doc',
-    'legal_doc'
-  ];
-
-  const missing = required.filter(type => !assetTypes.includes(type));
+  const categoryReadiness = buildProjectAssetCategoryReadiness(projectName, assets);
+  const required = getAssetTypeCatalog()
+    .filter(item => item.required)
+    .map(item => item.asset_type);
+  const assetTypes = assets
+    .map(item => getCanonicalAssetType(item.asset_type) || String(item.asset_type || '').trim().toLowerCase())
+    .filter(Boolean);
+  const missing = categoryReadiness.categories
+    .filter(item => item.required && item.status === 'Missing')
+    .map(item => item.asset_type);
+  const blockers = categoryReadiness.categories
+    .filter(item => item.required && ['Missing', 'Needs Review'].includes(item.status))
+    .map(item => item.asset_type);
 
   return {
     project: projectName,
@@ -6581,108 +6589,365 @@ function reviewProjectMissingAssets(projectName) {
     required_asset_types: required,
     registered_asset_types: [...new Set(assetTypes)].sort(),
     missing,
-    status: missing.length ? 'missing_assets' : 'assets_ready'
+    blockers,
+    category_readiness: categoryReadiness,
+    status: blockers.length ? 'asset_blockers' : 'assets_ready'
   };
 }
 function getAssetTypeCatalog() {
   return [
     {
       asset_type: 'logo',
-      label: 'Project Logo',
+      label: 'Logo / Logo',
+      purpose: 'brand_foundation',
+      purpose_label: 'Brand foundation',
       required: true,
-      allowed_extensions: ['.png', '.svg', '.jpg', '.jpeg'],
+      allowed_extensions: ['.png', '.svg', '.jpg', '.jpeg', '.webp'],
       target_folder: 'brand-assets',
-      description: 'Official brand logo'
+      aliases: [],
+      description: 'Official brand logo.',
+      guidance: {
+        what_to_upload: 'Primary logo files, transparent logo variants, and approved lockups.',
+        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+        used_in: ['Setup', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'brand_guideline',
-      label: 'Brand Guideline',
+      label: 'Brand Guideline / Markenrichtlinie',
+      purpose: 'brand_foundation',
+      purpose_label: 'Brand foundation',
       required: true,
-      allowed_extensions: ['.pdf', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.md', '.txt'],
       target_folder: 'brand-assets',
-      description: 'Brand identity and usage guide'
+      aliases: ['brand_guidelines', 'brand_guide', 'brand_reference_doc'],
+      description: 'Brand identity, voice, visual rules, and usage guidance.',
+      guidance: {
+        what_to_upload: 'Brand book, tone guide, design system notes, claim rules, and visual do/dont guidance.',
+        why_it_matters: 'Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.',
+        used_in: ['Setup', 'Campaign Studio', 'Content Studio', 'Media Studio', 'AI Command']
+      }
     },
     {
       asset_type: 'product_csv',
-      label: 'Product Data Sheet',
+      label: 'Product Data / Produktdaten',
+      purpose: 'product_offers',
+      purpose_label: 'Product and offers',
       required: true,
-      allowed_extensions: ['.csv', '.xlsx'],
+      allowed_extensions: ['.csv', '.xlsx', '.xls', '.json'],
       target_folder: 'products',
-      description: 'Structured product list'
-    },
-    {
-      asset_type: 'product_image',
-      label: 'Product Image',
-      required: false,
-      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp'],
-      target_folder: 'products',
-      description: 'Real product image'
-    },
-    {
-      asset_type: 'product_video',
-      label: 'Product Video',
-      required: false,
-      allowed_extensions: ['.mp4', '.mov'],
-      target_folder: 'products',
-      description: 'Real product video'
-    },
-    {
-      asset_type: 'packaging_doc',
-      label: 'Packaging Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.png', '.jpg', '.jpeg'],
-      target_folder: 'products',
-      description: 'Packaging or label reference'
+      aliases: ['product_data', 'product_feed', 'product_sheet'],
+      description: 'Structured product data for planning, content, and campaign packaging.',
+      guidance: {
+        what_to_upload: 'SKU list, product names, descriptions, variants, ingredients, usage, and product URLs.',
+        why_it_matters: 'Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'pricing_doc',
-      label: 'Pricing Document',
+      label: 'Pricing & Offers / Preise & Angebote',
+      purpose: 'product_offers',
+      purpose_label: 'Product and offers',
       required: true,
-      allowed_extensions: ['.pdf', '.xlsx', '.csv', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.csv', '.xlsx', '.xls', '.txt', '.md'],
       target_folder: 'content',
-      description: 'Pricing, offers, or sales sheet'
+      aliases: ['pricing', 'price_list', 'offers', 'offer_doc'],
+      description: 'Pricing, bundles, discounts, and commercial offer rules.',
+      guidance: {
+        what_to_upload: 'Price lists, offer sheets, bundles, campaign discounts, coupons, and margin guardrails.',
+        why_it_matters: 'Prevents Campaign Studio, Publishing, and AI Command from inventing prices or offers.',
+        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+      }
     },
     {
       asset_type: 'legal_doc',
-      label: 'Legal / Compliance Document',
+      label: 'Legal Documents / Rechtliche Dokumente',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
       required: true,
-      allowed_extensions: ['.pdf', '.docx'],
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md'],
       target_folder: 'content',
-      description: 'Policies, legal terms, disclaimers'
+      aliases: ['legal', 'compliance_doc', 'terms_doc'],
+      description: 'Policies, legal terms, disclaimers, and claim restrictions.',
+      guidance: {
+        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+        used_in: ['Content Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'brand_reference_doc',
-      label: 'Brand Reference Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md'],
-      target_folder: 'content',
-      description: 'Reference material about the brand'
+      asset_type: 'product_photos',
+      label: 'Product Photos / Produktfotos',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.avif'],
+      target_folder: 'products',
+      aliases: ['product_image', 'product_images', 'product_photo', 'product'],
+      description: 'Approved product photography for content, media, ads, and publishing.',
+      guidance: {
+        what_to_upload: 'Clean product packshots, lifestyle product photos, before/after images where allowed, and hero crops.',
+        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing need real product visuals.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'faq',
-      label: 'FAQ Document',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md'],
-      target_folder: 'content',
-      description: 'Frequently asked questions'
+      asset_type: 'product_videos',
+      label: 'Product Videos / Produktvideos',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.mp4', '.mov', '.webm', '.m4v'],
+      target_folder: 'products',
+      aliases: ['product_video', 'product_video_assets', 'video'],
+      description: 'Approved product videos, demos, UGC clips, and cutdowns.',
+      guidance: {
+        what_to_upload: 'Product demos, UGC clips, reels, explainers, usage videos, and source cutdowns.',
+        why_it_matters: 'Media Studio, Content Studio, Campaign Studio, and Publishing use video as creative source material.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'testimonial',
-      label: 'Testimonials',
-      required: false,
-      allowed_extensions: ['.pdf', '.docx', '.txt', '.md', '.png', '.jpg', '.jpeg', '.mp4'],
-      target_folder: 'content',
-      description: 'Customer or partner testimonials'
+      asset_type: 'social_assets',
+      label: 'Social Assets / Social-Media-Assets',
+      purpose: 'campaign_social',
+      purpose_label: 'Campaign and social',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.pdf', '.psd', '.ai', '.fig'],
+      target_folder: 'campaigns',
+      aliases: ['social_asset', 'social_creatives', 'organic_social_assets'],
+      description: 'Organic social creative, post visuals, reels, stories, and channel-ready source assets.',
+      guidance: {
+        what_to_upload: 'Organic post images, story frames, reels, thumbnails, channel templates, and captions references.',
+        why_it_matters: 'Content Studio, Media Studio, Campaign Studio, and Publishing can reuse proven channel assets.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
     },
     {
-      asset_type: 'email_template',
-      label: 'Email Template',
-      required: false,
-      allowed_extensions: ['.html', '.txt', '.md', '.docx'],
+      asset_type: 'campaign_assets',
+      label: 'Campaign Assets / Kampagnenmaterial',
+      purpose: 'campaign_social',
+      purpose_label: 'Campaign and social',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.pdf', '.doc', '.docx', '.html', '.zip'],
+      target_folder: 'campaigns',
+      aliases: ['campaign_asset', 'creative_assets', 'ad_assets'],
+      description: 'Campaign-specific creative, copy, export packs, banners, and channel packages.',
+      guidance: {
+        what_to_upload: 'Campaign banners, ad creative, landing-page assets, email hero files, export packs, and wave-specific files.',
+        why_it_matters: 'Campaign Studio and Publishing need a reusable package for each campaign or wave.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'packaging_images',
+      label: 'Packaging Images / Verpackungsbilder',
+      purpose: 'visual_media',
+      purpose_label: 'Visual media',
+      required: true,
+      allowed_extensions: ['.png', '.jpg', '.jpeg', '.webp', '.pdf'],
+      target_folder: 'products',
+      aliases: ['packaging_doc', 'packaging_image', 'packaging', 'label_image'],
+      description: 'Packaging photos, labels, inserts, and box or bottle references.',
+      guidance: {
+        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+        why_it_matters: 'Media Studio and Publishing need packaging truth for product visuals and compliance checks.',
+        used_in: ['Campaign Studio', 'Media Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'testimonials_reviews',
+      label: 'Testimonials & Reviews / Kundenstimmen & Bewertungen',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
+      required: true,
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md', '.csv', '.xlsx', '.png', '.jpg', '.jpeg'],
       target_folder: 'content',
-      description: 'Email campaign template'
+      aliases: ['testimonial', 'testimonials', 'review', 'reviews'],
+      description: 'Customer proof, reviews, testimonial exports, and approved quotes.',
+      guidance: {
+        what_to_upload: 'Review exports, testimonial docs, approved screenshots, quote permissions, and proof notes.',
+        why_it_matters: 'Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.',
+        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'certificates',
+      label: 'Certificates / Zertifikate',
+      purpose: 'proof_compliance',
+      purpose_label: 'Proof and compliance',
+      required: true,
+      allowed_extensions: ['.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx'],
+      target_folder: 'content',
+      aliases: ['certificate', 'certification', 'certifications', 'cert'],
+      description: 'Certifications, lab reports, awards, and official proof documents.',
+      guidance: {
+        what_to_upload: 'Certificates, compliance proof, awards, lab reports, or official authorization documents.',
+        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+        used_in: ['Content Studio', 'Publishing', 'AI Command']
+      }
+    },
+    {
+      asset_type: 'partner_docs',
+      label: 'Partner Documents / Partnerdokumente',
+      purpose: 'partnerships',
+      purpose_label: 'Partnerships',
+      required: true,
+      allowed_extensions: ['.pdf', '.doc', '.docx', '.txt', '.md', '.csv', '.xlsx'],
+      target_folder: 'content',
+      aliases: ['partner_doc', 'partner_document', 'supplier_doc', 'partner_material'],
+      description: 'Partner, supplier, distributor, marketplace, and collaboration documents.',
+      guidance: {
+        what_to_upload: 'Partner briefs, supplier docs, marketplace requirements, distributor notes, and collaboration agreements.',
+        why_it_matters: 'Campaign Studio, Publishing, and AI Command need partner constraints before reuse or release.',
+        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+      }
     }
   ];
+}
+
+function getCanonicalAssetType(assetType) {
+  const normalized = String(assetType || '').trim().toLowerCase();
+  if (!normalized) return '';
+
+  for (const item of getAssetTypeCatalog()) {
+    const values = [item.asset_type, ...(item.aliases || [])].map(value => String(value || '').trim().toLowerCase());
+    if (values.includes(normalized)) {
+      return item.asset_type;
+    }
+  }
+
+  return '';
+}
+
+function getAssetCategoryDefinition(assetType) {
+  const canonicalType = getCanonicalAssetType(assetType);
+  return getAssetTypeCatalog().find(item => item.asset_type === canonicalType) || null;
+}
+
+function getAssetCategoryStatus(asset, projectName) {
+  const record = asset || {};
+  const explicitStatus = String(
+    record.readiness_status ||
+    record.review_status ||
+    record.approval_status ||
+    record.status ||
+    ''
+  ).trim().toLowerCase();
+
+  if (record.approved === true || ['approved', 'ready_approved'].includes(explicitStatus)) {
+    return 'Approved';
+  }
+
+  const filePath = String(record.file_path || record.local_path || '').trim();
+  const exists = filePath ? fs.existsSync(filePath) : record.exists === true;
+  if (!exists || record.exists === false) {
+    return 'Needs Review';
+  }
+
+  try {
+    const folderInfo = getTargetFolderForAssetType(projectName, record.asset_type);
+    if (filePath && !filePath.startsWith(folderInfo.target_dir)) {
+      return 'Needs Review';
+    }
+  } catch (_) {
+    return 'Needs Review';
+  }
+
+  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+    return 'Needs Review';
+  }
+
+  return 'Uploaded';
+}
+
+function buildProjectAssetCategoryReadiness(projectName, assetsInput = null) {
+  const assets = Array.isArray(assetsInput) ? assetsInput : listProjectAssets(projectName);
+  const catalog = getAssetTypeCatalog();
+  const categories = catalog.map(item => {
+    const matchingAssets = assets.filter(asset => getCanonicalAssetType(asset.asset_type) === item.asset_type);
+    const statuses = matchingAssets.map(asset => getAssetCategoryStatus(asset, projectName));
+    const status =
+      !matchingAssets.length
+        ? 'Missing'
+        : statuses.includes('Approved')
+          ? 'Approved'
+          : statuses.includes('Uploaded')
+            ? 'Uploaded'
+            : 'Needs Review';
+    const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
+    const uploadedAssets = matchingAssets
+      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Uploaded')
+      .map(asset => asset.asset_id || path.basename(String(asset.file_path || '')))
+      .filter(Boolean);
+    const approvedAssets = matchingAssets
+      .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Approved')
+      .map(asset => asset.asset_id || path.basename(String(asset.file_path || '')))
+      .filter(Boolean);
+
+    return {
+      asset_type: item.asset_type,
+      internal_key: item.asset_type,
+      label: item.label,
+      display_label: item.label,
+      purpose: item.purpose,
+      purpose_label: item.purpose_label,
+      required: item.required,
+      allowed_extensions: item.allowed_extensions,
+      accepted_file_types: item.allowed_extensions,
+      target_folder: item.target_folder,
+      aliases: item.aliases || [],
+      description: item.description,
+      guidance: item.guidance,
+      status,
+      blocker,
+      count: matchingAssets.length,
+      uploaded_count: statuses.filter(value => value === 'Uploaded').length,
+      approved_count: statuses.filter(value => value === 'Approved').length,
+      needs_review_count: statuses.filter(value => value === 'Needs Review').length,
+      asset_ids: matchingAssets.map(asset => asset.asset_id).filter(Boolean),
+      uploaded_assets: uploadedAssets,
+      approved_assets: approvedAssets,
+      next_action:
+        status === 'Missing'
+          ? `Upload ${item.label}.`
+          : status === 'Needs Review'
+            ? `Review ${item.label} classification, file availability, or folder placement.`
+            : status === 'Uploaded'
+              ? `Review and approve ${item.label} when ready.`
+              : `${item.label} is approved.`
+    };
+  });
+
+  const summary = categories.reduce((acc, item) => {
+    const key = item.status.toLowerCase().replace(/\s+/g, '_');
+    acc[key] = (acc[key] || 0) + 1;
+    if (item.blocker) acc.blockers += 1;
+    return acc;
+  }, {
+    total: categories.length,
+    missing: 0,
+    uploaded: 0,
+    needs_review: 0,
+    approved: 0,
+    blockers: 0
+  });
+
+  const nextCategory = categories.find(item => item.status === 'Missing') ||
+    categories.find(item => item.status === 'Needs Review') ||
+    categories.find(item => item.status === 'Uploaded') ||
+    null;
+
+  return {
+    project: projectName,
+    reviewed_at: new Date().toISOString(),
+    summary,
+    categories,
+    next_best_action: nextCategory
+      ? nextCategory.next_action
+      : 'All library categories are covered.'
+  };
 }
 
 function reviewProjectUploadMapping(projectName) {
@@ -6700,10 +6965,14 @@ function reviewProjectUploadMapping(projectName) {
     upload_mapping: catalog.map(item => ({
       asset_type: item.asset_type,
       label: item.label,
+      purpose: item.purpose,
+      purpose_label: item.purpose_label,
       required: item.required,
       allowed_extensions: item.allowed_extensions,
       target_folder: item.target_folder,
-      description: item.description
+      description: item.description,
+      guidance: item.guidance,
+      aliases: item.aliases || []
     }))
   };
 }
@@ -6747,7 +7016,8 @@ function reviewProjectConnectorReadiness(projectName) {
 function getTargetFolderForAssetType(projectName, assetType) {
   const base = getProjectBasePaths(projectName);
   const catalog = getAssetTypeCatalog();
-  const item = catalog.find(x => x.asset_type === String(assetType || '').trim().toLowerCase());
+  const canonicalType = getCanonicalAssetType(assetType);
+  const item = catalog.find(x => x.asset_type === canonicalType);
 
   if (!item) {
     throw new Error('Unknown asset type');
@@ -7449,13 +7719,14 @@ app.post('/media/upload', applySingleMediaUpload, (req, res) => {
         writeJsonFile(paths.registryPath, registry);
       }
     } else {
-      registeredAsset = registerProjectAsset(project, type, absolutePath);
+      registeredAsset = registerProjectAsset(project, uploadTarget.assetType || type, absolutePath);
     }
 
     return res.json({
       success: true,
       project,
-      type,
+      type: uploadTarget.assetType || type,
+      requested_type: uploadTarget.requestedAssetType || type,
       filename,
       saved_to: absolutePath,
       target_folder: uploadTarget.target_folder,
@@ -10084,11 +10355,12 @@ function reviewProjectMissingPriorities(projectName) {
   const important = [];
   const optional = [];
 
-  const assetMissing = missingAssets.missing || [];
+  const assetMissing = missingAssets.blockers || missingAssets.missing || [];
   const connectorMissing = connectorReadiness.missing || [];
+  const requiredAssetTypes = new Set(getAssetTypeCatalog().filter(item => item.required).map(item => item.asset_type));
 
   for (const item of assetMissing) {
-    if (['logo', 'brand_guideline', 'product_csv', 'pricing_doc', 'legal_doc'].includes(item)) {
+    if (requiredAssetTypes.has(item)) {
       critical.push(item);
     } else {
       important.push(item);
@@ -10224,11 +10496,20 @@ function buildProjectControlCenterAssets(projectName) {
   const routes = reviewProjectAssetRoutes(projectName);
   const missingAssets = reviewProjectMissingAssets(projectName);
   const folderHealth = reviewProjectFolderHealth(projectName);
+  const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
 
   return {
     project: projectName,
     generated_at: new Date().toISOString(),
     assets,
+    asset_catalog: getAssetTypeCatalog(),
+    category_readiness: categoryReadiness,
+    approved_assets: categoryReadiness.categories
+      .flatMap(category => category.approved_assets.map(assetId => ({
+        asset_id: assetId,
+        asset_type: category.asset_type,
+        label: category.label
+      }))),
     routes,
     missing_assets: missingAssets,
     folder_health: folderHealth

@@ -1,15 +1,17 @@
 import { uploadProjectAsset } from "../api.js";
+import {
+  ASSET_PURPOSE_ORDER,
+  getAssetCatalog,
+  getAssetNextAction,
+  getAssetStatusTone,
+  getCanonicalAssetType,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  normalizeAssetCategory,
+  titleCaseAssetKey
+} from "../asset-library.js";
 
 const librarySessionStore = new Map();
-const SAFE_UPLOAD_ASSET_TYPES = [
-  { value: "logo", label: "Logo" },
-  { value: "product", label: "Product" },
-  { value: "packaging", label: "Packaging" },
-  { value: "reference", label: "Reference" },
-  { value: "video", label: "Video" },
-  { value: "image", label: "Image" },
-  { value: "document", label: "Document" }
-];
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -114,7 +116,7 @@ function ensureLibrarySession(projectName) {
       searchQuery: "",
       metadataDrafts: {},
       hiddenAssetIds: new Set(),
-      uploadType: "product",
+      uploadType: "logo",
       customUploadType: "",
       recentUploads: [],
       lastUploadedFilenames: [],
@@ -129,7 +131,8 @@ function normalizeAssets({
   assets,
   routes,
   registryAssets,
-  session
+  session,
+  catalog
 }) {
   const routedById = new Map();
   const routedByPath = new Map();
@@ -156,6 +159,9 @@ function normalizeAssets({
       ...draft,
       id: asset?.asset_id || `asset-${index}`,
       filename: basename(asset?.file_path || asset?.filename || ""),
+      category: getCategoryForAsset(asset, catalog),
+      category_label: getCategoryDisplayLabel(asset, catalog),
+      canonical_asset_type: getCanonicalAssetType(asset?.asset_type, catalog),
       folder: getAssetFolder(asset),
       exists: asset?.exists !== false,
       routed: Boolean(routeMeta),
@@ -296,6 +302,97 @@ function buildLibraryAiPrompt(projectName, selectedAsset, missingRequiredAssets)
   return `Review the library for ${projectLabel}. Selected asset: ${assetLabel}. Missing required asset types: ${missingLabel}. Recommend the next best asset cleanup or upload actions.`;
 }
 
+function getCategoryForAsset(asset, catalog) {
+  const canonicalType = getCanonicalAssetType(asset?.asset_type, catalog);
+  return catalog.find((item) => item.asset_type === canonicalType) || normalizeAssetCategory({
+    asset_type: canonicalType || asString(asset?.asset_type || "asset"),
+    label: titleCaseAssetKey(canonicalType || asset?.asset_type || "Asset"),
+    required: false
+  });
+}
+
+function getCategoryDisplayLabel(asset, catalog) {
+  const category = getCategoryForAsset(asset, catalog);
+  return category.display_label || category.label || titleCaseAssetKey(asset?.asset_type || "asset");
+}
+
+function formatExtensions(category) {
+  return asArray(category.accepted_file_types || category.allowed_extensions).join(", ") || "Project-approved files";
+}
+
+function groupCategoriesByPurpose(categories) {
+  const groups = new Map();
+  asArray(categories).forEach((category) => {
+    const key = category.purpose || "other";
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        label: category.purpose_label || titleCaseAssetKey(key),
+        items: []
+      });
+    }
+    groups.get(key).items.push(category);
+  });
+
+  return Array.from(groups.values()).sort((a, b) => {
+    const aIndex = ASSET_PURPOSE_ORDER.indexOf(a.key);
+    const bIndex = ASSET_PURPOSE_ORDER.indexOf(b.key);
+    return (aIndex < 0 ? 99 : aIndex) - (bIndex < 0 ? 99 : bIndex) || a.label.localeCompare(b.label);
+  });
+}
+
+function renderCategoryReadiness(groups, escapeHtml) {
+  if (!groups.length) {
+    return renderEmpty("No asset categories are available for this project yet.", escapeHtml);
+  }
+
+  return `
+    <div class="library-category-groups">
+      ${groups.map((group) => `
+        <div class="library-category-group">
+          <div class="library-category-group-head">
+            <strong>${escapeHtml(group.label)}</strong>
+            <span>${escapeHtml(`${group.items.length} categories`)}</span>
+          </div>
+          <div class="library-category-grid">
+            ${group.items.map((category) => `
+              <article class="library-category-card ${getAssetStatusTone(category.status)}">
+                <div class="library-category-card-head">
+                  <div>
+                    <h4>${escapeHtml(category.display_label || category.label || category.asset_type)}</h4>
+                    <small>${escapeHtml(category.internal_key || category.asset_type)}</small>
+                  </div>
+                  <span class="card-badge ${getAssetStatusTone(category.status)}">${escapeHtml(category.status || "Missing")}</span>
+                </div>
+                <div class="library-category-count">${escapeHtml(`${formatCount(category.count)} file${Number(category.count) === 1 ? "" : "s"}`)}</div>
+                <div class="library-guidance-grid">
+                  <div>
+                    <span>Upload</span>
+                    <p>${escapeHtml(category.guidance?.what_to_upload || category.description || "Project source files.")}</p>
+                  </div>
+                  <div>
+                    <span>Accepted</span>
+                    <p>${escapeHtml(formatExtensions(category))}</p>
+                  </div>
+                  <div>
+                    <span>Why it matters</span>
+                    <p>${escapeHtml(category.guidance?.why_it_matters || "This supports reusable project execution.")}</p>
+                  </div>
+                  <div>
+                    <span>Used in</span>
+                    <p>${escapeHtml(asArray(category.guidance?.used_in).join(", ") || "Library, AI Command")}</p>
+                  </div>
+                </div>
+                <div class="library-category-next">${escapeHtml(category.next_action || "Keep this category ready for reuse.")}</div>
+              </article>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function normalizeCustomAssetType(value = "") {
   return asString(value)
     .trim()
@@ -304,9 +401,9 @@ function normalizeCustomAssetType(value = "") {
     .replace(/[^a-z0-9_-]/g, "");
 }
 
-function getValidatedUploadAssetType(selection = "", customValue = "") {
+function getValidatedUploadAssetType(selection = "", customValue = "", catalog = []) {
   const normalizedSelection = asString(selection).trim().toLowerCase();
-  const safeValues = new Set(SAFE_UPLOAD_ASSET_TYPES.map((item) => item.value));
+  const safeValues = new Set(asArray(catalog).map((item) => item.asset_type || item.value).filter(Boolean));
 
   if (safeValues.has(normalizedSelection)) {
     return normalizedSelection;
@@ -347,6 +444,7 @@ function bindLibraryWorkspace({
   const routes = asObject(assetsData?.routes);
   const registryAssets = asArray(registry?.assets);
   const registryTotal = Number(registry?.total_assets || registryAssets.length || 0);
+  const catalog = getAssetCatalog(assetsData);
 
   const syncSelectionToLatestUpload = (allAssets) => {
     const uploadedNames = asArray(session.lastUploadedFilenames);
@@ -386,7 +484,8 @@ function bindLibraryWorkspace({
     try {
       assetType = getValidatedUploadAssetType(
         assetTypeSelect?.value || session.uploadType,
-        customAssetTypeInput?.value || session.customUploadType
+        customAssetTypeInput?.value || session.customUploadType,
+        catalog
       );
     } catch (error) {
       showError?.(error.message || "Choose a valid asset type before uploading.");
@@ -471,7 +570,8 @@ function bindLibraryWorkspace({
       assets,
       routes,
       registryAssets,
-      session
+      session,
+      catalog
     });
     syncSelectionToLatestUpload(allAssets);
 
@@ -525,13 +625,15 @@ function bindLibraryWorkspace({
                 <div class="library-asset-head">
                   <div>
                     <div class="library-asset-title">${escapeHtml(asset.filename || asset.asset_type || "Asset")}</div>
-                    <div class="library-asset-meta">${escapeHtml(asset.asset_type || "asset")} • ${escapeHtml(asset.folder || "unassigned")}</div>
+                    <div class="library-asset-meta">${escapeHtml(asset.category_label || asset.asset_type || "asset")} • ${escapeHtml(asset.folder || "unassigned")}</div>
+                    <div class="library-asset-key">${escapeHtml(asset.asset_type || "asset")}</div>
                   </div>
                   <span class="card-badge ${asset.localOnly ? "warning" : asset.exists ? "success" : "danger"}">${escapeHtml(asset.localOnly ? "Queued" : asset.exists ? "Live" : "Missing")}</span>
                 </div>
                 <div class="library-asset-tags">
                   <span class="library-tag ${asset.inExpectedFolder ? "success" : asset.routed ? "warning" : "neutral"}">${escapeHtml(asset.inExpectedFolder ? "In place" : asset.routed ? "Off-route" : "Unrouted")}</span>
                   <span class="library-tag ${asset.registryKnown ? "success" : "neutral"}">${escapeHtml(asset.registryKnown ? "Registry" : "Untracked")}</span>
+                  <span class="library-tag neutral">${escapeHtml(asset.category_label || "Unclassified")}</span>
                   <span class="library-tag neutral">${escapeHtml(asset.source_signal)}</span>
                 </div>
               </button>
@@ -552,7 +654,8 @@ function bindLibraryWorkspace({
         ? `
           <div class="data-stack">
             <div class="data-row"><span>Filename</span><strong>${escapeHtml(selectedAsset.filename || "-")}</strong></div>
-            <div class="data-row"><span>Asset type</span><strong>${escapeHtml(selectedAsset.asset_type || "asset")}</strong></div>
+            <div class="data-row"><span>Category</span><strong>${escapeHtml(selectedAsset.category_label || selectedAsset.asset_type || "asset")}</strong></div>
+            <div class="data-row"><span>Internal key</span><strong>${escapeHtml(selectedAsset.asset_type || "asset")}</strong></div>
             <div class="data-row"><span>Folder</span><strong>${escapeHtml(selectedAsset.folder || "unassigned")}</strong></div>
             <div class="data-row"><span>Path</span><strong>${escapeHtml(selectedAsset.file_path || "Queued upload")}</strong></div>
             <div class="data-row"><span>Source mode</span><strong>${escapeHtml(selectedAsset.source_signal)}</strong></div>
@@ -569,11 +672,11 @@ function bindLibraryWorkspace({
           <div class="library-form-grid">
             <div class="setup-field-group">
               <div class="setup-field-head">
-                <label class="setup-label" for="libraryAssetTypeInput">Asset classification</label>
+                <label class="setup-label" for="libraryAssetTypeInput">Internal classification key</label>
                 <span class="setup-field-state is-optional">${escapeHtml(selectedAsset.localOnly ? "Queued" : "Save Draft only")}</span>
               </div>
               <input id="libraryAssetTypeInput" class="setup-input" type="text" value="${escapeHtml(currentDraft.asset_type || selectedAsset.asset_type || "")}" placeholder="e.g. product_image">
-              <div class="setup-helper">Adjust the logical asset type used by workflows. Save Draft keeps this metadata in a temporary local draft.</div>
+              <div class="setup-helper">Human label: ${escapeHtml(selectedAsset.category_label || "Unclassified")}. Save Draft keeps this metadata in a temporary local draft.</div>
             </div>
 
             <div class="setup-field-group">
@@ -667,7 +770,7 @@ function bindLibraryWorkspace({
             ${missingRequiredAssets.map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("")}
           </ul>
         `
-        : renderEmpty("All required asset types are currently present.", escapeHtml);
+        : renderEmpty("All project template categories have at least one uploaded asset.", escapeHtml);
     }
 
     const folderButtons = Array.from(document.querySelectorAll("[data-library-folder]"));
@@ -697,12 +800,28 @@ function bindLibraryWorkspace({
 
     const uploadTypeSelect = $("libraryUploadTypeSelect");
     const uploadCustomTypeInput = $("libraryUploadCustomTypeInput");
+    const uploadGuidance = $("libraryUploadGuidance");
+    const selectedUploadCategory = catalog.find((item) => item.asset_type === session.uploadType) || catalog[0] || null;
     if (uploadTypeSelect) {
-      uploadTypeSelect.value = session.uploadType || "product";
+      uploadTypeSelect.value = session.uploadType || catalog[0]?.asset_type || "logo";
       uploadTypeSelect.onchange = (event) => {
-        session.uploadType = event.target.value || "product";
+        session.uploadType = event.target.value || catalog[0]?.asset_type || "logo";
         renderWorkspace();
       };
+    }
+
+    if (uploadGuidance) {
+      uploadGuidance.innerHTML = selectedUploadCategory
+        ? `
+          <div class="library-upload-guidance">
+            <div class="data-row"><span>What to upload</span><strong>${escapeHtml(selectedUploadCategory.guidance?.what_to_upload || selectedUploadCategory.description || "Project files")}</strong></div>
+            <div class="data-row"><span>Accepted types</span><strong>${escapeHtml(formatExtensions(selectedUploadCategory))}</strong></div>
+            <div class="data-row"><span>Why it matters</span><strong>${escapeHtml(selectedUploadCategory.guidance?.why_it_matters || "Supports reusable project work.")}</strong></div>
+            <div class="data-row"><span>Used in</span><strong>${escapeHtml(asArray(selectedUploadCategory.guidance?.used_in).join(", ") || "Library")}</strong></div>
+            <div class="library-asset-key">Internal key: ${escapeHtml(selectedUploadCategory.asset_type)}</div>
+          </div>
+        `
+        : renderEmpty("Select a category to see upload guidance.", escapeHtml);
     }
 
     if (uploadCustomTypeInput) {
@@ -750,7 +869,8 @@ function bindLibraryWorkspace({
         assets,
         routes,
         registryAssets,
-        session
+        session,
+        catalog
       });
       const selectedAsset = allAssets.find((asset) => asset.id === session.selectedAssetId) || null;
       const input = $("quickCommandInput");
@@ -795,12 +915,45 @@ export const libraryRoute = {
     const folderHealth = asObject(assetsData.folder_health);
     const session = ensureLibrarySession(projectName);
 
-    const missingRequiredAssets = asArray(assetsData.missing_assets?.missing);
+    const categoryReadiness = getCategoryReadinessList(assetsData);
+    const categorySummary = asObject(assetsData.category_readiness?.summary);
+    const categoryGroups = groupCategoriesByPurpose(categoryReadiness);
+    const missingRequiredAssets = getMissingAssetLabels(assetsData);
+    const nextBestAction = getAssetNextAction(assetsData);
     const root = $("libraryRoot");
     if (!root) return;
 
     root.innerHTML = `
       <div class="library-wrapper">
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Project Asset Foundation</div>
+              <h3>${escapeHtml(projectName ? `${projectName} Library` : "Project Library")}</h3>
+              <p class="home-section-copy" style="margin: 6px 0 0;">Upload, classify, validate, and reuse project-owned files without crossing project boundaries.</p>
+            </div>
+            <span class="card-badge ${missingRequiredAssets.length ? "warning" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Covered")}</span>
+          </div>
+          <div class="library-readiness-summary">
+            <div class="data-card"><span class="data-label">Categories</span><strong>${escapeHtml(String(categorySummary.total || categoryReadiness.length))}</strong></div>
+            <div class="data-card"><span class="data-label">Missing</span><strong>${escapeHtml(String(categorySummary.missing ?? categoryReadiness.filter((item) => item.status === "Missing").length))}</strong></div>
+            <div class="data-card"><span class="data-label">Needs review</span><strong>${escapeHtml(String(categorySummary.needs_review ?? categoryReadiness.filter((item) => item.status === "Needs Review").length))}</strong></div>
+            <div class="data-card"><span class="data-label">Approved</span><strong>${escapeHtml(String(categorySummary.approved ?? categoryReadiness.filter((item) => item.status === "Approved").length))}</strong></div>
+          </div>
+          <div class="simple-banner library-next-action">${escapeHtml(nextBestAction || "Upload the next missing category before launch work continues.")}</div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Category Readiness</h3>
+              <p class="home-section-copy" style="margin: 6px 0 0;">Each category shows what belongs there, accepted file types, why it matters, and where it is reused.</p>
+            </div>
+            <span class="card-badge neutral">Project template</span>
+          </div>
+          ${renderCategoryReadiness(categoryGroups, escapeHtml)}
+        </section>
+
         <div class="library-layout">
           <div class="library-main">
             <section class="card">
@@ -838,7 +991,7 @@ export const libraryRoute = {
               <div id="libraryAssetEditor" style="margin-top: 16px;"></div>
               <div class="setup-validation-block">
                 <div class="card-head">
-                  <h3>Missing required asset types</h3>
+                  <h3>Missing Library Blockers</h3>
                   <span class="card-badge ${missingRequiredAssets.length ? "danger" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Complete")}</span>
                 </div>
                 <div id="libraryMissingAssets"></div>
@@ -864,12 +1017,12 @@ export const libraryRoute = {
 
                 <div class="setup-field-group">
                   <div class="setup-field-head">
-                    <label class="setup-label" for="libraryUploadTypeInput">Default asset type</label>
+                    <label class="setup-label" for="libraryUploadTypeSelect">Asset category</label>
                     <span class="setup-field-state is-optional">Applies to queue</span>
                   </div>
                   <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
-                    ${SAFE_UPLOAD_ASSET_TYPES.map((item) => `
-                      <option value="${escapeHtml(item.value)}"${session.uploadType === item.value ? " selected" : ""}>${escapeHtml(item.label)}</option>
+                    ${getAssetCatalog(assetsData).map((item) => `
+                      <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
                     `).join("")}
                     <option value="custom"${session.uploadType === "custom" ? " selected" : ""}>Custom type (advanced)</option>
                   </select>
@@ -878,7 +1031,8 @@ export const libraryRoute = {
                       ? `<input id="libraryUploadCustomTypeInput" class="setup-input" type="text" value="${escapeHtml(session.customUploadType || "")}" placeholder="custom_type" style="margin-top: 10px;">`
                       : ""
                   }
-                  <div class="setup-helper">Use a known safe type when possible. Custom type is available for advanced cases and is validated before upload.</div>
+                  <div class="setup-helper">Use a project template category when possible. Custom type is available for advanced cases and is validated before upload.</div>
+                  <div id="libraryUploadGuidance" style="margin-top: 10px;"></div>
                 </div>
 
                 <div class="setup-field-group">

@@ -4,6 +4,10 @@ import {
   setSharedHandoff
 } from "../shared-context.js";
 
+import {
+  getCategoryReadinessList
+} from "../asset-library.js";
+
 const MODE_DEFS = [
   {
     id: "executive",
@@ -355,6 +359,8 @@ function buildUnifiedAiContext(state, intelligence) {
   const connectors = asObject(state.data.integrations);
   const controlCenter = asObject(connectors.control_center);
   const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
+  const assetCategories = getCategoryReadinessList(assets);
 
   const insights =
     asObject(intelligence?.insights) ||
@@ -419,6 +425,22 @@ function buildUnifiedAiContext(state, intelligence) {
     readinessDashboard,
     connectors,
     controlCenter,
+    assets,
+    assetCategories,
+    approvedAssets: assetCategories
+      .filter((item) => item.status === "Approved")
+      .flatMap((item) => asArray(item.approved_assets).map((assetId) => ({
+        asset_id: assetId,
+        asset_type: item.asset_type,
+        label: item.display_label || item.label || item.asset_type
+      }))),
+    assetBlockers: assetCategories
+      .filter((item) => item.blocker || ["Missing", "Needs Review"].includes(item.status))
+      .map((item) => ({
+        asset_type: item.asset_type,
+        label: item.display_label || item.label || item.asset_type,
+        status: item.status
+      })),
     activity,
     insights,
     learning,
@@ -989,7 +1011,12 @@ async function submitDurableCommand({
       command: cleanCommand,
       mode_id: modeId || session.modeId,
       source,
-      actor: "mh-assistant"
+      actor: "mh-assistant",
+      asset_context: {
+        categories: aiContext.assetCategories,
+        approved_assets: aiContext.approvedAssets,
+        blockers: aiContext.assetBlockers
+      }
     });
 
     response = asObject(result?.response);

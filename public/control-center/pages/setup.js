@@ -1,3 +1,10 @@
+import {
+  getAssetNextAction,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+
 const REQUIRED_FIELDS = [
   { name: "project_name", label: "Project name" },
   { name: "project_type", label: "Project type" },
@@ -463,8 +470,11 @@ export const setupRoute = {
 
     const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
     const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "Not ready";
-    const missingAssets = asArray(assets.missing_assets?.missing);
+    const missingAssets = getMissingAssetLabels(assets);
     const missingConnectors = asArray(integrations.readiness?.missing);
+    const libraryCategories = getCategoryReadinessList(assets);
+    const setupAssetKeys = ["logo", "brand_guideline"];
+    const setupAssetNextAction = getAssetNextAction(assets, setupAssetKeys);
     const criticalGaps = asArray(readinessDashboard.priorities?.critical);
     const nextActions = asArray(readinessDashboard.next_best_actions).length
       ? asArray(readinessDashboard.next_best_actions)
@@ -475,6 +485,9 @@ export const setupRoute = {
       const source = sources[key];
       return Boolean(asString(source?.value || source).trim());
     }).length;
+    const setupAssetBlockerCount = libraryCategories.filter((item) =>
+      setupAssetKeys.includes(item.asset_type) && ["Missing", "Needs Review"].includes(item.status)
+    ).length;
 
     const projectInfoStatus = getSectionStatus("project_information", values);
     const businessStatus = getSectionStatus("business_context", values);
@@ -844,6 +857,16 @@ export const setupRoute = {
                   <div class="simple-banner">${escapeHtml(nextActions[0] || "No next-best action is currently suggested yet.")}</div>
                 </div>
               </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h3>Library Inputs</h3>
+                <span class="card-badge ${setupAssetBlockerCount ? "warning" : "success"}">${escapeHtml(setupAssetBlockerCount ? `${setupAssetBlockerCount} open` : "Ready")}</span>
+              </div>
+              <p class="setup-side-copy">Setup reads the logo and brand guideline before downstream planning, creative, and AI assistance rely on brand context.</p>
+              ${renderAssetDependencyRows(assets, setupAssetKeys, escapeHtml, "Brand library inputs are covered for Setup.")}
+              <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(setupAssetNextAction)}</div>
             </section>
 
             <section class="card">

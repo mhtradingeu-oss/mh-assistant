@@ -1,4 +1,10 @@
 import { getSharedCampaignRecord, getSharedHandoff, setSharedCampaignRecord, setSharedHandoff } from "../shared-context.js";
+import {
+  getAssetNextAction,
+  getCategoryReadinessList,
+  getMissingAssetLabels,
+  renderAssetDependencyRows
+} from "../asset-library.js";
 
 const campaignSessions = new Map();
 const campaignSaveTimers = new Map();
@@ -208,8 +214,8 @@ function buildDefaults(state) {
   const market = context.currentMarket || overviewData.market || "";
   const language = context.currentLanguage || overviewData.language || "";
   const campaignName = context.activeCampaign || `${context.currentProject || "Campaign"} Launch`;
-  const missingAssets = asArray(assets.missing_assets?.missing);
-  const requiredAssetTypes = asArray(assets.missing_assets?.required_asset_types);
+  const missingAssets = getMissingAssetLabels(assets);
+  const requiredAssetTypes = getCategoryReadinessList(assets).map((item) => item.display_label || item.label || item.asset_type);
   const scheduledJobs = asArray(activity.scheduled_jobs);
   const channels = Array.from(new Set(
     scheduledJobs
@@ -1011,12 +1017,24 @@ function buildCampaignModel(state, session, values) {
     (item) => `${item.title}|${item.action}|${item.domain}`
   );
 
-  const missingAssets = uniqueStrings([
-    ...asArray(assets.missing_assets?.missing),
-    ...asArray(assets.missing_assets?.required_asset_types)
-  ]);
-  const requiredAssetTypes = uniqueStrings(asArray(assets.missing_assets?.required_asset_types));
-  const assetTypesPresent = uniqueStrings(asArray(assets.assets).map((item) => asString(item.asset_type)));
+  const campaignAssetKeys = [
+    "product_csv",
+    "pricing_doc",
+    "product_photos",
+    "product_videos",
+    "campaign_assets",
+    "social_assets",
+    "packaging_images"
+  ];
+  const campaignAssetCategories = getCategoryReadinessList(assets)
+    .filter((item) => campaignAssetKeys.includes(item.asset_type));
+  const missingAssets = getMissingAssetLabels(assets, campaignAssetKeys);
+  const requiredAssetTypes = uniqueStrings(campaignAssetCategories.map((item) => item.display_label || item.label || item.asset_type));
+  const assetTypesPresent = uniqueStrings(
+    campaignAssetCategories
+      .filter((item) => item.status !== "Missing")
+      .map((item) => item.display_label || item.label || item.asset_type)
+  );
   const connectedChannels = uniqueStrings(
     Object.entries(checks)
       .filter(([, isReady]) => Boolean(isReady))
@@ -1109,6 +1127,9 @@ function buildCampaignModel(state, session, values) {
     scheduledJobs,
     requiredAssetTypes,
     assetTypesPresent,
+    campaignAssetKeys,
+    campaignAssetCategories,
+    assetNextAction: getAssetNextAction(assets, campaignAssetKeys),
     missingAssets,
     missingIntegrations: uniqueBy(missingIntegrations, (item) => `${item.title}|${item.body}`),
     platformSignals,
@@ -1482,6 +1503,8 @@ export const campaignStudioRoute = {
       scheduledJobs,
       requiredAssetTypes,
       assetTypesPresent,
+      campaignAssetKeys,
+      assetNextAction,
       missingAssets,
       missingIntegrations,
       platformSignals,
@@ -1827,6 +1850,11 @@ export const campaignStudioRoute = {
                   escapeHtml,
                   multiline: true
                 })}
+              </div>
+              <div class="campaign-studio-panel-block">
+                <h4 class="insights-subtitle">Library inputs for campaign planning</h4>
+                ${renderAssetDependencyRows(state.data.assets, campaignAssetKeys, escapeHtml, "Product, pricing, and campaign assets are covered.")}
+                <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(assetNextAction)}</div>
               </div>
               <div class="campaign-readiness-grid">
                 ${renderBlockerGroup(

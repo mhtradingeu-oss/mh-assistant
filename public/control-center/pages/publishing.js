@@ -1,4 +1,9 @@
 import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import {
+  filterAssetCategories,
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
 
 const publishingSessions = new Map();
 
@@ -751,6 +756,13 @@ function bindPublishingWorkspace({
   const projectName = state.context.currentProject || "";
   const session = ensureSession(projectName, state, channels);
   const selectedItem = getSelectedItem(queue, session.selectedId);
+  const publishingAssetKeys = ["legal_doc", "pricing_doc", "product_csv", "product_photos", "product_videos", "campaign_assets", "social_assets", "logo"];
+  const publishingAssetBlockers = filterAssetCategories(state.data.assets, publishingAssetKeys)
+    .filter((item) => ["Missing", "Needs Review"].includes(item.status));
+  const publishingAssetBlockerLabel = publishingAssetBlockers
+    .map((item) => item.display_label || item.label || item.asset_type)
+    .slice(0, 4)
+    .join(", ");
 
   Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
     button.onclick = () => {
@@ -897,6 +909,10 @@ function bindPublishingWorkspace({
         showError?.("Select a publishing item before approving it.");
         return;
       }
+      if (publishingAssetBlockers.length) {
+        showError?.(`Resolve Library blockers before approval: ${publishingAssetBlockerLabel}.`);
+        return;
+      }
 
       await runAndRefresh(
         () => approvePublishingItem(projectName, selectedItem.jobId, {
@@ -918,6 +934,10 @@ function bindPublishingWorkspace({
     publishBtn.onclick = async () => {
       if (!selectedItem) {
         showError?.("Select a publishing item before marking it published.");
+        return;
+      }
+      if (publishingAssetBlockers.length) {
+        showError?.(`Resolve Library blockers before publishing: ${publishingAssetBlockerLabel}.`);
         return;
       }
 
@@ -1061,6 +1081,10 @@ export const publishingRoute = {
     const statusCounts = getStatusCounts(queue);
     const previewModel = buildPreviewModel(state, session, selectedItem);
     const channelCards = buildChannelCards(state, queue);
+    const publishingAssetKeys = ["legal_doc", "pricing_doc", "product_csv", "product_photos", "product_videos", "campaign_assets", "social_assets", "logo"];
+    const publishingAssets = filterAssetCategories(state.data.assets, publishingAssetKeys);
+    const publishingAssetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
+    const publishingAssetNextAction = getAssetNextAction(state.data.assets, publishingAssetKeys);
     const root = $("publishingRoot");
 
     if (!root) return;
@@ -1090,8 +1114,8 @@ export const publishingRoute = {
               <strong>${escapeHtml(String(channelCards.filter((card) => card.connected).length))}</strong>
             </div>
             <div class="publishing-overview-item">
-              <span>Selected item</span>
-              <strong>${escapeHtml(selectedItem ? selectedItem.title : "No item selected")}</strong>
+              <span>Asset blockers</span>
+              <strong>${escapeHtml(String(publishingAssetBlockers.length))}</strong>
             </div>
           </div>
         </section>
@@ -1220,9 +1244,13 @@ export const publishingRoute = {
             <div class="card-head">
               <div>
                 <h3>Approval / Publish Actions</h3>
-                <p class="publishing-section-copy">Approve marks the item ready. Publish Now records an immediate publish. Requeue sends the item back to the scheduled queue using the current timing fields.</p>
+                <p class="publishing-section-copy">Approve marks the item ready. Publish Now records an immediate publish. Legal, pricing, and asset categories should be covered before release.</p>
               </div>
               <span class="card-badge ${getStatusBadgeClass(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft view")}</span>
+            </div>
+            <div class="publishing-asset-gate">
+              ${renderAssetDependencyRows(state.data.assets, publishingAssetKeys, escapeHtml, "Publishing library inputs are covered.")}
+              <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(publishingAssetNextAction)}</div>
             </div>
             ${renderPreview(previewModel, selectedItem, escapeHtml)}
             ${renderActionSummary(selectedItem, checks, escapeHtml)}

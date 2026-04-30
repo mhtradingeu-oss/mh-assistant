@@ -290,6 +290,9 @@ function buildServerContext(projectName, deps = {}) {
   const readinessDashboard = asObject(readiness.dashboard);
   const overview = asObject(asObject(dashboard.overview).overview);
   const connectors = asObject(dashboard.connectors);
+  const assets = asObject(dashboard.assets);
+  const assetReadiness = asObject(assets.category_readiness);
+  const assetCategories = asArray(assetReadiness.categories);
   const integrations = asObject(connectors.control_center);
   const research = {
     key_questions: compactList(learning.open_questions || learning.questions || insights.priority_questions, 5),
@@ -314,6 +317,21 @@ function buildServerContext(projectName, deps = {}) {
       critical_gaps: compactList(readinessDashboard.priorities?.critical || readiness.priorities?.critical, 4),
       next_best_actions: compactList(asObject(dashboard.overview).next_best_actions || readinessDashboard.next_best_actions, 4),
       recommendations: compactList(learning.recommendations || insights.recommendations, 4),
+      asset_categories: assetCategories.map((item) => ({
+        asset_type: asString(item.asset_type),
+        label: asString(item.label || item.display_label || item.asset_type),
+        status: asString(item.status),
+        approved_assets: asArray(item.approved_assets).slice(0, 5),
+        uploaded_assets: asArray(item.uploaded_assets).slice(0, 5)
+      })),
+      approved_assets: assetCategories
+        .filter((item) => asString(item.status) === 'Approved')
+        .flatMap((item) => asArray(item.approved_assets).map((assetId) => `${asString(item.label || item.asset_type)}: ${assetId}`))
+        .slice(0, 12),
+      asset_blockers: assetCategories
+        .filter((item) => item.blocker || ['Missing', 'Needs Review'].includes(asString(item.status)))
+        .map((item) => `${asString(item.label || item.asset_type)}: ${asString(item.status)}`)
+        .slice(0, 12),
       connected_integrations: collectConnectedIntegrations({
         ...integrations,
         readiness: connectors.readiness,
@@ -480,6 +498,9 @@ function buildResponseFromContext(command, context, classified, providerOutput =
   if (context.summary.critical_gaps.length) {
     summaryBits.push(`Critical gaps: ${context.summary.critical_gaps.join('; ')}.`);
   }
+  if (context.summary.asset_blockers?.length) {
+    summaryBits.push(`Asset blockers: ${context.summary.asset_blockers.slice(0, 4).join('; ')}.`);
+  }
 
   const baseRecommendations = context.summary.recommendations.length
     ? context.summary.recommendations
@@ -517,6 +538,9 @@ function buildResponseFromContext(command, context, classified, providerOutput =
   const nextActions = [
     ...(providerNextActions.length ? providerNextActions : structuredNextActions),
     ...(providerNextActions.length || structuredNextActions.length ? [] : context.summary.next_best_actions.slice(0, 2)),
+    ...(providerNextActions.length || structuredNextActions.length || !context.summary.asset_blockers?.length
+      ? []
+      : [`Open Library and resolve ${context.summary.asset_blockers[0]}.`]),
     `Route the strongest outcome into ${titleCase(routeTarget)}.`
   ].filter(Boolean);
   const routeSuggestions = uniqueRouteSuggestions([

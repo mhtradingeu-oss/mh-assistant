@@ -12,6 +12,10 @@ import {
   decideProjectApproval,
   executeProjectAiCommand
 } from "../api.js";
+import {
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
 import { setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const CONTENT_TYPES = ["posts", "captions", "emails", "blogs", "scripts", "general"];
@@ -766,6 +770,8 @@ export const contentStudioRoute = {
     const pendingApprovals = asArray(session.approvals).filter((item) =>
       asString(item.entity_type) === "content_item" && asString(item.status) === "pending"
     );
+    const contentAssetKeys = ["brand_guideline", "product_csv", "product_photos", "product_videos", "testimonials_reviews", "legal_doc"];
+    const contentAssetNextAction = getAssetNextAction(state.data.assets, contentAssetKeys);
 
     root.innerHTML = `
       <div class="content-studio-wrapper">
@@ -819,6 +825,17 @@ export const contentStudioRoute = {
                 `).join("")}
               </div>
               ${renderContentQueue(items, selectedItem?.id || "", escapeHtml)}
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Library Inputs</h3>
+                  <p class="content-section-copy">Content Studio reads approved brand guidance, product facts, product media, proof, and legal context before drafting or handoff.</p>
+                </div>
+              </div>
+              ${renderAssetDependencyRows(state.data.assets, contentAssetKeys, escapeHtml, "Content library inputs are covered.")}
+              <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(contentAssetNextAction)}</div>
             </section>
 
             <section class="panel">

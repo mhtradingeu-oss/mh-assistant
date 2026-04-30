@@ -12,6 +12,10 @@ import {
   listProjectTasks,
   saveProjectMediaJob
 } from "../api.js";
+import {
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
 import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 
 const mediaStudioSessions = new Map();
@@ -804,6 +808,8 @@ export const mediaStudioRoute = {
     const pendingApprovals = asArray(session.approvals).filter((item) =>
       asString(item.entity_type) === "media_job" && asString(item.status) === "pending"
     );
+    const mediaAssetKeys = ["logo", "brand_guideline", "product_photos", "product_videos", "packaging_images", "social_assets", "campaign_assets"];
+    const mediaAssetNextAction = getAssetNextAction(state.data.assets, mediaAssetKeys);
 
     root.innerHTML = `
       <div class="media-studio-wrapper">
@@ -853,6 +859,17 @@ export const mediaStudioRoute = {
                 </div>
               </div>
               ${renderMediaQueue(session.items, selectedItem?.id || "", escapeHtml)}
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Library Inputs</h3>
+                  <p class="media-section-copy">Media Studio reads logo, brand guidance, product images, video, packaging, and campaign assets before production or publishing handoff.</p>
+                </div>
+              </div>
+              ${renderAssetDependencyRows(state.data.assets, mediaAssetKeys, escapeHtml, "Media library inputs are covered.")}
+              <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(mediaAssetNextAction)}</div>
             </section>
 
             <section class="panel">
