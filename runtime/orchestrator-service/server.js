@@ -6862,13 +6862,431 @@ function getAssetCategoryStatus(asset, projectName) {
   return 'Uploaded';
 }
 
-function buildProjectAssetCategoryReadiness(projectName, assetsInput = null) {
+function listFilesByExtensions(rootDir, extensions = [], recursive = true) {
+  if (!rootDir || !fs.existsSync(rootDir)) {
+    return [];
+  }
+
+  const allow = new Set((extensions || []).map(ext => String(ext || '').trim().toLowerCase()));
+  const queue = [rootDir];
+  const files = [];
+
+  while (queue.length) {
+    const current = queue.shift();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    entries.forEach((entry) => {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        if (recursive) {
+          queue.push(fullPath);
+        }
+        return;
+      }
+
+      if (!entry.isFile()) {
+        return;
+      }
+
+      const extension = path.extname(entry.name).toLowerCase();
+      if (!allow.size || allow.has(extension)) {
+        files.push(fullPath);
+      }
+    });
+  }
+
+  return files.sort((a, b) => a.localeCompare(b));
+}
+
+function listDirectChildDirectories(rootDir) {
+  if (!rootDir || !fs.existsSync(rootDir)) {
+    return [];
+  }
+
+  return fs.readdirSync(rootDir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function parseCsvDocument(csvRaw = '') {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < csvRaw.length; index += 1) {
+    const char = csvRaw[index];
+    const next = csvRaw[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (!inQuotes && char === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+
+    if (!inQuotes && (char === '\n' || char === '\r')) {
+      if (char === '\r' && next === '\n') {
+        index += 1;
+      }
+
+      row.push(field);
+      const hasAnyValue = row.some(value => String(value || '').length > 0);
+      if (hasAnyValue) {
+        rows.push(row);
+      }
+      row = [];
+      field = '';
+      continue;
+    }
+
+    field += char;
+  }
+
+  if (field.length || row.length) {
+    row.push(field);
+    const hasAnyValue = row.some(value => String(value || '').length > 0);
+    if (hasAnyValue) {
+      rows.push(row);
+    }
+  }
+
+  return rows;
+}
+
+function normalizeLibraryFolderCandidate(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function listFrontImageFiles(rootDir) {
+  return listFilesByExtensions(rootDir, ['.png'], true)
+    .filter(filePath => path.basename(filePath).toLowerCase() === 'front.png');
+}
+
+function buildProjectLibraryFilesystemScan(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(safeProject);
+  const brandPaths = getProjectBrandPaths(safeProject);
+
+  const projectProductsDir = basePaths.productsDir;
+  const brandProductCsvDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'product_csv'),
+    path.join(brandPaths.legacyBaseDir, 'product_csv'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'product_csv')
+  ]);
+  const brandProductImageDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'products', 'images'),
+    path.join(brandPaths.legacyBaseDir, 'products', 'images'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'images')
+  ]);
+  const brandProductVideoDirs = uniqueValues([
+    path.join(brandPaths.baseDir, 'products', 'videos'),
+    path.join(brandPaths.legacyBaseDir, 'products', 'videos'),
+    path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'products', 'videos')
+  ]);
+
+  const productDataExtensions = ['.csv', '.xlsx', '.xls', '.json'];
+  const csvValidationExtensions = new Set(['.csv']);
+
+  const projectProductDataFiles = listFilesByExtensions(projectProductsDir, productDataExtensions, true);
+  const mirrorProductDataFiles = uniqueValues(brandProductCsvDirs.flatMap((dirPath) => listFilesByExtensions(dirPath, productDataExtensions, true)));
+
+  const preferredCsvFile = projectProductDataFiles.find(filePath =>
+    path.basename(filePath).toLowerCase().includes('product_master') && csvValidationExtensions.has(path.extname(filePath).toLowerCase())
+  ) || projectProductDataFiles.find(filePath => csvValidationExtensions.has(path.extname(filePath).toLowerCase()))
+    || mirrorProductDataFiles.find(filePath => csvValidationExtensions.has(path.extname(filePath).toLowerCase()))
+    || '';
+
+  const csvValidation = {
+    csv_file: preferredCsvFile,
+    rows_total: 0,
+    missing_product_name_rows: 0,
+    missing_image_folder_rows: 0,
+    csv_product_folders: [],
+    matched_product_rows: [],
+    missing_product_rows: []
+  };
+
+  const frontFiles = uniqueValues(brandProductImageDirs.flatMap((dirPath) => listFrontImageFiles(dirPath)));
+  const frontFolderNames = [...new Set(frontFiles.map((filePath) => {
+    const matchedRoot = brandProductImageDirs.find((dirPath) => filePath === dirPath || filePath.startsWith(`${dirPath}${path.sep}`));
+    if (!matchedRoot) {
+      return path.basename(path.dirname(filePath));
+    }
+
+    return path.relative(matchedRoot, path.dirname(filePath)).replace(/\\/g, '/');
+  }))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+  const frontFolderSet = new Set(frontFolderNames);
+
+  if (preferredCsvFile && fs.existsSync(preferredCsvFile) && csvValidationExtensions.has(path.extname(preferredCsvFile).toLowerCase())) {
+    const raw = fs.readFileSync(preferredCsvFile, 'utf8').replace(/^\uFEFF/, '');
+    const parsedRows = parseCsvDocument(raw);
+
+    if (parsedRows.length) {
+      const headers = parsedRows[0].map(value => String(value || '').trim());
+      const productNameIndex = headers.findIndex(value => value.toLowerCase() === 'product name');
+      const imageFolderIndex = headers.findIndex(value => value.toLowerCase() === 'image folder');
+      const dataRows = parsedRows.slice(1);
+
+      csvValidation.rows_total = dataRows.length;
+
+      dataRows.forEach((dataRow, rowIndex) => {
+        const productName = productNameIndex >= 0 ? String(dataRow[productNameIndex] || '').trim() : '';
+        const imageFolder = imageFolderIndex >= 0 ? String(dataRow[imageFolderIndex] || '').trim() : '';
+        const candidates = [
+          imageFolder,
+          normalizeLibraryFolderCandidate(productName)
+        ].filter((value, index, array) => value && array.indexOf(value) === index);
+        const expectedFolder = imageFolder || candidates[0] || '';
+        const matchedFolder = candidates.find(candidate => frontFolderSet.has(candidate)) || '';
+
+        if (!productName) {
+          csvValidation.missing_product_name_rows += 1;
+        }
+        if (!imageFolder) {
+          csvValidation.missing_image_folder_rows += 1;
+        }
+
+        candidates.forEach((candidate) => {
+          csvValidation.csv_product_folders.push(candidate);
+        });
+
+        if (matchedFolder) {
+          csvValidation.matched_product_rows.push({
+            row_number: rowIndex + 2,
+            product_name: productName || '',
+            expected_folder: expectedFolder,
+            matched_folder: matchedFolder
+          });
+          return;
+        }
+
+        csvValidation.missing_product_rows.push({
+          row_number: rowIndex + 2,
+          product_name: productName || '',
+          expected_folder: expectedFolder,
+          candidate_folders: candidates
+        });
+      });
+    }
+  }
+
+  const imageFolders = uniqueValues(brandProductImageDirs.flatMap((dirPath) => listDirectChildDirectories(dirPath)));
+  const foldersMissingFront = imageFolders.filter((folderName) => !frontFolderSet.has(folderName));
+  const csvFolderSet = new Set(csvValidation.csv_product_folders.filter(Boolean));
+  const extraImageFolders = frontFolderNames.filter(folder => !csvFolderSet.has(folder));
+  const missingImageFolders = csvValidation.missing_product_rows
+    .map((item) => item.expected_folder || item.product_name)
+    .filter(Boolean);
+  const logicalProductDataFiles = [...new Set(projectProductDataFiles.concat(mirrorProductDataFiles).map(filePath => path.basename(filePath).toLowerCase()))];
+
+  const productVideoFiles = uniqueValues(brandProductVideoDirs.flatMap((dirPath) => listFilesByExtensions(dirPath, ['.mp4', '.mov', '.webm', '.m4v'], true)));
+
+  const scannedAssets = [];
+
+  projectProductDataFiles.concat(mirrorProductDataFiles).forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_csv',
+      file_path: filePath,
+      exists: true,
+      scan_source: filePath.startsWith(projectProductsDir) ? 'project_products' : 'brand_product_csv'
+    });
+  });
+
+  frontFiles.forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_photos',
+      file_path: filePath,
+      exists: true,
+      scan_source: 'brand_products_images_recursive'
+    });
+  });
+
+  productVideoFiles.forEach((filePath) => {
+    scannedAssets.push({
+      asset_type: 'product_videos',
+      file_path: filePath,
+      exists: true,
+      scan_source: 'brand_products_videos_recursive'
+    });
+  });
+
+  return {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    paths: {
+      project_products: projectProductsDir,
+      brand_product_csv: brandProductCsvDirs,
+      brand_product_images: brandProductImageDirs,
+      brand_product_videos: brandProductVideoDirs
+    },
+    product_csv: {
+      canonical_files: projectProductDataFiles,
+      mirror_files: mirrorProductDataFiles,
+      total_files: projectProductDataFiles.length + mirrorProductDataFiles.length,
+      logical_files: logicalProductDataFiles.length,
+      valid_files: projectProductDataFiles.concat(mirrorProductDataFiles).length,
+      preferred_source: preferredCsvFile,
+      status: projectProductDataFiles.concat(mirrorProductDataFiles).length > 0 ? 'Uploaded' : 'Missing',
+      count_label: `${logicalProductDataFiles.length} file${logicalProductDataFiles.length === 1 ? '' : 's'}`,
+      detection_summary: [
+        `Detected ${logicalProductDataFiles.length} logical product data file(s) across ${projectProductDataFiles.length + mirrorProductDataFiles.length} physical location(s).`,
+        `Canonical project files: ${projectProductDataFiles.length}.`,
+        `Brand mirror files: ${mirrorProductDataFiles.length}.`
+      ],
+      csv_validation: {
+        csv_file: csvValidation.csv_file,
+        rows_total: csvValidation.rows_total,
+        missing_product_name_rows: csvValidation.missing_product_name_rows,
+        missing_image_folder_rows: csvValidation.missing_image_folder_rows
+      }
+    },
+    product_photos: {
+      total_product_folders: imageFolders.length,
+      folders_with_front_image: frontFolderNames.length,
+      folders_missing_front_image: foldersMissingFront.length,
+      missing_front_folders: foldersMissingFront,
+      csv_products_total: csvValidation.rows_total,
+      csv_products_matched_front: csvValidation.matched_product_rows.length,
+      csv_products_missing_front: csvValidation.missing_product_rows.length,
+      csv_missing_front_folders: missingImageFolders,
+      extra_image_folders: extraImageFolders,
+      count_label: `${csvValidation.matched_product_rows.length}/${csvValidation.rows_total} matched`,
+      missing_product_rows: csvValidation.missing_product_rows,
+      status:
+        csvValidation.rows_total > 0
+          ? (csvValidation.missing_product_rows.length ? 'Needs Review' : (csvValidation.matched_product_rows.length ? 'Uploaded' : 'Missing'))
+          : (frontFolderNames.length ? 'Uploaded' : 'Missing'),
+      detection_summary: [
+        `Matched front images for ${csvValidation.matched_product_rows.length} of ${csvValidation.rows_total} CSV products.`,
+        `Missing images for ${csvValidation.missing_product_rows.length} CSV product(s).`,
+        `Detected ${frontFolderNames.length} image folder(s) with front.png and ${extraImageFolders.length} extra folder(s) not referenced by the CSV.`
+      ],
+      front_files: frontFiles
+    },
+    product_videos: {
+      total_files: productVideoFiles.length,
+      status: productVideoFiles.length ? 'Uploaded' : 'Missing',
+      files: productVideoFiles
+    },
+    scanned_assets: scannedAssets
+  };
+}
+
+function refreshProjectLibraryRegistry(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(safeProject);
+  const assetsRegistryPath = path.join(basePaths.baseDir, 'assets-registry.json');
+  const hasAssetRegistry = fs.existsSync(assetsRegistryPath);
+
+  if (!fs.existsSync(basePaths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const existingAssets = hasAssetRegistry ? readJsonFile(assetsRegistryPath, []) : [];
+  const scan = buildProjectLibraryFilesystemScan(safeProject);
+  const managedTypes = new Set(['product_csv', 'product_photos', 'product_videos']);
+  const now = new Date().toISOString();
+
+  const existingByKey = new Map();
+  existingAssets.forEach((asset) => {
+    const canonicalType = getCanonicalAssetType(asset.asset_type) || String(asset.asset_type || '').trim().toLowerCase();
+    const filePath = String(asset.file_path || '').trim();
+    if (!canonicalType || !filePath) {
+      return;
+    }
+    const key = `${canonicalType}::${filePath}`;
+    existingByKey.set(key, asset);
+  });
+
+  const retained = existingAssets.filter((asset) => {
+    const canonicalType = getCanonicalAssetType(asset.asset_type) || String(asset.asset_type || '').trim().toLowerCase();
+    const managedByRefresh = String(asset?.metadata?.managed_by || '').trim().toLowerCase() === 'library_refresh';
+    return !(managedTypes.has(canonicalType) && managedByRefresh);
+  });
+
+  const refreshedAssets = [];
+  scan.scanned_assets.forEach((scanned) => {
+    const canonicalType = getCanonicalAssetType(scanned.asset_type) || String(scanned.asset_type || '').trim().toLowerCase();
+    const filePath = String(scanned.file_path || '').trim();
+    if (!managedTypes.has(canonicalType) || !filePath) {
+      return;
+    }
+
+    const key = `${canonicalType}::${filePath}`;
+    const previous = existingByKey.get(key) || {};
+
+    refreshedAssets.push({
+      ...previous,
+      asset_id: previous.asset_id || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      project: safeProject,
+      asset_type: canonicalType,
+      file_path: filePath,
+      exists: fs.existsSync(filePath),
+      registered_at: previous.registered_at || now,
+      updated_at: now,
+      metadata: {
+        ...(previous.metadata && typeof previous.metadata === 'object' ? previous.metadata : {}),
+        managed_by: 'library_refresh',
+        scan_source: scanned.scan_source || 'library_refresh',
+        refreshed_at: now
+      }
+    });
+  });
+
+  const nextAssets = retained.concat(refreshedAssets);
+
+  if (hasAssetRegistry) {
+    writeJsonFile(assetsRegistryPath, nextAssets);
+  }
+
+  const categoryReadiness = buildProjectAssetCategoryReadiness(safeProject, nextAssets, {
+    filesystemScan: scan
+  });
+
+  return {
+    project: safeProject,
+    refreshed_at: now,
+    categories: categoryReadiness.categories,
+    product_csv: scan.product_csv,
+    product_photos: scan.product_photos,
+    missing_images: scan.product_photos?.csv_missing_front_folders || [],
+    extra_image_folders: scan.product_photos?.extra_image_folders || [],
+    registry_path: hasAssetRegistry ? assetsRegistryPath : null,
+    registry_updated: hasAssetRegistry,
+    previous_total_assets: existingAssets.length,
+    refreshed_assets_added: refreshedAssets.length,
+    total_assets: nextAssets.length,
+    filesystem_scan: scan,
+    category_readiness: categoryReadiness
+  };
+}
+
+function buildProjectAssetCategoryReadiness(projectName, assetsInput = null, options = {}) {
   const assets = Array.isArray(assetsInput) ? assetsInput : listProjectAssets(projectName);
+  const filesystemScan = options.filesystemScan || buildProjectLibraryFilesystemScan(projectName);
   const catalog = getAssetTypeCatalog();
   const categories = catalog.map(item => {
     const matchingAssets = assets.filter(asset => getCanonicalAssetType(asset.asset_type) === item.asset_type);
     const statuses = matchingAssets.map(asset => getAssetCategoryStatus(asset, projectName));
-    const status =
+    let status =
       !matchingAssets.length
         ? 'Missing'
         : statuses.includes('Approved')
@@ -6876,6 +7294,31 @@ function buildProjectAssetCategoryReadiness(projectName, assetsInput = null) {
           : statuses.includes('Uploaded')
             ? 'Uploaded'
             : 'Needs Review';
+
+    let count = matchingAssets.length;
+    let uploadedCount = statuses.filter(value => value === 'Uploaded').length;
+    let approvedCount = statuses.filter(value => value === 'Approved').length;
+    let needsReviewCount = statuses.filter(value => value === 'Needs Review').length;
+    let detectionSummary = [];
+
+    if (item.asset_type === 'product_csv') {
+      const metrics = filesystemScan.product_csv || {};
+      status = metrics.status || status;
+      count = Number(metrics.logical_files || metrics.total_files || 0);
+      uploadedCount = status === 'Uploaded' ? Math.max(1, count) : 0;
+      approvedCount = 0;
+      needsReviewCount = status === 'Needs Review' ? Math.max(1, count) : 0;
+      detectionSummary = Array.isArray(metrics.detection_summary) ? metrics.detection_summary : [];
+    } else if (item.asset_type === 'product_photos') {
+      const metrics = filesystemScan.product_photos || {};
+      status = metrics.status || status;
+      count = Number(metrics.csv_products_matched_front || 0);
+      uploadedCount = Number(metrics.csv_products_matched_front || 0);
+      approvedCount = 0;
+      needsReviewCount = Number(metrics.csv_products_missing_front || 0) > 0 ? 1 : 0;
+      detectionSummary = Array.isArray(metrics.detection_summary) ? metrics.detection_summary : [];
+    }
+
     const blocker = item.required && ['Missing', 'Needs Review'].includes(status);
     const uploadedAssets = matchingAssets
       .filter(asset => getAssetCategoryStatus(asset, projectName) === 'Uploaded')
@@ -6902,15 +7345,24 @@ function buildProjectAssetCategoryReadiness(projectName, assetsInput = null) {
       guidance: item.guidance,
       status,
       blocker,
-      count: matchingAssets.length,
-      uploaded_count: statuses.filter(value => value === 'Uploaded').length,
-      approved_count: statuses.filter(value => value === 'Approved').length,
-      needs_review_count: statuses.filter(value => value === 'Needs Review').length,
+      count,
+      count_label:
+        item.asset_type === 'product_csv'
+          ? (filesystemScan.product_csv?.count_label || `${count} file${count === 1 ? '' : 's'}`)
+          : item.asset_type === 'product_photos'
+            ? (filesystemScan.product_photos?.count_label || `${count} file${count === 1 ? '' : 's'}`)
+            : `${count} file${count === 1 ? '' : 's'}`,
+      uploaded_count: uploadedCount,
+      approved_count: approvedCount,
+      needs_review_count: needsReviewCount,
+      detection_summary: detectionSummary,
       asset_ids: matchingAssets.map(asset => asset.asset_id).filter(Boolean),
       uploaded_assets: uploadedAssets,
       approved_assets: approvedAssets,
       next_action:
-        status === 'Missing'
+        item.asset_type === 'product_photos' && status === 'Needs Review'
+          ? `Upload missing product front images. Currently matched ${filesystemScan.product_photos?.csv_products_matched_front || 0} of ${filesystemScan.product_photos?.csv_products_total || 0}.`
+          : status === 'Missing'
           ? `Upload ${item.label}.`
           : status === 'Needs Review'
             ? `Review ${item.label} classification, file availability, or folder placement.`
@@ -7808,6 +8260,16 @@ app.get('/public/media-manager/project/:project', (req, res) => {
   } catch (error) {
     return res.status(400).json({
       error: error.message || 'Failed to build media manager payload'
+    });
+  }
+});
+
+app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+  try {
+    return res.json(refreshProjectLibraryRegistry(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to refresh project library'
     });
   }
 });
@@ -16362,14 +16824,14 @@ if (command === '/list_project_assets') {
   }
 
   try {
-    const result = listProjectAssets(projectName);
-    return res.json({ command, result });
-  } catch (error) {
-    return res.json({
-      error: 'Failed to list project assets',
-      details: error.message
-    });
-  }
+  const result = listProjectAssets(projectName);
+  return res.json({ command, result });
+} catch (error) {
+  return res.status(500).json({
+    error: 'Failed to list project assets.',
+    details: error.message
+  });
+}
 }
 
 if (command === '/set_project_source_of_truth') {

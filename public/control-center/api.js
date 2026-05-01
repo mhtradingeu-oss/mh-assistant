@@ -237,6 +237,19 @@ export async function saveProjectSetup(projectName, payload = {}) {
   );
 }
 
+export async function refreshProjectLibrary(projectName) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/library/refresh`,
+    "POST",
+    {},
+    "Failed to refresh project library"
+  );
+}
+
 export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");

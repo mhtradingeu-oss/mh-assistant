@@ -1,4 +1,4 @@
-import { uploadProjectAsset } from "../api.js";
+import { refreshProjectLibrary, uploadProjectAsset } from "../api.js";
 import {
   ASSET_PURPOSE_ORDER,
   getAssetCatalog,
@@ -346,6 +346,12 @@ function renderCategoryReadiness(groups, escapeHtml) {
     return renderEmpty("No asset categories are available for this project yet.", escapeHtml);
   }
 
+  const getCountLabel = (category) => {
+    const provided = asString(category.count_label || "").trim();
+    if (provided) return provided;
+    return `${formatCount(category.count)} file${Number(category.count) === 1 ? "" : "s"}`;
+  };
+
   return `
     <div class="library-category-groups">
       ${groups.map((group) => `
@@ -364,7 +370,15 @@ function renderCategoryReadiness(groups, escapeHtml) {
                   </div>
                   <span class="card-badge ${getAssetStatusTone(category.status)}">${escapeHtml(category.status || "Missing")}</span>
                 </div>
-                <div class="library-category-count">${escapeHtml(`${formatCount(category.count)} file${Number(category.count) === 1 ? "" : "s"}`)}</div>
+                <div class="library-category-count">${escapeHtml(getCountLabel(category))}</div>
+                ${asArray(category.detection_summary).length
+                  ? `
+                    <div class="setup-helper" style="margin-top: 8px;">
+                      ${asArray(category.detection_summary).map((line) => `<div>${escapeHtml(asString(line))}</div>`).join("")}
+                    </div>
+                  `
+                  : ""
+                }
                 <div class="library-guidance-grid">
                   <div>
                     <span>Upload</span>
@@ -932,7 +946,10 @@ export const libraryRoute = {
               <h3>${escapeHtml(projectName ? `${projectName} Library` : "Project Library")}</h3>
               <p class="home-section-copy" style="margin: 6px 0 0;">Upload, classify, validate, and reuse project-owned files without crossing project boundaries.</p>
             </div>
-            <span class="card-badge ${missingRequiredAssets.length ? "warning" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Covered")}</span>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh Library Scan</button>
+              <span class="card-badge ${missingRequiredAssets.length ? "warning" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Covered")}</span>
+            </div>
           </div>
           <div class="library-readiness-summary">
             <div class="data-card"><span class="data-label">Categories</span><strong>${escapeHtml(String(categorySummary.total || categoryReadiness.length))}</strong></div>
@@ -1101,5 +1118,31 @@ export const libraryRoute = {
       folderHealth,
       missingRequiredAssets
     });
+
+    const refreshScanBtn = $("libraryRefreshScanBtn");
+    if (refreshScanBtn) {
+      refreshScanBtn.onclick = async () => {
+        if (!projectName) {
+          showError?.("Select a project before refreshing the library scan.");
+          return;
+        }
+
+        refreshScanBtn.disabled = true;
+        try {
+          const refreshed = await refreshProjectLibrary(projectName);
+          if (typeof reloadProjectData === "function") {
+            await reloadProjectData(projectName);
+          }
+          const summary = asObject(refreshed?.category_readiness?.summary);
+          const uploaded = Number(summary.uploaded || 0);
+          const needsReview = Number(summary.needs_review || 0);
+          showMessage?.(`Library scan refreshed. Uploaded categories: ${uploaded}; needs review: ${needsReview}.`);
+        } catch (error) {
+          showError?.(error.message || "Failed to refresh project library scan.");
+        } finally {
+          refreshScanBtn.disabled = false;
+        }
+      };
+    }
   }
 };
