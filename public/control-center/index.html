@@ -27,7 +27,7 @@
 
     <div class="os-layout">
       <!-- Sidebar -->
-      <aside class="sidebar" aria-label="Main navigation">
+      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
         <div class="sidebar-brand">
           <div class="brand-badge">AI OS</div>
           <h1>MH Assistant</h1>
@@ -83,17 +83,14 @@
       <!-- Main shell -->
       <div class="main-shell">
         <header class="topbar">
-          <button id="sidebarToggleBtn" class="sidebar-toggle" type="button" aria-label="Toggle sidebar">
+          <button id="sidebarToggleBtn" class="sidebar-toggle" type="button" aria-label="Toggle sidebar" aria-controls="sidebarNav" aria-expanded="false">
             ☰
           </button>
 
           <div class="topbar-left">
             <div class="page-context">
-              <div id="pageEyebrow" class="page-eyebrow">Start</div>
+              <span id="pageEyebrow" class="page-eyebrow">Start</span>
               <h2 id="pageTitle" class="page-title">Home</h2>
-              <p id="pageDescription" class="page-description">
-                Executive overview for project status, readiness, actions, and launch flow.
-              </p>
             </div>
           </div>
 
@@ -107,16 +104,26 @@
                 <span class="context-label">Market</span>
                 <strong id="ctxMarket">-</strong>
               </div>
-              <div class="context-card">
+              <div class="context-card ctx-card-hide-sm">
                 <span class="context-label">Mode</span>
                 <strong id="ctxMode">-</strong>
               </div>
-              <div class="context-card">
+              <div class="context-card ctx-card-hide-sm">
                 <span class="context-label">Campaign</span>
                 <strong id="ctxCampaign">-</strong>
               </div>
+              <div class="context-card">
+                <span class="context-label">Route</span>
+                <strong id="ctxRoute">home</strong>
+              </div>
+              <div class="context-card">
+                <span class="context-label">Alerts</span>
+                <strong id="ctxAlerts">0</strong>
+              </div>
             </div>
           </div>
+          <!-- pageDescription kept hidden; used by applyStandardPageLayout -->
+          <p id="pageDescription" class="page-description" hidden></p>
         </header>
 
         <section class="command-bar" aria-label="Global command bar">
@@ -148,8 +155,8 @@
           </div>
         </section>
 
-        <main id="workspace" class="workspace" aria-live="polite">
-          <div id="pageRoot"></div>
+        <main id="workspace" class="workspace page-container" aria-live="polite">
+          <div id="pageRoot" class="section"></div>
         </main>
       </div>
     </div>

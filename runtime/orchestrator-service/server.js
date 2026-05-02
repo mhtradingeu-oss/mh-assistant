@@ -391,22 +391,7 @@ const DATA_DIR = path.join(BASE_DIR, 'data');
 const CONTROL_CENTER_PUBLIC_DIR = path.join(BASE_DIR, 'public', 'control-center');
 const LEGACY_BRAND_ASSETS_DIR = path.join(DATA_DIR, 'brand-assets');
 const EXECUTION_DIR = path.join(DATA_DIR, 'execution');
-const HAIROTICMEN_BACKUP_DIR = path.join(
-  EXECUTION_DIR,
-  'hairoticmen/assets/backups'
-);
-
-const HAIROTICMEN_MEDIA_DIR = path.join(
-  EXECUTION_DIR,
-  'hairoticmen/media'
-);
-
-const HAIROTICMEN_MEDIA_QUEUE_PATH = path.join(
-  HAIROTICMEN_MEDIA_DIR,
-  'queue/blog-image-queue.json'
-);
-
-const LIVE_EMAIL_PROJECT = 'hairoticmen';
+const DEFAULT_PROJECT_ENV = 'MH_DEFAULT_PROJECT';
 const EMAIL_ARTIFACT_TYPES = Object.freeze({
   PREPARE_PACKAGE: 'email_prepare_package',
   PREPARED_HTML: 'email_prepared_html',
@@ -415,6 +400,14 @@ const EMAIL_ARTIFACT_TYPES = Object.freeze({
   DRAFT_QUEUE: 'email_draft_queue',
   MEDIA_QUEUE: 'email_media_queue'
 });
+const EXECUTION_BRIDGE_STATES = Object.freeze([
+  'draft',
+  'ready_for_review',
+  'manual_publish_ready',
+  'pending_execution',
+  'executed',
+  'failed'
+]);
 
 const PORT = process.env.PORT || 3000;
 
@@ -1109,20 +1102,80 @@ function writeEmailArtifactArray(projectName, artifactType, data) {
   return candidatePaths;
 }
 
-function readLiveEmailQueue(projectName = LIVE_EMAIL_PROJECT, requestedIdentifier = 'email-draft-queue') {
-  return readEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
+function requireQueueProjectName(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName) || getPreferredProjectName();
+  if (!safeProject) {
+    throw Object.assign(new Error(`Missing project context. Set ${DEFAULT_PROJECT_ENV} or pass project explicitly.`), {
+      statusCode: 400,
+      code: 'PROJECT_CONTEXT_MISSING'
+    });
+  }
+  return safeProject;
 }
 
-function writeLiveEmailQueue(projectName = LIVE_EMAIL_PROJECT, queue = []) {
-  return writeEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
+function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, requestedIdentifier);
 }
 
-function readLiveEmailMediaQueue(projectName = LIVE_EMAIL_PROJECT, requestedIdentifier = 'email-media-queue') {
-  return readEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+function writeLiveEmailQueue(projectName, queue = []) {
+  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.DRAFT_QUEUE, queue);
 }
 
-function writeLiveEmailMediaQueue(projectName = LIVE_EMAIL_PROJECT, queue = []) {
-  return writeEmailArtifactArray(projectName, EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+  return readEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, requestedIdentifier);
+}
+
+function writeLiveEmailMediaQueue(projectName, queue = []) {
+  return writeEmailArtifactArray(requireQueueProjectName(projectName), EMAIL_ARTIFACT_TYPES.MEDIA_QUEUE, queue);
+}
+
+function getLegacyExecutionRoot(projectName) {
+  return resolveProjectPath(EXECUTION_DIR, requireQueueProjectName(projectName)).projectRoot;
+}
+
+function getLegacyContentQueuePath(projectName, queueType) {
+  const queueMap = {
+    ads: path.join('content', 'ads', 'ad-queue.json'),
+    social: path.join('content', 'social', 'post-queue.json'),
+    blog: path.join('content', 'blog', 'blog-queue.json'),
+    reel: path.join('content', 'campaigns', 'reel-brief-queue.json'),
+    tasks: path.join('tasks', 'task-board.json')
+  };
+  const relativePath = queueMap[queueType];
+
+  if (!relativePath) {
+    throw new Error(`Unknown content queue type: ${queueType}`);
+  }
+
+  const queuePath = path.join(getLegacyExecutionRoot(projectName), relativePath);
+  ensureJsonFile(queuePath, []);
+  return queuePath;
+}
+
+function readLegacyContentQueue(projectName, queueType) {
+  return readJsonFile(getLegacyContentQueuePath(projectName, queueType), []);
+}
+
+function writeLegacyContentQueue(projectName, queueType, queue = []) {
+  writeJsonFile(getLegacyContentQueuePath(projectName, queueType), Array.isArray(queue) ? queue : []);
+}
+
+function getProjectBackupDir(projectName) {
+  const backupDir = path.join(getLegacyExecutionRoot(projectName), 'assets', 'backups');
+  ensureDir(backupDir);
+  return backupDir;
+}
+
+function getProjectMediaDir(projectName) {
+  const mediaDir = path.join(getLegacyExecutionRoot(projectName), 'media');
+  ensureDir(mediaDir);
+  return mediaDir;
+}
+
+function getProjectBlogImageQueuePath(projectName) {
+  const queuePath = path.join(getProjectMediaDir(projectName), 'queue', 'blog-image-queue.json');
+  ensureJsonFile(queuePath, []);
+  return queuePath;
 }
 
 const PHASE375_TARGET_DOMAINS = new Set([
@@ -3142,20 +3195,44 @@ function getGermanLaunchPaths(projectName) {
   };
 }
 
+function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+  if (!Array.isArray(products)) {
+    appLogger.warn('launch_products_invalid', {
+      route: '/telegram-command',
+      action: context,
+      project: normalizeOptionalProjectSlug(projectName),
+      received_type: typeof products
+    });
+    return [];
+  }
+
+  const launchReadyProducts = products.filter(p =>
+    p &&
+    p.status === 'publish' &&
+    p.product_slug &&
+    p.product_name &&
+    !String(p.product_name).includes('(Copy)') &&
+    !String(p.product_name).includes('[DRAFT') &&
+    !String(p.product_name).toLowerCase().includes('clone')
+  );
+
+  if (!launchReadyProducts.length) {
+    appLogger.warn('launch_ready_products_empty', {
+      route: '/telegram-command',
+      action: context,
+      project: normalizeOptionalProjectSlug(projectName)
+    });
+  }
+
+  return launchReadyProducts;
+}
+
 function buildGermanLaunchPlan(projectName) {
   const productPaths = getProductIntelligencePaths(projectName);
   const products = readJsonFile(productPaths.productsPath, []);
-
-  const launchReadyProducts = products.filter(p =>
-  p &&
-  p.status === 'publish' &&
-  p.product_slug &&
-  p.product_name &&
-  !String(p.product_name).includes('(Copy)') &&
-  !String(p.product_name).includes('[DRAFT')
- );
-  const heroProducts = publishedProducts.slice(0, 3);
-  const supportProducts = publishedProducts.slice(3, 10);
+  const launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_german_launch_plan');
+  const heroProducts = launchReadyProducts.slice(0, 3);
+  const supportProducts = launchReadyProducts.slice(3, 10);
 
   const plan = {
     project: projectName,
@@ -3178,9 +3255,10 @@ function buildGermanLaunchPlan(projectName) {
       }))
     },
     product_selection: {
-      published_count: publishedProducts.length,
+      published_count: launchReadyProducts.length,
       hero_count: heroProducts.length,
-      support_count: supportProducts.length
+      support_count: supportProducts.length,
+      validation_status: launchReadyProducts.length ? 'ready' : 'no_launch_ready_products'
     },
     channel_mix: [
       'instagram',
@@ -3249,16 +3327,7 @@ function buildLaunchWave(projectName, waveName) {
   const products = readJsonFile(productPaths.productsPath, []);
 
   const safeWaveName = String(waveName || '').toLowerCase();
-
-  let launchReadyProducts = products.filter(p =>
-    p &&
-    p.status === 'publish' &&
-    p.product_slug &&
-    p.product_name &&
-    !String(p.product_name).includes('(Copy)') &&
-    !String(p.product_name).includes('[DRAFT') &&
-    !String(p.product_name).toLowerCase().includes('clone')
-  );
+  let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
 
   if (safeWaveName.includes('beard')) {
     launchReadyProducts = launchReadyProducts.filter(
@@ -4000,10 +4069,11 @@ function buildImprovedChannelPost(projectName, channel, productSlug) {
   let improved = { ...asset };
 
   if (normalizedChannel === 'instagram' || normalizedChannel === 'facebook') {
+    const brandHashtag = buildProjectHashtag(projectName);
     improved.caption =
       `${productName} fuer eine gepflegte, starke Bart-Routine.\n\n` +
       `Highlights: ${benefits || 'Pflege und Performance'}.\n\n` +
-      `Jetzt entdecken.\n\n#hairoticmen #bartpflege #maennerpflege`;
+      `Jetzt entdecken.\n\n${brandHashtag} #bartpflege #maennerpflege`;
   }
 
   if (normalizedChannel === 'email') {
@@ -5123,24 +5193,164 @@ function appendAudit(entry) {
 
 function detectProject(message) {
   const text = String(message || '').toLowerCase();
+  const compactText = text.replace(/[^a-z0-9]+/g, '');
 
-  if (text.includes('smartaccount') || text.includes('smart accounting')) {
-    return 'smartaccounting';
-  }
-
-  if (text.includes('iwrite')) {
-    return 'iwrite';
-  }
-
-  if (text.includes('hairoticmen')) {
-    return 'hairoticmen';
-  }
-
-  if (text.includes('beauty of spirit') || text.includes('beautyofspirit')) {
-    return 'beauty-of-spirit';
+  try {
+    const projects = listProjectNamesWithProfiles();
+    for (const project of projects) {
+      const normalized = String(project || '').trim().toLowerCase();
+      const compactProject = normalized.replace(/[^a-z0-9]+/g, '');
+      if (
+        normalized &&
+        (text.includes(normalized) || (compactProject && compactText.includes(compactProject)))
+      ) {
+        return normalized;
+      }
+    }
+  } catch (error) {
+    appLogger.warn('project_detection_registry_failed', {
+      route: '/task',
+      action: 'detect_project',
+      error: serializeErrorForLog(error)
+    });
   }
 
   return 'unknown';
+}
+
+function normalizeOptionalProjectSlug(value) {
+  const raw = String(value == null ? '' : value).trim();
+  if (!raw) return '';
+
+  try {
+    return normalizeProjectSlug(raw);
+  } catch (error) {
+    return '';
+  }
+}
+
+function getPreferredProjectName() {
+  const envProject = normalizeOptionalProjectSlug(process.env[DEFAULT_PROJECT_ENV]);
+  if (envProject) {
+    return envProject;
+  }
+
+  try {
+    const projects = listProjects();
+    const first = Array.isArray(projects) ? projects[0] : null;
+    return normalizeOptionalProjectSlug(
+      typeof first === 'string' ? first : first?.project_name || first?.name
+    );
+  } catch (error) {
+    return '';
+  }
+}
+
+function extractProjectFlag(args = []) {
+  const values = Array.isArray(args) ? args : [];
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = String(values[index] || '').trim();
+    if (value === '--project' || value === '-p') {
+      return normalizeOptionalProjectSlug(values[index + 1]);
+    }
+
+    if (value.startsWith('--project=')) {
+      return normalizeOptionalProjectSlug(value.slice('--project='.length));
+    }
+  }
+
+  return '';
+}
+
+function stripProjectFlagArgs(args = []) {
+  const values = Array.isArray(args) ? args : [];
+  const result = [];
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = String(values[index] || '').trim();
+    if (value === '--project' || value === '-p') {
+      index += 1;
+      continue;
+    }
+
+    if (value.startsWith('--project=')) {
+      continue;
+    }
+
+    result.push(values[index]);
+  }
+
+  return result;
+}
+
+function resolveRequestProjectName(req, options = {}) {
+  const explicit = normalizeOptionalProjectSlug(options.projectName)
+    || normalizeOptionalProjectSlug(options.explicitProject)
+    || normalizeOptionalProjectSlug(req?.body?.project)
+    || normalizeOptionalProjectSlug(req?.query?.project)
+    || normalizeOptionalProjectSlug(req?.params?.project);
+
+  if (explicit) {
+    return explicit;
+  }
+
+  const detected = detectProject(options.text || req?.body?.text || '');
+  if (detected && detected !== 'unknown') {
+    return detected;
+  }
+
+  return options.allowFallback === false ? '' : getPreferredProjectName();
+}
+
+function requireProjectContext(req, options = {}) {
+  const projectName = resolveRequestProjectName(req, options);
+  if (projectName) {
+    return projectName;
+  }
+
+  const error = new Error(`Missing project context. Provide request project, query project, --project, or ${DEFAULT_PROJECT_ENV}.`);
+  error.statusCode = 400;
+  error.code = 'PROJECT_CONTEXT_MISSING';
+  throw error;
+}
+
+function buildProjectHashtag(projectName) {
+  const display = getProjectDisplayName(projectName);
+  const compact = String(display || projectName || '')
+    .replace(/[^a-zA-Z0-9]+/g, '')
+    .trim();
+
+  return compact ? `#${compact}` : '#Project';
+}
+
+function getProjectDisplayName(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName);
+  if (!safeProject) return 'Project';
+
+  try {
+    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+    return String(
+      projectData.brand_name ||
+      projectData.display_name ||
+      projectData.project_name ||
+      safeProject
+    ).trim();
+  } catch (error) {
+    return safeProject;
+  }
+}
+
+function getProjectWebsiteUrl(projectName) {
+  const safeProject = normalizeOptionalProjectSlug(projectName);
+  if (!safeProject) return '';
+
+  try {
+    const projectData = readJsonFile(getProjectBasePaths(safeProject).projectFilePath, {});
+    return String(projectData.website_url || '').trim();
+  } catch (error) {
+    return '';
+  }
 }
 
 function detectTaskType(message) {
@@ -5504,18 +5714,501 @@ function getProjectBasePaths(projectName) {
   const baseDir = resolved.projectRoot;
 
   return {
+    project: safeProject,
     baseDir,
     brandAssetsDir: path.join(baseDir, 'brand-assets'),
     productsDir: path.join(baseDir, 'products'),
     contentDir: path.join(baseDir, 'content'),
+    mediaDir: path.join(baseDir, 'media'),
     campaignsDir: path.join(baseDir, 'campaigns'),
+    publishingDir: path.join(baseDir, 'publishing'),
     launchDir: path.join(baseDir, 'launch'),
     executionDir: path.join(baseDir, 'execution'),
+    telemetryDir: path.join(baseDir, 'telemetry'),
+    logsDir: path.join(baseDir, 'logs'),
     optimizationDir: path.join(baseDir, 'optimization'),
     reportsDir: path.join(baseDir, 'reports'),
     integrationsDir: path.join(baseDir, 'integrations'),
     uploadsDir: path.join(baseDir, 'uploads'),
     projectFilePath: path.join(baseDir, 'project.json')
+  };
+}
+
+function getLegacyProjectBasePaths(projectName) {
+  const resolved = resolveProjectPath(LEGACY_BRAND_ASSETS_DIR, projectName);
+  return {
+    project: resolved.project,
+    baseDir: resolved.projectRoot,
+    brandProfilePath: path.join(resolved.projectRoot, 'brand-profile.json'),
+    assetsRegistryPath: path.join(resolved.projectRoot, 'assets-registry.json'),
+    mediaInputRegistryPath: path.join(resolved.projectRoot, 'media-input-registry.json')
+  };
+}
+
+function getProjectBaselinePaths(projectName) {
+  const base = getProjectBasePaths(projectName);
+  const legacy = getLegacyProjectBasePaths(projectName);
+  const opsDir = path.join(base.baseDir, 'ops');
+  const integrationsRegistryPath = path.join(base.baseDir, 'integrations-registry.json');
+
+  return {
+    ...base,
+    opsDir,
+    brandProfilePath: path.join(base.brandAssetsDir, 'brand-profile.json'),
+    assetsRegistryPath: path.join(base.baseDir, 'assets-registry.json'),
+    sourcesRegistryPath: path.join(base.baseDir, 'sources-registry.json'),
+    sourceOfTruthRegistryPath: path.join(base.baseDir, 'source-of-truth-registry.json'),
+    integrationsRegistryPath,
+    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+    aiArtifactsPath: path.join(opsDir, 'ai-artifacts.json'),
+    aiRecommendationsPath: path.join(opsDir, 'ai-recommendations.json'),
+    aiMemoryPath: path.join(opsDir, 'ai-memory.json'),
+    integrationRegistryPath: integrationsRegistryPath,
+    integrationControlCenterPath: path.join(base.integrationsDir, 'control-center.json'),
+    legacy
+  };
+}
+
+function stableJsonHash(value) {
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(value == null ? null : value))
+    .digest('hex');
+}
+
+function logProjectDataMismatch(projectName, entry = {}) {
+  try {
+    const paths = getProjectBasePaths(projectName);
+    const logPath = path.join(paths.baseDir, 'ops', 'data-mismatches.json');
+    const current = readJsonFile(logPath, []);
+    const next = Array.isArray(current) ? current : [];
+    next.push({
+      timestamp: new Date().toISOString(),
+      project: normalizeProjectSlug(projectName),
+      ...entry
+    });
+    writeJsonFile(logPath, next.slice(-200));
+    appLogger.warn('project_data_mismatch', {
+      route: '/media-manager/project/:project/setup',
+      action: 'log_project_data_mismatch',
+      project: normalizeOptionalProjectSlug(projectName),
+      domain: entry.domain || 'unknown',
+      canonicalPath: entry.canonical_path,
+      legacyPath: entry.legacy_path,
+      reason: entry.reason
+    });
+  } catch (error) {
+    appLogger.warn('project_data_mismatch_log_failed', {
+      route: '/media-manager/project/:project/setup',
+      action: 'log_project_data_mismatch',
+      project: normalizeOptionalProjectSlug(projectName),
+      error: serializeErrorForLog(error)
+    });
+  }
+}
+
+function readCanonicalJsonWithLegacyFallback(projectName, options = {}) {
+  const canonicalPath = String(options.canonicalPath || '').trim();
+  const legacyCandidates = Array.isArray(options.legacyCandidates) ? options.legacyCandidates : [];
+  const fallback = options.fallback;
+  const domain = String(options.domain || 'project-baseline').trim();
+  const normalize = typeof options.normalize === 'function' ? options.normalize : (value) => value;
+  const canonicalExists = fs.existsSync(canonicalPath);
+  const canonicalValue = canonicalExists ? normalize(readJsonFile(canonicalPath, fallback)) : null;
+
+  let firstLegacy = null;
+  for (const legacyPath of legacyCandidates.filter(Boolean)) {
+    if (!fs.existsSync(legacyPath)) {
+      continue;
+    }
+
+    const legacyValue = normalize(readJsonFile(legacyPath, fallback));
+    firstLegacy = firstLegacy || { path: legacyPath, value: legacyValue };
+
+    if (canonicalExists && stableJsonHash(canonicalValue) !== stableJsonHash(legacyValue)) {
+      logProjectDataMismatch(projectName, {
+        domain,
+        reason: 'canonical_legacy_value_mismatch',
+        canonical_path: canonicalPath,
+        legacy_path: legacyPath,
+        canonical_hash: stableJsonHash(canonicalValue),
+        legacy_hash: stableJsonHash(legacyValue)
+      });
+    }
+  }
+
+  if (canonicalExists) {
+    return {
+      value: canonicalValue,
+      source: 'canonical',
+      path: canonicalPath,
+      migrated: false
+    };
+  }
+
+  if (firstLegacy) {
+    ensureDir(path.dirname(canonicalPath));
+    writeJsonFile(canonicalPath, firstLegacy.value);
+    logProjectDataMismatch(projectName, {
+      domain,
+      reason: 'canonical_missing_migrated_from_legacy',
+      canonical_path: canonicalPath,
+      legacy_path: firstLegacy.path,
+      legacy_hash: stableJsonHash(firstLegacy.value)
+    });
+    return {
+      value: firstLegacy.value,
+      source: 'legacy',
+      path: firstLegacy.path,
+      migrated: true
+    };
+  }
+
+  ensureDir(path.dirname(canonicalPath));
+  writeJsonFile(canonicalPath, fallback);
+  return {
+    value: fallback,
+    source: 'default',
+    path: canonicalPath,
+    migrated: false
+  };
+}
+
+function normalizeAssetsRegistry(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeSourceStatus(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'verified') return 'verified';
+  if (raw === 'outdated') return 'outdated';
+  if (raw === 'connected') return 'connected';
+  return 'missing';
+}
+
+function computeSourceStatus(entry = {}) {
+  const value = normalizeSetupTextValue(entry.value);
+  const explicitStatus = normalizeSourceStatus(entry.status);
+  if (explicitStatus !== 'missing') {
+    return explicitStatus;
+  }
+
+  if (!value) {
+    return 'missing';
+  }
+
+  const updatedAt = normalizeSetupTextValue(entry.updated_at);
+  const updatedMs = updatedAt ? Date.parse(updatedAt) : NaN;
+  if (Number.isFinite(updatedMs)) {
+    const ageMs = Date.now() - updatedMs;
+    const staleThresholdMs = 180 * 24 * 60 * 60 * 1000;
+    if (ageMs > staleThresholdMs) {
+      return 'outdated';
+    }
+  }
+
+  if (normalizeSetupTextValue(entry.verified_at)) {
+    return 'verified';
+  }
+
+  return 'connected';
+}
+
+function normalizeSourceRegistry(value) {
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  return input.sources && typeof input.sources === 'object' && !Array.isArray(input.sources)
+    ? input.sources
+    : input;
+}
+
+function buildSourceOfTruthRegistry(sources = {}) {
+  const normalizedSources = normalizeSourceRegistry(sources);
+  const requiredMap = {
+    website: ['website'],
+    social_links: ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'pinterest'],
+    product_files: ['product_files', 'product_csv', 'products_file'],
+    brand_assets: ['brand_assets', 'logo', 'brand_guideline'],
+    legal_docs: ['legal_docs', 'legal_doc'],
+    pricing_docs: ['pricing_docs', 'pricing_doc'],
+    campaign_docs: ['campaign_docs', 'campaign_doc']
+  };
+
+  const requiredSources = Object.entries(requiredMap).reduce((acc, [key, candidates]) => {
+    const foundEntry = candidates
+      .map((candidate) => normalizeSourceRegistry(normalizedSources)[candidate])
+      .find((item) => item && typeof item === 'object');
+
+    const fallbackValue = candidates
+      .map((candidate) => normalizeSetupTextValue(normalizedSources[candidate]))
+      .find(Boolean);
+
+    const entry = foundEntry || (fallbackValue ? { value: fallbackValue } : {});
+    const status = computeSourceStatus(entry);
+
+    acc[key] = {
+      status,
+      value: normalizeSetupTextValue(entry.value || fallbackValue),
+      updated_at: normalizeSetupTextValue(entry.updated_at),
+      verified_at: normalizeSetupTextValue(entry.verified_at),
+      source: normalizeSetupTextValue(entry.source)
+    };
+
+    return acc;
+  }, {});
+
+  return {
+    updated_at: new Date().toISOString(),
+    statuses: ['missing', 'connected', 'verified', 'outdated'],
+    sources: normalizedSources,
+    required_sources: requiredSources
+  };
+}
+
+function buildDefaultBrandProfile(projectName, projectData = {}) {
+  const now = new Date().toISOString();
+  const goals = [projectData.primary_goal, projectData.secondary_goal]
+    .map((value) => normalizeSetupTextValue(value))
+    .filter(Boolean);
+  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+
+  return {
+    project: normalizeProjectSlug(projectName),
+    brand_name: projectData.brand_name || projectData.project_name || normalizeProjectSlug(projectName),
+    business_type: projectData.business_type || projectData.project_type || '',
+    brand_promise: projectData.brand_promise || '',
+    tone: projectData.tone || projectData.brand_voice || '',
+    brand_voice: projectData.brand_voice || '',
+    visual_identity: projectData.visual_identity || '',
+    positioning: projectData.positioning || projectData.offer_positioning || projectData.differentiation || '',
+    offer_positioning: projectData.offer_positioning || '',
+    market: projectData.market || '',
+    language: projectData.language || '',
+    currency: projectData.currency || '',
+    audience: projectData.audience || projectData.audience_primary || '',
+    audience_primary: projectData.audience_primary || '',
+    audience_problem: projectData.audience_problem || '',
+    competitors: normalizeSetupListValue(projectData.competitors),
+    goals,
+    website: projectData.website || projectData.website_url || '',
+    social_channels: socialChannels,
+    differentiation: projectData.differentiation || '',
+    source: 'setup',
+    created_at: projectData.created_at || now,
+    updated_at: projectData.updated_at || now
+  };
+}
+
+function buildBrandProfileFromProject(projectName, projectData = {}, existing = {}) {
+  return {
+    ...existing,
+    ...buildDefaultBrandProfile(projectName, projectData),
+    created_at: existing.created_at || projectData.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function ensureProjectBaselineFiles(projectName, projectDataInput = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const projectData = {
+    ...readJsonFile(paths.projectFilePath, {}),
+    ...(projectDataInput && typeof projectDataInput === 'object' ? projectDataInput : {})
+  };
+
+  [
+    paths.baseDir,
+    paths.brandAssetsDir,
+    paths.productsDir,
+    paths.contentDir,
+    paths.mediaDir,
+    paths.campaignsDir,
+    paths.publishingDir,
+    paths.launchDir,
+    paths.executionDir,
+    paths.telemetryDir,
+    paths.logsDir,
+    paths.optimizationDir,
+    paths.reportsDir,
+    paths.integrationsDir,
+    paths.uploadsDir,
+    paths.opsDir,
+    paths.legacy.baseDir
+  ].forEach(ensureDir);
+
+  const brandProfile = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'brand-profile',
+    canonicalPath: paths.brandProfilePath,
+    legacyCandidates: [paths.legacy.brandProfilePath],
+    fallback: buildDefaultBrandProfile(safeProject, projectData)
+  });
+
+  const assetsRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'assets-registry',
+    canonicalPath: paths.assetsRegistryPath,
+    legacyCandidates: [paths.legacy.assetsRegistryPath, paths.legacy.mediaInputRegistryPath],
+    fallback: [],
+    normalize: normalizeAssetsRegistry
+  });
+
+  const sourcesRegistry = readCanonicalJsonWithLegacyFallback(safeProject, {
+    domain: 'source-of-truth',
+    canonicalPath: paths.sourceOfTruthRegistryPath,
+    legacyCandidates: [paths.sourcesRegistryPath],
+    fallback: buildSourceOfTruthRegistry({}),
+    normalize: buildSourceOfTruthRegistry
+  });
+
+  ensureJsonFile(paths.sourcesRegistryPath, normalizeSourceRegistry(sourcesRegistry.value));
+  ensureJsonFile(paths.aiCommandsPath, []);
+  ensureJsonFile(paths.aiArtifactsPath, []);
+  ensureJsonFile(paths.aiRecommendationsPath, []);
+  ensureJsonFile(paths.aiMemoryPath, []);
+  ensureJsonFile(paths.integrationControlCenterPath, {
+    updated_at: '',
+    records: {}
+  });
+  ensureJsonFile(paths.integrationsRegistryPath, {
+    updated_at: '',
+    records: {}
+  });
+
+  const integrationSnapshot = readJsonFile(paths.integrationControlCenterPath, {
+    updated_at: '',
+    records: {}
+  });
+  writeJsonFile(paths.integrationsRegistryPath, {
+    updated_at: normalizeSetupTextValue(integrationSnapshot.updated_at) || new Date().toISOString(),
+    records: integrationSnapshot.records && typeof integrationSnapshot.records === 'object'
+      ? integrationSnapshot.records
+      : {}
+  });
+
+  return {
+    project: safeProject,
+    checked_at: new Date().toISOString(),
+    required_files: {
+      project_file: {
+        path: paths.projectFilePath,
+        exists: fs.existsSync(paths.projectFilePath)
+      },
+      brand_profile: {
+        path: paths.brandProfilePath,
+        exists: fs.existsSync(paths.brandProfilePath),
+        source: brandProfile.source,
+        migrated: brandProfile.migrated
+      },
+      assets_registry: {
+        path: paths.assetsRegistryPath,
+        exists: fs.existsSync(paths.assetsRegistryPath),
+        source: assetsRegistry.source,
+        migrated: assetsRegistry.migrated
+      },
+      source_of_truth_registry: {
+        path: paths.sourceOfTruthRegistryPath,
+        exists: fs.existsSync(paths.sourceOfTruthRegistryPath),
+        source: sourcesRegistry.source,
+        migrated: sourcesRegistry.migrated
+      },
+      integrations_registry: {
+        path: paths.integrationsRegistryPath,
+        exists: fs.existsSync(paths.integrationsRegistryPath)
+      },
+      ai_commands: {
+        path: paths.aiCommandsPath,
+        exists: fs.existsSync(paths.aiCommandsPath)
+      },
+      ai_artifacts: {
+        path: paths.aiArtifactsPath,
+        exists: fs.existsSync(paths.aiArtifactsPath)
+      },
+      ai_recommendations: {
+        path: paths.aiRecommendationsPath,
+        exists: fs.existsSync(paths.aiRecommendationsPath)
+      },
+      ai_memory: {
+        path: paths.aiMemoryPath,
+        exists: fs.existsSync(paths.aiMemoryPath)
+      },
+      integrations: {
+        path: paths.integrationControlCenterPath,
+        exists: fs.existsSync(paths.integrationControlCenterPath)
+      }
+    },
+    required_folders: {
+      campaigns: { path: paths.campaignsDir, exists: fs.existsSync(paths.campaignsDir) },
+      content: { path: paths.contentDir, exists: fs.existsSync(paths.contentDir) },
+      media: { path: paths.mediaDir, exists: fs.existsSync(paths.mediaDir) },
+      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+      reports: { path: paths.reportsDir, exists: fs.existsSync(paths.reportsDir) },
+      execution: { path: paths.executionDir, exists: fs.existsSync(paths.executionDir) },
+      telemetry: { path: paths.telemetryDir, exists: fs.existsSync(paths.telemetryDir) },
+      logs: { path: paths.logsDir, exists: fs.existsSync(paths.logsDir) }
+    }
+  };
+}
+
+function persistProjectSetupArtifacts(projectName, projectData = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const validation = ensureProjectBaselineFiles(safeProject, projectData);
+  const existingBrandProfile = readJsonFile(paths.brandProfilePath, {});
+  const brandProfile = buildBrandProfileFromProject(safeProject, projectData, existingBrandProfile);
+  writeJsonFile(paths.brandProfilePath, brandProfile);
+
+  const currentSources = normalizeSourceRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const nextSources = { ...currentSources };
+  if (projectData.website_url) {
+    nextSources.website = {
+      value: String(projectData.website_url || '').trim(),
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  }
+
+  const socialChannels = normalizeSetupListValue(projectData.social_channels || projectData.social_links);
+  socialChannels.forEach((channel) => {
+    const key = channel.toLowerCase();
+    nextSources[key] = {
+      value: key,
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  });
+
+  const projectSourceAliases = {
+    product_files: projectData.product_files || projectData.products_file,
+    brand_assets: projectData.brand_assets,
+    legal_docs: projectData.legal_docs,
+    pricing_docs: projectData.pricing_docs,
+    campaign_docs: projectData.campaign_docs
+  };
+
+  Object.entries(projectSourceAliases).forEach(([sourceKey, value]) => {
+    const normalized = normalizeSetupTextValue(value);
+    if (!normalized) {
+      return;
+    }
+
+    nextSources[sourceKey] = {
+      value: normalized,
+      updated_at: new Date().toISOString(),
+      source: 'setup',
+      status: 'connected'
+    };
+  });
+
+  writeJsonFile(paths.sourcesRegistryPath, nextSources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(nextSources));
+
+  return {
+    ...validation,
+    brand_profile_path: paths.brandProfilePath,
+    assets_registry_path: paths.assetsRegistryPath,
+    source_of_truth_registry_path: paths.sourceOfTruthRegistryPath,
+    ai_memory_path: paths.aiMemoryPath,
+    integrations_path: paths.integrationsRegistryPath
   };
 }
 
@@ -5527,9 +6220,13 @@ function ensureProjectBaseStructure(projectName) {
     paths.brandAssetsDir,
     paths.productsDir,
     paths.contentDir,
+    paths.mediaDir,
     paths.campaignsDir,
+    paths.publishingDir,
     paths.launchDir,
     paths.executionDir,
+    paths.telemetryDir,
+    paths.logsDir,
     paths.optimizationDir,
     paths.reportsDir,
     paths.integrationsDir,
@@ -5569,9 +6266,13 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
       brand_assets: paths.brandAssetsDir,
       products: paths.productsDir,
       content: paths.contentDir,
+      media: paths.mediaDir,
       campaigns: paths.campaignsDir,
+      publishing: paths.publishingDir,
       launch: paths.launchDir,
       execution: paths.executionDir,
+      telemetry: paths.telemetryDir,
+      logs: paths.logsDir,
       optimization: paths.optimizationDir,
       reports: paths.reportsDir,
       integrations: paths.integrationsDir,
@@ -5582,11 +6283,13 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
   projects.push(projectData);
   writeJsonFile(registry.registryPath, projects);
   writeJsonFile(paths.projectFilePath, projectData);
+  const baseline = persistProjectSetupArtifacts(safeProject, projectData);
 
   return {
     ...projectData,
     registry_path: registry.registryPath,
-    project_file: paths.projectFilePath
+    project_file: paths.projectFilePath,
+    baseline_validation: baseline
   };
 }
 
@@ -5610,6 +6313,20 @@ function normalizeSetupListValue(value) {
 
 function normalizeProjectSetupPayload(payload = {}) {
   const input = payload && typeof payload === 'object' ? payload : {};
+  const additionalFields = {
+    business_type: normalizeSetupTextValue(input.business_type || input.project_type),
+    tone: normalizeSetupTextValue(input.tone || input.brand_voice),
+    positioning: normalizeSetupTextValue(input.positioning || input.offer_positioning || input.differentiation),
+    audience: normalizeSetupTextValue(input.audience || input.audience_primary),
+    goals: normalizeSetupListValue(input.goals),
+    website: normalizeSetupTextValue(input.website || input.website_url),
+    social_channels: normalizeSetupListValue(input.social_channels || input.social_links),
+    product_files: normalizeSetupTextValue(input.product_files || input.products_file),
+    brand_assets: normalizeSetupTextValue(input.brand_assets),
+    legal_docs: normalizeSetupTextValue(input.legal_docs),
+    pricing_docs: normalizeSetupTextValue(input.pricing_docs),
+    campaign_docs: normalizeSetupTextValue(input.campaign_docs)
+  };
 
   return {
     project_type: normalizeSetupTextValue(input.project_type),
@@ -5632,7 +6349,11 @@ function normalizeProjectSetupPayload(payload = {}) {
     audience_geography: normalizeSetupTextValue(input.audience_geography),
     competitors: normalizeSetupListValue(input.competitors),
     differentiation: normalizeSetupTextValue(input.differentiation),
-    operator_notes: normalizeSetupListValue(input.operator_notes)
+    operator_notes: normalizeSetupListValue(input.operator_notes),
+    ...additionalFields,
+    setup_payload: {
+      ...input
+    }
   };
 }
 
@@ -5678,12 +6399,15 @@ function updateProjectSetup(projectName, payload = {}) {
     writeJsonFile(registry.registryPath, projects);
   }
 
+  const baseline = persistProjectSetupArtifacts(safeProject, nextProject);
+
   return {
     project: safeProject,
     saved_fields: Object.keys(normalized),
     updated_at: updatedAt,
     project_file: paths.projectFilePath,
     registry_path: registry.registryPath,
+    baseline_validation: baseline,
     record: nextProject
   };
 }
@@ -5703,27 +6427,186 @@ function reviewProject(projectName) {
   return readJsonFile(paths.projectFilePath, {});
 }
 
+function reviewProjectCanonicalParity(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+  const checks = [];
+  const mismatchLogPath = path.join(paths.opsDir, 'data-mismatches.json');
+
+  const domains = [
+    {
+      domain: 'brand_profile',
+      canonical_path: paths.brandProfilePath,
+      legacy_path: paths.legacy.brandProfilePath
+    },
+    {
+      domain: 'assets_registry',
+      canonical_path: paths.assetsRegistryPath,
+      legacy_path: paths.legacy.assetsRegistryPath
+    },
+    {
+      domain: 'source_of_truth_registry',
+      canonical_path: paths.sourceOfTruthRegistryPath,
+      legacy_path: paths.sourcesRegistryPath
+    }
+  ];
+
+  domains.forEach((item) => {
+    const canonicalExists = fs.existsSync(item.canonical_path);
+    const legacyExists = fs.existsSync(item.legacy_path);
+    const canonicalRaw = canonicalExists ? readJsonFile(item.canonical_path, null) : null;
+    const legacyRaw = legacyExists ? readJsonFile(item.legacy_path, null) : null;
+    const canonicalValue = item.domain === 'source_of_truth_registry'
+      ? normalizeSourceRegistry(canonicalRaw)
+      : canonicalRaw;
+    const legacyValue = item.domain === 'source_of_truth_registry'
+      ? normalizeSourceRegistry(legacyRaw)
+      : legacyRaw;
+    const parity = canonicalExists && legacyExists
+      ? stableJsonHash(canonicalValue) === stableJsonHash(legacyValue)
+      : canonicalExists;
+
+    if (canonicalExists && legacyExists && !parity) {
+      logProjectDataMismatch(safeProject, {
+        domain: item.domain,
+        reason: 'canonical_legacy_parity_check_mismatch',
+        canonical_path: item.canonical_path,
+        legacy_path: item.legacy_path,
+        canonical_hash: stableJsonHash(canonicalValue),
+        legacy_hash: stableJsonHash(legacyValue)
+      });
+    }
+
+    checks.push({
+      domain: item.domain,
+      canonical_path: item.canonical_path,
+      legacy_path: item.legacy_path,
+      canonical_exists: canonicalExists,
+      legacy_exists: legacyExists,
+      parity,
+      fallback_in_use: !canonicalExists && legacyExists
+    });
+  });
+
+  const mismatches = checks.filter((item) => !item.parity).length;
+  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+  const report = {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    mismatches,
+    fallback_dependencies: fallbackDependencies,
+    checks,
+    mismatch_log_path: mismatchLogPath,
+    recommendation: fallbackDependencies > 0 || mismatches > 0
+      ? 'Reduce fallback dependencies by keeping canonical files in sync before disabling legacy reads.'
+      : 'Canonical files are aligned with available legacy data.'
+  };
+
+  const reportPath = path.join(paths.reportsDir, 'canonical-migration-report.json');
+  writeJsonFile(reportPath, report);
+
+  return {
+    ...report,
+    report_path: reportPath
+  };
+}
+
 function reviewProjectReadiness(projectName) {
-  const paths = getProjectBasePaths(projectName);
+  const paths = getProjectBaselinePaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
   }
 
+  const safeProject = normalizeProjectSlug(projectName);
   const projectData = readJsonFile(paths.projectFilePath, {});
+  const baselineValidation = ensureProjectBaselineFiles(safeProject, projectData);
+  const brandProfile = readJsonFile(paths.brandProfilePath, {});
+  const sourceRegistry = buildSourceOfTruthRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const missingAssets = reviewProjectMissingAssets(safeProject);
+  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+  const parityReport = reviewProjectCanonicalParity(safeProject);
+  const campaigns = listCampaigns(safeProject, { limit: 50 });
+  const aiMemoryItems = listAiMemory(safeProject, { limit: 20 });
+
+  const setupFields = ['project_name', 'project_type', 'website_url', 'market', 'language', 'currency', 'primary_goal', 'audience_primary'];
+  const setupCompleteCount = setupFields
+    .filter((field) => Boolean(normalizeSetupTextValue(projectData[field])))
+    .length;
+  const setupCompleteness = Math.round((setupCompleteCount / setupFields.length) * 100);
+
+  const brandFields = ['brand_name', 'business_type', 'market', 'language', 'currency', 'tone', 'positioning', 'audience', 'goals', 'website'];
+  const brandCompleteCount = brandFields
+    .filter((field) => {
+      if (Array.isArray(brandProfile[field])) {
+        return brandProfile[field].length > 0;
+      }
+      return Boolean(normalizeSetupTextValue(brandProfile[field]));
+    })
+    .length;
+  const brandProfileCompleteness = Math.round((brandCompleteCount / brandFields.length) * 100);
+
+  const requiredSourceEntries = sourceRegistry.required_sources && typeof sourceRegistry.required_sources === 'object'
+    ? Object.values(sourceRegistry.required_sources)
+    : [];
+  const sourceCompleteCount = requiredSourceEntries
+    .filter((entry) => ['connected', 'verified'].includes(normalizeSourceStatus(entry?.status)))
+    .length;
+  const sourceOfTruthCompleteness = requiredSourceEntries.length
+    ? Math.round((sourceCompleteCount / requiredSourceEntries.length) * 100)
+    : 0;
+
+  const assetBlockers = Array.isArray(missingAssets.blockers) ? missingAssets.blockers.length : 0;
+  const requiredAssetCount = Array.isArray(missingAssets.required_asset_types) ? missingAssets.required_asset_types.length : 0;
+  const assetsCompleteness = requiredAssetCount
+    ? Math.max(0, Math.round(((requiredAssetCount - assetBlockers) / requiredAssetCount) * 100))
+    : 0;
+
+  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+  const campaignReadiness = campaigns.length > 0 ? 100 : 40;
+  const executionReadiness = fs.existsSync(paths.executionDir) && fs.existsSync(paths.opsDir) ? 100 : 0;
+  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+  const aiMemoryReadiness = fs.existsSync(paths.aiMemoryPath)
+    ? (aiMemoryItems.length > 0 ? 100 : 75)
+    : 0;
+
+  const domainScores = {
+    setup_completeness: setupCompleteness,
+    brand_profile_completeness: brandProfileCompleteness,
+    source_of_truth_completeness: sourceOfTruthCompleteness,
+    assets_completeness: assetsCompleteness,
+    integrations_completeness: integrationsCompleteness,
+    campaign_readiness: campaignReadiness,
+    execution_readiness: executionReadiness,
+    publishing_readiness: publishingReadiness,
+    ai_memory_readiness: aiMemoryReadiness
+  };
 
   const checks = {
     has_project_file: fs.existsSync(paths.projectFilePath),
     has_brand_assets_dir: fs.existsSync(paths.brandAssetsDir),
     has_products_dir: fs.existsSync(paths.productsDir),
     has_content_dir: fs.existsSync(paths.contentDir),
+    has_media_dir: fs.existsSync(paths.mediaDir),
     has_campaigns_dir: fs.existsSync(paths.campaignsDir),
+    has_publishing_dir: fs.existsSync(paths.publishingDir),
     has_launch_dir: fs.existsSync(paths.launchDir),
     has_execution_dir: fs.existsSync(paths.executionDir),
+    has_telemetry_dir: fs.existsSync(paths.telemetryDir),
+    has_logs_dir: fs.existsSync(paths.logsDir),
     has_optimization_dir: fs.existsSync(paths.optimizationDir),
     has_reports_dir: fs.existsSync(paths.reportsDir),
     has_integrations_dir: fs.existsSync(paths.integrationsDir),
     has_uploads_dir: fs.existsSync(paths.uploadsDir),
+    has_brand_profile: baselineValidation.required_files.brand_profile.exists,
+    has_assets_registry: baselineValidation.required_files.assets_registry.exists,
+    has_source_of_truth_registry: baselineValidation.required_files.source_of_truth_registry.exists,
+    has_integrations_registry: baselineValidation.required_files.integrations_registry.exists,
+    has_ai_commands: baselineValidation.required_files.ai_commands.exists,
+    has_ai_artifacts: baselineValidation.required_files.ai_artifacts.exists,
+    has_ai_recommendations: baselineValidation.required_files.ai_recommendations.exists,
+    has_ai_memory: baselineValidation.required_files.ai_memory.exists,
+    has_integration_control_center: baselineValidation.required_files.integrations.exists,
     has_website_url: !!projectData.website_url,
     has_market: !!projectData.market,
     has_language: !!projectData.language,
@@ -5736,38 +6619,81 @@ function reviewProjectReadiness(projectName) {
   if (!checks.has_market) missing.push('market');
   if (!checks.has_language) missing.push('language');
   if (!checks.has_project_type) missing.push('project_type');
+  if (domainScores.brand_profile_completeness < 100) missing.push('brand_profile_incomplete');
+  if (domainScores.source_of_truth_completeness < 100) missing.push('source_of_truth_incomplete');
+  if (domainScores.assets_completeness < 100) missing.push('assets_incomplete');
+  if (domainScores.integrations_completeness < 100) missing.push('integrations_incomplete');
+  if (domainScores.campaign_readiness < 100) missing.push('campaign_readiness');
+  if (domainScores.execution_readiness < 100) missing.push('execution_readiness');
+  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+  if (domainScores.ai_memory_readiness < 100) missing.push('ai_memory_readiness');
 
   const totalChecks = Object.keys(checks).length;
   const passedChecks = Object.values(checks).filter(Boolean).length;
-  const readinessScore = Math.round((passedChecks / totalChecks) * 100);
+  const structuralReadinessScore = Math.round((passedChecks / totalChecks) * 100);
+  const domainReadinessScore = Math.round(
+    Object.values(domainScores).reduce((sum, score) => sum + score, 0) / Object.keys(domainScores).length
+  );
+  const readinessScore = Math.round((structuralReadinessScore + domainReadinessScore) / 2);
 
   return {
-    project: projectName,
+    project: safeProject,
     reviewed_at: new Date().toISOString(),
     readiness_score: readinessScore,
+    structural_readiness_score: structuralReadinessScore,
+    domain_readiness_score: domainReadinessScore,
+    readiness_domains: domainScores,
     checks,
     missing,
-    status: missing.length ? 'needs_input' : 'ready_for_data_upload'
+    baseline_validation: baselineValidation,
+    canonical_parity: parityReport,
+    status: readinessScore >= 85 ? 'ready_for_data_upload' : 'needs_input'
   };
 }
 function getProjectAssetPaths(projectName) {
-  const base = getProjectBasePaths(projectName);
+  const base = getProjectBaselinePaths(projectName);
+  ensureProjectBaselineFiles(projectName);
 
-  const assetsRegistryPath = path.join(base.baseDir, 'assets-registry.json');
-  const sourcesRegistryPath = path.join(base.baseDir, 'sources-registry.json');
+  return base;
+}
 
-  if (!fs.existsSync(assetsRegistryPath)) {
-    writeJsonFile(assetsRegistryPath, []);
+function normalizeAssetTags(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeSetupTextValue(item))
+      .filter(Boolean);
   }
 
-  if (!fs.existsSync(sourcesRegistryPath)) {
-    writeJsonFile(sourcesRegistryPath, {});
-  }
+  return normalizeSetupListValue(value);
+}
+
+function normalizeAssetRecord(projectName, asset = {}) {
+  const now = new Date().toISOString();
+  const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || normalizeSetupTextValue(asset.type || asset.asset_type).toLowerCase();
+  const filePath = normalizeSetupTextValue(asset.file_path || asset.path);
+  const fileName = normalizeSetupTextValue(asset.file_name || (filePath ? path.basename(filePath) : ''));
+  const createdAt = normalizeSetupTextValue(asset.created_at || asset.registered_at) || now;
+  const status = normalizeSetupTextValue(asset.status)
+    || (normalizeSetupTextValue(asset.exists) === 'false' ? 'missing' : 'connected');
+  const source = normalizeSetupTextValue(asset.source || asset.scan_source || asset.metadata?.scan_source || 'project_upload');
+  const normalizedProject = normalizeProjectSlug(projectName);
 
   return {
-    ...base,
-    assetsRegistryPath,
-    sourcesRegistryPath
+    id: normalizeSetupTextValue(asset.id || asset.asset_id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    asset_id: normalizeSetupTextValue(asset.asset_id || asset.id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    file_name: fileName,
+    file_path: filePath,
+    type: canonicalType,
+    asset_type: canonicalType,
+    project: normalizedProject,
+    source,
+    tags: normalizeAssetTags(asset.tags),
+    status,
+    created_at: createdAt,
+    updated_at: now,
+    source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth),
+    exists: fs.existsSync(filePath),
+    metadata: asset.metadata && typeof asset.metadata === 'object' ? asset.metadata : {}
   };
 }
 
@@ -5778,19 +6704,19 @@ function registerProjectAsset(projectName, assetType, filePath) {
     throw new Error('Project not found');
   }
 
-  const assets = readJsonFile(paths.assetsRegistryPath, []);
+  const assets = readJsonFile(paths.assetsRegistryPath, [])
+    .map((item) => normalizeAssetRecord(projectName, item));
 
-  const record = {
-    asset_id: `asset_${Date.now()}`,
-    project: projectName,
-    asset_type: String(assetType || '').trim().toLowerCase(),
-    file_path: String(filePath || '').trim(),
-    exists: fs.existsSync(String(filePath || '').trim()),
-    registered_at: new Date().toISOString()
-  };
+  const record = normalizeAssetRecord(projectName, {
+    type: assetType,
+    file_path: filePath,
+    source: 'project_upload',
+    status: 'connected'
+  });
 
-  assets.push(record);
-  writeJsonFile(paths.assetsRegistryPath, assets);
+  const withoutExisting = assets.filter((item) => item.file_path !== record.file_path || item.type !== record.type);
+  withoutExisting.unshift(record);
+  writeJsonFile(paths.assetsRegistryPath, withoutExisting);
 
   return {
     ...record,
@@ -5805,7 +6731,10 @@ function listProjectAssets(projectName) {
     throw new Error('Project not found');
   }
 
-  return readJsonFile(paths.assetsRegistryPath, []);
+  const normalized = readJsonFile(paths.assetsRegistryPath, [])
+    .map((item) => normalizeAssetRecord(projectName, item));
+  writeJsonFile(paths.assetsRegistryPath, normalized);
+  return normalized;
 }
 
 function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
@@ -5815,18 +6744,22 @@ function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
     throw new Error('Project not found');
   }
 
+  const normalizedType = String(sourceType || '').trim().toLowerCase();
+  const normalizedValue = String(sourceValue || '').trim();
   const sources = readJsonFile(paths.sourcesRegistryPath, {});
-  sources[String(sourceType || '').trim().toLowerCase()] = {
-    value: String(sourceValue || '').trim(),
-    updated_at: new Date().toISOString()
+  sources[normalizedType] = {
+    value: normalizedValue,
+    updated_at: new Date().toISOString(),
+    status: 'connected'
   };
 
   writeJsonFile(paths.sourcesRegistryPath, sources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
 
   return {
     project: projectName,
-    source_type: String(sourceType || '').trim().toLowerCase(),
-    source_value: String(sourceValue || '').trim(),
+    source_type: normalizedType,
+    source_value: normalizedValue,
     registry_path: paths.sourcesRegistryPath
   };
 }
@@ -5848,6 +6781,7 @@ function removeProjectSourceOfTruth(projectName, sourceType) {
   const existing = sources[normalizedSourceType] || null;
   delete sources[normalizedSourceType];
   writeJsonFile(paths.sourcesRegistryPath, sources);
+  writeJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry(sources));
 
   return {
     project: projectName,
@@ -5866,7 +6800,8 @@ function reviewProjectSources(projectName) {
 
   return {
     project: projectName,
-    sources: readJsonFile(paths.sourcesRegistryPath, {})
+    sources: readJsonFile(paths.sourcesRegistryPath, {}),
+    source_of_truth_registry: readJsonFile(paths.sourceOfTruthRegistryPath, buildSourceOfTruthRegistry({}))
   };
 }
 
@@ -5916,14 +6851,19 @@ function sanitizeIntegrationId(value) {
 }
 
 function getProjectIntegrationPaths(projectName) {
-  const paths = getProjectBasePaths(projectName);
+  const paths = getProjectBaselinePaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
   }
 
-  const controlCenterRegistryPath = path.join(paths.integrationsDir, 'control-center.json');
+  ensureProjectBaselineFiles(projectName);
+  const controlCenterRegistryPath = paths.integrationControlCenterPath;
   ensureJsonFile(controlCenterRegistryPath, {
+    updated_at: '',
+    records: {}
+  });
+  ensureJsonFile(paths.integrationsRegistryPath, {
     updated_at: '',
     records: {}
   });
@@ -5956,6 +6896,7 @@ function writeProjectIntegrationRegistry(projectName, registry = {}) {
   };
 
   writeJsonFile(paths.controlCenterRegistryPath, payload);
+  writeJsonFile(paths.integrationsRegistryPath, payload);
 
   return {
     ...payload,
@@ -7200,14 +8141,16 @@ function refreshProjectLibraryRegistry(projectName) {
     throw new Error('Project not found');
   }
 
-  const existingAssets = hasAssetRegistry ? readJsonFile(assetsRegistryPath, []) : [];
+  const existingAssets = hasAssetRegistry
+    ? readJsonFile(assetsRegistryPath, []).map((asset) => normalizeAssetRecord(safeProject, asset))
+    : [];
   const scan = buildProjectLibraryFilesystemScan(safeProject);
   const managedTypes = new Set(['product_csv', 'product_photos', 'product_videos']);
   const now = new Date().toISOString();
 
   const existingByKey = new Map();
   existingAssets.forEach((asset) => {
-    const canonicalType = getCanonicalAssetType(asset.asset_type) || String(asset.asset_type || '').trim().toLowerCase();
+    const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || String(asset.type || asset.asset_type || '').trim().toLowerCase();
     const filePath = String(asset.file_path || '').trim();
     if (!canonicalType || !filePath) {
       return;
@@ -7217,7 +8160,7 @@ function refreshProjectLibraryRegistry(projectName) {
   });
 
   const retained = existingAssets.filter((asset) => {
-    const canonicalType = getCanonicalAssetType(asset.asset_type) || String(asset.asset_type || '').trim().toLowerCase();
+    const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || String(asset.type || asset.asset_type || '').trim().toLowerCase();
     const managedByRefresh = String(asset?.metadata?.managed_by || '').trim().toLowerCase() === 'library_refresh';
     return !(managedTypes.has(canonicalType) && managedByRefresh);
   });
@@ -7233,22 +8176,22 @@ function refreshProjectLibraryRegistry(projectName) {
     const key = `${canonicalType}::${filePath}`;
     const previous = existingByKey.get(key) || {};
 
-    refreshedAssets.push({
+    refreshedAssets.push(normalizeAssetRecord(safeProject, {
       ...previous,
-      asset_id: previous.asset_id || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
-      project: safeProject,
-      asset_type: canonicalType,
+      id: previous.id || previous.asset_id,
+      type: canonicalType,
       file_path: filePath,
-      exists: fs.existsSync(filePath),
-      registered_at: previous.registered_at || now,
-      updated_at: now,
+      source: previous.source || scanned.scan_source || 'library_refresh',
+      source_of_truth: previous.source_of_truth,
+      status: fs.existsSync(filePath) ? 'connected' : 'missing',
+      created_at: previous.created_at || previous.registered_at || now,
       metadata: {
         ...(previous.metadata && typeof previous.metadata === 'object' ? previous.metadata : {}),
         managed_by: 'library_refresh',
         scan_source: scanned.scan_source || 'library_refresh',
         refreshed_at: now
       }
-    });
+    }));
   });
 
   const nextAssets = retained.concat(refreshedAssets);
@@ -7436,19 +8379,27 @@ function reviewProjectConnectorReadiness(projectName) {
     throw new Error('Project not found');
   }
 
-  const sources = readJsonFile(paths.sourcesRegistryPath, {});
+  const sources = normalizeSourceRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
+  const hasSource = (key) => {
+    const source = sources[key];
+    if (source && typeof source === 'object') {
+      const status = normalizeSourceStatus(source.status);
+      return ['connected', 'verified'].includes(status) && Boolean(normalizeSetupTextValue(source.value));
+    }
+    return Boolean(normalizeSetupTextValue(source));
+  };
 
   const checks = {
-    website: !!sources.website,
-    ecommerce: !!sources.ecommerce,
-    instagram: !!sources.instagram,
-    facebook: !!sources.facebook,
-    tiktok: !!sources.tiktok,
-    youtube: !!sources.youtube,
-    email: !!sources.email,
-    amazon: !!sources.amazon,
-    ebay: !!sources.ebay,
-    analytics: !!sources.analytics
+    website: hasSource('website'),
+    ecommerce: hasSource('ecommerce'),
+    instagram: hasSource('instagram'),
+    facebook: hasSource('facebook'),
+    tiktok: hasSource('tiktok'),
+    youtube: hasSource('youtube'),
+    email: hasSource('email'),
+    amazon: hasSource('amazon'),
+    ebay: hasSource('ebay'),
+    analytics: hasSource('analytics')
   };
 
   const missing = Object.keys(checks).filter(key => !checks[key]);
@@ -7698,16 +8649,13 @@ app.post('/task', (req, res) => {
 
 app.get('/today', (req, res) => {
   try {
-    const tasks = JSON.parse(
-  fs.readFileSync(
-    path.join(EXECUTION_DIR, 'hairoticmen/tasks/task-board.json'),
-    'utf8'
-  )
-);
+    const projectName = requireProjectContext(req);
+    const tasks = readLegacyContentQueue(projectName, 'tasks');
     
     const pending = tasks.filter(t => t.status === 'pending');
 
     res.json({
+      project: projectName,
       today_tasks: pending.slice(0, 5)
     });
   } catch (err) {
@@ -7717,16 +8665,13 @@ app.get('/today', (req, res) => {
 
 app.get('/next', (req, res) => {
   try {
-    const tasks = JSON.parse(
-  fs.readFileSync(
-    path.join(EXECUTION_DIR, 'hairoticmen/tasks/task-board.json'),
-    'utf8'
-  )
-);
+    const projectName = requireProjectContext(req);
+    const tasks = readLegacyContentQueue(projectName, 'tasks');
     
     const next = tasks.find(t => t.status === 'pending');
 
     res.json({
+      project: projectName,
       next_task: next || null
     });
   } catch (err) {
@@ -7748,6 +8693,234 @@ app.post('/ingest', (req, res) => {
   });
 
   res.json(result);
+});
+
+app.post('/execute_publish_package', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const publishPackage = resolvePublishPackageForExecution(projectName, req.body || {});
+    const payload = buildSocialExecutionPayload(publishPackage);
+    const executionState = 'manual_publish_ready';
+
+    const result = {
+      project: projectName,
+      campaign_name: String(publishPackage.campaign_name || req.body?.campaign_name || '').trim(),
+      channel: payload.channel,
+      execution_state: executionState,
+      caption: payload.caption,
+      media_path: payload.media_path,
+      platform_specific_payload: payload.platform_specific_payload,
+      supported_execution_states: EXECUTION_BRIDGE_STATES
+    };
+
+    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+      status: executionState,
+      result: {
+        campaign_name: result.campaign_name,
+        channel: result.channel,
+        media_path: result.media_path,
+        has_caption: Boolean(result.caption)
+      }
+    });
+
+    return res.json({
+      ok: true,
+      ...result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'PUBLISH_EXECUTION_FAILED',
+      message: error.message || 'Failed to execute publish package'
+    });
+  }
+});
+
+app.post('/execute_email_package', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const emailPackage = resolveEmailPackageForExecution(projectName, req.body || {});
+    const readyPayload = buildEmailReadyPayload(emailPackage);
+    const executionState = 'pending_execution';
+
+    const result = {
+      project: projectName,
+      campaign_name: String(emailPackage.campaign_name || req.body?.campaign_name || '').trim(),
+      execution_state: executionState,
+      subject: readyPayload.subject,
+      html_body: readyPayload.html_body,
+      text_body: readyPayload.text_body,
+      ready_for_provider_send: true,
+      supported_execution_states: EXECUTION_BRIDGE_STATES
+    };
+
+    const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
+      status: executionState,
+      result: {
+        campaign_name: result.campaign_name,
+        subject: result.subject,
+        ready_for_provider_send: true
+      }
+    });
+
+    return res.json({
+      ok: true,
+      ...result,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'execute_email_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'EMAIL_EXECUTION_FAILED',
+      message: error.message || 'Failed to execute email package'
+    });
+  }
+});
+
+app.post('/generate_media_from_prompt', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const promptPack = req.body?.prompt_pack && typeof req.body.prompt_pack === 'object'
+      ? req.body.prompt_pack
+      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
+
+    if (!promptPack || typeof promptPack !== 'object' || Object.keys(promptPack).length === 0) {
+      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
+      error.statusCode = 400;
+      error.code = 'PROMPT_PACK_MISSING';
+      throw error;
+    }
+
+    const generated = buildMediaGenerationMock(promptPack, req.body || {});
+    const executionState = 'ready_for_review';
+    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+      status: executionState,
+      result: {
+        has_image_prompt: Boolean(generated.image_prompt),
+        scene_count: Array.isArray(generated.scene_breakdown) ? generated.scene_breakdown.length : 0
+      }
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      execution_state: executionState,
+      supported_execution_states: EXECUTION_BRIDGE_STATES,
+      image_prompt: generated.image_prompt,
+      video_script: generated.video_script,
+      scene_breakdown: generated.scene_breakdown,
+      mock_output: true,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'MEDIA_GENERATION_BRIDGE_FAILED',
+      message: error.message || 'Failed to generate media from prompt'
+    });
+  }
+});
+
+app.post('/build_ad_execution_package', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const campaignPackage = resolveCampaignPackageForAds(projectName, req.body || {});
+    const adPackage = buildAdExecutionPackage(campaignPackage, req.body || {});
+    const executionState = 'ready_for_review';
+    const log = writeExecutionBridgeLog(projectName, 'build_ad_execution_package', {
+      status: executionState,
+      result: {
+        campaign_name: String(campaignPackage.campaign_name || req.body?.campaign_name || '').trim(),
+        headline: adPackage.headline,
+        audience: adPackage.audience
+      }
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      campaign_name: String(campaignPackage.campaign_name || req.body?.campaign_name || '').trim(),
+      execution_state: executionState,
+      supported_execution_states: EXECUTION_BRIDGE_STATES,
+      ad_copy: adPackage.ad_copy,
+      headline: adPackage.headline,
+      cta: adPackage.cta,
+      audience: adPackage.audience,
+      budget_suggestion: adPackage.budget_suggestion,
+      execution_log: log.file_path
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 400);
+    const logProject = projectName || resolveProjectNameForLog(req);
+
+    if (logProject) {
+      writeExecutionBridgeLog(logProject, 'build_ad_execution_package', {
+        status: 'failed',
+        result: 'validation_failed',
+        error: error.message,
+        details: {
+          code: error.code || 'REQUEST_ERROR'
+        }
+      });
+    }
+
+    return sendError(res, {
+      statusCode,
+      code: error.code || 'AD_EXECUTION_BRIDGE_FAILED',
+      message: error.message || 'Failed to build ad execution package'
+    });
+  }
 });
 
 app.get('/products', async (req, res) => {
@@ -7772,6 +8945,8 @@ app.get('/products', async (req, res) => {
 app.get('/optimize-product/:id', async (req, res) => {
   try {
     const productId = req.params.id;
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
       auth: {
@@ -7790,7 +8965,7 @@ app.get('/optimize-product/:id', async (req, res) => {
       current_short_description: product.short_description || '',
       current_description: product.description || '',
       optimization: {
-        seo_title_suggestion: `${product.name} | HAIROTICMEN Deutschland`,
+        seo_title_suggestion: `${product.name} | ${brandName}`,
         cta_suggestion: 'Jetzt entdecken',
         conversion_improvements: [
           'Add a stronger launch-offer banner above the fold',
@@ -7815,6 +8990,8 @@ app.get('/optimize-product/:id', async (req, res) => {
 app.get('/prepare-product-update/:id', async (req, res) => {
   try {
     const productId = req.params.id;
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
       auth: {
@@ -7841,9 +9018,9 @@ app.get('/prepare-product-update/:id', async (req, res) => {
         description: product.description || ''
       },
       proposed_update: {
-        seo_title: `${cleanName} | HAIROTICMEN Deutschland`,
+        seo_title: `${cleanName} | ${brandName}`,
         meta_description:
-          `${cleanName} von HAIROTICMEN. Premium Männerpflege für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
+          `${cleanName} von ${brandName}. Premium Angebot für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
         cta_primary: 'Jetzt entdecken',
         cta_secondary: 'Routine starten',
         trust_bullets: [
@@ -7853,13 +9030,13 @@ app.get('/prepare-product-update/:id', async (req, res) => {
           'Ideal für eine klare Grooming-Routine'
         ],
         optimized_short_description:
-          `<p><strong>${cleanName}</strong> von HAIROTICMEN – Premium Männerpflege für Männer, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
+          `<p><strong>${cleanName}</strong> von ${brandName} – Premium Angebot für Kunden, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
 
         optimized_description:
           `<h2>${cleanName}</h2>
 <p>Premium Männerpflege für einen gepflegten, klaren und selbstbewussten Auftritt.</p>
 
-<h3>Warum HAIROTICMEN?</h3>
+<h3>Warum ${brandName}?</h3>
 <ul>
   <li>Einfach in der Anwendung</li>
   <li>Premium Qualität für Männer mit Anspruch</li>
@@ -7881,7 +9058,7 @@ app.get('/prepare-product-update/:id', async (req, res) => {
 <p>Einfach in die tägliche Routine integrieren und für einen gepflegten, klaren und hochwertigen Eindruck sorgen.</p>
 
 <h3>Launch-Hinweis</h3>
-<p>Jetzt entdecken und Teil der HAIROTICMEN Grooming-Routine werden.</p>`
+<p>Jetzt entdecken und Teil der ${brandName} Routine werden.</p>`
       },
       review_required: true,
       next_step:
@@ -7898,6 +9075,7 @@ app.get('/prepare-product-update/:id', async (req, res) => {
 
 app.post('/backup-and-clone-product/:id', async (req, res) => {
   try {
+    const projectName = requireProjectContext(req);
     const productId = req.params.id;
 
     const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
@@ -7909,11 +9087,11 @@ app.post('/backup-and-clone-product/:id', async (req, res) => {
 
     const product = response.data;
 
-    fs.mkdirSync(HAIROTICMEN_BACKUP_DIR, { recursive: true });
+    const backupDir = getProjectBackupDir(projectName);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFilePath = path.join(
-      HAIROTICMEN_BACKUP_DIR,
+      backupDir,
       `product-${product.id}-backup-${timestamp}.json`
     );
 
@@ -7981,6 +9159,8 @@ app.post('/backup-and-clone-product/:id', async (req, res) => {
 
 app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
   try {
+    const projectName = resolveRequestProjectName(req);
+    const brandName = projectName ? getProjectDisplayName(projectName) : 'Project';
     const originalId = req.params.originalId;
     const cloneId = req.params.cloneId;
 
@@ -7996,9 +9176,9 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
     const cleanName = originalProduct.name || 'Unnamed Product';
 
     const preparedUpdate = {
-      seo_title: `${cleanName} | HAIROTICMEN Deutschland`,
+      seo_title: `${cleanName} | ${brandName}`,
       meta_description:
-        `${cleanName} von HAIROTICMEN. Premium Männerpflege für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
+        `${cleanName} von ${brandName}. Premium Angebot für eine einfache, wirksame und hochwertige Routine. Jetzt entdecken.`,
       cta_primary: 'Jetzt entdecken',
       cta_secondary: 'Routine starten',
       trust_bullets: [
@@ -8008,13 +9188,13 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
         'Ideal für eine klare Grooming-Routine'
       ],
       optimized_short_description:
-        `<p><strong>${cleanName}</strong> von HAIROTICMEN – Premium Männerpflege für Männer, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
+        `<p><strong>${cleanName}</strong> von ${brandName} – Premium Angebot für Kunden, die Wert auf Qualität, Wirkung und eine einfache Routine legen.</p>`,
 
       optimized_description:
         `<h2>${cleanName}</h2>
 <p>Premium Männerpflege für einen gepflegten, klaren und selbstbewussten Auftritt.</p>
 
-<h3>Warum HAIROTICMEN?</h3>
+<h3>Warum ${brandName}?</h3>
 <ul>
   <li>Einfach in der Anwendung</li>
   <li>Premium Qualität für Männer mit Anspruch</li>
@@ -8036,7 +9216,7 @@ app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) 
 <p>Einfach in die tägliche Routine integrieren und für einen gepflegten, klaren und hochwertigen Eindruck sorgen.</p>
 
 <h3>Launch-Hinweis</h3>
-<p>Jetzt entdecken und Teil der HAIROTICMEN Grooming-Routine werden.</p>
+<p>Jetzt entdecken und Teil der ${brandName} Routine werden.</p>
 
 <h3>Vertrauen & Qualität</h3>
 <ul>
@@ -8260,6 +9440,142 @@ app.get('/public/media-manager/project/:project', (req, res) => {
   } catch (error) {
     return res.status(400).json({
       error: error.message || 'Failed to build media manager payload'
+    });
+  }
+});
+
+
+app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const providedKey =
+      req.headers['x-mh-control-key'] ||
+      (String(req.headers.authorization || '').startsWith('Bearer ')
+        ? String(req.headers.authorization || '').slice('Bearer '.length)
+        : '');
+
+    const validWriteKey =
+      process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+      process.env.MH_CONTROL_CENTER_READ_KEY ||
+      process.env.MH_CONTROL_KEY ||
+      '';
+
+    if (!validWriteKey || providedKey !== validWriteKey) {
+      return res.status(401).json({
+        error: 'Missing or invalid protected write key. Provide x-mh-control-key or Authorization: Bearer <key>.'
+      });
+    }
+
+    const project = String(req.params.project || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const assetId = String(req.params.assetId || '').trim();
+    const status = String(req.body?.status || '').trim().toLowerCase();
+    const note = String(req.body?.note || '').trim();
+
+    const allowed = new Set(['approved', 'needs_review', 'rejected', 'archived']);
+    if (!project || !assetId) {
+      return res.status(400).json({ error: 'Missing project or assetId.' });
+    }
+
+    if (!allowed.has(status)) {
+      return res.status(400).json({
+        error: 'Invalid status.',
+        allowed: Array.from(allowed)
+      });
+    }
+
+    const root = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
+    const registryPath = path.join(root, 'data', 'projects', project, 'assets-registry.json');
+
+    if (!fs.existsSync(registryPath)) {
+      return res.status(404).json({
+        error: 'Assets registry not found.',
+        registryPath
+      });
+    }
+
+    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    const now = new Date().toISOString();
+
+    let matched = 0;
+
+    function matchesAsset(obj) {
+      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+
+      return (
+        String(obj.asset_id || '') === assetId ||
+        String(obj.assetId || '') === assetId ||
+        String(obj.id || '') === assetId
+      );
+    }
+
+    function updateAsset(obj) {
+      matched += 1;
+
+      obj.status = status;
+      obj.review_status = status;
+      obj.needs_review = status === 'needs_review';
+      obj.approved = status === 'approved';
+      obj.rejected = status === 'rejected';
+      obj.archived = status === 'archived';
+      obj.reviewed_at = now;
+      obj.reviewed_by = 'control_center';
+
+      if (status === 'approved') {
+        obj.approved_at = now;
+        obj.approval_note = note || obj.approval_note || 'Approved from Control Center Library.';
+      }
+
+      if (status === 'rejected') {
+        obj.rejected_at = now;
+        obj.rejection_note = note || obj.rejection_note || 'Rejected from Control Center Library.';
+      }
+
+      if (status === 'archived') {
+        obj.archived_at = now;
+        obj.archive_note = note || obj.archive_note || 'Archived from Control Center Library.';
+      }
+    }
+
+    function walk(value) {
+      if (!value || typeof value !== 'object') return;
+
+      if (Array.isArray(value)) {
+        value.forEach(walk);
+        return;
+      }
+
+      if (matchesAsset(value)) {
+        updateAsset(value);
+      }
+
+      Object.values(value).forEach(walk);
+    }
+
+    walk(registry);
+
+    if (!matched) {
+      return res.status(404).json({
+        error: 'Asset not found in registry.',
+        project,
+        assetId
+      });
+    }
+
+    registry.updated_at = now;
+    registry.last_reviewed_at = now;
+
+    fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n');
+
+    return res.json({
+      ok: true,
+      project,
+      assetId,
+      status,
+      matched,
+      registryPath
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message || 'Failed to update asset status.'
     });
   }
 });
@@ -9966,11 +11282,13 @@ function buildProductPromptPack(product) {
 function buildChannelPack(product) {
   const pp = product.prompt_pack || {};
   const name = product.product_name || 'This product';
+  const productProject = normalizeOptionalProjectSlug(product.project || product.project_name);
+  const brandHashtag = productProject ? buildProjectHashtag(productProject) : '#Brand';
 
   function ig() {
     const b = pp.branding || {};
     return {
-      caption: `${b.hook}\n\n${b.cta}\n\n#hairoticmen #mensgrooming #premiumstyle`,
+      caption: `${b.hook}\n\n${b.cta}\n\n${brandHashtag} #mensgrooming #premiumstyle`,
       visual_prompt: b.visual_prompt,
       format: 'square / 4:5',
       goal: 'engagement + awareness'
@@ -10381,6 +11699,309 @@ function reviewCampaignFinalization(projectName, campaignName) {
     publish_packages_count: publishFiles.length,
     has_email_package: fs.existsSync(emailFile),
     ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+  };
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getExecutionBridgeLogDirectory(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const logsDir = path.join(projectRoot, 'execution', 'logs');
+  ensureDir(logsDir);
+
+  return {
+    project: safeProject,
+    logs_dir: logsDir
+  };
+}
+
+function writeExecutionBridgeLog(projectName, action, payload = {}) {
+  const directory = getExecutionBridgeLogDirectory(projectName);
+  const timestamp = new Date().toISOString();
+  const safeAction = String(action || 'execution_action')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '_') || 'execution_action';
+  const fileSafeStamp = timestamp.replace(/[:.]/g, '-');
+  const filePath = path.join(directory.logs_dir, `${fileSafeStamp}_${safeAction}.json`);
+
+  const record = {
+    timestamp,
+    action: safeAction,
+    status: String(payload.status || 'failed').trim() || 'failed',
+    result: payload.result == null ? null : sanitizeValue(payload.result)
+  };
+
+  if (payload.error) {
+    record.error = sanitizeErrorMessage(payload.error, 'Execution bridge failed');
+  }
+
+  if (payload.details != null) {
+    record.details = sanitizeValue(payload.details);
+  }
+
+  writeJsonFile(filePath, record);
+
+  return {
+    ...record,
+    file_path: filePath
+  };
+}
+
+function resolveProjectNameForLog(req) {
+  return normalizeOptionalProjectSlug(req?.body?.project)
+    || normalizeOptionalProjectSlug(req?.query?.project)
+    || normalizeOptionalProjectSlug(req?.params?.project)
+    || '';
+}
+
+function assertExecutionPackageAssets(pkg, packageName = 'package') {
+  const assets = Array.isArray(pkg?.assets) ? pkg.assets : [];
+  if (!assets.length) {
+    const error = new Error(`Cannot execute ${packageName}: package has no assets`);
+    error.statusCode = 422;
+    error.code = 'EXECUTION_PACKAGE_EMPTY';
+    throw error;
+  }
+
+  return assets;
+}
+
+function resolvePublishPackageForExecution(projectName, input = {}) {
+  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+    ? input.publish_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  const channel = String(input.channel || '').trim().toLowerCase();
+  if (!campaignName || !channel) {
+    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+    error.statusCode = 400;
+    error.code = 'PUBLISH_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return buildCampaignPublishPackage(projectName, campaignName, channel);
+}
+
+function buildSocialExecutionPayload(publishPackage) {
+  const assets = assertExecutionPackageAssets(publishPackage, 'publish package');
+  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+  const primaryAsset = assets[0] || {};
+  const channelAsset = primaryAsset.channel_asset && typeof primaryAsset.channel_asset === 'object'
+    ? primaryAsset.channel_asset
+    : {};
+  const caption = String(channelAsset.caption || channelAsset.body || '').trim()
+    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+  const mediaPath = String(
+    channelAsset.media_path
+    || channelAsset.asset_path
+    || channelAsset.file_path
+    || primaryAsset.media_path
+    || ''
+  ).trim() || null;
+  const tiktokSteps = Array.isArray(channelAsset.structure) && channelAsset.structure.length
+    ? channelAsset.structure
+    : ['Hook (0-3s)', 'Product value (3-8s)', 'Proof or detail (8-15s)', 'CTA (15s+)'];
+
+  return {
+    channel,
+    caption,
+    media_path: mediaPath,
+    platform_specific_payload: {
+      instagram: {
+        caption,
+        media_path: mediaPath,
+        format: String(channelAsset.format || '4:5').trim(),
+        goal: String(channelAsset.goal || 'engagement').trim()
+      },
+      facebook: {
+        message: caption,
+        media_path: mediaPath,
+        format: String(channelAsset.format || '1:1').trim(),
+        goal: String(channelAsset.goal || 'reach').trim()
+      },
+      tiktok: {
+        caption,
+        hook_3s: String(channelAsset.hook_3s || '').trim(),
+        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+        structure: tiktokSteps
+      }
+    }
+  };
+}
+
+function resolveEmailPackageForExecution(projectName, input = {}) {
+  const inlinePackage = input.email_package && typeof input.email_package === 'object'
+    ? input.email_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  if (!campaignName) {
+    const error = new Error('Missing email package. Provide email_package or campaign_name');
+    error.statusCode = 400;
+    error.code = 'EMAIL_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return buildCampaignEmailPackage(projectName, campaignName);
+}
+
+function buildEmailReadyPayload(emailPackage) {
+  const primaryAsset = emailPackage.primary_asset && typeof emailPackage.primary_asset === 'object'
+    ? emailPackage.primary_asset
+    : null;
+
+  if (!primaryAsset || !primaryAsset.channel_asset || typeof primaryAsset.channel_asset !== 'object') {
+    const error = new Error('Email package does not include a primary channel asset');
+    error.statusCode = 422;
+    error.code = 'EMAIL_PACKAGE_INVALID';
+    throw error;
+  }
+
+  const channelAsset = primaryAsset.channel_asset;
+  const campaignName = String(emailPackage.campaign_name || '').trim();
+  const subject = String(channelAsset.subject || `${campaignName || 'Campaign'} Update`).trim();
+  const headline = String(channelAsset.headline || primaryAsset.product_name || campaignName || 'Campaign Update').trim();
+  const body = String(channelAsset.body || channelAsset.caption || '').trim();
+  const cta = String(channelAsset.cta || 'Shop now').trim();
+  const textBody = [headline, body, cta].filter(Boolean).join('\n\n').trim();
+  const htmlBody = [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<body style="font-family:Arial,sans-serif;background:#f7f7f7;color:#111;padding:24px;">',
+    `<h1 style="margin:0 0 12px;">${escapeHtml(headline)}</h1>`,
+    `<p style="margin:0 0 16px;line-height:1.5;">${escapeHtml(body)}</p>`,
+    `<p style="margin:0;"><strong>${escapeHtml(cta)}</strong></p>`,
+    '</body>',
+    '</html>'
+  ].join('');
+
+  return {
+    subject,
+    html_body: htmlBody,
+    text_body: textBody
+  };
+}
+
+function buildMediaGenerationMock(promptPack = {}, input = {}) {
+  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+  const branding = source.branding && typeof source.branding === 'object' ? source.branding : {};
+  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+  const feature = source.feature && typeof source.feature === 'object' ? source.feature : {};
+
+  const imagePrompt = String(
+    input.image_prompt
+    || branding.visual_prompt
+    || feature.visual_prompt
+    || 'Create a clean brand-safe hero visual with real product focus and premium lighting.'
+  ).trim();
+  const videoScript = [
+    String(reel.hook || branding.hook || 'Start with a direct hook for the target audience.').trim(),
+    String(reel.video_prompt || 'Show product usage with a clear before/after context and one main benefit.').trim(),
+    String(reel.cta || branding.cta || 'End with a clear CTA and brand tag.').trim()
+  ].filter(Boolean).join(' ');
+
+  return {
+    image_prompt: imagePrompt,
+    video_script: videoScript,
+    scene_breakdown: [
+      {
+        scene: 1,
+        timing: '0-3s',
+        objective: 'Hook attention',
+        direction: String(reel.hook || branding.hook || 'Open with audience pain or aspiration.').trim()
+      },
+      {
+        scene: 2,
+        timing: '3-10s',
+        objective: 'Show product value',
+        direction: String(reel.video_prompt || feature.video_prompt || imagePrompt).trim()
+      },
+      {
+        scene: 3,
+        timing: '10-15s',
+        objective: 'Drive action',
+        direction: String(reel.cta || branding.cta || 'Close with CTA and brand recall.').trim()
+      }
+    ]
+  };
+}
+
+function resolveCampaignPackageForAds(projectName, input = {}) {
+  const inlinePackage = input.campaign_package && typeof input.campaign_package === 'object'
+    ? input.campaign_package
+    : null;
+  if (inlinePackage) {
+    return inlinePackage;
+  }
+
+  const campaignName = String(input.campaign_name || '').trim();
+  if (!campaignName) {
+    const error = new Error('Missing campaign package. Provide campaign_package or campaign_name');
+    error.statusCode = 400;
+    error.code = 'CAMPAIGN_PACKAGE_MISSING';
+    throw error;
+  }
+
+  return readCampaignExecutionPackage(projectName, campaignName);
+}
+
+function buildAdExecutionPackage(campaignPackage, input = {}) {
+  const products = Array.isArray(campaignPackage?.products) ? campaignPackage.products : [];
+  if (!products.length) {
+    const error = new Error('Campaign package does not include products');
+    error.statusCode = 422;
+    error.code = 'CAMPAIGN_PACKAGE_EMPTY';
+    throw error;
+  }
+
+  const primary = products[0] || {};
+  const promptPack = primary.prompt_pack && typeof primary.prompt_pack === 'object'
+    ? primary.prompt_pack
+    : {};
+  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+  const branding = promptPack.branding && typeof promptPack.branding === 'object' ? promptPack.branding : {};
+  const intelligence = primary.marketing_intelligence && typeof primary.marketing_intelligence === 'object'
+    ? primary.marketing_intelligence
+    : {};
+
+  const headline = String(input.headline || offer.headline || branding.headline || `${primary.product_name || campaignPackage.campaign_name} offer`).trim();
+  const cta = String(input.cta || offer.cta || branding.cta || 'Shop now').trim();
+  const adCopy = String(input.ad_copy || offer.hook || branding.hook || `${headline}. ${cta}`).trim();
+  const audience = String(
+    input.audience
+    || intelligence.audience_primary
+    || intelligence.target_audience
+    || intelligence.persona
+    || 'Adults interested in premium grooming products'
+  ).trim();
+  const budgetSuggestion = {
+    daily_budget: Number(input.daily_budget || 45),
+    currency: String(input.currency || 'EUR').trim(),
+    rationale: `Starter budget based on ${products.length} product(s) in campaign package.`
+  };
+
+  return {
+    ad_copy: adCopy,
+    headline,
+    cta,
+    audience,
+    budget_suggestion: budgetSuggestion
   };
 }
 
@@ -11148,7 +12769,14 @@ app.post('/telegram-command', async (req, res) => {
 
     const parts = text.split(/\s+/);
     const command = parts[0];
-    const args = parts.slice(1);
+    const rawArgs = parts.slice(1);
+    const commandProject = resolveRequestProjectName(req, {
+      explicitProject: extractProjectFlag(rawArgs),
+      text
+    });
+    const args = stripProjectFlagArgs(rawArgs);
+    const commandBrandName = commandProject ? getProjectDisplayName(commandProject) : 'Project';
+    const commandHashtag = commandProject ? buildProjectHashtag(commandProject) : '#Project';
 
     if (command === '/products') {
       const response = await axios.get(`${process.env.WC_BASE_URL}/products`, {
@@ -11244,39 +12872,36 @@ app.post('/telegram-command', async (req, res) => {
     }
 
        if (command === '/content_plan') {
-      const taskBoardPath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/tasks/task-board.json'
-      );
+      const taskBoardPath = getLegacyContentQueuePath(commandProject, 'tasks');
 
-      const tasks = JSON.parse(fs.readFileSync(taskBoardPath, 'utf8'));
+      const tasks = readJsonFile(taskBoardPath, []);
       const contentTasks = tasks.filter(
         t =>
-          t.project === 'HAIROTICMEN' &&
+          String(t.project || '').trim().toLowerCase() === commandProject &&
           ['content_plan', 'content', 'blog', 'email', 'ads'].includes(t.type)
       );
 
       return res.json({
         command,
         result: {
-          project: 'HAIROTICMEN',
+          project: commandProject,
           marketing_tasks: contentTasks
         }
       });
     }
 
         if (command === '/create_post') {
-      const topic = args.join(' ') || 'HAIROTICMEN launch post';
+      const topic = args.join(' ') || `${commandBrandName} launch post`;
 
       const postDraft = {
         id: `post_${Date.now()}`,
         topic,
         platform: 'instagram',
         status: 'draft',
-        caption: `Entdecke ${topic} mit HAIROTICMEN. Premium Pflege für Männer, die Wert auf Stil, Qualität und Wirkung legen.`,
+        caption: `Entdecke ${topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Wert auf Stil, Qualität und Wirkung legen.`,
         cta: 'Jetzt entdecken',
         hashtags: [
-          '#HAIROTICMEN',
+          commandHashtag,
           '#MensGrooming',
           '#PremiumCare',
           '#BarberStyle',
@@ -11292,10 +12917,7 @@ app.post('/telegram-command', async (req, res) => {
           `Short-form social video for ${topic}: start with a strong visual hook, show premium product or grooming moment, reinforce confidence and routine, finish with CTA Jetzt entdecken.`
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(postDraft);
@@ -11314,12 +12936,12 @@ app.post('/telegram-command', async (req, res) => {
         id: `blog_${Date.now()}`,
         topic,
         status: 'draft',
-        title: `${topic} | HAIROTICMEN Blog`,
+        title: `${topic} | ${commandBrandName} Blog`,
         excerpt:
-          `${topic} – praktische Tipps, moderne Routinen und Premium Männerpflege von HAIROTICMEN.`,
-        seo_title: `${topic} | HAIROTICMEN Deutschland`,
+          `${topic} – praktische Tipps, moderne Routinen und Premium Positionierung von ${commandBrandName}.`,
+        seo_title: `${topic} | ${commandBrandName}`,
         meta_description:
-          `${topic} – entdecke Tipps, Routinen und Premium Männerpflege von HAIROTICMEN für einen gepflegten und starken Auftritt.`,
+          `${topic} – entdecke Tipps, Routinen und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`,
         target_keywords: [
           topic,
           'männerpflege deutschland',
@@ -11333,7 +12955,7 @@ app.post('/telegram-command', async (req, res) => {
           topic,
           'Männerpflege',
           'Grooming',
-          'HAIROTICMEN',
+          commandBrandName,
           'Deutschland'
         ],
         internal_link_suggestions: [
@@ -11348,7 +12970,7 @@ app.post('/telegram-command', async (req, res) => {
         featured_image_prompt:
           `Create a premium masculine featured image for a German blog article about ${topic}. Clean grooming aesthetic, luxury male care branding, modern barbershop mood, natural contrast, elegant composition, suitable for a premium men’s grooming website.`,
         featured_image_alt:
-          `${topic} – Premium Männerpflege und Grooming von HAIROTICMEN`,
+          `${topic} – Premium Artikel von ${commandBrandName}`,
         outline: [
           'Einleitung',
           'Warum das Thema wichtig ist',
@@ -11362,7 +12984,7 @@ app.post('/telegram-command', async (req, res) => {
 <p>Ein gepflegter Look beginnt nicht bei Zufall, sondern bei der richtigen Routine. ${topic} ist für viele Männer in Deutschland mehr als nur ein Trend – es ist ein Teil eines starken, bewussten und gepflegten Auftritts.</p>
 
 <h3>Warum dieses Thema wichtig ist</h3>
-<p>Viele Männer investieren in Kleidung, Stil und Auftreten, unterschätzen aber die Wirkung einer klaren Pflege- und Grooming-Routine. Genau hier setzt HAIROTICMEN an: mit Premium Produkten und einer einfachen, wirksamen Struktur.</p>
+<p>Viele Kunden investieren in Stil und Auftreten, unterschätzen aber die Wirkung einer klaren Routine. Genau hier setzt ${commandBrandName} an: mit Premium Produkten und einer einfachen, wirksamen Struktur.</p>
 
 <h3>Die häufigsten Fehler</h3>
 <ul>
@@ -11384,15 +13006,12 @@ app.post('/telegram-command', async (req, res) => {
 <p>Eine starke Routine spart Zeit, reduziert Unsicherheit und verbessert sichtbar die Wirkung des gesamten Looks. Premium Männerpflege bedeutet nicht Komplexität – sondern Klarheit, Qualität und Konsequenz.</p>
 
 <h3>Fazit</h3>
-<p>${topic} ist nicht nur ein Pflegethema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit HAIROTICMEN entsteht eine Routine, die zu Männern passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
+<p>${topic} ist nicht nur ein Produktthema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit ${commandBrandName} entsteht eine Routine, die zu Kunden passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
 
-<p><strong>CTA:</strong> Entdecke jetzt HAIROTICMEN und bringe deine Routine auf das nächste Level.</p>`
+<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und bringe deine Routine auf das nächste Level.</p>`
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(blogDraft);
@@ -11405,7 +13024,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
    if (command === '/create_email') {
-      const topic = args.join(' ') || 'HAIROTICMEN Launch';
+      const topic = args.join(' ') || `${commandBrandName} Launch`;
 
       const emailDraft = {
         id: `email_${Date.now()}`,
@@ -11417,13 +13036,13 @@ app.post('/telegram-command', async (req, res) => {
         subject: `${topic} – Jetzt entdecken`,
         preheader: 'Premium Pflege, klare Routine, starker Auftritt.',
         body:
-          `Entdecke ${topic} mit HAIROTICMEN. Premium Produkte für Männer, die ihre Routine auf das nächste Level bringen wollen.`,
+          `Entdecke ${topic} mit ${commandBrandName}. Premium Produkte für Kunden, die ihre Routine auf das nächste Level bringen wollen.`,
         cta: 'Jetzt entdecken'
       };
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, emailDraft.id);
+      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
       queue.push(emailDraft);
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -11432,21 +13051,18 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/create_ads') {
-      const topic = args.join(' ') || 'HAIROTICMEN Launch';
+      const topic = args.join(' ') || `${commandBrandName} Launch`;
 
       const adDraft = {
         status: 'draft',
         campaign_type: 'meta',
         headline: `${topic} – Premium Pflege für Männer`,
         primary_text:
-          `Mit ${topic} von HAIROTICMEN setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
+          `Mit ${topic} von ${commandBrandName} setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
         cta: 'Jetzt entdecken'
       };
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       queue.push(adDraft);
@@ -11459,10 +13075,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
        if (command === '/review_ads') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -11473,10 +13086,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_posts') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -11487,10 +13097,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_blog') {
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
 
@@ -11501,7 +13108,7 @@ app.post('/telegram-command', async (req, res) => {
     }
 
     if (command === '/review_emails') {
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, 'review-emails');
+      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
 
       return res.json({
         command,
@@ -11515,10 +13122,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11543,10 +13147,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11571,10 +13172,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11599,7 +13197,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -11608,7 +13206,7 @@ app.post('/telegram-command', async (req, res) => {
 
       item.status = 'approved';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -11622,10 +13220,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11635,9 +13230,9 @@ app.post('/telegram-command', async (req, res) => {
       }
 
       item.status = 'improved';
-      item.headline = `Jetzt entdecken: ${item.topic} – Premium Männerpflege von HAIROTICMEN`;
+      item.headline = `Jetzt entdecken: ${item.topic} – Premium Angebot von ${commandBrandName}`;
       item.primary_text =
-        `Für Männer in Deutschland, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von HAIROTICMEN verbindet Premium Pflege, starke Positionierung und einen modernen Auftritt.`;
+        `Für Kunden, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von ${commandBrandName} verbindet Premium Positionierung mit einem klaren Auftritt.`;
       item.hooks = [
         'Dein Look beginnt mit deiner Routine',
         'Premium Männerpflege ohne Kompromisse',
@@ -11665,10 +13260,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11677,9 +13269,9 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Post draft not found' });
       }
 
-            item.status = 'improved';
+      item.status = 'improved';
       item.caption =
-        `Ein stärkerer Look beginnt mit der richtigen Routine. ${item.topic} mit HAIROTICMEN steht für Premium Pflege, klare Wirkung und einen gepflegten Auftritt im Alltag.`;
+        `Ein stärkerer Auftritt beginnt mit der richtigen Routine. ${item.topic} mit ${commandBrandName} steht für Premium Positionierung, klare Wirkung und einen hochwertigen Eindruck.`;
       item.hooks = [
         'Dein Look wirkt nie zufällig',
         'Premium Pflege für Männer mit Anspruch',
@@ -11689,7 +13281,7 @@ app.post('/telegram-command', async (req, res) => {
       item.hook_type = 'premium + transformation';
       item.visual_format = 'feed post / reel support';
       item.aspect_ratio = '4:5 or 9:16';
-      item.overlay_text = `HAIROTICMEN | ${item.topic}`;
+      item.overlay_text = `${commandBrandName} | ${item.topic}`;
       item.creative_prompt =
         `Create a premium social creative for ${item.topic}, suitable for Instagram and Facebook, masculine luxury grooming aesthetic, clean composition, strong product focus, elegant contrast, Germany-market premium brand feel.`;
       item.video_brief =
@@ -11708,10 +13300,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11721,9 +13310,9 @@ app.post('/telegram-command', async (req, res) => {
       }
 
             item.status = 'improved';
-      item.seo_title = `${item.topic} | HAIROTICMEN Deutschland`;
+      item.seo_title = `${item.topic} | ${commandBrandName}`;
       item.meta_description =
-        `${item.topic} – Tipps, Routine und Premium Männerpflege von HAIROTICMEN für einen gepflegten und starken Auftritt.`;
+        `${item.topic} – Tipps, Routine und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`;
       item.target_keywords = [
         item.topic,
         'männerpflege deutschland',
@@ -11737,7 +13326,7 @@ app.post('/telegram-command', async (req, res) => {
         item.topic,
         'Männerpflege',
         'Grooming Tipps',
-        'HAIROTICMEN',
+        commandBrandName,
         'Premium Pflege'
       ];
       item.internal_link_suggestions = [
@@ -11751,7 +13340,7 @@ app.post('/telegram-command', async (req, res) => {
       item.featured_image_prompt =
         `Create a premium editorial blog image for ${item.topic}, focused on modern German men’s grooming, refined masculine styling, clean grooming tools, premium hair and beard care aesthetic, suitable as a featured image for a luxury grooming brand.`;
       item.featured_image_alt =
-        `${item.topic} – Premium Männerpflege Artikel von HAIROTICMEN`;
+        `${item.topic} – Premium Artikel von ${commandBrandName}`;
 
       item.excerpt =
         `${item.topic} – Premium Tipps, klare Routine und hochwertige Männerpflege für Deutschland.`;
@@ -11772,7 +13361,7 @@ app.post('/telegram-command', async (req, res) => {
 </ul>
 
 <h3>Die bessere Lösung</h3>
-<p>Mit einer klaren Struktur, hochwertigen Produkten und einem Fokus auf echte Wirkung wird Pflege einfacher, effizienter und sichtbarer. Genau dafür steht HAIROTICMEN.</p>
+<p>Mit einer klaren Struktur, hochwertigen Produkten und einem Fokus auf echte Wirkung wird die Routine einfacher, effizienter und sichtbarer. Genau dafür steht ${commandBrandName}.</p>
 
 <h3>Praktische Empfehlungen</h3>
 <ul>
@@ -11782,13 +13371,13 @@ app.post('/telegram-command', async (req, res) => {
   <li>Auf Einfachheit und Beständigkeit setzen</li>
 </ul>
 
-<h3>Warum HAIROTICMEN dazu passt</h3>
-<p>HAIROTICMEN verbindet Premium Männerpflege mit einer modernen, klaren und wirksamen Routine. Für Männer, die nicht einfach nur Produkte wollen – sondern einen stärkeren Auftritt.</p>
+<h3>Warum ${commandBrandName} dazu passt</h3>
+<p>${commandBrandName} verbindet Premium Positionierung mit einer modernen, klaren und wirksamen Routine. Für Kunden, die nicht einfach nur Produkte wollen, sondern einen stärkeren Auftritt.</p>
 
 <h3>Fazit</h3>
 <p>${item.topic} ist ein Thema für Männer, die mehr aus ihrer Routine machen wollen. Mit der richtigen Struktur, hochwertigen Produkten und einem klaren Anspruch entsteht ein Look, der bewusst, gepflegt und stark wirkt.</p>
 
-<p><strong>CTA:</strong> Entdecke jetzt HAIROTICMEN und entwickle eine Routine, die wirklich zu dir passt.</p>`;
+<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und entwickle eine Routine, die wirklich zu dir passt.</p>`;
 
       fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2), 'utf8');
 
@@ -11804,7 +13393,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -11818,10 +13407,10 @@ app.post('/telegram-command', async (req, res) => {
       item.subject = `${item.topic} – Premium Routine für Männer in Deutschland`;
       item.preheader = 'Premium Pflege, klare Routine, starker Auftritt.';
       item.body =
-        `Entdecke ${item.topic} mit HAIROTICMEN. Premium Pflege für Männer, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
+        `Entdecke ${item.topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
       item.cta = 'Jetzt entdecken';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -11835,10 +13424,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing ad draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11864,10 +13450,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing post draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11893,10 +13476,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11922,7 +13502,7 @@ app.post('/telegram-command', async (req, res) => {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -11931,7 +13511,7 @@ app.post('/telegram-command', async (req, res) => {
 
       item.status = 'ready_for_send';
 
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, queue);
+      writeLiveEmailQueue(commandProject, queue);
 
       return res.json({
         command,
@@ -11946,7 +13526,7 @@ if (command === '/publish_blog') {
   }
 
   const response = await fetch(
-    `http://localhost:3000/publish-blog/${draftId}`,
+    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
     { method: 'POST' }
   );
 
@@ -11963,10 +13543,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -11995,10 +13572,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const queuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
       const item = queue.find(x => x.id === draftId);
@@ -12032,10 +13606,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -12044,12 +13615,12 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Blog draft not found' });
       }
 
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'queue'), { recursive: true });
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'blog'), { recursive: true });
+      const mediaDir = getProjectMediaDir(commandProject);
+      const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+      fs.mkdirSync(path.join(mediaDir, 'blog'), { recursive: true });
 
-      const mediaQueue = JSON.parse(
-        fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-      );
+      const mediaQueue = readJsonFile(mediaQueuePath, []);
 
       const assetId = `blogimg_${Date.now()}`;
       const safeSlug = String(blogItem.topic || 'blog-image')
@@ -12059,7 +13630,7 @@ if (command === '/publish_blog') {
 
       const plannedFilename = `${assetId}-${safeSlug}.png`;
       const plannedOutputPath = path.join(
-        HAIROTICMEN_MEDIA_DIR,
+        mediaDir,
         'blog',
         plannedFilename
       );
@@ -12084,7 +13655,7 @@ if (command === '/publish_blog') {
 
       mediaQueue.push(assetRecord);
       fs.writeFileSync(
-        HAIROTICMEN_MEDIA_QUEUE_PATH,
+        mediaQueuePath,
         JSON.stringify(mediaQueue, null, 2),
         'utf8'
       );
@@ -12101,9 +13672,7 @@ if (command === '/publish_blog') {
         return res.json({ error: 'Missing asset id or blog draft id' });
       }
 
-      const mediaQueue = JSON.parse(
-        fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-      );
+      const mediaQueue = readJsonFile(getProjectBlogImageQueuePath(commandProject), []);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -12131,9 +13700,8 @@ if (command === '/generate_image_real') {
     return res.json({ error: 'Missing blog draft id or asset id' });
   }
 
-  const mediaQueue = JSON.parse(
-    fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-  );
+  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+  const mediaQueue = readJsonFile(mediaQueuePath, []);
 
   let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -12180,7 +13748,7 @@ if (command === '/generate_image_real') {
     asset.generated_at = new Date().toISOString();
 
     fs.writeFileSync(
-      HAIROTICMEN_MEDIA_QUEUE_PATH,
+      mediaQueuePath,
       JSON.stringify(mediaQueue, null, 2),
       'utf8'
     );
@@ -12210,10 +13778,7 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Missing blog draft id' });
   }
 
-  const blogQueuePath = path.join(
-    EXECUTION_DIR,
-    'hairoticmen/content/blog/blog-queue.json'
-  );
+  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
   const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
   const blogItem = blogQueue.find(x => x.id === draftId);
@@ -12222,9 +13787,8 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Blog not published or not found' });
   }
 
-  const mediaQueue = JSON.parse(
-    fs.readFileSync(HAIROTICMEN_MEDIA_QUEUE_PATH, 'utf8')
-  );
+  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+  const mediaQueue = readJsonFile(mediaQueuePath, []);
 
   const asset = mediaQueue
     .filter(x => x.linked_blog_id === draftId)
@@ -12280,7 +13844,7 @@ if (command === '/attach_blog_image') {
     blogItem.featured_image_source = asset.filename;
 
     fs.writeFileSync(
-      HAIROTICMEN_MEDIA_QUEUE_PATH,
+      mediaQueuePath,
       JSON.stringify(mediaQueue, null, 2),
       'utf8'
     );
@@ -12319,10 +13883,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -12455,10 +14016,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing blog draft id' });
       }
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
+      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
       const blogItem = blogQueue.find(x => x.id === draftId);
@@ -12495,7 +14053,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: queue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
       const item = queue.find(x => x.id === draftId);
 
       if (!item) {
@@ -12531,17 +14089,18 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id' });
       }
 
-      const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
       const emailItem = emailQueue.find(x => x.id === draftId);
 
       if (!emailItem) {
         return res.json({ error: 'Email draft not found' });
       }
 
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'queue'), { recursive: true });
-      fs.mkdirSync(path.join(HAIROTICMEN_MEDIA_DIR, 'email'), { recursive: true });
+      const mediaDir = getProjectMediaDir(commandProject);
+      fs.mkdirSync(path.join(mediaDir, 'queue'), { recursive: true });
+      fs.mkdirSync(path.join(mediaDir, 'email'), { recursive: true });
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, draftId);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
 
       const assetId = `emailimg_${Date.now()}`;
       const safeSlug = String(emailItem.topic || 'email-image')
@@ -12551,7 +14110,7 @@ if (command === '/attach_blog_image') {
 
       const plannedFilename = `${assetId}-${safeSlug}.png`;
       const plannedOutputPath = path.join(
-        HAIROTICMEN_MEDIA_DIR,
+        mediaDir,
         'email',
         plannedFilename
       );
@@ -12560,7 +14119,7 @@ if (command === '/attach_blog_image') {
         `Create a premium email hero image for ${emailItem.topic}, focused on luxury men’s grooming, strong masculine branding, refined product presentation, elegant dark premium styling, suitable for a high-conversion campaign email for the German market.`;
 
       const altText =
-        `${emailItem.topic} – Premium Männerpflege Kampagne von HAIROTICMEN`;
+        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
 
       const assetRecord = {
         asset_id: assetId,
@@ -12581,7 +14140,7 @@ if (command === '/attach_blog_image') {
       };
 
       mediaQueue.push(assetRecord);
-      writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
+      writeLiveEmailMediaQueue(commandProject, mediaQueue);
 
       return res.json({
         command,
@@ -12595,7 +14154,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id or asset id' });
       }
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, ref);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -12623,14 +14182,14 @@ if (command === '/attach_blog_image') {
     return res.json({ error: 'Missing email draft id' });
   }
 
-  const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
   const emailItem = emailQueue.find(x => x.id === draftId);
 
   if (!emailItem) {
     return res.json({ error: 'Email draft not found' });
   }
 
-  const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, draftId);
+  const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
 
   const generatedAssets = mediaQueue
     .filter(x => x.linked_email_id === draftId && x.status === 'generated')
@@ -12674,6 +14233,7 @@ if (command === '/attach_blog_image') {
     emailItem.hero_image_alt = asset.alt_text;
     emailItem.hero_image_wp_media_id = mediaId;
 
+    const projectWebsiteUrl = getProjectWebsiteUrl(commandProject) || '#';
     emailItem.html_body =
       `<div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;background:#ffffff;">` +
       `<img src="${publicImageUrl}" alt="${asset.alt_text}" style="width:100%;height:auto;display:block;border:0;" />` +
@@ -12681,11 +14241,11 @@ if (command === '/attach_blog_image') {
       `<h2 style="margin:0 0 12px 0;color:#111;">${emailItem.subject || ''}</h2>` +
       `<p style="margin:0 0 16px 0;color:#444;">${emailItem.preheader || ''}</p>` +
       `<p style="margin:0 0 24px 0;color:#222;line-height:1.6;">${emailItem.body || ''}</p>` +
-      `<a href="https://hairoticmen.de" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
+      `<a href="${projectWebsiteUrl}" style="display:inline-block;padding:14px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">${emailItem.cta || 'Jetzt entdecken'}</a>` +
       `</div></div>`;
 
-    writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
-    writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+    writeLiveEmailQueue(commandProject, emailQueue);
 
     return res.json({
       command,
@@ -12714,7 +14274,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing email draft id or asset id' });
       }
 
-      const { data: mediaQueue } = readLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, ref);
+      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
 
       let asset = mediaQueue.find(x => x.asset_id === ref);
 
@@ -12758,7 +14318,7 @@ if (command === '/attach_blog_image') {
         asset.status = 'generated';
         asset.generated_at = new Date().toISOString();
 
-        writeLiveEmailMediaQueue(LIVE_EMAIL_PROJECT, mediaQueue);
+        writeLiveEmailMediaQueue(commandProject, mediaQueue);
 
         return res.json({
           command,
@@ -12790,7 +14350,7 @@ if (command === '/attach_blog_image') {
         return res.json({ error: 'Missing recipient email' });
       }
 
-        const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, draftId);
+        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
       const emailItem = emailQueue.find(x => x.id === draftId);
 
       if (!emailItem) {
@@ -12823,7 +14383,7 @@ if (command === '/attach_blog_image') {
         emailItem.sent_at = new Date().toISOString();
         emailItem.send_result = response.data;
 
-        writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+        writeLiveEmailQueue(commandProject, emailQueue);
 
         return res.json({
           command,
@@ -13202,10 +14762,7 @@ if (command === '/reuse_blog_to_social') {
     return res.json({ error: 'Missing blog ID' });
   }
 
-  const blogQueuePath = path.join(
-    EXECUTION_DIR,
-    'hairoticmen/content/blog/blog-queue.json'
-  );
+  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
 
   if (!fs.existsSync(blogQueuePath)) {
     return res.json({ error: 'Blog queue not found' });
@@ -13224,9 +14781,9 @@ if (command === '/reuse_blog_to_social') {
     posts: [
       {
         platform: 'instagram',
-        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit HAIROTICMEN steht für Premium Pflege und klare Ergebnisse.`,
+        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit ${commandBrandName} steht für Premium Positionierung und klare Ergebnisse.`,
         cta: 'Jetzt entdecken',
-        hashtags: ['#HAIROTICMEN','#MensGrooming','#PremiumCare','#BarberStyle','#MensStyle']
+        hashtags: [commandHashtag, '#MensGrooming', '#PremiumCare', '#BarberStyle', '#MensStyle']
       },
       {
         platform: 'facebook',
@@ -13236,7 +14793,7 @@ if (command === '/reuse_blog_to_social') {
     ],
     reel: {
       hook: 'Dein Look ist kein Zufall',
-      script: `Routine entscheidet alles. ${blog.topic} mit HAIROTICMEN bringt Klarheit und Wirkung.`,
+      script: `Routine entscheidet alles. ${blog.topic} mit ${commandBrandName} bringt Klarheit und Wirkung.`,
       cta: 'Jetzt starten'
     },
     ad: {
@@ -13259,7 +14816,7 @@ if (command === '/reuse_email_to_social') {
     return res.json({ error: 'Missing email ID' });
   }
 
-  const { candidate, data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, emailId);
+  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
 
   if (!fs.existsSync(candidate.selectedPath)) {
     return res.json({ error: 'Email queue not found' });
@@ -13484,7 +15041,7 @@ if (command === '/generate_reel_from_blog') {
         topic,
         status: 'draft',
         hashtag_groups: {
-          brand: ['#HAIROTICMEN'],
+          brand: [buildProjectHashtag(projectName)],
           niche: ['#MensGrooming', '#PremiumCare', '#BarberStyle'],
           topic: [`#${topic.replace(/\s+/g, '')}`],
           audience: ['#MensStyle', '#GroomingRoutine']
@@ -13957,6 +15514,8 @@ if (command === '/execute_campaign_brain') {
     return res.json({ error: 'Campaign brain not found' });
   }
 
+  const brainProject = normalizeOptionalProjectSlug(brain.project_id) || commandProject;
+  const brainBrandName = getProjectDisplayName(brainProject);
   const mainKeyword = brain.opportunity_map?.high_volume_keywords?.[0] || 'mens grooming';
 
   const result = {
@@ -13966,7 +15525,7 @@ if (command === '/execute_campaign_brain') {
     status: 'generated',
 
     blog: {
-      title: `${mainKeyword} | HAIROTICMEN Guide`,
+      title: `${mainKeyword} | ${brainBrandName} Guide`,
       topic: mainKeyword,
       structure: [
         'introduction',
@@ -13980,7 +15539,7 @@ if (command === '/execute_campaign_brain') {
 
     email: {
       subject: `${mainKeyword} – Premium Routine für Männer`,
-      body: `Entdecke die perfekte ${mainKeyword} Routine mit HAIROTICMEN.`,
+      body: `Entdecke die perfekte ${mainKeyword} Routine mit ${brainBrandName}.`,
       cta: 'Jetzt entdecken'
     },
 
@@ -14042,29 +15601,16 @@ if (command === '/execute_campaign_brain') {
         'campaign-output/campaign-output-queue.json'
       );
 
-      const blogQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/blog/blog-queue.json'
-      );
-
-      const postQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/social/post-queue.json'
-      );
-
-      const adQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/ads/ad-queue.json'
-      );
-
-      const reelQueuePath = path.join(
-        EXECUTION_DIR,
-        'hairoticmen/content/campaigns/reel-brief-queue.json'
-      );
+      const campaignProject = commandProject;
+      const campaignBrandName = getProjectDisplayName(campaignProject);
+      const blogQueuePath = getLegacyContentQueuePath(campaignProject, 'blog');
+      const postQueuePath = getLegacyContentQueuePath(campaignProject, 'social');
+      const adQueuePath = getLegacyContentQueuePath(campaignProject, 'ads');
+      const reelQueuePath = getLegacyContentQueuePath(campaignProject, 'reel');
 
       const campaignOutputQueue = JSON.parse(fs.readFileSync(campaignOutputPath, 'utf8'));
       const blogQueue = JSON.parse(fs.readFileSync(blogQueuePath, 'utf8'));
-      const { data: emailQueue } = readLiveEmailQueue(LIVE_EMAIL_PROJECT, execId);
+      const { data: emailQueue } = readLiveEmailQueue(commandProject, execId);
       const postQueue = JSON.parse(fs.readFileSync(postQueuePath, 'utf8'));
       const adQueue = JSON.parse(fs.readFileSync(adQueuePath, 'utf8'));
       const reelQueue = JSON.parse(fs.readFileSync(reelQueuePath, 'utf8'));
@@ -14090,8 +15636,8 @@ if (command === '/execute_campaign_brain') {
           topic: campaignExec.blog.topic,
           status: 'draft',
           title: campaignExec.blog.title,
-          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von HAIROTICMEN.`,
-          seo_title: `${campaignExec.blog.title} | HAIROTICMEN Deutschland`,
+          excerpt: `${campaignExec.blog.topic} – Premium Tipps und klare Routine von ${campaignBrandName}.`,
+          seo_title: `${campaignExec.blog.title} | ${campaignBrandName}`,
           meta_description: `${campaignExec.blog.topic} – entdecke eine starke und einfache Premium-Routine für Männer in Deutschland.`,
           target_keywords: [campaignExec.blog.topic],
           search_intent: 'informational + commercial',
@@ -14100,7 +15646,7 @@ if (command === '/execute_campaign_brain') {
           tag_suggestions: [
             campaignExec.blog.topic,
             'Männerpflege',
-            'HAIROTICMEN',
+            campaignBrandName,
             'Premium Pflege'
           ],
           internal_link_suggestions: [
@@ -14111,9 +15657,9 @@ if (command === '/execute_campaign_brain') {
             'Add one strong authority source if relevant'
           ],
           featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
-          featured_image_alt: `${campaignExec.blog.topic} – Premium Männerpflege Artikel von HAIROTICMEN`,
+          featured_image_alt: `${campaignExec.blog.topic} – Premium Artikel von ${campaignBrandName}`,
           outline: campaignExec.blog.structure || [],
-          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit HAIROTICMEN.</p>`,
+          body: `<h2>${campaignExec.blog.topic}</h2><p>Entdecke ${campaignExec.blog.topic} mit ${campaignBrandName}.</p>`,
           source_campaign_execution_id: execId
         };
 
@@ -14152,14 +15698,14 @@ if (command === '/execute_campaign_brain') {
             caption: post.caption || '',
             cta: post.cta || 'Jetzt entdecken',
             hashtags: [
-              '#HAIROTICMEN',
+              buildProjectHashtag(campaignProject),
               '#MensGrooming',
               '#PremiumCare'
             ],
             hook_type: post.hook || 'campaign angle',
             visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
             aspect_ratio: post.platform === 'instagram' ? '4:5 or 9:16' : '1:1',
-            overlay_text: `HAIROTICMEN | ${campaignExec.blog?.topic || 'campaign'}`,
+            overlay_text: `${campaignBrandName} | ${campaignExec.blog?.topic || 'campaign'}`,
             creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
             video_brief: `Create short-form visual content for ${campaignExec.blog?.topic || 'campaign'} on ${post.platform}.`,
             source_campaign_execution_id: execId
@@ -14225,7 +15771,7 @@ if (command === '/execute_campaign_brain') {
       }
 
       fs.writeFileSync(blogQueuePath, JSON.stringify(blogQueue, null, 2), 'utf8');
-      writeLiveEmailQueue(LIVE_EMAIL_PROJECT, emailQueue);
+      writeLiveEmailQueue(commandProject, emailQueue);
       fs.writeFileSync(postQueuePath, JSON.stringify(postQueue, null, 2), 'utf8');
       fs.writeFileSync(adQueuePath, JSON.stringify(adQueue, null, 2), 'utf8');
       fs.writeFileSync(reelQueuePath, JSON.stringify(reelQueue, null, 2), 'utf8');
@@ -14306,7 +15852,7 @@ if (command === '/execute_campaign_brain') {
 
       try {
         const response = await axios.post(
-          `http://localhost:3000/publish-blog/${blogId}`
+          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
         );
 
         campaignExec.controlled_publish = campaignExec.controlled_publish || {};
@@ -14363,8 +15909,9 @@ if (command === '/execute_campaign_brain') {
 
       try {
         const response = await axios.post(
-          'http://localhost:3000/telegram-command',
+          `http://localhost:${PORT}/telegram-command`,
           {
+            project: commandProject,
             text: `/send_email_draft ${emailId} ${toEmail}`
           }
         );
@@ -17161,7 +18708,8 @@ if (command === '/project_control_center_activity') {
 
 app.post('/publish-clone/:cloneId', async (req, res) => {
   try {
-    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
       status: 'published'
     });
     const cloneId = req.params.cloneId;
@@ -17203,7 +18751,8 @@ app.post('/publish-clone/:cloneId', async (req, res) => {
 
 app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
   try {
-    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
       status: 'published'
     });
     const originalId = req.params.originalId;
@@ -17227,11 +18776,11 @@ app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
     const originalProduct = originalResponse.data;
     const cloneProduct = cloneResponse.data;
 
-    fs.mkdirSync(HAIROTICMEN_BACKUP_DIR, { recursive: true });
+    const backupDir = getProjectBackupDir(projectName);
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFilePath = path.join(
-      HAIROTICMEN_BACKUP_DIR,
+      backupDir,
       `product-${originalProduct.id}-pre-replace-backup-${timestamp}.json`
     );
 
@@ -17338,15 +18887,13 @@ app.post('/cleanup-clone/:cloneId', async (req, res) => {
 
 app.post('/publish-blog/:draftId', async (req, res) => {
   try {
-    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
       status: 'published'
     });
     const draftId = req.params.draftId;
 
-    const queuePath = path.join(
-      EXECUTION_DIR,
-      'hairoticmen/content/blog/blog-queue.json'
-    );
+    const queuePath = getLegacyContentQueuePath(projectName, 'blog');
 
     const queue = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
     const item = queue.find(x => x.id === draftId);
@@ -17446,13 +18993,15 @@ app.post('/publish-blog/:draftId', async (req, res) => {
 
 app.post('/rollback-product/:productId', async (req, res) => {
   try {
-    assertPublishingMutationAllowed(LIVE_EMAIL_PROJECT, 'publish', {
+    const projectName = requireProjectContext(req);
+    assertPublishingMutationAllowed(projectName, 'publish', {
       status: 'published'
     });
     const productId = req.params.productId;
+    const backupDir = getProjectBackupDir(projectName);
 
     const backupFiles = fs
-      .readdirSync(HAIROTICMEN_BACKUP_DIR)
+      .readdirSync(backupDir)
       .filter(file => file.includes(`product-${productId}`))
       .sort()
       .reverse();
@@ -17466,7 +19015,7 @@ app.post('/rollback-product/:productId', async (req, res) => {
     }
 
     const latestBackupFile = backupFiles[0];
-    const backupPath = path.join(HAIROTICMEN_BACKUP_DIR, latestBackupFile);
+    const backupPath = path.join(backupDir, latestBackupFile);
 
     const backupData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
 
@@ -17510,6 +19059,1290 @@ app.post('/rollback-product/:productId', async (req, res) => {
   }
 });
 
+// ─── PHASE 4: SCHEDULER / AUTOMATION LAYER ─────────────────────────────────
+
+const SCHEDULER_LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+const SCHEDULER_DEFAULT_MAX_ATTEMPTS = 3;
+const SCHEDULER_VALID_MODES = Object.freeze(['manual', 'semi_auto', 'auto']);
+
+function getSchedulerFilePath(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const executionDir = path.join(projectRoot, 'execution');
+  ensureDir(executionDir);
+  return path.join(executionDir, 'scheduler.json');
+}
+
+function readSchedulerJobs(projectName) {
+  return readJsonFile(getSchedulerFilePath(projectName), []);
+}
+
+function writeSchedulerJobs(projectName, jobs) {
+  writeJsonFile(getSchedulerFilePath(projectName), jobs);
+}
+
+function writeSchedulerAuditLog(projectName, entry) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const logsDir = path.join(projectRoot, 'execution', 'logs');
+  ensureDir(logsDir);
+
+  const timestamp = new Date().toISOString();
+  const fileSafeStamp = timestamp.replace(/[:.]/g, '-');
+  const logPath = path.join(logsDir, `scheduler-${fileSafeStamp}.jsonl`);
+
+  const record = {
+    timestamp,
+    job_id: String(entry.job_id || ''),
+    action: String(entry.action || 'worker_action'),
+    status: String(entry.status || ''),
+    error: entry.error ? sanitizeErrorMessage(entry.error, 'Worker error') : null,
+    result_reference: entry.result_reference != null ? sanitizeValue(entry.result_reference) : null
+  };
+
+  fs.appendFileSync(logPath, JSON.stringify(record) + '\n', 'utf8');
+  return logPath;
+}
+
+function getIntelligencePaths(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
+  const analyticsDir = path.join(projectRoot, 'analytics');
+  const aiDir = path.join(projectRoot, 'ai');
+
+  ensureDir(analyticsDir);
+  ensureDir(aiDir);
+
+  return {
+    project: safeProject,
+    projectRoot,
+    analyticsDir,
+    aiDir,
+    performancePath: path.join(analyticsDir, 'performance.json'),
+    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+    learningPath: path.join(aiDir, 'learning.json')
+  };
+}
+
+function toFiniteNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeFeedbackMetrics(input = {}) {
+  const metrics = {
+    impressions: Math.max(0, toFiniteNumber(input.impressions, 0)),
+    clicks: Math.max(0, toFiniteNumber(input.clicks, 0)),
+    engagement: Math.max(0, toFiniteNumber(input.engagement, 0)),
+    conversions: Math.max(0, toFiniteNumber(input.conversions, 0)),
+    revenue: Math.max(0, toFiniteNumber(input.revenue, 0))
+  };
+
+  if (Object.prototype.hasOwnProperty.call(input || {}, 'cost')) {
+    metrics.cost = Math.max(0, toFiniteNumber(input.cost, 0));
+  }
+
+  return metrics;
+}
+
+function derivePerformanceStats(metrics = {}) {
+  const impressions = Math.max(0, toFiniteNumber(metrics.impressions, 0));
+  const clicks = Math.max(0, toFiniteNumber(metrics.clicks, 0));
+  const engagement = Math.max(0, toFiniteNumber(metrics.engagement, 0));
+  const conversions = Math.max(0, toFiniteNumber(metrics.conversions, 0));
+  const revenue = Math.max(0, toFiniteNumber(metrics.revenue, 0));
+  const cost = Math.max(0, toFiniteNumber(metrics.cost, 0));
+
+  const ctr = impressions > 0 ? clicks / impressions : 0;
+  const engagementRate = impressions > 0 ? engagement / impressions : 0;
+  const conversionRate = clicks > 0 ? conversions / clicks : 0;
+  const roas = cost > 0 ? revenue / cost : (revenue > 0 ? null : 0);
+  const cpa = conversions > 0 && cost > 0 ? cost / conversions : null;
+
+  const weightedScore = (
+    (ctr * 100 * 0.3)
+    + (engagementRate * 100 * 0.2)
+    + (conversionRate * 100 * 0.35)
+    + ((roas == null ? 1 : roas) * 10 * 0.15)
+  );
+
+  return {
+    ctr: Number(ctr.toFixed(4)),
+    engagement_rate: Number(engagementRate.toFixed(4)),
+    conversion_rate: Number(conversionRate.toFixed(4)),
+    roas: roas == null ? null : Number(roas.toFixed(3)),
+    cpa: cpa == null ? null : Number(cpa.toFixed(3)),
+    performance_score: Number(Math.max(0, weightedScore).toFixed(2))
+  };
+}
+
+function readPerformanceStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.performancePath, {
+    version: 1,
+    project: paths.project,
+    records: []
+  });
+
+  if (!payload || typeof payload !== 'object') {
+    return {
+      version: 1,
+      project: paths.project,
+      updated_at: new Date().toISOString(),
+      records: []
+    };
+  }
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload.updated_at || '').trim() || null,
+    records: Array.isArray(payload.records) ? payload.records : []
+  };
+}
+
+function writePerformanceStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    records: Array.isArray(store?.records) ? store.records : []
+  };
+  writeJsonFile(paths.performancePath, payload);
+  return payload;
+}
+
+function readLearningStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.learningPath, {
+    version: 1,
+    project: paths.project,
+    patterns: [],
+    history: []
+  });
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload?.updated_at || '').trim() || null,
+    patterns: Array.isArray(payload?.patterns) ? payload.patterns : [],
+    history: Array.isArray(payload?.history) ? payload.history : []
+  };
+}
+
+function writeLearningStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    patterns: Array.isArray(store?.patterns) ? store.patterns : [],
+    history: Array.isArray(store?.history) ? store.history : []
+  };
+  writeJsonFile(paths.learningPath, payload);
+  return payload;
+}
+
+function readRecommendationsStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.recommendationsPath, {
+    version: 1,
+    project: paths.project,
+    latest: null,
+    history: []
+  });
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload?.updated_at || '').trim() || null,
+    latest: payload?.latest && typeof payload.latest === 'object' ? payload.latest : null,
+    history: Array.isArray(payload?.history) ? payload.history : []
+  };
+}
+
+function writeRecommendationsStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    latest: store?.latest && typeof store.latest === 'object' ? store.latest : null,
+    history: Array.isArray(store?.history) ? store.history : []
+  };
+  writeJsonFile(paths.recommendationsPath, payload);
+  return payload;
+}
+
+function inferPerformanceContextFromJob(job = {}) {
+  const payload = job && typeof job.package_payload === 'object' ? job.package_payload : {};
+  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+    ? payload.publish_package
+    : {};
+  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+  const firstAsset = assets[0] && typeof assets[0] === 'object' ? assets[0] : {};
+
+  return {
+    campaign_id: String(
+      payload.campaign_id
+      || publishPackage.campaign_id
+      || job.source_package_id
+      || ''
+    ).trim() || null,
+    product_slug: String(
+      payload.product_slug
+      || firstAsset.product_slug
+      || firstAsset.product_id
+      || ''
+    ).trim() || null,
+    hook: String(
+      payload.hook
+      || payload.primary_hook
+      || firstAsset.hook
+      || ''
+    ).trim() || null
+  };
+}
+
+function appendPerformanceRecord(projectName, input = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const store = readPerformanceStore(safeProject);
+  const schedulerJobs = readSchedulerJobs(safeProject);
+  const matchedJob = schedulerJobs.find((job) => String(job.id || '').trim() === String(input.job_id || '').trim()) || null;
+  const inferred = inferPerformanceContextFromJob(matchedJob || {});
+  const normalizedChannel = String(input.channel || matchedJob?.channel || '').trim().toLowerCase();
+  const metrics = normalizeFeedbackMetrics(input.metrics || {});
+  const stats = derivePerformanceStats(metrics);
+  const recordedAt = new Date().toISOString();
+
+  const record = {
+    record_id: `perf_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
+    recorded_at: recordedAt,
+    project: safeProject,
+    job_id: String(input.job_id || '').trim(),
+    channel: normalizedChannel,
+    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+    product_slug: String(input.product_slug || inferred.product_slug || '').trim() || null,
+    hook: String(input.hook || inferred.hook || '').trim() || null,
+    metrics,
+    stats
+  };
+
+  store.records.push(record);
+  writePerformanceStore(safeProject, store);
+
+  return {
+    record,
+    total_records: store.records.length
+  };
+}
+
+function calculateEntityPerformance(records, key) {
+  const map = new Map();
+
+  for (const record of records) {
+    const id = String(record?.[key] || '').trim();
+    if (!id) continue;
+
+    const current = map.get(id) || {
+      key: id,
+      count: 0,
+      score_sum: 0,
+      ctr_sum: 0,
+      conversion_rate_sum: 0,
+      roas_sum: 0,
+      roas_count: 0,
+      revenue_sum: 0,
+      conversions_sum: 0
+    };
+
+    current.count += 1;
+    current.score_sum += toFiniteNumber(record?.stats?.performance_score, 0);
+    current.ctr_sum += toFiniteNumber(record?.stats?.ctr, 0);
+    current.conversion_rate_sum += toFiniteNumber(record?.stats?.conversion_rate, 0);
+    current.revenue_sum += toFiniteNumber(record?.metrics?.revenue, 0);
+    current.conversions_sum += toFiniteNumber(record?.metrics?.conversions, 0);
+
+    const roas = record?.stats?.roas;
+    if (Number.isFinite(roas)) {
+      current.roas_sum += roas;
+      current.roas_count += 1;
+    }
+
+    map.set(id, current);
+  }
+
+  return Array.from(map.values()).map((value) => ({
+    key: value.key,
+    count: value.count,
+    avg_score: Number((value.score_sum / Math.max(1, value.count)).toFixed(2)),
+    avg_ctr: Number((value.ctr_sum / Math.max(1, value.count)).toFixed(4)),
+    avg_conversion_rate: Number((value.conversion_rate_sum / Math.max(1, value.count)).toFixed(4)),
+    avg_roas: value.roas_count > 0
+      ? Number((value.roas_sum / value.roas_count).toFixed(3))
+      : null,
+    total_revenue: Number(value.revenue_sum.toFixed(2)),
+    total_conversions: value.conversions_sum
+  }));
+}
+
+function buildTrendSnapshot(records, channel) {
+  const scoped = records
+    .filter((record) => String(record.channel || '').trim().toLowerCase() === channel)
+    .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+
+  if (!scoped.length) {
+    return {
+      channel,
+      direction: 'stable',
+      change_pct: 0,
+      recent_avg_score: 0,
+      previous_avg_score: 0,
+      sample_size: 0
+    };
+  }
+
+  const recent = scoped.slice(-3);
+  const previous = scoped.slice(-6, -3);
+
+  const average = (items) => {
+    if (!items.length) return 0;
+    const total = items.reduce((sum, item) => sum + toFiniteNumber(item?.stats?.performance_score, 0), 0);
+    return total / items.length;
+  };
+
+  const recentAvg = average(recent);
+  const previousAvg = average(previous);
+  const delta = previousAvg > 0 ? ((recentAvg - previousAvg) / previousAvg) * 100 : 0;
+
+  let direction = 'stable';
+  if (delta > 8) direction = 'up';
+  if (delta < -8) direction = 'down';
+
+  return {
+    channel,
+    direction,
+    change_pct: Number(delta.toFixed(2)),
+    recent_avg_score: Number(recentAvg.toFixed(2)),
+    previous_avg_score: Number(previousAvg.toFixed(2)),
+    sample_size: scoped.length
+  };
+}
+
+function buildPerformanceSummary(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const store = readPerformanceStore(safeProject);
+  const records = Array.isArray(store.records) ? store.records : [];
+  const topCampaigns = calculateEntityPerformance(records, 'campaign_id')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+  const topProducts = calculateEntityPerformance(records, 'product_slug')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+  const channels = calculateEntityPerformance(records, 'channel')
+    .sort((a, b) => b.avg_score - a.avg_score);
+  const topChannels = channels.slice(0, 3);
+  const weakChannels = channels.filter((channel) => channel.avg_score < 22 || channel.avg_conversion_rate < 0.01);
+  const hooks = calculateEntityPerformance(records, 'hook')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+
+  const trendChannels = Array.from(
+    new Set(records.map((record) => String(record.channel || '').trim().toLowerCase()).filter(Boolean))
+  );
+  const trends = trendChannels
+    .map((channel) => buildTrendSnapshot(records, channel))
+    .sort((a, b) => b.recent_avg_score - a.recent_avg_score);
+
+  return {
+    project: safeProject,
+    records_tracked: records.length,
+    top_performing_campaigns: topCampaigns,
+    top_performing_products: topProducts,
+    top_channels: topChannels,
+    weak_channels: weakChannels,
+    best_hooks: hooks,
+    performance_trends: trends
+  };
+}
+
+function collectExecutionSignals(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const jobs = readSchedulerJobs(safeProject);
+  const completed = jobs.filter((job) => job.status === 'completed');
+  const failed = jobs.filter((job) => job.status === 'failed');
+  const retryable = jobs.filter((job) => job.status === 'retryable');
+
+  const byChannel = new Map();
+  for (const job of jobs) {
+    const channel = String(job.channel || '').trim().toLowerCase();
+    if (!channel) continue;
+
+    const current = byChannel.get(channel) || {
+      channel,
+      total_jobs: 0,
+      completed: 0,
+      failed: 0,
+      retryable: 0
+    };
+
+    current.total_jobs += 1;
+    if (job.status === 'completed') current.completed += 1;
+    if (job.status === 'failed') current.failed += 1;
+    if (job.status === 'retryable') current.retryable += 1;
+    byChannel.set(channel, current);
+  }
+
+  const channelStatus = Array.from(byChannel.values()).map((entry) => ({
+    ...entry,
+    failure_rate: entry.total_jobs > 0
+      ? Number(((entry.failed + entry.retryable) / entry.total_jobs).toFixed(4))
+      : 0
+  }));
+
+  return {
+    total_jobs: jobs.length,
+    completed_jobs: completed.length,
+    failed_jobs: failed.length,
+    retryable_jobs: retryable.length,
+    channel_status: channelStatus
+  };
+}
+
+function buildRiskAlerts(summary, records) {
+  const alerts = [];
+
+  for (const trend of summary.performance_trends || []) {
+    if (trend.direction === 'down' && trend.sample_size >= 4) {
+      alerts.push({
+        type: 'declining_performance',
+        severity: 'high',
+        channel: trend.channel,
+        message: `${trend.channel} is declining (${trend.change_pct}% recent score trend).`
+      });
+    }
+  }
+
+  const recentRecords = records
+    .slice(-20)
+    .filter((record) => record && typeof record === 'object');
+
+  for (const record of recentRecords) {
+    const engagementRate = toFiniteNumber(record?.stats?.engagement_rate, 0);
+    if (engagementRate > 0 && engagementRate < 0.01) {
+      alerts.push({
+        type: 'low_engagement',
+        severity: 'medium',
+        channel: record.channel,
+        job_id: record.job_id,
+        message: `Low engagement detected on ${record.channel} (ER ${Number((engagementRate * 100).toFixed(2))}%).`
+      });
+    }
+
+    const cost = toFiniteNumber(record?.metrics?.cost, 0);
+    const conversions = toFiniteNumber(record?.metrics?.conversions, 0);
+    const roas = record?.stats?.roas;
+    if (cost > 0 && (conversions === 0 || (Number.isFinite(roas) && roas < 1))) {
+      alerts.push({
+        type: 'wasted_budget',
+        severity: conversions === 0 ? 'high' : 'medium',
+        channel: record.channel,
+        job_id: record.job_id,
+        message: `Budget inefficiency on ${record.channel} (cost ${cost}, conversions ${conversions}, roas ${roas == null ? 'n/a' : roas}).`
+      });
+    }
+  }
+
+  return alerts.slice(0, 25);
+}
+
+function generateOptimizationRecommendations(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const executionSignals = collectExecutionSignals(safeProject);
+  const records = readPerformanceStore(safeProject).records;
+  const alerts = buildRiskAlerts(summary, records);
+
+  const stop = [];
+  const scale = [];
+  const improve = [];
+  const newAngles = [];
+
+  for (const channel of summary.weak_channels || []) {
+    stop.push(`Pause low-performing ${channel.key} creatives with avg score ${channel.avg_score}.`);
+  }
+
+  for (const channel of summary.top_channels || []) {
+    scale.push(`Scale ${channel.key} where avg score is ${channel.avg_score} and conversion rate is ${channel.avg_conversion_rate}.`);
+  }
+
+  for (const hook of summary.best_hooks || []) {
+    if (hook.count >= 2) {
+      scale.push(`Reuse hook "${hook.key}" across adjacent campaigns (avg score ${hook.avg_score}).`);
+    }
+  }
+
+  for (const signal of executionSignals.channel_status || []) {
+    if (signal.failure_rate > 0.3) {
+      improve.push(`Improve ${signal.channel} execution reliability (failure rate ${signal.failure_rate}).`);
+    }
+  }
+
+  if (!(summary.best_hooks || []).length) {
+    newAngles.push('Test 3 hook families: pain-point opener, quick transformation, and authority-led proof.');
+  } else {
+    const primaryHook = summary.best_hooks[0].key;
+    newAngles.push(`Create a variant ladder for "${primaryHook}": short CTA variant, social-proof variant, and urgency variant.`);
+  }
+
+  if ((summary.top_performing_products || []).length) {
+    const topProduct = summary.top_performing_products[0].key;
+    newAngles.push(`Build product-led storytelling around ${topProduct} with channel-native edits per platform.`);
+  }
+
+  return {
+    generated_at: new Date().toISOString(),
+    project: safeProject,
+    based_on: {
+      records_tracked: summary.records_tracked,
+      scheduler_jobs_tracked: executionSignals.total_jobs,
+      completed_jobs: executionSignals.completed_jobs
+    },
+    stop: Array.from(new Set(stop)).slice(0, 8),
+    scale: Array.from(new Set(scale)).slice(0, 8),
+    improve: Array.from(new Set(improve)).slice(0, 8),
+    new_angles_to_test: Array.from(new Set(newAngles)).slice(0, 8),
+    alerts,
+    summary
+  };
+}
+
+function upsertLearningPattern(learningStore, pattern) {
+  const safePattern = String(pattern.pattern || '').trim();
+  if (!safePattern) return null;
+
+  const existingIndex = learningStore.patterns.findIndex(
+    (item) => String(item.pattern || '').trim().toLowerCase() === safePattern.toLowerCase()
+      && String(item.channel || '').trim().toLowerCase() === String(pattern.channel || '').trim().toLowerCase()
+  );
+
+  const now = new Date().toISOString();
+  if (existingIndex >= 0) {
+    const current = learningStore.patterns[existingIndex];
+    learningStore.patterns[existingIndex] = {
+      ...current,
+      confidence: Number(Math.max(current.confidence || 0, pattern.confidence || 0).toFixed(2)),
+      support_count: Number(current.support_count || 0) + Number(pattern.support_count || 1),
+      last_observed_at: now,
+      evidence: Array.from(new Set([...(current.evidence || []), ...(pattern.evidence || [])])).slice(-8)
+    };
+    return learningStore.patterns[existingIndex];
+  }
+
+  const entry = {
+    id: `learn_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`,
+    pattern: safePattern,
+    channel: String(pattern.channel || '').trim().toLowerCase() || null,
+    confidence: Number(toFiniteNumber(pattern.confidence, 0.5).toFixed(2)),
+    support_count: Number(pattern.support_count || 1),
+    learned_from: String(pattern.learned_from || 'performance_feedback').trim(),
+    evidence: Array.isArray(pattern.evidence) ? pattern.evidence.slice(0, 8) : [],
+    first_observed_at: now,
+    last_observed_at: now
+  };
+
+  learningStore.patterns.push(entry);
+  return entry;
+}
+
+function buildLearningCandidates(summary, recommendations) {
+  const candidates = [];
+
+  for (const channel of summary.top_channels || []) {
+    if (channel.count >= 2 && channel.avg_ctr >= 0.02) {
+      candidates.push({
+        pattern: `${channel.key} consistently drives above-baseline CTR`,
+        channel: channel.key,
+        confidence: Math.min(0.95, 0.55 + (channel.avg_ctr * 3)),
+        support_count: channel.count,
+        learned_from: 'performance_summary',
+        evidence: [`avg_ctr=${channel.avg_ctr}`, `avg_score=${channel.avg_score}`]
+      });
+    }
+  }
+
+  for (const hook of summary.best_hooks || []) {
+    if (hook.count >= 2) {
+      candidates.push({
+        pattern: `Hook "${hook.key}" converts better across sampled runs`,
+        confidence: Math.min(0.95, 0.5 + (hook.avg_conversion_rate * 5)),
+        support_count: hook.count,
+        learned_from: 'hook_analysis',
+        evidence: [`avg_conversion_rate=${hook.avg_conversion_rate}`, `avg_score=${hook.avg_score}`]
+      });
+    }
+  }
+
+  for (const recommendation of recommendations.scale || []) {
+    if (/tiktok/i.test(recommendation)) {
+      candidates.push({
+        pattern: 'Short-form channel momentum suggests concise, mobile-first creative variants',
+        channel: 'tiktok',
+        confidence: 0.68,
+        support_count: 1,
+        learned_from: 'recommendation_engine',
+        evidence: [recommendation]
+      });
+    }
+  }
+
+  return candidates;
+}
+
+function updateIntelligenceLoop(projectName, context = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const recommendations = generateOptimizationRecommendations(safeProject);
+
+  const recommendationStore = readRecommendationsStore(safeProject);
+  recommendationStore.latest = recommendations;
+  recommendationStore.history.push({
+    generated_at: recommendations.generated_at,
+    trigger: String(context.trigger || 'manual').trim(),
+    stop_count: recommendations.stop.length,
+    scale_count: recommendations.scale.length,
+    improve_count: recommendations.improve.length,
+    angle_count: recommendations.new_angles_to_test.length,
+    alert_count: recommendations.alerts.length
+  });
+  writeRecommendationsStore(safeProject, recommendationStore);
+
+  const learningStore = readLearningStore(safeProject);
+  const candidates = buildLearningCandidates(summary, recommendations);
+  const updates = [];
+  for (const candidate of candidates) {
+    const updated = upsertLearningPattern(learningStore, candidate);
+    if (updated) updates.push(updated);
+  }
+
+  learningStore.history.push({
+    generated_at: new Date().toISOString(),
+    trigger: String(context.trigger || 'manual').trim(),
+    records_tracked: summary.records_tracked,
+    recommendations_generated: {
+      stop: recommendations.stop.length,
+      scale: recommendations.scale.length,
+      improve: recommendations.improve.length,
+      new_angles: recommendations.new_angles_to_test.length
+    },
+    alerts_count: recommendations.alerts.length,
+    learning_updates: updates.length,
+    feedback_record_id: context.feedbackRecord?.record_id || null,
+    job_id: context.jobRecord?.id || context.feedbackRecord?.job_id || null
+  });
+  writeLearningStore(safeProject, learningStore);
+
+  return {
+    summary,
+    recommendations,
+    learning_updates: updates,
+    alerts: recommendations.alerts
+  };
+}
+
+function buildSmartSuggestions(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const recommendationStore = readRecommendationsStore(safeProject);
+  const learningStore = readLearningStore(safeProject);
+  const latest = recommendationStore.latest || generateOptimizationRecommendations(safeProject);
+
+  const topChannel = summary.top_channels?.[0]?.key || null;
+  const topProduct = summary.top_performing_products?.[0]?.key || null;
+  const topHook = summary.best_hooks?.[0]?.key || null;
+  const strongestPattern = (learningStore.patterns || [])
+    .slice()
+    .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
+
+  return {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    next_best_action: latest.scale[0] || latest.improve[0] || 'Collect more feedback records to unlock stronger suggestions.',
+    next_campaign_idea: topProduct
+      ? `Launch a 3-creative sprint for ${topProduct}${topHook ? ` using hook "${topHook}"` : ''}.`
+      : 'Launch a 3-creative sprint around the top-converting product category this week.',
+    best_channel_to_focus: topChannel,
+    content_to_regenerate: latest.improve[0] || latest.stop[0] || 'Regenerate low-engagement creatives with a shorter hook and stronger CTA.',
+    learning_signal: strongestPattern
+      ? {
+        pattern: strongestPattern.pattern,
+        confidence: strongestPattern.confidence,
+        channel: strongestPattern.channel
+      }
+      : null,
+    alerts: latest.alerts || []
+  };
+}
+
+function generateJobId() {
+  return `job-${crypto.randomBytes(8).toString('hex')}`;
+}
+
+function generateWorkerId() {
+  return `worker-${crypto.randomBytes(4).toString('hex')}`;
+}
+
+function isJobDue(job) {
+  if (job.status !== 'pending' && job.status !== 'retryable') return false;
+  const scheduledAt = new Date(job.scheduled_at).getTime();
+  return !isNaN(scheduledAt) && scheduledAt <= Date.now();
+}
+
+function isJobLockExpired(job) {
+  if (!job.locked_at) return false;
+  const lockedAt = new Date(job.locked_at).getTime();
+  return !isNaN(lockedAt) && (Date.now() - lockedAt) > SCHEDULER_LOCK_TIMEOUT_MS;
+}
+
+function buildSchedulerJobRecord(params) {
+  const now = new Date().toISOString();
+  const typeMap = {
+    publish: '/execute_publish_package',
+    email: '/execute_email_package',
+    media: '/generate_media_from_prompt',
+    ads: '/build_ad_execution_package'
+  };
+
+  return {
+    id: generateJobId(),
+    project: String(params.project || '').trim(),
+    type: String(params.type || '').trim(),
+    source_package_id: String(params.source_package_id || '').trim() || null,
+    channel: String(params.channel || '').trim() || null,
+    execution_endpoint: typeMap[String(params.type || '').trim()] || null,
+    execution_state: 'pending',
+    scheduled_at: String(params.scheduled_at || '').trim(),
+    mode: String(params.mode || 'semi_auto').trim(),
+    package_payload: params.package_payload || null,
+    status: 'pending',
+    attempts: 0,
+    max_attempts: Number(params.max_attempts) > 0
+      ? Number(params.max_attempts)
+      : SCHEDULER_DEFAULT_MAX_ATTEMPTS,
+    locked_at: null,
+    locked_by: null,
+    last_error: null,
+    created_at: now,
+    updated_at: now
+  };
+}
+
+function executeJobBridge(job) {
+  const project = job.project;
+  const payload = job.package_payload && typeof job.package_payload === 'object'
+    ? job.package_payload
+    : {};
+
+  if (job.type === 'publish') {
+    const publishPackage = resolvePublishPackageForExecution(project, payload);
+    const socialPayload = buildSocialExecutionPayload(publishPackage);
+    return {
+      execution_state: 'manual_publish_ready',
+      channel: socialPayload.channel,
+      caption: socialPayload.caption,
+      media_path: socialPayload.media_path
+    };
+  }
+
+  if (job.type === 'email') {
+    const emailPackage = resolveEmailPackageForExecution(project, payload);
+    const emailPayload = buildEmailReadyPayload(emailPackage);
+    return {
+      execution_state: 'pending_execution',
+      subject: emailPayload.subject,
+      ready_for_provider_send: true
+    };
+  }
+
+  if (job.type === 'media') {
+    const promptPack = payload.prompt_pack && typeof payload.prompt_pack === 'object'
+      ? payload.prompt_pack
+      : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+
+    if (!promptPack || typeof promptPack !== 'object' || Object.keys(promptPack).length === 0) {
+      const err = new Error('Missing prompt_pack in package_payload');
+      err.statusCode = 400;
+      err.code = 'PROMPT_PACK_MISSING';
+      throw err;
+    }
+
+    const generated = buildMediaGenerationMock(promptPack, payload);
+    return {
+      execution_state: 'ready_for_review',
+      image_prompt: generated.image_prompt,
+      scene_count: Array.isArray(generated.scene_breakdown) ? generated.scene_breakdown.length : 0
+    };
+  }
+
+  if (job.type === 'ads') {
+    const campaignPackage = resolveCampaignPackageForAds(project, payload);
+    const adPackage = buildAdExecutionPackage(campaignPackage, payload);
+    return {
+      execution_state: 'ready_for_review',
+      headline: adPackage.headline,
+      audience: adPackage.audience
+    };
+  }
+
+  const err = new Error(`Unknown job type: ${job.type}`);
+  err.statusCode = 400;
+  err.code = 'UNKNOWN_JOB_TYPE';
+  throw err;
+}
+
+app.post('/schedule_execution_job', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+
+    const type = String(req.body?.type || '').trim().toLowerCase();
+    if (!SCHEDULER_VALID_JOB_TYPES.includes(type)) {
+      const err = new Error(
+        `Invalid job type "${type}". Valid types: ${SCHEDULER_VALID_JOB_TYPES.join(', ')}`
+      );
+      err.statusCode = 400;
+      err.code = 'INVALID_JOB_TYPE';
+      throw err;
+    }
+
+    const scheduledAtRaw = String(req.body?.scheduled_at || '').trim();
+    if (!scheduledAtRaw) {
+      const err = new Error('Missing scheduled_at. Provide an ISO8601 datetime string.');
+      err.statusCode = 400;
+      err.code = 'SCHEDULED_AT_MISSING';
+      throw err;
+    }
+
+    const scheduledAtMs = new Date(scheduledAtRaw).getTime();
+    if (isNaN(scheduledAtMs)) {
+      const err = new Error('Invalid scheduled_at. Must be a valid ISO8601 datetime string.');
+      err.statusCode = 400;
+      err.code = 'SCHEDULED_AT_INVALID';
+      throw err;
+    }
+
+    const mode = String(req.body?.mode || 'semi_auto').trim().toLowerCase();
+    if (!SCHEDULER_VALID_MODES.includes(mode)) {
+      const err = new Error(
+        `Invalid mode "${mode}". Valid modes: ${SCHEDULER_VALID_MODES.join(', ')}`
+      );
+      err.statusCode = 400;
+      err.code = 'INVALID_JOB_MODE';
+      throw err;
+    }
+
+    const packagePayload = req.body?.package_payload && typeof req.body.package_payload === 'object'
+      ? req.body.package_payload
+      : null;
+
+    if (!packagePayload || Object.keys(packagePayload).length === 0) {
+      const err = new Error(
+        'Missing package content. Provide package_payload object with the execution payload.'
+      );
+      err.statusCode = 400;
+      err.code = 'PACKAGE_PAYLOAD_MISSING';
+      throw err;
+    }
+
+    const job = buildSchedulerJobRecord({
+      project: projectName,
+      type,
+      source_package_id: req.body?.source_package_id,
+      channel: req.body?.channel,
+      scheduled_at: scheduledAtRaw,
+      mode,
+      package_payload: packagePayload,
+      max_attempts: req.body?.max_attempts
+    });
+
+    const jobs = readSchedulerJobs(projectName);
+    jobs.push(job);
+    writeSchedulerJobs(projectName, jobs);
+
+    writeSchedulerAuditLog(projectName, {
+      job_id: job.id,
+      action: 'job_created',
+      status: 'pending',
+      result_reference: {
+        type: job.type,
+        scheduled_at: job.scheduled_at,
+        mode: job.mode
+      }
+    });
+
+    return res.status(201).json({
+      ok: true,
+      job
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'SCHEDULE_JOB_FAILED',
+      message: error.message || 'Failed to schedule execution job'
+    });
+  }
+});
+
+app.get('/scheduler_queue', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const nowMs = Date.now();
+    const jobs = readSchedulerJobs(projectName);
+
+    const pending = [];
+    const due = [];
+    const running = [];
+    const failed = [];
+    const completed = [];
+    const retryable = [];
+
+    for (const job of jobs) {
+      if (job.status === 'completed') {
+        completed.push(job);
+        continue;
+      }
+
+      if (job.status === 'failed') {
+        failed.push(job);
+        continue;
+      }
+
+      if (job.status === 'running') {
+        running.push(isJobLockExpired(job) ? { ...job, lock_expired: true } : job);
+        continue;
+      }
+
+      if (job.status === 'retryable') {
+        retryable.push(job);
+        const scheduledAt = new Date(job.scheduled_at).getTime();
+        if (!isNaN(scheduledAt) && scheduledAt <= nowMs) {
+          due.push(job);
+        }
+        continue;
+      }
+
+      if (job.status === 'pending') {
+        pending.push(job);
+        const scheduledAt = new Date(job.scheduled_at).getTime();
+        if (!isNaN(scheduledAt) && scheduledAt <= nowMs) {
+          due.push(job);
+        }
+      }
+    }
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      total: jobs.length,
+      queue: {
+        pending: pending.length,
+        due: due.length,
+        running: running.length,
+        failed: failed.length,
+        completed: completed.length,
+        retryable: retryable.length
+      },
+      jobs: {
+        pending,
+        due,
+        running,
+        failed,
+        completed,
+        retryable
+      }
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'SCHEDULER_QUEUE_FAILED',
+      message: error.message || 'Failed to retrieve scheduler queue'
+    });
+  }
+});
+
+app.post('/run_scheduler_worker_once', (req, res) => {
+  let projectName = '';
+
+  try {
+    projectName = requireProjectContext(req, { allowFallback: false });
+    const workerId = generateWorkerId();
+    const lockTimestamp = new Date().toISOString();
+    const results = [];
+
+    const jobs = readSchedulerJobs(projectName);
+
+    // Phase 1: lock all due jobs atomically
+    for (const job of jobs) {
+      if (job.status === 'completed') continue;
+      if (job.status === 'failed' && job.attempts >= job.max_attempts) continue;
+
+      const isStaleRunning = job.status === 'running' && isJobLockExpired(job);
+      const isDue = isJobDue(job);
+
+      if (!isDue && !isStaleRunning) continue;
+
+      job.status = 'running';
+      job.locked_at = lockTimestamp;
+      job.locked_by = workerId;
+      job.attempts = (job.attempts || 0) + 1;
+      job.updated_at = lockTimestamp;
+    }
+
+    writeSchedulerJobs(projectName, jobs);
+
+    // Phase 2: execute locked jobs and update status
+    for (const job of jobs) {
+      if (job.status !== 'running' || job.locked_by !== workerId) continue;
+
+      const executionTimestamp = new Date().toISOString();
+
+      try {
+        const result = executeJobBridge(job);
+        job.status = 'completed';
+        job.execution_state = result.execution_state || 'completed';
+        job.last_error = null;
+        job.locked_at = null;
+        job.locked_by = null;
+        job.updated_at = executionTimestamp;
+
+        const logPath = writeSchedulerAuditLog(projectName, {
+          job_id: job.id,
+          action: 'job_executed',
+          status: 'completed',
+          result_reference: result
+        });
+
+        let intelligenceUpdate = null;
+        try {
+          intelligenceUpdate = updateIntelligenceLoop(projectName, {
+            trigger: 'job_completed',
+            jobRecord: job,
+            executionResult: result
+          });
+        } catch (intelligenceError) {
+          writeSchedulerAuditLog(projectName, {
+            job_id: job.id,
+            action: 'intelligence_loop_failed',
+            status: 'non_fatal',
+            error: intelligenceError.message || 'Intelligence loop update failed'
+          });
+        }
+
+        results.push({
+          job_id: job.id,
+          type: job.type,
+          status: 'completed',
+          execution_state: job.execution_state,
+          intelligence_alerts: intelligenceUpdate?.alerts?.length || 0,
+          log: logPath
+        });
+      } catch (err) {
+        const errorMessage = sanitizeErrorMessage(err.message, 'Job execution failed');
+        const canRetry = job.attempts < job.max_attempts;
+        const executionTimestamp2 = new Date().toISOString();
+
+        job.status = canRetry ? 'retryable' : 'failed';
+        job.execution_state = 'failed';
+        job.last_error = errorMessage;
+        job.locked_at = null;
+        job.locked_by = null;
+        job.updated_at = executionTimestamp2;
+
+        const logPath = writeSchedulerAuditLog(projectName, {
+          job_id: job.id,
+          action: 'job_failed',
+          status: job.status,
+          error: errorMessage,
+          result_reference: {
+            attempts: job.attempts,
+            max_attempts: job.max_attempts,
+            can_retry: canRetry
+          }
+        });
+
+        results.push({
+          job_id: job.id,
+          type: job.type,
+          status: job.status,
+          attempts: job.attempts,
+          max_attempts: job.max_attempts,
+          last_error: errorMessage,
+          log: logPath
+        });
+      }
+    }
+
+    writeSchedulerJobs(projectName, jobs);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      worker_id: workerId,
+      processed: results.length,
+      results
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'WORKER_RUN_FAILED',
+      message: error.message || 'Failed to run scheduler worker'
+    });
+  }
+});
+
+app.post('/record_execution_feedback', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const jobId = String(req.body?.job_id || '').trim();
+    const channel = String(req.body?.channel || '').trim().toLowerCase();
+    const metrics = req.body?.metrics;
+
+    if (!jobId) {
+      const err = new Error('Missing job_id');
+      err.statusCode = 400;
+      err.code = 'JOB_ID_MISSING';
+      throw err;
+    }
+
+    if (!channel) {
+      const err = new Error('Missing channel');
+      err.statusCode = 400;
+      err.code = 'CHANNEL_MISSING';
+      throw err;
+    }
+
+    if (!metrics || typeof metrics !== 'object') {
+      const err = new Error('Missing metrics object');
+      err.statusCode = 400;
+      err.code = 'METRICS_MISSING';
+      throw err;
+    }
+
+    const required = ['impressions', 'clicks', 'engagement', 'conversions', 'revenue'];
+    for (const key of required) {
+      if (!Object.prototype.hasOwnProperty.call(metrics, key)) {
+        const err = new Error(`metrics.${key} is required`);
+        err.statusCode = 400;
+        err.code = 'METRICS_FIELD_MISSING';
+        throw err;
+      }
+    }
+
+    const appended = appendPerformanceRecord(projectName, {
+      job_id: jobId,
+      channel,
+      campaign_id: req.body?.campaign_id,
+      product_slug: req.body?.product_slug,
+      hook: req.body?.hook,
+      metrics
+    });
+
+    const update = updateIntelligenceLoop(projectName, {
+      trigger: 'feedback_recorded',
+      feedbackRecord: appended.record
+    });
+
+    return res.status(201).json({
+      ok: true,
+      project: projectName,
+      total_records: appended.total_records,
+      feedback_record: appended.record,
+      intelligence: {
+        learning_updates: update.learning_updates.length,
+        recommendation_alerts: update.alerts.length
+      },
+      analytics_file: getIntelligencePaths(projectName).performancePath
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'RECORD_EXECUTION_FEEDBACK_FAILED',
+      message: error.message || 'Failed to record execution feedback'
+    });
+  }
+});
+
+app.get('/get_performance_summary', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const summary = buildPerformanceSummary(projectName);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      summary
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GET_PERFORMANCE_SUMMARY_FAILED',
+      message: error.message || 'Failed to build performance summary'
+    });
+  }
+});
+
+app.post('/generate_optimization_recommendations', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const update = updateIntelligenceLoop(projectName, {
+      trigger: 'recommendation_requested'
+    });
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      recommendations: {
+        what_to_stop: update.recommendations.stop,
+        what_to_scale: update.recommendations.scale,
+        what_to_improve: update.recommendations.improve,
+        new_angles_to_test: update.recommendations.new_angles_to_test
+      },
+      risk_alerts: update.recommendations.alerts,
+      based_on: update.recommendations.based_on
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GENERATE_OPTIMIZATION_RECOMMENDATIONS_FAILED',
+      message: error.message || 'Failed to generate optimization recommendations'
+    });
+  }
+});
+
+app.get('/get_smart_suggestions', (req, res) => {
+  try {
+    const projectName = requireProjectContext(req, { allowFallback: false });
+    const suggestions = buildSmartSuggestions(projectName);
+
+    return res.json({
+      ok: true,
+      project: projectName,
+      suggestions
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 400),
+      code: error.code || 'GET_SMART_SUGGESTIONS_FAILED',
+      message: error.message || 'Failed to get smart suggestions'
+    });
+  }
+});
+
+// ─── END PHASE 4 ─────────────────────────────────────────────────────────────
+
 app.use((err, req, res, next) => {
   const statusCode = getErrorStatusCode(err, 500);
   const explicitCode = String(err?.code || '').trim();
@@ -17545,10 +20378,37 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  appLogger.info('service_started', {
-    route: '/health',
-    action: 'listen',
-    port: Number(PORT)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    appLogger.info('service_started', {
+      route: '/health',
+      action: 'listen',
+      port: Number(PORT)
+    });
   });
-});
+}
+
+module.exports = {
+  app,
+  __stability: {
+    createProject,
+    updateProjectSetup,
+    reviewProject,
+    reviewProjectReadiness,
+    reviewProjectSources,
+    reviewProjectCanonicalParity,
+    ensureProjectBaselineFiles,
+    getProjectBaselinePaths,
+    registerProjectAsset,
+    listProjectAssets,
+    setProjectSourceOfTruth,
+    readCanonicalJsonWithLegacyFallback,
+    getProductIntelligencePaths,
+    buildGermanLaunchPlan,
+    buildCampaignExecutionPackage,
+    buildCampaignPublishPackage,
+    readJsonFile,
+    writeJsonFile,
+    upsertCampaign
+  }
+};

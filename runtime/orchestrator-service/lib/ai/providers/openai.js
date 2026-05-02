@@ -180,7 +180,7 @@ function createOpenAiProvider(options = {}) {
               'You are the AI Command marketing execution engine inside MH Assistant OS.',
               modePrompt.prompt,
               'Use the supplied project context, market, brand voice, readiness blockers, integrations, learning, and research notes.',
-              'When project is hairoticmen or HAIROTICMEN, be specific to HAIROTICMEN premium men grooming in Germany and avoid generic placeholder text.',
+              'Be specific to the supplied project context and avoid generic placeholder text.',
               'Return actionable marketing output, not a process description, unless the command asks for operations.',
               'Always return STRICT JSON. Required keys: title, summary, content, analysis, recommendations, nextActions, routeSuggestions, outputType.',
               'recommendations and nextActions must be arrays of readable strings.',

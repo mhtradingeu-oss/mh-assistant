@@ -5,6 +5,7 @@ const https = require('https');
 
 const baseUrl = process.env.MH_BASE_URL || `http://127.0.0.1:${process.env.PORT || '3000'}`;
 const writeKey = String(process.env.MH_CONTROL_CENTER_WRITE_KEY || '').trim();
+const validProject = String(process.env.MH_TEST_PROJECT || process.env.MH_DEFAULT_PROJECT || 'phase375smoke').trim();
 
 if (!writeKey) {
   console.error('FAIL Missing MH_CONTROL_CENTER_WRITE_KEY in environment.');
@@ -96,7 +97,7 @@ async function run() {
       await assertStatus(
         'valid project media-manager route',
         'GET',
-        '/media-manager/project/hairoticmen',
+        `/media-manager/project/${encodeURIComponent(validProject)}`,
         [200]
       );
     },
@@ -124,7 +125,7 @@ async function run() {
       await assertStatus(
         'nested traversal path segment',
         'GET',
-        '/media-manager/project/hairoticmen/../phase375smoke',
+        `/media-manager/project/${encodeURIComponent(validProject)}/../phase375smoke`,
         [400, 404]
       );
     },
@@ -157,7 +158,7 @@ async function run() {
       await assertNotStatus(
         'valid insights route remains functional',
         'GET',
-        '/api/insights/hairoticmen',
+        `/api/insights/${encodeURIComponent(validProject)}`,
         [400]
       );
     }

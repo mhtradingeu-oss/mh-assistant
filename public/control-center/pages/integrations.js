@@ -1160,6 +1160,8 @@ function renderIntegrationCard(card, session, escapeHtml) {
         <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
         <div class="integration-simple-copy">
           <strong>${escapeHtml(card.label)}</strong>
+          <span class="integration-card-meta">Health: ${escapeHtml(card.healthSummary)}</span>
+          <span class="integration-card-meta">Last sync: ${escapeHtml(formatDateTime(card.lastSync))}</span>
         </div>
         <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(
           card.statusLabel === "Partial" || card.statusLabel === "Token expired" || card.statusLabel === "Error"
@@ -1310,10 +1312,16 @@ function buildSectionGroups(domainModels) {
       domains: [byId.get("analytics"), byId.get("ads")].filter(Boolean)
     },
     {
-      id: "support-operations-tools",
-      title: "Support / Operations Tools",
-      description: "Lifecycle, CRM, automation, and coordination tools that support execution, alerts, and internal operating flow.",
-      domains: [byId.get("email-crm"), byId.get("automation")].filter(Boolean)
+      id: "email-crm",
+      title: "Email & CRM",
+      description: "Lifecycle messaging, customer records, audience segmentation, and relationship data required for retention and lifecycle operations.",
+      domains: [byId.get("email-crm")].filter(Boolean)
+    },
+    {
+      id: "ai-automation-tools",
+      title: "AI / Automation Tools",
+      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+      domains: [byId.get("automation")].filter(Boolean)
     }
   ].map((section) => {
     const cards = section.domains.flatMap((domain) => domain.cards);
@@ -1689,6 +1697,11 @@ export const integrationsRoute = {
     const notConnectedTotal = allCards.filter((card) => card.statusLabel === "Not Connected").length;
     const attentionTotal = partialTotal + errorTotal + expiredTotal;
     const criticalMissingCount = criticalMissing.length;
+    const readinessBase = Math.max(allCards.length, 1);
+    const systemScore = Math.round(((connectedTotal + partialTotal * 0.5) / readinessBase) * 100);
+    const connectorReadiness = Math.round((connectedTotal / readinessBase) * 100);
+    const channelReadiness = Math.round(((connectedTotal + partialTotal) / readinessBase) * 100);
+    const operationalRisk = Math.min(100, Math.round(((attentionTotal + criticalMissingCount) / readinessBase) * 100));
     const lastGlobalSync =
       asString(controlCenter.summary?.last_global_sync) ||
       allCards
@@ -1704,28 +1717,29 @@ export const integrationsRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <div class="setup-kicker">Connection Management</div>
-              <h3>Connection Overview</h3>
-              <p class="home-section-copy" style="margin:6px 0 0;">Track which integrations are connected, which are still missing, and which need attention before sync and intelligence can be trusted.</p>
+              <div class="setup-kicker">Integration Readiness</div>
+              <h3>Integration Readiness Cards</h3>
+              <p class="home-section-copy" style="margin:6px 0 0;">Track connection health, identify risk, and move channel readiness toward production reliability.</p>
             </div>
             <span class="card-badge ${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
           <div class="integrations-overview-grid integration-overview-grid-4">
             <div class="data-card">
-              <span class="data-label">Connected</span>
-              <strong>${escapeHtml(String(connectedTotal))}</strong>
+              <span class="data-label">System Score</span>
+              <strong>${escapeHtml(String(systemScore))}%</strong>
             </div>
             <div class="data-card">
-              <span class="data-label">Not connected</span>
-              <strong>${escapeHtml(String(notConnectedTotal))}</strong>
+              <span class="data-label">Connector Readiness</span>
+              <strong>${escapeHtml(String(connectorReadiness))}%</strong>
             </div>
             <div class="data-card">
-              <span class="data-label">Needs attention / blocked</span>
-              <strong>${escapeHtml(String(attentionTotal))}</strong>
+              <span class="data-label">Channel Readiness</span>
+              <strong>${escapeHtml(String(channelReadiness))}%</strong>
             </div>
             <div class="data-card">
-              <span class="data-label">Last global sync</span>
-              <strong>${escapeHtml(formatDateTime(lastGlobalSync))}</strong>
+              <span class="data-label">Operational Risk</span>
+              <strong>${escapeHtml(String(operationalRisk))}%</strong>
+              <div class="setup-helper" style="margin-top:8px;">Last sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</div>
             </div>
           </div>
         </section>

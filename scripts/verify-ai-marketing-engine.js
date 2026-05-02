@@ -18,6 +18,8 @@ const {
 
 let passed = 0;
 let failed = 0;
+const TEST_PROJECT = process.env.MH_TEST_PROJECT || 'demo-project';
+const TEST_BRAND = process.env.MH_TEST_BRAND || 'DEMO BRAND';
 
 function assert(label, condition, details = '') {
   if (condition) {
@@ -35,10 +37,10 @@ function containsObjectLeak(value) {
 
 function createContext() {
   return {
-    project: 'hairoticmen',
+    project: TEST_PROJECT,
     generated_at: new Date().toISOString(),
     summary: {
-      project_name: 'HAIROTICMEN',
+      project_name: TEST_BRAND,
       goal: 'Launch premium men grooming products in Germany.',
       audience: 'Men in Germany who want confident beard and hair grooming routines.',
       critical_gaps: ['brand guideline', 'product proof assets'],
@@ -70,15 +72,15 @@ console.log('\n--- [A] Ad ideas route and output ---');
   const { classified, response } = build(command, {
     outputType: 'ad_ideas',
     title: 'Beard Oil ad ideas',
-    summary: 'Three German-market ad ideas for HAIROTICMEN Beard Oil.',
-    content: 'Three ad ideas for HAIROTICMEN Beard Oil in Germany.',
+    summary: `Three German-market ad ideas for ${TEST_BRAND} Beard Oil.`,
+    content: `Three ad ideas for ${TEST_BRAND} Beard Oil in Germany.`,
     analysis: 'These ideas emphasize confidence, softness, and routine upgrade.',
     recommendations: ['Prioritize Meta and TikTok variants.'],
     nextActions: ['Draft the strongest variant in Content Studio.'],
     adIdeas: [
       {
         hook: 'Dein Bart wirkt trocken?',
-        primaryText: 'HAIROTICMEN Beard Oil macht die Routine leichter und den Bart gepflegter.',
+        primaryText: `${TEST_BRAND} Beard Oil macht die Routine leichter und den Bart gepflegter.`,
         headline: 'Bartpflege ohne Kompromisse',
         cta: 'Jetzt testen',
         audienceSegment: 'Men 25-45 in Germany',
@@ -118,12 +120,12 @@ console.log('\n--- [A] Ad ideas route and output ---');
 
 console.log('\n--- [B] Campaign package route and output ---');
 {
-  const command = 'Build a launch campaign for HAIROTICMEN in Germany focused on Beard Kit, Beard Oil, and Hair Wax';
+  const command = `Build a launch campaign for ${TEST_BRAND} in Germany focused on Beard Kit, Beard Oil, and Hair Wax`;
   const { classified, response } = build(command, {
     outputType: 'campaign_package',
-    title: 'HAIROTICMEN launch campaign',
+    title: `${TEST_BRAND} launch campaign`,
     summary: 'A German launch package for Beard Kit, Beard Oil, and Hair Wax.',
-    content: 'Launch HAIROTICMEN with a grooming routine offer and three-phase rollout.',
+    content: `Launch ${TEST_BRAND} with a grooming routine offer and three-phase rollout.`,
     analysis: 'The package uses routine-building and premium grooming confidence as the core angle.',
     recommendations: ['Lead with Beard Kit as the bundle anchor.'],
     campaignPackage: {
@@ -160,7 +162,7 @@ console.log('\n--- [C] Instagram hooks route and output ---');
   const { classified, response } = build(command, {
     outputType: 'content_pack',
     title: 'Instagram hooks for Beard Oil',
-    summary: 'Five hook options for HAIROTICMEN Beard Oil.',
+    summary: `Five hook options for ${TEST_BRAND} Beard Oil.`,
     content: 'Five hooks for Instagram creative.',
     analysis: 'Hooks focus on dryness, confidence, and daily grooming.',
     contentPack: {

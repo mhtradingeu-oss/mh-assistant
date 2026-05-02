@@ -7,6 +7,7 @@ import {
   getRouteDefinition,
   setRouteAccessResolver
 } from "./router.js";
+import { applyStandardPageLayout } from "./ui/page-standard.js";
 import {
   getState,
   setProjects,
@@ -575,11 +576,18 @@ function hideLoading() {
 function renderTopContext() {
   const state = getState();
   const ctx = state.context;
+  const operations = state.data.operations || {};
+  const notifications = Array.isArray(operations?.notifications?.items)
+    ? operations.notifications.items
+    : [];
+  const unread = notifications.filter((item) => !item?.read_at).length;
 
   setText("ctxProject", ctx.currentProject);
   setText("ctxMarket", ctx.currentMarket);
   setText("ctxMode", ctx.executionMode);
   setText("ctxCampaign", ctx.activeCampaign);
+  setText("ctxRoute", state.currentRoute || "home");
+  setText("ctxAlerts", unread);
 }
 
 function renderProjectSwitcher() {
@@ -705,10 +713,28 @@ function renderCurrentPage() {
       publishPublishingItem,
       failPublishingItem
     });
+
+    if (!routeDef.disableStandardLayout) {
+      applyStandardPageLayout({
+        route: currentRoute,
+        state: getState(),
+        navigateTo,
+        showMessage,
+        reloadProjectData: loadProjectData
+      });
+    }
     return;
   }
 
   renderPlaceholders();
+
+  applyStandardPageLayout({
+    route: currentRoute,
+    state: getState(),
+    navigateTo,
+    showMessage,
+    reloadProjectData: loadProjectData
+  });
 }
 
 function renderGlobalUi() {
@@ -862,20 +888,37 @@ function bindResponsiveUi() {
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = $("sidebarToggleBtn");
   const backdrop = $("sidebarBackdrop");
+  const MOBILE_BREAKPOINT = 1024;
+
+  function isMobileViewport() {
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+  }
+
+  function syncToggleState(isOpen) {
+    if (!toggleBtn) return;
+    toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+  }
 
   function openSidebar() {
-    if (!sidebar) return;
+    if (!sidebar || !isMobileViewport()) return;
     sidebar.classList.add("is-open");
     if (backdrop) backdrop.classList.add("is-visible");
+    document.body.classList.add("sidebar-open");
     document.body.style.overflow = "hidden";
+    syncToggleState(true);
   }
 
   function closeSidebar() {
     if (!sidebar) return;
     sidebar.classList.remove("is-open");
     if (backdrop) backdrop.classList.remove("is-visible");
+    document.body.classList.remove("sidebar-open");
     document.body.style.overflow = "";
+    syncToggleState(false);
   }
+
+  syncToggleState(false);
 
   if (toggleBtn) {
     toggleBtn.onclick = (event) => {
@@ -896,13 +939,19 @@ function bindResponsiveUi() {
 
   document.addEventListener("click", (event) => {
     const clickedNavItem = event.target.closest(".nav-item[data-route]");
-    if (clickedNavItem && window.innerWidth <= 980) {
+    if (clickedNavItem && isMobileViewport()) {
+      closeSidebar();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
       closeSidebar();
     }
   });
 
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 980) {
+    if (!isMobileViewport()) {
       closeSidebar();
     }
   });
@@ -913,7 +962,42 @@ function bindResponsiveUi() {
 ========================= */
 
 function executeSearch() {
-  showMessage("Search is not available yet");
+  const input = $("globalSearch");
+  const query = (input?.value || "").trim().toLowerCase();
+  if (!query) {
+    showError("Enter a route, page name, or keyword to search.");
+    return;
+  }
+
+  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+  const candidates = navItems.map((item) => {
+    const route = item.getAttribute("data-route") || "";
+    const label = (item.textContent || "").trim();
+    return {
+      route,
+      label,
+      haystack: `${route} ${label}`.toLowerCase()
+    };
+  });
+
+  const startsWith = candidates.filter((item) => item.haystack.startsWith(query));
+  const includes = candidates.filter((item) => !startsWith.includes(item) && item.haystack.includes(query));
+  const matches = [...startsWith, ...includes];
+
+  if (!matches.length) {
+    showError(`No route matches "${query}".`);
+    return;
+  }
+
+  if (matches.length === 1) {
+    navigateTo(matches[0].route);
+    showMessage(`Opened ${matches[0].label}.`);
+    return;
+  }
+
+  const top = matches.slice(0, 5);
+  showMessage(`Matches: ${top.map((item) => item.label).join(" • ")}. Press Enter again to open ${top[0].label}.`);
+  navigateTo(top[0].route);
 }
 
 function executeQuickCommand() {
@@ -940,24 +1024,13 @@ function bindCommandInputs() {
   const commandInput = $("quickCommandInput");
   const runBtn = $("runQuickCommandBtn");
   const searchBtn = $("runSearchBtn");
-  const searchLeft = searchInput?.closest(".command-bar-left");
-  const searchRight = searchBtn?.closest(".command-bar-right");
 
   if (searchInput) {
     searchInput.value = "";
-    searchInput.style.display = "none";
   }
 
   if (searchBtn) {
-    searchBtn.style.display = "none";
-  }
-
-  if (searchLeft) {
-    searchLeft.style.display = "none";
-  }
-
-  if (searchRight) {
-    searchRight.style.gap = "12px";
+    searchBtn.onclick = executeSearch;
   }
 
   if (commandInput) {
@@ -965,6 +1038,15 @@ function bindCommandInputs() {
       if (event.key === "Enter") {
         event.preventDefault();
         executeQuickCommand();
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        executeSearch();
       }
     });
   }

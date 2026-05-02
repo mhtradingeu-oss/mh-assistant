@@ -157,11 +157,9 @@ export async function fetchProjects() {
   } catch (error) {
     console.warn("Using fallback projects list:", error.message);
 
-    const fallbackItems = ["hairoticmen", "testproject"];
-
     return {
-      items: fallbackItems,
-      preferredProject: "hairoticmen",
+      items: [],
+      preferredProject: "",
       fallback: true
     };
   }

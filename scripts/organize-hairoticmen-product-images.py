@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 import shutil
 from pathlib import Path
 
 ROOT = Path("/opt/mh-assistant")
-IMAGES_ROOT = ROOT / "data/brand-assets/hairoticmen/products/images"
+PROJECT = os.environ.get("MH_IMAGE_PROJECT") or os.environ.get("MH_DEFAULT_PROJECT") or "project-name"
+IMAGES_ROOT = ROOT / f"data/brand-assets/{PROJECT}/products/images"
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 
@@ -60,7 +62,7 @@ def main():
     skipped = 0
     junk = 0
 
-    print("=== Hairoticmen product image organizer ===")
+    print(f"=== {PROJECT} product image organizer ===")
     print(f"Mode: {'APPLY' if args.apply else 'DRY RUN'}")
     print(f"Images root: {IMAGES_ROOT}")
     print("")
@@ -103,7 +105,7 @@ def main():
     print("")
     if not args.apply:
         print("Dry-run only. To apply:")
-        print("python3 scripts/organize-hairoticmen-product-images.py --apply --delete-junk")
+        print(f"MH_IMAGE_PROJECT={PROJECT} python3 scripts/{Path(__file__).name} --apply --delete-junk")
 
 if __name__ == "__main__":
     main()

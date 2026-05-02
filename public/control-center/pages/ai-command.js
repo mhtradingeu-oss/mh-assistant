@@ -1,2004 +1,1641 @@
 import {
-  getSharedHandoff,
-  setSharedAiDraft,
-  setSharedHandoff
+	getSharedHandoff,
+	setSharedAiDraft,
+	setSharedHandoff
 } from "../shared-context.js";
 
 import {
-  getCategoryReadinessList
+	getCategoryReadinessList
 } from "../asset-library.js";
 
+// ============================================================
+//  AI TEAM DEFINITIONS
+// ============================================================
+
 const MODE_DEFS = [
-  {
-    id: "executive",
-    label: "Executive",
-    summary: "Priorities, blockers, readiness, and next-best actions.",
-    routeHint: "home"
-  },
-  {
-    id: "campaign",
-    label: "Campaign Strategist",
-    summary: "Campaign concepts, launch plans, channel mix, segments, and offer strategy.",
-    routeHint: "campaign-studio"
-  },
-  {
-    id: "content",
-    label: "Content Creator",
-    summary: "Captions, hooks, scripts, post ideas, emails, and landing page sections.",
-    routeHint: "content-studio"
-  },
-  {
-    id: "seo",
-    label: "SEO Specialist",
-    summary: "Keywords, blog topics, landing-page SEO, search intent, and metadata.",
-    routeHint: "insights"
-  },
-  {
-    id: "ads",
-    label: "Ads Specialist",
-    summary: "Ad concepts, targeting angles, platform copy, paid strategy, and budget split.",
-    routeHint: "ads-manager"
-  },
-  {
-    id: "research",
-    label: "Research Analyst",
-    summary: "Competitors, market trends, audience research, and positioning gaps.",
-    routeHint: "research"
-  },
-  {
-    id: "operations",
-    label: "Operations Planner",
-    summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
-    routeHint: "workflows"
-  }
+	{
+		id: "strategist",
+		label: "Strategist",
+		icon: "🎯",
+		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+		routeHint: "campaign-studio"
+	},
+	{
+		id: "writer",
+		label: "Writer",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		routeHint: "content-studio"
+	},
+	{
+		id: "designer",
+		label: "Designer",
+		icon: "🎨",
+		summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+		routeHint: "content-studio"
+	},
+	{
+		id: "media",
+		label: "Media Agent",
+		icon: "📸",
+		summary: "Image selection, video direction, asset readiness, and media strategy.",
+		routeHint: "library"
+	},
+	{
+		id: "ads",
+		label: "Ads Specialist",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		routeHint: "ads-manager"
+	},
+	{
+		id: "analyst",
+		label: "Analyst",
+		icon: "📊",
+		summary: "SEO, performance data, content insights, and traffic patterns.",
+		routeHint: "insights"
+	},
+	{
+		id: "researcher",
+		label: "Researcher",
+		icon: "🔬",
+		summary: "Competitors, market trends, audience research, and positioning gaps.",
+		routeHint: "research"
+	},
+	{
+		id: "operations",
+		label: "Operations",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		routeHint: "workflows"
+	}
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	seo: "analyst",
+	research: "researcher"
+};
+
+// 4 quick-action prompts shown in the composer
+const QUICK_ACTIONS = [
+	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
+	{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },
+	{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },
+	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
 ];
 
 const aiSessions = new Map();
 let lastRenderContext = null;
 let aiCommandBridgeRegistered = false;
 
+// ============================================================
+//  HELPERS
+// ============================================================
+
 function asArray(value) {
-  return Array.isArray(value) ? value : [];
+	return Array.isArray(value) ? value : [];
 }
 
 function asObject(value) {
-  return value && typeof value === "object" ? value : {};
+	return value && typeof value === "object" ? value : {};
 }
 
 function asString(value) {
-  if (value == null) return "";
-  return String(value);
+	if (value == null) return "";
+	return String(value);
 }
 
 function humanizeValue(value, fallback = "") {
-  if (value == null) return fallback;
-  if (typeof value === "string") {
-    const clean = value.trim();
-    return clean === "[object Object]" ? fallback : clean;
-  }
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
-  }
-  if (typeof value === "object") {
-    const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
-    const detail = humanizeValue(
-      value.action ||
-      value.summary ||
-      value.description ||
-      value.recommendation ||
-      value.reason ||
-      value.insight ||
-      value.body ||
-      value.text ||
-      value.value
-    );
-    if (title && detail && title !== detail) return `${title}: ${detail}`;
-    if (title || detail) return title || detail;
-
-    return Object.entries(value)
-      .filter(([, item]) => item != null && typeof item !== "object")
-      .slice(0, 4)
-      .map(([key, item]) => `${titleCase(key)}: ${humanizeValue(item)}`)
-      .filter(Boolean)
-      .join("; ") || fallback;
-  }
-  return fallback;
+	if (value == null) return fallback;
+	if (typeof value === "string") {
+		const clean = value.trim();
+		return clean === "[object Object]" ? fallback : clean;
+	}
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+	if (Array.isArray(value)) {
+		return value.map((item) => humanizeValue(item)).filter(Boolean).join("; ") || fallback;
+	}
+	if (typeof value === "object") {
+		const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+		const detail = humanizeValue(
+			value.action ||
+			value.summary ||
+			value.description ||
+			value.recommendation ||
+			value.reason ||
+			value.insight ||
+			value.body ||
+			value.text ||
+			value.value
+		);
+		if (title && detail && title !== detail) return `${title}: ${detail}`;
+		if (title || detail) return title || detail;
+		return Object.entries(value)
+			.filter(([, item]) => item != null && typeof item !== "object")
+			.slice(0, 4)
+			.map(([key, item]) => `${titleCase(key)}: ${humanizeValue(item)}`)
+			.filter(Boolean)
+			.join("; ") || fallback;
+	}
+	return fallback;
 }
 
 function normalizeDisplayList(value, limit = 8) {
-  return asArray(value)
-    .map((item) => humanizeValue(item))
-    .filter(Boolean)
-    .slice(0, limit);
+	return asArray(value)
+		.map((item) => humanizeValue(item))
+		.filter(Boolean)
+		.slice(0, limit);
 }
 
 function toNumber(value, fallback = null) {
-  if (value == null || value === "") return fallback;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
+	if (value == null || value === "") return fallback;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function nowIso() {
-  return new Date().toISOString();
+	return new Date().toISOString();
 }
 
 function isMissingIntelligenceError(error) {
-  const status = Number(error?.status);
-  if (status !== 404) return false;
-  const message = asString(error?.message).toLowerCase();
-  return message.includes("insights") || message.includes("learning") || message.includes("not found");
+	const status = Number(error?.status);
+	if (status !== 404) return false;
+	const message = asString(error?.message).toLowerCase();
+	return message.includes("insights") || message.includes("learning") || message.includes("not found");
 }
 
 function formatTime(value) {
-  const date = value ? new Date(value) : new Date();
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+	const date = value ? new Date(value) : new Date();
+	if (Number.isNaN(date.getTime())) return "-";
+	return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function titleCase(value) {
-  return asString(value)
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (match) => match.toUpperCase());
-}
-
-function compactWords(value, limit = 8, fallback = "Signal pending") {
-  const words = asString(value)
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, limit);
-  return words.length ? words.join(" ") : fallback;
+	return asString(value)
+		.replace(/[_-]+/g, " ")
+		.replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
 function formatCompactNumber(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return "--";
-  return new Intl.NumberFormat(undefined, {
-    notation: "compact",
-    maximumFractionDigits: 1
-  }).format(parsed);
-}
-
-function formatPercent(value, digits = 1) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return "--";
-  return `${parsed.toFixed(digits)}%`;
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return "--";
+	return new Intl.NumberFormat(undefined, {
+		notation: "compact",
+		maximumFractionDigits: 1
+	}).format(parsed);
 }
 
 function formatCurrency(value, currency = "USD") {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return "--";
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currency || "USD",
-      maximumFractionDigits: 0
-    }).format(parsed);
-  } catch (_) {
-    return `${currency || "USD"} ${Math.round(parsed)}`;
-  }
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return "--";
+	try {
+		return new Intl.NumberFormat(undefined, {
+			style: "currency",
+			currency: currency || "USD",
+			maximumFractionDigits: 0
+		}).format(parsed);
+	} catch (_) {
+		return `${currency || "USD"} ${Math.round(parsed)}`;
+	}
 }
 
 function getModeMeta(id) {
-  return MODE_DEFS.find((item) => item.id === id) || MODE_DEFS[0];
-}
-
-function createIntroMessage(projectName) {
-  return {
-    title: projectName ? `${projectName} AI Command is online` : "AI Command is online",
-    summary: "This workspace now thinks like an operational system brain. Ask what is happening, why it matters, what to do next, or what page to move into.",
-    findings: [
-      "Use Executive mode for readiness, blockers, priorities, and next actions.",
-      "Use Content, SEO, and Ads modes for performance-specific decisions.",
-      "Use Operations mode when you want the system to route you into campaigns, publishing, integrations, or workflows."
-    ],
-    recommendations: [],
-    nextActions: [],
-    routeSuggestions: [],
-    missingData: []
-  };
-}
-
-function ensureSession(projectName) {
-  const key = projectName || "__default__";
-  if (!aiSessions.has(key)) {
-    aiSessions.set(key, {
-      modeId: "executive",
-      draftMessage: "",
-      messages: [
-        {
-          id: `msg-${Date.now()}`,
-          role: "assistant",
-          modeId: "executive",
-          createdAt: nowIso(),
-          source: "system",
-          response: createIntroMessage(projectName)
-        }
-      ],
-      history: [],
-      intelligence: {
-        project: key,
-        status: "idle",
-        dashboard: null,
-        insights: null,
-        learning: null,
-        error: "",
-        loadedAt: "",
-        loadingPromise: null
-      },
-      lastAppliedHandoffId: ""
-    });
-  }
-  return aiSessions.get(key);
-}
-
-function buildSuggestedPrompts(aiContext, modeId) {
-  const projectLabel = aiContext.projectName || "this project";
-  const mode = getModeMeta(modeId);
-  const basePrompts = {
-    executive: [
-      "What should I do next?",
-      "Summarize project status.",
-      "What is blocking growth right now?",
-      "What are the current priorities?"
-    ],
-    campaign: [
-      "Build a launch campaign for HAIROTICMEN in Germany.",
-      "Create a campaign plan for Beard Kit, Beard Oil, and Hair Wax.",
-      "What offer strategy should this campaign use?",
-      "Map the launch phases and channel mix."
-    ],
-    content: [
-      "Generate 5 Instagram hooks for Beard Oil.",
-      "Write caption ideas for the next product push.",
-      "Draft a reel script for Beard Oil.",
-      "Create email copy for the campaign launch."
-    ],
-    seo: [
-      "Build an SEO keyword plan for Beard Oil.",
-      "Generate blog topics for men’s grooming in Germany.",
-      "Write a meta title and description for Beard Oil.",
-      "Map search intent for the campaign landing page."
-    ],
-    ads: [
-      "Give me 3 ad ideas for beard oil in Germany.",
-      "Write Meta ad copy for Beard Kit.",
-      "Create TikTok ad hooks for Hair Wax.",
-      "Suggest targeting angles and CTAs."
-    ],
-    research: [
-      "Research competitor positioning for men’s grooming in Germany.",
-      "What market trends should shape this launch?",
-      "Find audience research gaps for Beard Oil.",
-      "What positioning gaps can HAIROTICMEN own?"
-    ],
-    operations: [
-      "Build a task plan for campaign launch.",
-      "Create a handoff plan for content, media, publishing, and ads.",
-      "What approvals are needed before launch?",
-      "Build an execution timeline."
-    ]
-  };
-
-  return asArray(basePrompts[mode.id] || []).map((prompt) => ({
-    label: mode.label,
-    prompt: projectLabel ? `${prompt} Use the current intelligence for ${projectLabel}.` : prompt
-  }));
+	const resolvedId = MODE_ID_ALIASES[id] || id;
+	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
 }
 
 function extractTopMessage(item = {}) {
-  return asString(
-    item.label ||
-    item.title ||
-    item.page ||
-    item.query ||
-    item.campaign_name ||
-    item.name
-  );
+	return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);
 }
 
-function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
-  setSharedAiDraft(projectName, {
-    projectName: projectName || "",
-    modeId: modeId || "",
-    lastCommand: asString(command),
-    lastResponseTitle: asString(response?.title),
-    routeSuggestions: asArray(response?.routeSuggestions),
-    updatedAt: nowIso()
-  });
+// ============================================================
+//  SESSION
+// ============================================================
+
+function ensureSession(projectName) {
+	const key = projectName || "__default__";
+	if (!aiSessions.has(key)) {
+		aiSessions.set(key, {
+			modeId: "operations",
+			draftMessage: "",
+			taskMode: "free",
+			taskType: "launch",
+			taskProduct: "",
+			taskChannel: "",
+			messages: [],
+			history: [],
+			intelligence: {
+				project: key,
+				status: "idle",
+				dashboard: null,
+				insights: null,
+				learning: null,
+				error: "",
+				loadedAt: "",
+				loadingPromise: null
+			},
+			lastAppliedHandoffId: ""
+		});
+	}
+	return aiSessions.get(key);
 }
 
-function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
-  const handoff = getSharedHandoff(projectName, "ai-command", operations);
-  const handoffId = asString(handoff?.id);
-
-  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) {
-    return;
-  }
-
-  const payload = asObject(handoff?.payload);
-  const draftContext = asObject(payload.draft_context);
-  const prompt = asString(payload.prompt);
-
-  if (draftContext.modeId) {
-    session.modeId = draftContext.modeId;
-  }
-
-  if (prompt) {
-    session.draftMessage = prompt;
-  }
-
-  if (draftContext.projectName || prompt) {
-    setSharedAiDraft(projectName, {
-      projectName,
-      modeId: draftContext.modeId || session.modeId,
-      lastCommand: prompt || draftContext.lastCommand || "",
-      lastResponseTitle: draftContext.lastResponseTitle || "",
-      routeSuggestions: asArray(draftContext.routeSuggestions)
-    });
-  }
-
-  session.lastAppliedHandoffId = handoffId;
-  consumeProjectHandoff?.(projectName, handoffId, {
-    actor: "mh-assistant"
-  }).catch((error) => {
-    console.warn("Failed to consume AI handoff:", error.message);
-  });
-  showMessage?.("AI Command restored context from the shared backbone.");
-}
+// ============================================================
+//  UNIFIED AI CONTEXT
+// ============================================================
 
 function buildUnifiedAiContext(state, intelligence) {
-  const overviewBlock = asObject(state.data.overview);
-  const overview = asObject(overviewBlock.overview);
-  const readiness = asObject(state.data.readiness);
-  const readinessDashboard = asObject(readiness.dashboard);
-  const connectors = asObject(state.data.integrations);
-  const controlCenter = asObject(connectors.control_center);
-  const activity = asObject(state.data.activity);
-  const assets = asObject(state.data.assets);
-  const assetCategories = getCategoryReadinessList(assets);
+	const overviewBlock = asObject(state.data.overview);
+	const overview = asObject(overviewBlock.overview);
+	const readiness = asObject(state.data.readiness);
+	const readinessDashboard = asObject(readiness.dashboard);
+	const connectors = asObject(state.data.integrations);
+	const controlCenter = asObject(connectors.control_center);
+	const activity = asObject(state.data.activity);
+	const assets = asObject(state.data.assets);
+	const assetCategories = getCategoryReadinessList(assets);
 
-  const insights =
-    asObject(intelligence?.insights) ||
-    asObject(activity.insights) ||
-    asObject(activity.marketing_insights) ||
-    asObject(activity.performance_insights);
-  const learning =
-    asObject(intelligence?.learning) ||
-    asObject(activity.learning);
+	const insights =
+		asObject(intelligence?.insights) ||
+		asObject(activity.insights) ||
+		asObject(activity.marketing_insights) ||
+		asObject(activity.performance_insights);
+	const learning =
+		asObject(intelligence?.learning) ||
+		asObject(activity.learning);
 
-  const coverage = asObject(insights.data_coverage);
-  const coverageEntries = Object.entries(coverage);
-  const coveredCount = coverageEntries.filter(([, item]) => asString(item?.status) === "covered").length;
-  const partialCount = coverageEntries.filter(([, item]) => asString(item?.status) === "partial").length;
-  const missingCount = coverageEntries.filter(([, item]) => asString(item?.status) === "missing").length;
-  const recommendations = asArray(learning.recommendations || insights.recommendations);
-  const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
-  const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
-  const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
-  const missingIntegrations = [];
+	const coverage = asObject(insights.data_coverage);
+	const coverageEntries = Object.entries(coverage);
+	const coveredCount = coverageEntries.filter(([, item]) => asString(item?.status) === "covered").length;
+	const recommendations = asArray(learning.recommendations || insights.recommendations);
+	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+	const missingIntegrations = [];
 
-  coverageEntries.forEach(([key, item]) => {
-    if (asString(item?.status) !== "covered") {
-      missingIntegrations.push({
-        label: titleCase(key),
-        status: asString(item?.status) || "missing",
-        integrations: asArray(item?.integrations)
-      });
-    }
-  });
+	coverageEntries.forEach(([key, item]) => {
+		if (asString(item?.status) !== "covered") {
+			missingIntegrations.push({
+				label: titleCase(key),
+				status: asString(item?.status) || "missing",
+				integrations: asArray(item?.integrations)
+			});
+		}
+	});
 
-  const connectorIssues = Object.values(asObject(controlCenter.records))
-    .filter((record) => ["error", "token_expired", "partial"].includes(asString(record?.status)))
-    .map((record) => ({
-      label: titleCase(record.integration_id),
-      status: record.status_label || record.status,
-      reason: record.health_summary || record.last_error
-    }));
+	const connectorIssues = Object.values(asObject(controlCenter.records))
+		.filter((record) => ["error", "token_expired", "partial"].includes(asString(record?.status)))
+		.map((record) => ({
+			label: titleCase(record.integration_id),
+			status: record.status_label || record.status,
+			reason: record.health_summary || record.last_error
+		}));
 
-  return {
-    projectName: state.context.currentProject || "",
-    market: state.context.currentMarket || overview.market || "",
-    language: state.context.currentLanguage || overview.language || "",
-    campaign: state.context.activeCampaign || "Not selected yet",
-    executionMode: state.context.executionMode || overview.execution_mode || "",
-    currency: overview.currency || "USD",
-    readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
-    readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
-    nextBestActions,
-    criticalGaps,
-    importantGaps,
-    missingIntegrations,
-    connectorIssues,
-    integrationSummary: asObject(controlCenter.summary),
-    coveredCount,
-    partialCount,
-    missingCount,
-    coverageTotal: coverageEntries.length,
-    coverage,
-    overview,
-    readiness,
-    readinessDashboard,
-    connectors,
-    controlCenter,
-    assets,
-    assetCategories,
-    approvedAssets: assetCategories
-      .filter((item) => item.status === "Approved")
-      .flatMap((item) => asArray(item.approved_assets).map((assetId) => ({
-        asset_id: assetId,
-        asset_type: item.asset_type,
-        label: item.display_label || item.label || item.asset_type
-      }))),
-    assetBlockers: assetCategories
-      .filter((item) => item.blocker || ["Missing", "Needs Review"].includes(item.status))
-      .map((item) => ({
-        asset_type: item.asset_type,
-        label: item.display_label || item.label || item.asset_type,
-        status: item.status
-      })),
-    activity,
-    insights,
-    learning,
-    recommendations,
-    topContent: asArray(insights.best_performing_content),
-    weakContent: asArray(insights.underperforming_content),
-    website: asObject(insights.website),
-    seo: asObject(insights.seo),
-    paid: asObject(insights.paid),
-    social: asObject(insights.social),
-    learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
-    aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
-    sourceSummary: asObject(insights.source_summary || learning.source_summary),
-    hasLiveIntelligence:
-      Boolean(Object.keys(insights).length) ||
-      Boolean(Object.keys(learning).length)
-  };
+	return {
+		projectName: state.context.currentProject || "",
+		market: state.context.currentMarket || overview.market || "",
+		language: state.context.currentLanguage || overview.language || "",
+		campaign: state.context.activeCampaign || "Not selected",
+		executionMode: state.context.executionMode || overview.execution_mode || "",
+		currency: overview.currency || "USD",
+		readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
+		readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
+		nextBestActions,
+		criticalGaps,
+		importantGaps,
+		missingIntegrations,
+		connectorIssues,
+		integrationSummary: asObject(controlCenter.summary),
+		coveredCount,
+		coverageTotal: coverageEntries.length,
+		coverage,
+		overview,
+		readiness,
+		readinessDashboard,
+		connectors,
+		controlCenter,
+		assets,
+		assetCategories,
+		approvedAssets: assetCategories
+			.filter((item) => item.status === "Approved")
+			.flatMap((item) => asArray(item.approved_assets).map((assetId) => ({
+				asset_id: assetId,
+				asset_type: item.asset_type,
+				label: item.display_label || item.label || item.asset_type
+			}))),
+		assetBlockers: assetCategories
+			.filter((item) => item.blocker || ["Missing", "Needs Review"].includes(item.status))
+			.map((item) => ({
+				asset_type: item.asset_type,
+				label: item.display_label || item.label || item.asset_type,
+				status: item.status
+			})),
+		activity,
+		insights,
+		learning,
+		recommendations,
+		topContent: asArray(insights.best_performing_content),
+		weakContent: asArray(insights.underperforming_content),
+		website: asObject(insights.website),
+		seo: asObject(insights.seo),
+		paid: asObject(insights.paid),
+		social: asObject(insights.social),
+		learningPatterns: asObject(learning.learning_patterns || insights.learning_patterns),
+		aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+		hasLiveIntelligence:
+			Boolean(Object.keys(insights).length) ||
+			Boolean(Object.keys(learning).length)
+	};
 }
 
-function scoreMode(text, modeId) {
-  const query = asString(text).toLowerCase();
-  const keywordMap = {
-    executive: ["next", "status", "priority", "priorities", "blocking", "blocker", "decision", "summary", "do next", "readiness"],
-    campaign: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy"],
-    content: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "post next"],
-    seo: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking"],
-    ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "hooks", "cta", "paid", "targeting angle"],
-    research: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate"],
-    operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish"]
-  };
+// ============================================================
+//  INTENT CLASSIFICATION
+// ============================================================
 
-  return asArray(keywordMap[modeId]).reduce((total, keyword) => {
-    return total + (query.includes(keyword) ? 1 : 0);
-  }, 0);
+function scoreMode(text, modeId) {
+	const query = asString(text).toLowerCase();
+	const keywordMap = {
+		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+		designer: ["design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction"],
+		media: ["media", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],
+		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+	};
+	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+		return total + (query.includes(keyword) ? 1 : 0);
+	}, 0);
 }
 
 function classifyIntent(message, selectedModeId) {
-  const scores = MODE_DEFS.map((mode) => ({
-    modeId: mode.id,
-    score: scoreMode(message, mode.id) + (mode.id === selectedModeId ? 0.75 : 0)
-  }));
-
-  scores.sort((a, b) => b.score - a.score);
-  const top = scores[0] || { modeId: selectedModeId || "executive" };
-  const query = asString(message).toLowerCase();
-
-  const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
-
-  return {
-    selectedModeId,
-    resolvedModeId: top.modeId || selectedModeId || "executive",
-    actionRouting
-  };
+	const scores = MODE_DEFS.map((mode) => ({
+		modeId: mode.id,
+		score: scoreMode(message, mode.id) + (mode.id === selectedModeId ? 0.75 : 0)
+	}));
+	scores.sort((a, b) => b.score - a.score);
+	const top = scores[0] || { modeId: selectedModeId || "operations" };
+	const query = asString(message).toLowerCase();
+	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+	return {
+		selectedModeId,
+		resolvedModeId: top.modeId || selectedModeId || "operations",
+		actionRouting
+	};
 }
 
 function routeSuggestion(label, route, reason) {
-  return { label, route, reason };
+	return { label, route, reason };
 }
 
 function normalizeActionLabel(item) {
-  return titleCase(asString(item).replace(/^connector:/, "").replace(/^asset:/, ""));
+	return titleCase(asString(item).replace(/^connector:/, "").replace(/^asset:/, ""));
 }
 
+// ============================================================
+//  RESPONSE BUILDERS
+// ============================================================
+
 function buildMissingDataNotes(aiContext, lane) {
-  const notes = [];
-  const coverage = aiContext.coverage;
-
-  if (!Object.keys(coverage).length) {
-    notes.push("Live intelligence coverage is not available yet. Load project insights to unlock stronger guidance.");
-    return notes;
-  }
-
-  if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
-    notes.push("Social insight feeds are still partial or missing. Sync Facebook, Instagram, TikTok, and YouTube to learn from real post performance.");
-  }
-
-  if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
-    notes.push("SEO intelligence is incomplete because Search Console data has not been synced yet.");
-  }
-
-  if (lane === "seo" && asString(coverage.website_analytics?.status) !== "covered") {
-    notes.push("Website analytics are incomplete, so landing-page and traffic guidance is less precise than it should be.");
-  }
-
-  if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
-    notes.push("Paid platform reporting is missing, so campaign and ROAS guidance is still limited.");
-  }
-
-  return notes;
+	const notes = [];
+	const coverage = aiContext.coverage;
+	if (!Object.keys(coverage).length) {
+		notes.push("Load project insights to unlock live intelligence guidance.");
+		return notes;
+	}
+	if (lane === "content" && asString(coverage.social_insights?.status) !== "covered") {
+		notes.push("Sync social feeds to learn from real post performance.");
+	}
+	if (lane === "seo" && asString(coverage.seo_search_console?.status) !== "covered") {
+		notes.push("Search Console not synced — SEO guidance is limited.");
+	}
+	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+		notes.push("Paid platform reporting not connected — ROAS guidance is limited.");
+	}
+	return notes;
 }
 
 function buildExecutiveResponse(aiContext) {
-  const topRecommendation = aiContext.recommendations[0];
-  const summaryParts = [];
-
-  if (aiContext.readinessScore != null) {
-    summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 and currently ${aiContext.readinessStatus || "in progress"}.`);
-  }
-  if (aiContext.criticalGaps.length) {
-    summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are still open.`);
-  }
-  if (aiContext.recommendations.length) {
-    summaryParts.push(`${aiContext.recommendations.length} intelligence-driven recommendations are available.`);
-  }
-
-  return {
-    title: "Executive project briefing",
-    summary: summaryParts.join(" ") || "The project context is loaded, but the decision surface is still limited by incomplete live intelligence.",
-    findings: [
-      aiContext.criticalGaps.length
-        ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.`
-        : "No critical readiness gaps are currently flagged.",
-      aiContext.missingIntegrations.length
-        ? `Missing or partial intelligence lanes: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.`
-        : "Integration coverage is strong across the current intelligence lanes.",
-      topRecommendation
-        ? `Top recommendation: ${topRecommendation.title}.`
-        : "No live recommendation stack has been produced yet."
-    ],
-    recommendations: [
-      topRecommendation
-        ? `${topRecommendation.title}: ${topRecommendation.action}`
-        : "Complete the missing intelligence connections so the system can produce stronger prioritization.",
-      ...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
-    ].filter(Boolean),
-    nextActions: [
-      ...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
-      ...(aiContext.connectorIssues[0]
-        ? [`Investigate ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`]
-        : [])
-    ],
-    routeSuggestions: [
-      routeSuggestion("Open Setup", "setup", "Use Setup to close missing project basics, goals, and audience inputs."),
-      routeSuggestion("Open Integrations", "integrations", "Use Integrations to reconnect missing data sources and improve intelligence coverage."),
-      routeSuggestion("Open Insights", "insights", "Use Insights to review performance signals and the current recommendation stack.")
-    ],
-    missingData: buildMissingDataNotes(aiContext, "executive")
-  };
+	const topRecommendation = aiContext.recommendations[0];
+	const summaryParts = [];
+	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+	if (aiContext.recommendations.length) summaryParts.push(`${aiContext.recommendations.length} recommendations available.`);
+	return {
+		title: "Project status briefing",
+		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+		findings: [
+			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.slice(0, 4).map((item) => item.label).join(", ")}.` : "Intelligence coverage is solid.",
+			topRecommendation ? `Top recommendation: ${topRecommendation.title}.` : "No recommendation stack yet."
+		],
+		recommendations: [
+			topRecommendation ? `${topRecommendation.title}: ${topRecommendation.action}` : "Connect missing integrations to produce better recommendations.",
+			...aiContext.recommendations.slice(1, 3).map((item) => `${item.title}: ${item.action}`)
+		].filter(Boolean),
+		nextActions: [
+			...aiContext.nextBestActions.slice(0, 4).map((item) => `Resolve ${normalizeActionLabel(item)}.`),
+			...(aiContext.connectorIssues[0] ? [`Fix ${aiContext.connectorIssues[0].label}: ${aiContext.connectorIssues[0].reason}.`] : [])
+		],
+		routeSuggestions: [
+			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+			routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "executive")
+	};
 }
 
 function buildContentResponse(aiContext) {
-  const top = aiContext.topContent[0];
-  const weak = aiContext.weakContent[0];
-  const bestFormat = aiContext.learningPatterns.best_formats?.label;
-  const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
-
-  return {
-    title: "Content intelligence briefing",
-    summary: top
-      ? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
-      : "There is not enough measured post-level data yet to rank content winners confidently.",
-    findings: [
-      top
-        ? `Top performer: ${extractTopMessage(top)} with ${formatCompactNumber(top.engagement ?? top.reach)} visible performance signal.`
-        : "No top-performing post has been measured yet.",
-      weak
-        ? `Weakest current item: ${extractTopMessage(weak)}.`
-        : "No weak content list is available yet.",
-      bestFormat && bestFormat !== "No format pattern yet"
-        ? `Best reusable format signal: ${bestFormat}.`
-        : "No reliable content-format learning pattern has emerged yet.",
-      bestPlatform && bestPlatform !== "No platform pattern yet"
-        ? `Best channel signal so far: ${bestPlatform}.`
-        : "No clear platform winner exists yet."
-    ].filter(Boolean),
-    recommendations: [
-      top
-        ? `Reuse the strongest pattern from ${extractTopMessage(top)} and adapt it into the next publishing cycle.`
-        : "Sync social insights so the system can identify winning hooks, formats, and publishing windows.",
-      weak
-        ? `Rewrite or repurpose ${extractTopMessage(weak)} with a stronger hook, tighter CTA, and better format-platform fit.`
-        : null,
-      bestFormat && bestFormat !== "No format pattern yet"
-        ? `Double down on ${bestFormat} while testing one adjacent format variation.`
-        : null
-    ].filter(Boolean),
-    nextActions: [
-      top ? `Create a follow-up asset based on ${extractTopMessage(top)}.` : "Load more social insight data before expanding the content queue.",
-      weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit the current content inventory for posts that are not converting attention into clicks.",
-      "Prepare the next publishing batch with performance-led hooks instead of generic posting volume."
-    ],
-    routeSuggestions: [
-      routeSuggestion("Open Content Studio", "content-studio", "Use Content Studio to rewrite weak posts and turn winning patterns into new drafts."),
-      routeSuggestion("Open Publishing", "publishing", "Use Publishing to schedule the next batch with stronger timing and approval control."),
-      routeSuggestion("Open Insights", "insights", "Use Insights to compare top and weak content in one place.")
-    ],
-    missingData: buildMissingDataNotes(aiContext, "content")
-  };
+	const top = aiContext.topContent[0];
+	const weak = aiContext.weakContent[0];
+	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+	return {
+		title: "Content intelligence briefing",
+		summary: top
+			? `${extractTopMessage(top)} is the strongest measured content item right now${top.platform ? ` on ${titleCase(top.platform)}` : ""}.`
+			: "Not enough post-level data yet to rank content winners.",
+		findings: [
+			top ? `Top performer: ${extractTopMessage(top)} with ${formatCompactNumber(top.engagement ?? top.reach)} signal.` : "No top post measured yet.",
+			weak ? `Weakest item: ${extractTopMessage(weak)}.` : "No weak content list yet.",
+			bestFormat && bestFormat !== "No format pattern yet" ? `Best format: ${bestFormat}.` : "No format pattern emerged yet.",
+			bestPlatform && bestPlatform !== "No platform pattern yet" ? `Best platform: ${bestPlatform}.` : "No clear platform winner yet."
+		].filter(Boolean),
+		recommendations: [
+			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+			bestFormat && bestFormat !== "No format pattern yet" ? `Double down on ${bestFormat} while testing one variation.` : null
+		].filter(Boolean),
+		nextActions: [
+			top ? `Create a follow-up asset using ${extractTopMessage(top)}'s pattern.` : "Load social insight data before expanding content queue.",
+			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+			"Prepare next batch with performance-led hooks instead of generic posting volume."
+		],
+		routeSuggestions: [
+			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+			routeSuggestion("Insights", "insights", "Compare top and weak content performance.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "content")
+	};
 }
 
 function buildSeoResponse(aiContext) {
-  const seo = aiContext.seo;
-  const website = aiContext.website;
-  const topQuery = asArray(seo.top_queries)[0];
-  const lowCtr = asArray(seo.low_ctr_pages)[0];
-  const weakPage = asArray(website.weak_pages)[0];
-
-  return {
-    title: "SEO and traffic intelligence briefing",
-    summary: seo.summary?.impressions != null
-      ? `Search visibility is live with ${formatCompactNumber(seo.summary.impressions)} impressions, and the current SEO lane is ready for prioritization.`
-      : "SEO visibility is not live yet, so current guidance is limited by missing Search Console data.",
-    findings: [
-      topQuery
-        ? `Top query signal: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.`
-        : "No top query list is available yet.",
-      lowCtr
-        ? `Best CTR opportunity: ${extractTopMessage(lowCtr)} is getting visibility but weak click-through.`
-        : "No low-CTR opportunity list is available yet.",
-      weakPage
-        ? `Website weak page: ${extractTopMessage(weakPage)} is drawing traffic without enough conversion evidence.`
-        : "No weak landing-page signal is available yet.",
-      website.summary?.sessions != null
-        ? `Website traffic signal: ${formatCompactNumber(website.summary.sessions)} sessions are currently measured.`
-        : "Website sessions are not available yet."
-    ],
-    recommendations: [
-      lowCtr
-        ? `Improve the title and SERP message for ${extractTopMessage(lowCtr)} first because it has visible impression opportunity.`
-        : "Connect Search Console to unlock CTR and ranking opportunity analysis.",
-      weakPage
-        ? `Tighten landing-page intent match and CTA clarity on ${extractTopMessage(weakPage)}.`
-        : "Use GA4 or landing-page analytics to locate pages that attract traffic but do not convert.",
-      aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
-    ].filter(Boolean),
-    nextActions: [
-      topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect or sync Search Console before making SEO roadmap decisions.",
-      lowCtr ? `Rewrite metadata for ${extractTopMessage(lowCtr)}.` : "Review page titles and meta descriptions on the highest-priority pages manually.",
-      "Audit the top landing pages for stronger offer clarity and conversion flow."
-    ],
-    routeSuggestions: [
-      routeSuggestion("Open Insights", "insights", "Use Insights to review search and website performance together."),
-      routeSuggestion("Open Integrations", "integrations", "Use Integrations to reconnect GA4 or Search Console if intelligence is incomplete."),
-      routeSuggestion("Open Setup", "setup", "Use Setup to refine positioning and audience language if the traffic signal is weak or misaligned.")
-    ],
-    missingData: buildMissingDataNotes(aiContext, "seo")
-  };
+	const seo = aiContext.seo;
+	const website = aiContext.website;
+	const topQuery = asArray(seo.top_queries)[0];
+	const lowCtr = asArray(seo.low_ctr_pages)[0];
+	const weakPage = asArray(website.weak_pages)[0];
+	return {
+		title: "SEO & traffic briefing",
+		summary: seo.summary?.impressions != null
+			? `${formatCompactNumber(seo.summary.impressions)} impressions tracked. SEO lane is ready for prioritization.`
+			: "SEO visibility not live — connect Search Console to unlock guidance.",
+		findings: [
+			topQuery ? `Top query: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.` : "No top query data yet.",
+			lowCtr ? `CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.` : "No low-CTR list yet.",
+			weakPage ? `Weak landing page: ${extractTopMessage(weakPage)}.` : "No weak page signal yet.",
+			website.summary?.sessions != null ? `Website traffic: ${formatCompactNumber(website.summary.sessions)} sessions tracked.` : "Website sessions not measured yet."
+		],
+		recommendations: [
+			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+			weakPage ? `Tighten intent match and CTA on ${extractTopMessage(weakPage)}.` : "Review page titles and meta descriptions on priority pages.",
+			aiContext.recommendations.find((item) => item.domain === "seo")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			topQuery ? `Expand content around ${extractTopMessage(topQuery)}.` : "Reconnect Search Console before making SEO roadmap decisions.",
+			lowCtr ? `Rewrite metadata for ${extractTopMessage(lowCtr)}.` : "Audit page titles on highest-priority pages.",
+			"Review top landing pages for stronger offer clarity and conversion flow."
+		],
+		routeSuggestions: [
+			routeSuggestion("Insights", "insights", "Review search and website performance together."),
+			routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),
+			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "seo")
+	};
 }
 
 function buildAdsResponse(aiContext) {
-  const paid = aiContext.paid;
-  const bestCampaign = asArray(paid.best_campaigns)[0];
-  const weakCampaign = asArray(paid.weak_campaigns)[0];
-  const bestCreative = asArray(paid.best_creatives)[0];
-
-  return {
-    title: "Paid performance briefing",
-    summary: paid.summary?.spend != null
-      ? `Paid media is live with ${formatCurrency(paid.summary.spend, aiContext.currency)} in tracked spend.`
-      : "Paid reporting is not live yet, so the system cannot rank campaigns or diagnose ROAS reliably.",
-    findings: [
-      bestCampaign
-        ? `Best campaign signal: ${extractTopMessage(bestCampaign)}.`
-        : "No winning paid campaign list is available yet.",
-      weakCampaign
-        ? `Weak campaign signal: ${extractTopMessage(weakCampaign)}.`
-        : "No weak paid campaign list is available yet.",
-      bestCreative
-        ? `Best creative cue: ${extractTopMessage(bestCreative)}.`
-        : "No creative performance breakdown is available yet.",
-      paid.summary?.roas != null
-        ? `Current ROAS signal: ${Number(paid.summary.roas).toFixed(2)}x.`
-        : "ROAS is not available yet."
-    ],
-    recommendations: [
-      bestCampaign
-        ? `Scale only after validating that ${extractTopMessage(bestCampaign)} has strong CTR, conversion quality, or ROAS.`
-        : "Connect Meta Ads, Google Ads, or TikTok Ads feeds before making scale decisions.",
-      weakCampaign
-        ? `Pause or refresh ${extractTopMessage(weakCampaign)} if the same weak pattern continues after a creative update.`
-        : null,
-      aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
-    ].filter(Boolean),
-    nextActions: [
-      bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid campaign performance data before scaling any creative.",
-      weakCampaign ? `Rebuild the hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping for the next paid sync cycle.",
-      "Keep paid decisions tied to conversion and revenue signal, not just click volume."
-    ],
-    routeSuggestions: [
-      routeSuggestion("Open Ads Manager", "ads-manager", "Use Ads Manager to review pacing, creative mapping, and the paid operating view."),
-      routeSuggestion("Open Integrations", "integrations", "Use Integrations to connect or reconnect paid reporting platforms."),
-      routeSuggestion("Open Insights", "insights", "Use Insights to compare paid performance against organic and website results.")
-    ],
-    missingData: buildMissingDataNotes(aiContext, "ads")
-  };
+	const paid = aiContext.paid;
+	const bestCampaign = asArray(paid.best_campaigns)[0];
+	const weakCampaign = asArray(paid.weak_campaigns)[0];
+	const bestCreative = asArray(paid.best_creatives)[0];
+	return {
+		title: "Paid performance briefing",
+		summary: paid.summary?.spend != null
+			? `Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.`
+			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+		findings: [
+			bestCampaign ? `Best campaign: ${extractTopMessage(bestCampaign)}.` : "No winning campaign measured yet.",
+			weakCampaign ? `Weak campaign: ${extractTopMessage(weakCampaign)}.` : "No weak campaign list yet.",
+			bestCreative ? `Best creative: ${extractTopMessage(bestCreative)}.` : "No creative breakdown yet.",
+			paid.summary?.roas != null ? `Current ROAS: ${Number(paid.summary.roas).toFixed(2)}x.` : "ROAS not available yet."
+		],
+		recommendations: [
+			bestCampaign ? `Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.` : "Connect paid platforms before making scale decisions.",
+			weakCampaign ? `Pause or refresh ${extractTopMessage(weakCampaign)} if weak pattern continues.` : null,
+			aiContext.recommendations.find((item) => item.domain === "paid")?.action || ""
+		].filter(Boolean),
+		nextActions: [
+			bestCreative ? `Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.` : "Sync paid data before scaling any creative.",
+			weakCampaign ? `Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.` : "Audit campaign naming and creative mapping.",
+			"Tie paid decisions to conversion and revenue signal — not just clicks."
+		],
+		routeSuggestions: [
+			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+			routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),
+			routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")
+		],
+		missingData: buildMissingDataNotes(aiContext, "ads")
+	};
 }
 
 function buildResearchResponse(aiContext) {
-  return {
-    title: "Research and evidence briefing",
-    summary: "The current system has enough operating context to highlight where better evidence would improve decision quality next.",
-    findings: [
-      aiContext.missingIntegrations.length
-        ? `Missing intelligence lanes: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.`
-        : "The main intelligence lanes are structurally connected.",
-      aiContext.criticalGaps.length
-        ? `Current critical gaps still affect research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.`
-        : "No major project-setup gaps are currently blocking research quality.",
-      aiContext.learning.system_lessons?.[0] || aiContext.learningPatterns.best_topics?.label
-        ? `Current system learning: ${aiContext.learning.system_lessons?.[0] || aiContext.learningPatterns.best_topics?.label}.`
-        : "The learning engine needs more live data before it can generalize stronger market patterns."
-    ].filter(Boolean),
-    recommendations: [
-      "Use the missing intelligence list as the research roadmap for what the system still cannot see clearly.",
-      "Validate audience-language fit, offer clarity, and channel-fit assumptions before expanding execution volume.",
-      "Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
-    ],
-    nextActions: [
-      "Review Setup and tighten goals, audience, competitor, and market assumptions.",
-      "Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
-      "Use Insights to identify where the current recommendation stack is still blind."
-    ],
-    routeSuggestions: [
-      routeSuggestion("Open Setup", "setup", "Use Setup to strengthen project assumptions, goals, and audience context."),
-      routeSuggestion("Open Integrations", "integrations", "Use Integrations to increase data coverage and reduce blind spots."),
-      routeSuggestion("Open Insights", "insights", "Use Insights to see where the evidence is strong and where it is still thin.")
-    ],
-    missingData: [
-      ...buildMissingDataNotes(aiContext, "seo"),
-      ...buildMissingDataNotes(aiContext, "ads"),
-      ...buildMissingDataNotes(aiContext, "content")
-    ]
-  };
+	return {
+		title: "Research & evidence briefing",
+		summary: "The system has enough operating context to highlight where better evidence would improve decision quality.",
+		findings: [
+			aiContext.missingIntegrations.length ? `Missing intelligence: ${aiContext.missingIntegrations.map((item) => item.label).join(", ")}.` : "Main intelligence lanes are structurally connected.",
+			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+			aiContext.learningPatterns.best_topics?.label ? `Current system learning: ${aiContext.learningPatterns.best_topics.label}.` : "Learning engine needs more live data."
+		].filter(Boolean),
+		recommendations: [
+			"Use the missing intelligence list as the research roadmap for what the system cannot see clearly.",
+			"Validate audience-language fit and offer clarity before expanding execution volume.",
+			"Prioritize integrations that unlock attribution and performance evidence over vanity metrics."
+		],
+		nextActions: [
+			"Review Setup and tighten goals, audience, competitor, and market assumptions.",
+			"Reconnect missing analytics, SEO, and paid feeds to improve evidence quality.",
+			"Use Insights to identify where the recommendation stack is still blind."
+		],
+		routeSuggestions: [
+			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+			routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),
+			routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")
+		],
+		missingData: [
+			...buildMissingDataNotes(aiContext, "seo"),
+			...buildMissingDataNotes(aiContext, "ads"),
+			...buildMissingDataNotes(aiContext, "content")
+		]
+	};
 }
 
 function buildOperationsTaskBlock(aiContext, message) {
-  const query = asString(message).toLowerCase();
-
-  if (/launch.*campaign|new campaign/.test(query)) {
-    return {
-      title: "Task-ready campaign brief",
-      owner: "Campaign Studio",
-      steps: [
-        "Define the campaign objective, audience, and offer.",
-        "Choose channels and budget based on current intelligence coverage.",
-        "List required assets and publishing dependencies before launch."
-      ]
-    };
-  }
-
-  if (/7-day content plan|content plan/.test(query)) {
-    return {
-      title: "Task-ready content plan",
-      owner: "Content Studio",
-      steps: [
-        "Use the strongest content pattern as the starting template.",
-        "Map seven days of posts by platform, hook, format, and CTA.",
-        "Route approved items into Publishing for scheduling."
-      ]
-    };
-  }
-
-  if (/improve weak posts|weak post/.test(query)) {
-    return {
-      title: "Task-ready content repair plan",
-      owner: "Content Studio",
-      steps: [
-        "Select the weakest current items from Insights.",
-        "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.",
-        "Republish only after updated versions are approved."
-      ]
-    };
-  }
-
-  if (/reconnect|missing tools|missing integrations/.test(query)) {
-    return {
-      title: "Task-ready integration recovery plan",
-      owner: "Integrations",
-      steps: [
-        "Reconnect critical analytics and performance feeds first.",
-        "Test each integration after reconnect and sync current data.",
-        "Return to Insights to confirm coverage improves."
-      ]
-    };
-  }
-
-  return {
-    title: "Task-ready operations block",
-    owner: "Workflows",
-    steps: [
-      "Confirm the goal and the required output.",
-      "Identify which page owns the work.",
-      "Move into the correct workspace and execute the first concrete step."
-    ]
-  };
+	const query = asString(message).toLowerCase();
+	if (/launch.*campaign|new campaign/.test(query)) {
+		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+	}
+	if (/content plan|7-day/.test(query)) {
+		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+	}
+	if (/weak post|improve content/.test(query)) {
+		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+	}
+	if (/reconnect|missing tools|missing integrations/.test(query)) {
+		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
+	}
+	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and execute the first step."] };
 }
 
 function buildOperationsResponse(aiContext, message) {
-  const query = asString(message).toLowerCase();
-  const taskBlock = buildOperationsTaskBlock(aiContext, message);
-  const routeSuggestions = [];
-
-  if (/campaign/.test(query)) {
-    routeSuggestions.push(routeSuggestion("Open Campaign Studio", "campaign-studio", "Use Campaign Studio to turn this into a structured launch plan."));
-  }
-  if (/content|post/.test(query)) {
-    routeSuggestions.push(routeSuggestion("Open Content Studio", "content-studio", "Use Content Studio to draft, rewrite, or prepare the requested content outputs."));
-    routeSuggestions.push(routeSuggestion("Open Publishing", "publishing", "Use Publishing if the next step is scheduling or approval."));
-  }
-  if (/reconnect|connect|integration|tool|sync/.test(query)) {
-    routeSuggestions.push(routeSuggestion("Open Integrations", "integrations", "Use Integrations to reconnect data sources and restore intelligence coverage."));
-  }
-  if (/ads|campaign scale|roas|creative/.test(query)) {
-    routeSuggestions.push(routeSuggestion("Open Ads Manager", "ads-manager", "Use Ads Manager to review live paid performance and action the next media move."));
-  }
-
-  if (!routeSuggestions.length) {
-    routeSuggestions.push(routeSuggestion("Open Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
-  }
-
-  return {
-    title: "Operations routing brief",
-    summary: "This request is best handled as an orchestrated workflow, not a generic chat answer.",
-    findings: [
-      aiContext.criticalGaps.length
-        ? `Execution still has unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.`
-        : "No major critical gap is blocking the requested operation.",
-      aiContext.missingIntegrations.length
-        ? `Intelligence coverage still has gaps that may reduce execution quality.`
-        : "The core intelligence surface is available for routing."
-    ],
-    recommendations: [
-      "Move into the correct workspace instead of trying to manage the whole flow from chat.",
-      aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact execution step."
-    ].filter(Boolean),
-    nextActions: taskBlock.steps,
-    routeSuggestions,
-    taskBlock,
-    missingData: buildMissingDataNotes(aiContext, "content")
-  };
+	const query = asString(message).toLowerCase();
+	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+	const routeSuggestions = [];
+	if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));
+	if (/content|post/.test(query)) {
+		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+	}
+	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+	return {
+		title: "Operations routing brief",
+		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+		findings: [
+			aiContext.criticalGaps.length ? `Unresolved critical gaps: ${aiContext.criticalGaps.slice(0, 3).map(normalizeActionLabel).join(", ")}.` : "No critical gap is blocking this operation.",
+			aiContext.missingIntegrations.length ? "Intelligence coverage gaps may reduce execution quality." : "Core intelligence is available for routing."
+		],
+		recommendations: [
+			"Move into the correct workspace rather than managing the whole flow from chat.",
+			aiContext.recommendations[0]?.action || "Use the current recommendation stack to choose the first high-impact step."
+		].filter(Boolean),
+		nextActions: taskBlock.steps,
+		routeSuggestions,
+		taskBlock,
+		missingData: buildMissingDataNotes(aiContext, "content")
+	};
 }
 
 function buildResponseForMode(aiContext, classified, message) {
-  switch (classified.resolvedModeId) {
-    case "content":
-      return buildContentResponse(aiContext);
-    case "seo":
-      return buildSeoResponse(aiContext);
-    case "ads":
-      return buildAdsResponse(aiContext);
-    case "research":
-      return buildResearchResponse(aiContext);
-    case "operations":
-      return buildOperationsResponse(aiContext, message);
-    case "executive":
-    default:
-      if (classified.actionRouting) {
-        return buildOperationsResponse(aiContext, message);
-      }
-      return buildExecutiveResponse(aiContext);
-  }
+	switch (classified.resolvedModeId) {
+		case "writer":
+		case "designer":
+		case "media":
+			return buildContentResponse(aiContext);
+		case "analyst":
+			return buildSeoResponse(aiContext);
+		case "ads":
+			return buildAdsResponse(aiContext);
+		case "researcher":
+			return buildResearchResponse(aiContext);
+		case "strategist":
+			return buildOperationsResponse(aiContext, message);
+		case "operations":
+		default:
+			return classified.actionRouting
+				? buildOperationsResponse(aiContext, message)
+				: buildExecutiveResponse(aiContext);
+	}
 }
 
+// ============================================================
+//  INTELLIGENCE LOADER
+// ============================================================
+
 async function ensureIntelligenceLoaded({
-  projectName,
-  session,
-  getState,
-  reloadProjectData,
-  fetchProjectInsights,
-  fetchProjectLearning,
-  rerender
+	projectName,
+	session,
+	getState,
+	reloadProjectData,
+	fetchProjectInsights,
+	fetchProjectLearning,
+	rerender
 }) {
-  if (!projectName) {
-    session.intelligence = {
-      ...session.intelligence,
-      status: "error",
-      error: "Select a project to load AI intelligence."
-    };
-    return;
-  }
+	if (!projectName) {
+		session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to load AI intelligence." };
+		return;
+	}
+	const current = session.intelligence;
+	const freshEnough = current.status === "ready" && current.project === projectName && current.loadedAt && (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+	if (freshEnough) return;
+	if (current.loadingPromise) return current.loadingPromise;
 
-  const current = session.intelligence;
-  const freshEnough =
-    current.status === "ready" &&
-    current.project === projectName &&
-    current.loadedAt &&
-    (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+	const state = getState();
+	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
 
-  if (freshEnough) {
-    return;
-  }
+	session.intelligence = {
+		...current,
+		project: projectName,
+		status: "loading",
+		error: "",
+		loadingPromise: (async () => {
+			try {
+				if (needsDashboard) await reloadProjectData(projectName);
+				const [insightsResult, learningResult] = await Promise.allSettled([
+					fetchProjectInsights(projectName),
+					fetchProjectLearning(projectName)
+				]);
+				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+				const intelligenceErrors = [
+					insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+					learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
+				].filter(Boolean);
+				session.intelligence = {
+					project: projectName,
+					status: "ready",
+					dashboard: getState().data,
+					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+					error: intelligenceErrors[0] || "",
+					loadedAt: nowIso(),
+					loadingPromise: null
+				};
+			} catch (error) {
+				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+			} finally {
+				rerender();
+			}
+		})()
+	};
 
-  if (current.loadingPromise) {
-    return current.loadingPromise;
-  }
+	rerender();
+	return session.intelligence.loadingPromise;
+}
 
-  const state = getState();
-  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+// ============================================================
+//  COMMAND SUBMISSION
+// ============================================================
 
-  session.intelligence = {
-    ...current,
-    project: projectName,
-    status: "loading",
-    error: "",
-    loadingPromise: (async () => {
-      try {
-        if (needsDashboard) {
-          await reloadProjectData(projectName);
-        }
+function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+	setSharedAiDraft(projectName, {
+		projectName: projectName || "",
+		modeId: modeId || "",
+		lastCommand: asString(command),
+		lastResponseTitle: asString(response?.title),
+		routeSuggestions: asArray(response?.routeSuggestions),
+		updatedAt: nowIso()
+	});
+}
 
-        const [insightsResult, learningResult] = await Promise.allSettled([
-          fetchProjectInsights(projectName),
-          fetchProjectLearning(projectName)
-        ]);
+function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+	const handoffId = asString(handoff?.id);
+	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
 
-        const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
-        const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+	const payload = asObject(handoff?.payload);
+	const draftContext = asObject(payload.draft_context);
+	const prompt = asString(payload.prompt);
+	if (draftContext.modeId) session.modeId = draftContext.modeId;
+	if (prompt) session.draftMessage = prompt;
 
-        const intelligenceErrors = [
-          insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
-          learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""
-        ].filter(Boolean);
+	if (draftContext.projectName || prompt) {
+		setSharedAiDraft(projectName, {
+			projectName,
+			modeId: draftContext.modeId || session.modeId,
+			lastCommand: prompt || draftContext.lastCommand || "",
+			lastResponseTitle: draftContext.lastResponseTitle || "",
+			routeSuggestions: asArray(draftContext.routeSuggestions)
+		});
+	}
 
-        session.intelligence = {
-          project: projectName,
-          status: "ready",
-          dashboard: getState().data,
-          insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
-          learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
-          error: intelligenceErrors[0] || "",
-          loadedAt: nowIso(),
-          loadingPromise: null
-        };
-      } catch (error) {
-        session.intelligence = {
-          ...session.intelligence,
-          project: projectName,
-          status: "error",
-          error: error.message || "Failed to load live intelligence",
-          loadingPromise: null
-        };
-      } finally {
-        rerender();
-      }
-    })()
-  };
-
-  rerender();
-  return session.intelligence.loadingPromise;
+	session.lastAppliedHandoffId = handoffId;
+	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+		console.warn("Failed to consume AI handoff:", error.message);
+	});
+	showMessage?.("AI Command restored context from the shared backbone.");
 }
 
 async function submitDurableCommand({
-  projectName,
-  aiContext,
-  session,
-  command,
-  modeId,
-  source,
-  executeProjectAiCommand,
-  reloadProjectData
+	projectName,
+	aiContext,
+	session,
+	command,
+	modeId,
+	source,
+	executeProjectAiCommand,
+	reloadProjectData
 }) {
-  const cleanCommand = asString(command).trim();
-  if (!cleanCommand) {
-    return { accepted: false, failed: false };
-  }
+	const cleanCommand = asString(command).trim();
+	if (!cleanCommand) return { accepted: false, failed: false };
+	if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");
 
-  if (typeof executeProjectAiCommand !== "function") {
-    throw new Error("AI command service is unavailable in this view.");
-  }
+	let result = null;
+	let response = {};
+	let resolvedModeId = modeId || session.modeId;
+	let commandId = "";
 
-  let result = null;
-  let response = {};
-  let resolvedModeId = modeId || session.modeId;
-  let commandId = "";
+	try {
+		result = await executeProjectAiCommand(projectName, {
+			command: cleanCommand,
+			mode_id: modeId || session.modeId,
+			source,
+			actor: "mh-assistant",
+			asset_context: {
+				categories: aiContext.assetCategories,
+				approved_assets: aiContext.approvedAssets,
+				blockers: aiContext.assetBlockers
+			}
+		});
+		response = asObject(result?.response);
+		const classification = asObject(result?.command?.classification);
+		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+		commandId = asString(result?.command?.id);
+	} catch (error) {
+		const payload = asObject(error?.payload);
+		const payloadResponse = asObject(payload?.response);
+		const payloadCommand = asObject(payload?.command);
+		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+		commandId = asString(payloadCommand?.id);
+		response = {
+			status: "failed",
+			title: "Command failed",
+			summary: failureReason,
+			findings: [failureReason],
+			nextActions: ["Check AI provider configuration and retry."],
+			routeSuggestions: [],
+			missingData: [],
+			error: failureReason
+		};
+	}
 
-  try {
-    result = await executeProjectAiCommand(projectName, {
-      command: cleanCommand,
-      mode_id: modeId || session.modeId,
-      source,
-      actor: "mh-assistant",
-      asset_context: {
-        categories: aiContext.assetCategories,
-        approved_assets: aiContext.approvedAssets,
-        blockers: aiContext.assetBlockers
-      }
-    });
+	const createdAt = nowIso();
+	session.modeId = resolvedModeId;
 
-    response = asObject(result?.response);
-    const classification = asObject(result?.command?.classification);
-    resolvedModeId =
-      asString(classification.resolvedModeId) ||
-      asString(result?.command?.mode_id) ||
-      modeId ||
-      session.modeId;
-    commandId = asString(result?.command?.id);
-  } catch (error) {
-    const payload = asObject(error?.payload);
-    const payloadResponse = asObject(payload?.response);
-    const payloadCommand = asObject(payload?.command);
-    const failureReason =
-      asString(payload?.error) ||
-      asString(payloadResponse?.error) ||
-      asString(error?.message) ||
-      "AI provider failed to return output.";
+	session.messages.push({
+		id: `msg-user-${Date.now()}`,
+		role: "user",
+		modeId: resolvedModeId,
+		content: cleanCommand,
+		createdAt,
+		source
+	});
 
-    resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
-    commandId = asString(payloadCommand?.id);
-    response = {
-      status: "failed",
-      title: "AI command failed",
-      summary: failureReason,
-      content: "",
-      analysis: "",
-      recommendations: [],
-      findings: [failureReason],
-      nextActions: ["Fix AI provider configuration and retry."],
-      routeSuggestions: [],
-      missingData: [],
-      error: failureReason
-    };
-  }
+	session.messages.push({
+		id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		role: "assistant",
+		modeId: resolvedModeId,
+		createdAt: asString(result?.command?.created_at) || nowIso(),
+		source: "durable-ai-response",
+		response
+	});
 
-  const createdAt = nowIso();
+	session.history.unshift({
+		id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		modeId: resolvedModeId,
+		command: cleanCommand,
+		createdAt,
+		source,
+		responseTitle: response.title || (response.status === "failed" ? "Command failed" : ""),
+		failed: asString(response.status).toLowerCase() === "failed"
+	});
+	session.history = session.history.slice(0, 14);
+	session.draftMessage = "";
 
-  session.modeId = resolvedModeId;
-  session.messages.push({
-    id: `msg-user-${Date.now()}`,
-    role: "user",
-    modeId: resolvedModeId,
-    content: cleanCommand,
-    createdAt,
-    source
-  });
-
-  session.messages.push({
-    id: `msg-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    role: "assistant",
-    modeId: resolvedModeId,
-    createdAt: asString(result?.command?.created_at) || nowIso(),
-    source: "durable-ai-response",
-    response
-  });
-
-  session.history.unshift({
-    id: commandId || `history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    modeId: resolvedModeId,
-    command: cleanCommand,
-    createdAt,
-    source,
-    responseTitle: response.title || (response.status === "failed" ? "AI command failed" : "")
-  });
-  session.history = session.history.slice(0, 14);
-  session.draftMessage = "";
-  syncAiWorkflowBridge({
-    projectName: aiContext.projectName,
-    modeId: resolvedModeId,
-    command: cleanCommand,
-    response
-  });
-
-  await reloadProjectData?.(projectName);
-  return {
-    accepted: true,
-    failed: asString(response.status).toLowerCase() === "failed"
-  };
+	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+	await reloadProjectData?.(projectName);
+	return { accepted: true, failed: asString(response.status).toLowerCase() === "failed" };
 }
 
-function normalizeAdIdeaForDisplay(item = {}) {
-  const record = asObject(item);
-  return {
-    hook: humanizeValue(record.hook || record.title || record.angle || record.headline),
-    primaryText: humanizeValue(record.primaryText || record.primary_text || record.copy || record.text || record.body || record.description),
-    headline: humanizeValue(record.headline || record.title),
-    cta: humanizeValue(record.cta || record.CTA || record.callToAction || record.call_to_action),
-    audienceSegment: humanizeValue(record.audienceSegment || record.audience_segment || record.audience || record.segment),
-    emotionalTrigger: humanizeValue(record.emotionalTrigger || record.emotional_trigger || record.trigger || record.motivation),
-    platformFit: humanizeValue(record.platformFit || record.platform_fit || record.platform || record.channel),
-    visualDirection: humanizeValue(record.visualDirection || record.visual_direction || record.visual || record.creative_direction)
-  };
+// ============================================================
+//  RENDER: CONTROL ROOM HEADER
+// ============================================================
+
+function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+	const projectLabel = aiContext.projectName || "No project selected";
+	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+
+	const intelDotClass = { ready: "ready", loading: "loading", error: "error", idle: "idle" }[intelligenceStatus] || "idle";
+	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+
+
+	const caps = [];
+	if (aiContext.projectName) caps.push("Campaign planning");
+	if (aiContext.hasLiveIntelligence) caps.push("Performance analysis");
+	if (aiContext.recommendations.length) caps.push(`${aiContext.recommendations.length} recommendations ready`);
+	if (aiContext.topContent.length) caps.push("Content intelligence");
+	if (aiContext.paid?.summary?.spend != null) caps.push("Paid media briefing");
+	if (aiContext.seo?.summary?.impressions != null) caps.push("SEO analysis");
+	caps.push("Content generation", "Research & competitor analysis", "Execution routing");
+
+	return `
+		<div class="ctrl-room-header">
+			<div class="ctrl-room-header-top">
+				<div>
+					<div class="ctrl-room-eyebrow">AI Team</div>
+					<h2 class="ctrl-room-title">Control Room</h2>
+				</div>
+				<div style="display:flex;align-items:center;gap:12px;">
+					<span class="ctrl-intel-dot ${escapeHtml(intelDotClass)}"></span>
+					<span class="ctrl-intel-label">${escapeHtml(intelLabel)}</span>
+					<button id="ctrlRefreshBtn" class="ctrl-secondary-btn" type="button">Refresh intelligence</button>
+				</div>
+			</div>
+
+			<div class="ctrl-room-context-bar">
+				<div class="ctrl-room-ctx-chip">
+					<span>Project</span>
+					<strong>${escapeHtml(projectLabel)}</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Readiness</span>
+					<strong>${escapeHtml(readinessLabel)}</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Coverage</span>
+					<strong>${escapeHtml(coverageLabel)} connected</strong>
+				</div>
+				<div class="ctrl-room-ctx-chip">
+					<span>Campaign</span>
+					<strong>${escapeHtml(aiContext.campaign || "None")}</strong>
+				</div>
+				${aiContext.market ? `<div class="ctrl-room-ctx-chip"><span>Market</span><strong>${escapeHtml(aiContext.market)}</strong></div>` : ""}
+			</div>
+
+			<div class="ctrl-room-cap-row">
+				<span class="ctrl-cap-heading">What AI can do now</span>
+				<div class="ctrl-room-capability-bar">
+					${caps.slice(0, 8).map((cap) => `<span class="ctrl-room-cap-pill">${escapeHtml(cap)}</span>`).join("")}
+				</div>
+			</div>
+
+			${session.intelligence.error ? `<div class="ctrl-intel-error">${escapeHtml(session.intelligence.error)}</div>` : ""}
+		</div>
+	`;
 }
 
-function renderAdIdeas(response, escapeHtml) {
-  const ideas = asArray(response.adIdeas || response.ad_ideas)
-    .map((item) => typeof item === "string" ? normalizeAdIdeaForDisplay({ hook: item, primaryText: item }) : normalizeAdIdeaForDisplay(item))
-    .filter((item) => item.hook || item.primaryText || item.headline)
-    .slice(0, 5);
+// ============================================================
+//  RENDER: TEAM SELECTOR
+// ============================================================
 
-  if (!ideas.length) return "";
-
-  return `
-    <div class="ai-output-card ai-output-span">
-      <span class="ai-output-label">Ad Ideas</span>
-      <div class="ai-marketing-card-grid">
-        ${ideas.map((idea) => `
-          <article class="ai-marketing-card">
-            <strong>${escapeHtml(idea.hook || idea.headline || "Ad idea")}</strong>
-            <p>${escapeHtml(idea.primaryText || "No primary copy returned.")}</p>
-            <div class="ai-marketing-meta">
-              ${idea.headline ? `<div><span>Headline</span><b>${escapeHtml(idea.headline)}</b></div>` : ""}
-              ${idea.cta ? `<div><span>CTA</span><b>${escapeHtml(idea.cta)}</b></div>` : ""}
-              ${idea.platformFit ? `<div><span>Platform</span><b>${escapeHtml(idea.platformFit)}</b></div>` : ""}
-              ${idea.audienceSegment ? `<div><span>Segment</span><b>${escapeHtml(idea.audienceSegment)}</b></div>` : ""}
-              ${idea.emotionalTrigger ? `<div><span>Trigger</span><b>${escapeHtml(idea.emotionalTrigger)}</b></div>` : ""}
-              ${idea.visualDirection ? `<div><span>Visual</span><b>${escapeHtml(idea.visualDirection)}</b></div>` : ""}
-            </div>
-          </article>
-        `).join("")}
-      </div>
-    </div>
-  `;
+function renderTeamSelector(session, escapeHtml) {
+	return `
+		<div>
+			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+			<div class="ctrl-room-team">
+				${MODE_DEFS.map((agent) => `
+					<button
+						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+						type="button"
+						data-ctrl-mode="${escapeHtml(agent.id)}"
+						title="${escapeHtml(agent.summary)}"
+					>
+						<span class="ctrl-team-icon">${agent.icon}</span>
+						<span class="ctrl-team-name">${escapeHtml(agent.label)}</span>
+						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+					</button>
+				`).join("")}
+			</div>
+		</div>
+	`;
 }
 
-function renderListSection(label, items, escapeHtml) {
-  const values = normalizeDisplayList(items, 12);
-  if (!values.length) return "";
-  return `
-    <div class="ai-structured-section">
-      <span class="ai-output-label">${escapeHtml(label)}</span>
-      <ul class="ai-output-list">${values.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-    </div>
-  `;
+// ============================================================
+//  RENDER: COMMAND COMPOSER
+// ============================================================
+
+function renderCommandComposer(session, aiContext, escapeHtml) {
+	const mode = getModeMeta(session.modeId);
+	const projectLabel = aiContext.projectName || "this project";
+	const isStructured = session.taskMode === "structured";
+
+	const productOptions = [
+		...new Set(aiContext.assetCategories.map((cat) => cat.label || cat.asset_type).filter(Boolean).slice(0, 8))
+	];
+	const channelOptions = ["Instagram", "TikTok", "Facebook", "YouTube", "Email", "Google Ads", "Meta Ads", "LinkedIn"];
+
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<div style="display:flex;align-items:center;gap:8px;">
+					<span style="font-size:18px;">${mode.icon}</span>
+					<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">${escapeHtml(mode.label)} — Command Composer</h3>
+				</div>
+				<div class="ctrl-mode-toggle">
+					<button class="ctrl-mode-btn${!isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="free">Free text</button>
+					<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>
+				</div>
+			</div>
+			<div class="ctrl-composer-body">
+				<textarea
+					id="ctrlComposerInput"
+					class="ctrl-composer-textarea"
+					rows="4"
+					placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"
+				>${escapeHtml(session.draftMessage)}</textarea>
+
+				<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">
+					<div class="ctrl-task-fields-label">Build a structured task</div>
+					<div class="ctrl-task-field">
+						<label>Task type</label>
+						<select id="ctrlTaskType" class="ctrl-task-select">
+							<option value="launch"${session.taskType === "launch" ? " selected" : ""}>🚀 Launch Campaign</option>
+							<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>
+							<option value="analyze"${session.taskType === "analyze" ? " selected" : ""}>📊 Analyze Performance</option>
+							<option value="fix"${session.taskType === "fix" ? " selected" : ""}>🔧 Fix Readiness</option>
+						</select>
+					</div>
+					<div class="ctrl-task-field">
+						<label>Product / focus area</label>
+						<select id="ctrlProductSelect" class="ctrl-task-select">
+							<option value="">— whole project —</option>
+							${productOptions.map((opt) => `<option value="${escapeHtml(opt)}"${session.taskProduct === opt ? " selected" : ""}>${escapeHtml(opt)}</option>`).join("")}
+						</select>
+					</div>
+					<div class="ctrl-task-field">
+						<label>Channel</label>
+						<select id="ctrlChannelSelect" class="ctrl-task-select">
+							<option value="">— all channels —</option>
+							${channelOptions.map((ch) => `<option value="${escapeHtml(ch)}"${session.taskChannel === ch ? " selected" : ""}>${escapeHtml(ch)}</option>`).join("")}
+						</select>
+					</div>
+					<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>
+				</div>
+
+				<div class="ctrl-composer-actions">
+					<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send to ${escapeHtml(mode.label)}</button>
+					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
+					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
+				</div>
+				<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only — send to execute</div>
+			</div>
+		</div>
+	`;
 }
 
-function renderCampaignPackage(response, escapeHtml) {
-  const pkg = asObject(response.campaignPackage || response.campaign_package);
-  if (!Object.keys(pkg).length) return "";
-  const phases = asArray(pkg.launchPhases || pkg.launch_phases || pkg.phases);
+// ============================================================
+//  RENDER: SUGGESTED PROMPTS
+// ============================================================
 
-  return `
-    <div class="ai-output-card ai-output-span">
-      <span class="ai-output-label">Campaign Package</span>
-      <div class="ai-campaign-package">
-        <div class="ai-campaign-summary-grid">
-          <div><span>Concept</span><strong>${escapeHtml(humanizeValue(pkg.concept || pkg.campaignConcept || "Campaign concept pending"))}</strong></div>
-          <div><span>Offer</span><strong>${escapeHtml(humanizeValue(pkg.offer || "Offer pending"))}</strong></div>
-          <div><span>Audience</span><strong>${escapeHtml(humanizeValue(pkg.targetAudience || pkg.target_audience || pkg.audience || "Audience pending"))}</strong></div>
-        </div>
-        ${renderListSection("Products", pkg.products, escapeHtml)}
-        ${renderListSection("Channels", pkg.channels, escapeHtml)}
-        ${
-          phases.length
-            ? `
-              <div class="ai-structured-section">
-                <span class="ai-output-label">Launch Phases</span>
-                <div class="ai-phase-list">
-                  ${phases.map((phase, index) => {
-                    const record = asObject(phase);
-                    return `
-                      <div class="ai-phase-item">
-                        <strong>${escapeHtml(humanizeValue(record.name || record.title || `Phase ${index + 1}`))}</strong>
-                        <p>${escapeHtml(humanizeValue(record.goal || record.objective || record.focus || record.summary || ""))}</p>
-                        ${renderListSection("Actions", record.actions || record.steps || record.tasks, escapeHtml)}
-                      </div>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
-            `
-            : ""
-        }
-        ${renderListSection("Content Angles", pkg.contentAngles || pkg.content_angles, escapeHtml)}
-        ${renderListSection("Ad Angles", pkg.adAngles || pkg.ad_angles, escapeHtml)}
-        ${renderListSection("Required Assets", pkg.requiredAssets || pkg.required_assets, escapeHtml)}
-        ${renderListSection("Missing Blockers", pkg.missingBlockers || pkg.missing_blockers || pkg.blockers, escapeHtml)}
-        ${renderListSection("Next Actions", pkg.nextActions || pkg.next_actions, escapeHtml)}
-        ${renderListSection("Suggested Handoffs", pkg.suggestedHandoffs || pkg.suggested_handoffs, escapeHtml)}
-      </div>
-    </div>
-  `;
+function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+	const projectLabel = aiContext.projectName || "this project";
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Suggested prompts</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send to run</span>
+			</div>
+			<div class="ctrl-composer-body">
+				<div class="ctrl-prompts-grid">
+					${QUICK_ACTIONS.map((action) => `
+						<button
+							class="ctrl-prompt-btn"
+							type="button"
+							data-ctrl-quick="${escapeHtml(action.action)}"
+							data-ctrl-quick-template="${escapeHtml(action.template.replace("{project}", projectLabel))}"
+						>
+							<span class="ctrl-prompt-icon">${action.icon}</span>
+							<span>
+								<span class="ctrl-prompt-label">${escapeHtml(action.label)}</span>
+								<span class="ctrl-prompt-sub">${escapeHtml(action.sub)}</span>
+							</span>
+						</button>
+					`).join("")}
+				</div>
+			</div>
+		</div>
+	`;
 }
 
-function renderContentPack(response, escapeHtml) {
-  const pack = asObject(response.contentPack || response.content_pack);
-  if (!Object.keys(pack).length) return "";
-  return `
-    <div class="ai-output-card ai-output-span">
-      <span class="ai-output-label">Content Pack</span>
-      <div class="ai-structured-grid">
-        ${renderListSection("Hooks", pack.hooks, escapeHtml)}
-        ${renderListSection("Captions", pack.captions, escapeHtml)}
-        ${renderListSection("Post Ideas", pack.postIdeas || pack.post_ideas || pack.ideas, escapeHtml)}
-        ${renderListSection("Scripts", pack.scripts || pack.reelScripts || pack.reel_scripts, escapeHtml)}
-        ${renderListSection("Email Copy", pack.emailCopy || pack.email_copy || pack.emails, escapeHtml)}
-        ${renderListSection("Landing Page Sections", pack.landingPageSections || pack.landing_page_sections, escapeHtml)}
-      </div>
-    </div>
-  `;
+// ============================================================
+//  RENDER: AI RESPONSE (clean cards, no raw JSON)
+// ============================================================
+
+function renderCleanResponse(response, escapeHtml, ownerId) {
+	const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
+	const title = humanizeValue(response.title, "");
+	const summary = humanizeValue(response.summary, "");
+	const findings = normalizeDisplayList(response.findings, 5);
+	const recommendations = normalizeDisplayList(response.recommendations, 4);
+	const nextActions = normalizeDisplayList(response.nextActions || response.next_actions, 4);
+	const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+		const record = asObject(item);
+		return {
+			label: humanizeValue(record.label || record.title || record.route || item),
+			route: asString(record.route || record.destination || record.page),
+			reason: humanizeValue(record.reason || record.summary || item)
+		};
+	}).filter((item) => item.label || item.route);
+	const taskBlock = asObject(response.taskBlock);
+	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+
+	if (!hasContent && !hasError) {
+		return `<div class="ctrl-response-card"><p style="color:var(--color-text-2);font-size:13px;">No output returned.</p></div>`;
+	}
+
+	return `
+		<div class="ctrl-response-card">
+			${hasError ? `
+				<div class="ctrl-error-banner">
+					<span>⚠</span>
+					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+				</div>
+			` : ""}
+
+			${title ? `<div class="ctrl-response-summary">${escapeHtml(title)}</div>` : ""}
+			${summary ? `<div class="ctrl-response-body">${escapeHtml(summary)}</div>` : ""}
+
+			${findings.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Key findings</div>
+					<div class="ctrl-response-items">
+						${findings.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${recommendations.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Recommendations</div>
+					<div class="ctrl-response-items">
+						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${nextActions.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Next actions</div>
+					<div class="ctrl-response-items">
+						${nextActions.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${taskBlock.title ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Task block — ${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
+					<div class="ctrl-task-block-name">${escapeHtml(humanizeValue(taskBlock.title))}</div>
+					<div class="ctrl-response-items" style="margin-top:6px;">
+						${normalizeDisplayList(taskBlock.steps, 6).map((step) => `<div class="ctrl-response-item"><span>${escapeHtml(step)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${routeSuggestions.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Open workspace</div>
+					<div class="ctrl-route-row">
+						${routeSuggestions.map((item, index) => `
+							<button class="ctrl-route-btn" type="button" data-ctrl-route="${index}" data-ctrl-route-owner="${escapeHtml(ownerId || "")}" title="${escapeHtml(item.reason)}">
+								${escapeHtml(item.label)} →
+							</button>
+						`).join("")}
+					</div>
+				</div>
+			` : ""}
+		</div>
+	`;
 }
 
-function renderGenericPlan(title, plan, escapeHtml) {
-  const record = asObject(plan);
-  const entries = Object.entries(record).filter(([, value]) => {
-    if (Array.isArray(value)) return value.length;
-    if (value && typeof value === "object") return Object.keys(value).length;
-    return Boolean(humanizeValue(value));
-  });
-  if (!entries.length) return "";
+// ============================================================
+//  RENDER: MESSAGE STREAM
+// ============================================================
 
-  return `
-    <div class="ai-output-card ai-output-span">
-      <span class="ai-output-label">${escapeHtml(title)}</span>
-      <div class="ai-structured-grid">
-        ${entries.map(([key, value]) => {
-          if (Array.isArray(value)) return renderListSection(titleCase(key), value, escapeHtml);
-          if (value && typeof value === "object") {
-            const nested = Object.entries(value)
-              .map(([nestedKey, nestedValue]) => `${titleCase(nestedKey)}: ${humanizeValue(nestedValue)}`)
-              .filter((item) => !item.endsWith(": "));
-            return renderListSection(titleCase(key), nested, escapeHtml);
-          }
-          return `
-            <div class="ai-structured-section">
-              <span class="ai-output-label">${escapeHtml(titleCase(key))}</span>
-              <p>${escapeHtml(humanizeValue(value))}</p>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    </div>
-  `;
+function renderMessageStream(messages, escapeHtml) {
+	if (!messages.length) {
+		return `
+			<div class="ctrl-empty-stream">
+				<div class="ctrl-empty-icon">💬</div>
+				<div class="ctrl-empty-title">Start the conversation</div>
+				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+			</div>
+		`;
+	}
+
+	return messages.map((message) => {
+		const mode = getModeMeta(message.modeId);
+		if (message.role === "user") {
+			return `
+				<div class="ctrl-msg-user">
+					<div class="ctrl-msg-user-bubble">
+						<div class="ctrl-msg-user-text">${escapeHtml(message.content)}</div>
+						<div class="ctrl-msg-meta">${escapeHtml(formatTime(message.createdAt))}</div>
+					</div>
+				</div>
+			`;
+		}
+		return `
+			<div class="ctrl-msg-ai">
+				<div class="ctrl-msg-agent-icon" title="${escapeHtml(mode.label)}">${mode.icon}</div>
+				<div class="ctrl-msg-ai-body">
+					<div class="ctrl-msg-ai-agent">${escapeHtml(mode.label)} · ${escapeHtml(formatTime(message.createdAt))}</div>
+					${renderCleanResponse(asObject(message.response), escapeHtml, message.id)}
+				</div>
+			</div>
+		`;
+	}).join("");
 }
 
-function renderOutputTypeBlock(response, outputType, escapeHtml) {
-  if (outputType === "ad_ideas") return renderAdIdeas(response, escapeHtml);
-  if (outputType === "campaign_package") return renderCampaignPackage(response, escapeHtml);
-  if (outputType === "content_pack") return renderContentPack(response, escapeHtml);
-  if (outputType === "seo_plan") return renderGenericPlan("SEO Plan", response.seoPlan || response.seo_plan, escapeHtml);
-  if (outputType === "research_report") return renderGenericPlan("Research Report", response.researchReport || response.research_report, escapeHtml);
-  if (outputType === "operations_plan") return renderGenericPlan("Operations Plan", response.operationsPlan || response.operations_plan, escapeHtml);
-  if (outputType === "executive_brief") return renderGenericPlan("Executive Brief", response.executiveBrief || response.executive_brief, escapeHtml);
-  return "";
+// ============================================================
+//  RENDER: RESULTS PANEL
+// ============================================================
+
+function renderResultsPanel(session, escapeHtml) {
+	return `
+		<div class="ctrl-results-panel">
+			<div class="ctrl-results-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Conversation &amp; results</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${session.messages.length} message${session.messages.length !== 1 ? "s" : ""}</span>
+			</div>
+			<div id="ctrlChatStream" class="ctrl-chat-stream">
+				${renderMessageStream(session.messages, escapeHtml)}
+			</div>
+		</div>
+	`;
 }
 
-function renderAssistantResponse(response, escapeHtml, ownerId) {
-  const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
-  const outputType = asString(response.outputType || response.output_type);
-  const contentText = humanizeValue(response.content);
-  const analysisText = humanizeValue(response.analysis);
-  const findings = normalizeDisplayList(response.findings, 10);
-  const recommendations = normalizeDisplayList(response.recommendations, 10);
-  const nextActions = normalizeDisplayList(response.nextActions || response.next_actions, 10);
-  const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
-    const record = asObject(item);
-    return {
-      label: humanizeValue(record.label || record.title || record.route || item),
-      route: asString(record.route || record.destination || record.page),
-      reason: humanizeValue(record.reason || record.summary || record.description || item)
-    };
-  }).filter((item) => item.label || item.route || item.reason);
-  const missingData = normalizeDisplayList(response.missingData || response.missing_data, 10);
-  const taskBlock = asObject(response.taskBlock);
-  const isEffectivelyEmpty =
-    !hasError &&
-    !asString(response.title) &&
-    !asString(response.summary) &&
-    !contentText &&
-    !analysisText &&
-    !findings.length &&
-    !recommendations.length &&
-    !nextActions.length;
+// ============================================================
+//  RENDER: RECENT COMMANDS
+// ============================================================
 
-  if (isEffectivelyEmpty) {
-    return `<div class="empty-box">No output returned</div>`;
-  }
-
-  return `
-    <div class="ai-response-grid">
-      ${
-        hasError
-          ? `<div class="ai-output-card ai-output-span"><span class="ai-output-label">Error</span><strong>Command failed</strong><p>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</p></div>`
-          : ""
-      }
-
-      <div class="ai-output-card ai-output-span">
-        <span class="ai-output-label">Summary</span>
-        <strong>${escapeHtml(humanizeValue(response.title, "AI response"))}</strong>
-        <p>${escapeHtml(humanizeValue(response.summary, "No summary available."))}</p>
-        ${outputType ? `<div class="card-badge neutral">${escapeHtml(titleCase(outputType))}</div>` : ""}
-      </div>
-
-      ${renderOutputTypeBlock(response, outputType, escapeHtml)}
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Content</span>
-        <p>${escapeHtml(contentText || "No output returned")}</p>
-      </div>
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Analysis</span>
-        <p>${escapeHtml(analysisText || "No analysis returned")}</p>
-      </div>
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Key Findings</span>
-        ${
-          findings.length
-            ? `<ul class="ai-output-list">${findings.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-            : `<div class="empty-box">No findings available yet.</div>`
-        }
-      </div>
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Recommendations</span>
-        ${
-          recommendations.length
-            ? `<ul class="ai-output-list">${recommendations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-            : `<div class="empty-box">No recommendations available yet.</div>`
-        }
-      </div>
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Next Actions</span>
-        ${
-          nextActions.length
-            ? `<ul class="ai-output-list">${nextActions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-            : `<div class="empty-box">No next actions available yet.</div>`
-        }
-      </div>
-
-      <div class="ai-output-card">
-        <span class="ai-output-label">Suggested Route</span>
-        ${
-          routeSuggestions.length
-            ? `<div class="ai-route-list">${routeSuggestions.map((item, index) => `
-                <button class="ai-route-btn" type="button" data-ai-route="${index}" data-ai-route-owner="${escapeHtml(ownerId || "")}">
-                  <strong>${escapeHtml(item.label)}</strong>
-                  <span>${escapeHtml(item.reason || "")}</span>
-                </button>
-              `).join("")}</div>`
-            : `<div class="empty-box">No route suggestion yet.</div>`
-        }
-      </div>
-
-      ${
-        taskBlock.title
-          ? `
-            <div class="ai-output-card ai-output-span">
-              <span class="ai-output-label">Task-ready Block</span>
-              <strong>${escapeHtml(humanizeValue(taskBlock.title, "Task-ready block"))}</strong>
-              <div class="ai-task-owner">${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
-              ${
-                asArray(taskBlock.steps).length
-                  ? `<ul class="ai-output-list">${normalizeDisplayList(taskBlock.steps, 12).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-                  : ""
-              }
-            </div>
-          `
-          : ""
-      }
-
-      ${
-        missingData.length
-          ? `
-            <div class="ai-output-card ai-output-span">
-              <span class="ai-output-label">Missing Intelligence</span>
-              <ul class="ai-output-list">${missingData.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-            </div>
-          `
-          : ""
-      }
-    </div>
-  `;
+function renderRecentCommands(session, escapeHtml) {
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Recent commands</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${session.history.length} logged · click to restore</span>
+			</div>
+			<div class="ctrl-composer-body">
+				${session.history.length ? `
+					<div class="ctrl-recents-list">
+						${session.history.slice(0, 8).map((entry, index) => {
+							const mode = getModeMeta(entry.modeId);
+							const statusClass = entry.failed ? "danger" : "success";
+							const statusLabel = entry.failed ? "Failed" : "Done";
+							return `
+								<button class="ctrl-recent-item" type="button" data-ctrl-history="${index}">
+									<span class="ctrl-recent-agent">${mode.icon}</span>
+									<div class="ctrl-recent-content">
+										<div class="ctrl-recent-command">${escapeHtml(entry.command)}</div>
+										<div class="ctrl-recent-result">${escapeHtml(entry.responseTitle || mode.label + " · " + formatTime(entry.createdAt))}</div>
+									</div>
+									<div class="ctrl-recent-meta">
+										<span class="ctrl-recent-time">${escapeHtml(formatTime(entry.createdAt))}</span>
+										<span class="card-badge ${statusClass}" style="font-size:10px;padding:2px 7px;">${statusLabel}</span>
+									</div>
+								</button>
+							`;
+						}).join("")}
+					</div>
+				` : `
+					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+				`}
+			</div>
+		</div>
+	`;
 }
 
-function renderMessages(messages, escapeHtml) {
-  return messages.length
-    ? messages.map((message) => {
-      const mode = getModeMeta(message.modeId);
-      if (message.role === "user") {
-        return `
-          <div class="ai-message ai-message-user">
-            <div class="ai-message-meta">
-              <span>You</span>
-              <span>${escapeHtml(formatTime(message.createdAt))}</span>
-            </div>
-            <div class="ai-message-body">${escapeHtml(message.content)}</div>
-          </div>
-        `;
-      }
+// ============================================================
+//  RENDER: AI MEMORY & ARTIFACTS
+// ============================================================
 
-      return `
-        <div class="ai-message ai-message-assistant">
-          <div class="ai-message-meta">
-            <span>${escapeHtml(mode.label)} Mode</span>
-            <span>${escapeHtml(formatTime(message.createdAt))}</span>
-          </div>
-          <div class="ai-message-body">
-            ${renderAssistantResponse(asObject(message.response), escapeHtml, message.id)}
-          </div>
-        </div>
-      `;
-    }).join("")
-    : `<div class="empty-box">No conversation yet. Use the global quick command bar or the local composer to begin.</div>`;
+function renderArtifactsPanel(aiContext, session, escapeHtml) {
+	const recommendations = aiContext.recommendations.slice(0, 4);
+	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+		.filter(([, val]) => val && val.label && val.label !== "No format pattern yet" && val.label !== "No platform pattern yet")
+		.slice(0, 3);
+	const artifacts = session.messages
+		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+		.slice(-4)
+		.map((msg) => ({
+			type: titleCase(asString(msg.response?.outputType || msg.response?.output_type)),
+			title: humanizeValue(msg.response?.title, "Artifact"),
+			body: humanizeValue(msg.response?.summary, ""),
+			time: formatTime(msg.createdAt)
+		}));
+
+	const hasContent = recommendations.length || patterns.length || artifacts.length;
+
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">AI memory &amp; artifacts</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+			</div>
+			<div class="ctrl-composer-body">
+				${!hasContent ? `
+					<div class="ctrl-empty-box">Recommendations and learned patterns will appear here as the AI works with your project data.</div>
+				` : `
+					<div class="ctrl-artifacts-grid">
+						${artifacts.map((art) => `
+							<div class="ctrl-artifact-card">
+								<div class="ctrl-artifact-type">Artifact · ${escapeHtml(art.type)} · ${escapeHtml(art.time)}</div>
+								<div class="ctrl-artifact-title">${escapeHtml(art.title)}</div>
+								${art.body ? `<div class="ctrl-artifact-body">${escapeHtml(art.body)}</div>` : ""}
+							</div>
+						`).join("")}
+
+						${recommendations.map((rec) => {
+							const r = asObject(rec);
+							const recTitle = humanizeValue(r.title || r.label || r.headline || rec);
+							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+							const recDomain = asString(r.domain || r.category || "");
+							return `
+								<div class="ctrl-artifact-card">
+									<div class="ctrl-artifact-type">Recommendation${recDomain ? " · " + titleCase(recDomain) : ""}</div>
+									<div class="ctrl-artifact-title">${escapeHtml(recTitle)}</div>
+									${recAction ? `<div class="ctrl-artifact-body">${escapeHtml(recAction)}</div>` : ""}
+								</div>
+							`;
+						}).join("")}
+
+						${patterns.map(([key, val]) => {
+							const patternLabel = humanizeValue(val.label);
+							const patternDetail = humanizeValue(val.detail || val.insight || val.reason || "");
+							return `
+								<div class="ctrl-artifact-card">
+									<div class="ctrl-artifact-type">Learned pattern · ${escapeHtml(titleCase(key))}</div>
+									<div class="ctrl-artifact-title">${escapeHtml(patternLabel)}</div>
+									${patternDetail ? `<div class="ctrl-artifact-body">${escapeHtml(patternDetail)}</div>` : ""}
+								</div>
+							`;
+						}).join("")}
+					</div>
+				`}
+			</div>
+		</div>
+	`;
 }
 
-function renderSuggestedPrompts(items, escapeHtml) {
-  return items.map((item, index) => `
-    <button class="ai-prompt-btn" type="button" data-ai-prompt="${index}">
-      <span class="ai-prompt-label">${escapeHtml(item.label)}</span>
-      <span class="ai-prompt-text">${escapeHtml(item.prompt)}</span>
-    </button>
-  `).join("");
-}
-
-function renderHistory(history, escapeHtml) {
-  return history.length
-    ? `
-      <div class="ai-history-list">
-        ${history.map((entry, index) => `
-          <button class="ai-history-item" type="button" data-ai-history="${index}">
-            <div class="ai-history-head">
-              <span class="ai-history-specialist">${escapeHtml(getModeMeta(entry.modeId).label)}</span>
-              <span class="ai-history-time">${escapeHtml(formatTime(entry.createdAt))}</span>
-            </div>
-            <div class="ai-history-command">${escapeHtml(entry.command)}</div>
-          </button>
-        `).join("")}
-      </div>
-    `
-    : `<div class="empty-box">Command history will appear here after you start using the intelligence brain.</div>`;
-}
-
-function renderCoverageBadges(aiContext, escapeHtml) {
-  const coverageEntries = Object.entries(asObject(aiContext.coverage));
-  if (!coverageEntries.length) {
-    return `<div class="empty-box">Coverage will appear once live intelligence is loaded.</div>`;
-  }
-
-  return `
-    <div class="ai-coverage-grid">
-      ${coverageEntries.map(([key, item]) => `
-        <div class="ai-coverage-item">
-          <span>${escapeHtml(titleCase(key))}</span>
-          <strong class="card-badge ${escapeHtml(
-            asString(item?.status) === "covered"
-              ? "success"
-              : asString(item?.status) === "partial"
-                ? "warning"
-                : "danger"
-          )}">${escapeHtml(titleCase(item?.status || "missing"))}</strong>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
+// ============================================================
+//  BRIDGE
+// ============================================================
 
 function rerenderAiWorkspace() {
-  if (!lastRenderContext) return;
-  const { getState, render } = lastRenderContext;
-  const state = getState();
-  if (state.currentRoute !== "ai-command") return;
-  render();
+	if (!lastRenderContext) return;
+	const { getState, render } = lastRenderContext;
+	const state = getState();
+	if (state.currentRoute !== "ai-command") return;
+	render();
 }
 
 function ensureAiCommandBridge() {
-  if (aiCommandBridgeRegistered || typeof window === "undefined") {
-    return;
-  }
+	if (aiCommandBridgeRegistered || typeof window === "undefined") return;
 
-  window.addEventListener("mh:submit-ai-command", async (event) => {
-    if (!lastRenderContext) return;
+	window.addEventListener("mh:submit-ai-command", async (event) => {
+		if (!lastRenderContext) return;
+		const detail = asObject(event?.detail);
+		const message = asString(detail.message);
+		const meta = asObject(detail.meta);
+		const { getState, fetchProjectInsights, fetchProjectLearning, reloadProjectData, render, executeProjectAiCommand } = lastRenderContext;
+		const state = getState();
+		const projectName = state.context.currentProject || "";
+		const session = ensureSession(projectName);
+		await ensureIntelligenceLoaded({ projectName, session, getState, reloadProjectData, fetchProjectInsights, fetchProjectLearning, rerender: render });
+		const aiContext = buildUnifiedAiContext(getState(), session.intelligence);
+		let accepted = { accepted: false, failed: false };
+		try {
+			accepted = await submitDurableCommand({ projectName, aiContext, session, command: message, modeId: meta.modeId || session.modeId, source: meta.source || "external-command", executeProjectAiCommand, reloadProjectData });
+		} catch (error) {
+			lastRenderContext.showError?.(error.message || "Failed to execute AI command.");
+		}
+		if (accepted.accepted) rerenderAiWorkspace();
+	});
 
-    const detail = asObject(event?.detail);
-    const message = asString(detail.message);
-    const meta = asObject(detail.meta);
-    const {
-      getState,
-      fetchProjectInsights,
-      fetchProjectLearning,
-      reloadProjectData,
-      render,
-      executeProjectAiCommand
-    } = lastRenderContext;
-    const state = getState();
-    const projectName = state.context.currentProject || "";
-    const session = ensureSession(projectName);
+	aiCommandBridgeRegistered = true;
+}
 
-    await ensureIntelligenceLoaded({
-      projectName,
-      session,
-      getState,
-      reloadProjectData,
-      fetchProjectInsights,
-      fetchProjectLearning,
-      rerender: render
-    });
+// ============================================================
+//  BINDING
+// ============================================================
 
-    const aiContext = buildUnifiedAiContext(getState(), session.intelligence);
-    let accepted = { accepted: false, failed: false };
-    try {
-      accepted = await submitDurableCommand({
-        projectName,
-        aiContext,
-        session,
-        command: message,
-        modeId: meta.modeId || session.modeId,
-        source: meta.source || "external-command",
-        executeProjectAiCommand,
-        reloadProjectData
-      });
-    } catch (error) {
-      lastRenderContext.showError?.(error.message || "Failed to execute AI command.");
-    }
-
-    if (accepted.accepted) {
-      rerenderAiWorkspace();
-    }
-  });
-
-  aiCommandBridgeRegistered = true;
+function buildTaskCommand(session, projectLabel) {
+	const typeMap = {
+		launch: `Build a launch campaign for ${projectLabel}`,
+		content: `Generate content for ${projectLabel}`,
+		analyze: `Analyze current performance for ${projectLabel}`,
+		fix: `Identify and fix the critical readiness gaps for ${projectLabel}`
+	};
+	const base = typeMap[session.taskType] || `Work on ${projectLabel}`;
+	const product = session.taskProduct ? ` focusing on ${session.taskProduct}` : "";
+	const channel = session.taskChannel ? ` for ${session.taskChannel}` : "";
+	return `${base}${product}${channel}. Use the current live intelligence to produce a concrete, actionable plan.`;
 }
 
 function bindAiWorkspace({
-  $,
-  getState,
-  navigateTo,
-  showMessage,
-  showError,
-  createProjectHandoff,
-  executeProjectAiCommand,
-  reloadProjectData,
-  render
+	$,
+	getState,
+	navigateTo,
+	showMessage,
+	showError,
+	createProjectHandoff,
+	executeProjectAiCommand,
+	reloadProjectData,
+	render
 }) {
-  const state = getState();
-  const projectName = state.context.currentProject || "";
-  const session = ensureSession(projectName);
-  const aiContext = buildUnifiedAiContext(state, session.intelligence);
+	const state = getState();
+	const projectName = state.context.currentProject || "";
+	const session = ensureSession(projectName);
+	const aiContext = buildUnifiedAiContext(state, session.intelligence);
 
-  Array.from(document.querySelectorAll("[data-ai-mode]")).forEach((button) => {
-    button.onclick = () => {
-      session.modeId = button.getAttribute("data-ai-mode") || session.modeId;
-      render();
-    };
-  });
+	// Team selector
+	Array.from(document.querySelectorAll("[data-ctrl-mode]")).forEach((button) => {
+		button.onclick = () => {
+			session.modeId = button.getAttribute("data-ctrl-mode") || session.modeId;
+			render();
+		};
+	});
 
-  Array.from(document.querySelectorAll("[data-ai-prompt]")).forEach((button) => {
-    button.onclick = () => {
-      const prompts = buildSuggestedPrompts(aiContext, session.modeId);
-      const prompt = prompts[Number(button.getAttribute("data-ai-prompt"))] || null;
-      const input = $("aiCommandComposerInput");
-      if (input && prompt) {
-        input.value = prompt.prompt;
-        session.draftMessage = prompt.prompt;
-      }
-    };
-  });
+	// Quick action prompts
+	Array.from(document.querySelectorAll("[data-ctrl-quick]")).forEach((button) => {
+		button.onclick = () => {
+			const template = button.getAttribute("data-ctrl-quick-template") || "";
+			const input = $("ctrlComposerInput");
+			if (input && template) {
+				input.value = template;
+				session.draftMessage = template;
+			}
+		};
+	});
 
-  Array.from(document.querySelectorAll("[data-ai-history]")).forEach((button) => {
-    button.onclick = () => {
-      const entry = session.history[Number(button.getAttribute("data-ai-history"))];
-      if (!entry) return;
-      session.modeId = entry.modeId;
-      session.draftMessage = entry.command;
-      render();
-    };
-  });
+	// History restore
+	Array.from(document.querySelectorAll("[data-ctrl-history]")).forEach((button) => {
+		button.onclick = () => {
+			const entry = session.history[Number(button.getAttribute("data-ctrl-history"))];
+			if (!entry) return;
+			session.modeId = entry.modeId;
+			session.draftMessage = entry.command;
+			render();
+		};
+	});
 
-  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
-    button.onclick = () => {
-      const ownerId = button.getAttribute("data-ai-route-owner") || "";
-      const messageIndex = session.messages.findIndex((item) => item.id === ownerId && item.role === "assistant");
-      const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
-      const route = asArray(message?.response?.routeSuggestions)[Number(button.getAttribute("data-ai-route"))];
-      if (!route?.route) return;
-      const priorUserMessage = messageIndex > 0
-        ? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user")
-        : null;
-      const handoffMessage = priorUserMessage?.content || message?.response?.summary || "";
-      if (route.route === "workflows") {
-        syncAiWorkflowBridge({
-          projectName,
-          modeId: priorUserMessage?.modeId || session.modeId,
-          command: handoffMessage,
-          response: message?.response
-        });
-        const handoff = {
-          source_page: "ai-command",
-          destination_page: "workflows",
-          payload: {
-            prompt: handoffMessage,
-            workflow_title: message?.response?.title || "",
-            draft_context: {
-              projectName,
-              modeId: priorUserMessage?.modeId || session.modeId,
-              lastCommand: handoffMessage,
-              lastResponseTitle: message?.response?.title || "",
-              routeSuggestions: asArray(message?.response?.routeSuggestions)
-            },
-            output: {
-              summary: message?.response?.summary || "",
-              nextActions: asArray(message?.response?.nextActions)
-            }
-          }
-        };
-        setSharedHandoff(projectName, "workflows", handoff);
-        createProjectHandoff?.(projectName, handoff).catch((error) => {
-          console.warn("Failed to persist AI-to-workflow handoff:", error.message);
-        });
-        const globalInput = $("quickCommandInput");
-        if (globalInput) {
-          globalInput.value = handoffMessage;
-        }
-      } else {
-        const handoff = {
-          source_page: "ai-command",
-          destination_page: route.route,
-          payload: {
-            prompt: handoffMessage,
-            draft_context: {
-              projectName,
-              modeId: priorUserMessage?.modeId || session.modeId,
-              lastCommand: handoffMessage,
-              lastResponseTitle: message?.response?.title || "",
-              routeSuggestions: asArray(message?.response?.routeSuggestions)
-            },
-            output: message?.response || {}
-          },
-          status: "available"
-        };
-        setSharedHandoff(projectName, route.route, handoff);
-        createProjectHandoff?.(projectName, handoff).catch((error) => {
-          console.warn("Failed to persist AI route handoff:", error.message);
-        });
-      }
-      navigateTo(route.route);
-    };
-  });
+	// Route buttons
+	Array.from(document.querySelectorAll("[data-ctrl-route]")).forEach((button) => {
+		button.onclick = () => {
+			const ownerId = button.getAttribute("data-ctrl-route-owner") || "";
+			const messageIndex = session.messages.findIndex((item) => item.id === ownerId && item.role === "assistant");
+			const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
+			const route = asArray(message?.response?.routeSuggestions)[Number(button.getAttribute("data-ctrl-route"))];
+			if (!route?.route) return;
+			const priorUserMessage = messageIndex > 0 ? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user") : null;
+			const handoffMessage = priorUserMessage?.content || message?.response?.summary || "";
 
-  const composerInput = $("aiCommandComposerInput");
-  if (composerInput) {
-    composerInput.value = session.draftMessage || "";
-    composerInput.oninput = (event) => {
-      session.draftMessage = event.target.value || "";
-    };
-    composerInput.onkeydown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-        event.preventDefault();
-        (async () => {
-          let submitted = { accepted: false, failed: false };
-          try {
-            submitted = await submitDurableCommand({
-              projectName,
-              aiContext,
-              session,
-              command: composerInput.value,
-              modeId: session.modeId,
-              source: "local-composer",
-              executeProjectAiCommand,
-              reloadProjectData
-            });
-          } catch (error) {
-            showError?.(error.message || "Failed to execute AI command.");
-            return;
-          }
-          if (!submitted.accepted) {
-            showError?.("Enter a command before sending.");
-            return;
-          }
-          if (submitted.failed) {
-            showError?.("AI Command failed. Check the response area for details.");
-          } else {
-            showMessage?.("AI Command responded using live project intelligence.");
-          }
-          render();
-        })();
-      }
-    };
-  }
+			if (route.route === "workflows") {
+				syncAiWorkflowBridge({ projectName, modeId: priorUserMessage?.modeId || session.modeId, command: handoffMessage, response: message?.response });
+				const handoff = {
+					source_page: "ai-command", destination_page: "workflows",
+					payload: {
+						prompt: handoffMessage, workflow_title: message?.response?.title || "",
+						draft_context: { projectName, modeId: priorUserMessage?.modeId || session.modeId, lastCommand: handoffMessage, lastResponseTitle: message?.response?.title || "", routeSuggestions: asArray(message?.response?.routeSuggestions) },
+						output: { summary: message?.response?.summary || "", nextActions: asArray(message?.response?.nextActions) }
+					}
+				};
+				setSharedHandoff(projectName, "workflows", handoff);
+				createProjectHandoff?.(projectName, handoff).catch((error) => console.warn("Failed to persist AI-to-workflow handoff:", error.message));
+				const globalInput = $("quickCommandInput");
+				if (globalInput) globalInput.value = handoffMessage;
+			} else {
+				const handoff = {
+					source_page: "ai-command", destination_page: route.route,
+					payload: {
+						prompt: handoffMessage,
+						draft_context: { projectName, modeId: priorUserMessage?.modeId || session.modeId, lastCommand: handoffMessage, lastResponseTitle: message?.response?.title || "", routeSuggestions: asArray(message?.response?.routeSuggestions) },
+						output: message?.response || {}
+					},
+					status: "available"
+				};
+				setSharedHandoff(projectName, route.route, handoff);
+				createProjectHandoff?.(projectName, handoff).catch((error) => console.warn("Failed to persist AI route handoff:", error.message));
+			}
+			navigateTo(route.route);
+		};
+	});
 
-  const sendBtn = $("aiCommandSendBtn");
-  if (sendBtn) {
-    sendBtn.onclick = async () => {
-      let submitted = { accepted: false, failed: false };
-      try {
-        submitted = await submitDurableCommand({
-          projectName,
-          aiContext,
-          session,
-          command: $("aiCommandComposerInput")?.value || "",
-          modeId: session.modeId,
-          source: "local-composer",
-          executeProjectAiCommand,
-          reloadProjectData
-        });
-      } catch (error) {
-        showError?.(error.message || "Failed to execute AI command.");
-        return;
-      }
-      if (!submitted.accepted) {
-        showError?.("Enter a command before sending.");
-        return;
-      }
-      if (submitted.failed) {
-        showError?.("AI Command failed. Check the response area for details.");
-      } else {
-        showMessage?.("AI Command responded using live project intelligence.");
-      }
-      render();
-    };
-  }
+	// Task mode toggle
+	Array.from(document.querySelectorAll("[data-ctrl-task-toggle]")).forEach((button) => {
+		button.onclick = () => {
+			session.taskMode = button.getAttribute("data-ctrl-task-toggle") || "free";
+			render();
+		};
+	});
 
-  const clearBtn = $("aiCommandClearBtn");
-  if (clearBtn) {
-    clearBtn.onclick = () => {
-      session.messages = session.messages.slice(0, 1);
-      session.history = [];
-      session.draftMessage = "";
-      showMessage?.("AI Command session cleared for this project.");
-      render();
-    };
-  }
+	// Build task command
+	const buildTaskBtn = $("ctrlBuildTaskBtn");
+	if (buildTaskBtn) {
+		buildTaskBtn.onclick = () => {
+			const productSelect = $("ctrlProductSelect");
+			const channelSelect = $("ctrlChannelSelect");
+			const typeSelect = $("ctrlTaskType");
+			if (productSelect) session.taskProduct = productSelect.value || "";
+			if (channelSelect) session.taskChannel = channelSelect.value || "";
+			if (typeSelect) session.taskType = typeSelect.value || "launch";
+			const cmd = buildTaskCommand(session, aiContext.projectName || "this project");
+			const input = $("ctrlComposerInput");
+			if (input) { input.value = cmd; session.draftMessage = cmd; }
+		};
+	}
 
-  const refreshBtn = $("aiCommandRefreshBtn");
-  if (refreshBtn) {
-    refreshBtn.onclick = async () => {
-      session.intelligence.loadedAt = "";
-      session.intelligence.status = "idle";
-      await ensureIntelligenceLoaded({
-        projectName,
-        session,
-        getState,
-        reloadProjectData: lastRenderContext.reloadProjectData,
-        fetchProjectInsights: lastRenderContext.fetchProjectInsights,
-        fetchProjectLearning: lastRenderContext.fetchProjectLearning,
-        rerender: render
-      });
-      showMessage?.("AI intelligence refreshed.");
-    };
-  }
+	// Main textarea
+	const composerInput = $("ctrlComposerInput");
+	if (composerInput) {
+		composerInput.value = session.draftMessage || "";
+		composerInput.oninput = (event) => { session.draftMessage = event.target.value || ""; };
+		composerInput.onkeydown = (event) => {
+			if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+				event.preventDefault();
+				triggerSend();
+			}
+		};
+	}
 
-  const useGlobalBtn = $("aiCommandUseGlobalBtn");
-  if (useGlobalBtn) {
-    useGlobalBtn.onclick = () => {
-      const globalInput = $("quickCommandInput");
-      if (globalInput) {
-        globalInput.value = $("aiCommandComposerInput")?.value || session.draftMessage || "";
-      }
-      showMessage?.("Draft copied to the global quick command bar.");
-    };
-  }
+	async function triggerSend() {
+		const cmd = $("ctrlComposerInput")?.value || session.draftMessage || "";
+		let submitted = { accepted: false, failed: false };
+		try {
+			submitted = await submitDurableCommand({ projectName, aiContext, session, command: cmd, modeId: session.modeId, source: "control-room", executeProjectAiCommand, reloadProjectData });
+		} catch (error) {
+			showError?.(error.message || "Failed to execute AI command.");
+			return;
+		}
+		if (!submitted.accepted) { showError?.("Enter a command before sending."); return; }
+		if (submitted.failed) {
+			showError?.("AI Command failed. See the response area for details.");
+		} else {
+			showMessage?.("AI Team responded using live project intelligence.");
+		}
+		render();
+	}
+
+	const sendBtn = $("ctrlSendBtn");
+	if (sendBtn) sendBtn.onclick = triggerSend;
+
+	const clearBtn = $("ctrlClearBtn");
+	if (clearBtn) {
+		clearBtn.onclick = () => {
+			session.messages = [];
+			session.history = [];
+			session.draftMessage = "";
+			showMessage?.("Session cleared.");
+			render();
+		};
+	}
+
+	const globalBtn = $("ctrlGlobalBtn");
+	if (globalBtn) {
+		globalBtn.onclick = () => {
+			const globalInput = $("quickCommandInput");
+			if (globalInput) globalInput.value = $("ctrlComposerInput")?.value || session.draftMessage || "";
+			showMessage?.("Draft copied to the global bar.");
+		};
+	}
+
+	const refreshBtn = $("ctrlRefreshBtn");
+	if (refreshBtn) {
+		refreshBtn.onclick = async () => {
+			session.intelligence.loadedAt = "";
+			session.intelligence.status = "idle";
+			await ensureIntelligenceLoaded({
+				projectName, session, getState,
+				reloadProjectData: lastRenderContext.reloadProjectData,
+				fetchProjectInsights: lastRenderContext.fetchProjectInsights,
+				fetchProjectLearning: lastRenderContext.fetchProjectLearning,
+				rerender: render
+			});
+			showMessage?.("Intelligence refreshed.");
+		};
+	}
+
+	// Scroll chat to bottom
+	const chatStream = $("ctrlChatStream");
+	if (chatStream) chatStream.scrollTop = chatStream.scrollHeight;
 }
 
+// ============================================================
+//  ROUTE EXPORT
+// ============================================================
+
 export const aiCommandRoute = {
-  id: "ai-command",
-  meta: {
-    eyebrow: "AI & Build",
-    title: "AI Command",
-    description: "Intelligence-driven system brain for project status, growth decisions, and action routing."
-  },
-  template: `
-    <section class="page is-active" data-page="ai-command">
-      <div id="aiCommandRoot"></div>
-    </section>
-  `,
-  render(context) {
-    const {
-      getState,
-      $,
-      escapeHtml,
-      navigateTo,
-      showMessage,
-      showError,
-      reloadProjectData,
-      fetchProjectInsights,
-      fetchProjectLearning,
-      createProjectHandoff,
-      consumeProjectHandoff,
-      executeProjectAiCommand
-    } = context;
+	id: "ai-command",
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Team Control Room",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+		const {
+			getState,
+			$,
+			escapeHtml,
+			navigateTo,
+			showMessage,
+			showError,
+			reloadProjectData,
+			fetchProjectInsights,
+			fetchProjectLearning,
+			createProjectHandoff,
+			consumeProjectHandoff,
+			executeProjectAiCommand
+		} = context;
 
-    const render = () => {
-      const state = getState();
-      const projectName = state.context.currentProject || "";
-      const session = ensureSession(projectName);
-      session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
+		const render = () => {
+			const state = getState();
+			const projectName = state.context.currentProject || "";
+			const session = ensureSession(projectName);
+			session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
 
-      lastRenderContext = {
-        ...context,
-        render
-      };
-      ensureAiCommandBridge();
-      applyDurableAiHandoff(projectName, state.data.operations, session, consumeProjectHandoff, showMessage);
+			lastRenderContext = { ...context, render };
+			ensureAiCommandBridge();
+			applyDurableAiHandoff(projectName, state.data.operations, session, consumeProjectHandoff, showMessage);
+			ensureIntelligenceLoaded({ projectName, session, getState, reloadProjectData, fetchProjectInsights, fetchProjectLearning, rerender: render });
 
-      ensureIntelligenceLoaded({
-        projectName,
-        session,
-        getState,
-        reloadProjectData,
-        fetchProjectInsights,
-        fetchProjectLearning,
-        rerender: render
-      });
+			const aiContext = buildUnifiedAiContext(state, session.intelligence);
+			const intelligenceStatus = session.intelligence.status || "idle";
 
-      const aiContext = buildUnifiedAiContext(state, session.intelligence);
-      const mode = getModeMeta(session.modeId);
-      const prompts = buildSuggestedPrompts(aiContext, session.modeId);
-      const root = $("aiCommandRoot");
-      if (!root) return;
+			const root = $("ctrlRoomRoot");
+			if (!root) return;
 
-      const intelligenceStatusLabel =
-        session.intelligence.status === "loading"
-          ? "Refreshing intelligence"
-          : session.intelligence.status === "error"
-            ? "Intelligence limited"
-            : session.intelligence.status === "ready"
-              ? "Live intelligence loaded"
-              : "Waiting for intelligence";
+			root.innerHTML = `
+				<div class="ctrl-room-wrapper">
+					${renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml)}
+					${renderTeamSelector(session, escapeHtml)}
+					<div class="ctrl-room-main">
+						<div class="ctrl-composer-panel">
+							${renderCommandComposer(session, aiContext, escapeHtml)}
+							${renderSuggestedPromptsSection(aiContext, session, escapeHtml)}
+						</div>
+						${renderResultsPanel(session, escapeHtml)}
+					</div>
+					<div class="ctrl-room-bottom">
+						${renderRecentCommands(session, escapeHtml)}
+						${renderArtifactsPanel(aiContext, session, escapeHtml)}
+					</div>
+				</div>
+			`;
 
-      root.innerHTML = `
-        <div class="ai-command-wrapper">
-          <div class="ai-command-layout">
-            <div class="ai-command-side">
-              <section class="card">
-                <div class="card-head">
-                  <div>
-                    <div class="setup-kicker">Central AI Workspace</div>
-                    <h3>Command Input</h3>
-                    <p class="home-section-copy" style="margin:6px 0 0;">Prefilled commands appear here first. Nothing runs until you send the command from this page.</p>
-                  </div>
-                  <span class="card-badge ${escapeHtml(
-                    session.intelligence.status === "ready"
-                      ? "success"
-                      : session.intelligence.status === "loading"
-                        ? "warning"
-                        : session.intelligence.status === "error"
-                          ? "danger"
-                          : "neutral"
-                  )}">${escapeHtml(intelligenceStatusLabel)}</span>
-                </div>
+			bindAiWorkspace({ $, getState, navigateTo, showMessage, showError, createProjectHandoff, executeProjectAiCommand, reloadProjectData, render });
+		};
 
-                ${
-                  session.intelligence.error
-                    ? `<div class="ai-intelligence-banner warning">${escapeHtml(session.intelligence.error)}</div>`
-                    : ""
-                }
-
-                <div class="ai-context-grid" style="margin-bottom:16px;">
-                  <div class="ai-context-item">
-                    <span>Current mode</span>
-                    <strong>${escapeHtml(mode.label)}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Readiness</span>
-                    <strong>${escapeHtml(aiContext.readinessScore == null ? "--" : `${aiContext.readinessScore}/100`)}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Coverage</span>
-                    <strong>${escapeHtml(`${aiContext.coveredCount}/${aiContext.coverageTotal || 0} covered`)}</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Recommendations</span>
-                    <strong>${escapeHtml(String(aiContext.recommendations.length))}</strong>
-                  </div>
-                </div>
-
-                <div class="ai-composer" style="margin-top:0;padding-top:0;border-top:none;">
-                  <textarea id="aiCommandComposerInput" class="setup-input setup-textarea" rows="4" placeholder="Ask what to do next, what content is working, why SEO is weak, which campaign to scale, or where the system should route the next action.">${escapeHtml(session.draftMessage)}</textarea>
-                  <div class="ai-composer-actions">
-                    <div class="setup-helper">Use Send Command or Ctrl/Cmd + Enter to execute now. Copy To Global Bar only mirrors the current draft to the shell input.</div>
-                    <div class="ai-composer-buttons">
-                      <button id="aiCommandClearBtn" class="btn btn-secondary" type="button">Clear Session</button>
-                      <button id="aiCommandUseGlobalBtn" class="btn btn-secondary" type="button">Copy To Global Bar</button>
-                      <button id="aiCommandRefreshBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
-                      <button id="aiCommandSendBtn" class="btn btn-primary" type="button">Send Command</button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section class="card ai-command-main">
-                <div class="card-head">
-                  <div>
-                    <h3>Current Result / Response Area</h3>
-                    <p class="home-section-copy" style="margin:6px 0 0;">Responses below reflect executed commands only. Prefilled drafts and history selections do not generate a result until you send them.</p>
-                  </div>
-                  <span class="card-badge neutral">Live output</span>
-                </div>
-                <div id="aiCommandChat" class="ai-chat-stream">
-                  ${renderMessages(session.messages, escapeHtml)}
-                </div>
-              </section>
-            </div>
-
-            <aside class="ai-command-side">
-              <section class="card">
-                <div class="card-head">
-                  <h3>Specialist / Mode Selection</h3>
-                  <span class="card-badge neutral">Modes</span>
-                </div>
-                <div class="ai-specialist-grid">
-                  ${MODE_DEFS.map((item) => `
-                    <button class="ai-specialist-card${item.id === session.modeId ? " is-active" : ""}" type="button" data-ai-mode="${escapeHtml(item.id)}">
-                      <span class="ai-specialist-name">${escapeHtml(item.label)}</span>
-                      <span class="ai-specialist-summary">${escapeHtml(item.summary)}</span>
-                    </button>
-                  `).join("")}
-                </div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
-                  <h3>Suggested Prompts</h3>
-                  <span class="card-badge neutral">Prefill only</span>
-                </div>
-                <p class="setup-side-copy">Choosing a prompt fills the command input. It does not execute until you send it.</p>
-                <div id="aiCommandSuggestions" class="ai-prompt-grid">
-                  ${renderSuggestedPrompts(prompts, escapeHtml)}
-                </div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
-                  <h3>History / Previous Commands</h3>
-                  <span class="card-badge neutral">${escapeHtml(`${session.history.length} recent`)}</span>
-                </div>
-                <p class="setup-side-copy">History is reference-only until you restore a command into the input and send it again.</p>
-                <div id="aiCommandHistory">
-                  ${renderHistory(session.history, escapeHtml)}
-                </div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
-                  <h3>AI Command Assistant Notes</h3>
-                  <span class="card-badge neutral">Guide</span>
-                </div>
-                <div class="ai-context-grid">
-                  <div class="ai-context-item">
-                    <span>Execute now</span>
-                    <strong>Send Command</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Prefilled behavior</span>
-                    <strong>Draft only</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>History behavior</span>
-                    <strong>Reference only</strong>
-                  </div>
-                  <div class="ai-context-item">
-                    <span>Project context</span>
-                    <strong>${escapeHtml(aiContext.projectName || "Not selected")}</strong>
-                  </div>
-                </div>
-                <div class="ai-context-section">
-                  <div class="ai-context-heading">Coverage map</div>
-                  ${renderCoverageBadges(aiContext, escapeHtml)}
-                </div>
-              </section>
-            </aside>
-          </div>
-        </div>
-      `;
-
-      bindAiWorkspace({
-        $,
-        getState,
-        navigateTo,
-        showMessage,
-        showError,
-        createProjectHandoff,
-        executeProjectAiCommand,
-        reloadProjectData,
-        render
-      });
-    };
-
-    render();
-  }
+		render();
+	}
 };

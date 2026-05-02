@@ -126,8 +126,8 @@ const SECTION_DEFINITIONS = [
     description: "Define the commercial identity, market defaults, and baseline operating context for the project.",
     backendLabel: "Project profile fields are ready for backend save",
     fields: [
-      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "hairoticmen" },
-      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Hairotic Men" },
+      { path: "project.projectName", label: "Project name", type: "text", critical: true, placeholder: "project-name" },
+      { path: "project.brandName", label: "Brand name", type: "text", critical: true, placeholder: "Brand name" },
       {
         path: "project.market",
         label: "Market",

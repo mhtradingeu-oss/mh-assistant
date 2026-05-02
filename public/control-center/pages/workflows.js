@@ -8,52 +8,52 @@ import {
 
 const WORKFLOW_CATALOG = [
   {
-    id: "launch-new-campaign",
-    title: "Launch New Campaign",
-    description: "Turn campaign structure, current readiness, and system intelligence into a go-live operating plan.",
+    id: "launch-product",
+    title: "Launch Product",
+    description: "Turn product context, campaign readiness, and system intelligence into a launch-ready operating plan.",
     requiredInputs: ["Campaign", "Product", "Audience", "Channels", "Goal", "Timeframe", "Budget"],
     expectedOutput: "Launch summary, execution plan, required assets, blockers, and next actions.",
     aiModeId: "operations"
   },
   {
-    id: "build-content-plan",
-    title: "Build Content Plan",
+    id: "create-content-plan",
+    title: "Create Content Plan",
     description: "Generate a content operating plan using current campaign context, winning patterns, and weak-signal avoidance.",
     requiredInputs: ["Campaign", "Product", "Audience", "Channels", "Goal", "Timeframe", "Notes"],
     expectedOutput: "Content plan, channel priorities, asset needs, risks, and production next actions.",
     aiModeId: "content"
   },
   {
-    id: "generate-ad-strategy",
-    title: "Generate Ad Strategy",
+    id: "generate-campaign",
+    title: "Generate Campaign",
+    description: "Create a campaign package with launch phases, messaging angles, channel plan, and dependencies.",
+    requiredInputs: ["Campaign", "Product", "Audience", "Channels", "Goal", "Timeframe", "Notes"],
+    expectedOutput: "Campaign package, priorities, dependencies, risks, and rollout next actions.",
+    aiModeId: "campaign"
+  },
+  {
+    id: "build-ads",
+    title: "Build Ads",
     description: "Create a paid campaign operating view using offer context, connected channels, and paid performance signals.",
     requiredInputs: ["Campaign", "Product", "Audience", "Channels", "Goal", "Budget", "Notes"],
     expectedOutput: "Ad strategy, suggested channels, creative needs, blockers, and next actions.",
     aiModeId: "ads"
   },
   {
-    id: "seo-optimization-plan",
-    title: "SEO Optimization Plan",
-    description: "Translate website and search intelligence into an execution-first optimization plan.",
-    requiredInputs: ["Product", "Audience", "Goal", "Timeframe", "Notes"],
-    expectedOutput: "SEO summary, optimization plan, required support assets, risks, and next actions.",
-    aiModeId: "seo"
-  },
-  {
-    id: "competitor-research",
-    title: "Competitor Research",
-    description: "Create a focused research workflow around market context, positioning gaps, and missing intelligence.",
-    requiredInputs: ["Product", "Audience", "Goal", "Channels", "Notes"],
-    expectedOutput: "Research summary, key comparison angles, risks, and follow-up next actions.",
-    aiModeId: "research"
-  },
-  {
-    id: "weekly-performance-report",
-    title: "Weekly Performance Report",
+    id: "run-weekly-report",
+    title: "Run Weekly Report",
     description: "Package the current operating picture into a clear report with decisions, blockers, and next actions.",
     requiredInputs: ["Campaign", "Channels", "Goal", "Timeframe", "Notes"],
     expectedOutput: "Weekly summary, key decisions, risks, suggested channels, and next actions.",
     aiModeId: "executive"
+  },
+  {
+    id: "research-competitors",
+    title: "Research Competitors",
+    description: "Create a focused research workflow around market context, positioning gaps, and missing intelligence.",
+    requiredInputs: ["Product", "Audience", "Goal", "Channels", "Notes"],
+    expectedOutput: "Research summary, key comparison angles, risks, and follow-up next actions.",
+    aiModeId: "research"
   }
 ];
 
@@ -141,6 +141,22 @@ function formatPercent(value, digits = 0) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return "-";
   return `${parsed.toFixed(digits)}%`;
+}
+
+function normalizeWorkflowStatus(status) {
+  const normalized = asString(status).trim().toLowerCase();
+  if (["running", "in_progress", "processing", "queued", "scheduled", "pending"].includes(normalized)) return "running";
+  if (["failed", "error", "errored", "cancelled"].includes(normalized)) return "failed";
+  if (["completed", "success", "done"].includes(normalized)) return "completed";
+  return "draft";
+}
+
+function statusTone(status) {
+  const normalized = normalizeWorkflowStatus(status);
+  if (normalized === "completed") return "success";
+  if (normalized === "running") return "warning";
+  if (normalized === "failed") return "danger";
+  return "neutral";
 }
 
 function normalizeRecommendation(item) {
@@ -519,6 +535,69 @@ function buildWorkflowContext(state, session) {
   };
 }
 
+function buildWorkflowOverviewCounts(session, context) {
+  const runStates = Object.values(asObject(session.runsByWorkflow));
+  const runCounts = runStates.reduce((acc, run) => {
+    const normalized = normalizeWorkflowStatus(run?.status);
+    acc[normalized] = (acc[normalized] || 0) + 1;
+    return acc;
+  }, { draft: 0, running: 0, completed: 0, failed: 0 });
+
+  const executionResults = asArray(context.activity?.execution_results);
+  const schedulerJobs = asArray(context.activity?.scheduled_jobs);
+
+  const executionCompleted = executionResults.filter((item) => statusTone(item?.execution_status) === "success").length;
+  const executionFailed = executionResults.filter((item) => statusTone(item?.execution_status) === "danger").length;
+  const schedulerRunning = schedulerJobs.filter((item) => statusTone(item?.status) === "warning").length;
+
+  return {
+    available: WORKFLOW_CATALOG.length,
+    running: runCounts.running + schedulerRunning,
+    completed: runCounts.completed + executionCompleted,
+    failed: runCounts.failed + executionFailed
+  };
+}
+
+function buildRunningWorkflowRows(session, context) {
+  const rows = [];
+
+  WORKFLOW_CATALOG.forEach((workflow) => {
+    const run = asObject(session.runsByWorkflow?.[workflow.id]);
+    if (normalizeWorkflowStatus(run.status) !== "running") return;
+    rows.push({
+      id: `workflow-${workflow.id}`,
+      name: workflow.title,
+      progress: 68,
+      currentStep: "Generating structured workflow output",
+      nextStep: "Persist run output and refresh project operations"
+    });
+  });
+
+  asArray(context.activity?.scheduled_jobs)
+    .filter((job) => statusTone(job?.status) === "warning")
+    .slice(0, 4)
+    .forEach((job) => {
+      const rawStatus = asString(job.status).trim().toLowerCase();
+      const progress = rawStatus === "processing" || rawStatus === "running"
+        ? 75
+        : rawStatus === "queued" || rawStatus === "scheduled"
+          ? 30
+          : 50;
+
+      rows.push({
+        id: `scheduler-${asString(job.id) || nowIso()}`,
+        name: `${titleCase(job.type || "Publish")} Scheduler Job`,
+        progress,
+        currentStep: titleCase(rawStatus || "queued"),
+        nextStep: rawStatus === "processing" || rawStatus === "running"
+          ? "Write execution result"
+          : "Worker pickup and execution"
+      });
+    });
+
+  return rows;
+}
+
 async function ensureWorkflowIntelligenceLoaded({
   projectName,
   session,
@@ -609,11 +688,7 @@ function deriveSuggestedChannels(inputs, context, workflowId) {
     context.topContent.map((item) => asString(asObject(item).platform || asObject(item).channel))
   ).map(titleCase);
 
-  if (workflowId === "seo-optimization-plan") {
-    return uniqueStrings(["SEO", "Website", "Blog", ...fromInputs, ...fromConnected]).slice(0, 5);
-  }
-
-  if (workflowId === "generate-ad-strategy") {
+  if (workflowId === "build-ads") {
     return uniqueStrings(["Meta", "Google Ads", "TikTok", ...fromInputs, ...fromConnected]).slice(0, 5);
   }
 
@@ -625,7 +700,6 @@ function buildWorkflowOutput(workflow, inputs, context) {
   const topRecommendation = context.recommendations[0];
   const topContentSignal = context.topContent[0];
   const weakContentSignal = context.weakContent[0];
-  const seoOp = asArray(context.seo.opportunities || context.seo.recommendations)[0];
   const paidSummary = asObject(context.paid.summary || context.paid.overview || context.paid);
 
   const risks = uniqueStrings([
@@ -638,11 +712,11 @@ function buildWorkflowOutput(workflow, inputs, context) {
 
   const requiredAssets = uniqueStrings([
     ...context.missingAssets.map(titleCase),
-    workflow.id === "launch-new-campaign" ? "Launch brief" : "",
-    workflow.id === "build-content-plan" ? "Content brief" : "",
-    workflow.id === "generate-ad-strategy" ? "Ad creative set" : "",
-    workflow.id === "seo-optimization-plan" ? "Landing page copy" : "",
-    workflow.id === "weekly-performance-report" ? "Performance snapshot" : ""
+    workflow.id === "launch-product" ? "Launch brief" : "",
+    workflow.id === "create-content-plan" ? "Content brief" : "",
+    workflow.id === "generate-campaign" ? "Campaign brief" : "",
+    workflow.id === "build-ads" ? "Ad creative set" : "",
+    workflow.id === "run-weekly-report" ? "Performance snapshot" : ""
   ]).filter(Boolean);
 
   let summary = "";
@@ -650,7 +724,7 @@ function buildWorkflowOutput(workflow, inputs, context) {
   let executionPlan = [];
   let nextActions = [];
 
-  if (workflow.id === "launch-new-campaign") {
+  if (workflow.id === "launch-product") {
     summary = `Launch ${inputs.campaign || context.campaignName || "the active campaign"} with ${inputs.goal || "the current project goal"} as the primary operating target.${topRecommendation?.action ? ` Highest-impact recommendation: ${topRecommendation.action}` : ""}`;
     keyDecisions = uniqueStrings([
       inputs.audience ? `Prioritize ${inputs.audience} as the lead audience.` : "Clarify the lead audience before launch.",
@@ -668,7 +742,7 @@ function buildWorkflowOutput(workflow, inputs, context) {
       "Review missing dependencies before launch.",
       topRecommendation?.action || context.readiness.next_best_actions?.[0] || "Resolve the top readiness blocker."
     ]);
-  } else if (workflow.id === "build-content-plan") {
+  } else if (workflow.id === "create-content-plan") {
     summary = `Build a content plan for ${inputs.campaign || context.campaignName || "the current campaign"} using current audience context and available content learning.${topContentSignal ? ` Strongest signal: ${firstNonEmpty(topContentSignal.title, topContentSignal.label, topContentSignal.topic, topContentSignal.hook)}.` : ""}`;
     keyDecisions = uniqueStrings([
       inputs.audience ? `Write for ${inputs.audience}.` : "Clarify the audience emphasis.",
@@ -686,7 +760,25 @@ function buildWorkflowOutput(workflow, inputs, context) {
       "Coordinate supporting visuals in Media Studio.",
       topRecommendation?.action || "Review weak content signals before finalizing the schedule."
     ]);
-  } else if (workflow.id === "generate-ad-strategy") {
+  } else if (workflow.id === "generate-campaign") {
+    summary = `Generate a full campaign package for ${inputs.campaign || context.campaignName || "the active campaign"} with ${inputs.goal || "the primary business objective"} as the anchor.${topRecommendation?.action ? ` Top recommendation: ${topRecommendation.action}` : ""}`;
+    keyDecisions = uniqueStrings([
+      inputs.audience ? `Build messaging around ${inputs.audience}.` : "Define the primary audience before finalizing campaign pillars.",
+      suggestedChannels[0] ? `Lead with ${suggestedChannels[0]} in phase one.` : "Define the first launch channel.",
+      inputs.timeframe ? `Use ${inputs.timeframe} as the rollout window.` : "Set an execution window for the campaign phases."
+    ]);
+    executionPlan = [
+      "Generate campaign concept, launch phases, and offer framing.",
+      "Map phase-by-phase content, media, and channel dependencies.",
+      "Confirm blockers across assets, integrations, and ownership.",
+      "Route approved package to Campaign Studio for execution alignment."
+    ];
+    nextActions = uniqueStrings([
+      "Open Campaign Studio and apply the generated campaign package.",
+      "Align content and media dependency timelines.",
+      topRecommendation?.action || "Close the highest-priority readiness blocker before execution."
+    ]);
+  } else if (workflow.id === "build-ads") {
     summary = `Generate a paid strategy for ${inputs.product || context.overview.project_name || "the current offer"} with ${inputs.goal || "campaign performance"} as the target.${paidSummary.roas != null ? ` Current tracked ROAS is ${Number(paidSummary.roas).toFixed(2)}.` : ""}`;
     keyDecisions = uniqueStrings([
       suggestedChannels[0] ? `Prioritize ${suggestedChannels[0]} as the first paid lane.` : "Define the first paid lane.",
@@ -704,25 +796,7 @@ function buildWorkflowOutput(workflow, inputs, context) {
       "Build ad creative dependencies in Media Studio.",
       topRecommendation?.action || "Reconnect missing paid intelligence if signals are weak."
     ]);
-  } else if (workflow.id === "seo-optimization-plan") {
-    summary = `Build an SEO optimization plan for ${inputs.product || context.overview.project_name || "the project"} using current website and search intelligence.${seoOp ? ` Priority opportunity: ${typeof seoOp === "string" ? seoOp : firstNonEmpty(seoOp.query, seoOp.page, seoOp.title, seoOp.label)}.` : ""}`;
-    keyDecisions = uniqueStrings([
-      inputs.goal ? `Optimize toward ${inputs.goal}.` : "Clarify the business goal behind the SEO work.",
-      suggestedChannels[0] ? `Use ${suggestedChannels[0]} as the lead support lane.` : "",
-      context.website ? "Use website and search signals together for prioritization." : "Website and search data are still partial."
-    ]);
-    executionPlan = [
-      "Prioritize query, page, or CTR opportunities.",
-      "Align landing copy, metadata, and support content with campaign intent.",
-      "Package related content and website tasks.",
-      "Route support work into Content Studio and Publishing."
-    ];
-    nextActions = uniqueStrings([
-      "Send supporting work to Content Studio.",
-      "Review website and tracking blockers.",
-      topRecommendation?.action || "Connect search intelligence for sharper prioritization."
-    ]);
-  } else if (workflow.id === "competitor-research") {
+  } else if (workflow.id === "research-competitors") {
     summary = `Create a competitor research brief for ${inputs.product || context.overview.project_name || "the project"} using current market context, learning, and visible intelligence gaps.`;
     keyDecisions = uniqueStrings([
       inputs.audience ? `Research from the perspective of ${inputs.audience}.` : "Clarify the audience lens for research.",
@@ -740,7 +814,7 @@ function buildWorkflowOutput(workflow, inputs, context) {
       "Use Campaign Studio to test the best angle that emerges.",
       topRecommendation?.action || "Close missing intelligence gaps that limit research quality."
     ]);
-  } else {
+  } else if (workflow.id === "run-weekly-report") {
     summary = `Prepare a weekly performance report for ${inputs.campaign || context.campaignName || context.projectName || "the project"} using current readiness, content, website, SEO, and paid signals.`;
     keyDecisions = uniqueStrings([
       context.readiness.readiness_status ? `Readiness is currently ${context.readiness.readiness_status}.` : "",
@@ -757,6 +831,22 @@ function buildWorkflowOutput(workflow, inputs, context) {
       "Save the report as a structured task.",
       "Route the top follow-up into the right execution workspace.",
       topRecommendation?.action || "Review the highest-priority blocker."
+    ]);
+  } else {
+    summary = `Build a structured workflow output for ${workflow.title} using current project context and intelligence.`;
+    keyDecisions = uniqueStrings([
+      inputs.goal ? `Keep ${inputs.goal} as the primary objective.` : "Define a clear workflow goal before execution.",
+      inputs.audience ? `Optimize the outcome for ${inputs.audience}.` : "Define the target audience.",
+      inputs.channels ? `Scope execution across ${inputs.channels}.` : "Set workflow channels explicitly."
+    ]);
+    executionPlan = [
+      "Validate inputs and workflow context.",
+      "Generate structured output and route suggestions.",
+      "Resolve critical blockers and assign next actions."
+    ];
+    nextActions = uniqueStrings([
+      "Run the workflow again after input refinements.",
+      "Route output to the relevant workspace for execution."
     ]);
   }
 
@@ -794,9 +884,9 @@ function buildRoleAwareRouting(operations, activeRole, selectedWorkflow) {
     preferredDomains,
     targets: filteredTargets.length ? filteredTargets : ROUTING_TARGETS.filter((target) => allowedRoutes.includes(target.id)),
     workflowHint:
-      selectedWorkflow.id === "competitor-research"
+      selectedWorkflow.id === "research-competitors"
         ? "Research work should usually route through Analyst or Strategist ownership first."
-        : selectedWorkflow.id === "generate-ad-strategy"
+        : selectedWorkflow.id === "build-ads"
           ? "Paid execution should normally hand off to the Ads Operator after strategist sign-off."
           : "Use the role-aware route list to hand the workflow to the right operating lane."
   };
@@ -1074,22 +1164,27 @@ function bindWorkflowCatalog({
   }
 
   const refreshBtn = $("workflowRefreshIntelligenceBtn");
+  const doRefresh = async () => {
+    session.intelligence.loadedAt = "";
+    session.intelligence.status = "idle";
+    await ensureWorkflowIntelligenceLoaded({
+      projectName,
+      session,
+      getState,
+      reloadProjectData,
+      fetchProjectInsights,
+      fetchProjectLearning,
+      rerender: render
+    });
+    showMessage?.("Workflow intelligence refreshed.");
+  };
   if (refreshBtn) {
-    refreshBtn.onclick = async () => {
-      session.intelligence.loadedAt = "";
-      session.intelligence.status = "idle";
-      await ensureWorkflowIntelligenceLoaded({
-        projectName,
-        session,
-        getState,
-        reloadProjectData,
-        fetchProjectInsights,
-        fetchProjectLearning,
-        rerender: render
-      });
-      showMessage?.("Workflow intelligence refreshed.");
-    };
+    refreshBtn.onclick = doRefresh;
   }
+  // also wire the inline ↻ button that avoids duplicate id
+  Array.from(document.querySelectorAll("[data-wf-refresh]")).forEach((btn) => {
+    btn.onclick = doRefresh;
+  });
 
   const runBtn = $("workflowRunBtn");
   if (runBtn) {
@@ -1162,6 +1257,8 @@ function bindWorkflowCatalog({
         render();
       }
     };
+    const runBtnMain = $("workflowRunBtnMain");
+    if (runBtnMain) runBtnMain.onclick = runBtn.onclick;
   }
 
   Array.from(document.querySelectorAll("[data-workflow-route]")).forEach((button) => {
@@ -1220,7 +1317,7 @@ function bindWorkflowCatalog({
           owner_role: session.activeRole,
           assignee_role: session.activeRole,
           service_domain:
-            getWorkflowDef(workflowId).id === "competitor-research" || getWorkflowDef(workflowId).id === "weekly-performance-report"
+            getWorkflowDef(workflowId).id === "research-competitors" || getWorkflowDef(workflowId).id === "run-weekly-report"
               ? "research"
               : "campaign",
           route_target: "workflows",
@@ -1237,60 +1334,139 @@ function bindWorkflowCatalog({
     };
   }
 
+  const pushPromptToAiCommand = ({
+    activeWorkflow,
+    prompt,
+    modeId,
+    responseTitle,
+    output
+  }) => {
+    const aiDraft = {
+      projectName,
+      modeId,
+      lastCommand: prompt,
+      lastResponseTitle: responseTitle,
+      routeSuggestions: []
+    };
+    setSharedAiDraft(projectName, aiDraft);
+    setSharedHandoff(projectName, "ai-command", {
+      source_page: "workflows",
+      destination_page: "ai-command",
+      linked_entity: {
+        entity_type: "workflow_run",
+        entity_id: currentRun.runId || ""
+      },
+      payload: {
+        prompt,
+        workflow_id: activeWorkflow.id,
+        workflow_title: activeWorkflow.title,
+        draft_context: aiDraft,
+        output
+      }
+    });
+    createProjectHandoff?.(projectName, {
+      source_page: "workflows",
+      destination_page: "ai-command",
+      linked_entity: {
+        entity_type: "workflow_run",
+        entity_id: currentRun.runId || ""
+      },
+      payload: {
+        prompt,
+        workflow_id: activeWorkflow.id,
+        workflow_title: activeWorkflow.title,
+        draft_context: aiDraft,
+        output
+      }
+    }).catch((error) => {
+      console.warn("Failed to persist workflow-to-AI handoff:", error.message);
+    });
+    navigateTo("ai-command");
+    const globalInput = $("quickCommandInput");
+    if (globalInput) {
+      globalInput.value = prompt;
+    }
+  };
+
   const handlePushToAi = async () => {
+    const activeWorkflow = getWorkflowDef(session.selectedWorkflowId);
+    const inputs = session.inputsByWorkflow[activeWorkflow.id];
+    const output = session.runsByWorkflow[activeWorkflow.id].output;
+    const prompt = output
+      ? `Refine this ${activeWorkflow.title.toLowerCase()} output for ${inputs.campaign || projectName || "this project"}.\n\nSummary: ${output.summary}\n\nNext actions: ${(output.nextActions || []).join("; ")}`
+      : `Build a sharper ${activeWorkflow.title.toLowerCase()} for ${inputs.campaign || projectName || "this project"} using product ${inputs.product || "to be defined"}, audience ${inputs.audience || "to be defined"}, channels ${inputs.channels || "to be defined"}, goal ${inputs.goal || "to be defined"}, timeframe ${inputs.timeframe || "to be defined"}, budget ${inputs.budget || "to be defined"}, and notes ${inputs.notes || "none"}.`;
+
+    pushPromptToAiCommand({
+      activeWorkflow,
+      prompt,
+      modeId: activeWorkflow.aiModeId,
+      responseTitle: output?.title || activeWorkflow.title,
+      output
+    });
+    showMessage?.("Workflow context pushed to AI Command.");
+  };
+
+  const recommendBtn = $("workflowRecommendBtn");
+  if (recommendBtn) {
+    recommendBtn.onclick = () => {
       const activeWorkflow = getWorkflowDef(session.selectedWorkflowId);
       const inputs = session.inputsByWorkflow[activeWorkflow.id];
-      const output = session.runsByWorkflow[activeWorkflow.id].output;
-      const prompt = output
-        ? `Refine this ${activeWorkflow.title.toLowerCase()} output for ${inputs.campaign || projectName || "this project"}.\n\nSummary: ${output.summary}\n\nNext actions: ${output.nextActions.join("; ")}`
-        : `Build a sharper ${activeWorkflow.title.toLowerCase()} for ${inputs.campaign || projectName || "this project"} using product ${inputs.product || "to be defined"}, audience ${inputs.audience || "to be defined"}, channels ${inputs.channels || "to be defined"}, goal ${inputs.goal || "to be defined"}, timeframe ${inputs.timeframe || "to be defined"}, budget ${inputs.budget || "to be defined"}, and notes ${inputs.notes || "none"}.`;
-      const aiDraft = {
-        projectName,
-        modeId: activeWorkflow.aiModeId,
-        lastCommand: prompt,
-        lastResponseTitle: output?.title || activeWorkflow.title,
-        routeSuggestions: []
-      };
-      setSharedAiDraft(projectName, aiDraft);
-      setSharedHandoff(projectName, "ai-command", {
-        source_page: "workflows",
-        destination_page: "ai-command",
-        linked_entity: {
-          entity_type: "workflow_run",
-          entity_id: currentRun.runId || ""
-        },
-        payload: {
-          prompt,
-          workflow_id: activeWorkflow.id,
-          workflow_title: activeWorkflow.title,
-          draft_context: aiDraft,
-          output
-        }
+      const workflowSummary = WORKFLOW_CATALOG.map((item) => `- ${item.title}: ${item.description}`).join("\n");
+      const prompt = [
+        "Recommend the best workflow to run now and explain why.",
+        `Project: ${projectName || "unknown"}`,
+        `Campaign: ${inputs.campaign || "not provided"}`,
+        `Goal: ${inputs.goal || "not provided"}`,
+        `Audience: ${inputs.audience || "not provided"}`,
+        `Channels: ${inputs.channels || "not provided"}`,
+        "",
+        "Available workflows:",
+        workflowSummary,
+        "",
+        "Return: recommended workflow, reasoning, required inputs still missing, and immediate next step."
+      ].join("\n");
+
+      pushPromptToAiCommand({
+        activeWorkflow,
+        prompt,
+        modeId: "operations",
+        responseTitle: "Workflow Recommendation",
+        output: session.runsByWorkflow[activeWorkflow.id].output
       });
-      createProjectHandoff?.(projectName, {
-        source_page: "workflows",
-        destination_page: "ai-command",
-        linked_entity: {
-          entity_type: "workflow_run",
-          entity_id: currentRun.runId || ""
-        },
-        payload: {
-          prompt,
-          workflow_id: activeWorkflow.id,
-          workflow_title: activeWorkflow.title,
-          draft_context: aiDraft,
-          output
-        }
-      }).catch((error) => {
-        console.warn("Failed to persist workflow-to-AI handoff:", error.message);
+      showMessage?.("Workflow recommendation prompt sent to AI Command.");
+    };
+  }
+
+  const customBtn = $("workflowBuildCustomBtn");
+  if (customBtn) {
+    customBtn.onclick = () => {
+      const activeWorkflow = getWorkflowDef(session.selectedWorkflowId);
+      const inputs = session.inputsByWorkflow[activeWorkflow.id];
+      const prompt = [
+        "Build a custom business workflow automation blueprint.",
+        `Project: ${projectName || "unknown"}`,
+        `Campaign: ${inputs.campaign || "not provided"}`,
+        `Product: ${inputs.product || "not provided"}`,
+        `Audience: ${inputs.audience || "not provided"}`,
+        `Goal: ${inputs.goal || "not provided"}`,
+        `Channels: ${inputs.channels || "not provided"}`,
+        `Timeframe: ${inputs.timeframe || "not provided"}`,
+        `Budget: ${inputs.budget || "not provided"}`,
+        `Notes: ${inputs.notes || "none"}`,
+        "",
+        "Return: workflow name, purpose, required inputs, 5-8 ordered execution steps, output package, handoff targets, and KPI checks."
+      ].join("\n");
+
+      pushPromptToAiCommand({
+        activeWorkflow,
+        prompt,
+        modeId: "operations",
+        responseTitle: "Custom Workflow Builder",
+        output: session.runsByWorkflow[activeWorkflow.id].output
       });
-      navigateTo("ai-command");
-      const globalInput = $("quickCommandInput");
-      if (globalInput) {
-        globalInput.value = prompt;
-      }
-      showMessage?.("Workflow context pushed to AI Command.");
-  };
+      showMessage?.("Custom workflow builder prompt sent to AI Command.");
+    };
+  }
 
   const pushAiBtn = $("workflowPushAiBtn");
   if (pushAiBtn) {
@@ -1347,6 +1523,8 @@ export const workflowsRoute = {
       const currentRun = session.runsByWorkflow[selectedWorkflow.id];
       const workflowContext = buildWorkflowContext(state, session);
       const roleRouting = buildRoleAwareRouting(state.data.operations, session.activeRole, selectedWorkflow);
+      const overviewCounts = buildWorkflowOverviewCounts(session, workflowContext);
+      const runningWorkflowRows = buildRunningWorkflowRows(session, workflowContext);
       const campaignDraft = getCampaignDraft(projectName, state.data.operations);
       const aiDraft = getAiDraft(projectName, state.data.operations);
       const root = $("workflowsRoot");
@@ -1378,133 +1556,157 @@ export const workflowsRoute = {
         rerender: render
       });
 
-      const intelligenceLabel =
-        session.intelligence.status === "loading"
-          ? "Refreshing intelligence"
-          : session.intelligence.status === "ready"
-            ? "Live intelligence loaded"
-            : session.intelligence.status === "error"
-              ? "Intelligence limited"
-              : "Waiting for intelligence";
+      // ── derived helpers ────────────────────────────────────────────────────
+      const inputsReady = selectedWorkflow.requiredInputs.every((key) =>
+        asString(currentInputs[key.toLowerCase()]).trim()
+      );
+      const hasOutput   = Boolean(currentRun.output?.summary);
+      const isRunning   = normalizeWorkflowStatus(currentRun.status) === "running";
+      const runBtnLabel = isRunning ? "Running…" : "Run Workflow";
+      const intelStatus = session.intelligence.status;
+
+      const intelBadge = intelStatus === "ready"
+        ? `<span class="card-badge success">Intelligence live</span>`
+        : intelStatus === "loading"
+          ? `<span class="card-badge warning">Loading…</span>`
+          : intelStatus === "error"
+            ? `<span class="card-badge danger">Intelligence limited</span>`
+            : `<span class="card-badge neutral">Not loaded</span>`;
 
       root.innerHTML = `
-        <div class="workflows-wrapper">
-          <div class="workflows-layout">
-            <section class="workflows-catalog">
-              <div class="card">
+        <div class="wf-shell">
+
+          <!-- ① PAGE HEADER -->
+          <header class="wf-header">
+            <div class="wf-header-left">
+              <p class="wf-header-eyebrow">Workflow Automation</p>
+              <h2 class="wf-header-title">Run a structured workflow to turn context into execution.</h2>
+            </div>
+            <div class="wf-header-right">
+              ${intelBadge}
+              <button id="workflowRunBtn" class="btn btn-primary wf-run-btn" type="button"
+                ${isRunning ? "disabled" : ""}>
+                ${escapeHtml(runBtnLabel)}
+              </button>
+            </div>
+          </header>
+
+          <!-- ② STATUS STRIP -->
+          <div class="wf-status-strip">
+            <div class="wf-status-pill">
+              <span class="wf-status-label">Selected</span>
+              <strong class="wf-status-value">${escapeHtml(selectedWorkflow.title)}</strong>
+            </div>
+            <div class="wf-status-pill">
+              <span class="wf-status-label">Status</span>
+              <strong class="wf-status-value">
+                <span class="card-badge ${statusTone(currentRun.status)}">${escapeHtml(titleCase(normalizeWorkflowStatus(currentRun.status)))}</span>
+              </strong>
+            </div>
+            <div class="wf-status-pill">
+              <span class="wf-status-label">Inputs ready</span>
+              <strong class="wf-status-value">${inputsReady ? "✓ All filled" : "Incomplete"}</strong>
+            </div>
+            <div class="wf-status-pill">
+              <span class="wf-status-label">Completed runs</span>
+              <strong class="wf-status-value">${escapeHtml(String(overviewCounts.completed))}</strong>
+            </div>
+            ${overviewCounts.running ? `
+            <div class="wf-status-pill is-warning">
+              <span class="wf-status-label">Active</span>
+              <strong class="wf-status-value">${escapeHtml(String(overviewCounts.running))} running</strong>
+            </div>` : ""}
+            ${overviewCounts.failed ? `
+            <div class="wf-status-pill is-danger">
+              <span class="wf-status-label">Failed</span>
+              <strong class="wf-status-value">${escapeHtml(String(overviewCounts.failed))}</strong>
+            </div>` : ""}
+          </div>
+
+          <!-- ③ MAIN BODY -->
+          <div class="wf-body">
+
+            <!-- LEFT: workflow picker -->
+            <nav class="wf-catalog" aria-label="Workflow catalog">
+              <p class="wf-section-label">Choose workflow</p>
+              ${WORKFLOW_CATALOG.map((workflow) => {
+                const run  = session.runsByWorkflow[workflow.id];
+                const tone = statusTone(run.status);
+                const active = workflow.id === selectedWorkflow.id;
+                return `
+                  <button class="wf-pick-card${active ? " is-active" : ""}" type="button"
+                    data-workflow-card="${escapeHtml(workflow.id)}">
+                    <div class="wf-pick-top">
+                      <span class="wf-pick-name">${escapeHtml(workflow.title)}</span>
+                      <span class="card-badge ${tone}">${escapeHtml(titleCase(normalizeWorkflowStatus(run.status)))}</span>
+                    </div>
+                    <p class="wf-pick-desc">${escapeHtml(workflow.description)}</p>
+                    ${active ? `<div class="wf-pick-active-bar"></div>` : ""}
+                  </button>
+                `;
+              }).join("")}
+            </nav>
+
+            <!-- CENTER: workspace -->
+            <div class="wf-workspace">
+
+              <!-- STEP 1: Review the workflow -->
+              <div class="card wf-step-card">
                 <div class="card-head">
                   <div>
-                    <div class="setup-kicker">Execution Orchestration</div>
-                    <h3>Workflow Catalog</h3>
-                    <p class="workflow-section-copy">Select a workflow first. Running from the catalog immediately switches to that workflow and starts execution.</p>
+                    <p class="wf-step-label">Step 1 of 3</p>
+                    <h3>${escapeHtml(selectedWorkflow.title)}</h3>
+                    <p class="wf-step-purpose">${escapeHtml(selectedWorkflow.description)}</p>
                   </div>
-                  <span class="card-badge neutral">${escapeHtml(`${WORKFLOW_CATALOG.length} workflows`)}</span>
+                  <span class="card-badge ${statusTone(currentRun.status)}">${escapeHtml(titleCase(normalizeWorkflowStatus(currentRun.status)))}</span>
                 </div>
-                <div class="workflows-card-list">
-                  ${WORKFLOW_CATALOG.map((workflow) => {
-                    const run = session.runsByWorkflow[workflow.id];
-                    return `
-                      <button class="workflow-card${workflow.id === selectedWorkflow.id ? " is-active" : ""}" type="button" data-workflow-card="${escapeHtml(workflow.id)}">
-                        <div class="workflow-card-head">
-                          <div class="workflow-card-title-group">
-                            <strong>${escapeHtml(workflow.title)}</strong>
-                            <span class="workflow-card-meta">${escapeHtml(`${workflow.requiredInputs.length} inputs`)}</span>
-                          </div>
-                          <span class="card-badge ${run.status === "completed" ? "success" : run.status === "running" ? "warning" : "neutral"}">${escapeHtml(titleCase(run.status))}</span>
-                        </div>
-                        <p>${escapeHtml(workflow.description)}</p>
-                        <div class="workflow-card-summary">
-                          <span class="workflow-card-label">Last output</span>
-                          <div class="workflow-card-copy">${escapeHtml(run.output?.summary || "No run output yet.")}</div>
-                        </div>
-                        <div class="workflow-card-actions">
-                          <button class="btn btn-secondary" type="button" data-workflow-run="${escapeHtml(workflow.id)}">Run Workflow</button>
-                        </div>
-                      </button>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
-            </section>
-
-            <section class="workflows-main">
-              <div class="card">
-                <div class="card-head">
-                  <h3>Workflow Overview</h3>
-                  <span class="card-badge ${currentRun.status === "completed" ? "success" : currentRun.status === "running" ? "warning" : "neutral"}">${escapeHtml(titleCase(currentRun.status))}</span>
-                </div>
-                <p class="workflow-section-copy">Use the page in order: select a workflow, review the details, complete the inputs, run it, then monitor the output and route follow-up work.</p>
-                <div class="workflow-overview-grid">
-                  <div class="workflow-source-item">
-                    <span>Selected workflow</span>
-                    <strong>${escapeHtml(selectedWorkflow.title)}</strong>
-                  </div>
-                  <div class="workflow-source-item">
-                    <span>Intelligence</span>
-                    <strong>${escapeHtml(intelligenceLabel)}</strong>
-                  </div>
-                  <div class="workflow-source-item">
-                    <span>Last run</span>
-                    <strong>${escapeHtml(formatDateTime(currentRun.lastRun))}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-head">
-                  <h3>Selected Workflow Details</h3>
-                  <span class="card-badge neutral">Review</span>
-                </div>
-                <div class="workflow-detail-stack">
-                  <div class="ai-output-card">
-                    <span class="ai-output-label">What this workflow does</span>
-                    <strong>${escapeHtml(selectedWorkflow.title)}</strong>
-                    <p>${escapeHtml(selectedWorkflow.description)}</p>
-                  </div>
-                  <div class="workflow-detail-grid">
-                    ${renderOutputBlock("Expected Output", [selectedWorkflow.expectedOutput], escapeHtml, "No expected output defined.")}
-                    <div class="ai-output-card">
-                      <span class="ai-output-label">Routing Context</span>
-                      <strong>${escapeHtml(titleCase(session.activeRole))}</strong>
-                      <p>${escapeHtml(roleRouting.workflowHint)}</p>
+                <div class="wf-what-you-get">
+                  <div class="wf-what-block">
+                    <p class="wf-section-label">You need to provide</p>
+                    <div class="wf-tag-row">
+                      ${selectedWorkflow.requiredInputs.map((inp) => `
+                        <span class="wf-tag ${asString(currentInputs[inp.toLowerCase()]).trim() ? "is-filled" : ""}">${escapeHtml(inp)}</span>
+                      `).join("")}
                     </div>
                   </div>
+                  <div class="wf-what-block">
+                    <p class="wf-section-label">You will receive</p>
+                    <p class="wf-output-desc">${escapeHtml(selectedWorkflow.expectedOutput)}</p>
+                  </div>
                 </div>
               </div>
 
-              <div class="card">
+              <!-- STEP 2: Inputs -->
+              <div class="card wf-step-card">
                 <div class="card-head">
-                  <h3>Required Inputs</h3>
-                  <span class="card-badge neutral">Provide inputs</span>
-                </div>
-                <div class="workflow-section-copy">
-                  Inputs can come from Campaign Studio, AI Command, or manual entry. Copying from those sources prepares the form only. The workflow runs when you explicitly use Run Workflow.
-                </div>
-                <div class="workflow-overview-grid">
-                  <div class="workflow-source-item">
-                    <span>Campaign Studio draft</span>
-                    <strong>${escapeHtml(campaignDraft.campaignName ? "Available" : "Not loaded")}</strong>
+                  <div>
+                    <p class="wf-step-label">Step 2 of 3</p>
+                    <h3>Fill Inputs</h3>
                   </div>
-                  <div class="workflow-source-item">
-                    <span>AI Command context</span>
-                    <strong>${escapeHtml(aiDraft.lastCommand ? "Available" : "Not loaded")}</strong>
-                  </div>
-                  <div class="workflow-source-item">
-                    <span>Project intelligence</span>
-                    <strong>${escapeHtml(workflowContext.hasLiveIntelligence ? "Live" : "Fallback")}</strong>
+                  <div class="wf-import-row">
+                    <button id="workflowUseCampaignBtn" class="btn btn-secondary"
+                      type="button" title="Copy inputs from Campaign Studio draft">
+                      ${escapeHtml(campaignDraft.campaignName ? "↙ Campaign Studio" : "Campaign Studio")}
+                    </button>
+                    <button id="workflowUseAiBtn" class="btn btn-secondary"
+                      type="button" title="Copy context from last AI Command session">
+                      ${escapeHtml(aiDraft.lastCommand ? "↙ AI Command" : "AI Command")}
+                    </button>
+                    <button id="workflowResetInputsBtn" class="btn btn-ghost"
+                      type="button">Reset</button>
+                    <button class="btn btn-ghost"
+                      type="button" data-wf-refresh>↻ Intelligence</button>
                   </div>
                 </div>
-                <div class="workflow-input-actions">
-                  <button id="workflowUseCampaignBtn" class="btn btn-secondary" type="button">Use Campaign Studio Inputs</button>
-                  <button id="workflowUseAiBtn" class="btn btn-secondary" type="button">Use AI Command Context</button>
-                  <button id="workflowResetInputsBtn" class="btn btn-secondary" type="button">Reset to Project Defaults</button>
-                </div>
+                ${session.intelligence.error
+                  ? `<div class="empty-box" style="margin-bottom:12px;">${escapeHtml(session.intelligence.error)}</div>`
+                  : ""}
                 <form id="workflowInputForm" class="setup-form-grid setup-form-grid-2">
                   ${renderField({
                     name: "campaign",
                     label: "Campaign",
                     value: currentInputs.campaign,
-                    helper: "Campaign name or launch label this workflow should operate against.",
+                    helper: "Campaign name or launch label.",
                     placeholder: "Spring launch wave 1",
                     escapeHtml
                   })}
@@ -1512,7 +1714,7 @@ export const workflowsRoute = {
                     name: "product",
                     label: "Product",
                     value: currentInputs.product,
-                    helper: "Primary product, offer family, or focus area.",
+                    helper: "Primary product or offer family.",
                     placeholder: "Hero product or bundle",
                     escapeHtml
                   })}
@@ -1520,8 +1722,8 @@ export const workflowsRoute = {
                     name: "audience",
                     label: "Audience",
                     value: currentInputs.audience,
-                    helper: "The main audience this workflow should optimize for.",
-                    placeholder: "Primary audience",
+                    helper: "Who this workflow optimises for.",
+                    placeholder: "Primary audience segment",
                     escapeHtml,
                     multiline: true
                   })}
@@ -1529,7 +1731,7 @@ export const workflowsRoute = {
                     name: "channels",
                     label: "Channels",
                     value: currentInputs.channels,
-                    helper: "Comma-separated channels or destinations in scope.",
+                    helper: "Comma-separated channels in scope.",
                     placeholder: "instagram, email, website",
                     escapeHtml
                   })}
@@ -1537,15 +1739,15 @@ export const workflowsRoute = {
                     name: "goal",
                     label: "Goal",
                     value: currentInputs.goal,
-                    helper: "Business or execution outcome the workflow should target.",
-                    placeholder: "Launch, growth, retention, traffic",
+                    helper: "Outcome the workflow should target.",
+                    placeholder: "Launch, growth, retention",
                     escapeHtml
                   })}
                   ${renderField({
                     name: "timeframe",
                     label: "Timeframe",
                     value: currentInputs.timeframe,
-                    helper: "Launch window, reporting window, or planning range.",
+                    helper: "Planning or reporting window.",
                     placeholder: "Next 14 days",
                     escapeHtml
                   })}
@@ -1553,145 +1755,185 @@ export const workflowsRoute = {
                     name: "budget",
                     label: "Budget",
                     value: currentInputs.budget,
-                    helper: "Working budget number if allocation matters.",
+                    helper: "Working budget if allocation matters.",
                     placeholder: "5000",
                     escapeHtml
                   })}
                   ${renderField({
                     name: "notes",
-                    label: "Optional notes",
+                    label: "Notes",
                     value: currentInputs.notes,
-                    helper: "Any user instruction, AI hint, or execution caveat.",
-                    placeholder: "Constraints, priorities, or direction",
+                    helper: "Constraints, priorities, or direction.",
+                    placeholder: "Optional — anything the AI should know",
                     escapeHtml,
                     multiline: true,
-                    rows: 4
+                    rows: 3
                   })}
                 </form>
+                <div class="wf-run-prompt">
+                  <button id="workflowRunBtnMain" class="btn btn-primary wf-run-btn-lg" type="button"
+                    ${isRunning ? "disabled" : ""}>
+                    ${escapeHtml(runBtnLabel)}
+                  </button>
+                  <p class="wf-run-hint">
+                    Inputs auto-save. Run builds a structured output from your project context, intelligence, and these fields.
+                  </p>
+                </div>
               </div>
 
-              <div class="card">
+              <!-- STEP 3: Output -->
+              <div class="card wf-step-card">
                 <div class="card-head">
-                  <h3>Execution Actions / Status</h3>
-                  <span class="card-badge ${currentRun.status === "completed" ? "success" : currentRun.status === "running" ? "warning" : "neutral"}">${escapeHtml(titleCase(currentRun.status))}</span>
+                  <div>
+                    <p class="wf-step-label">Step 3 of 3</p>
+                    <h3>Output &amp; Next Action</h3>
+                  </div>
+                  ${hasOutput ? `<span class="card-badge success">Ready to route</span>` : `<span class="card-badge neutral">Waiting for run</span>`}
                 </div>
-                <p class="workflow-section-copy">Run executes immediately. Route buttons carry the latest workflow output into another workspace. Save as Structured Task stores the output locally for follow-through.</p>
-                <div class="workflow-action-row">
-                  <button id="workflowRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
-                  <button id="workflowRunBtn" class="btn btn-primary" type="button">${escapeHtml(currentRun.status === "running" ? "Running..." : "Run Workflow")}</button>
-                </div>
-                <div class="workflow-overview-grid">
-                  <div class="workflow-execution-item">
-                    <span>Status</span>
-                    <strong>${escapeHtml(titleCase(currentRun.status))}</strong>
+
+                ${isRunning ? `
+                  <div class="wf-running-state">
+                    <div class="loading-spinner"></div>
+                    <p>Collecting inputs, loading intelligence, and generating structured output…</p>
                   </div>
-                  <div class="workflow-execution-item">
-                    <span>Output preview</span>
-                    <strong>${escapeHtml(currentRun.output?.summary ? "Available" : "Empty")}</strong>
+                ` : hasOutput ? `
+                  <!-- output summary -->
+                  <div class="wf-output-summary">
+                    <p class="wf-output-text">${escapeHtml(currentRun.output.summary)}</p>
                   </div>
-                  <div class="workflow-execution-item">
-                    <span>History entries</span>
-                    <strong>${escapeHtml(String(currentRun.history.length))}</strong>
+                  <div class="wf-output-grid">
+                    ${renderOutputBlock("Key Decisions",   currentRun.output.keyDecisions,   escapeHtml, "None generated.")}
+                    ${renderOutputBlock("Execution Plan",  currentRun.output.executionPlan,  escapeHtml, "None generated.")}
+                    ${renderOutputBlock("Required Assets", currentRun.output.requiredAssets, escapeHtml, "None identified.")}
+                    ${renderOutputBlock("Suggested Channels", currentRun.output.suggestedChannels, escapeHtml, "None suggested.")}
+                    ${renderOutputBlock("Risks / Blockers",   currentRun.output.risks,       escapeHtml, "No blockers detected.")}
+                    ${renderOutputBlock("Next Actions",    currentRun.output.nextActions,    escapeHtml, "None generated.")}
                   </div>
-                </div>
-                ${
-                  session.intelligence.error
-                    ? `<div class="empty-box">${escapeHtml(`Intelligence warning: ${session.intelligence.error}`)}</div>`
-                    : ""
-                }
-                <div class="workflow-route-block">
-                  <div class="workflow-subsection-head">
-                    <h4>Open Next Workspace</h4>
-                    <span class="card-badge neutral">${escapeHtml(String(roleRouting.targets.length + 1))}</span>
-                  </div>
-                  <div class="workflow-route-actions">
-                    ${roleRouting.targets.map((target) => `
-                      <button class="quick-action-btn" type="button" data-workflow-route="${escapeHtml(target.id)}">
-                        <span class="home-action-title">${escapeHtml(target.label.replace(/^Send to /, "Route to "))}</span>
-                        <span class="home-action-meta">Carry the current workflow output into ${escapeHtml(titleCase(target.id))}.</span>
+
+                  <!-- ④ NEXT ACTION — route or save -->
+                  <div class="wf-next-action">
+                    <p class="wf-section-label">👉 Where should this output go?</p>
+                    <p class="wf-next-hint">Route it into the workspace that picks up from here, or save as a task for later follow-through.</p>
+                    <div class="wf-route-grid">
+                      ${roleRouting.targets.map((target) => `
+                        <button class="wf-route-btn" type="button" data-workflow-route="${escapeHtml(target.id)}">
+                          ${escapeHtml(target.label.replace(/^Send to /, ""))}
+                          <span class="wf-route-arrow">→</span>
+                        </button>
+                      `).join("")}
+                      <button id="workflowSaveTaskBtn" class="wf-route-btn is-save" type="button">
+                        Save as Task <span class="wf-route-arrow">↓</span>
                       </button>
-                    `).join("")}
-                    <button id="workflowSaveTaskBtn" class="quick-action-btn" type="button">
-                      <span class="home-action-title">Save as Structured Task</span>
-                      <span class="home-action-meta">Store the current workflow output for follow-through without leaving this page.</span>
+                      <button id="workflowPushAiBtn" class="wf-route-btn is-ai" type="button">
+                        Refine in AI Command <span class="wf-route-arrow">→</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- history -->
+                  ${currentRun.history.length > 1 ? `
+                    <details class="wf-history">
+                      <summary class="wf-history-toggle">Previous runs (${escapeHtml(String(currentRun.history.length))})</summary>
+                      <div class="wf-history-list">
+                        ${currentRun.history.slice(1, 6).map((item) => `
+                          <div class="wf-history-row">
+                            <span class="wf-history-time">${escapeHtml(formatDateTime(item.createdAt))}</span>
+                            <span class="wf-history-summary">${escapeHtml(item.output?.summary || "Structured output saved.")}</span>
+                          </div>
+                        `).join("")}
+                      </div>
+                    </details>
+                  ` : ""}
+                ` : `
+                  <div class="wf-empty-output">
+                    <p>Complete the inputs above, then hit <strong>Run Workflow</strong> to generate your structured output.</p>
+                    <button class="btn btn-primary wf-run-btn" type="button"
+                      data-workflow-run="${escapeHtml(selectedWorkflow.id)}">
+                      Run Workflow
                     </button>
                   </div>
-                </div>
-                <div class="workflow-route-block">
-                  <div class="workflow-subsection-head">
-                    <h4>Recent Execution History</h4>
-                    <span class="card-badge neutral">${escapeHtml(String(currentRun.history.length))}</span>
-                  </div>
-                  ${
-                    currentRun.history.length
-                      ? `
-                        <div class="workflow-history-list">
-                          ${currentRun.history.map((item) => `
-                            <div class="workflow-history-item">
-                              <strong>${escapeHtml(formatDateTime(item.createdAt))}</strong>
-                              <span>${escapeHtml(item.output?.summary || "Structured output saved.")}</span>
-                            </div>
-                          `).join("")}
-                        </div>
-                      `
-                      : `<div class="empty-box">No workflow history yet. Run the selected workflow to start an execution trail.</div>`
-                  }
-                </div>
-                ${
-                  currentRun.status === "running"
-                    ? `<div class="workflow-loading">Collecting inputs, loading dashboard, insights, learning, and generating a structured workflow output.</div>`
-                    : currentRun.output
-                      ? `
-                        <div class="ai-response-grid">
-                          <div class="ai-output-card ai-output-span">
-                            <span class="ai-output-label">Summary</span>
-                            <strong>${escapeHtml(selectedWorkflow.title)}</strong>
-                            <p>${escapeHtml(currentRun.output.summary)}</p>
-                          </div>
-                          ${renderOutputBlock("Key Decisions", currentRun.output.keyDecisions, escapeHtml, "No decisions generated yet.")}
-                          ${renderOutputBlock("Execution Plan", currentRun.output.executionPlan, escapeHtml, "No execution plan generated yet.")}
-                          ${renderOutputBlock("Required Assets", currentRun.output.requiredAssets, escapeHtml, "No required assets identified yet.")}
-                          ${renderOutputBlock("Suggested Channels", currentRun.output.suggestedChannels, escapeHtml, "No channels suggested yet.")}
-                          ${renderOutputBlock("Risks / Blockers", currentRun.output.risks, escapeHtml, "No blockers detected.")}
-                          ${renderOutputBlock("Next Actions", currentRun.output.nextActions, escapeHtml, "No next actions generated yet.")}
-                        </div>
-                      `
-                      : `<div class="empty-box">Run the selected workflow to generate a structured output using project context, insights, learning, and current recommendations.</div>`
-                }
+                `}
               </div>
-            </section>
 
-            <aside class="workflows-side">
+            </div><!-- /wf-workspace -->
+
+            <!-- RIGHT: AI sidebar -->
+            <aside class="wf-ai-side">
               <div class="card">
                 <div class="card-head">
-                  <h3>Workflow AI Assistant</h3>
-                  <span class="card-badge neutral">Assist</span>
+                  <h3>AI Assistant</h3>
+                  <span class="card-badge neutral">This page</span>
                 </div>
-                <p class="workflow-section-copy">Send to AI Command prefills the assistant with the current workflow context and then navigates there. It does not execute the workflow.</p>
-                <div class="workflow-routing-list">
+                <p class="wf-side-copy">Not sure which workflow to run? Let AI recommend one or build a custom blueprint.</p>
+                <div class="wf-ai-actions">
+                  <button id="workflowRecommendBtn" class="quick-action-btn" type="button">
+                    <span class="home-action-title">Recommend a Workflow</span>
+                    <span class="home-action-meta">AI picks the highest-impact workflow for right now and explains why.</span>
+                  </button>
+                  <button id="workflowBuildCustomBtn" class="quick-action-btn" type="button">
+                    <span class="home-action-title">Build Custom Workflow</span>
+                    <span class="home-action-meta">Generate a bespoke workflow with steps, handoffs, and KPI checks.</span>
+                  </button>
                   <button id="workflowPushAiBtnSecondary" class="quick-action-btn" type="button">
-                    <span class="home-action-title">Send to AI Command</span>
-                    <span class="home-action-meta">Prefill AI Command with the current workflow context and open that page.</span>
+                    <span class="home-action-title">Refine Current in AI</span>
+                    <span class="home-action-meta">Push current workflow context to AI Command for deeper refinement.</span>
                   </button>
                 </div>
-                <div class="workflow-history-list">
-                  <div class="workflow-history-item">
-                    <strong>Selection stays separate from execution</strong>
-                    <span>Choose a workflow from the catalog without running it.</span>
+              </div>
+
+              <!-- intelligence status -->
+              <div class="card">
+                <div class="card-head">
+                  <h3>Intelligence</h3>
+                  ${intelBadge}
+                </div>
+                <div class="wf-intel-rows">
+                  <div class="wf-intel-row">
+                    <span>Campaign draft</span>
+                    <span class="card-badge ${campaignDraft.campaignName ? "success" : "neutral"}">${escapeHtml(campaignDraft.campaignName ? "Available" : "Not set")}</span>
                   </div>
-                  <div class="workflow-history-item">
-                    <strong>Inputs stay editable before run</strong>
-                    <span>Copy context from other pages or type directly into the input form.</span>
+                  <div class="wf-intel-row">
+                    <span>AI context</span>
+                    <span class="card-badge ${aiDraft.lastCommand ? "success" : "neutral"}">${escapeHtml(aiDraft.lastCommand ? "Available" : "Not set")}</span>
                   </div>
-                  <div class="workflow-history-item">
-                    <strong>Execution stays explicit</strong>
-                    <span>Run starts immediately, then this page shows the current status, output, and routing options.</span>
+                  <div class="wf-intel-row">
+                    <span>Live signals</span>
+                    <span class="card-badge ${workflowContext.hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(workflowContext.hasLiveIntelligence ? "Live" : "Fallback")}</span>
                   </div>
+                  ${workflowContext.connectedChannels.length ? `
+                  <div class="wf-intel-row">
+                    <span>Connected channels</span>
+                    <span>${escapeHtml(workflowContext.connectedChannels.join(", "))}</span>
+                  </div>` : ""}
+                  ${workflowContext.missingIntegrations.length ? `
+                  <div class="wf-intel-row is-warning">
+                    <span>Missing integrations</span>
+                    <span>${escapeHtml(workflowContext.missingIntegrations.slice(0, 3).join(", "))}</span>
+                  </div>` : ""}
+                </div>
+                <button id="workflowRefreshIntelligenceBtn" class="btn btn-ghost" type="button"
+                  style="margin-top:8px;width:100%;">↻ Refresh intelligence</button>
+              </div>
+
+              <!-- flow guide -->
+              <div class="card">
+                <div class="card-head">
+                  <h3>You are here</h3>
+                </div>
+                <div class="wf-flow-guide">
+                  <div class="wf-flow-step is-done">Setup</div>
+                  <div class="wf-flow-arrow">→</div>
+                  <div class="wf-flow-step is-done">Campaign Studio</div>
+                  <div class="wf-flow-arrow">→</div>
+                  <div class="wf-flow-step is-current">Workflows</div>
+                  <div class="wf-flow-arrow">→</div>
+                  <div class="wf-flow-step">Content / Media / Publishing / Ads</div>
                 </div>
               </div>
             </aside>
-          </div>
-        </div>
+
+          </div><!-- /wf-body -->
+        </div><!-- /wf-shell -->
       `;
 
       bindWorkflowCatalog({

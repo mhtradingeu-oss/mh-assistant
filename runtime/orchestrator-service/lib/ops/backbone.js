@@ -98,6 +98,10 @@ const STATUS_MODELS = {
   },
   events: {
     categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+  },
+  execution_bridges: {
+    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
   }
 };
 

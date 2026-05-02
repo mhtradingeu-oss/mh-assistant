@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SERVER_FILE="$ROOT_DIR/runtime/orchestrator-service/server.js"
 LOG_DIR="${TMPDIR:-/tmp}/mh-orchestrator-stability"
+TEST_PROJECT="${MH_TEST_PROJECT:-${MH_DEFAULT_PROJECT:-phase375smoke}}"
 mkdir -p "$LOG_DIR"
 
 if [[ ! -f "$SERVER_FILE" ]]; then
@@ -110,7 +111,7 @@ code="$(http_status GET "http://127.0.0.1:$CASE1_PORT/readyz" "$CASE1_BODY")"
 assert_status "readyz when key missing" "503" "$code"
 assert_contains "readyz missing env marker" "$CASE1_BODY" '"MH_CONTROL_CENTER_WRITE_KEY"'
 
-code="$(http_status POST "http://127.0.0.1:$CASE1_PORT/media-manager/project/hairoticmen/approvals" "$CASE1_BODY" -H "Content-Type: application/json" -d '{}')"
+code="$(http_status POST "http://127.0.0.1:$CASE1_PORT/media-manager/project/$TEST_PROJECT/approvals" "$CASE1_BODY" -H "Content-Type: application/json" -d '{}')"
 assert_status "protected write without configured key" "503" "$code"
 
 
@@ -125,10 +126,10 @@ code="$(http_status GET "http://127.0.0.1:$CASE2_PORT/readyz" "$CASE2_BODY")"
 assert_status "readyz when key configured" "200" "$code"
 assert_contains "readyz configured flag" "$CASE2_BODY" '"key_configured":true'
 
-code="$(http_status POST "http://127.0.0.1:$CASE2_PORT/media-manager/project/hairoticmen/approvals" "$CASE2_BODY" -H "Content-Type: application/json" -d '{}')"
+code="$(http_status POST "http://127.0.0.1:$CASE2_PORT/media-manager/project/$TEST_PROJECT/approvals" "$CASE2_BODY" -H "Content-Type: application/json" -d '{}')"
 assert_status "protected write without provided key" "401" "$code"
 
-code="$(http_status POST "http://127.0.0.1:$CASE2_PORT/media-manager/project/hairoticmen/approvals" "$CASE2_BODY" -H "Content-Type: application/json" -H "x-mh-control-key: wrong-key" -d '{}')"
+code="$(http_status POST "http://127.0.0.1:$CASE2_PORT/media-manager/project/$TEST_PROJECT/approvals" "$CASE2_BODY" -H "Content-Type: application/json" -H "x-mh-control-key: wrong-key" -d '{}')"
 assert_status "protected write with invalid key" "403" "$code"
 
 code="$(http_status POST "http://127.0.0.1:$CASE2_PORT/publish-blog/not-a-real-draft" "$CASE2_BODY" -H "x-mh-control-key: test-write-key" -H "Content-Type: application/json" -d '{}')"
