@@ -338,13 +338,13 @@ function buildExecutiveData(state) {
         title: "System Health",
         value: formatPercent(systemScore),
         detail: dashboardLabelFromScore(systemScore),
-        tone: statusTone("", systemScore)
+        tone: statusTone("score", systemScore)
       },
       {
         title: "Project Readiness",
         value: formatPercent(readinessScore),
         detail: criticalGaps.length ? `${formatCount(criticalGaps.length)} blockers` : "Ready for scale",
-        tone: statusTone("", readinessScore)
+        tone: statusTone("score", readinessScore)
       },
       {
         title: "Automation",
@@ -464,13 +464,6 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
     };
   }
 
-  const secondaryBtn = $("homeExecSecondaryBtn");
-  if (secondaryBtn) {
-    secondaryBtn.onclick = () => {
-      navigateTo(dashboard.secondaryActionRoute);
-    };
-  }
-
   const nextBtn = $("homeExecNextActionBtn");
   if (nextBtn) {
     nextBtn.onclick = () => {
@@ -492,13 +485,6 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
     };
   }
 
-  const setupBtn = $("homeExecSetupBtn");
-  if (setupBtn) {
-    setupBtn.onclick = () => {
-      navigateTo("setup");
-    };
-  }
-
   const teamButtons = Array.from(document.querySelectorAll("[data-home-exec-agent]"));
   teamButtons.forEach((button) => {
     button.onclick = () => {
@@ -513,27 +499,18 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
   });
 
   const aiPromptButtons = Array.from(document.querySelectorAll("[data-home-ai-prompt]"));
-  aiPromptButtons.forEach((button) => {
-    button.onclick = () => {
-      const prompt = asString(button.getAttribute("data-home-ai-prompt"));
-      const input = $("quickCommandInput");
-      if (input) {
-        input.value = prompt;
-      }
-      navigateTo("ai-command");
-      showMessage?.("Executive prompt opened in AI Command.");
-    };
-  });
-
-  const aiChiefBtn = $("homeExecAiChiefBtn");
-  if (aiChiefBtn) {
-    aiChiefBtn.onclick = () => {
-      const input = $("quickCommandInput");
-      if (input) {
-        input.value = dashboard.aiChief.prompts[0];
-      }
-      navigateTo("ai-command");
-    };
+  if (aiPromptButtons.length) {
+    aiPromptButtons.forEach((button) => {
+      button.onclick = () => {
+        const prompt = asString(button.getAttribute("data-home-ai-prompt"));
+        const input = $("quickCommandInput");
+        if (input) {
+          input.value = prompt;
+        }
+        navigateTo("ai-command");
+        showMessage?.("Executive prompt opened in AI Command.");
+      };
+    });
   }
 }
 
@@ -562,149 +539,89 @@ export const homeRoute = {
       <div class="home-exec-shell">
         <section class="card home-exec-header">
           <div class="home-exec-header-main">
-            <div>
-              <div class="setup-kicker">${escapeHtml(dashboard.projectName || "Project not selected")}</div>
-              <h3 class="home-exec-project">Executive Command Center</h3>
-              <div class="home-exec-summary">${escapeHtml(dashboard.oneLineSummary)}</div>
+            <div class="home-exec-header-copy">
+              <div class="setup-kicker">Executive Project</div>
+              <h3 class="home-exec-project">${escapeHtml(dashboard.projectName || "Project not selected")}</h3>
+              <p class="home-exec-summary">${escapeHtml(dashboard.oneLineSummary)}</p>
             </div>
-            <div class="home-exec-header-actions">
-              <span class="card-badge ${dashboard.headerTone}">${escapeHtml(dashboard.headerStatus)}</span>
-              <button id="homeExecPrimaryBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.primaryActionLabel)}</button>
-              <button id="homeExecSecondaryBtn" class="btn btn-secondary" type="button">${escapeHtml(dashboard.secondaryActionLabel)}</button>
-            </div>
+            <button id="homeExecPrimaryBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.primaryActionLabel)}</button>
           </div>
         </section>
 
         <section class="card">
           <div class="card-head">
-            <h3>Page Power Summary</h3>
-            <span class="card-badge neutral">Executive Snapshot</span>
+            <h3>System Health</h3>
+            <span class="card-badge ${dashboard.headerTone}">${escapeHtml(dashboard.headerStatus)}</span>
           </div>
-          <div class="home-exec-power-grid">
-            ${dashboard.capabilities.map((capability) => `
-              <article class="home-exec-power-card tone-${escapeHtml(capability.tone)}">
-                <span class="data-label">${escapeHtml(capability.title)}</span>
-                <strong>${escapeHtml(capability.value)}</strong>
-                <p>${escapeHtml(capability.detail)}</p>
-              </article>
-            `).join("")}
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Current Status</h3>
-            <span class="card-badge ${dashboard.health.criticalAlerts ? "warning" : "success"}">${dashboard.health.criticalAlerts ? "Needs attention" : "Stable"}</span>
-          </div>
-          <div class="home-exec-status-grid">
-            ${dashboard.statusBoard.map((statusItem) => `
-              <article class="home-exec-status-card tone-${escapeHtml(statusItem.tone)}">
-                <span class="data-label">${escapeHtml(statusItem.label)}</span>
-                <strong>${escapeHtml(statusItem.value)}</strong>
-                <p>${escapeHtml(statusItem.hint)}</p>
-              </article>
-            `).join("")}
+          <div class="home-exec-health-grid">
+            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.systemScore))}">
+              <span class="data-label">System Score</span>
+              <strong>${escapeHtml(formatPercent(dashboard.health.systemScore))}</strong>
+              <p>${escapeHtml(dashboardLabelFromScore(dashboard.health.systemScore))}</p>
+            </article>
+            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.projectReadiness))}">
+              <span class="data-label">Readiness</span>
+              <strong>${escapeHtml(formatPercent(dashboard.health.projectReadiness))}</strong>
+              <p>Project launch confidence</p>
+            </article>
+            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.connectorReadiness))}">
+              <span class="data-label">Connectors</span>
+              <strong>${escapeHtml(formatPercent(dashboard.health.connectorReadiness))}</strong>
+              <p>Platform and channel coverage</p>
+            </article>
+            <article class="home-exec-metric tone-${escapeHtml(dashboard.health.automationTone)}">
+              <span class="data-label">Automation</span>
+              <strong>${escapeHtml(dashboard.health.automationStatus)}</strong>
+              <p>Scheduler and execution health</p>
+            </article>
+            <article class="home-exec-metric tone-${escapeHtml(dashboard.health.intelligenceTone)}">
+              <span class="data-label">Intelligence</span>
+              <strong>${escapeHtml(dashboard.health.intelligenceStatus)}</strong>
+              <p>Live insights and feedback loop</p>
+            </article>
+            <article class="home-exec-metric tone-${dashboard.health.criticalAlerts ? "danger" : "success"}">
+              <span class="data-label">Critical Alerts</span>
+              <strong>${escapeHtml(formatCount(dashboard.health.criticalAlerts))}</strong>
+              <p>${dashboard.health.criticalAlerts ? "Immediate attention required" : "No active critical alerts"}</p>
+            </article>
           </div>
         </section>
 
         <section class="home-exec-main-grid">
+          <section class="card home-exec-next">
+            <div class="card-head">
+              <h3>Next Best Action</h3>
+              <span class="card-badge warning">Recommended</span>
+            </div>
+            <p class="home-exec-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
+            <p class="home-exec-next-why">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+            <button id="homeExecNextActionBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.nextBestAction.buttonLabel)}</button>
+          </section>
+
           <section class="card home-exec-campaign">
             <div class="card-head">
-              <h3>Main Work Area</h3>
-              <span class="card-badge neutral">Campaign + Execution</span>
+              <h3>Active Campaign Snapshot</h3>
+              <span class="card-badge neutral">Live Status</span>
             </div>
-
             ${dashboard.campaign.name
               ? `
               <div class="home-exec-snapshot-grid">
                 <div class="data-row"><span>Campaign name</span><strong>${escapeHtml(dashboard.campaign.name)}</strong></div>
+                <div class="data-row"><span>Stage</span><strong>${escapeHtml(dashboard.campaign.currentStage)}</strong></div>
                 <div class="data-row"><span>Channels</span><strong>${escapeHtml(dashboard.campaign.channels.length ? dashboard.campaign.channels.join(", ") : "Not assigned")}</strong></div>
-                <div class="data-row"><span>Current stage</span><strong>${escapeHtml(dashboard.campaign.currentStage)}</strong></div>
                 <div class="data-row"><span>Next scheduled action</span><strong>${escapeHtml(dashboard.campaign.nextScheduledAction)}</strong></div>
               </div>
             `
-              : `<div class="empty-box">No active campaign is selected yet. Start in Campaign Studio to create your launch plan.</div>`
+              : `<div class="empty-box">No active campaign selected yet. Open Campaign Studio to start one.</div>`
             }
-
-            <div class="home-exec-stream-block">
-              <div class="home-exec-stream-head">
-                <h4>Recent Execution Summary</h4>
-              </div>
-              ${dashboard.recentExecutionSummary.length
-                ? `<ul class="home-exec-stream-list">
-                    ${dashboard.recentExecutionSummary.map((item) => `
-                      <li class="home-exec-stream-item">
-                        <div>
-                          <strong>${escapeHtml(item.channel)}</strong>
-                          <p>${escapeHtml(item.when)}</p>
-                        </div>
-                        <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.status)}</span>
-                      </li>
-                    `).join("")}
-                  </ul>`
-                : `<div class="empty-box">No execution events yet. Run a workflow or schedule publishing to populate timeline.</div>`
-              }
-            </div>
-
-            <div>
-              <button id="homeExecCampaignBtn" class="btn btn-secondary" type="button">Open Campaign Studio</button>
-            </div>
-          </section>
-
-          <section class="home-exec-side-stack">
-            <section class="card home-exec-next">
-              <div class="card-head">
-                <h3>Smart Next Action</h3>
-                <span class="card-badge warning">Recommended</span>
-              </div>
-              <p class="home-exec-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
-              <p class="home-exec-next-why">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
-              <div class="home-exec-next-actions">
-                <button id="homeExecNextActionBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.nextBestAction.buttonLabel)}</button>
-                <button id="homeExecSetupBtn" class="btn btn-secondary" type="button">Open Setup</button>
-              </div>
-            </section>
-
-            <section class="card home-exec-blockers">
-              <div class="card-head">
-                <h3>Critical Blockers</h3>
-                <span class="card-badge ${dashboard.blockers.length ? "danger" : "success"}">${dashboard.blockers.length ? "Action required" : "No critical blockers"}</span>
-              </div>
-              ${dashboard.blockers.length
-                ? `<ul class="simple-list">
-                    ${dashboard.blockers.map((blocker) => `<li>${escapeHtml(blocker)}</li>`).join("")}
-                  </ul>`
-                : `<div class="empty-box">No critical blockers are open. Continue by scaling the active campaign.</div>`
-              }
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <h3>Scheduler Queue</h3>
-                <span class="card-badge neutral">Automation</span>
-              </div>
-              ${dashboard.schedulerQueue.length
-                ? `<ul class="home-exec-stream-list">
-                    ${dashboard.schedulerQueue.map((item) => `
-                      <li class="home-exec-stream-item">
-                        <div>
-                          <strong>${escapeHtml(item.channel)}</strong>
-                          <p>${escapeHtml(item.when)}</p>
-                        </div>
-                        <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.status)}</span>
-                      </li>
-                    `).join("")}
-                  </ul>`
-                : `<div class="empty-box">No scheduled jobs. Use Publishing to queue the next execution wave.</div>`
-              }
-            </section>
+            <button id="homeExecCampaignBtn" class="btn btn-secondary" type="button">Open Campaign Studio</button>
           </section>
         </section>
 
         <section class="card">
           <div class="card-head">
-            <h3>AI Team Overview</h3>
-            <span class="card-badge neutral">Role Agents</span>
+            <h3>AI Team Panel</h3>
+            <span class="card-badge neutral">Operational Roles</span>
           </div>
           <div class="home-exec-team-grid">
             ${aiTeam.map((agent) => `
@@ -720,56 +637,43 @@ export const homeRoute = {
           </div>
         </section>
 
-        <section class="card home-exec-ai-chief">
-          <div class="card-head">
-            <h3>${escapeHtml(dashboard.aiChief.title)}</h3>
-            <button id="homeExecAiChiefBtn" class="btn btn-primary" type="button">Open In AI Command</button>
-          </div>
-          <p class="home-exec-next-why">${escapeHtml(dashboard.aiChief.description)}</p>
-          <div class="home-exec-ai-prompt-grid">
-            ${dashboard.aiChief.prompts.map((prompt) => `
-              <button class="btn btn-secondary home-exec-ai-prompt" type="button" data-home-ai-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>
-            `).join("")}
-          </div>
-        </section>
-
         <section class="card">
           <div class="card-head">
-            <h3>Recent Decision Memory</h3>
-            <span class="card-badge neutral">Latest</span>
+            <h3>Recent Execution Summary</h3>
+            <span class="card-badge neutral">Latest Signals</span>
           </div>
-          <div class="home-exec-recent-grid">
-            <article class="home-exec-recent-card">
-              <span class="data-label">Last execution</span>
-              <p>${escapeHtml(dashboard.recent.execution)}</p>
-            </article>
-            <article class="home-exec-recent-card">
-              <span class="data-label">Last recommendation</span>
-              <p>${escapeHtml(dashboard.recent.recommendation)}</p>
-            </article>
-            <article class="home-exec-recent-card">
-              <span class="data-label">Last feedback</span>
-              <p>${escapeHtml(dashboard.recent.feedback)}</p>
-            </article>
+          <div class="home-exec-recent-summary">
+            <div class="home-exec-stream-block">
+              <div class="home-exec-stream-head">
+                <h4>Recent Executions</h4>
+              </div>
+              ${dashboard.recentExecutionSummary.length
+                ? `<ul class="home-exec-stream-list">
+                    ${dashboard.recentExecutionSummary.slice(0, 3).map((item) => `
+                      <li class="home-exec-stream-item">
+                        <div>
+                          <strong>${escapeHtml(item.channel)}</strong>
+                          <p>${escapeHtml(item.when)}</p>
+                        </div>
+                        <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.status)}</span>
+                      </li>
+                    `).join("")}
+                  </ul>`
+                : `<div class="empty-box">No execution activity recorded yet.</div>`
+              }
+            </div>
+            <div class="home-exec-recent-grid">
+              <article class="home-exec-recent-card">
+                <span class="data-label">Latest warning</span>
+                <p>${escapeHtml(dashboard.blockers[0] || "No active warning right now.")}</p>
+              </article>
+              <article class="home-exec-recent-card">
+                <span class="data-label">Latest recommendation</span>
+                <p>${escapeHtml(dashboard.recent.recommendation)}</p>
+              </article>
+            </div>
           </div>
         </section>
-
-        <details class="card home-exec-advanced">
-          <summary>
-            <span>View details</span>
-            <span class="card-badge neutral">Advanced</span>
-          </summary>
-          <div class="home-exec-snapshot-grid">
-            <div class="data-row"><span>Project</span><strong>${escapeHtml(dashboard.advanced.projectName)}</strong></div>
-            <div class="data-row"><span>Unread notifications</span><strong>${escapeHtml(formatCount(dashboard.advanced.notifications))}</strong></div>
-            <div class="data-row"><span>Pending tasks</span><strong>${escapeHtml(formatCount(dashboard.advanced.pendingTasks))}</strong></div>
-            <div class="data-row"><span>Pending approvals</span><strong>${escapeHtml(formatCount(dashboard.advanced.pendingApprovals))}</strong></div>
-            <div class="data-row"><span>Scheduled jobs</span><strong>${escapeHtml(formatCount(dashboard.advanced.scheduledJobs))}</strong></div>
-            <div class="data-row"><span>Execution records</span><strong>${escapeHtml(formatCount(dashboard.advanced.executionResults))}</strong></div>
-            <div class="data-row"><span>Next schedule</span><strong>${escapeHtml(dashboard.advanced.nextSchedule)}</strong></div>
-            <div class="data-row"><span>Last execution time</span><strong>${escapeHtml(dashboard.advanced.lastExecution)}</strong></div>
-          </div>
-        </details>
       </div>
     `;
 
