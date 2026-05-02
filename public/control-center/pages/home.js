@@ -104,6 +104,11 @@ function dedupe(values = []) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
+function compact(value, fallback = "-") {
+  const text = asString(value).trim();
+  return text || fallback;
+}
+
 function routeForAction(action) {
   const text = asString(action).toLowerCase();
   if (/(connector|integration|sync)/.test(text)) return "integrations";
@@ -156,6 +161,7 @@ function buildExecutiveData(state) {
   const readiness = asObject(state.data.readiness);
   const integrations = asObject(state.data.integrations);
   const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
   const operations = asObject(state.data.operations);
 
   const overviewData = asObject(overview.overview);
@@ -199,6 +205,25 @@ function buildExecutiveData(state) {
   const criticalGaps = asArray(readinessPriorities.critical);
   const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
   const unreadNotifications = notifications.filter((item) => !item?.read_at);
+
+  const connectorChecks = asObject(integrations.readiness?.checks);
+  const connectorKeys = Object.keys(connectorChecks);
+  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+
+  const categoryReadiness = asArray(assets.category_readiness?.categories);
+  const missingAssetLabels = [
+    ...asArray(assets.missing_assets?.assets),
+    ...asArray(assets.missing_assets?.missing),
+    ...asArray(assets.missing_assets?.blockers),
+    ...categoryReadiness
+      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+      .map((item) => asString(item.display_label || item.label || item.asset_type))
+  ].map((item) => item.trim()).filter(Boolean);
+  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+
+  const assetItems = asArray(assets.assets);
+  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
 
   const insightsRecommendations = asArray(insights.recommendations);
   const learningLessons = asArray(learning.system_lessons);
@@ -260,6 +285,26 @@ function buildExecutiveData(state) {
     return !text || text.includes("pending") || text.includes("requested");
   });
 
+  const mediaJobs = asArray(operations.media_jobs?.items);
+  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+
+  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+  );
+  const publishReadyCount = publishingQueue.filter((item) => {
+    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();
+    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+  }).length + scheduledJobs.length;
+
+  const emailConnected = Boolean(
+    connectorChecks.email || connectorChecks.mailer || connectorChecks.smtp || connectorChecks.mailchimp
+  );
+
+  const readinessMissing = [
+    ...asArray(readinessData.missing),
+    ...asArray(readiness.missing_fields)
+  ].map((item) => compact(item, "")).filter(Boolean);
+
   const completedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "success");
 
   const readyCount = [
@@ -267,14 +312,6 @@ function buildExecutiveData(state) {
     asNumber(connectorScore) >= 70 ? 1 : 0,
     failedExecutions.length === 0 ? 1 : 0
   ].reduce((sum, value) => sum + value, 0);
-
-  const blockers = criticalGaps.length
-    ? criticalGaps.slice(0, 4)
-    : failedExecutions.slice(0, 4).map((item) => {
-      const channel = humanizeStatus(item?.channel, "Channel");
-      const status = humanizeStatus(item?.execution_status, "Failed");
-      return `${channel}: ${status}`;
-    });
 
   const recentExecutionSummary = sortedExecution.slice(0, 4).map((item) => {
     const channel = humanizeStatus(item?.channel, "Channel");
@@ -300,6 +337,53 @@ function buildExecutiveData(state) {
     };
   });
 
+  const recentActivity = [
+    ...sortedExecution.slice(0, 8).map((item) => ({
+      kind: "Execution",
+      title: `${humanizeStatus(item?.channel, "Channel")} • ${humanizeStatus(item?.execution_status, "Unknown")}`,
+      detail: compact(item?.wave_name, "Execution result"),
+      when: formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at),
+      tone: statusTone(item?.execution_status),
+      stamp: parseTimestamp(item)
+    })),
+    ...sortedSchedule.slice(0, 8).map((item) => ({
+      kind: "Schedule",
+      title: `${humanizeStatus(item?.channel, "Channel")} • ${humanizeStatus(item?.status, "Scheduled")}`,
+      detail: compact(item?.wave_name, "Scheduled job"),
+      when: formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at),
+      tone: statusTone(item?.status),
+      stamp: parseTimestamp(item)
+    })),
+    ...notifications.slice(0, 8).map((item) => ({
+      kind: "Alert",
+      title: compact(item?.title || item?.summary || item?.kind, "Notification"),
+      detail: compact(item?.action || item?.status || item?.level, "Review required"),
+      when: formatRelativeDate(item?.updated_at || item?.created_at),
+      tone: statusTone(item?.level || item?.status),
+      stamp: parseTimestamp(item)
+    }))
+  ].sort((a, b) => b.stamp - a.stamp).slice(0, 10);
+
+  const blockers = {
+    integrations: missingIntegrations,
+    assets: missingAssets,
+    failedJobs: failedExecutions.slice(0, 8).map((item) =>
+      `${humanizeStatus(item?.channel, "Channel")}: ${humanizeStatus(item?.execution_status, "Failed")}`
+    ),
+    readinessGaps: dedupe([
+      ...criticalGaps.map((item) => compact(item, "")).filter(Boolean),
+      ...readinessMissing
+    ]).slice(0, 10)
+  };
+
+  const totalBlockers =
+    blockers.integrations.length +
+    blockers.assets.length +
+    blockers.failedJobs.length +
+    blockers.readinessGaps.length;
+
+  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+
   return {
     projectName,
     headerStatus: humanizeStatus(
@@ -319,6 +403,7 @@ function buildExecutiveData(state) {
       systemScore,
       projectReadiness: asNumber(readinessScore),
       connectorReadiness: asNumber(connectorScore),
+      connectorCoverage: `${connectedConnectorCount}/${connectorKeys.length || 0}`,
       automationStatus: toneLabel(automationTone),
       automationTone,
       intelligenceStatus: intelligenceScore > 0 ? "Active" : "Needs input",
@@ -409,14 +494,36 @@ function buildExecutiveData(state) {
       name: activeCampaignName,
       channels: activeChannels,
       currentStage,
+      executionMode: compact(state.context.executionMode || overviewData.execution_mode, "Not set"),
       nextScheduledAction: nextScheduled
         ? `${humanizeStatus(nextScheduled.status, "Scheduled")}: ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
         : "No scheduled action yet"
     },
 
     blockers,
+    totalBlockers,
     schedulerQueue,
     recentExecutionSummary,
+    recentActivity,
+
+    launchSnapshot: {
+      publishReadiness: publishReadyCount,
+      mediaReadiness: mediaReadyCount,
+      emailReadiness: emailConnected ? "Connected" : "Missing",
+      scheduledJobs: scheduledJobs.length,
+      campaignReadiness: campaignReadinessTone === "success" ? "Ready" : "At risk"
+    },
+
+    systemHealth: {
+      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+      sourceOfTruth: sourceOfTruthCount ? `${sourceOfTruthCount} assets marked` : "Not configured",
+      missingRequiredData: totalBlockers,
+      missingDataList: dedupe([
+        ...blockers.integrations.map((item) => `Integration: ${item}`),
+        ...blockers.assets.map((item) => `Asset: ${item}`),
+        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+      ]).slice(0, 6)
+    },
 
     recent: {
       execution: latestExecution
@@ -424,17 +531,6 @@ function buildExecutiveData(state) {
         : "No execution recorded yet",
       recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "No recommendation generated yet",
       feedback: asString(learningLessons[0]).trim() || "No feedback captured yet"
-    },
-
-    aiChief: {
-      title: "Executive AI Chief of Staff",
-      description: "Turn live system signals into focused decisions for setup, execution, and growth.",
-      prompts: [
-        "Create a 24-hour executive plan from current readiness, blockers, and failed runs.",
-        "Summarize the fastest path from current state to publishing-ready.",
-        "Create owner-by-owner actions for Strategist, Writer, Analyst, and Operations.",
-        "Recommend whether to improve setup, content, or publishing first and explain why."
-      ]
     },
 
     advanced: {
@@ -464,7 +560,7 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
     };
   }
 
-  const nextBtn = $("homeExecNextActionBtn");
+  const nextBtn = $("homeNextActionBtn");
   if (nextBtn) {
     nextBtn.onclick = () => {
       if (dashboard.nextBestAction.route === "ai-command") {
@@ -478,45 +574,37 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
     };
   }
 
-  const campaignBtn = $("homeExecCampaignBtn");
+  const campaignBtn = $("homeCampaignOpenBtn");
   if (campaignBtn) {
     campaignBtn.onclick = () => {
       navigateTo("campaign-studio");
     };
   }
 
-  const teamButtons = Array.from(document.querySelectorAll("[data-home-exec-agent]"));
-  teamButtons.forEach((button) => {
-    button.onclick = () => {
-      const role = asString(button.getAttribute("data-home-exec-agent")) || "team";
-      const input = $("quickCommandInput");
-      if (input) {
-        input.value = `Create a concise action plan for the ${role} role using current project priorities and blockers.`;
-      }
-      navigateTo("ai-command");
-      showMessage?.("Agent task opened in AI Command.");
-    };
-  });
+  const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+  if (quickCampaignBtn) quickCampaignBtn.onclick = () => navigateTo("campaign-studio");
 
-  const aiPromptButtons = Array.from(document.querySelectorAll("[data-home-ai-prompt]"));
-  if (aiPromptButtons.length) {
-    aiPromptButtons.forEach((button) => {
-      button.onclick = () => {
-        const prompt = asString(button.getAttribute("data-home-ai-prompt"));
-        const input = $("quickCommandInput");
-        if (input) {
-          input.value = prompt;
-        }
-        navigateTo("ai-command");
-        showMessage?.("Executive prompt opened in AI Command.");
-      };
-    });
+  const quickAssetBtn = $("homeQuickUploadAssetBtn");
+  if (quickAssetBtn) quickAssetBtn.onclick = () => navigateTo("library");
+
+  const quickConnectBtn = $("homeQuickConnectPlatformBtn");
+  if (quickConnectBtn) quickConnectBtn.onclick = () => navigateTo("integrations");
+
+  const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+  if (quickReadinessBtn) quickReadinessBtn.onclick = () => navigateTo("setup");
+
+  const quickAiBtn = $("homeQuickOpenAiBtn");
+  if (quickAiBtn) {
+    quickAiBtn.onclick = () => {
+      const input = $("quickCommandInput");
+      if (input) input.value = dashboard.nextBestAction.recommendation;
+      navigateTo("ai-command");
+    };
   }
 }
 
 export const homeRoute = {
   id: "home",
-  disableStandardLayout: true,
   meta: {
     eyebrow: "Executive",
     title: "Executive Command Center",
@@ -530,149 +618,226 @@ export const homeRoute = {
   render({ getState, $, escapeHtml, navigateTo, showMessage }) {
     const state = getState();
     const dashboard = buildExecutiveData(state);
-    const aiTeam = buildAiTeamCards(state);
 
     const root = $("homeExecRoot");
     if (!root) return;
 
     root.innerHTML = `
-      <div class="home-exec-shell">
-        <section class="card home-exec-header">
-          <div class="home-exec-header-main">
-            <div class="home-exec-header-copy">
-              <div class="setup-kicker">Executive Project</div>
-              <h3 class="home-exec-project">${escapeHtml(dashboard.projectName || "Project not selected")}</h3>
-              <p class="home-exec-summary">${escapeHtml(dashboard.oneLineSummary)}</p>
+      <div class="home-decision-shell">
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Executive Overview</p>
+              <h3>Operating Snapshot</h3>
             </div>
-            <button id="homeExecPrimaryBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.primaryActionLabel)}</button>
+            <span class="card-badge ${escapeHtml(statusTone("score", dashboard.health.systemScore))}">${escapeHtml(formatPercent(dashboard.health.systemScore))}</span>
           </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>System Health</h3>
-            <span class="card-badge ${dashboard.headerTone}">${escapeHtml(dashboard.headerStatus)}</span>
-          </div>
-          <div class="home-exec-health-grid">
-            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.systemScore))}">
-              <span class="data-label">System Score</span>
-              <strong>${escapeHtml(formatPercent(dashboard.health.systemScore))}</strong>
-              <p>${escapeHtml(dashboardLabelFromScore(dashboard.health.systemScore))}</p>
-            </article>
-            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.projectReadiness))}">
-              <span class="data-label">Readiness</span>
+          <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
+          <div class="home-decision-kpi-grid">
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Readiness Score</span>
               <strong>${escapeHtml(formatPercent(dashboard.health.projectReadiness))}</strong>
-              <p>Project launch confidence</p>
             </article>
-            <article class="home-exec-metric tone-${escapeHtml(statusTone("score", dashboard.health.connectorReadiness))}">
-              <span class="data-label">Connectors</span>
-              <strong>${escapeHtml(formatPercent(dashboard.health.connectorReadiness))}</strong>
-              <p>Platform and channel coverage</p>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Active Project</span>
+              <strong>${escapeHtml(compact(dashboard.projectName, "Not selected"))}</strong>
             </article>
-            <article class="home-exec-metric tone-${escapeHtml(dashboard.health.automationTone)}">
-              <span class="data-label">Automation</span>
-              <strong>${escapeHtml(dashboard.health.automationStatus)}</strong>
-              <p>Scheduler and execution health</p>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Active Campaign</span>
+              <strong>${escapeHtml(compact(dashboard.campaign.name, "Not selected"))}</strong>
             </article>
-            <article class="home-exec-metric tone-${escapeHtml(dashboard.health.intelligenceTone)}">
-              <span class="data-label">Intelligence</span>
-              <strong>${escapeHtml(dashboard.health.intelligenceStatus)}</strong>
-              <p>Live insights and feedback loop</p>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Execution Mode</span>
+              <strong>${escapeHtml(dashboard.campaign.executionMode)}</strong>
             </article>
-            <article class="home-exec-metric tone-${dashboard.health.criticalAlerts ? "danger" : "success"}">
-              <span class="data-label">Critical Alerts</span>
-              <strong>${escapeHtml(formatCount(dashboard.health.criticalAlerts))}</strong>
-              <p>${dashboard.health.criticalAlerts ? "Immediate attention required" : "No active critical alerts"}</p>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Connector Status</span>
+              <strong>${escapeHtml(dashboard.health.connectorCoverage)}</strong>
             </article>
           </div>
         </section>
 
-        <section class="home-exec-main-grid">
-          <section class="card home-exec-next">
-            <div class="card-head">
-              <h3>Next Best Action</h3>
-              <span class="card-badge warning">Recommended</span>
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Critical Issues / Blockers</p>
+              <h3>What is blocking launch</h3>
             </div>
-            <p class="home-exec-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
-            <p class="home-exec-next-why">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
-            <button id="homeExecNextActionBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.nextBestAction.buttonLabel)}</button>
-          </section>
+            <span class="card-badge ${dashboard.totalBlockers ? "warning" : "success"}">${escapeHtml(dashboard.totalBlockers ? `${dashboard.totalBlockers} open` : "No blockers")}</span>
+          </div>
+          <div class="home-decision-blockers-grid">
+            <article class="home-decision-blocker-card">
+              <h4>Missing Integrations</h4>
+              ${dashboard.blockers.integrations.length
+                ? `<ul class="home-decision-list">${dashboard.blockers.integrations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                : `<div class="empty-box">No missing integrations detected.</div>`}
+            </article>
+            <article class="home-decision-blocker-card">
+              <h4>Missing Assets</h4>
+              ${dashboard.blockers.assets.length
+                ? `<ul class="home-decision-list">${dashboard.blockers.assets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                : `<div class="empty-box">No missing assets detected.</div>`}
+            </article>
+            <article class="home-decision-blocker-card">
+              <h4>Failed Jobs</h4>
+              ${dashboard.blockers.failedJobs.length
+                ? `<ul class="home-decision-list">${dashboard.blockers.failedJobs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                : `<div class="empty-box">No failed jobs detected.</div>`}
+            </article>
+            <article class="home-decision-blocker-card">
+              <h4>Readiness Gaps</h4>
+              ${dashboard.blockers.readinessGaps.length
+                ? `<ul class="home-decision-list">${dashboard.blockers.readinessGaps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+                : `<div class="empty-box">No readiness gaps reported.</div>`}
+            </article>
+          </div>
+        </section>
 
-          <section class="card home-exec-campaign">
-            <div class="card-head">
-              <h3>Active Campaign Snapshot</h3>
-              <span class="card-badge neutral">Live Status</span>
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Next Best Action</p>
+              <h3>What should I do next?</h3>
             </div>
-            ${dashboard.campaign.name
-              ? `
-              <div class="home-exec-snapshot-grid">
-                <div class="data-row"><span>Campaign name</span><strong>${escapeHtml(dashboard.campaign.name)}</strong></div>
-                <div class="data-row"><span>Stage</span><strong>${escapeHtml(dashboard.campaign.currentStage)}</strong></div>
-                <div class="data-row"><span>Channels</span><strong>${escapeHtml(dashboard.campaign.channels.length ? dashboard.campaign.channels.join(", ") : "Not assigned")}</strong></div>
-                <div class="data-row"><span>Next scheduled action</span><strong>${escapeHtml(dashboard.campaign.nextScheduledAction)}</strong></div>
-              </div>
-            `
-              : `<div class="empty-box">No active campaign selected yet. Open Campaign Studio to start one.</div>`
-            }
-            <button id="homeExecCampaignBtn" class="btn btn-secondary" type="button">Open Campaign Studio</button>
-          </section>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>AI Team Panel</h3>
-            <span class="card-badge neutral">Operational Roles</span>
+            <span class="card-badge warning">Recommended</span>
           </div>
-          <div class="home-exec-team-grid">
-            ${aiTeam.map((agent) => `
-              <article class="home-exec-agent-card">
-                <div class="home-ai-agent-head">
-                  <h4>${escapeHtml(agent.name)}</h4>
-                  <span class="card-badge ${agent.tone}">${escapeHtml(agent.status)}</span>
-                </div>
-                <p class="home-exec-agent-summary">${escapeHtml(agent.summary)}</p>
-                <button class="btn btn-secondary" type="button" data-home-exec-agent="${escapeHtml(agent.name)}">Open ${escapeHtml(agent.name)}</button>
-              </article>
-            `).join("")}
+          <div class="home-decision-next">
+            <p class="home-decision-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
+            <p class="home-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+            <button id="homeNextActionBtn" class="btn btn-primary" type="button">${escapeHtml(dashboard.nextBestAction.buttonLabel)}</button>
           </div>
         </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Recent Execution Summary</h3>
-            <span class="card-badge neutral">Latest Signals</span>
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Launch / Campaign Snapshot</p>
+              <h3>Current launch status</h3>
+            </div>
+            <span class="card-badge ${dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning"}">${escapeHtml(dashboard.launchSnapshot.campaignReadiness)}</span>
           </div>
-          <div class="home-exec-recent-summary">
-            <div class="home-exec-stream-block">
-              <div class="home-exec-stream-head">
-                <h4>Recent Executions</h4>
-              </div>
-              ${dashboard.recentExecutionSummary.length
-                ? `<ul class="home-exec-stream-list">
-                    ${dashboard.recentExecutionSummary.slice(0, 3).map((item) => `
-                      <li class="home-exec-stream-item">
-                        <div>
-                          <strong>${escapeHtml(item.channel)}</strong>
-                          <p>${escapeHtml(item.when)}</p>
-                        </div>
-                        <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.status)}</span>
-                      </li>
+          <div class="home-decision-kpi-grid">
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Current Campaign</span>
+              <strong>${escapeHtml(compact(dashboard.campaign.name, "Not selected"))}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Publish Readiness</span>
+              <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Media Readiness</span>
+              <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Email Readiness</span>
+              <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Scheduled Jobs</span>
+              <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+            </article>
+          </div>
+          <div class="home-decision-row-actions">
+            <button id="homeCampaignOpenBtn" class="btn btn-secondary" type="button">Open Campaign Studio</button>
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Activity & Execution Feed</p>
+              <h3>Latest jobs and actions</h3>
+            </div>
+            <span class="card-badge neutral">${escapeHtml(`${dashboard.recentActivity.length} items`)}</span>
+          </div>
+          ${dashboard.recentActivity.length
+            ? `<div class="home-decision-feed-table-wrap">
+                <table class="home-decision-feed-table">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Event</th>
+                      <th>Detail</th>
+                      <th>Status</th>
+                      <th>When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${dashboard.recentActivity.map((item) => `
+                      <tr>
+                        <td>${escapeHtml(item.kind)}</td>
+                        <td><strong>${escapeHtml(item.title)}</strong></td>
+                        <td>${escapeHtml(item.detail)}</td>
+                        <td><span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(toneLabel(item.tone))}</span></td>
+                        <td>${escapeHtml(item.when)}</td>
+                      </tr>
                     `).join("")}
-                  </ul>`
-                : `<div class="empty-box">No execution activity recorded yet.</div>`
-              }
-            </div>
-            <div class="home-exec-recent-grid">
-              <article class="home-exec-recent-card">
-                <span class="data-label">Latest warning</span>
-                <p>${escapeHtml(dashboard.blockers[0] || "No active warning right now.")}</p>
-              </article>
-              <article class="home-exec-recent-card">
-                <span class="data-label">Latest recommendation</span>
-                <p>${escapeHtml(dashboard.recent.recommendation)}</p>
-              </article>
+                  </tbody>
+                </table>
+              </div>`
+            : `<div class="empty-box">No activity yet. Execute a workflow or schedule a launch item to populate this feed.</div>`
+          }
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Quick Actions</p>
+              <h3>Where should I click?</h3>
             </div>
           </div>
+          <div class="home-decision-quick-actions">
+            <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Start campaign</span>
+              <span class="home-action-meta">Open Campaign Studio and work on launch waves.</span>
+            </button>
+            <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Upload asset</span>
+              <span class="home-action-meta">Open Library and close missing asset blockers.</span>
+            </button>
+            <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Connect platform</span>
+              <span class="home-action-meta">Open Integrations and fix connector gaps.</span>
+            </button>
+            <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Review readiness</span>
+              <span class="home-action-meta">Open Setup and resolve foundation issues.</span>
+            </button>
+            <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Open AI Command</span>
+              <span class="home-action-meta">Send current next action to AI for fast execution guidance.</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Data Quality / System Health</p>
+              <h3>Can we trust the current state?</h3>
+            </div>
+          </div>
+          <div class="home-decision-health-grid">
+            <article class="home-decision-kpi-card">
+              <span class="data-label">API Status</span>
+              <strong>${escapeHtml(dashboard.systemHealth.apiStatus)}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Source of Truth</span>
+              <strong>${escapeHtml(dashboard.systemHealth.sourceOfTruth)}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Missing Required Data</span>
+              <strong>${escapeHtml(formatCount(dashboard.systemHealth.missingRequiredData))}</strong>
+            </article>
+          </div>
+          ${dashboard.systemHealth.missingDataList.length
+            ? `<ul class="home-decision-list home-decision-list-spaced">
+                ${dashboard.systemHealth.missingDataList.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+              </ul>`
+            : `<div class="empty-box">Required data appears complete for current decision-making.</div>`
+          }
         </section>
       </div>
     `;

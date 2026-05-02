@@ -448,6 +448,7 @@ function injectRoleSwitcher() {
     try { localStorage.setItem(CONTROL_ROLE_STORAGE_KEY, role); } catch (_) {}
     const { currentRoute } = getState();
     navigateTo(currentRoute, false);
+    renderGlobalUi();
     renderCurrentPage();
   });
 
@@ -474,6 +475,15 @@ function escapeHtml(value) {
 function safeText(value, fallback = "-") {
   if (value == null || value === "") return fallback;
   return String(value);
+}
+
+function formatRoleLabel(role) {
+  const normalized = String(role || "").trim().toLowerCase();
+  if (!normalized) return "Admin";
+  return normalized
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function setText(id, value, fallback = "-") {
@@ -588,6 +598,11 @@ function renderTopContext() {
   setText("ctxCampaign", ctx.activeCampaign);
   setText("ctxRoute", state.currentRoute || "home");
   setText("ctxAlerts", unread);
+
+  const roleBadge = $("mobileRoleBadge");
+  if (roleBadge) {
+    roleBadge.textContent = formatRoleLabel(getActiveRole());
+  }
 }
 
 function renderProjectSwitcher() {
@@ -888,16 +903,69 @@ function bindResponsiveUi() {
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = $("sidebarToggleBtn");
   const backdrop = $("sidebarBackdrop");
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandToggleBtn = $("commandToggleBtn");
+  const commandBackdrop = $("commandBackdrop");
   const MOBILE_BREAKPOINT = 1024;
+  const MOBILE_COMPACT_BREAKPOINT = 768;
 
   function isMobileViewport() {
     return window.innerWidth <= MOBILE_BREAKPOINT;
+  }
+
+  function isCompactMobileViewport() {
+    return window.innerWidth <= MOBILE_COMPACT_BREAKPOINT;
   }
 
   function syncToggleState(isOpen) {
     if (!toggleBtn) return;
     toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+  }
+
+  function setMobileCommandExpanded(expanded) {
+    if (!appRoot || !commandBar || !commandToggleBtn) return;
+
+    if (!isCompactMobileViewport()) {
+      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+      commandBar.classList.remove("is-collapsed");
+      commandBar.setAttribute("aria-hidden", "false");
+      if (commandBackdrop) {
+        commandBackdrop.classList.remove("is-visible");
+        commandBackdrop.setAttribute("aria-hidden", "true");
+      }
+      commandToggleBtn.setAttribute("aria-expanded", "false");
+      commandToggleBtn.textContent = "Command";
+      return;
+    }
+
+    appRoot.classList.add("is-mobile-shell");
+    appRoot.classList.toggle("is-mobile-command-open", expanded);
+    commandBar.classList.toggle("is-collapsed", !expanded);
+    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+    if (commandBackdrop) {
+      commandBackdrop.classList.toggle("is-visible", expanded);
+      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+    }
+    commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    commandToggleBtn.textContent = expanded ? "Close" : "Command";
+  }
+
+  function syncCompactShellState() {
+    const isCompact = isCompactMobileViewport();
+    if (!appRoot || !commandToggleBtn) return;
+
+    appRoot.classList.toggle("is-mobile-shell", isCompact);
+    commandToggleBtn.hidden = !isCompact;
+
+    if (!isCompact) {
+      setMobileCommandExpanded(false);
+      return;
+    }
+
+    const isOpen = appRoot.classList.contains("is-mobile-command-open");
+    setMobileCommandExpanded(isOpen);
   }
 
   function openSidebar() {
@@ -937,10 +1005,33 @@ function bindResponsiveUi() {
     backdrop.onclick = closeSidebar;
   }
 
+  if (commandToggleBtn) {
+    commandToggleBtn.onclick = (event) => {
+      event.preventDefault();
+      if (!appRoot) return;
+      const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
+      setMobileCommandExpanded(nextOpen);
+    };
+  }
+
+  if (commandBackdrop) {
+    commandBackdrop.onclick = () => setMobileCommandExpanded(false);
+  }
+
   document.addEventListener("click", (event) => {
     const clickedNavItem = event.target.closest(".nav-item[data-route]");
     if (clickedNavItem && isMobileViewport()) {
       closeSidebar();
+    }
+
+    if (!isCompactMobileViewport() || !appRoot?.classList.contains("is-mobile-command-open")) {
+      return;
+    }
+
+    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+    if (!clickedCommandToggle && !clickedInsideCommand) {
+      setMobileCommandExpanded(false);
     }
   });
 
@@ -948,13 +1039,49 @@ function bindResponsiveUi() {
     if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
       closeSidebar();
     }
+    if (event.key === "Escape" && appRoot?.classList.contains("is-mobile-command-open")) {
+      setMobileCommandExpanded(false);
+    }
   });
 
   window.addEventListener("resize", () => {
     if (!isMobileViewport()) {
       closeSidebar();
     }
+    syncCompactShellState();
   });
+
+  window.addEventListener("orientationchange", syncCompactShellState);
+  syncCompactShellState();
+}
+
+function bindShellMeasurements() {
+  const appRoot = $("app");
+  const topbar = document.querySelector(".topbar");
+  if (!appRoot || !topbar) return;
+
+  let rafId = 0;
+
+  const update = () => {
+    rafId = 0;
+    const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
+    appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
+  };
+
+  const scheduleUpdate = () => {
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(update);
+  };
+
+  update();
+
+  if (typeof window.ResizeObserver === "function") {
+    const observer = new window.ResizeObserver(scheduleUpdate);
+    observer.observe(topbar);
+  }
+
+  window.addEventListener("resize", scheduleUpdate);
+  window.addEventListener("orientationchange", scheduleUpdate);
 }
 
 /* =========================
@@ -1118,6 +1245,7 @@ async function init() {
     bindProjectSwitcher();
     bindGlobalButtons();
     bindResponsiveUi();
+    bindShellMeasurements();
     bindCommandInputs();
 
     injectAccessKeyButton();

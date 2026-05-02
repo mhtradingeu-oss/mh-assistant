@@ -59,6 +59,30 @@ const STEP_DEFINITIONS = [
   }
 ];
 
+const STEP_ICONS = {
+  "business-basics": "🧩",
+  "brand-identity": "🎯",
+  "market-language": "🌍",
+  audience: "👥",
+  goals: "📈",
+  competitors: "⚔️",
+  channels: "📣"
+};
+
+const FIELD_IMPORTANCE_REASON = {
+  project_name: "Used across routing, saves, and system context labels.",
+  project_type: "Improves AI defaults and recommended workflow strategies.",
+  website_url: "Needed for crawl/reference and destination-aware copy generation.",
+  brand_promise: "Guides positioning quality and channel consistency.",
+  market: "Controls localization and market-specific execution assumptions.",
+  language: "Ensures content generation uses the correct language defaults.",
+  currency: "Required for pricing context and paid/media planning outputs.",
+  audience_primary: "Improves message relevance and audience-specific tactics.",
+  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+  competitors: "Supports differentiation and benchmark-aware recommendations.",
+  social_channels: "Defines where campaign and publishing workflows should execute."
+};
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -91,6 +115,48 @@ function formatPercent(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return "0%";
   return `${Math.max(0, Math.round(parsed))}%`;
+}
+
+function formatUpdatedAt(value) {
+  if (!value) return "Not available";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not available";
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function getAllSetupFieldNames() {
+  const names = STEP_DEFINITIONS.flatMap((step) => step.fields);
+  return Array.from(new Set(names));
+}
+
+function countCompleted(fields, values) {
+  return fields.filter((name) => Boolean(asString(values[name]).trim())).length;
+}
+
+function getValidationSummary({ missingFields, readinessStatus, readinessScore, criticalGaps, failedCount }) {
+  const normalizedReadiness = asString(readinessStatus).toLowerCase();
+  const score = Number(readinessScore);
+  const hasScoreWarning = Number.isFinite(score) && score < 85;
+  const hasBlockers = missingFields.length > 0 || criticalGaps.length > 0 || failedCount > 0;
+
+  if (!hasBlockers && !hasScoreWarning && normalizedReadiness === "strong") {
+    return { tone: "success", label: "Validated" };
+  }
+
+  if (missingFields.length > 0 || criticalGaps.length > 0) {
+    return { tone: "warning", label: "Needs review" };
+  }
+
+  return { tone: "neutral", label: "Partial" };
+}
+
+function getMissingFieldInsights(missingFields) {
+  return missingFields.map((field) => ({
+    name: field.name,
+    label: field.label,
+    reason: FIELD_IMPORTANCE_REASON[field.name] || "Required to improve setup quality and downstream reliability.",
+    stepId: getFieldStepId(field.name)
+  }));
 }
 
 function getSetupDraftKey(projectName) {
@@ -195,6 +261,17 @@ function getStepStatus(step, values) {
   if (complete === total) return { tone: "success", label: "Ready" };
   if (complete === 0) return { tone: "danger", label: "Missing" };
   return { tone: "warning", label: `${complete}/${total}` };
+}
+
+function getRecommendedStep(values) {
+  const scored = STEP_DEFINITIONS.map((step) => {
+    const status = getStepStatus(step, values);
+    const score = status.tone === "danger" ? 0 : status.tone === "warning" ? 1 : 2;
+    return { step, status, score };
+  });
+
+  scored.sort((a, b) => a.score - b.score);
+  return scored[0]?.step || STEP_DEFINITIONS[0];
 }
 
 function getWizardReadinessStatus(values, readinessScore, readinessStatus) {
@@ -391,15 +468,55 @@ function updateWizardDashboard({
   activateStep
 }) {
   const missingFields = getMissingRequiredFields(values);
+  const missingInsights = getMissingFieldInsights(missingFields);
   const completionPercent = getCompletionPercent(values);
+  const allFields = getAllSetupFieldNames();
+  const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+  const optionalNames = allFields.filter((name) => !requiredNames.includes(name));
+  const requiredCompleted = countCompleted(requiredNames, values);
+  const optionalCompleted = countCompleted(optionalNames, values);
+
+  const validationSummary = getValidationSummary({
+    missingFields,
+    readinessStatus,
+    readinessScore,
+    criticalGaps,
+    failedCount: 0
+  });
+  const recommendedStep = getRecommendedStep(values);
 
   updateSetupFieldIndicators(form, values);
 
   const completionText = document.getElementById("setupCompletionPercent");
   if (completionText) completionText.textContent = `${completionPercent}%`;
 
+  const completionTextWide = document.getElementById("setupCompletionPercentValue");
+  if (completionTextWide) completionTextWide.textContent = `${completionPercent}%`;
+
+  const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
+  if (requiredCompleteEl) requiredCompleteEl.textContent = String(requiredCompleted);
+
+  const requiredTotalEl = document.getElementById("setupRequiredTotal");
+  if (requiredTotalEl) requiredTotalEl.textContent = String(requiredNames.length);
+
+  const optionalCompleteEl = document.getElementById("setupOptionalCompleted");
+  if (optionalCompleteEl) optionalCompleteEl.textContent = String(optionalCompleted);
+
+  const optionalTotalEl = document.getElementById("setupOptionalTotal");
+  if (optionalTotalEl) optionalTotalEl.textContent = String(optionalNames.length);
+
   const completionBar = document.getElementById("setupCompletionBar");
-  if (completionBar) completionBar.style.width = `${completionPercent}%`;
+  if (completionBar) {
+    completionBar.style.width = `${completionPercent}%`;
+    completionBar.classList.remove("is-low", "is-mid", "is-high");
+    if (completionPercent < 45) {
+      completionBar.classList.add("is-low");
+    } else if (completionPercent < 80) {
+      completionBar.classList.add("is-mid");
+    } else {
+      completionBar.classList.add("is-high");
+    }
+  }
 
   const missingCount = document.getElementById("setupMissingCount");
   if (missingCount) missingCount.textContent = String(missingFields.length);
@@ -411,13 +528,34 @@ function updateWizardDashboard({
     readinessBadge.textContent = label;
   }
 
+  const validationBadge = document.getElementById("setupValidationBadge");
+  if (validationBadge) {
+    validationBadge.className = `card-badge ${validationSummary.tone}`;
+    validationBadge.textContent = validationSummary.label;
+  }
+
   const missingList = document.getElementById("setupMissingFields");
   if (missingList) {
     missingList.innerHTML = renderIndicatorList(
-      missingFields.map((field) => field.label),
+      missingInsights.map((item) => `${item.label} - ${item.reason}`),
       escapeHtml,
       "All required setup fields are complete."
     );
+  }
+
+  const missingActionList = document.getElementById("setupMissingActions");
+  if (missingActionList) {
+    missingActionList.innerHTML = missingInsights.length
+      ? `<div class="setup-smart-gap-list">${missingInsights.map((item) => `
+          <article class="setup-smart-gap-item">
+            <div>
+              <h5>${escapeHtml(item.label)}</h5>
+              <p>${escapeHtml(item.reason)}</p>
+            </div>
+            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+          </article>
+        `).join("")}</div>`
+      : `<div class="empty-box">No required field gaps detected.</div>`;
   }
 
   const blockerList = document.getElementById("setupSystemGaps");
@@ -442,18 +580,70 @@ function updateWizardDashboard({
       const stepId = getFieldStepId(first.name);
       activateStep(stepId);
       const input = form.querySelector(`[name="${first.name}"]`);
-      if (input && typeof input.focus === "function") input.focus();
+      if (input && typeof input.focus === "function") {
+        input.focus();
+        if (typeof input.scrollIntoView === "function") {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
     };
   }
 
   STEP_DEFINITIONS.forEach((step) => {
     const badge = document.getElementById(`setupStepBadge-${step.id}`);
+    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+    const statusNote = form.querySelector(`[data-setup-step-note="${step.id}"]`);
     const status = getStepStatus(step, values);
     if (badge) {
       badge.className = `card-badge ${status.tone}`;
       badge.textContent = status.label;
     }
+    if (button) {
+      button.classList.remove("is-problem", "is-warning", "is-ready", "is-recommended");
+      if (status.tone === "danger") button.classList.add("is-problem");
+      if (status.tone === "warning") button.classList.add("is-warning");
+      if (status.tone === "success") button.classList.add("is-ready");
+      if (recommendedStep.id === step.id) button.classList.add("is-recommended");
+      button.title = `${step.description} Status: ${status.label}.`;
+      button.setAttribute("data-step-tone", status.tone);
+    }
+    if (statusNote) {
+      statusNote.className = `setup-smart-step-note tone-${status.tone}`;
+      statusNote.textContent = status.tone === "danger"
+        ? "Needs required data"
+        : status.tone === "warning"
+          ? "Partially complete"
+          : "Looks good";
+    }
   });
+
+  const recommendedTitle = document.getElementById("setupRecommendedStepTitle");
+  if (recommendedTitle) recommendedTitle.textContent = recommendedStep.title;
+
+  const recommendedReason = document.getElementById("setupRecommendedStepReason");
+  if (recommendedReason) recommendedReason.textContent = recommendedStep.description;
+
+  const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
+  if (recommendedBtn) {
+    recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
+    recommendedBtn.textContent = `Open ${recommendedStep.title}`;
+  }
+
+  const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
+  const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+  const missingFieldCount = missingFields.length;
+  const hasMissing = missingFieldCount > 0;
+  const disabledText = `Disabled - ${missingFieldCount} required field${missingFieldCount === 1 ? "" : "s"} missing`;
+  if (continueLibraryBtn) {
+    continueLibraryBtn.disabled = hasMissing;
+    continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${disabledText})` : "Continue to Library";
+    continueLibraryBtn.title = hasMissing ? "Complete required setup fields before moving to Library." : "Proceed to Library.";
+  }
+  if (continueIntegrationsBtn) {
+    continueIntegrationsBtn.disabled = hasMissing;
+    continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${disabledText})` : "Continue to Integrations";
+    continueIntegrationsBtn.title = hasMissing ? "Complete required setup fields before moving to Integrations." : "Proceed to Integrations.";
+  }
 
   const stepCounter = document.getElementById("setupStepCounter");
   if (stepCounter) {
@@ -483,6 +673,7 @@ function bindSetupActions({
   if (!form) return;
 
   const stepButtons = Array.from(document.querySelectorAll("[data-setup-step]"));
+  const stepActionButtons = Array.from(document.querySelectorAll("[data-setup-open-step]"));
   const stepPanels = Array.from(document.querySelectorAll("[data-setup-step-panel]"));
   const draftKeyName = projectName || "current project";
   let activeStepId = STEP_DEFINITIONS[0].id;
@@ -518,6 +709,17 @@ function bindSetupActions({
 
   stepButtons.forEach((button) => {
     button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+  });
+
+  stepActionButtons.forEach((button) => {
+    button.onclick = () => {
+      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+      activateStep(stepId);
+      const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
+      if (panel && typeof panel.scrollIntoView === "function") {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
   });
 
   const prevBtn = $("setupPrevStepBtn");
@@ -563,6 +765,22 @@ function bindSetupActions({
 
   form.oninput = refreshSummary;
   form.onchange = refreshSummary;
+
+  form.addEventListener("click", (event) => {
+    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+    if (!jumpBtn) return;
+    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+    if (stepId) activateStep(stepId);
+    const input = form.querySelector(`[name="${fieldName}"]`);
+    if (input && typeof input.focus === "function") {
+      input.focus();
+      if (typeof input.scrollIntoView === "function") {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  });
+
   refreshSummary();
 
   const saveDraftBtn = $("setupSaveDraftBtn");
@@ -714,6 +932,20 @@ function bindSetupActions({
     };
   }
 
+  const continueIntegrationsBtn = $("setupContinueIntegrationsBtn");
+  if (continueIntegrationsBtn) {
+    continueIntegrationsBtn.onclick = () => {
+      navigateTo("integrations");
+    };
+  }
+
+  const reviewReadinessBtn = $("setupReviewReadinessBtn");
+  if (reviewReadinessBtn) {
+    reviewReadinessBtn.onclick = () => {
+      navigateTo("home");
+    };
+  }
+
   const smartActionBtn = $("setupSmartActionBtn");
   if (smartActionBtn) {
     smartActionBtn.onclick = () => {
@@ -724,7 +956,12 @@ function bindSetupActions({
         const stepId = getFieldStepId(first.name);
         activateStep(stepId);
         const input = form.querySelector(`[name="${first.name}"]`);
-        if (input && typeof input.focus === "function") input.focus();
+        if (input && typeof input.focus === "function") {
+          input.focus();
+          if (typeof input.scrollIntoView === "function") {
+            input.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
         showMessage?.(`Focus moved to ${first.label}.`);
         return;
       }
@@ -742,8 +979,8 @@ export const setupRoute = {
   id: "setup",
   meta: {
     eyebrow: "Start",
-    title: "Setup Wizard",
-    description: "Complete project configuration through guided steps with missing-field visibility and AI drafting support."
+    title: "Smart Guided Setup",
+    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
   },
   template: `
     <section class="page is-active" data-page="setup">
@@ -777,26 +1014,40 @@ export const setupRoute = {
     const missingConnectors = asArray(integrations.readiness?.missing);
     const criticalGaps = asArray(readinessDashboard.priorities?.critical);
     const missingFields = getMissingRequiredFields(values);
+    const missingFieldInsights = getMissingFieldInsights(missingFields);
     const completionPercent = getCompletionPercent(values);
     const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
-    const completedRequired = REQUIRED_FIELDS.length - missingFields.length;
     const failedCount = asArray(integrations.readiness?.failed).length;
-    const needsAttentionCount = missingFields.length + missingAssets.length + missingConnectors.length + criticalGaps.length;
-    const nextActionText = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
-    const brandStatus = getSetupBrandStatus(values);
-    const localizationStatus = getSetupLocalizationStatus(values);
+    const validationSummary = getValidationSummary({
+      missingFields,
+      readinessStatus,
+      readinessScore,
+      criticalGaps,
+      failedCount
+    });
+    const allFields = getAllSetupFieldNames();
+    const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+    const optionalNames = allFields.filter((name) => !requiredNames.includes(name));
+    const requiredCompleted = countCompleted(requiredNames, values);
+    const optionalCompleted = countCompleted(optionalNames, values);
+    const lastSavedAt = formatUpdatedAt(
+      readinessDashboard.updated_at ||
+      readinessDashboard.last_saved_at ||
+      overviewData.updated_at ||
+      overviewData.last_updated_at
+    );
 
     const root = $("setupRoot");
     if (!root) return;
 
     root.innerHTML = `
       <div class="setup-wizard-shell">
-        <section class="card setup-wizard-header">
+        <section class="card setup-smart-overview">
           <div class="setup-wizard-header-top">
             <div>
-              <div class="setup-kicker">Guided Project Setup</div>
-              <h3 class="setup-v2-title">${escapeHtml(projectName ? `${projectName} Wizard` : "Project Setup Wizard")}</h3>
-              <p class="setup-v2-subtitle">Move step by step through your project baseline and close launch-critical gaps without information overload.</p>
+              <div class="setup-kicker">Setup Completion Overview</div>
+              <h3 class="setup-v2-title">Project Source-of-Truth Status</h3>
+              <p class="setup-v2-subtitle">Track completion, validation quality, and what to resolve next before continuing.</p>
             </div>
             <div class="setup-v2-toolbar">
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
@@ -805,127 +1056,73 @@ export const setupRoute = {
             </div>
           </div>
 
-          <div class="setup-wizard-progress-grid">
-            <article class="setup-wizard-progress-card">
-              <span class="data-label">Setup Progress</span>
-              <strong id="setupCompletionPercent" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
+          <div class="setup-smart-overview-grid">
+            <article class="setup-smart-overview-card">
+              <span class="data-label">Completion</span>
+              <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
               <div class="setup-progress" aria-label="Setup completion">
                 <div class="setup-progress-track">
                   <div id="setupCompletionBar" class="setup-progress-fill" style="width:${escapeHtml(String(completionPercent))}%"></div>
                 </div>
               </div>
             </article>
-            <article class="setup-wizard-progress-card">
-              <span class="data-label">Missing Fields</span>
-              <strong id="setupMissingCount" class="setup-wizard-progress-value">${escapeHtml(String(missingFields.length))}</strong>
-              <span class="setup-helper">Required fields still incomplete.</span>
+            <article class="setup-smart-overview-card">
+              <span class="data-label">Required Completed</span>
+              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> required fields missing</span>
             </article>
-            <article class="setup-wizard-progress-card">
-              <span class="data-label">Project Readiness</span>
-              <strong class="setup-wizard-progress-value">${escapeHtml(formatPercent(readinessScore))}</strong>
+            <article class="setup-smart-overview-card">
+              <span class="data-label">Optional Completed</span>
+              <strong><span id="setupOptionalCompleted">${escapeHtml(String(optionalCompleted))}</span>/<span id="setupOptionalTotal">${escapeHtml(String(optionalNames.length))}</span></strong>
+              <span class="setup-helper">Optional setup context quality</span>
+            </article>
+            <article class="setup-smart-overview-card">
+              <span class="data-label">Validation Status</span>
+              <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
+              <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+            </article>
+            <article class="setup-smart-overview-card">
+              <span class="data-label">Last Saved / Updated</span>
+              <strong>${escapeHtml(lastSavedAt)}</strong>
               <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
             </article>
           </div>
         </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Page Power Summary</h3>
-            <span class="card-badge neutral">Setup capabilities</span>
-          </div>
-          <div class="setup-v2-status-strip">
-            <article class="setup-v2-stat">
-              <span class="data-label">Setup Completion</span>
-              <strong class="setup-v2-stat-value">${escapeHtml(String(completionPercent))}%</strong>
-              <span class="setup-helper">Required baseline completion status.</span>
-            </article>
-            <article class="setup-v2-stat">
-              <span class="data-label">Brand Profile</span>
-              <strong class="setup-v2-stat-value">${escapeHtml(brandStatus)}</strong>
-              <span class="setup-helper">Positioning and voice readiness.</span>
-            </article>
-            <article class="setup-v2-stat">
-              <span class="data-label">Market Stack</span>
-              <strong class="setup-v2-stat-value">${escapeHtml(localizationStatus)}</strong>
-              <span class="setup-helper">Market, language, and currency setup.</span>
-            </article>
-            <article class="setup-v2-stat">
-              <span class="data-label">Validation Checklist</span>
-              <strong class="setup-v2-stat-value">${escapeHtml(String(completedRequired))}/${REQUIRED_FIELDS.length}</strong>
-              <span class="setup-helper">Checklist used by readiness validation.</span>
-            </article>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Current Status</h3>
-            <span class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
-          </div>
-          <div class="home-exec-status-grid">
-            <article class="home-exec-status-card tone-${completionPercent >= 85 ? "success" : "warning"}">
-              <span class="data-label">Ready</span>
-              <strong>${escapeHtml(completionPercent >= 85 ? "Yes" : "Not yet")}</strong>
-              <p>Setup baseline readiness state.</p>
-            </article>
-            <article class="home-exec-status-card tone-${missingFields.length ? "danger" : "success"}">
-              <span class="data-label">Missing</span>
-              <strong>${escapeHtml(String(missingFields.length))}</strong>
-              <p>Required fields still empty.</p>
-            </article>
-            <article class="home-exec-status-card tone-${failedCount ? "danger" : "success"}">
-              <span class="data-label">Failed</span>
-              <strong>${escapeHtml(String(failedCount))}</strong>
-              <p>Failed connector checks from integration readiness.</p>
-            </article>
-            <article class="home-exec-status-card tone-${needsAttentionCount ? "warning" : "success"}">
-              <span class="data-label">Needs Attention</span>
-              <strong>${escapeHtml(String(needsAttentionCount))}</strong>
-              <p>Open fields, assets, connectors, and critical gaps.</p>
-            </article>
-            <article class="home-exec-status-card tone-success">
-              <span class="data-label">Completed</span>
-              <strong>${escapeHtml(String(completedRequired))}</strong>
-              <p>Required fields fully completed.</p>
-            </article>
-            <article class="home-exec-status-card tone-neutral">
-              <span class="data-label">Next Step</span>
-              <strong>${escapeHtml(missingFields.length ? "Complete fields" : "Continue flow")}</strong>
-              <p>${escapeHtml(nextActionText)}</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Main Work Area</h3>
-            <span class="card-badge neutral">Guided setup wizard</span>
-          </div>
-          <p class="home-section-copy">Complete each guided section, validate readiness, then continue to Library.</p>
-        </section>
-
         <div class="setup-wizard-layout">
-          <aside class="setup-wizard-sidebar card">
-            <h4>Guided Steps</h4>
-            <p class="setup-helper">Complete one section at a time.</p>
-            <div class="setup-wizard-step-list" role="tablist" aria-label="Setup wizard steps">
+          <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
+            <h4>Guided Setup Steps</h4>
+            <p class="setup-helper">Each step shows status, purpose, and a direct action.</p>
+            <article class="setup-smart-recommended-step">
+              <span class="data-label">Recommended Step</span>
+              <strong id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</strong>
+              <p id="setupRecommendedStepReason">${escapeHtml(getRecommendedStep(values).description)}</p>
+              <button id="setupRecommendedStepBtn" class="btn btn-secondary" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">Open ${escapeHtml(getRecommendedStep(values).title)}</button>
+            </article>
+            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
               ${STEP_DEFINITIONS.map((step, index) => {
                 const status = getStepStatus(step, values);
+                const icon = STEP_ICONS[step.id] || "•";
                 return `
-                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
-                    <span class="setup-wizard-step-meta">Step ${index + 1}</span>
-                    <span class="setup-wizard-step-title">${escapeHtml(step.title)}</span>
-                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
-                  </button>
+                  <article class="setup-smart-step-item">
+                    <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}" title="${escapeHtml(step.description)}">
+                      <span class="setup-wizard-step-meta">Step ${index + 1}</span>
+                      <span class="setup-wizard-step-title"><span class="setup-step-icon" aria-hidden="true">${escapeHtml(icon)}</span>${escapeHtml(step.title)}</span>
+                      <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+                    </button>
+                    <p>${escapeHtml(step.description)}</p>
+                    <div class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : "Looks good"}</div>
+                    <button class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(step.id)}">Open Step</button>
+                  </article>
                 `;
               }).join("")}
             </div>
           </aside>
 
-          <section class="setup-wizard-form card">
+          <section class="setup-wizard-form card setup-smart-form-panel">
             <div class="setup-wizard-form-head">
               <div>
-                <span class="data-label">Current Step</span>
+                <span class="data-label">Main Setup Form</span>
                 <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
               </div>
               <div class="setup-wizard-nav-actions">
@@ -1009,26 +1206,27 @@ export const setupRoute = {
         </div>
 
         <div class="setup-wizard-side-panels">
-          <section class="card setup-wizard-missing-panel">
+          <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
             <div class="card-head">
-              <h4>Smart Next Action</h4>
-              <span class="card-badge warning">Recommended</span>
-            </div>
-            <p class="home-section-copy">${escapeHtml(nextActionText)}</p>
-            <div class="setup-wizard-ai-actions">
-              <button id="setupSmartActionBtn" class="btn btn-primary" type="button">Do next action</button>
-              <button id="setupValidateNowBtn" class="btn btn-secondary" type="button">Validate readiness</button>
-            </div>
-            <button id="setupContinueLibraryBtn" class="btn btn-ghost" type="button">Continue to Library</button>
-          </section>
-
-          <section class="card setup-wizard-missing-panel">
-            <div class="card-head">
-              <h4>Missing Information</h4>
+              <h4>Missing Information / Readiness Gaps</h4>
               <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
             </div>
+            <div id="setupMissingActions">
+              ${missingFieldInsights.length
+                ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
+                    <article class="setup-smart-gap-item">
+                      <div>
+                        <h5>${escapeHtml(item.label)}</h5>
+                        <p>${escapeHtml(item.reason)}</p>
+                      </div>
+                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+                    </article>
+                  `).join("")}</div>`
+                : `<div class="empty-box">All required setup fields are complete.</div>`
+              }
+            </div>
             <div id="setupMissingFields">
-              ${renderIndicatorList(missingFields.map((field) => field.label), escapeHtml, "All required setup fields are complete.")}
+              ${renderIndicatorList(missingFieldInsights.map((item) => `${item.label} - ${item.reason}`), escapeHtml, "All required setup fields are complete.")}
             </div>
             <div class="setup-wizard-missing-divider"></div>
             <h5>System blockers</h5>
@@ -1045,64 +1243,76 @@ export const setupRoute = {
             </div>
           </section>
 
-          <section class="card setup-wizard-ai-panel">
+          <section class="card setup-smart-validation-panel">
             <div class="card-head">
-              <h4>Contextual AI Agent</h4>
-              <span class="card-badge neutral">Draft mode</span>
+              <h4>Validation & Diagnostics</h4>
+              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
             </div>
-            <p class="home-section-copy">Generate instant setup drafts for positioning, audience, and tone, then apply only what you want.</p>
-            <div class="setup-wizard-ai-list">
-              <article class="setup-wizard-ai-item">
-                <div>
-                  <strong>Suggest positioning</strong>
-                  <p id="setupAiPositioningText">${escapeHtml(buildPositioningSuggestion(values))}</p>
-                </div>
-                <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Apply</button>
+            <div class="setup-smart-diagnostics-grid">
+              <article class="setup-smart-diagnostic-card">
+                <span class="data-label">Validation status</span>
+                <strong>${escapeHtml(validationSummary.label)}</strong>
+                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
               </article>
-              <article class="setup-wizard-ai-item">
-                <div>
-                  <strong>Suggest audience</strong>
-                  <p id="setupAiAudienceText">${escapeHtml(buildAudienceSuggestion(values))}</p>
-                </div>
-                <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Apply</button>
+              <article class="setup-smart-diagnostic-card">
+                <span class="data-label">Warnings</span>
+                <strong>${escapeHtml(String(criticalGaps.length))}</strong>
+                <p>Critical readiness gaps reported by diagnostics.</p>
               </article>
-              <article class="setup-wizard-ai-item">
-                <div>
-                  <strong>Suggest brand tone</strong>
-                  <p id="setupAiToneText">${escapeHtml(buildToneSuggestion(values))}</p>
-                </div>
-                <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Apply</button>
+              <article class="setup-smart-diagnostic-card">
+                <span class="data-label">Integration blockers</span>
+                <strong>${escapeHtml(String(missingConnectors.length + failedCount))}</strong>
+                <p>Missing or failed connector checks.</p>
               </article>
             </div>
-            <div class="setup-wizard-ai-actions">
-              <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Fill missing fields draft</button>
-              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command</button>
+            <div class="setup-v2-answers">
+              <article class="setup-v2-answer-card">
+                <h4>Setup diagnostics</h4>
+                <p>Readiness score: ${escapeHtml(formatPercent(readinessScore))}</p>
+                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
+                <p>Critical gaps: ${escapeHtml(String(criticalGaps.length))}</p>
+              </article>
+              <article class="setup-v2-answer-card">
+                <h4>Dependency diagnostics</h4>
+                <p>Missing assets: ${escapeHtml(String(missingAssets.length))}</p>
+                <p>Missing connectors: ${escapeHtml(String(missingConnectors.length))}</p>
+                <p>Failed connectors: ${escapeHtml(String(failedCount))}</p>
+              </article>
             </div>
           </section>
         </div>
 
-        <details class="card setup-v2-details">
-          <summary>
-            <span>View details</span>
-            <span class="card-badge neutral">Advanced</span>
-          </summary>
-          <div class="setup-v2-answers">
-            <article class="setup-v2-answer-card">
-              <h4>Setup diagnostics</h4>
-              <p>Readiness score: ${escapeHtml(formatPercent(readinessScore))}</p>
-              <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
-              <p>Critical gaps: ${escapeHtml(String(criticalGaps.length))}</p>
-            </article>
-            <article class="setup-v2-answer-card">
-              <h4>Dependency diagnostics</h4>
-              <p>Missing assets: ${escapeHtml(String(missingAssets.length))}</p>
-              <p>Missing connectors: ${escapeHtml(String(missingConnectors.length))}</p>
-              <p>Failed connectors: ${escapeHtml(String(failedCount))}</p>
-            </article>
+        <section class="card setup-smart-handoff-panel">
+          <div class="card-head">
+            <h4>Continue / Handoff</h4>
+            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run smart action</button>
           </div>
-        </details>
+          <div class="setup-smart-handoff-actions">
+            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+            <button id="setupReviewReadinessBtn" class="btn btn-ghost" type="button">Review readiness</button>
+            <button id="setupSaveBackendBtnBottom" class="btn btn-primary" type="button">Save setup</button>
+          </div>
+        </section>
+
+        <section class="card setup-smart-ai-tools" hidden>
+          <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">AI Positioning</button>
+          <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">AI Audience</button>
+          <button id="setupAiToneBtn" class="btn btn-ghost" type="button">AI Tone</button>
+          <button id="setupAiFillMissingBtn" class="btn btn-ghost" type="button">AI Fill Missing</button>
+          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command</button>
+          <p id="setupAiPositioningText"></p>
+          <p id="setupAiAudienceText"></p>
+          <p id="setupAiToneText"></p>
+        </section>
       </div>
     `;
+
+    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+    const saveTopBtn = $("setupSaveBackendBtn");
+    if (saveBottomBtn && saveTopBtn) {
+      saveBottomBtn.onclick = () => saveTopBtn.click();
+    }
 
     bindSetupActions({
       $,

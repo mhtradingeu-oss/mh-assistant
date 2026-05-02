@@ -1769,27 +1769,6 @@ export const integrationsRoute = {
             </div>
           </div>
         </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>Integrations AI Assistant</h3>
-            <span class="card-badge neutral">${escapeHtml(`${recommendations.prompts.length} prompts`)}</span>
-          </div>
-          <p class="setup-side-copy">These prompts send integration context to AI Command. They do not change any connection state until you run actions from this page.</p>
-          <div class="integration-ai-prompt-list">
-            ${recommendations.prompts.map((item) => `
-              <button
-                class="quick-action-btn"
-                type="button"
-                data-integration-prompt="1"
-                data-integration-prompt-text="${escapeHtml(item.prompt)}"
-              >
-                <span class="home-action-title">${escapeHtml(item.label)}</span>
-                <span class="home-action-meta">${escapeHtml(item.prompt)}</span>
-              </button>
-            `).join("")}
-          </div>
-        </section>
       </div>
     `;
 

@@ -826,7 +826,7 @@ function ensureShell(page) {
       </section>
 
       <aside class="std-main-right" data-ui-role="route-side-panels">
-        <section class="card std-action-panel" data-ui-role="page-specific-power-actions">
+        <section class="card std-action-panel" data-ui-role="action-panel">
           <div class="section-header">
             <div>
               <p class="card-label">Power Actions</p>
@@ -849,7 +849,7 @@ function ensureShell(page) {
           <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
         </section>
 
-        <section class="card ai-panel" data-ui-role="contextual-ai-agent">
+        <section class="card ai-panel" data-ui-role="ai-panel">
           <div class="section-header">
             <div>
               <p class="card-label">Contextual AI Agent</p>

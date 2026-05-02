@@ -19,6 +19,58 @@ const SMART_CATEGORY_BUCKETS = [
   { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
 ];
 
+const REQUIRED_ASSET_REQUIREMENTS = [
+  {
+    key: "logos",
+    label: "Logos",
+    types: ["logo"],
+    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+    uploadType: "logo"
+  },
+  {
+    key: "brand_guidelines",
+    label: "Brand Guidelines",
+    types: ["brand_guideline"],
+    why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",
+    uploadType: "brand_guideline"
+  },
+  {
+    key: "product_data",
+    label: "Product CSV / Product Data",
+    types: ["product_csv"],
+    why: "Product data anchors facts, variants, and claims for campaign and publishing.",
+    uploadType: "product_csv"
+  },
+  {
+    key: "product_images",
+    label: "Product Images",
+    types: ["product_photos", "packaging_images"],
+    why: "Approved product and packaging visuals are required for high-trust creative production.",
+    uploadType: "product_photos"
+  },
+  {
+    key: "videos",
+    label: "Videos",
+    types: ["product_videos"],
+    why: "Video source assets are required for reels, demos, and cutdowns.",
+    uploadType: "product_videos"
+  },
+  {
+    key: "legal_pricing",
+    label: "Legal / Pricing Documents",
+    types: ["legal_doc", "pricing_doc"],
+    why: "Legal and pricing documents prevent non-compliant copy and invented offers.",
+    uploadType: "legal_doc"
+  },
+  {
+    key: "research_documents",
+    label: "Research Documents",
+    types: ["partner_docs", "testimonials_reviews", "certificates"],
+    why: "Research and proof documents support claims, trust signals, and strategy decisions.",
+    uploadType: "partner_docs"
+  }
+];
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -226,7 +278,7 @@ async function updateLibraryAssetStatus(assetId, status, projectName) {
     const badge = row.querySelector("[data-asset-status-badge]");
     if (badge) {
       badge.textContent = status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-      badge.className = `badge badge-${status === "approved" ? "success" : status === "rejected" ? "danger" : status === "archived" ? "muted" : "warning"}`;
+      badge.className = `card-badge ${status === "approved" ? "success" : status === "rejected" ? "danger" : status === "archived" ? "muted" : status === "uploaded" ? "neutral" : "warning"}`;
     }
   }
 
@@ -283,6 +335,9 @@ function ensureLibrarySession(projectName) {
       selectedCategoryKey: "all",
       selectedAssetId: "",
       searchQuery: "",
+      selectedType: "all",
+      selectedStatus: "all",
+      sortBy: "updated_desc",
       uploadType: "logo",
       uploading: false,
       recentUploads: []
@@ -321,6 +376,34 @@ function getCategoryByType(categoryReadiness) {
   return map;
 }
 
+function normalizeReadinessStatus(value = "") {
+  const normalized = asString(value).trim().toLowerCase().replace(/\s+/g, "_");
+  if (!normalized) return "uploaded";
+  if (normalized.includes("approved")) return "approved";
+  if (normalized.includes("missing")) return "missing";
+  if (normalized === "uploaded") return "uploaded";
+  if (normalized.includes("needs_review") || normalized.includes("review")) return "needs_review";
+  if (normalized.includes("reject")) return "rejected";
+  if (normalized.includes("archiv")) return "archived";
+  return "uploaded";
+}
+
+function toStatusLabel(status = "") {
+  const value = normalizeReadinessStatus(status);
+  if (value === "approved") return "Approved";
+  if (value === "needs_review") return "Needs Review";
+  if (value === "missing") return "Missing";
+  if (value === "rejected") return "Rejected";
+  if (value === "archived") return "Archived";
+  return "Uploaded";
+}
+
+function toStatusTone(status = "") {
+  const value = normalizeReadinessStatus(status);
+  if (value === "needs_review") return getAssetStatusTone("needs review");
+  return getAssetStatusTone(value);
+}
+
 function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {
   const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));
 
@@ -347,11 +430,13 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
 
     return {
       id: asset.asset_id || asset.id || `asset-${index}`,
+      asset_id: asset.asset_id || asset.id || `asset-${index}`,
       name: fileName || asString(asset.file_name || "Asset"),
       file_path: filePath,
       asset_type: canonicalType || asString(asset.asset_type || "asset"),
       category_label: asString(category.display_label || category.label || catalogItem.display_label || catalogItem.label || canonicalType || asset.asset_type || "Asset"),
       category_status: asString(category.status || "Uploaded"),
+      status: normalizeReadinessStatus(asset.readiness_status || asset.review_status || asset.approval_status || asset.status || category.status || "uploaded"),
       exists: asset.exists !== false,
       source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth || legacy?.use_as_source_of_truth),
       used_in: usedIn,
@@ -364,7 +449,7 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
   });
 }
 
-function buildAssetOverview({ assets, categoryReadiness, missingRequiredAssets, recentUploads }) {
+function buildAssetOverview({ assets, requiredGroups }) {
   const now = Date.now();
   const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
 
@@ -374,34 +459,25 @@ function buildAssetOverview({ assets, categoryReadiness, missingRequiredAssets, 
     return Number.isFinite(ts) && ts >= sevenDaysAgo;
   }).length;
 
-  const recentUploadsFromSession = asArray(recentUploads).filter((item) => item.status === "success").length;
-
-  const campaignDependencies = asArray(categoryReadiness).filter((item) => {
-    const usedIn = asArray(item.guidance?.used_in).join(" ").toLowerCase();
-    return usedIn.includes("campaign") || usedIn.includes("media") || usedIn.includes("publishing");
-  });
-
-  const readyForCampaign = campaignDependencies.filter((item) => {
-    const status = asString(item.status).toLowerCase();
-    return ["uploaded", "approved"].includes(status);
-  }).length;
+  const approvedAssets = assets.filter((asset) => asset.status === "approved").length;
+  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+  const missingRequiredAssets = requiredGroups.filter((item) => item.status === "missing").length;
+  const sourceOfTruthAssets = assets.filter((asset) => asset.source_of_truth).length;
+  const sourceCoverage = assets.length ? Math.round((sourceOfTruthAssets / assets.length) * 100) : 0;
+  const nextAction = requiredGroups.find((item) => item.status === "missing") || requiredGroups.find((item) => item.status === "needs_review") || null;
 
   return {
     totalAssets: assets.length,
-    sourceOfTruthAssets: assets.filter((asset) => asset.source_of_truth).length,
-    missingRequiredAssets: missingRequiredAssets.length,
-    recentlyUploaded: recentlyUploadedByDate + recentUploadsFromSession,
-    readyForCampaign,
-    readyForCampaignTotal: campaignDependencies.length
+    approvedAssets,
+    needsReviewAssets,
+    missingRequiredAssets,
+    sourceOfTruthAssets,
+    sourceCoverage,
+    recentlyUploaded: recentlyUploadedByDate,
+    nextAction: nextAction
+      ? `${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}`
+      : "Required assets are covered. Continue with classification and approvals."
   };
-}
-
-function bucketStatus(categories) {
-  const statuses = categories.map((item) => asString(item.status).toLowerCase());
-  if (!statuses.length || statuses.every((value) => value === "missing")) return "Missing";
-  if (statuses.includes("needs review")) return "Needs Review";
-  if (statuses.includes("uploaded") || statuses.includes("approved")) return "Ready";
-  return "Missing";
 }
 
 function buildCategoryBuckets(categoryReadiness) {
@@ -412,12 +488,52 @@ function buildCategoryBuckets(categoryReadiness) {
       .map((type) => categoryByType.get(type))
       .filter(Boolean);
     const usedIn = [...new Set(entries.flatMap((entry) => asArray(entry.guidance?.used_in)))];
+    const statuses = entries.map((entry) => normalizeReadinessStatus(entry.status));
+
+    let status = "Needs Review";
+    if (!entries.length || statuses.every((value) => value === "missing")) {
+      status = "Missing";
+    } else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {
+      status = "Needs Review";
+    } else {
+      status = "Approved";
+    }
 
     return {
       ...bucket,
-      status: bucketStatus(entries),
+      status,
       count: entries.reduce((acc, item) => acc + Number(item.count || 0), 0),
       used_in: usedIn
+    };
+  });
+}
+
+function buildRequiredAssetGroups(categoryReadiness) {
+  const categoryByType = getCategoryByType(categoryReadiness);
+
+  return REQUIRED_ASSET_REQUIREMENTS.map((requirement) => {
+    const entries = requirement.types
+      .map((type) => categoryByType.get(type))
+      .filter(Boolean);
+
+    const statuses = entries.map((entry) => normalizeReadinessStatus(entry.status));
+    let status = "missing";
+    if (entries.length && statuses.every((value) => value === "approved")) {
+      status = "present";
+    } else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {
+      status = "needs_review";
+    } else if (entries.length && statuses.some((value) => value === "approved")) {
+      status = "needs_review";
+    }
+
+    const totalCount = entries.reduce((acc, item) => acc + Number(item.count || 0), 0);
+
+    return {
+      ...requirement,
+      status,
+      totalCount,
+      used_in: [...new Set(entries.flatMap((entry) => asArray(entry.guidance?.used_in || [])))],
+      action: status === "missing" ? "upload" : status === "needs_review" ? "review" : "classify"
     };
   });
 }
@@ -425,27 +541,36 @@ function buildCategoryBuckets(categoryReadiness) {
 function getFilteredAssets(allAssets, session, bucketMap) {
   const selectedCategoryKey = session.selectedCategoryKey || "all";
   const selectedBucket = bucketMap.get(selectedCategoryKey) || null;
+  const selectedType = session.selectedType || "all";
+  const selectedStatus = session.selectedStatus || "all";
+  const sortBy = session.sortBy || "updated_desc";
   const allowedTypes = selectedBucket ? new Set(selectedBucket.types) : null;
   const searchValue = asString(session.searchQuery).trim();
   const searchRegex = searchValue ? new RegExp(escapeRegExp(searchValue), "i") : null;
 
-  return allAssets.filter((asset) => {
+  const filtered = allAssets.filter((asset) => {
     const matchesBucket = !allowedTypes || allowedTypes.has(asset.asset_type);
+    const matchesType = selectedType === "all" || asset.asset_type === selectedType;
+    const matchesStatus = selectedStatus === "all" || asset.status === selectedStatus;
     const haystack = `${asset.name} ${asset.asset_type} ${asset.category_label} ${asset.file_path} ${asset.used_in.join(" ")}`;
     const matchesSearch = !searchRegex || searchRegex.test(haystack);
-    return matchesBucket && matchesSearch;
+    return matchesBucket && matchesType && matchesStatus && matchesSearch;
   });
-}
 
-function buildMissingDetails(categoryReadiness) {
-  return asArray(categoryReadiness)
-    .filter((item) => asString(item.status).toLowerCase() === "missing" && item.required !== false)
-    .map((item) => ({
-      asset_type: item.asset_type,
-      label: item.display_label || item.label || item.asset_type,
-      why: item.guidance?.why_it_matters || "Required to keep campaign planning and execution accurate.",
-      used_in: asArray(item.guidance?.used_in)
-    }));
+  const toTimestamp = (value) => {
+    const ts = new Date(value || 0).getTime();
+    return Number.isFinite(ts) ? ts : 0;
+  };
+
+  const sorted = [...filtered].sort((left, right) => {
+    if (sortBy === "name_asc") return left.name.localeCompare(right.name);
+    if (sortBy === "name_desc") return right.name.localeCompare(left.name);
+    if (sortBy === "updated_asc") return toTimestamp(left.uploaded_at) - toTimestamp(right.uploaded_at);
+    if (sortBy === "status") return toStatusLabel(left.status).localeCompare(toStatusLabel(right.status));
+    return toTimestamp(right.uploaded_at) - toTimestamp(left.uploaded_at);
+  });
+
+  return sorted;
 }
 
 function renderPreview(asset, escapeHtml) {
@@ -507,6 +632,7 @@ function bindLibraryWorkspace({
   const catalog = getAssetCatalog(assetsData);
   const categoryByType = getCategoryByType(categoryReadiness);
   const allAssets = normalizeAssets(projectName, assetsData, registry, categoryByType, catalog);
+  const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
   const categoryBuckets = buildCategoryBuckets(categoryReadiness);
   const bucketMap = new Map(categoryBuckets.map((item) => [item.key, item]));
   const filteredAssets = getFilteredAssets(allAssets, session, bucketMap);
@@ -516,13 +642,20 @@ function bindLibraryWorkspace({
   }
 
   const selectedAsset = allAssets.find((asset) => asset.id === session.selectedAssetId) || null;
-  const missingDetails = buildMissingDetails(categoryReadiness);
   const overview = buildAssetOverview({
     assets: allAssets,
-    categoryReadiness,
-    missingRequiredAssets,
-    recentUploads: session.recentUploads
+    requiredGroups
   });
+
+  const recentActivity = [...allAssets]
+    .filter((asset) => asset.uploaded_at)
+    .sort((left, right) => new Date(right.uploaded_at || 0).getTime() - new Date(left.uploaded_at || 0).getTime())
+    .slice(0, 6);
+
+  const typeOptions = [
+    { value: "all", label: "All types" },
+    ...catalog.map((item) => ({ value: item.asset_type, label: item.display_label || item.label || item.asset_type }))
+  ];
 
   const overviewBox = $("libraryOverviewCards");
   if (overviewBox) {
@@ -532,63 +665,147 @@ function bindLibraryWorkspace({
         <strong>${escapeHtml(formatCount(overview.totalAssets))}</strong>
       </article>
       <article class="data-card smart-overview-card">
-        <span class="data-label">Source-of-truth assets</span>
-        <strong>${escapeHtml(formatCount(overview.sourceOfTruthAssets))}</strong>
+        <span class="data-label">Approved assets</span>
+        <strong>${escapeHtml(formatCount(overview.approvedAssets))}</strong>
+      </article>
+      <article class="data-card smart-overview-card">
+        <span class="data-label">Needs review</span>
+        <strong>${escapeHtml(formatCount(overview.needsReviewAssets))}</strong>
       </article>
       <article class="data-card smart-overview-card">
         <span class="data-label">Missing required assets</span>
         <strong>${escapeHtml(formatCount(overview.missingRequiredAssets))}</strong>
       </article>
       <article class="data-card smart-overview-card">
-        <span class="data-label">Recently uploaded</span>
-        <strong>${escapeHtml(formatCount(overview.recentlyUploaded))}</strong>
+        <span class="data-label">Source-of-truth coverage</span>
+        <strong>${escapeHtml(`${formatCount(overview.sourceCoverage)}%`)}</strong>
       </article>
       <article class="data-card smart-overview-card">
-        <span class="data-label">Ready for campaign</span>
-        <strong>${escapeHtml(`${formatCount(overview.readyForCampaign)} / ${formatCount(overview.readyForCampaignTotal)}`)}</strong>
+        <span class="data-label">Next action</span>
+        <strong class="library-overview-next-action">${escapeHtml(overview.nextAction)}</strong>
       </article>
     `;
   }
 
-  const categoryBox = $("libraryCategoryCards");
-  if (categoryBox) {
-    categoryBox.innerHTML = categoryBuckets.map((bucket) => {
-      const tone = getAssetStatusTone(bucket.status === "Ready" ? "Approved" : bucket.status);
-      const activeClass = session.selectedCategoryKey === bucket.key ? "is-active" : "";
-      const usedIn = bucket.used_in.length ? bucket.used_in.join(", ") : "Library";
+  const requiredBox = $("libraryRequiredAssetsGrid");
+  if (requiredBox) {
+    requiredBox.innerHTML = requiredGroups.map((item) => {
+      const tone = item.status === "present" ? "success" : item.status === "missing" ? "danger" : "warning";
+      const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
+      const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
 
       return `
-        <button class="library-category-chip ${tone} ${activeClass}" type="button" data-library-bucket="${escapeHtml(bucket.key)}">
-          <div class="library-category-chip-head">
-            <span>${escapeHtml(bucket.label)}</span>
-            <span class="card-badge ${tone}">${escapeHtml(bucket.status)}</span>
+        <article class="library-required-card">
+          <div class="library-required-card-head">
+            <h4>${escapeHtml(item.label)}</h4>
+            <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
           </div>
-          <div class="library-category-chip-meta">${escapeHtml(`${formatCount(bucket.count)} files`)}</div>
-          <div class="library-category-chip-used">${escapeHtml(usedIn)}</div>
-        </button>
+          <p>${escapeHtml(item.why)}</p>
+          <div class="library-required-card-foot">
+            <small>${escapeHtml(`Detected files: ${formatCount(item.totalCount)}`)}</small>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              data-library-required-action="${escapeHtml(item.action)}"
+              data-library-required-key="${escapeHtml(item.key)}"
+              data-library-upload-type="${escapeHtml(item.uploadType)}"
+            >${escapeHtml(actionLabel)}</button>
+          </div>
+        </article>
       `;
     }).join("");
+  }
+
+  const typeSelect = $("libraryFilterTypeSelect");
+  if (typeSelect) {
+    typeSelect.innerHTML = typeOptions.map((option) => `
+      <option value="${escapeHtml(option.value)}"${session.selectedType === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+    `).join("");
+    typeSelect.onchange = (event) => {
+      session.selectedType = event.target.value || "all";
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
+  }
+
+  const statusSelect = $("libraryFilterStatusSelect");
+  if (statusSelect) {
+    statusSelect.value = session.selectedStatus;
+    statusSelect.onchange = (event) => {
+      session.selectedStatus = event.target.value || "all";
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
+  }
+
+  const sortSelect = $("librarySortSelect");
+  if (sortSelect) {
+    sortSelect.value = session.sortBy;
+    sortSelect.onchange = (event) => {
+      session.sortBy = event.target.value || "updated_desc";
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
   }
 
   const tableBody = $("libraryAssetTableBody");
   if (tableBody) {
     tableBody.innerHTML = filteredAssets.length
       ? filteredAssets.map((asset) => {
-        const tone = getAssetStatusTone(asset.category_status);
+        const tone = toStatusTone(asset.status);
+        const statusLabel = toStatusLabel(asset.status);
         return `
-          <tr class="${session.selectedAssetId === asset.id ? "is-active" : ""}">
+          <tr class="${session.selectedAssetId === asset.id ? "is-active" : ""}" data-asset-row-id="${escapeHtml(asset.asset_id)}" data-asset-status="${escapeHtml(asset.status)}">
             <td>${escapeHtml(asset.name)}</td>
             <td>
               <div>${escapeHtml(asset.category_label)}</div>
               <small class="library-table-type">${escapeHtml(asset.asset_type)}</small>
             </td>
-            <td><span class="card-badge ${tone}">${escapeHtml(asset.category_status)}</span></td>
+            <td><span class="card-badge ${tone}" data-asset-status-badge>${escapeHtml(statusLabel)}</span></td>
+            <td><span class="card-badge ${asset.source_of_truth ? "success" : "neutral"}">${escapeHtml(asset.source_of_truth ? "Yes" : "No")}</span></td>
             <td>${escapeHtml(asset.used_in.join(", ") || "Library")}</td>
             <td>
               <div class="library-table-actions">
                 <button class="btn btn-secondary" type="button" data-library-select="${escapeHtml(asset.id)}">Select</button>
                 <div class="library-actions">
                   ${asset.preview_url ? `<a class="btn btn-primary btn-sm library-link-btn" href="${escapeHtml(asset.preview_url)}" target="_blank" rel="noreferrer">Open</a>` : `<button class="btn btn-primary btn-sm" type="button" disabled>Open</button>`}
+                  <button class="btn btn-secondary btn-sm" type="button" data-library-source-truth="${escapeHtml(asset.id)}">${escapeHtml(asset.source_of_truth ? "Source" : "Set SoT")}</button>
                   <div class="library-action-menu">
                     <button class="btn btn-secondary btn-sm library-action-toggle" type="button">Actions ▾</button>
                     <div class="library-action-dropdown">
@@ -605,7 +822,7 @@ function bindLibraryWorkspace({
           </tr>
         `;
       }).join("")
-      : `<tr><td colspan="5"><div class="empty-box">No assets match this view.</div></td></tr>`;
+      : `<tr><td colspan="6"><div class="empty-box">No assets match this view. Adjust type/status filters or search.</div></td></tr>`;
   }
 
   const previewVisual = $("libraryPreviewVisual");
@@ -620,29 +837,36 @@ function bindLibraryWorkspace({
         <div class="data-stack">
           <div class="data-row"><span>Name</span><strong>${escapeHtml(selectedAsset.name)}</strong></div>
           <div class="data-row"><span>Type</span><strong>${escapeHtml(selectedAsset.asset_type)}</strong></div>
-          <div class="data-row"><span>Status</span><strong>${escapeHtml(selectedAsset.category_status)}</strong></div>
+          <div class="data-row"><span>Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
           <div class="data-row"><span>Source of truth</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Yes" : "No")}</strong></div>
           <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
           <div class="data-row"><span>Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
+        </div>
+        <div class="library-preview-actions">
+          ${selectedAsset.preview_url ? `<a class="btn btn-primary library-link-btn" href="${escapeHtml(selectedAsset.preview_url)}" target="_blank" rel="noreferrer">Open Asset</a>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
+          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
+          <button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Source of Truth" : "Set as Source of Truth")}</button>
+          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
+          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>
         </div>
       `
       : `<div class="empty-box">Select an asset to view details.</div>`;
   }
 
-  const missingBox = $("libraryMissingAssetsList");
-  if (missingBox) {
-    missingBox.innerHTML = missingDetails.length
-      ? missingDetails.map((item) => `
-        <article class="library-missing-card">
-          <div class="library-missing-head">
-            <strong>${escapeHtml(item.label)}</strong>
-            <button class="btn btn-primary" type="button" data-library-upload-type="${escapeHtml(item.asset_type)}">Upload</button>
-          </div>
-          <p>${escapeHtml(item.why)}</p>
-          <small>${escapeHtml(item.used_in.length ? `Used in: ${item.used_in.join(", ")}` : "Used in: Library")}</small>
-        </article>
-      `).join("")
-      : `<div class="empty-box">All required asset categories are covered.</div>`;
+  const activityBox = $("libraryRecentActivity");
+  if (activityBox) {
+    activityBox.innerHTML = recentActivity.length
+      ? `
+        <ul class="simple-list">
+          ${recentActivity.map((asset) => `
+            <li>
+              <strong>${escapeHtml(asset.name)}</strong>
+              <span>${escapeHtml(`${toStatusLabel(asset.status)} • ${formatDate(asset.uploaded_at)}`)}</span>
+            </li>
+          `).join("")}
+        </ul>
+      `
+      : `<div class="empty-box">No recent uploaded or updated assets yet.</div>`;
   }
 
   const uploadSummary = $("libraryUploadSummary");
@@ -661,24 +885,44 @@ function bindLibraryWorkspace({
       : `<div class="empty-box">No uploads in this session yet.</div>`;
   }
 
-  const categoryButtons = Array.from(document.querySelectorAll("[data-library-bucket]"));
-  categoryButtons.forEach((button) => {
+  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+  requiredActionButtons.forEach((button) => {
     button.onclick = () => {
-      session.selectedCategoryKey = button.getAttribute("data-library-bucket") || "all";
-      bindLibraryWorkspace({
-        $,
-        projectName,
-        session,
-        assetsData,
-        registry,
-        categoryReadiness,
-        missingRequiredAssets,
-        navigateTo,
-        reloadProjectData,
-        showMessage,
-        showError,
-        escapeHtml
-      });
+      const action = button.getAttribute("data-library-required-action") || "review";
+      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+
+      if (action === "upload") {
+        session.uploadType = uploadType;
+        const uploadTypeSelect = $("libraryUploadTypeSelect");
+        if (uploadTypeSelect) uploadTypeSelect.value = uploadType;
+        const uploadInput = $("libraryUploadInput");
+        uploadInput?.click();
+        return;
+      }
+
+      if (action === "review") {
+        session.selectedStatus = "needs_review";
+        bindLibraryWorkspace({
+          $,
+          projectName,
+          session,
+          assetsData,
+          registry,
+          categoryReadiness,
+          missingRequiredAssets,
+          navigateTo,
+          reloadProjectData,
+          showMessage,
+          showError,
+          escapeHtml
+        });
+        return;
+      }
+
+      const input = $("quickCommandInput");
+      if (input) input.value = buildAiPrompt(projectName, "classify");
+      navigateTo("ai-command");
+      showMessage?.("AI classification prompt sent.");
     };
   });
 
@@ -700,6 +944,20 @@ function bindLibraryWorkspace({
         showError,
         escapeHtml
       });
+    };
+  });
+
+  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+  sourceOfTruthButtons.forEach((button) => {
+    button.onclick = () => {
+      const assetId = button.getAttribute("data-library-source-truth") || "";
+      const asset = allAssets.find((item) => item.id === assetId);
+      const input = $("quickCommandInput");
+      if (input) {
+        input.value = `For ${projectName || "this project"}, set ${asset?.name || "the selected asset"} as source-of-truth if valid and explain any risks before approval.`;
+      }
+      navigateTo("ai-command");
+      showMessage?.("Source-of-truth action routed to AI Command.");
     };
   });
 
@@ -972,8 +1230,8 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <div class="setup-kicker">Smart Asset Library</div>
-              <h3>${escapeHtml(projectName ? `${projectName} Assets` : "Project Assets")}</h3>
+              <div class="setup-kicker">Asset Control System</div>
+              <h3>${escapeHtml(projectName ? `${projectName} Asset Overview` : "Asset Overview")}</h3>
             </div>
             <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh</button>
           </div>
@@ -982,25 +1240,37 @@ export const libraryRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Upload Center</h3>
-            <span class="card-badge neutral">Drag and drop</span>
+            <h3>Required Assets / Readiness Gaps</h3>
+            <span class="card-badge warning">Action required where missing</span>
+          </div>
+          <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Asset Actions</h3>
+            <div class="library-action-toolbar">
+              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+            </div>
           </div>
           <div class="library-upload-grid">
             <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
-              <strong>Drop files here</strong>
-              <span>or click to browse</span>
+              <strong>Upload Assets</strong>
+              <span>Drop files here or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
               <input id="libraryUploadInput" type="file" multiple hidden>
             </div>
             <div class="library-upload-controls">
-              <label class="setup-label" for="libraryUploadTypeSelect">Category</label>
+              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
               <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
                 ${getAssetCatalog(assetsData).map((item) => `
                   <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
                 `).join("")}
               </select>
-              <div class="setup-helper">Supported: images, videos, documents, spreadsheets, and archives based on selected category.</div>
-              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload</button>
+              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
             </div>
           </div>
           <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
@@ -1008,80 +1278,78 @@ export const libraryRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Asset Categories</h3>
-            <span class="card-badge neutral">Readiness</span>
+            <h3>Asset Workspace</h3>
+            <span class="card-badge neutral">Table + Preview</span>
           </div>
-          <div class="library-category-chip-grid">
-            <button class="library-category-chip neutral is-active" type="button" data-library-bucket="all">
-              <div class="library-category-chip-head">
-                <span>All Assets</span>
-                <span class="card-badge neutral">View</span>
+          <div class="library-workspace-grid">
+            <div class="library-workspace-main">
+              <div class="library-filter-bar">
+                <div class="library-filter-field">
+                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+                </div>
+                <div class="library-filter-field">
+                  <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
+                  <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+                    <option value="all">All statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="needs_review">Needs review</option>
+                    <option value="uploaded">Uploaded</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+                <div class="library-filter-field">
+                  <label class="setup-label" for="librarySortSelect">Sort</label>
+                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+                    <option value="updated_desc">Newest first</option>
+                    <option value="updated_asc">Oldest first</option>
+                    <option value="name_asc">Name A-Z</option>
+                    <option value="name_desc">Name Z-A</option>
+                    <option value="status">Status</option>
+                  </select>
+                </div>
+                <div class="library-filter-field library-filter-search">
+                  <label class="setup-label" for="librarySearchInput">Search</label>
+                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+                </div>
               </div>
-              <div class="library-category-chip-meta">All categories</div>
-              <div class="library-category-chip-used">Library overview</div>
-            </button>
-            <div id="libraryCategoryCards" class="library-category-chip-group"></div>
-          </div>
-        </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Assets</h3>
-            <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, type, status, or usage" style="max-width: 320px;">
-          </div>
-          <div class="library-table-wrap">
-            <table class="library-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Used in</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="libraryAssetTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <div class="library-smart-columns">
-          <section class="card">
-            <div class="card-head">
-              <h3>Preview</h3>
-              <span class="card-badge neutral">Selected asset</span>
+              <div class="library-table-wrap">
+                <table class="library-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Source of Truth</th>
+                      <th>Used in</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="libraryAssetTableBody"></tbody>
+                </table>
+              </div>
             </div>
-            <div id="libraryPreviewVisual"></div>
-            <div id="libraryPreviewMeta" style="margin-top: 12px;"></div>
-          </section>
 
-          <section class="card">
-            <div class="card-head">
-              <h3>Missing Assets</h3>
-              <span class="card-badge ${missingRequiredAssets.length ? "warning" : "success"}">${escapeHtml(missingRequiredAssets.length ? `${missingRequiredAssets.length} missing` : "Covered")}</span>
-            </div>
-            <div id="libraryMissingAssetsList"></div>
-          </section>
-        </div>
+            <aside class="library-workspace-side">
+              <section class="card library-preview-card">
+                <div class="card-head">
+                  <h3>Asset Detail</h3>
+                  <span class="card-badge neutral">Preview + Decisions</span>
+                </div>
+                <div id="libraryPreviewVisual"></div>
+                <div id="libraryPreviewMeta" style="margin-top: 12px;"></div>
+              </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>AI Asset Assistant</h3>
-            <span class="card-badge neutral">Quick actions</span>
-          </div>
-          <div class="quick-actions library-ai-actions">
-            <button id="libraryAiClassifyBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Classify files</span>
-              <span class="home-action-meta">Suggest clean category mapping and source-of-truth candidates.</span>
-            </button>
-            <button id="libraryAiMissingBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Find missing files</span>
-              <span class="home-action-meta">Prioritize what to upload next to unblock campaigns.</span>
-            </button>
-            <button id="libraryAiExtractBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Extract document info</span>
-              <span class="home-action-meta">Pull legal, pricing, and campaign facts from docs.</span>
-            </button>
+              <section class="card">
+                <div class="card-head">
+                  <h3>Activity / Recent Assets</h3>
+                  <span class="card-badge neutral">Latest updates</span>
+                </div>
+                <div id="libraryRecentActivity"></div>
+              </section>
+            </aside>
           </div>
         </section>
       </div>
