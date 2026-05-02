@@ -1,4 +1,5 @@
 const integrationSessions = new Map();
+let integrationDrawerEscapeHandler = null;
 const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);
 
 const INTEGRATION_DOMAINS = [
@@ -614,10 +615,157 @@ function ensureSession(projectName) {
   if (!integrationSessions.has(key)) {
     integrationSessions.set(key, {
       drafts: {},
-      selectedIntegrationId: ""
+      selectedIntegrationId: "",
+      categoryFilter: "all",
+      statusFilter: "all",
+      searchQuery: "",
+      activeDrawerIntegrationId: "",
+      drawerOpen: false,
+      validationIntegrationId: "",
+      validationFieldKey: "",
+      validationMessage: ""
     });
   }
   return integrationSessions.get(key);
+}
+
+function openIntegrationDrawer(session, integrationId) {
+  session.selectedIntegrationId = integrationId || "";
+  session.activeDrawerIntegrationId = integrationId || "";
+  session.drawerOpen = Boolean(integrationId);
+}
+
+function closeIntegrationDrawer(session) {
+  session.drawerOpen = false;
+  session.activeDrawerIntegrationId = "";
+  session.validationIntegrationId = "";
+  session.validationFieldKey = "";
+  session.validationMessage = "";
+}
+
+function setIntegrationValidation(session, integrationId, fieldKey, message) {
+  session.validationIntegrationId = integrationId || "";
+  session.validationFieldKey = fieldKey || "";
+  session.validationMessage = message || "";
+}
+
+function clearIntegrationValidation(session, integrationId, fieldKey) {
+  const sameIntegration = !integrationId || session.validationIntegrationId === integrationId;
+  const sameField = !fieldKey || session.validationFieldKey === fieldKey;
+  if (!sameIntegration || !sameField) return;
+  session.validationIntegrationId = "";
+  session.validationFieldKey = "";
+  session.validationMessage = "";
+}
+
+function normalizeSuggestedUrl(value) {
+  const text = asString(value).trim();
+  if (!text) return "";
+  if (/^https?:\/\//i.test(text)) return text;
+  return `https://${text}`;
+}
+
+function getSuggestedHostname(value) {
+  const normalized = normalizeSuggestedUrl(value);
+  if (!normalized) return "";
+  try {
+    return new URL(normalized).hostname.replace(/^www\./i, "");
+  } catch (_) {
+    return "";
+  }
+}
+
+function getProjectSetupOverview(state) {
+  return asObject(state.data?.overview?.overview);
+}
+
+function getSuggestedFieldValue(state, integration, field) {
+  const overview = getProjectSetupOverview(state);
+  const websiteUrl = normalizeSuggestedUrl(overview.website_url);
+  const hostname = getSuggestedHostname(websiteUrl);
+
+  if (!websiteUrl && !hostname) return "";
+
+  if (integration.id === "website" && field.key === "url") {
+    return websiteUrl;
+  }
+  if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {
+    try {
+      return `${new URL(websiteUrl).origin}/webhooks/mh`;
+    } catch (_) {
+      return "";
+    }
+  }
+  if (integration.id === "woocommerce" && field.key === "storeUrl") {
+    return websiteUrl;
+  }
+  if (integration.id === "search-console" && field.key === "propertyUrl") {
+    return websiteUrl;
+  }
+  if (integration.id === "search-console" && field.key === "siteDomain" && hostname) {
+    return `sc-domain:${hostname}`;
+  }
+  if (integration.id === "mailer" && field.key === "senderDomain") {
+    return hostname;
+  }
+
+  return "";
+}
+
+function getResolvedFieldValue(state, session, integration, field, record, sourceValue) {
+  const draft = ensureDraft(session, integration.id);
+  if (draft[field.key] != null) return draft[field.key];
+  if (isSecretField(field)) return "";
+  const suggested = getSuggestedFieldValue(state, integration, field);
+  if (field.key === integration.primaryField) {
+    return asString(record.primary_value || sourceValue || record.config?.[field.key] || suggested);
+  }
+  return asString(record.config?.[field.key] || suggested);
+}
+
+function getQuickConnectLabel(integration) {
+  if (["ga4", "gtm", "search-console", "youtube", "google-ads", "google-drive"].includes(integration.id)) {
+    return "Connect with Google";
+  }
+  if (["facebook", "instagram", "meta-pixel", "meta-ads"].includes(integration.id)) {
+    return "Connect with Meta";
+  }
+  if (integration.id === "shopify") {
+    return "Connect with Shopify";
+  }
+  return "";
+}
+
+function getSmartConnectLabel(card) {
+  if (card.backendSupported === false) return "Open setup";
+  if (card.statusLabel === "Connected") return "Manage Connection";
+  if (card.statusLabel === "Partial") return "Complete Setup";
+  if (card.statusLabel === "Token expired") return "Reconnect Now";
+  if (card.statusLabel === "Error") return "Fix Connection";
+  return getQuickConnectLabel(card) || (card.id === "website" ? "Connect Website" : `Connect ${card.label}`);
+}
+
+function getDrawerPrimaryAction(card) {
+  if (card.backendSupported === false) {
+    return { action: "select", label: "Open setup" };
+  }
+  if (card.statusLabel === "Connected") {
+    return { action: "sync", label: "Sync Now" };
+  }
+  if (["Token expired", "Error"].includes(card.statusLabel)) {
+    return { action: "reconnect", label: getSmartConnectLabel(card) };
+  }
+  return { action: "connect", label: getSmartConnectLabel(card) };
+}
+
+function buildSuggestedValues(state, integration) {
+  return integration.fields.reduce((accumulator, field) => {
+    const suggested = getSuggestedFieldValue(state, integration, field);
+    if (suggested) {
+      accumulator[field.key] = suggested;
+    }
+    return accumulator;
+  }, {});
 }
 
 function ensureDraft(session, integrationId) {
@@ -804,32 +952,32 @@ function getServerRecord(state, integration) {
   return buildLegacyFallbackRecord(integration, state);
 }
 
-function getFieldValue(session, integration, field, record, sourceValue) {
+function getFieldValue(session, integration, field, record, sourceValue, suggestedValue = "") {
   const draft = ensureDraft(session, integration.id);
   if (draft[field.key] != null) return draft[field.key];
   if (isSecretField(field)) return "";
   if (field.key === integration.primaryField) {
-    return asString(record.primary_value || sourceValue || record.config?.[field.key]);
+    return asString(record.primary_value || sourceValue || record.config?.[field.key] || suggestedValue);
   }
-  return asString(record.config?.[field.key]);
+  return asString(record.config?.[field.key] || suggestedValue);
 }
 
 function hasSavedServerCredential(record, fieldKey) {
   return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);
 }
 
-function getLocalFillCount(session, integration, record, sourceValue) {
+function getLocalFillCount(session, integration, record, sourceValue, state) {
   return integration.fields.filter((field) => {
-    const value = asString(getFieldValue(session, integration, field, record, sourceValue)).trim();
+    const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
     return Boolean(value) || (isSecretField(field) && hasSavedServerCredential(record, field.key));
   }).length;
 }
 
-function getRequiredMissing(session, integration, record, sourceValue) {
+function getRequiredMissing(session, integration, record, sourceValue, state) {
   return integration.fields
     .filter((field) => field.required)
     .filter((field) => {
-      const value = asString(getFieldValue(session, integration, field, record, sourceValue)).trim();
+      const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
       return !value && !(isSecretField(field) && hasSavedServerCredential(record, field.key));
     })
     .map((field) => field.label);
@@ -879,13 +1027,14 @@ function buildIntegrationCardModel(integration, session, state) {
   const statusLabel = backendSupported
     ? normalizeStatusLabel(record.status_label || record.status)
     : "Unavailable";
-  const localFillCount = getLocalFillCount(session, integration, record, sourceValue);
-  const missingRequired = getRequiredMissing(session, integration, record, sourceValue);
+  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
+  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
   const totalFields = integration.fields.length;
   const accessModel = getIntegrationAccessModel(integration);
   const dataScopes = asArray(record.data_scopes).length
     ? asArray(record.data_scopes).map(titleCase)
     : inferScopeKeys(integration).map(titleCase);
+  const suggestedValues = buildSuggestedValues(state, integration);
 
   return {
     ...integration,
@@ -906,6 +1055,7 @@ function buildIntegrationCardModel(integration, session, state) {
     readScopes: asArray(record.read_scopes).length ? asArray(record.read_scopes) : accessModel.read,
     writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
     credentialState: asObject(record.credential_state),
+    suggestedValues,
     missingRequired: backendSupported ? missingRequired : [],
     lastSync: asString(record.last_sync_at),
     lastImport: asString(record.last_import_at),
@@ -1013,6 +1163,199 @@ function buildCriticalMissing(domainModels) {
     }));
 }
 
+function buildAISmartRecommendation(domainModels) {
+  const allCards = domainModels.flatMap((d) => d.cards);
+  const actionableCards = allCards.filter((c) => c.backendSupported);
+  const criticalCards = actionableCards.filter((c) => c.critical);
+  const allCriticalConnected = criticalCards.length > 0 && criticalCards.every((c) => c.statusLabel === "Connected");
+
+  let targetCard = null;
+
+  // 1. Failed or expired critical connector
+  targetCard = actionableCards.find(
+    (c) => c.critical && ["Error", "Token expired"].includes(c.statusLabel)
+  ) || null;
+
+  // 2. Missing Website
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.id === "website" && c.statusLabel !== "Connected") || null;
+  }
+
+  // 3. Missing WooCommerce (when website is already present in the domain list)
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.id === "woocommerce" && c.statusLabel !== "Connected") || null;
+  }
+
+  // 4. Missing GA4
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.id === "ga4" && c.statusLabel !== "Connected") || null;
+  }
+
+  // 5. Missing Search Console
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.id === "search-console" && c.statusLabel !== "Connected") || null;
+  }
+
+  // 6. Missing Instagram or Facebook
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => ["instagram", "facebook"].includes(c.id) && c.statusLabel !== "Connected") || null;
+  }
+
+  // 7. Missing Meta Pixel
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.id === "meta-pixel" && c.statusLabel !== "Connected") || null;
+  }
+
+  // 8. Missing Email / CRM
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => ["smtp", "mailer", "mailchimp"].includes(c.id) && c.statusLabel !== "Connected") || null;
+  }
+
+  // 9. Any remaining critical missing
+  if (!targetCard) {
+    targetCard = actionableCards.find((c) => c.critical && c.statusLabel !== "Connected") || null;
+  }
+
+  // Healthy fallback — suggest next optional connector
+  if (!targetCard) {
+    const nextOptional = actionableCards.find((c) => !c.critical && c.statusLabel !== "Connected") || null;
+    return { healthy: true, nextOptional, allCriticalConnected };
+  }
+
+  // Priority label and tone
+  let priorityLabel, priorityTone;
+  if (targetCard.critical) {
+    priorityLabel = "Critical";
+    priorityTone = "danger";
+  } else {
+    priorityLabel = "Recommended";
+    priorityTone = "warning";
+  }
+
+  // Why this first? — blocker type
+  const BLOCKER_MAP = {
+    launch_blocker: ["website", "woocommerce", "shopify", "smtp", "mailer"],
+    attribution_blocker: ["ga4", "gtm", "meta-pixel", "tiktok-pixel", "custom-analytics"],
+    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+    data_learning_blocker: ["search-console", "mailchimp", "meta-ads", "google-ads"]
+  };
+
+  let reasonType = "launch_blocker";
+  for (const [type, ids] of Object.entries(BLOCKER_MAP)) {
+    if (ids.includes(targetCard.id)) {
+      reasonType = type;
+      break;
+    }
+  }
+
+  const REASON_LABELS = {
+    launch_blocker: "Launch blocker",
+    attribution_blocker: "Attribution blocker",
+    publishing_blocker: "Publishing blocker",
+    data_learning_blocker: "Data learning blocker"
+  };
+
+  // Impact chips
+  const impactChips = [];
+  if (targetCard.critical) {
+    impactChips.push("Launch readiness");
+  }
+  if (["ga4", "search-console", "gtm", "meta-pixel", "custom-analytics", "website"].includes(targetCard.id)) {
+    impactChips.push("Analytics");
+  }
+  if (["instagram", "facebook", "tiktok", "youtube", "linkedin"].includes(targetCard.id)) {
+    impactChips.push("Publishing");
+  }
+  if (["woocommerce", "shopify", "amazon", "ebay"].includes(targetCard.id)) {
+    impactChips.push("Commerce");
+  }
+  if (["meta-ads", "google-ads", "tiktok-ads", "meta-pixel", "tiktok-pixel"].includes(targetCard.id)) {
+    impactChips.push("Ads optimization");
+  }
+
+  return {
+    healthy: false,
+    card: targetCard,
+    priorityLabel,
+    priorityTone,
+    reasonType,
+    reasonLabel: REASON_LABELS[reasonType] || "Launch blocker",
+    impactChips,
+    allCriticalConnected
+  };
+}
+
+function renderAISmartRecommendation(rec, escapeHtml) {
+  if (rec.healthy) {
+    const nextHtml = rec.nextOptional
+      ? `
+        <div class="ai-smart-rec-healthy-next">
+          <span class="ai-smart-rec-healthy-next-label">Suggested next:</span>
+          <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(rec.nextOptional.id)}">
+            Open ${escapeHtml(rec.nextOptional.label)}
+          </button>
+        </div>
+      `
+      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+
+    return `
+      <section class="card ai-smart-rec ai-smart-rec--healthy">
+        <div class="ai-smart-rec-header">
+          <div class="ai-smart-rec-kicker">
+            <span class="ai-smart-rec-badge success">AI Smart Connect</span>
+          </div>
+          <h3>Integration layer is healthy</h3>
+          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
+        </div>
+        ${nextHtml}
+      </section>
+    `;
+  }
+
+  const { card, priorityLabel, priorityTone, reasonLabel, impactChips } = rec;
+
+  const chipsHtml = impactChips.length
+    ? `<div class="ai-smart-rec-chips">${impactChips.map((chip) => `<span class="ai-smart-rec-chip">${escapeHtml(chip)}</span>`).join("")}</div>`
+    : "";
+
+  return `
+    <section class="card ai-smart-rec">
+      <div class="ai-smart-rec-header">
+        <div class="ai-smart-rec-kicker">
+          <span class="ai-smart-rec-badge ${escapeHtml(priorityTone)}">AI Smart Connect</span>
+          <span class="card-badge ${escapeHtml(priorityTone)}">${escapeHtml(priorityLabel)}</span>
+        </div>
+        <h3>Connect <strong>${escapeHtml(card.label)}</strong> next</h3>
+        <p class="ai-smart-rec-sub">${escapeHtml(card.whyItMatters)}</p>
+      </div>
+      <div class="ai-smart-rec-body">
+        <div class="ai-smart-rec-connector">
+          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
+          <div class="ai-smart-rec-connector-info">
+            <strong>${escapeHtml(card.label)}</strong>
+            <span>${escapeHtml(card.domainTitle)}</span>
+          </div>
+          <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
+        </div>
+        <div class="ai-smart-rec-why">
+          <div class="ai-smart-rec-why-top">
+            <span class="ai-smart-rec-why-label">Why this first?</span>
+            <span class="card-badge warning">${escapeHtml(reasonLabel)}</span>
+          </div>
+          <p>${escapeHtml(card.enables)}</p>
+        </div>
+        ${chipsHtml}
+        <div class="ai-smart-rec-actions">
+          <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">
+            Open Smart Connect
+          </button>
+          <span class="ai-smart-rec-cta-note">Opens the ${escapeHtml(card.label)} setup drawer and focuses the first required field.</span>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function buildRecommendations(domainModels, coverageMap) {
   const cards = domainModels.flatMap((domain) => domain.cards);
   const actionableCards = cards.filter((card) => card.backendSupported);
@@ -1084,6 +1427,369 @@ function buildRecommendations(domainModels, coverageMap) {
   return { recommendations, prompts };
 }
 
+const CONNECTOR_WORKSPACE_CATEGORIES = {
+  sales: {
+    label: "Sales",
+    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+    connectorIds: ["website", "woocommerce", "shopify", "amazon", "ebay"]
+  },
+  social: {
+    label: "Social",
+    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+    connectorIds: ["instagram", "facebook", "tiktok", "youtube", "linkedin"]
+  },
+  tracking: {
+    label: "Tracking",
+    description: "Measurement and attribution infrastructure required for launch visibility and optimization.",
+    connectorIds: ["ga4", "search-console", "meta-pixel", "tiktok-pixel", "gtm", "custom-analytics"]
+  },
+  communication: {
+    label: "Communication / CRM",
+    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
+    connectorIds: ["smtp", "mailer", "mailchimp", "crm", "telegram", "slack", "notion", "zapier-make", "google-drive", "webhook"]
+  },
+  growth: {
+    label: "Additional Growth",
+    description: "Paid media connectors that extend optimization once the core launch stack is stable.",
+    connectorIds: ["meta-ads", "google-ads", "tiktok-ads"]
+  }
+};
+
+const REQUIRED_LAUNCH_CATEGORY_IDS = ["sales", "social", "tracking", "communication"];
+
+function getConnectorWorkspaceCategory(card) {
+  const entry = Object.entries(CONNECTOR_WORKSPACE_CATEGORIES).find(([, meta]) =>
+    meta.connectorIds.includes(card.id)
+  );
+  return entry?.[0] || "growth";
+}
+
+function getConnectorWorkspaceStatus(card) {
+  if (card.statusLabel === "Connected") return "connected";
+  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+  if (card.statusLabel === "Partial") return "needs_setup";
+  return "missing";
+}
+
+function getConnectorWorkspaceStatusLabel(statusKey) {
+  if (statusKey === "needs_setup") return "Needs setup";
+  return titleCase(statusKey);
+}
+
+function getConnectorWorkspaceAction(card) {
+  const statusKey = getConnectorWorkspaceStatus(card);
+
+  if (card.backendSupported === false) {
+    return { label: "Open setup", action: "select" };
+  }
+
+  if (statusKey === "connected") {
+    return {
+      label: card.lastSync ? "Test" : "Sync",
+      action: card.lastSync ? "test" : "sync"
+    };
+  }
+
+  if (statusKey === "failed") {
+    return { label: getSmartConnectLabel(card), action: "reconnect" };
+  }
+
+  if (statusKey === "needs_setup") {
+    return { label: getSmartConnectLabel(card), action: "select" };
+  }
+
+  return { label: getSmartConnectLabel(card), action: "connect" };
+}
+
+function matchesConnectorSearch(card, searchQuery) {
+  const query = asString(searchQuery).trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [
+    card.label,
+    card.id,
+    card.domainTitle,
+    card.sourceKey,
+    card.purpose,
+    card.whyItMatters,
+    card.enablesSummary,
+    card.permissionScopeSummary
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
+function buildConnectorWorkspaceGroups(cards, session) {
+  const categoryFilter = asString(session.categoryFilter).trim().toLowerCase() || "all";
+  const statusFilter = asString(session.statusFilter).trim().toLowerCase() || "all";
+
+  return Object.entries(CONNECTOR_WORKSPACE_CATEGORIES)
+    .map(([id, meta]) => {
+      const groupCards = cards
+        .filter((card) => getConnectorWorkspaceCategory(card) === id)
+        .filter((card) => categoryFilter === "all" || categoryFilter === id)
+        .filter((card) => statusFilter === "all" || getConnectorWorkspaceStatus(card) === statusFilter)
+        .filter((card) => matchesConnectorSearch(card, session.searchQuery))
+        .sort((left, right) => {
+          const leftPriority = left.critical ? 0 : 1;
+          const rightPriority = right.critical ? 0 : 1;
+          if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+          return left.label.localeCompare(right.label);
+        });
+
+      return {
+        id,
+        ...meta,
+        cards: groupCards,
+        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+        failedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "failed").length,
+        missingCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "missing").length,
+        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
+      };
+    })
+    .filter((group) => group.cards.length || categoryFilter === group.id);
+}
+
+function buildIntegrationOverviewSummary(cards, recommendations) {
+  const requiredCards = cards.filter((card) => REQUIRED_LAUNCH_CATEGORY_IDS.includes(getConnectorWorkspaceCategory(card)));
+  const totalIntegrations = cards.length;
+  const connectedIntegrations = cards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+  const failedOrDisconnected = cards.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+  const warningCount = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+
+  let launchReadinessImpact = "Launch-ready from an integrations perspective.";
+  if (blockerCount) {
+    launchReadinessImpact = `${blockerCount} critical connector${blockerCount === 1 ? "" : "s"} still block reliable launch execution.`;
+  } else if (warningCount) {
+    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+  } else if (failedOrDisconnected) {
+    launchReadinessImpact = `${failedOrDisconnected} non-critical connector${failedOrDisconnected === 1 ? " is" : "s are"} disconnected or failed and should be repaired after launch blockers.`;
+  }
+
+  return {
+    totalIntegrations,
+    connectedIntegrations,
+    missingRequired,
+    failedOrDisconnected,
+    launchReadinessImpact,
+    nextRecommendedAction: recommendations.recommendations[0]?.title || "Review connector coverage"
+  };
+}
+
+function buildLaunchDiagnostics(cards) {
+  const requiredCards = cards.filter((card) => REQUIRED_LAUNCH_CATEGORY_IDS.includes(getConnectorWorkspaceCategory(card)));
+  const blockers = requiredCards
+    .filter((card) => card.critical && ["missing", "failed"].includes(getConnectorWorkspaceStatus(card)))
+    .map((card) => ({
+      title: card.label,
+      detail: card.whyItMatters
+    }))
+    .slice(0, 6);
+  const warnings = requiredCards
+    .filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup")
+    .map((card) => ({
+      title: card.label,
+      detail: card.missingRequired.length
+        ? `Finish required fields: ${card.missingRequired.join(", ")}`
+        : card.healthSummary
+    }))
+    .slice(0, 6);
+  const mustFix = blockers.length
+    ? blockers
+    : warnings.length
+      ? warnings
+      : requiredCards
+          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+          .map((card) => ({
+            title: card.label,
+            detail: card.healthSummary
+          }))
+          .slice(0, 4);
+
+  return { blockers, warnings, mustFix };
+}
+
+function mapActivityTone(value) {
+  const text = asString(value).toLowerCase();
+  if (/(failed|error|disconnect|blocked|expired)/.test(text)) return "danger";
+  if (/(pending|partial|warning|setup)/.test(text)) return "warning";
+  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
+  return "neutral";
+}
+
+function buildIntegrationActivityFeed(controlCenter, cards) {
+  const activity = asObject(controlCenter.activity);
+  const realEvents = [
+    ...asArray(activity.events),
+    ...asArray(activity.items),
+    ...asArray(controlCenter.recent_syncs),
+    ...asArray(controlCenter.recent_events),
+    ...asArray(controlCenter.history)
+  ]
+    .map((item, index) => ({
+      id: asString(item.id || item.event_id || item.sync_id || `real-${index}`),
+      title: asString(item.title || item.summary || item.message || item.event || item.type || "Integration event"),
+      detail: asString(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
+      timestamp: asString(item.timestamp || item.occurred_at || item.created_at || item.updated_at || item.completed_at || item.executed_at),
+      tone: mapActivityTone(item.status || item.level || item.type || item.result),
+      source: "real"
+    }))
+    .filter((item) => item.title);
+
+  if (realEvents.length) {
+    return realEvents
+      .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""))
+      .slice(0, 8);
+  }
+
+  return cards
+    .flatMap((card) => {
+      const events = [];
+      if (card.lastSync) {
+        events.push({
+          id: `${card.id}-sync`,
+          title: `${card.label} sync checkpoint`,
+          detail: "Derived from the latest connector sync timestamp.",
+          timestamp: card.lastSync,
+          tone: "success",
+          source: "derived"
+        });
+      }
+      if (card.lastTest) {
+        events.push({
+          id: `${card.id}-test`,
+          title: `${card.label} connection test`,
+          detail: "Derived from the latest connector test timestamp.",
+          timestamp: card.lastTest,
+          tone: "success",
+          source: "derived"
+        });
+      }
+      if (card.lastImport) {
+        events.push({
+          id: `${card.id}-import`,
+          title: `${card.label} history import`,
+          detail: "Derived from the latest connector import timestamp.",
+          timestamp: card.lastImport,
+          tone: "success",
+          source: "derived"
+        });
+      }
+      if (["Error", "Token expired"].includes(card.statusLabel)) {
+        events.push({
+          id: `${card.id}-repair`,
+          title: `${card.label} needs repair`,
+          detail: asString(card.record.last_error) || card.healthSummary,
+          timestamp: asString(card.record.updated_at || card.lastTest || card.lastSync || card.lastImport),
+          tone: "danger",
+          source: "derived"
+        });
+      }
+      return events;
+    })
+    .filter((item) => item.timestamp)
+    .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""))
+    .slice(0, 8);
+}
+
+function renderConnectorRow(card, session, escapeHtml) {
+  const statusKey = getConnectorWorkspaceStatus(card);
+  const statusLabel = getConnectorWorkspaceStatusLabel(statusKey);
+  const recommendedAction = getConnectorWorkspaceAction(card);
+  const isSelected = asString(session.selectedIntegrationId) === card.id;
+
+  return `
+    <article class="integration-control-row${isSelected ? " is-selected" : ""}">
+      <div class="integration-control-row-main">
+        <button class="integration-control-row-trigger" type="button" data-integration-select="${escapeHtml(card.id)}">
+          <span class="integration-control-row-icon">${escapeHtml(card.icon)}</span>
+          <span class="integration-control-row-copy">
+            <span class="integration-control-row-topline">
+              <strong>${escapeHtml(card.label)}</strong>
+              <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(statusLabel)}</span>
+            </span>
+            <span class="integration-control-row-meta">Why it matters: ${escapeHtml(card.whyItMatters)}</span>
+            <span class="integration-control-row-meta">Recommended action: ${escapeHtml(recommendedAction.label)}</span>
+          </span>
+        </button>
+      </div>
+      <div class="integration-control-row-actions">
+        ${recommendedAction.action === "select"
+          ? `<button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Open setup</button>`
+          : `<button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(recommendedAction.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(recommendedAction.label)}</button>`}
+        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Workspace</button>
+        ${card.backendSupported === false
+          ? ""
+          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test</button>`}
+        ${card.backendSupported === false
+          ? ""
+          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync</button>`}
+      </div>
+    </article>
+  `;
+}
+
+function renderConnectorGroup(group, session, escapeHtml) {
+  const countLabel = `${group.connectedCount} connected • ${group.setupCount} needs setup • ${group.failedCount} failed • ${group.missingCount} missing`;
+
+  return `
+    <section class="card integration-control-group">
+      <div class="card-head integration-control-group-head">
+        <div>
+          <h3>${escapeHtml(group.label)}</h3>
+          <p class="home-section-copy" style="margin:6px 0 0;">${escapeHtml(group.description)}</p>
+        </div>
+        <span class="card-badge ${group.failedCount || group.missingCount ? "warning" : group.setupCount ? "warning" : "success"}">${escapeHtml(countLabel)}</span>
+      </div>
+      <div class="integration-control-group-list">
+        ${group.cards.map((card) => renderConnectorRow(card, session, escapeHtml)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderDiagnosticsList(items, emptyText, escapeHtml) {
+  if (!items.length) {
+    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+  }
+
+  return `
+    <div class="integration-diagnostic-list">
+      ${items.map((item) => `
+        <div class="integration-diagnostic-item">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.detail)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderActivityFeed(items, escapeHtml) {
+  if (!items.length) {
+    return `<div class="empty-box">No integration events yet. Run a connection test or sync to populate recent activity.</div>`;
+  }
+
+  return `
+    <div class="integration-activity-list">
+      ${items.map((item) => `
+        <div class="integration-activity-item">
+          <div class="integration-activity-topline">
+            <strong>${escapeHtml(item.title)}</strong>
+            <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.source === "real" ? "Live" : "Derived")}</span>
+          </div>
+          <span>${escapeHtml(item.detail || "No additional detail available.")}</span>
+          <small>${escapeHtml(formatDateTime(item.timestamp))}</small>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderCoverageMap(items, escapeHtml) {
   return `
     <div class="integration-coverage-grid">
@@ -1115,36 +1821,51 @@ function renderCriticalMissing(items, escapeHtml) {
   `;
 }
 
-function renderField(integrationId, field, value, escapeHtml) {
+function renderField(integrationId, field, value, escapeHtml, options = {}) {
   const type = field.type || "text";
+  const invalidClass = options.invalid ? " is-invalid" : "";
   return `
-    <div class="integration-field-group">
-      <label class="setup-label" for="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
+    <div class="integration-field-group${invalidClass}" data-integration-field-group="${escapeHtml(integrationId)}:${escapeHtml(field.key)}">
+      <div class="integration-field-head">
+        <label class="setup-label" for="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
+        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
+      </div>
       <input
         id="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}"
-        class="setup-input"
+        class="setup-input${invalidClass}"
         type="${escapeHtml(type)}"
         value="${escapeHtml(value)}"
         placeholder="${escapeHtml(field.placeholder || "")}"
         autocomplete="${type === "password" ? "new-password" : "off"}"
+        aria-invalid="${options.invalid ? "true" : "false"}"
         data-integration-field="${escapeHtml(integrationId)}"
         data-field-key="${escapeHtml(field.key)}"
       />
+      ${options.invalid ? `<div class="integration-field-error">${escapeHtml(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
       <div class="setup-helper" data-integration-field-helper="${escapeHtml(integrationId)}:${escapeHtml(field.key)}"></div>
     </div>
   `;
 }
 
+function renderIntegrationActionButtons(card, escapeHtml) {
+  if (card.backendSupported === false) {
+    return `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+  }
+
+  const primary = getDrawerPrimaryAction(card);
+  const quickConnectLabel = getQuickConnectLabel(card);
+
+  return `
+    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${escapeHtml(primary.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primary.label)}</button>
+    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
+    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>` : ""}
+    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+  `;
+}
+
 function renderIntegrationCard(card, session, escapeHtml) {
   const isSelected = asString(session.selectedIntegrationId) === card.id;
-  const primaryActionLabel =
-    card.backendSupported === false
-      ? "Unavailable"
-      : card.statusLabel === "Connected"
-      ? "Manage"
-      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
-        ? "Fix Connection"
-        : "Connect";
+  const primaryActionLabel = getSmartConnectLabel(card);
   const primaryAction =
     card.backendSupported === false
       ? "unavailable"
@@ -1177,13 +1898,66 @@ function renderIntegrationCard(card, session, escapeHtml) {
   `;
 }
 
-function renderIntegrationDetailsPanel(card, session, escapeHtml) {
-  const fields = card.fields
+function renderDrawerProgress(card, escapeHtml) {
+  const stepOneComplete = card.missingRequired.length === 0;
+  const stepTwoComplete = Boolean(card.lastTest) || card.statusLabel === "Connected";
+  const stepThreeComplete = card.statusLabel === "Connected";
+  const steps = [
+    {
+      label: "Step 1: Fill required fields",
+      state: stepOneComplete ? "complete" : "active",
+      meta: stepOneComplete ? "Ready for validation." : `${card.missingRequired.length} required field${card.missingRequired.length === 1 ? "" : "s"} remaining.`
+    },
+    {
+      label: "Step 2: Test connection",
+      state: stepTwoComplete ? "complete" : stepOneComplete ? "active" : "pending",
+      meta: stepTwoComplete ? "Connection test checkpoint recorded." : "Run a connection test before activation."
+    },
+    {
+      label: "Step 3: Activate",
+      state: stepThreeComplete ? "complete" : stepOneComplete ? "active" : "pending",
+      meta: stepThreeComplete ? "Provider is active in the Control Center." : "Activate once fields and test are complete."
+    }
+  ];
+
+  return `
+    <div class="integration-drawer-progress">
+      ${steps.map((step) => `
+        <div class="integration-progress-step is-${escapeHtml(step.state)}">
+          <strong>${escapeHtml(step.label)}</strong>
+          <span>${escapeHtml(step.meta)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) {
+  const isDrawer = options.mode === "drawer";
+  const requiredFields = card.fields.filter((field) => field.required);
+  const optionalFields = card.fields.filter((field) => !field.required);
+  const fields = requiredFields
     .map((field) => renderField(
       card.id,
       field,
-      getFieldValue(session, card, field, card.record, card.sourceValue),
-      escapeHtml
+      getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]),
+      escapeHtml,
+      {
+        invalid: session.validationIntegrationId === card.id && session.validationFieldKey === field.key,
+        invalidMessage: session.validationMessage,
+        suggestion: card.suggestedValues[field.key] && getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]) === card.suggestedValues[field.key]
+      }
+    ))
+    .join("");
+  const optionalFieldMarkup = optionalFields
+    .map((field) => renderField(
+      card.id,
+      field,
+      getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]),
+      escapeHtml,
+      {
+        suggestion: card.suggestedValues[field.key] && getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]) === card.suggestedValues[field.key]
+      }
     ))
     .join("");
   const credentialItems = Object.entries(card.credentialState)
@@ -1192,7 +1966,7 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml) {
     .join("");
 
   return `
-    <section class="card integration-hub-card">
+    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
       <div class="integration-hub-head">
         <div class="integration-hub-title-wrap">
           <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
@@ -1201,7 +1975,10 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml) {
             <p>${escapeHtml(card.purpose)}</p>
           </div>
         </div>
-        <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
+        <div class="integration-hub-head-actions">
+          <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
+          ${isDrawer ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>` : ""}
+        </div>
       </div>
 
       <div class="integration-hub-intro">
@@ -1215,11 +1992,27 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml) {
         </div>
       </div>
 
+      ${isDrawer ? renderDrawerProgress(card, escapeHtml) : ""}
+
       <div class="integration-hub-grid">
         <div>
+          <div class="integration-mini-heading">Required fields</div>
           <div class="integration-field-grid">
             ${fields}
           </div>
+          ${session.validationIntegrationId === card.id && card.missingRequired.length
+            ? `<div class="integration-drawer-validation">${escapeHtml(`Missing required fields: ${card.missingRequired.join(", ")}`)}</div>`
+            : ""}
+          ${optionalFieldMarkup
+            ? `
+              <details class="integration-optional-fields">
+                <summary>Optional fields</summary>
+                <div class="integration-field-grid integration-field-grid--optional">
+                  ${optionalFieldMarkup}
+                </div>
+              </details>
+            `
+            : ""}
           ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
           <div class="integration-side-note">
             Sensitive credentials are stored server-side only. Leave password fields blank to keep the current saved value.
@@ -1244,21 +2037,71 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml) {
       </div>
 
       <div class="integration-action-row">
-        ${
-          card.backendSupported === false
-            ? `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`
-            : `
-              <button class="quick-action-btn" type="button" data-integration-action="connect" data-integration-id="${escapeHtml(card.id)}">Connect</button>
-              <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
-              <button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>
-              <button class="quick-action-btn" type="button" data-integration-action="import" data-integration-id="${escapeHtml(card.id)}">Import Data</button>
-              <button class="quick-action-btn integration-disconnect-btn" type="button" data-integration-action="disconnect" data-integration-id="${escapeHtml(card.id)}">Disconnect</button>
-              <button class="quick-action-btn" type="button" data-integration-action="reconnect" data-integration-id="${escapeHtml(card.id)}">Reconnect</button>
-            `
-        }
+        ${renderIntegrationActionButtons(card, escapeHtml)}
       </div>
     </section>
   `;
+}
+
+function renderSelectedConnectorSummary(card, escapeHtml) {
+  const smartLabel = getSmartConnectLabel(card);
+  return `
+    <section class="card integration-selected-summary">
+      <div class="card-head">
+        <div>
+          <h3>Selected connector</h3>
+          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
+        </div>
+        <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
+      </div>
+      <div class="integration-selected-summary-body">
+        <div class="integration-hub-title-wrap">
+          <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
+          <div>
+            <h4>${escapeHtml(card.label)}</h4>
+            <p>${escapeHtml(card.whyItMatters)}</p>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">${escapeHtml(smartLabel)}</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderIntegrationDrawer(card, session, escapeHtml) {
+  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+    return "";
+  }
+
+  return `
+    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
+      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
+        ${renderIntegrationDetailsPanel(card, session, escapeHtml, { mode: "drawer" })}
+      </aside>
+    </div>
+  `;
+}
+
+function focusDrawerField(session, card) {
+  if (!session.drawerOpen || !card || typeof window === "undefined") return;
+
+  const requiredEmptyField = card.fields.find((field) =>
+    field.required && card.missingRequired.includes(field.label)
+  );
+  const fieldKey = session.validationFieldKey || requiredEmptyField?.key || card.fields[0]?.key;
+  if (!fieldKey) return;
+
+  window.requestAnimationFrame(() => {
+    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+    if (input instanceof HTMLElement) {
+      input.scrollIntoView({ block: "center", behavior: "smooth" });
+      input.focus();
+      if (typeof input.select === "function" && input.tagName === "INPUT") {
+        input.select();
+      }
+    }
+  });
 }
 
 function renderDomainSection(domain, session, escapeHtml) {
@@ -1409,7 +2252,8 @@ function bindIntegrationActions({
 }) {
   Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
     button.onclick = () => {
-      session.selectedIntegrationId = button.getAttribute("data-integration-select") || "";
+      const integrationId = button.getAttribute("data-integration-select") || "";
+      openIntegrationDrawer(session, integrationId);
       render();
     };
   });
@@ -1418,7 +2262,7 @@ function bindIntegrationActions({
     button.onclick = async () => {
       const action = button.getAttribute("data-integration-primary") || "";
       const integrationId = button.getAttribute("data-integration-id") || "";
-      session.selectedIntegrationId = integrationId;
+      openIntegrationDrawer(session, integrationId);
 
       if (action === "manage") {
         render();
@@ -1426,18 +2270,11 @@ function bindIntegrationActions({
       }
 
       if (action === "unavailable") {
-        showError?.("This integration is unavailable because backend provider support is not configured yet.");
+        render();
         return;
       }
 
-      if (action === "connect") {
-        await persistPrimary(integrationId, false);
-        return;
-      }
-
-      if (action === "reconnect") {
-        await persistPrimary(integrationId, true);
-      }
+      render();
     };
   });
 
@@ -1445,7 +2282,11 @@ function bindIntegrationActions({
     input.oninput = (event) => {
       const integrationId = input.getAttribute("data-integration-field") || "";
       const fieldKey = input.getAttribute("data-field-key") || "";
-      setFieldValue(session, integrationId, fieldKey, event.target.value || "");
+      const nextValue = event.target.value || "";
+      setFieldValue(session, integrationId, fieldKey, nextValue);
+      if (asString(nextValue).trim()) {
+        clearIntegrationValidation(session, integrationId, fieldKey);
+      }
     };
   });
 
@@ -1466,9 +2307,42 @@ function bindIntegrationActions({
       return;
     }
 
+    if (session.validationIntegrationId === integrationId && session.validationFieldKey === fieldKey && session.validationMessage) {
+      helper.textContent = session.validationMessage;
+      return;
+    }
+
     helper.textContent = field.required
       ? "Required for a complete connection."
       : "Optional, but useful for scoping and diagnostics.";
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-category-filter]")).forEach((select) => {
+    select.onchange = (event) => {
+      session.categoryFilter = event.target.value || "all";
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-status-filter]")).forEach((select) => {
+    select.onchange = (event) => {
+      session.statusFilter = event.target.value || "all";
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-search]")).forEach((input) => {
+    input.oninput = (event) => {
+      session.searchQuery = event.target.value || "";
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+    button.onclick = () => {
+      closeIntegrationDrawer(session);
+      render();
+    };
   });
 
   function buildConnectionPayload(integrationId) {
@@ -1482,31 +2356,33 @@ function bindIntegrationActions({
     const credentials = {};
 
     integration.fields.forEach((field) => {
-      const draftValue = asString(draft[field.key]).trim();
+      const resolvedValue = asString(getResolvedFieldValue(state, session, integration, field, record, getLegacySourceValue(integration, getLegacySources(state)))).trim();
 
       if (field.key === integration.primaryField) {
         return;
       }
 
       if (isSecretField(field)) {
+        const draftValue = asString(draft[field.key]).trim();
         if (draftValue) {
           credentials[field.key] = draftValue;
         }
         return;
       }
 
-      const fallbackValue = asString(record.config?.[field.key]).trim();
-      if (draftValue || fallbackValue) {
-        config[field.key] = draftValue || fallbackValue;
+      if (resolvedValue) {
+        config[field.key] = resolvedValue;
       }
     });
 
-    const primaryValue = asString(
-      draft[integration.primaryField] ??
-      record.primary_value ??
-      record.config?.[integration.primaryField] ??
+    const primaryValue = asString(getResolvedFieldValue(
+      state,
+      session,
+      integration,
+      integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0],
+      record,
       getLegacySourceValue(integration, getLegacySources(state))
-    ).trim();
+    )).trim();
 
     const accessModel = getIntegrationAccessModel(integration);
 
@@ -1541,6 +2417,14 @@ function bindIntegrationActions({
     const value = asString(payload?.primary_value).trim();
 
     if (!value) {
+      setIntegrationValidation(
+        session,
+        integrationId,
+        primaryField.key,
+        `Add ${primaryField.label.toLowerCase()} to continue.`
+      );
+      openIntegrationDrawer(session, integrationId);
+      render();
       showError?.(`Enter ${primaryField.label.toLowerCase()} before connecting ${integration.label}.`);
       return;
     }
@@ -1552,6 +2436,7 @@ function bindIntegrationActions({
         await connectProjectIntegration(projectName, integrationId, payload);
       }
       clearDraft(session, integrationId);
+      clearIntegrationValidation(session, integrationId);
       showMessage?.(reconnect ? `${integration.label} reconnected.` : `${integration.label} connected.`);
       await reloadProjectData(projectName);
       render();
@@ -1647,6 +2532,18 @@ function bindIntegrationActions({
       showMessage?.("Integration review prompt added to AI Command.");
     };
   });
+
+  if (typeof document !== "undefined") {
+    if (integrationDrawerEscapeHandler) {
+      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+    }
+    integrationDrawerEscapeHandler = (event) => {
+      if (event.key !== "Escape" || !session.drawerOpen) return;
+      closeIntegrationDrawer(session);
+      render();
+    };
+    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+  }
 }
 
 export const integrationsRoute = {
@@ -1689,19 +2586,21 @@ export const integrationsRoute = {
     const coverageMap = buildCoverageMap(domainModels);
     const criticalMissing = buildCriticalMissing(domainModels);
     const recommendations = buildRecommendations(domainModels, coverageMap);
+    const aiRec = buildAISmartRecommendation(domainModels);
     const controlCenter = getControlCenterPayload(state);
-    const connectedTotal = allCards.filter((card) => card.statusLabel === "Connected").length;
-    const partialTotal = allCards.filter((card) => card.statusLabel === "Partial").length;
-    const errorTotal = allCards.filter((card) => card.statusLabel === "Error").length;
-    const expiredTotal = allCards.filter((card) => card.statusLabel === "Token expired").length;
-    const notConnectedTotal = allCards.filter((card) => card.statusLabel === "Not Connected").length;
-    const attentionTotal = partialTotal + errorTotal + expiredTotal;
-    const criticalMissingCount = criticalMissing.length;
+    const overview = buildIntegrationOverviewSummary(allCards, recommendations);
+    const diagnostics = buildLaunchDiagnostics(allCards);
+    const connectorGroups = buildConnectorWorkspaceGroups(allCards, session);
+    const filteredCards = connectorGroups.flatMap((group) => group.cards);
+    const selectedCard = filteredCards.find((card) => card.id === session.selectedIntegrationId) || allCards.find((card) => card.id === session.selectedIntegrationId) || filteredCards[0] || allCards[0] || null;
+    const drawerCard = allCards.find((card) => card.id === session.activeDrawerIntegrationId) || selectedCard;
+    const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;
     const readinessBase = Math.max(allCards.length, 1);
+    const criticalMissingCount = criticalMissing.length;
+    const connectedTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+    const partialTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
     const systemScore = Math.round(((connectedTotal + partialTotal * 0.5) / readinessBase) * 100);
-    const connectorReadiness = Math.round((connectedTotal / readinessBase) * 100);
-    const channelReadiness = Math.round(((connectedTotal + partialTotal) / readinessBase) * 100);
-    const operationalRisk = Math.min(100, Math.round(((attentionTotal + criticalMissingCount) / readinessBase) * 100));
+    const activityFeed = buildIntegrationActivityFeed(controlCenter, allCards);
     const lastGlobalSync =
       asString(controlCenter.summary?.last_global_sync) ||
       allCards
@@ -1713,42 +2612,151 @@ export const integrationsRoute = {
     if (!root) return;
 
     root.innerHTML = `
-      <div class="integrations-wrapper integration-control-center">
-        <section class="card">
-          <div class="card-head">
+      <div class="integrations-wrapper integration-system-panel">
+        <section class="card integration-system-overview">
+          <div class="card-head integration-system-overview-head">
             <div>
-              <div class="setup-kicker">Integration Readiness</div>
-              <h3>Integration Readiness Cards</h3>
-              <p class="home-section-copy" style="margin:6px 0 0;">Track connection health, identify risk, and move channel readiness toward production reliability.</p>
+              <div class="setup-kicker">Integration Overview</div>
+              <h3>System Control Panel</h3>
+              <p class="home-section-copy" style="margin:6px 0 0;">Track launch-critical connectors, diagnose readiness impact, and operate integrations without leaving the standard page shell.</p>
             </div>
-            <span class="card-badge ${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || notConnectedTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
+            <span class="card-badge ${escapeHtml(attentionTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
-          <div class="integrations-overview-grid integration-overview-grid-4">
-            <div class="data-card">
-              <span class="data-label">System Score</span>
-              <strong>${escapeHtml(String(systemScore))}%</strong>
+          <div class="integration-system-overview-grid">
+            <div class="data-card integration-system-metric">
+              <span class="data-label">Total Integrations</span>
+              <strong>${escapeHtml(String(overview.totalIntegrations))}</strong>
+              <span class="integration-system-metric-copy">All providers currently modeled in the control center.</span>
             </div>
-            <div class="data-card">
-              <span class="data-label">Connector Readiness</span>
-              <strong>${escapeHtml(String(connectorReadiness))}%</strong>
+            <div class="data-card integration-system-metric">
+              <span class="data-label">Connected Integrations</span>
+              <strong>${escapeHtml(String(overview.connectedIntegrations))}</strong>
+              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
             </div>
-            <div class="data-card">
-              <span class="data-label">Channel Readiness</span>
-              <strong>${escapeHtml(String(channelReadiness))}%</strong>
+            <div class="data-card integration-system-metric">
+              <span class="data-label">Missing Required</span>
+              <strong>${escapeHtml(String(overview.missingRequired))}</strong>
+              <span class="integration-system-metric-copy">Required launch connectors not yet fully connected.</span>
             </div>
-            <div class="data-card">
-              <span class="data-label">Operational Risk</span>
-              <strong>${escapeHtml(String(operationalRisk))}%</strong>
-              <div class="setup-helper" style="margin-top:8px;">Last sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</div>
+            <div class="data-card integration-system-metric">
+              <span class="data-label">Failed / Disconnected</span>
+              <strong>${escapeHtml(String(overview.failedOrDisconnected))}</strong>
+              <span class="integration-system-metric-copy">Connectors with missing or failed state across the full stack.</span>
+            </div>
+          </div>
+          <div class="integration-system-summary-grid">
+            <div class="integration-system-summary-card">
+              <span class="data-label">Launch Readiness Impact</span>
+              <strong>${escapeHtml(overview.launchReadinessImpact)}</strong>
+              <span>System score: ${escapeHtml(String(systemScore))}% • Last global sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</span>
+            </div>
+            <div class="integration-system-summary-card">
+              <span class="data-label">Next Recommended Action</span>
+              <strong>${escapeHtml(overview.nextRecommendedAction)}</strong>
+              <span>${escapeHtml(recommendations.recommendations[0]?.meta || "Review the highest-impact connector gap before the next campaign launch.")}</span>
             </div>
           </div>
         </section>
 
-        ${sectionGroups.map((section) => renderIntegrationSection(section, session, escapeHtml)).join("")}
+        ${renderAISmartRecommendation(aiRec, escapeHtml)}
 
-        <section class="card">
+        <section class="integration-system-workspace">
+          <div class="integration-system-workspace-main">
+            <section class="card integration-system-filters">
+              <div class="card-head integration-system-filters-head">
+                <div>
+                  <div class="setup-kicker">Required Launch Connectors</div>
+                  <h3>Connector Workspace</h3>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the connector setup workspace.</p>
+                </div>
+                <span class="card-badge ${escapeHtml(filteredCards.length ? "neutral" : "warning")}">${escapeHtml(filteredCards.length ? `${filteredCards.length} visible` : "No matches")}</span>
+              </div>
+              <div class="integration-filter-bar">
+                <label class="integration-filter-field">
+                  <span class="setup-label">Category</span>
+                  <select data-integration-category-filter>
+                    <option value="all">All categories</option>
+                    ${Object.entries(CONNECTOR_WORKSPACE_CATEGORIES).map(([id, meta]) => `<option value="${escapeHtml(id)}" ${session.categoryFilter === id ? "selected" : ""}>${escapeHtml(meta.label)}</option>`).join("")}
+                  </select>
+                </label>
+                <label class="integration-filter-field">
+                  <span class="setup-label">Status</span>
+                  <select data-integration-status-filter>
+                    <option value="all">All statuses</option>
+                    <option value="connected" ${session.statusFilter === "connected" ? "selected" : ""}>Connected</option>
+                    <option value="missing" ${session.statusFilter === "missing" ? "selected" : ""}>Missing</option>
+                    <option value="failed" ${session.statusFilter === "failed" ? "selected" : ""}>Failed</option>
+                    <option value="needs_setup" ${session.statusFilter === "needs_setup" ? "selected" : ""}>Needs setup</option>
+                  </select>
+                </label>
+                <label class="integration-filter-field integration-filter-search">
+                  <span class="setup-label">Search</span>
+                  <input
+                    type="search"
+                    value="${escapeHtml(session.searchQuery)}"
+                    placeholder="Search connector, provider, or source"
+                    data-integration-search
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section class="integration-system-group-stack">
+              ${connectorGroups.length
+                ? connectorGroups.map((group) => renderConnectorGroup(group, session, escapeHtml)).join("")
+                : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
+            </section>
+          </div>
+
+          <aside class="integration-system-workspace-side">
+            ${selectedCard ? renderSelectedConnectorSummary(selectedCard, escapeHtml) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
+
+            <section class="card integration-system-diagnostics">
+              <div class="card-head">
+                <div>
+                  <h3>Diagnostics / Readiness Impact</h3>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Review blockers, warnings, and the fixes required before campaign launch.</p>
+                </div>
+                <span class="card-badge ${escapeHtml(diagnostics.blockers.length ? "danger" : diagnostics.warnings.length ? "warning" : "success")}">${escapeHtml(diagnostics.blockers.length ? "Blockers" : diagnostics.warnings.length ? "Warnings" : "Clear")}</span>
+              </div>
+              <div class="integration-diagnostic-section">
+                <h4 class="integration-mini-heading">Blockers</h4>
+                ${renderDiagnosticsList(diagnostics.blockers, "No launch blockers are currently flagged.", escapeHtml)}
+              </div>
+              <div class="integration-diagnostic-section">
+                <h4 class="integration-mini-heading">Warnings</h4>
+                ${renderDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.", escapeHtml)}
+              </div>
+              <div class="integration-diagnostic-section">
+                <h4 class="integration-mini-heading">Fix Before Launch</h4>
+                ${renderDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.", escapeHtml)}
+              </div>
+              <div class="integration-system-prompt-row">
+                ${recommendations.prompts.slice(0, 2).map((item) => `
+                  <button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>
+                `).join("")}
+              </div>
+            </section>
+
+            <section class="card integration-system-activity">
+              <div class="card-head">
+                <div>
+                  <h3>Activity / Recent Syncs</h3>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>
+                </div>
+                <span class="card-badge ${escapeHtml(activityFeed.some((item) => item.source === "real") ? "success" : "neutral")}">${escapeHtml(activityFeed.some((item) => item.source === "real") ? "Live feed" : "Derived feed")}</span>
+              </div>
+              ${renderActivityFeed(activityFeed, escapeHtml)}
+            </section>
+          </aside>
+        </section>
+
+        <section class="card integration-system-readiness-map">
           <div class="card-head">
-            <h3>Integration Actions / Status</h3>
+            <div>
+              <h3>Coverage & Recovery Priorities</h3>
+              <p class="home-section-copy" style="margin:6px 0 0;">Use category coverage, missing critical connectors, and next actions to close the remaining launch gaps.</p>
+            </div>
             <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>
           </div>
           <div class="integration-ai-grid">
@@ -1768,7 +2776,13 @@ export const integrationsRoute = {
               </div>
             </div>
           </div>
+          <div class="integration-system-coverage-block">
+            <h4 class="integration-mini-heading">Launch coverage</h4>
+            ${renderCoverageMap(coverageMap, escapeHtml)}
+          </div>
         </section>
+
+        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, escapeHtml) : ""}
       </div>
     `;
 
@@ -1804,5 +2818,7 @@ export const integrationsRoute = {
         disconnectProjectIntegration
       })
     });
+
+    focusDrawerField(session, drawerCard);
   }
 };

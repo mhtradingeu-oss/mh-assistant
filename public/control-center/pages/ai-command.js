@@ -88,6 +88,94 @@ const QUICK_ACTIONS = [
 	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
 ];
 
+const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+
+const COMMAND_TYPES = [
+	{ id: "strategy", label: "Strategy" },
+	{ id: "content", label: "Content" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "integration", label: "Integration" },
+	{ id: "asset", label: "Asset" },
+	{ id: "research", label: "Research" },
+	{ id: "report", label: "Report" },
+	{ id: "automation", label: "Automation" }
+];
+
+const TARGET_TYPES = [
+	{ id: "current-project", label: "Current project" },
+	{ id: "selected-context", label: "Selected page/context" },
+	{ id: "campaign", label: "Campaign" },
+	{ id: "product", label: "Product" }
+];
+
+const IMPACT_CHIP_LABELS = [
+	"Launch readiness",
+	"Content",
+	"Campaign",
+	"Integrations",
+	"Assets",
+	"Automation"
+];
+
+const AGENT_CARDS = [
+	{
+		id: "strategist",
+		name: "Strategist",
+		purpose: "Build high-leverage decisions for launch sequencing and channel focus.",
+		bestUse: "When priorities compete and you need the best next move.",
+		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+	},
+	{
+		id: "writer",
+		name: "Writer",
+		purpose: "Transform strategy into high-converting copy and scripts.",
+		bestUse: "When campaigns need content batches fast.",
+		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+	},
+	{
+		id: "designer",
+		name: "Designer",
+		purpose: "Define creative direction, visual hierarchy, and asset guidance.",
+		bestUse: "When briefs need clear visual standards.",
+		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+	},
+	{
+		id: "media",
+		name: "Media Planner",
+		purpose: "Align media formats with channels, cadence, and readiness.",
+		bestUse: "When planning image/video requirements across channels.",
+		suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."
+	},
+	{
+		id: "ads",
+		name: "Ads Specialist",
+		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+		bestUse: "When preparing or fixing paid performance.",
+		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+	},
+	{
+		id: "analyst",
+		name: "Analyst",
+		purpose: "Turn multi-channel signals into prioritized actions.",
+		bestUse: "When you need evidence-backed recommendations.",
+		suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."
+	},
+	{
+		id: "researcher",
+		name: "Researcher",
+		purpose: "Strengthen decisions with market, competitor, and audience insight.",
+		bestUse: "When strategy needs stronger external evidence.",
+		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
 const aiSessions = new Map();
 let lastRenderContext = null;
 let aiCommandBridgeRegistered = false;
@@ -224,6 +312,12 @@ function ensureSession(projectName) {
 		aiSessions.set(key, {
 			modeId: "operations",
 			draftMessage: "",
+			commandType: "strategy",
+			targetType: "current-project",
+			targetValue: "",
+			draftStatus: "",
+			validationMessage: "",
+			localDraftLoaded: false,
 			taskMode: "free",
 			taskType: "launch",
 			taskProduct: "",
@@ -244,6 +338,66 @@ function ensureSession(projectName) {
 		});
 	}
 	return aiSessions.get(key);
+}
+
+function readLocalDraftMap() {
+	if (typeof window === "undefined") return {};
+	try {
+		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";
+		const parsed = JSON.parse(raw);
+		return parsed && typeof parsed === "object" ? parsed : {};
+	} catch (_) {
+		return {};
+	}
+}
+
+function writeLocalDraftMap(map) {
+	if (typeof window === "undefined") return;
+	try {
+		window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+	} catch (_) {}
+}
+
+function loadLocalDraft(projectName) {
+	const key = projectName || "__default__";
+	return asObject(readLocalDraftMap()[key]);
+}
+
+function saveLocalDraft(projectName, draftPayload) {
+	const key = projectName || "__default__";
+	const map = readLocalDraftMap();
+	map[key] = {
+		...asObject(map[key]),
+		...asObject(draftPayload),
+		updatedAt: nowIso()
+	};
+	writeLocalDraftMap(map);
+	return map[key];
+}
+
+function hydrateSessionDraft(projectName, session) {
+	if (session.localDraftLoaded) return;
+	const localDraft = loadLocalDraft(projectName);
+	if (localDraft.prompt) session.draftMessage = asString(localDraft.prompt);
+	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+	if (localDraft.commandType) session.commandType = asString(localDraft.commandType);
+	if (localDraft.targetType) session.targetType = asString(localDraft.targetType);
+	if (localDraft.targetValue) session.targetValue = asString(localDraft.targetValue);
+	if (localDraft.prompt || localDraft.updatedAt) {
+		session.draftStatus = `Draft restored ${formatTime(localDraft.updatedAt)}`;
+	}
+	session.localDraftLoaded = true;
+}
+
+function persistSessionDraft(projectName, session, hint) {
+	const saved = saveLocalDraft(projectName, {
+		prompt: session.draftMessage,
+		modeId: session.modeId,
+		commandType: session.commandType,
+		targetType: session.targetType,
+		targetValue: session.targetValue
+	});
+	session.draftStatus = hint || `Saved locally ${formatTime(saved.updatedAt)}`;
 }
 
 // ============================================================
@@ -1323,6 +1477,640 @@ function renderArtifactsPanel(aiContext, session, escapeHtml) {
 	`;
 }
 
+function getLastUserMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+}
+
+function getLastAssistantMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+}
+
+function buildCommandEnvelope(session, prompt) {
+	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
+	const targetValue = asString(session.targetValue).trim();
+	const targetLine = targetValue ? `${targetTypeLabel}: ${targetValue}` : targetTypeLabel;
+	return `${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}`;
+}
+
+function buildImpactChips(activeLabels) {
+	const activeSet = new Set(asArray(activeLabels));
+	return IMPACT_CHIP_LABELS.map((label) => ({
+		label,
+		active: activeSet.has(label)
+	}));
+}
+
+function buildSmartRecommendation(aiContext) {
+	if (aiContext.criticalGaps.length) {
+		return {
+			title: "Close critical readiness gaps before scale",
+			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+		};
+	}
+
+	if (aiContext.assetBlockers.length) {
+		return {
+			title: "Resolve asset blockers for execution flow",
+			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+			chips: buildImpactChips(["Assets", "Content", "Campaign"])
+		};
+	}
+
+	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+		return {
+			title: "Repair integration coverage for stronger AI output",
+			reason: `${impacted} integration signal${impacted === 1 ? "" : "s"} need attention before relying on full automation and optimization loops.`,
+			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+		};
+	}
+
+	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+		return {
+			title: "Define the active campaign operating plan",
+			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+		};
+	}
+
+	return {
+		title: "Generate next content wave from current signals",
+		reason: "Core readiness is stable enough to move into output generation and optimization.",
+		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+		chips: buildImpactChips(["Content", "Campaign", "Automation"])
+	};
+}
+
+function buildSuggestedCommands(aiContext) {
+	const suggestions = [];
+
+	if (aiContext.criticalGaps.length || aiContext.importantGaps.length) {
+		suggestions.push({
+			title: "Close setup gaps",
+			reason: `${aiContext.criticalGaps.length} critical and ${aiContext.importantGaps.length} important setup gap${aiContext.importantGaps.length + aiContext.criticalGaps.length === 1 ? "" : "s"} detected.`,
+			commandType: "strategy",
+			command: `Audit setup readiness for ${aiContext.projectName || "this project"}. Rank gaps by risk and define exact remediation steps.`,
+			chips: buildImpactChips(["Launch readiness", "Campaign"]),
+			score: 100
+		});
+	}
+
+	if (aiContext.assetBlockers.length) {
+		suggestions.push({
+			title: "Fix missing assets",
+			reason: `${aiContext.assetBlockers.length} asset blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} can slow content and campaign execution.`,
+			commandType: "asset",
+			command: `List missing or blocked assets for ${aiContext.projectName || "this project"}, grouped by urgency and destination workspace.`,
+			chips: buildImpactChips(["Assets", "Content", "Campaign"]),
+			score: 92
+		});
+	}
+
+	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+		suggestions.push({
+			title: "Repair missing integrations",
+			reason: `${aiContext.missingIntegrations.length} missing coverage lane${aiContext.missingIntegrations.length === 1 ? "" : "s"} and ${aiContext.connectorIssues.length} connector issue${aiContext.connectorIssues.length === 1 ? "" : "s"}.`,
+			commandType: "integration",
+			command: `Propose an integration repair sequence for ${aiContext.projectName || "this project"} with expected readiness impact per connector.`,
+			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"]),
+			score: 88
+		});
+	}
+
+	if (!aiContext.campaign || aiContext.campaign === "Not selected" || (aiContext.readinessScore != null && aiContext.readinessScore < 85)) {
+		suggestions.push({
+			title: "Sharpen campaign readiness",
+			reason: "Campaign orchestration is still under-defined or below optimal readiness.",
+			commandType: "campaign",
+			command: `Build a campaign readiness plan for ${aiContext.projectName || "this project"} with milestones, owners, and go/no-go criteria.`,
+			chips: buildImpactChips(["Campaign", "Launch readiness", "Automation"]),
+			score: 84
+		});
+	}
+
+	suggestions.push({
+		title: "Generate content production brief",
+		reason: "Maintain output velocity by translating current context into ready-to-produce content tasks.",
+		commandType: "content",
+		command: `Generate a content production brief for ${aiContext.projectName || "this project"} for the next seven days across priority channels.`,
+		chips: buildImpactChips(["Content", "Campaign"]),
+		score: 70
+	});
+
+	return suggestions
+		.sort((a, b) => b.score - a.score)
+		.slice(0, 3);
+}
+
+function renderImpactChips(chips, escapeHtml) {
+	return asArray(chips).map((chip) => `
+		<span class="aicmd-chip${chip.active ? " is-active" : ""}">${escapeHtml(chip.label)}</span>
+	`).join("");
+}
+
+function renderOverviewSection(aiContext, session, intelligenceStatus, escapeHtml) {
+	const lastUser = getLastUserMessage(session);
+	const lastAssistant = getLastAssistantMessage(session);
+	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+	const modeMeta = getModeMeta(session.modeId);
+	const resultSummary = humanizeValue(lastAssistant?.response?.title || lastAssistant?.response?.summary, "No result yet");
+	const lastCommand = humanizeValue(lastUser?.content, "No command yet");
+	const statusLabel = intelligenceStatus === "ready"
+		? "Live"
+		: intelligenceStatus === "loading"
+			? "Syncing"
+			: intelligenceStatus === "error"
+				? "Limited"
+				: "Idle";
+
+	return `
+		<section class="aicmd-section aicmd-overview">
+			<div class="aicmd-section-head">
+				<h3>AI Command Overview</h3>
+				<button id="aicmdRefreshBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Refresh intelligence</button>
+			</div>
+			<div class="aicmd-overview-grid">
+				<div class="aicmd-stat"><span>Current project</span><strong>${escapeHtml(aiContext.projectName || "Not selected")}</strong></div>
+				<div class="aicmd-stat"><span>Current readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+				<div class="aicmd-stat"><span>Active campaign</span><strong>${escapeHtml(aiContext.campaign || "Not selected")}</strong></div>
+				<div class="aicmd-stat"><span>System mode</span><strong>${escapeHtml(modeMeta.label)} · ${escapeHtml(statusLabel)}</strong></div>
+				<div class="aicmd-stat aicmd-stat-wide"><span>Last command</span><strong>${escapeHtml(lastCommand)}</strong></div>
+				<div class="aicmd-stat aicmd-stat-wide"><span>Last result</span><strong>${escapeHtml(resultSummary)}</strong></div>
+			</div>
+		</section>
+	`;
+}
+
+function renderSmartRecommendationSection(aiContext, escapeHtml) {
+	const smartRec = buildSmartRecommendation(aiContext);
+	return `
+		<section class="aicmd-section aicmd-recommendation">
+			<div class="aicmd-section-head">
+				<h3>Smart Recommendation</h3>
+			</div>
+			<div class="aicmd-rec-title">${escapeHtml(smartRec.title)}</div>
+			<p class="aicmd-rec-reason">${escapeHtml(smartRec.reason)}</p>
+			<div class="aicmd-chip-row">${renderImpactChips(smartRec.chips, escapeHtml)}</div>
+			<div class="aicmd-action-row">
+				<button id="aicmdRunSuggestionBtn" class="aicmd-btn aicmd-btn-primary" type="button">Run Suggested Command</button>
+				<button id="aicmdSaveSuggestionBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Save as Draft</button>
+			</div>
+		</section>
+	`;
+}
+
+function renderComposerSection(session, aiContext, escapeHtml) {
+	return `
+		<section class="aicmd-section">
+			<div class="aicmd-section-head"><h3>Command Composer</h3></div>
+			<div class="aicmd-input-grid">
+				<div>
+					<label class="aicmd-label" for="aicmdCommandType">Command type</label>
+					<select id="aicmdCommandType" class="aicmd-select">
+						${COMMAND_TYPES.map((item) => `<option value="${escapeHtml(item.id)}"${session.commandType === item.id ? " selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}
+					</select>
+				</div>
+				<div>
+					<label class="aicmd-label" for="aicmdTargetType">Target</label>
+					<select id="aicmdTargetType" class="aicmd-select">
+						${TARGET_TYPES.map((item) => `<option value="${escapeHtml(item.id)}"${session.targetType === item.id ? " selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}
+					</select>
+				</div>
+			</div>
+			<div>
+				<label class="aicmd-label" for="aicmdTargetValue">Target detail</label>
+				<input id="aicmdTargetValue" class="aicmd-input" type="text" placeholder="Optional campaign/product/context" value="${escapeHtml(session.targetValue || "")}">
+			</div>
+			<div>
+				<label class="aicmd-label" for="ctrlComposerInput">Prompt</label>
+				<textarea id="ctrlComposerInput" class="aicmd-textarea" rows="8" placeholder="Describe exactly what the AI Operating Center should do next for ${escapeHtml(aiContext.projectName || "this project")}.">${escapeHtml(session.draftMessage || "")}</textarea>
+				<div id="aicmdValidation" class="aicmd-validation${session.validationMessage ? " is-visible" : ""}">${escapeHtml(session.validationMessage || "")}</div>
+			</div>
+			<div class="aicmd-action-row">
+				<button id="aiCommandSendBtn" class="aicmd-btn aicmd-btn-primary" type="button">Run</button>
+				<button id="aicmdSaveDraftBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Save Draft</button>
+				<button id="aicmdClearBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Clear</button>
+				<button id="aicmdLoadSuggestionBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Load Suggestion</button>
+			</div>
+			<div class="aicmd-draft-state">${escapeHtml(session.draftStatus || "Draft auto-saves locally while you type.")}</div>
+		</section>
+	`;
+}
+
+function renderSuggestedCommandsSection(aiContext, escapeHtml) {
+	const suggestions = buildSuggestedCommands(aiContext);
+	return `
+		<section class="aicmd-section">
+			<div class="aicmd-section-head"><h3>Suggested Commands</h3></div>
+			<div class="aicmd-suggestions">
+				${suggestions.map((item, index) => `
+					<article class="aicmd-suggestion-card">
+						<h4>${escapeHtml(item.title)}</h4>
+						<p>${escapeHtml(item.reason)}</p>
+						<div class="aicmd-chip-row">${renderImpactChips(item.chips, escapeHtml)}</div>
+						<div class="aicmd-action-row">
+							<button class="aicmd-btn aicmd-btn-secondary" type="button" data-aicmd-use-suggestion="${index}">Use</button>
+							<button class="aicmd-btn aicmd-btn-ghost" type="button" data-aicmd-save-suggestion="${index}">Save Draft</button>
+						</div>
+					</article>
+				`).join("")}
+			</div>
+		</section>
+	`;
+}
+
+function renderSpecialistAgentsSection(escapeHtml) {
+	return `
+		<section class="aicmd-section">
+			<div class="aicmd-section-head"><h3>Specialist Agents</h3></div>
+			<div class="aicmd-agent-grid">
+				${AGENT_CARDS.map((agent) => `
+					<article class="aicmd-agent-card">
+						<h4>${escapeHtml(agent.name)}</h4>
+						<div class="aicmd-agent-meta"><span>Purpose</span><p>${escapeHtml(agent.purpose)}</p></div>
+						<div class="aicmd-agent-meta"><span>Best use</span><p>${escapeHtml(agent.bestUse)}</p></div>
+						<div class="aicmd-agent-meta"><span>Suggested prompt</span><p>${escapeHtml(agent.suggestedPrompt)}</p></div>
+						<button class="aicmd-btn aicmd-btn-secondary" type="button" data-aicmd-start-agent="${escapeHtml(agent.id)}">Start with this agent</button>
+					</article>
+				`).join("")}
+			</div>
+		</section>
+	`;
+}
+
+function renderOutputSection(session, escapeHtml) {
+	const lastAssistant = getLastAssistantMessage(session);
+	if (!lastAssistant) {
+		return `
+			<section class="aicmd-section">
+				<div class="aicmd-section-head"><h3>Output / Result</h3></div>
+				<div class="aicmd-empty-state">No result yet. Run a command to generate an output.</div>
+				<div class="aicmd-action-row">
+					<button class="aicmd-btn aicmd-btn-ghost" type="button" disabled>Copy Result</button>
+					<button class="aicmd-btn aicmd-btn-ghost" type="button" disabled>Send to Workflow (coming soon)</button>
+					<button class="aicmd-btn aicmd-btn-ghost" type="button" disabled>Send to Campaign (coming soon)</button>
+					<button class="aicmd-btn aicmd-btn-ghost" type="button" disabled>Send to Content Studio (coming soon)</button>
+				</div>
+			</section>
+		`;
+	}
+
+	return `
+		<section class="aicmd-section">
+			<div class="aicmd-section-head">
+				<h3>Output / Result</h3>
+				<span class="aicmd-result-time">${escapeHtml(formatTime(lastAssistant.createdAt))}</span>
+			</div>
+			${renderCleanResponse(asObject(lastAssistant.response), escapeHtml, lastAssistant.id)}
+			<div class="aicmd-action-row">
+				<button id="aicmdCopyResultBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Copy Result</button>
+				<button class="aicmd-btn aicmd-btn-ghost" type="button" data-aicmd-output-route="workflows">Send to Workflow</button>
+				<button class="aicmd-btn aicmd-btn-ghost" type="button" data-aicmd-output-route="campaign-studio">Send to Campaign</button>
+				<button class="aicmd-btn aicmd-btn-ghost" type="button" data-aicmd-output-route="content-studio">Send to Content Studio</button>
+			</div>
+		</section>
+	`;
+}
+
+function renderAiOperatingCenter(aiContext, session, intelligenceStatus, escapeHtml) {
+	return `
+		<div class="aicmd-shell">
+			${renderOverviewSection(aiContext, session, intelligenceStatus, escapeHtml)}
+			<div class="aicmd-main-grid">
+				<div class="aicmd-left-stack">
+					${renderSmartRecommendationSection(aiContext, escapeHtml)}
+					${renderComposerSection(session, aiContext, escapeHtml)}
+				</div>
+				<div class="aicmd-right-stack">
+					${renderSuggestedCommandsSection(aiContext, escapeHtml)}
+					${renderOutputSection(session, escapeHtml)}
+				</div>
+			</div>
+			${renderSpecialistAgentsSection(escapeHtml)}
+		</div>
+	`;
+}
+
+function buildResultCopyText(response) {
+	const title = humanizeValue(response?.title, "AI Result");
+	const summary = humanizeValue(response?.summary, "");
+	const findings = normalizeDisplayList(response?.findings, 10);
+	const actions = normalizeDisplayList(response?.nextActions || response?.next_actions, 10);
+	return [
+		title,
+		summary,
+		findings.length ? `Findings:\n- ${findings.join("\n- ")}` : "",
+		actions.length ? `Next actions:\n- ${actions.join("\n- ")}` : ""
+	].filter(Boolean).join("\n\n");
+}
+
+function bindAiOperatingCenter({
+	$,
+	getState,
+	navigateTo,
+	showMessage,
+	showError,
+	createProjectHandoff,
+	executeProjectAiCommand,
+	reloadProjectData,
+	fetchProjectInsights,
+	fetchProjectLearning,
+	render,
+	saveProjectAiDraft
+}) {
+	const state = getState();
+	const projectName = state.context.currentProject || "";
+	const session = ensureSession(projectName);
+	const aiContext = buildUnifiedAiContext(state, session.intelligence);
+	const smartRec = buildSmartRecommendation(aiContext);
+	const suggestions = buildSuggestedCommands(aiContext);
+
+	function syncSessionInputs() {
+		session.commandType = $("aicmdCommandType")?.value || session.commandType;
+		session.targetType = $("aicmdTargetType")?.value || session.targetType;
+		session.targetValue = $("aicmdTargetValue")?.value || "";
+		session.draftMessage = $("ctrlComposerInput")?.value || session.draftMessage || "";
+	}
+
+	function setValidation(message) {
+		session.validationMessage = message || "";
+		const validation = $("aicmdValidation");
+		if (!validation) return;
+		validation.textContent = session.validationMessage;
+		validation.classList.toggle("is-visible", Boolean(session.validationMessage));
+	}
+
+	function saveDraftLocal(hint, overridePrompt) {
+		syncSessionInputs();
+		if (overridePrompt != null) session.draftMessage = overridePrompt;
+		persistSessionDraft(projectName, session, hint);
+		if (typeof saveProjectAiDraft === "function") {
+			Promise.resolve(saveProjectAiDraft(projectName, {
+				prompt: session.draftMessage,
+				mode_id: session.modeId,
+				command_type: session.commandType,
+				target_type: session.targetType,
+				target_value: session.targetValue
+			})).catch(() => {});
+		}
+	}
+
+	async function runCommandFromPrompt(prompt, source) {
+		syncSessionInputs();
+		const clean = asString(prompt).trim();
+		if (!clean) {
+			setValidation("Prompt is required before running a command.");
+			const input = $("ctrlComposerInput");
+			if (input) input.focus();
+			return;
+		}
+		setValidation("");
+		const command = buildCommandEnvelope(session, clean);
+		let submitted = { accepted: false, failed: false };
+		try {
+			submitted = await submitDurableCommand({
+				projectName,
+				aiContext,
+				session,
+				command,
+				modeId: session.modeId,
+				source: source || "control-room",
+				executeProjectAiCommand,
+				reloadProjectData
+			});
+		} catch (error) {
+			showError?.(error.message || "Failed to execute AI command.");
+			return;
+		}
+		if (!submitted.accepted) {
+			setValidation("Prompt is required before running a command.");
+			const input = $("ctrlComposerInput");
+			if (input) input.focus();
+			return;
+		}
+		if (submitted.failed) {
+			showError?.("AI command returned an error. Review the Output section.");
+		} else {
+			showMessage?.("AI command completed.");
+		}
+		render();
+	}
+
+	function createAndNavigateHandoff(route, prompt, response) {
+		const handoffMessage = asString(prompt || "").trim() || humanizeValue(response?.summary || response?.title, "");
+		if (!handoffMessage) {
+			showError?.("No output is available to hand off yet.");
+			return;
+		}
+		const handoff = {
+			source_page: "ai-command",
+			destination_page: route,
+			payload: {
+				prompt: handoffMessage,
+				draft_context: {
+					projectName,
+					modeId: session.modeId,
+					lastCommand: handoffMessage,
+					lastResponseTitle: asString(response?.title),
+					routeSuggestions: asArray(response?.routeSuggestions)
+				},
+				output: asObject(response)
+			},
+			status: "available"
+		};
+
+		if (route === "workflows") {
+			syncAiWorkflowBridge({ projectName, modeId: session.modeId, command: handoffMessage, response });
+		}
+
+		setSharedHandoff(projectName, route, handoff);
+		createProjectHandoff?.(projectName, handoff).catch((error) => {
+			console.warn("Failed to persist AI handoff:", error.message);
+		});
+		navigateTo(route);
+	}
+
+	const composerInput = $("ctrlComposerInput");
+	if (composerInput) {
+		composerInput.oninput = () => {
+			session.draftMessage = composerInput.value || "";
+			if (session.validationMessage) setValidation("");
+			saveDraftLocal("Auto-saved locally");
+		};
+		composerInput.onkeydown = (event) => {
+			if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+				event.preventDefault();
+				runCommandFromPrompt(composerInput.value || session.draftMessage || "", "control-room");
+			}
+		};
+	}
+
+	const commandType = $("aicmdCommandType");
+	if (commandType) commandType.onchange = () => saveDraftLocal("Draft updated");
+
+	const targetType = $("aicmdTargetType");
+	if (targetType) targetType.onchange = () => saveDraftLocal("Draft updated");
+
+	const targetValue = $("aicmdTargetValue");
+	if (targetValue) targetValue.oninput = () => saveDraftLocal("Draft updated");
+
+	const runBtn = $("aiCommandSendBtn");
+	if (runBtn) {
+		runBtn.onclick = () => runCommandFromPrompt($("ctrlComposerInput")?.value || session.draftMessage || "", "control-room");
+	}
+
+	const saveDraftBtn = $("aicmdSaveDraftBtn");
+	if (saveDraftBtn) {
+		saveDraftBtn.onclick = () => {
+			saveDraftLocal("Draft saved");
+			showMessage?.("Draft saved.");
+			render();
+		};
+	}
+
+	const clearBtn = $("aicmdClearBtn");
+	if (clearBtn) {
+		clearBtn.onclick = () => {
+			session.draftMessage = "";
+			session.validationMessage = "";
+			saveDraftLocal("Draft cleared", "");
+			showMessage?.("Draft cleared.");
+			render();
+		};
+	}
+
+	const loadSuggestionBtn = $("aicmdLoadSuggestionBtn");
+	if (loadSuggestionBtn) {
+		loadSuggestionBtn.onclick = () => {
+			session.draftMessage = smartRec.command;
+			session.commandType = "strategy";
+			saveDraftLocal("Suggestion loaded", smartRec.command);
+			render();
+		};
+	}
+
+	const runSuggestionBtn = $("aicmdRunSuggestionBtn");
+	if (runSuggestionBtn) {
+		runSuggestionBtn.onclick = () => runCommandFromPrompt(smartRec.command, "smart-recommendation");
+	}
+
+	const saveSuggestionBtn = $("aicmdSaveSuggestionBtn");
+	if (saveSuggestionBtn) {
+		saveSuggestionBtn.onclick = () => {
+			session.draftMessage = smartRec.command;
+			session.commandType = "strategy";
+			saveDraftLocal("Recommendation saved as draft", smartRec.command);
+			showMessage?.("Recommendation saved as draft.");
+			render();
+		};
+	}
+
+	Array.from(document.querySelectorAll("[data-aicmd-use-suggestion]")).forEach((button) => {
+		button.onclick = () => {
+			const suggestion = suggestions[Number(button.getAttribute("data-aicmd-use-suggestion"))];
+			if (!suggestion) return;
+			session.commandType = suggestion.commandType;
+			session.draftMessage = suggestion.command;
+			saveDraftLocal("Suggestion loaded", suggestion.command);
+			render();
+		};
+	});
+
+	Array.from(document.querySelectorAll("[data-aicmd-save-suggestion]")).forEach((button) => {
+		button.onclick = () => {
+			const suggestion = suggestions[Number(button.getAttribute("data-aicmd-save-suggestion"))];
+			if (!suggestion) return;
+			session.commandType = suggestion.commandType;
+			session.draftMessage = suggestion.command;
+			saveDraftLocal("Suggestion saved", suggestion.command);
+			showMessage?.("Suggestion saved as draft.");
+			render();
+		};
+	});
+
+	Array.from(document.querySelectorAll("[data-aicmd-start-agent]")).forEach((button) => {
+		button.onclick = () => {
+			const agentId = button.getAttribute("data-aicmd-start-agent") || "operations";
+			const card = AGENT_CARDS.find((item) => item.id === agentId);
+			session.modeId = agentId;
+			session.draftMessage = card?.suggestedPrompt || session.draftMessage;
+			saveDraftLocal("Agent prompt loaded", session.draftMessage);
+			render();
+		};
+	});
+
+	const copyResultBtn = $("aicmdCopyResultBtn");
+	if (copyResultBtn) {
+		copyResultBtn.onclick = async () => {
+			const lastAssistant = getLastAssistantMessage(session);
+			if (!lastAssistant) {
+				showError?.("No result available to copy.");
+				return;
+			}
+			const payload = buildResultCopyText(lastAssistant.response);
+			try {
+				await navigator.clipboard.writeText(payload);
+				showMessage?.("Result copied.");
+			} catch (_) {
+				showError?.("Copy failed. Clipboard permission might be blocked.");
+			}
+		};
+	}
+
+	Array.from(document.querySelectorAll("[data-aicmd-output-route]")).forEach((button) => {
+		button.onclick = () => {
+			const lastAssistant = getLastAssistantMessage(session);
+			const lastUser = getLastUserMessage(session);
+			if (!lastAssistant) {
+				showError?.("Run a command first to hand off output.");
+				return;
+			}
+			const route = button.getAttribute("data-aicmd-output-route") || "";
+			createAndNavigateHandoff(route, lastUser?.content, lastAssistant.response);
+		};
+	});
+
+	Array.from(document.querySelectorAll("[data-ctrl-route]"))
+		.forEach((button) => {
+			button.onclick = () => {
+				const ownerId = button.getAttribute("data-ctrl-route-owner") || "";
+				const message = session.messages.find((item) => item.id === ownerId && item.role === "assistant");
+				const route = asArray(message?.response?.routeSuggestions)[Number(button.getAttribute("data-ctrl-route"))];
+				if (!route?.route) return;
+				const messageIndex = session.messages.findIndex((item) => item.id === ownerId);
+				const priorUserMessage = messageIndex > 0
+					? session.messages.slice(0, messageIndex).reverse().find((item) => item.role === "user")
+					: null;
+				createAndNavigateHandoff(route.route, priorUserMessage?.content, message?.response);
+			};
+		});
+
+	const refreshBtn = $("aicmdRefreshBtn");
+	if (refreshBtn) {
+		refreshBtn.onclick = async () => {
+			session.intelligence.loadedAt = "";
+			session.intelligence.status = "idle";
+			await ensureIntelligenceLoaded({
+				projectName,
+				session,
+				getState,
+				reloadProjectData,
+				fetchProjectInsights,
+				fetchProjectLearning,
+				rerender: render
+			});
+			showMessage?.("Intelligence refreshed.");
+		};
+	}
+
+}
+
 // ============================================================
 //  BRIDGE
 // ============================================================
@@ -1595,7 +2383,8 @@ export const aiCommandRoute = {
 			fetchProjectLearning,
 			createProjectHandoff,
 			consumeProjectHandoff,
-			executeProjectAiCommand
+			executeProjectAiCommand,
+			saveProjectAiDraft
 		} = context;
 
 		const render = () => {
@@ -1603,6 +2392,7 @@ export const aiCommandRoute = {
 			const projectName = state.context.currentProject || "";
 			const session = ensureSession(projectName);
 			session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
+			hydrateSessionDraft(projectName, session);
 
 			lastRenderContext = { ...context, render };
 			ensureAiCommandBridge();
@@ -1615,25 +2405,22 @@ export const aiCommandRoute = {
 			const root = $("ctrlRoomRoot");
 			if (!root) return;
 
-			root.innerHTML = `
-				<div class="ctrl-room-wrapper">
-					${renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml)}
-					${renderTeamSelector(session, escapeHtml)}
-					<div class="ctrl-room-main">
-						<div class="ctrl-composer-panel">
-							${renderCommandComposer(session, aiContext, escapeHtml)}
-							${renderSuggestedPromptsSection(aiContext, session, escapeHtml)}
-						</div>
-						${renderResultsPanel(session, escapeHtml)}
-					</div>
-					<div class="ctrl-room-bottom">
-						${renderRecentCommands(session, escapeHtml)}
-						${renderArtifactsPanel(aiContext, session, escapeHtml)}
-					</div>
-				</div>
-			`;
+			root.innerHTML = renderAiOperatingCenter(aiContext, session, intelligenceStatus, escapeHtml);
 
-			bindAiWorkspace({ $, getState, navigateTo, showMessage, showError, createProjectHandoff, executeProjectAiCommand, reloadProjectData, render });
+			bindAiOperatingCenter({
+				$,
+				getState,
+				navigateTo,
+				showMessage,
+				showError,
+				createProjectHandoff,
+				executeProjectAiCommand,
+				reloadProjectData,
+				fetchProjectInsights,
+				fetchProjectLearning,
+				render,
+				saveProjectAiDraft
+			});
 		};
 
 		render();
