@@ -791,8 +791,10 @@ async function loadProjectData(projectName) {
 
   showLoading("Loading project", `Please wait while ${projectName} is being loaded.`);
 
+  let payload = null;
+
   try {
-    const payload = await fetchAllCoreProjectData(projectName);
+    payload = await fetchAllCoreProjectData(projectName);
 
     const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
       ? payload.activity.scheduled_jobs
@@ -813,19 +815,8 @@ async function loadProjectData(projectName) {
       registry: payload.registry,
       integrations: payload.connectors,
       activity: payload.activity,
-      operations: payload.operations
+      operations: payload.operations || null
     });
-
-    if (!payload.operations) {
-      try {
-        const operations = await fetchProjectOperations(projectName);
-        patchState("data", {
-          operations
-        });
-      } catch (opsError) {
-        console.warn("Failed to load operations snapshot:", opsError.message);
-      }
-    }
 
     const overviewData = payload?.overview?.overview || {};
 
@@ -838,16 +829,35 @@ async function loadProjectData(projectName) {
     });
 
     renderGlobalUi();
-    renderCurrentPage();
+
+    try {
+      renderCurrentPage();
+    } catch (renderError) {
+      console.error("[LOAD_PROJECT_RENDER_ERROR]", renderError);
+      setError(renderError.message || "Failed to render project page");
+      showError(renderError.message || "Failed to render project page");
+    }
 
     showMessage(`Loaded project: ${projectName}`);
   } catch (error) {
-    console.error(error);
+    console.error("[LOAD_PROJECT_ERROR]", error);
     setError(error.message || "Failed to load project data");
     showError(error.message || "Failed to load project data");
   } finally {
     setLoading(false);
     hideLoading();
+  }
+
+  if (payload && !payload.operations) {
+    fetchProjectOperations(projectName)
+      .then((operations) => {
+        patchState("data", { operations });
+        renderGlobalUi();
+        renderCurrentPage();
+      })
+      .catch((opsError) => {
+        console.warn("Failed to load operations snapshot:", opsError.message);
+      });
   }
 }
 
