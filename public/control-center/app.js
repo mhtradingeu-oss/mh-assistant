@@ -797,33 +797,33 @@ async function loadProjectData(projectName) {
     const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
       ? payload.activity.scheduled_jobs
       : [];
+
     const executionResults = Array.isArray(payload?.activity?.execution_results)
       ? payload.activity.execution_results
       : [];
+
     const inferredCampaign =
       executionResults[0]?.wave_name ||
       scheduledJobs[0]?.wave_name ||
       "Not selected yet";
 
     patchState("data", {
-      overview: payload.overview,
-      readiness: payload.readiness,
-      assets: payload.assets,
-      tree: payload.tree,
-      registry: payload.registry,
-      integrations: payload.connectors,
-      activity: payload.activity,
-      operations: payload.operations
+      overview: payload?.overview || {},
+      readiness: payload?.readiness || {},
+      assets: payload?.assets || {},
+      tree: payload?.tree || {},
+      registry: payload?.registry || {},
+      integrations: payload?.connectors || {},
+      activity: payload?.activity || {},
+      operations: payload?.operations || null
     });
 
-    if (!payload.operations) {
+    if (!payload?.operations) {
       try {
         const operations = await fetchProjectOperations(projectName);
-        patchState("data", {
-          operations
-        });
+        patchState("data", { operations });
       } catch (opsError) {
-        console.warn("Failed to load operations snapshot:", opsError.message);
+        console.warn("Failed to load operations snapshot:", opsError?.message || opsError);
       }
     }
 
@@ -837,17 +837,54 @@ async function loadProjectData(projectName) {
       campaign: inferredCampaign
     });
 
-    renderGlobalUi();
-    renderCurrentPage();
+    try {
+      renderGlobalUi();
+      renderCurrentPage();
+    } catch (renderError) {
+      console.error("Project loaded, but render failed:", renderError);
+      setError(renderError?.message || "Project loaded, but the page failed to render.");
+      showError(renderError?.message || "Project loaded, but the page failed to render.");
+    }
 
     showMessage(`Loaded project: ${projectName}`);
   } catch (error) {
-    console.error(error);
-    setError(error.message || "Failed to load project data");
-    showError(error.message || "Failed to load project data");
+    console.error("Failed to load project data:", error);
+
+    setError(error?.message || "Failed to load project data");
+    showError(error?.message || "Failed to load project data");
+
+    patchState("data", {
+      overview: {},
+      readiness: {},
+      assets: {},
+      tree: {},
+      registry: {},
+      integrations: {},
+      activity: {},
+      operations: null
+    });
+
+    setProjectContext({
+      project: projectName,
+      market: "",
+      language: "",
+      mode: "",
+      campaign: "Not selected yet"
+    });
+
+    try {
+      renderGlobalUi();
+      renderCurrentPage();
+    } catch (renderError) {
+      console.error("Fallback render failed:", renderError);
+    }
   } finally {
-    setLoading(false);
-    hideLoading();
+    try {
+      setLoading(false);
+      hideLoading();
+    } catch (cleanupError) {
+      console.error("Failed to hide loading overlay:", cleanupError);
+    }
   }
 }
 

@@ -92,6 +92,8 @@ const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
 
 const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
 const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+const CONTROL_READ_KEY_ENV = 'MH_CONTROL_CENTER_READ_KEY';
+const CONTROL_COMPAT_KEY_ENV = 'MH_CONTROL_KEY';
 const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
   /^\/task\/?$/i,
   /^\/ingest\/?$/i,
@@ -139,15 +141,24 @@ function controlWriteKeyMatches(expected, provided) {
   return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
+function resolveConfiguredControlKey() {
+  return String(
+    process.env[CONTROL_WRITE_KEY_ENV]
+    || process.env[CONTROL_READ_KEY_ENV]
+    || process.env[CONTROL_COMPAT_KEY_ENV]
+    || ''
+  ).trim();
+}
+
 function requireProtectedControlWriteKey(req, res, next) {
   if (!isProtectedControlWriteRequest(req)) {
     return next();
   }
 
-  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  const expectedKey = resolveConfiguredControlKey();
   if (!expectedKey) {
     return res.status(503).json({
-      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+      error: `Protected write routes are disabled until ${CONTROL_WRITE_KEY_ENV}, ${CONTROL_READ_KEY_ENV}, or ${CONTROL_COMPAT_KEY_ENV} is configured on the server.`
     });
   }
 
@@ -199,10 +210,10 @@ function requireProtectedReadKey(req, res, next) {
     return next();
   }
 
-  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  const expectedKey = resolveConfiguredControlKey();
   if (!expectedKey) {
     return res.status(503).json({
-      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV} is configured on the server.`
+      error: `Protected read routes are disabled until ${CONTROL_WRITE_KEY_ENV}, ${CONTROL_READ_KEY_ENV}, or ${CONTROL_COMPAT_KEY_ENV} is configured on the server.`
     });
   }
 
@@ -458,7 +469,7 @@ const upload = multer({
 });
 
 
-const BASE_DIR = '/opt/mh-assistant';
+const BASE_DIR = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
 const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
 const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
 const DATA_DIR = path.join(BASE_DIR, 'data');
@@ -687,7 +698,7 @@ function detectIntegrationSecretUsage(projects = []) {
 }
 
 function buildReadinessState() {
-  const configuredWriteKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  const configuredWriteKey = resolveConfiguredControlKey();
   const checks = {
     control_write_key_configured: {
       ok: Boolean(configuredWriteKey),
@@ -746,7 +757,7 @@ function buildReadinessState() {
     checks,
     protected_write_mode: {
       enabled: true,
-      required_key_env: CONTROL_WRITE_KEY_ENV,
+      required_key_env: `${CONTROL_WRITE_KEY_ENV}|${CONTROL_READ_KEY_ENV}|${CONTROL_COMPAT_KEY_ENV}`,
       key_configured: Boolean(configuredWriteKey)
     },
     missing_required_env: missingRequiredEnv
@@ -5767,7 +5778,7 @@ function buildTaskResult({
   return result;
 }
 function getProjectRegistryPaths() {
-  const baseDir = '/opt/mh-assistant/data/projects';
+  const baseDir = path.join(BASE_DIR, "data", "projects");
   const registryPath = path.join(baseDir, 'registry.json');
 
   ensureDir(baseDir);
@@ -9527,11 +9538,7 @@ app.post('/media-manager/project/:project/assets/:assetId/status', express.json(
         ? String(req.headers.authorization || '').slice('Bearer '.length)
         : '');
 
-    const validWriteKey =
-      process.env.MH_CONTROL_CENTER_WRITE_KEY ||
-      process.env.MH_CONTROL_CENTER_READ_KEY ||
-      process.env.MH_CONTROL_KEY ||
-      '';
+    const validWriteKey = resolveConfiguredControlKey();
 
     if (!validWriteKey || providedKey !== validWriteKey) {
       return res.status(401).json({

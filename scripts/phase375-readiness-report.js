@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_DIR = '/opt/mh-assistant';
+const BASE_DIR = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
 const EXECUTION_PROJECTS_DIR = path.join(BASE_DIR, 'data', 'execution', 'projects');
 const TARGET_DOMAINS = new Set([
   'email',
