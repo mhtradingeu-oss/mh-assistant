@@ -458,7 +458,7 @@ const upload = multer({
 });
 
 
-const BASE_DIR = '/opt/mh-assistant';
+const BASE_DIR = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
 const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
 const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
 const DATA_DIR = path.join(BASE_DIR, 'data');
@@ -726,7 +726,7 @@ function buildReadinessState() {
     ok: !integrationSecretRequired || hasIntegrationSecretKeyConfigured(),
     required: integrationSecretRequired,
     env: 'MH_INTEGRATION_SECRET_KEY',
-    file: '/opt/mh-assistant/data/system/integration-secret.key.json'
+    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
   };
 
   const missingRequiredEnv = [];
@@ -4303,7 +4303,7 @@ function reviewChannelLearning(projectName, channel) {
   };
 }
 function getDocsPaths() {
-  const baseDir = '/opt/mh-assistant/docs';
+  const baseDir = path.join(BASE_DIR, 'docs');
 
   return {
     baseDir,
@@ -5767,7 +5767,7 @@ function buildTaskResult({
   return result;
 }
 function getProjectRegistryPaths() {
-  const baseDir = '/opt/mh-assistant/data/projects';
+  const baseDir = path.join(DATA_DIR, 'projects');
   const registryPath = path.join(baseDir, 'registry.json');
 
   ensureDir(baseDir);
@@ -12647,6 +12647,66 @@ function buildProjectControlCenterOverview(projectName) {
     next_best_actions: dashboard.next_best_actions || []
   };
 }
+function listFilesRecursiveSafe(dir, predicate = () => true) {
+  if (!fs.existsSync(dir)) return [];
+
+  const results = [];
+  const stack = [dir];
+
+  while (stack.length) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    entries.forEach(entry => {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && predicate(fullPath)) {
+        results.push(fullPath);
+      }
+    });
+  }
+
+  return results.sort();
+}
+
+function buildProjectProductMediaSummary(projectName) {
+  const brandRoot = path.join(DATA_DIR, 'brand-assets', projectName);
+  const productsRoot = path.join(brandRoot, 'products');
+  const imagesRoot = path.join(productsRoot, 'images');
+  const videosRoot = path.join(productsRoot, 'videos');
+  const csvRoot = path.join(brandRoot, 'product_csv');
+
+  const images = listFilesRecursiveSafe(imagesRoot, file => /front\.png$/i.test(file));
+  const videos = listFilesRecursiveSafe(videosRoot, file => /\.(mp4|mov)$/i.test(file));
+  const csv_files = listFilesRecursiveSafe(csvRoot, file => /\.csv$/i.test(file));
+
+  return {
+    products_root: productsRoot,
+    images_root: imagesRoot,
+    videos_root: videosRoot,
+    csv_root: csvRoot,
+    images: images.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path),
+      product_slug: path.basename(path.dirname(file_path))
+    })),
+    videos: videos.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path),
+      product_slug: path.basename(path.dirname(file_path))
+    })),
+    csv_files: csv_files.map(file_path => ({
+      file_path,
+      file_name: path.basename(file_path)
+    })),
+    counts: {
+      images: images.length,
+      videos: videos.length,
+      csv_files: csv_files.length
+    }
+  };
+}
 
 function buildProjectControlCenterAssets(projectName) {
   const assets = listProjectAssets(projectName);
@@ -12654,11 +12714,13 @@ function buildProjectControlCenterAssets(projectName) {
   const missingAssets = reviewProjectMissingAssets(projectName);
   const folderHealth = reviewProjectFolderHealth(projectName);
   const categoryReadiness = missingAssets.category_readiness || buildProjectAssetCategoryReadiness(projectName, assets);
+  const productMedia = buildProjectProductMediaSummary(projectName);
 
   return {
     project: projectName,
     generated_at: new Date().toISOString(),
     assets,
+    product_media: productMedia,
     asset_catalog: getAssetTypeCatalog(),
     category_readiness: categoryReadiness,
     approved_assets: categoryReadiness.categories

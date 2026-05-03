@@ -11,7 +11,7 @@ const {
   resolveProjectPath
 } = require('../security/project-isolation');
 
-const PROJECTS_DIR = '/opt/mh-assistant/data/projects';
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant', 'data', 'projects');
 const BACKBONE_VERSION = 'mh-ops-backbone-v2';
 
 // Canonical defaults for policy_rules — these are the authoritative safe values.
