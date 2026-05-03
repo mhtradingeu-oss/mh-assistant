@@ -30,6 +30,9 @@ const {
   buildProjectLearningPayload
 } = require('./lib/insights/ingestion-service');
 const {
+  createMediaProviderLayer
+} = require('./lib/media/provider-layer');
+const {
   normalizeProjectSlug,
   resolveProjectPath,
   isProjectSlugValidationError
@@ -295,6 +298,77 @@ const executionArtifactWriter = new ExecutionArtifactWriterAdapter({
 });
 
 let aiOrchestrator = null;
+const mediaProviderLayer = createMediaProviderLayer({
+  env: process.env,
+  axios
+});
+
+function resolveMediaProjectName(req) {
+  return normalizeOptionalProjectSlug(
+    req?.body?.project || req?.query?.project || req?.params?.project
+  );
+}
+
+function maybePersistMediaGenerationResult(req, {
+  requestType,
+  output,
+  status = 'needs_review'
+} = {}) {
+  const projectName = resolveMediaProjectName(req);
+  if (!projectName) return null;
+
+  const mediaJobId = asString(req?.body?.media_job_id || req?.body?.id || '');
+  const prompt = asString(req?.body?.prompt || '');
+  const now = new Date().toISOString();
+
+  const outputLabel = `${requestType} ${now.slice(0, 19).replace('T', ' ')}`;
+  const outputSummary = typeof output === 'string'
+    ? output
+    : JSON.stringify(output || {});
+
+  try {
+    const mediaJob = upsertMediaJob(projectName, {
+      id: mediaJobId || undefined,
+      title: asString(req?.body?.title || `${requestType} media job`),
+      request_type: requestType,
+      prompt,
+      brief: asString(req?.body?.objective || req?.body?.brief || ''),
+      status,
+      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+      model: asString(req?.body?.model || req?.body?.media_model || ''),
+      campaign_id: asString(req?.body?.campaign || req?.body?.campaign_id || ''),
+      content_item_id: asString(req?.body?.content_item_id || ''),
+      output_versions: req?.body?.output_versions,
+      new_output_version: {
+        label: outputLabel,
+        preview_url: asString(output?.images?.[0]?.url || output?.image_url || ''),
+        file_path: asString(output?.images?.[0]?.file_path || ''),
+        outputs: [
+          {
+            label: outputLabel,
+            summary: outputSummary
+          }
+        ],
+        actor: 'media-api'
+      },
+      outputs: [
+        {
+          label: outputLabel,
+          summary: outputSummary,
+          created_at: now
+        }
+      ],
+      actor: 'media-api'
+    });
+
+    return {
+      media_job: mediaJob,
+      operations: buildProjectOperationsPayload(projectName)
+    };
+  } catch (error) {
+    return null;
+  }
+}
 
 function buildAssetRoleFromType(type) {
   const map = {
@@ -20318,6 +20392,186 @@ app.post('/generate_optimization_recommendations', (req, res) => {
       statusCode: getErrorStatusCode(error, 400),
       code: error.code || 'GENERATE_OPTIMIZATION_RECOMMENDATIONS_FAILED',
       message: error.message || 'Failed to generate optimization recommendations'
+    });
+  }
+});
+
+app.post('/api/media/improve-prompt', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.improvePrompt(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: asString(req.body?.request_type || 'image'),
+      output: { improved_prompt: result.improved_prompt },
+      status: 'prompt_ready'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'prompt_ready',
+      improved_prompt: result.improved_prompt,
+      provider: result.provider,
+      model: result.model,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_IMPROVE_PROMPT_FAILED',
+      message: error.message || 'Failed to improve media prompt'
+    });
+  }
+});
+
+app.post('/api/media/brand-check', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.brandCheck(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: asString(req.body?.request_type || 'image'),
+      output: { brand_check: result.brand_check },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      brand_check: result.brand_check,
+      provider: result.provider,
+      model: result.model,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_BRAND_CHECK_FAILED',
+      message: error.message || 'Failed to run media brand check'
+    });
+  }
+});
+
+app.post('/api/media/generate-image', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateImage(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'image',
+      output: result,
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      images: result.images,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_IMAGE_FAILED',
+      message: error.message || 'Failed to generate image'
+    });
+  }
+});
+
+app.post('/api/media/generate-video-brief', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateVideoBrief(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'video',
+      output: { video_brief: result.video_brief },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      video_brief: result.video_brief,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_VIDEO_BRIEF_FAILED',
+      message: error.message || 'Failed to generate video brief'
+    });
+  }
+});
+
+app.post('/api/media/generate-voice-script', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateVoiceScript(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'audio',
+      output: { voice_script: result.voice_script },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      voice_script: result.voice_script,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_VOICE_SCRIPT_FAILED',
+      message: error.message || 'Failed to generate voice script'
+    });
+  }
+});
+
+app.post('/api/media/generate-campaign-pack', async (req, res) => {
+  try {
+    const result = await mediaProviderLayer.generateCampaignPack(req.body || {});
+    if (!result.ok && result.status === 'provider_not_configured') {
+      return res.status(200).json(result);
+    }
+
+    const persisted = maybePersistMediaGenerationResult(req, {
+      requestType: 'multi_format',
+      output: { campaign_pack: result.campaign_pack },
+      status: 'needs_review'
+    });
+
+    return res.json({
+      ok: true,
+      status: 'needs_review',
+      provider: result.provider,
+      model: result.model,
+      campaign_pack: result.campaign_pack,
+      ...(persisted || {})
+    });
+  } catch (error) {
+    return sendError(res, {
+      statusCode: getErrorStatusCode(error, 500),
+      code: error.code || 'MEDIA_GENERATE_CAMPAIGN_PACK_FAILED',
+      message: error.message || 'Failed to generate campaign pack'
     });
   }
 });

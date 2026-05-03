@@ -1,3 +1,5 @@
+import { getGlobalNextBestAction } from "../system-intelligence.js";
+
 const REQUIRED_ROUTES = [
   "home",
   "setup",
@@ -822,6 +824,14 @@ function ensureShell(page) {
 
     <section class="std-main-grid" data-ui-role="main-dashboard">
       <section class="std-work-area" data-ui-role="main-work-area">
+        <section class="std-smart-strip" id="stdSmartStrip" data-ui-role="smart-strip" hidden>
+          <div class="std-smart-strip-copy">
+            <span class="card-label">System Intelligence</span>
+            <strong id="stdSmartStripTitle">Smart next action</strong>
+            <p id="stdSmartStripReason" class="page-subtitle"></p>
+          </div>
+          <button type="button" class="btn btn-secondary" id="stdSmartStripBtn">Open</button>
+        </section>
         <div id="stdMainContentSlot" class="std-main-content-slot"></div>
       </section>
 
@@ -1145,6 +1155,10 @@ export function applyStandardPageLayout(context) {
   const aiDescription = shell.querySelector("#stdAiDescription");
   const nextTitle = shell.querySelector("#stdNextTitle");
   const nextBest = shell.querySelector("#stdNextBestAction");
+  const smartStrip = shell.querySelector("#stdSmartStrip");
+  const smartStripTitle = shell.querySelector("#stdSmartStripTitle");
+  const smartStripReason = shell.querySelector("#stdSmartStripReason");
+  const smartStripBtn = shell.querySelector("#stdSmartStripBtn");
 
   if (eyebrow) eyebrow.textContent = copy.eyebrow;
   if (title) title.textContent = copy.title;
@@ -1156,6 +1170,24 @@ export function applyStandardPageLayout(context) {
   if (aiDescription) aiDescription.textContent = ai.description;
   if (nextTitle) nextTitle.textContent = `${copy.eyebrow} recommendation`;
   if (nextBest) nextBest.textContent = nextBestAction(route, m);
+
+  const globalAction = getGlobalNextBestAction(state);
+  const showSmartStrip = Boolean(globalAction?.title) && route !== "home";
+  if (smartStrip) smartStrip.hidden = !showSmartStrip;
+  if (showSmartStrip) {
+    if (smartStripTitle) smartStripTitle.textContent = asString(globalAction.title);
+    if (smartStripReason) smartStripReason.textContent = asString(globalAction.reason || "");
+    if (smartStripBtn) {
+      smartStripBtn.textContent = asString(globalAction.actionLabel || "Open");
+      smartStripBtn.onclick = () => {
+        const quickInput = document.getElementById("quickCommandInput");
+        if (quickInput && globalAction?.draftPayload?.prompt) {
+          quickInput.value = asString(globalAction.draftPayload.prompt);
+        }
+        context.navigateTo(asString(globalAction.targetPage) || "ai-command");
+      };
+    }
+  }
 
   const routeContext = { ...context, state };
 

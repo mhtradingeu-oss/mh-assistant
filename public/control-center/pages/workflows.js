@@ -4,6 +4,21 @@ import {
   setSharedAiDraft,
   setSharedHandoff
 } from "../shared-context.js";
+import { getGlobalNextBestAction } from "../system-intelligence.js";
+import {
+  buildAutomationPlan,
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  pauseAutoMode,
+  resumeAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode,
+  getAutoFixPlan,
+  runAutomationPlan
+} from "../automation-engine.js";
 
 const WORKFLOW_CATALOG = [
   {
@@ -85,6 +100,14 @@ const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
 const workflowSessions = new Map();
 let lastWorkflowRenderContext = null;
 let workflowBridgeRegistered = false;
+let workflowAutoModeUnsubscribe = null;
+const workflowAutomationState = {
+  progress: "",
+  result: "",
+  cursor: 0,
+  lastPlan: [],
+  lastResults: []
+};
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -512,7 +535,29 @@ function buildFallbackOutput(workflow, inputs, context) {
   };
 }
 
-function buildSmartRecommendation(context, session) {
+function mapGlobalActionToWorkflowId(globalAction) {
+  const target = asString(globalAction?.targetPage).trim().toLowerCase();
+  if (target === "integrations") return "fix-integrations";
+  if (target === "publishing") return "prepare-publishing-package";
+  if (target === "content-studio") return "create-content-plan";
+  if (target === "media-studio") return "build-media-job";
+  if (target === "setup" || target === "campaign-studio") return "launch-campaign";
+  return "";
+}
+
+function buildSmartRecommendation(context, session, globalAction) {
+  const mappedWorkflowId = mapGlobalActionToWorkflowId(globalAction);
+  if (mappedWorkflowId) {
+    const mapped = getWorkflowDef(mappedWorkflowId);
+    return {
+      workflowId: mapped.id,
+      title: `System intelligence: ${globalAction.title || mapped.title}`,
+      reason: firstNonEmpty(globalAction.reason, `Global next best action points to ${titleCase(globalAction.targetPage)}.`),
+      chips: ["Launch readiness", "Automation", "Campaign"],
+      prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, `Build a ${mapped.title.toLowerCase()} execution plan from current system blockers and dependencies.`)
+    };
+  }
+
   if (context.missingIntegrations.length) {
     return {
       workflowId: "fix-integrations",
@@ -585,6 +630,134 @@ function renderRecommendationSection(recommendation, escapeHtml) {
         <button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>
         <button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
         <button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Command</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
+  const esc = typeof escapeHtml === "function"
+    ? escapeHtml
+    : (value) => String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+  const steps = asArray(fullPlan).slice(0, 8);
+  const gate = asObject(autoMode?.approvalRequiredStep);
+
+  return `
+    <section class="wfexec-section">
+      <div class="wfexec-head"><h3>Automation Layer</h3></div>
+      <p class="wfexec-rec-reason">
+        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+      </p>
+
+      <div class="wfexec-overview-grid">
+        <article class="wfexec-stat">
+          <span>Full plan steps</span>
+          <strong>${esc(String(asArray(fullPlan).length))}</strong>
+        </article>
+        <article class="wfexec-stat">
+          <span>Critical fix steps</span>
+          <strong>${esc(String(asArray(fixPlan).length))}</strong>
+        </article>
+      </div>
+
+      ${
+        steps.length
+          ? `<ol class="home-decision-list home-decision-list-spaced">
+              ${steps.map((step, idx) => `
+                <li>
+                  <strong>${esc(`Step ${idx + 1}`)}:</strong>
+                  ${esc(step.action)} 
+                  (${esc(step.type)} → ${esc(step.targetPage)})
+                </li>
+              `).join("")}
+            </ol>`
+          : `<div class="wfexec-empty">No safe automation steps are available.</div>`
+      }
+
+      <div class="wfexec-action-row">
+        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+          Run Full Automation
+        </button>
+        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+          Run Step-by-Step
+        </button>
+      </div>
+
+      <div id="workflowAutomationProgress" class="wfexec-meta">
+        ${esc(workflowAutomationState.progress || "")}
+      </div>
+
+      <div id="workflowAutomationResult" class="wfexec-meta">
+        ${esc(workflowAutomationState.result || "")}
+      </div>
+
+      <div class="wfexec-head" style="margin-top:10px;">
+        <h3>Auto Mode</h3>
+      </div>
+
+      <p class="wfexec-rec-reason">
+        Hands-free safe execution with approval gates and inline logs.
+      </p>
+
+      <div class="wfexec-action-row">
+        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+          Start Auto Mode From Plan
+        </button>
+        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+          Pause
+        </button>
+        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+          Resume
+        </button>
+        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+          Stop
+        </button>
+      </div>
+
+      <div class="wfexec-meta">
+        Status: ${esc(autoMode?.status || "idle")}
+      </div>
+
+      <div class="wfexec-meta">
+        Current step: ${esc(
+          asArray(autoMode?.currentPlan)[autoMode?.currentStepIndex]?.action || "None"
+        )}
+      </div>
+
+      ${
+        autoMode?.status === "waiting_approval"
+          ? `
+            <div class="wfexec-meta">
+              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+            </div>
+            <div class="wfexec-meta">
+              ${esc(gate.whatWillHappen || "Auto Mode is paused.")}
+            </div>
+            <div class="wfexec-action-row">
+              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+                Approve and Continue
+              </button>
+              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+                Skip Step
+              </button>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="wfexec-meta">
+        ${esc(
+          asArray(autoMode?.logs)
+            .slice(-3)
+            .map((entry) => `${entry.level || "info"}: ${entry.message || ""}`)
+            .join(" | ") || "No logs yet"
+        )}
       </div>
     </section>
   `;
@@ -714,6 +887,8 @@ function renderWorkflowExecutionLoop({
   metrics,
   context,
   recommendation,
+  automationPlan,
+  autoFixPlan,
   session,
   workflow,
   inputs,
@@ -727,6 +902,7 @@ function renderWorkflowExecutionLoop({
       <div class="wfexec-grid">
         <div class="wfexec-left">
           ${renderRecommendationSection(recommendation, escapeHtml)}
+          ${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}
           ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
         </div>
         <div class="wfexec-right">
@@ -1028,6 +1204,12 @@ function bindWorkflowExecutionLoop({
   createProjectHandoff,
   render
 }) {
+  createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+  if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+  workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+    render();
+  });
+
   const state = getState();
   const projectName = state.context.currentProject || "";
   const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
@@ -1234,7 +1416,7 @@ function bindWorkflowExecutionLoop({
   const startRecommendedBtn = $("wfexecStartRecommendedBtn");
   if (startRecommendedBtn) {
     startRecommendedBtn.onclick = () => {
-      const rec = buildSmartRecommendation(contextModel, session);
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
       runWorkflow(rec.workflowId);
     };
   }
@@ -1242,7 +1424,7 @@ function bindWorkflowExecutionLoop({
   const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");
   if (saveRecommendedBtn) {
     saveRecommendedBtn.onclick = () => {
-      const rec = buildSmartRecommendation(contextModel, session);
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
       session.selectedWorkflowId = rec.workflowId;
       session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
       persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
@@ -1254,7 +1436,7 @@ function bindWorkflowExecutionLoop({
   const sendRecommendedAiBtn = $("wfexecSendRecommendedAiBtn");
   if (sendRecommendedAiBtn) {
     sendRecommendedAiBtn.onclick = () => {
-      const rec = buildSmartRecommendation(contextModel, session);
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
       const recWorkflow = getWorkflowDef(rec.workflowId);
       session.selectedWorkflowId = recWorkflow.id;
       pushWorkflowToAiCommand({
@@ -1356,7 +1538,7 @@ function bindWorkflowExecutionLoop({
   const recommendBtn = $("workflowRecommendBtn");
   if (recommendBtn) {
     recommendBtn.onclick = () => {
-      const rec = buildSmartRecommendation(contextModel, session);
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
       const prompt = [
         "Recommend the best workflow to run next.",
         `Project: ${projectName || "not set"}`,
@@ -1422,6 +1604,120 @@ function bindWorkflowExecutionLoop({
         status: "available"
       });
       navigateTo("ai-command");
+    };
+  }
+
+  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+  if (fullAutomationBtn) {
+    fullAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+      const confirmed = window.confirm(`Run ${plan.length} safe automation steps?`);
+      if (!confirmed) return;
+
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.cursor = 0;
+      workflowAutomationState.result = "";
+      const result = await runAutomationPlan(plan, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: stepResult }) => {
+          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+          render();
+        }
+      });
+      workflowAutomationState.lastResults = asArray(result.results);
+      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+  if (stepAutomationBtn) {
+    stepAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+
+      const confirmed = window.confirm("Run next safe automation step?");
+      if (!confirmed) return;
+
+      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+      const singleStep = [plan[nextIndex]];
+      const stepResult = await runAutomationPlan(singleStep, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: runResult }) => {
+          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+        }
+      });
+
+      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+        ? "Step-by-step automation completed."
+        : "Step executed. Run again for next step.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const autoStartBtn = $("workflowAutoStartBtn");
+  if (autoStartBtn) {
+    autoStartBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, createProjectHandoff, projectName }
+      });
+      showMessage?.("Workflow Auto Mode started.");
+    };
+  }
+
+  const autoPauseBtn = $("workflowAutoPauseBtn");
+  if (autoPauseBtn) {
+    autoPauseBtn.onclick = () => {
+      pauseAutoMode();
+      showMessage?.("Auto Mode paused.");
+    };
+  }
+
+  const autoResumeBtn = $("workflowAutoResumeBtn");
+  if (autoResumeBtn) {
+    autoResumeBtn.onclick = async () => {
+      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode resumed.");
+    };
+  }
+
+  const autoStopBtn = $("workflowAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("workflowAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("workflowAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode skipped gated step.");
     };
   }
 }
@@ -1495,7 +1791,10 @@ export const workflowsRoute = {
       const run = asObject(session.runsByWorkflow[workflow.id]);
       const contextModel = buildWorkflowContext(state, session);
       const metrics = buildOverviewMetrics(session, contextModel);
-      const recommendation = buildSmartRecommendation(contextModel, session);
+      const recommendation = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(state));
+      const automationPlan = buildAutomationPlan(state);
+      const autoFixPlan = getAutoFixPlan(state);
+      const autoModeState = getAutoModeState();
       const blockedRequirements = getBlockedRequirements(workflow, inputs, contextModel);
 
       const root = $("workflowsRoot");
@@ -1505,6 +1804,9 @@ export const workflowsRoute = {
         metrics,
         context: contextModel,
         recommendation,
+        automationPlan,
+        autoFixPlan,
+        autoMode: autoModeState,
         session,
         workflow,
         inputs,

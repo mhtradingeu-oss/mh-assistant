@@ -8,6 +8,7 @@ import {
 } from "../asset-library.js";
 
 const librarySessionStore = new Map();
+const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 
 const SMART_CATEGORY_BUCKETS = [
   { key: "logos", label: "Logos", types: ["logo"] },
@@ -82,6 +83,40 @@ function asObject(value) {
 function asString(value) {
   if (value == null) return "";
   return String(value);
+}
+
+function titleCase(value = "") {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function toKey(value = "") {
+  return asString(value).trim().toLowerCase();
+}
+
+function projectKey(projectName) {
+  return toKey(projectName) || "__default__";
+}
+
+function readManagedMediaAssetMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function loadLocalManagedMediaAssets(projectName) {
+  const map = readManagedMediaAssetMap();
+  const primary = asArray(map[projectKey(projectName)]);
+  if (primary.length) return primary;
+  if (!toKey(projectName)) {
+    return asArray(map.workspace || map.Workspace || map.__default__);
+  }
+  return primary;
 }
 
 function basename(filePath = "") {
@@ -337,6 +372,7 @@ function ensureLibrarySession(projectName) {
       searchQuery: "",
       selectedType: "all",
       selectedStatus: "all",
+      selectedSource: "all",
       sortBy: "updated_desc",
       uploadType: "logo",
       uploading: false,
@@ -380,6 +416,9 @@ function normalizeReadinessStatus(value = "") {
   const normalized = asString(value).trim().toLowerCase().replace(/\s+/g, "_");
   if (!normalized) return "uploaded";
   if (normalized.includes("approved")) return "approved";
+  if (normalized.includes("publishing_ready")) return "publishing_ready";
+  if (normalized.includes("sent_to_publishing")) return "sent_to_publishing";
+  if (normalized.includes("draft")) return "draft";
   if (normalized.includes("missing")) return "missing";
   if (normalized === "uploaded") return "uploaded";
   if (normalized.includes("needs_review") || normalized.includes("review")) return "needs_review";
@@ -391,6 +430,9 @@ function normalizeReadinessStatus(value = "") {
 function toStatusLabel(status = "") {
   const value = normalizeReadinessStatus(status);
   if (value === "approved") return "Approved";
+  if (value === "publishing_ready") return "Publishing Ready";
+  if (value === "sent_to_publishing") return "Sent to Publishing";
+  if (value === "draft") return "Draft";
   if (value === "needs_review") return "Needs Review";
   if (value === "missing") return "Missing";
   if (value === "rejected") return "Rejected";
@@ -400,6 +442,8 @@ function toStatusLabel(status = "") {
 
 function toStatusTone(status = "") {
   const value = normalizeReadinessStatus(status);
+  if (value === "publishing_ready" || value === "sent_to_publishing") return "success";
+  if (value === "draft") return "neutral";
   if (value === "needs_review") return getAssetStatusTone("needs review");
   return getAssetStatusTone(value);
 }
@@ -447,6 +491,121 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
       is_video: isVideoExtension(extension)
     };
   });
+}
+
+function inferManagedAssetType(asset = {}) {
+  const mediaType = toKey(asset.media_type);
+  if (mediaType === "campaign-pack") return "campaign_pack";
+  if (mediaType === "video") return "generated_media";
+  if (mediaType === "voice") return "voice_script";
+  if (asset.video_brief) return "video_brief";
+  if (asset.voice_script) return "voice_script";
+  if (asset.prompt && !asset.image_url && !asset.video_url && !asset.audio_url) return "prompt_asset";
+  if (["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status))) return "publishing_ready_asset";
+  return "generated_media";
+}
+
+function normalizeManagedMediaAsset(rawAsset = {}, index = 0, sourceKind = "local") {
+  const asset = asObject(rawAsset);
+  const payload = asObject(asset.output_payload);
+  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+  const imageUrl = asString(asset.image_url || asset.url || payload.image_url || payload.url || asObject(asArray(payload.images)[0]).url);
+  const videoUrl = asString(asset.video_url || payload.video_url || asObject(asArray(payload.videos)[0]).url);
+  const audioUrl = asString(asset.audio_url || payload.audio_url || asObject(payload.audio).url);
+  const promptText = asString(asset.prompt || payload.prompt);
+  const briefText = asString(payload.video_brief || payload.voice_script || payload.message || asset.notes);
+  const managedType = inferManagedAssetType({
+    ...asset,
+    image_url: imageUrl,
+    video_url: videoUrl,
+    audio_url: audioUrl,
+    video_brief: payload.video_brief,
+    voice_script: payload.voice_script
+  });
+
+  return {
+    id: `managed-${id}`,
+    asset_id: id,
+    kind: "managed_media",
+    source_signature: asString(asset.source_signature),
+    name: asString(asset.title || `${asString(asset.media_type || "media")} ${asString(asset.version_id || "version")}`),
+    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+    asset_type: managedType,
+    category_label: "Media Studio Generated",
+    category_status: "Uploaded",
+    status: normalizeReadinessStatus(asset.status || asset.readiness_status || "needs_review"),
+    exists: true,
+    source_of_truth: false,
+    used_in: asArray(asset.usage).length ? asArray(asset.usage) : ["Library", "Media Studio"],
+    uploaded_at: asset.updated_at || asset.created_at || null,
+    preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),
+    extension: imageUrl ? "image" : videoUrl ? "video" : audioUrl ? "audio" : "json",
+    is_image: Boolean(imageUrl),
+    is_video: Boolean(videoUrl),
+    is_audio: Boolean(audioUrl),
+    image_url: imageUrl,
+    video_url: videoUrl,
+    audio_url: audioUrl,
+    text_preview: promptText || briefText,
+    json_preview: payload,
+    media_payload: payload,
+    media_type: asString(asset.media_type || payload.mode || "media"),
+    version_id: asString(asset.version_id || ""),
+    project: asString(asset.project || ""),
+    campaign: asString(asset.campaign || ""),
+    approval_status: asString(asset.approval_status || "draft"),
+    notes: asString(asset.notes || ""),
+    source_kind: sourceKind,
+    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+  };
+}
+
+function firstValidUrl(...values) {
+  for (const value of values) {
+    const text = asString(value).trim();
+    if (/^https?:\/\//i.test(text) || /^blob:/i.test(text) || /^data:image\//i.test(text)) {
+      return text;
+    }
+  }
+  return "";
+}
+
+function getManagedMediaAssets(projectName, operations) {
+  const local = loadLocalManagedMediaAssets(projectName)
+    .map((item, index) => normalizeManagedMediaAsset(item, index, "local"));
+
+  const backendHandoffs = asArray(operations?.handoffs?.items)
+    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+    .map((item) => {
+      const payload = asObject(item?.payload);
+      const libraryAsset = asObject(payload.library_asset);
+      return normalizeManagedMediaAsset(
+        {
+          ...libraryAsset,
+          handoff_id: item.id,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+        },
+        0,
+        "backend"
+      );
+    });
+
+  const mergedBySignature = new Map();
+  [...backendHandoffs, ...local].forEach((asset) => {
+    const key = asString(asset.source_signature || asset.asset_id || asset.id);
+    const existing = mergedBySignature.get(key);
+    if (!existing) {
+      mergedBySignature.set(key, asset);
+      return;
+    }
+    const existingTs = new Date(existing.uploaded_at || 0).getTime() || 0;
+    const candidateTs = new Date(asset.uploaded_at || 0).getTime() || 0;
+    if (candidateTs >= existingTs) mergedBySignature.set(key, asset);
+  });
+
+  return [...mergedBySignature.values()];
 }
 
 function buildAssetOverview({ assets, requiredGroups }) {
@@ -543,6 +702,7 @@ function getFilteredAssets(allAssets, session, bucketMap) {
   const selectedBucket = bucketMap.get(selectedCategoryKey) || null;
   const selectedType = session.selectedType || "all";
   const selectedStatus = session.selectedStatus || "all";
+  const selectedSource = session.selectedSource || "all";
   const sortBy = session.sortBy || "updated_desc";
   const allowedTypes = selectedBucket ? new Set(selectedBucket.types) : null;
   const searchValue = asString(session.searchQuery).trim();
@@ -552,9 +712,13 @@ function getFilteredAssets(allAssets, session, bucketMap) {
     const matchesBucket = !allowedTypes || allowedTypes.has(asset.asset_type);
     const matchesType = selectedType === "all" || asset.asset_type === selectedType;
     const matchesStatus = selectedStatus === "all" || asset.status === selectedStatus;
+    const matchesSource = selectedSource === "all"
+      || (selectedSource === "media-studio" && asset.kind === "managed_media")
+      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+      || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
     const haystack = `${asset.name} ${asset.asset_type} ${asset.category_label} ${asset.file_path} ${asset.used_in.join(" ")}`;
     const matchesSearch = !searchRegex || searchRegex.test(haystack);
-    return matchesBucket && matchesType && matchesStatus && matchesSearch;
+    return matchesBucket && matchesType && matchesStatus && matchesSource && matchesSearch;
   });
 
   const toTimestamp = (value) => {
@@ -578,6 +742,30 @@ function renderPreview(asset, escapeHtml) {
     return `<div class="empty-box">Select an asset to preview.</div>`;
   }
 
+  if (asset.is_image && asset.image_url) {
+    return `
+      <div class="library-preview-frame">
+        <img src="${escapeHtml(asset.image_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">
+      </div>
+    `;
+  }
+
+  if (asset.is_video && asset.video_url) {
+    return `
+      <div class="library-preview-frame">
+        <video class="library-preview-video" controls src="${escapeHtml(asset.video_url)}"></video>
+      </div>
+    `;
+  }
+
+  if (asset.is_audio && asset.audio_url) {
+    return `
+      <div class="library-preview-frame">
+        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asset.audio_url)}"></audio>
+      </div>
+    `;
+  }
+
   if (asset.is_image && asset.preview_url) {
     return `
       <div class="library-preview-frame">
@@ -592,6 +780,15 @@ function renderPreview(asset, escapeHtml) {
         <video class="library-preview-video" controls src="${escapeHtml(asset.preview_url)}"></video>
       </div>
     `;
+  }
+
+  if (asset.text_preview) {
+    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
+  }
+
+  const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);
+  if (jsonFallback && jsonFallback !== "{}") {
+    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(jsonFallback)}</div>`;
   }
 
   return `
@@ -620,6 +817,7 @@ function bindLibraryWorkspace({
   projectName,
   session,
   assetsData,
+  operations,
   registry,
   categoryReadiness,
   missingRequiredAssets,
@@ -631,7 +829,11 @@ function bindLibraryWorkspace({
 }) {
   const catalog = getAssetCatalog(assetsData);
   const categoryByType = getCategoryByType(categoryReadiness);
-  const allAssets = normalizeAssets(projectName, assetsData, registry, categoryByType, catalog);
+  const managedAssets = getManagedMediaAssets(projectName, operations);
+  const allAssets = [
+    ...managedAssets,
+    ...normalizeAssets(projectName, assetsData, registry, categoryByType, catalog)
+  ];
   const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
   const categoryBuckets = buildCategoryBuckets(categoryReadiness);
   const bucketMap = new Map(categoryBuckets.map((item) => [item.key, item]));
@@ -652,9 +854,20 @@ function bindLibraryWorkspace({
     .sort((left, right) => new Date(right.uploaded_at || 0).getTime() - new Date(left.uploaded_at || 0).getTime())
     .slice(0, 6);
 
+  const managedTypeOptions = [...new Set(managedAssets.map((item) => item.asset_type).filter(Boolean))];
   const typeOptions = [
     { value: "all", label: "All types" },
-    ...catalog.map((item) => ({ value: item.asset_type, label: item.display_label || item.label || item.asset_type }))
+    ...managedTypeOptions.map((type) => ({ value: type, label: titleCase(type) })),
+    ...catalog
+      .filter((item) => !managedTypeOptions.includes(item.asset_type))
+      .map((item) => ({ value: item.asset_type, label: item.display_label || item.label || item.asset_type }))
+  ];
+
+  const sourceOptions = [
+    { value: "all", label: "All sources" },
+    { value: "media-studio", label: "Media Studio" },
+    { value: "generated-media", label: "Generated Media" },
+    { value: "publishing-ready", label: "Publishing Ready" }
   ];
 
   const overviewBox = $("libraryOverviewCards");
@@ -762,6 +975,31 @@ function bindLibraryWorkspace({
     };
   }
 
+  const sourceSelect = $("libraryFilterSourceSelect");
+  if (sourceSelect) {
+    sourceSelect.innerHTML = sourceOptions.map((option) => `
+      <option value="${escapeHtml(option.value)}"${session.selectedSource === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+    `).join("");
+    sourceSelect.onchange = (event) => {
+      session.selectedSource = event.target.value || "all";
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        operations,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
+  }
+
   const sortSelect = $("librarySortSelect");
   if (sortSelect) {
     sortSelect.value = session.sortBy;
@@ -805,16 +1043,18 @@ function bindLibraryWorkspace({
                 <button class="btn btn-secondary" type="button" data-library-select="${escapeHtml(asset.id)}">Select</button>
                 <div class="library-actions">
                   ${asset.preview_url ? `<a class="btn btn-primary btn-sm library-link-btn" href="${escapeHtml(asset.preview_url)}" target="_blank" rel="noreferrer">Open</a>` : `<button class="btn btn-primary btn-sm" type="button" disabled>Open</button>`}
-                  <button class="btn btn-secondary btn-sm" type="button" data-library-source-truth="${escapeHtml(asset.id)}">${escapeHtml(asset.source_of_truth ? "Source" : "Set SoT")}</button>
-                  <div class="library-action-menu">
-                    <button class="btn btn-secondary btn-sm library-action-toggle" type="button">Actions ▾</button>
-                    <div class="library-action-dropdown">
-                      <button type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
-                      <button type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>
-                      <button type="button" data-asset-status-action="rejected" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Reject</button>
-                      <button type="button" data-asset-status-action="archived" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Archive</button>
-                    </div>
-                  </div>
+                  ${asset.kind === "managed_media"
+      ? `<button class="btn btn-secondary btn-sm" type="button" disabled>${escapeHtml(asset.source_label || "Managed")}</button>`
+      : `<button class="btn btn-secondary btn-sm" type="button" data-library-source-truth="${escapeHtml(asset.id)}">${escapeHtml(asset.source_of_truth ? "Source" : "Set SoT")}</button>
+                    <div class="library-action-menu">
+                      <button class="btn btn-secondary btn-sm library-action-toggle" type="button">Actions ▾</button>
+                      <div class="library-action-dropdown">
+                        <button type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
+                        <button type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>
+                        <button type="button" data-asset-status-action="rejected" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Reject</button>
+                        <button type="button" data-asset-status-action="archived" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Archive</button>
+                      </div>
+                    </div>`}
                   <button class="btn btn-secondary btn-sm" type="button" data-copy-asset-path="${escapeHtml(asset.file_path || asset.local_path || asset.preview_url || "")}">Copy Path</button>
                 </div>
               </div>
@@ -837,17 +1077,21 @@ function bindLibraryWorkspace({
         <div class="data-stack">
           <div class="data-row"><span>Name</span><strong>${escapeHtml(selectedAsset.name)}</strong></div>
           <div class="data-row"><span>Type</span><strong>${escapeHtml(selectedAsset.asset_type)}</strong></div>
+          <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
           <div class="data-row"><span>Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
           <div class="data-row"><span>Source of truth</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Yes" : "No")}</strong></div>
+          <div class="data-row"><span>Version</span><strong>${escapeHtml(selectedAsset.version_id || "-")}</strong></div>
           <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
           <div class="data-row"><span>Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
         </div>
         <div class="library-preview-actions">
           ${selectedAsset.preview_url ? `<a class="btn btn-primary library-link-btn" href="${escapeHtml(selectedAsset.preview_url)}" target="_blank" rel="noreferrer">Open Asset</a>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
           <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
-          <button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Source of Truth" : "Set as Source of Truth")}</button>
+          ${selectedAsset.kind === "managed_media"
+      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed media")}</button>`
+      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Source of Truth" : "Set as Source of Truth")}</button>
           <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>
+          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>`}
         </div>
       `
       : `<div class="empty-box">Select an asset to view details.</div>`;
@@ -1218,6 +1462,7 @@ export const libraryRoute = {
     const state = getState();
     const projectName = state.context.currentProject || "";
     const assetsData = asObject(state.data.assets);
+    const operations = asObject(state.data.operations);
     const registry = asObject(state.data.registry);
     const session = ensureLibrarySession(projectName);
     const categoryReadiness = getCategoryReadinessList(assetsData);
@@ -1292,12 +1537,19 @@ export const libraryRoute = {
                   <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
                   <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
                     <option value="all">All statuses</option>
+                    <option value="draft">Draft</option>
                     <option value="approved">Approved</option>
                     <option value="needs_review">Needs review</option>
+                    <option value="publishing_ready">Publishing ready</option>
+                    <option value="sent_to_publishing">Sent to publishing</option>
                     <option value="uploaded">Uploaded</option>
                     <option value="rejected">Rejected</option>
                     <option value="archived">Archived</option>
                   </select>
+                </div>
+                <div class="library-filter-field">
+                  <label class="setup-label" for="libraryFilterSourceSelect">Source</label>
+                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
                 </div>
                 <div class="library-filter-field">
                   <label class="setup-label" for="librarySortSelect">Sort</label>

@@ -1,3 +1,29 @@
+import {
+  buildSystemIntelligence,
+  getReadinessBlockers
+} from "../system-intelligence.js";
+import {
+  buildAutomationPlan,
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode,
+  getAutoFixPlan,
+  getAutoFlowPlan,
+  runAutomationPlan
+} from "../automation-engine.js";
+
+const homeAutomationState = {
+  mode: "fix",
+  progress: "",
+  result: "",
+  running: false
+};
+let homeAutoModeUnsubscribe = null;
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -552,7 +578,38 @@ function dashboardLabelFromScore(score) {
   return "Recovery needed";
 }
 
-function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
+function renderHomeAutomationPlan(plan, escapeHtml) {
+  if (!plan.length) return `<div class="empty-box">No safe automation steps are available right now.</div>`;
+  return `
+    <ol class="home-decision-list home-decision-list-spaced">
+      ${plan.map((step, index) => `
+        <li>
+          <strong>${escapeHtml(`Step ${index + 1}`)}:</strong>
+          ${escapeHtml(step.action)}
+          <span class="small-text">(${escapeHtml(step.type)} -> ${escapeHtml(step.targetPage)})</span>
+        </li>
+      `).join("")}
+    </ol>
+  `;
+}
+
+function renderHomeAutoModeLogs(logs, escapeHtml) {
+  const recent = asArray(logs).slice(-5).reverse();
+  if (!recent.length) return `<div class="empty-box">No Auto Mode logs yet.</div>`;
+  return `
+    <ul class="home-decision-list home-decision-list-spaced">
+      ${recent.map((entry) => `<li><strong>${escapeHtml(entry.level || "info")}:</strong> ${escapeHtml(entry.message || "")}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function bindHomeActions({ $, getState, navigateTo, showMessage, dashboard, render }) {
+  createAutoModeController(getState, { getState, navigateTo });
+  if (homeAutoModeUnsubscribe) homeAutoModeUnsubscribe();
+  homeAutoModeUnsubscribe = subscribeAutoMode(() => {
+    render();
+  });
+
   const primaryBtn = $("homeExecPrimaryBtn");
   if (primaryBtn) {
     primaryBtn.onclick = () => {
@@ -601,6 +658,137 @@ function bindHomeActions({ $, navigateTo, showMessage, dashboard }) {
       navigateTo("ai-command");
     };
   }
+
+  Array.from(document.querySelectorAll("[data-home-global-route]")).forEach((button) => {
+    button.onclick = () => {
+      const route = button.getAttribute("data-home-global-route") || "";
+      const prompt = button.getAttribute("data-home-global-prompt") || "";
+      if (!route) return;
+      if (route === "ai-command" && prompt) {
+        const input = $("quickCommandInput");
+        if (input) input.value = prompt;
+      }
+      navigateTo(route);
+    };
+  });
+
+  const previewPlanEl = $("homeAutomationPlanPreview");
+  const progressEl = $("homeAutomationProgress");
+  const resultEl = $("homeAutomationResult");
+
+  function currentPlan() {
+    const state = getState();
+    if (homeAutomationState.mode === "flow") return getAutoFlowPlan(state);
+    if (homeAutomationState.mode === "all") return buildAutomationPlan(state);
+    return getAutoFixPlan(state);
+  }
+
+  function updateAutomationStatus() {
+    if (progressEl) progressEl.textContent = homeAutomationState.progress || "";
+    if (resultEl) resultEl.textContent = homeAutomationState.result || "";
+  }
+
+  async function executePlan(mode) {
+    homeAutomationState.mode = mode;
+    const plan = currentPlan();
+    if (!plan.length) {
+      homeAutomationState.progress = "";
+      homeAutomationState.result = "No safe automation steps to run.";
+      updateAutomationStatus();
+      return;
+    }
+
+    const confirmed = window.confirm(`Automation will run ${plan.length} safe step(s). Continue?`);
+    if (!confirmed) return;
+
+    homeAutomationState.running = true;
+    homeAutomationState.result = "";
+    homeAutomationState.progress = `Step 0 / ${plan.length}`;
+    updateAutomationStatus();
+
+    const outcome = await runAutomationPlan(plan, {
+      context: { getState, navigateTo },
+      onProgress: ({ index, total, step, result }) => {
+        homeAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        updateAutomationStatus();
+      }
+    });
+
+    homeAutomationState.running = false;
+    homeAutomationState.result = outcome.status === "success"
+      ? "Automation finished: success."
+      : `Automation stopped: ${outcome.status}.`;
+    updateAutomationStatus();
+    showMessage?.(homeAutomationState.result);
+    render();
+  }
+
+  const fixAllBtn = $("homeFixAllIssuesBtn");
+  if (fixAllBtn) {
+    fixAllBtn.onclick = () => executePlan("fix");
+  }
+
+  const smartFlowBtn = $("homeRunSmartFlowBtn");
+  if (smartFlowBtn) {
+    smartFlowBtn.onclick = () => executePlan("flow");
+  }
+
+  if (previewPlanEl) {
+    const plan = currentPlan();
+    previewPlanEl.innerHTML = plan.length
+      ? `<ol class="home-decision-list home-decision-list-spaced">${plan.map((step, index) => `<li><strong>Step ${index + 1}:</strong> ${step.action} (${step.type} -> ${step.targetPage})</li>`).join("")}</ol>`
+      : `<div class="empty-box">No safe automation steps are available right now.</div>`;
+  }
+
+  updateAutomationStatus();
+
+  const autoGuidedBtn = $("homeAutoGuidedBtn");
+  if (autoGuidedBtn) {
+    autoGuidedBtn.onclick = async () => {
+      const plan = getAutoFixPlan(getState());
+      await startAutoMode(plan, {
+        mode: "guided",
+        context: { getState, navigateTo }
+      });
+      showMessage?.("Guided Auto Mode started.");
+    };
+  }
+
+  const autoUntilApprovalBtn = $("homeAutoUntilApprovalBtn");
+  if (autoUntilApprovalBtn) {
+    autoUntilApprovalBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo }
+      });
+      showMessage?.("Auto Mode started until approval gate.");
+    };
+  }
+
+  const autoStopBtn = $("homeAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("homeAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("homeAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo } });
+      showMessage?.("Gated step skipped.");
+    };
+  }
 }
 
 export const homeRoute = {
@@ -618,6 +806,16 @@ export const homeRoute = {
   render({ getState, $, escapeHtml, navigateTo, showMessage }) {
     const state = getState();
     const dashboard = buildExecutiveData(state);
+    const systemIntelligence = buildSystemIntelligence(state);
+    const globalTopActions = asArray(systemIntelligence.topActions).slice(0, 3);
+    const readinessMap = asArray(systemIntelligence.readinessMap);
+    const globalBlockers = getReadinessBlockers(state).slice(0, 6);
+    const automationFixPlan = getAutoFixPlan(state);
+    const automationFlowPlan = getAutoFlowPlan(state);
+    const automationPreviewPlan = homeAutomationState.mode === "flow" ? automationFlowPlan : automationFixPlan;
+    const autoMode = getAutoModeState();
+    const currentAutoStep = asArray(autoMode.currentPlan)[autoMode.currentStepIndex] || null;
+    const gate = asObject(autoMode.approvalRequiredStep);
 
     const root = $("homeExecRoot");
     if (!root) return;
@@ -691,6 +889,124 @@ export const homeRoute = {
                 : `<div class="empty-box">No readiness gaps reported.</div>`}
             </article>
           </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Global Smart Actions</p>
+              <h3>Top 3 cross-system moves</h3>
+            </div>
+            <span class="card-badge ${globalTopActions.length ? "warning" : "neutral"}">${escapeHtml(globalTopActions.length ? `${globalTopActions.length} actions` : "No actions")}</span>
+          </div>
+          ${globalTopActions.length
+            ? `<div class="home-decision-quick-actions">
+                ${globalTopActions.map((item) => `
+                  <button class="quick-action-btn" type="button" data-home-global-route="${escapeHtml(item.targetPage)}" data-home-global-prompt="${escapeHtml(item.draftPayload?.prompt || item.reason || "")}">
+                    <span class="home-action-title">${escapeHtml(item.title)}</span>
+                    <span class="home-action-meta">${escapeHtml(item.reason)}</span>
+                  </button>
+                `).join("")}
+              </div>`
+            : `<div class="empty-box">System intelligence has no urgent cross-page action right now.</div>`}
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Cross-System Blockers</p>
+              <h3>Global blockers queue</h3>
+            </div>
+            <span class="card-badge ${globalBlockers.length ? "danger" : "success"}">${escapeHtml(globalBlockers.length ? `${globalBlockers.length} blockers` : "Clear")}</span>
+          </div>
+          ${globalBlockers.length
+            ? `<ul class="home-decision-list home-decision-list-spaced">
+                ${globalBlockers.map((item) => `<li><strong>${escapeHtml(item.title)}</strong> - ${escapeHtml(item.reason)}</li>`).join("")}
+              </ul>`
+            : `<div class="empty-box">No global critical blockers detected.</div>`}
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Readiness Map</p>
+              <h3>Cross-page operating readiness</h3>
+            </div>
+          </div>
+          <div class="home-decision-kpi-grid">
+            ${readinessMap.map((item) => `
+              <article class="home-decision-kpi-card">
+                <span class="data-label">${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.ready ? "Ready" : "Needs work")}</strong>
+                <span class="small-text">${escapeHtml(item.note)}</span>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Auto Mode</p>
+              <h3>Hands-Free AI Execution</h3>
+            </div>
+            <span class="card-badge neutral">Safe mode</span>
+          </div>
+          <p class="home-decision-copy">Auto Mode runs only approved non-destructive steps, pauses at approval gates, and never auto-publishes.</p>
+          <div class="home-decision-row-actions">
+            <button id="homeAutoGuidedBtn" class="btn btn-secondary" type="button">Enable Guided Auto Mode</button>
+            <button id="homeAutoUntilApprovalBtn" class="btn btn-primary" type="button">Run Until Approval</button>
+            <button id="homeAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+          </div>
+          ${autoMode.status === "waiting_approval" ? `
+            <div id="homeAutoModeGate" class="simple-banner" style="margin-top:8px;">
+              <strong>Approval needed:</strong> ${escapeHtml(gate.reason || "Manual approval required.")}
+              <div>${escapeHtml(gate.whatWillHappen || "Auto Mode is paused.")}</div>
+              <div class="home-decision-row-actions" style="margin-top:8px;">
+                <button id="homeAutoApproveBtn" class="btn btn-secondary" type="button">Approve and Continue</button>
+                <button id="homeAutoSkipBtn" class="btn btn-secondary" type="button">Skip Step</button>
+              </div>
+            </div>
+          ` : ""}
+          <div class="home-decision-kpi-grid" style="margin-top:8px;">
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Current status</span>
+              <strong id="homeAutoModeStatus">${escapeHtml(autoMode.status || "idle")}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Current step</span>
+              <strong id="homeAutoModeCurrentStep">${escapeHtml(currentAutoStep ? `${autoMode.currentStepIndex + 1}/${asArray(autoMode.currentPlan).length} - ${currentAutoStep.action}` : "None")}</strong>
+            </article>
+          </div>
+          <div id="homeAutoModeLogs" style="margin-top:8px;">${renderHomeAutoModeLogs(autoMode.logs, escapeHtml)}</div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Automation Layer</p>
+              <h3>Smart Execution Engine</h3>
+            </div>
+            <span class="card-badge neutral">Safe mode</span>
+          </div>
+          <p class="home-decision-copy">The engine only executes safe steps: navigate, create draft, generate prompt, and create handoff.</p>
+          <div class="home-decision-row-actions">
+            <button id="homeFixAllIssuesBtn" class="btn btn-secondary" type="button">Fix All Issues</button>
+            <button id="homeRunSmartFlowBtn" class="btn btn-primary" type="button">Run Smart Flow</button>
+          </div>
+          <div class="home-decision-kpi-grid">
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Fix plan steps</span>
+              <strong>${escapeHtml(formatCount(automationFixPlan.length))}</strong>
+            </article>
+            <article class="home-decision-kpi-card">
+              <span class="data-label">Flow plan steps</span>
+              <strong>${escapeHtml(formatCount(automationFlowPlan.length))}</strong>
+            </article>
+          </div>
+          <div id="homeAutomationPlanPreview">${renderHomeAutomationPlan(automationPreviewPlan, escapeHtml)}</div>
+          <div id="homeAutomationProgress" class="simple-banner" style="margin-top:8px;">${escapeHtml(homeAutomationState.progress || "")}</div>
+          <div id="homeAutomationResult" class="simple-banner" style="margin-top:8px;">${escapeHtml(homeAutomationState.result || "")}</div>
         </section>
 
         <section class="card home-decision-section">
@@ -842,6 +1158,13 @@ export const homeRoute = {
       </div>
     `;
 
-    bindHomeActions({ $, navigateTo, showMessage, dashboard });
+    bindHomeActions({
+      $,
+      getState,
+      navigateTo,
+      showMessage,
+      dashboard,
+      render: () => homeRoute.render({ getState, $, escapeHtml, navigateTo, showMessage })
+    });
   }
 };

@@ -826,6 +826,60 @@ export async function saveProjectMediaJob(projectName, payload = {}) {
   );
 }
 
+export async function improveMediaPrompt(payload = {}) {
+  return sendJson(
+    "/api/media/improve-prompt",
+    "POST",
+    payload,
+    "Failed to improve media prompt"
+  );
+}
+
+export async function brandCheckMedia(payload = {}) {
+  return sendJson(
+    "/api/media/brand-check",
+    "POST",
+    payload,
+    "Failed to run media brand check"
+  );
+}
+
+export async function generateMediaImage(payload = {}) {
+  return sendJson(
+    "/api/media/generate-image",
+    "POST",
+    payload,
+    "Failed to generate image"
+  );
+}
+
+export async function generateMediaVideoBrief(payload = {}) {
+  return sendJson(
+    "/api/media/generate-video-brief",
+    "POST",
+    payload,
+    "Failed to generate video brief"
+  );
+}
+
+export async function generateMediaVoiceScript(payload = {}) {
+  return sendJson(
+    "/api/media/generate-voice-script",
+    "POST",
+    payload,
+    "Failed to generate voice script"
+  );
+}
+
+export async function generateMediaCampaignPack(payload = {}) {
+  return sendJson(
+    "/api/media/generate-campaign-pack",
+    "POST",
+    payload,
+    "Failed to generate campaign pack"
+  );
+}
+
 export async function listProjectHandoffs(projectName, params = {}) {
   if (!projectName) {
     throw new Error("Missing project name");

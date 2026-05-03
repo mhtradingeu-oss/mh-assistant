@@ -3,6 +3,20 @@ import {
 	setSharedAiDraft,
 	setSharedHandoff
 } from "../shared-context.js";
+import {
+	buildSystemIntelligence,
+} from "../system-intelligence.js";
+import {
+	buildAutomationPlan,
+	runAutomationPlan,
+	createAutoModeController,
+	getAutoModeState,
+	startAutoMode,
+	stopAutoMode,
+	approveCurrentGate,
+	skipCurrentStep,
+	subscribeAutoMode
+} from "../automation-engine.js";
 
 import {
 	getCategoryReadinessList
@@ -179,6 +193,55 @@ const AGENT_CARDS = [
 const aiSessions = new Map();
 let lastRenderContext = null;
 let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+function buildAutoPlanFromCommand(commandText, session) {
+	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+	const plan = [
+		{
+			id: `auto-generate-${Date.now()}`,
+			type: "generate_prompt",
+			targetPage: "ai-command",
+			action: "Generate prompt from AI command",
+			payload: {
+				prompt: command,
+				title: "AI command auto plan"
+			},
+			priority: "recommended"
+		},
+		{
+			id: `auto-workflow-${Date.now()}`,
+			type: "prepare_workflow",
+			targetPage: "workflows",
+			action: "Prepare workflow from AI command",
+			payload: {
+				prompt: command,
+				reason: "AI command prepared for workflow execution."
+			},
+			priority: "recommended"
+		}
+	];
+
+	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+		plan.push({
+			id: `auto-gated-${Date.now()}`,
+			type: "publish_now",
+			targetPage: "publishing",
+			action: "Publish now to external channels",
+			payload: {
+				prompt: command,
+				reason: "Requires approval gate before external publishing actions."
+			},
+			priority: "critical"
+		});
+	}
+
+	return plan;
+}
 
 // ============================================================
 //  HELPERS
@@ -1547,7 +1610,7 @@ function buildSmartRecommendation(aiContext) {
 	};
 }
 
-function buildSuggestedCommands(aiContext) {
+function buildSuggestedCommands(aiContext, globalIntelligence = null) {
 	const suggestions = [];
 
 	if (aiContext.criticalGaps.length || aiContext.importantGaps.length) {
@@ -1603,7 +1666,30 @@ function buildSuggestedCommands(aiContext) {
 		score: 70
 	});
 
+	const intelligence = globalIntelligence || buildSystemIntelligence({ data: {}, context: {} });
+	const sourceActions = asArray(intelligence.recommendations).filter((item) => {
+		const target = asString(item?.targetPage).toLowerCase();
+		const related = asArray(item?.relatedPages).map((entry) => asString(entry).toLowerCase());
+		return target === "ai-command" || related.includes("ai-command") || related.includes("workflows") || related.includes("publishing");
+	});
+
+	asArray(sourceActions).slice(0, 2).forEach((action, index) => {
+		const item = asObject(action);
+		const title = humanizeValue(item.title, "Run global intelligence action");
+		const reason = humanizeValue(item.reason, "System intelligence recommendation.");
+		const prompt = humanizeValue(item?.draftPayload?.prompt, `Plan and execute: ${title}.`);
+		suggestions.push({
+			title,
+			reason,
+			commandType: "automation",
+			command: prompt,
+			chips: buildImpactChips(["Launch readiness", "Automation"]),
+			score: 95 - index
+		});
+	});
+
 	return suggestions
+		.filter((item, index, arr) => arr.findIndex((candidate) => candidate.title === item.title) === index)
 		.sort((a, b) => b.score - a.score)
 		.slice(0, 3);
 }
@@ -1647,8 +1733,12 @@ function renderOverviewSection(aiContext, session, intelligenceStatus, escapeHtm
 	`;
 }
 
-function renderSmartRecommendationSection(aiContext, escapeHtml) {
+function renderSmartRecommendationSection(aiContext, session, autoMode, escapeHtml) {
 	const smartRec = buildSmartRecommendation(aiContext);
+	const autoProgress = aiAutomationState.progress || "";
+	const autoResult = aiAutomationState.result || "";
+	const autoPlan = asArray(session.autoPlanDraft);
+	const gate = asObject(autoMode?.approvalRequiredStep);
 	return `
 		<section class="aicmd-section aicmd-recommendation">
 			<div class="aicmd-section-head">
@@ -1659,8 +1749,29 @@ function renderSmartRecommendationSection(aiContext, escapeHtml) {
 			<div class="aicmd-chip-row">${renderImpactChips(smartRec.chips, escapeHtml)}</div>
 			<div class="aicmd-action-row">
 				<button id="aicmdRunSuggestionBtn" class="aicmd-btn aicmd-btn-primary" type="button">Run Suggested Command</button>
+				<button id="aicmdRunSuggestedPlanBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Run Suggested Plan</button>
 				<button id="aicmdSaveSuggestionBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Save as Draft</button>
 			</div>
+			<div class="aicmd-action-row">
+				<button id="aicmdRunThroughAutoBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Run This Command Through Auto Mode</button>
+				<button id="aicmdSaveAutoPlanBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Save as Auto Plan</button>
+				<button id="aicmdExplainGatesBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Explain Approval Gates</button>
+				<button id="aicmdAutoStopBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Stop Auto Mode</button>
+			</div>
+			<div class="aicmd-draft-state">Auto Mode status: ${escapeHtml(autoMode?.status || "idle")}</div>
+			<div class="aicmd-draft-state">Auto plan steps: ${escapeHtml(String(autoPlan.length))}</div>
+			<div class="aicmd-draft-state">Current step: ${escapeHtml(asArray(autoMode?.currentPlan)[autoMode?.currentStepIndex]?.action || "None")}</div>
+			${autoMode?.status === "waiting_approval" ? `
+				<div class="aicmd-draft-state"><strong>Approval needed:</strong> ${escapeHtml(gate.reason || "Manual approval required.")}</div>
+				<div class="aicmd-draft-state">${escapeHtml(gate.whatWillHappen || "Auto Mode paused at gate.")}</div>
+				<div class="aicmd-action-row">
+					<button id="aicmdAutoApproveBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Approve and Continue</button>
+					<button id="aicmdAutoSkipBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Skip Step</button>
+				</div>
+			` : ""}
+			<div class="aicmd-draft-state">${escapeHtml(asArray(autoMode?.logs).slice(-3).map((entry) => `${entry.level || "info"}: ${entry.message || ""}`).join(" | ") || "No logs yet")}</div>
+			<div class="aicmd-draft-state">${escapeHtml(autoProgress)}</div>
+			<div class="aicmd-draft-state">${escapeHtml(autoResult)}</div>
 		</section>
 	`;
 }
@@ -1703,8 +1814,8 @@ function renderComposerSection(session, aiContext, escapeHtml) {
 	`;
 }
 
-function renderSuggestedCommandsSection(aiContext, escapeHtml) {
-	const suggestions = buildSuggestedCommands(aiContext);
+function renderSuggestedCommandsSection(aiContext, globalIntelligence, escapeHtml) {
+	const suggestions = buildSuggestedCommands(aiContext, globalIntelligence);
 	return `
 		<section class="aicmd-section">
 			<div class="aicmd-section-head"><h3>Suggested Commands</h3></div>
@@ -1778,17 +1889,18 @@ function renderOutputSection(session, escapeHtml) {
 	`;
 }
 
-function renderAiOperatingCenter(aiContext, session, intelligenceStatus, escapeHtml) {
+function renderAiOperatingCenter(aiContext, session, intelligenceStatus, globalIntelligence, escapeHtml) {
+	const autoMode = getAutoModeState();
 	return `
 		<div class="aicmd-shell">
 			${renderOverviewSection(aiContext, session, intelligenceStatus, escapeHtml)}
 			<div class="aicmd-main-grid">
 				<div class="aicmd-left-stack">
-					${renderSmartRecommendationSection(aiContext, escapeHtml)}
+					${renderSmartRecommendationSection(aiContext, session, autoMode, escapeHtml)}
 					${renderComposerSection(session, aiContext, escapeHtml)}
 				</div>
 				<div class="aicmd-right-stack">
-					${renderSuggestedCommandsSection(aiContext, escapeHtml)}
+					${renderSuggestedCommandsSection(aiContext, globalIntelligence, escapeHtml)}
 					${renderOutputSection(session, escapeHtml)}
 				</div>
 			</div>
@@ -1829,7 +1941,13 @@ function bindAiOperatingCenter({
 	const session = ensureSession(projectName);
 	const aiContext = buildUnifiedAiContext(state, session.intelligence);
 	const smartRec = buildSmartRecommendation(aiContext);
-	const suggestions = buildSuggestedCommands(aiContext);
+	const globalIntelligence = buildSystemIntelligence(state);
+	const suggestions = buildSuggestedCommands(aiContext, globalIntelligence);
+	createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+	if (aiAutoModeUnsubscribe) aiAutoModeUnsubscribe();
+	aiAutoModeUnsubscribe = subscribeAutoMode(() => {
+		render();
+	});
 
 	function syncSessionInputs() {
 		session.commandType = $("aicmdCommandType")?.value || session.commandType;
@@ -2000,6 +2118,40 @@ function bindAiOperatingCenter({
 		runSuggestionBtn.onclick = () => runCommandFromPrompt(smartRec.command, "smart-recommendation");
 	}
 
+	const runSuggestedPlanBtn = $("aicmdRunSuggestedPlanBtn");
+	if (runSuggestedPlanBtn) {
+		runSuggestedPlanBtn.onclick = async () => {
+			const plan = buildAutomationPlan(getState());
+			if (!plan.length) {
+				aiAutomationState.progress = "";
+				aiAutomationState.result = "No safe plan steps available.";
+				render();
+				return;
+			}
+
+			const confirmed = window.confirm(`Run suggested automation plan with ${plan.length} safe step(s)?`);
+			if (!confirmed) return;
+
+			aiAutomationState.result = "";
+			aiAutomationState.progress = `Step 0 / ${plan.length}`;
+			render();
+
+			const runResult = await runAutomationPlan(plan, {
+				context: { getState, navigateTo, createProjectHandoff, projectName },
+				onProgress: ({ index, total, step, result }) => {
+					aiAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+					render();
+				}
+			});
+
+			aiAutomationState.result = runResult.status === "success"
+				? "Suggested automation plan completed."
+				: "Suggested automation plan stopped before completion.";
+			showMessage?.(aiAutomationState.result);
+			render();
+		};
+	}
+
 	const saveSuggestionBtn = $("aicmdSaveSuggestionBtn");
 	if (saveSuggestionBtn) {
 		saveSuggestionBtn.onclick = () => {
@@ -2008,6 +2160,75 @@ function bindAiOperatingCenter({
 			saveDraftLocal("Recommendation saved as draft", smartRec.command);
 			showMessage?.("Recommendation saved as draft.");
 			render();
+		};
+	}
+
+	const runThroughAutoBtn = $("aicmdRunThroughAutoBtn");
+	if (runThroughAutoBtn) {
+		runThroughAutoBtn.onclick = async () => {
+			syncSessionInputs();
+			const command = asString($("ctrlComposerInput")?.value || session.draftMessage || smartRec.command).trim();
+			const plan = buildAutoPlanFromCommand(command, session);
+			session.autoPlanDraft = plan;
+			await startAutoMode(plan, {
+				mode: "auto_until_approval",
+				context: { getState, navigateTo, createProjectHandoff, projectName }
+			});
+			showMessage?.("Auto Mode started from AI command.");
+		};
+	}
+
+	const saveAutoPlanBtn = $("aicmdSaveAutoPlanBtn");
+	if (saveAutoPlanBtn) {
+		saveAutoPlanBtn.onclick = () => {
+			syncSessionInputs();
+			const command = asString($("ctrlComposerInput")?.value || session.draftMessage || smartRec.command).trim();
+			session.autoPlanDraft = buildAutoPlanFromCommand(command, session);
+			setSharedHandoff(projectName, "workflows", {
+				source_page: "ai-command",
+				destination_page: "workflows",
+				status: "available",
+				payload: {
+					title: "Saved Auto Plan",
+					auto_plan: session.autoPlanDraft,
+					prompt: command
+				}
+			});
+			saveDraftLocal("Auto plan saved", command);
+			showMessage?.("Auto plan saved.");
+			render();
+		};
+	}
+
+	const explainGatesBtn = $("aicmdExplainGatesBtn");
+	if (explainGatesBtn) {
+		explainGatesBtn.onclick = () => {
+			aiAutomationState.result = "Approval gates pause Auto Mode for publishing, final approvals, external sends, paid ads, destructive edits, and credential actions.";
+			render();
+		};
+	}
+
+	const autoStopBtn = $("aicmdAutoStopBtn");
+	if (autoStopBtn) {
+		autoStopBtn.onclick = () => {
+			stopAutoMode();
+			showMessage?.("Auto Mode stopped.");
+		};
+	}
+
+	const autoApproveBtn = $("aicmdAutoApproveBtn");
+	if (autoApproveBtn) {
+		autoApproveBtn.onclick = async () => {
+			await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+			showMessage?.("Approval gate accepted.");
+		};
+	}
+
+	const autoSkipBtn = $("aicmdAutoSkipBtn");
+	if (autoSkipBtn) {
+		autoSkipBtn.onclick = async () => {
+			await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+			showMessage?.("Gated step skipped.");
 		};
 	}
 
@@ -2400,12 +2621,13 @@ export const aiCommandRoute = {
 			ensureIntelligenceLoaded({ projectName, session, getState, reloadProjectData, fetchProjectInsights, fetchProjectLearning, rerender: render });
 
 			const aiContext = buildUnifiedAiContext(state, session.intelligence);
+			const globalIntelligence = buildSystemIntelligence(state);
 			const intelligenceStatus = session.intelligence.status || "idle";
 
 			const root = $("ctrlRoomRoot");
 			if (!root) return;
 
-			root.innerHTML = renderAiOperatingCenter(aiContext, session, intelligenceStatus, escapeHtml);
+			root.innerHTML = renderAiOperatingCenter(aiContext, session, intelligenceStatus, globalIntelligence, escapeHtml);
 
 			bindAiOperatingCenter({
 				$,
