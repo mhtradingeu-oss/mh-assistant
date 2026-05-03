@@ -6,10 +6,30 @@ const {
   isPathWithinRoot
 } = require('../security/project-isolation');
 
-const DATA_ROOT = '/opt/mh-assistant/data';
+const APP_ROOT = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
+const DATA_ROOT = path.join(APP_ROOT, 'data');
 const PROJECTS_ROOT = path.join(DATA_ROOT, 'projects');
 const EXECUTION_ROOT = path.join(DATA_ROOT, 'execution', 'projects');
 const LEGACY_ROOT = path.join(DATA_ROOT, 'brand-assets');
+
+function normalizePath(value) {
+  if (typeof value !== "string") return value;
+  return value.replaceAll("/opt/mh-assistant", BASE_DIR);
+}
+
+function normalizeObjectPaths(value) {
+  if (Array.isArray(value)) {
+    return value.map(normalizeObjectPaths);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, normalizeObjectPaths(item)])
+    );
+  }
+
+  return normalizePath(value);
+}
 
 function parseBooleanFlag(value, defaultValue) {
   if (value == null || value === '') {

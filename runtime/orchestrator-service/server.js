@@ -737,7 +737,7 @@ function buildReadinessState() {
     ok: !integrationSecretRequired || hasIntegrationSecretKeyConfigured(),
     required: integrationSecretRequired,
     env: 'MH_INTEGRATION_SECRET_KEY',
-    file: '/opt/mh-assistant/data/system/integration-secret.key.json'
+    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
   };
 
   const missingRequiredEnv = [];
@@ -3389,7 +3389,7 @@ function buildGermanLaunchPlan(projectName) {
 
   return {
     ...plan,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -3403,7 +3403,7 @@ function readGermanLaunchPlan(projectName) {
 
   return {
     ...readJsonFile(filePath, {}),
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -3479,7 +3479,7 @@ function buildLaunchWave(projectName, waveName) {
 
   return {
     ...wave,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -3496,7 +3496,7 @@ function readLaunchWave(projectName, waveName) {
 
   return {
     ...readJsonFile(filePath, {}),
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 function getLaunchOpsPaths(projectName) {
@@ -3581,7 +3581,7 @@ function buildChannelConnectorPayload(projectName, waveName, channel) {
 
   return {
     ...payload,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -3617,7 +3617,7 @@ function scheduleLaunchJob(projectName, waveName, channel, scheduledFor) {
 
   return {
     ...job,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -3840,7 +3840,7 @@ function saveScheduledJobRecord(projectName, job) {
 
   return {
     ...payload,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -4135,7 +4135,7 @@ function buildPostReview(projectName, channel, productSlug) {
 
   return {
     ...review,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -4200,7 +4200,7 @@ function buildImprovedChannelPost(projectName, channel, productSlug) {
 
   return {
     ...result,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -4249,7 +4249,7 @@ function savePostPerformance(projectName, channel, productSlug, metricJson) {
     product_slug: productSlug,
     total_records: history.length,
     latest: record,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -4314,7 +4314,7 @@ function reviewChannelLearning(projectName, channel) {
   };
 }
 function getDocsPaths() {
-  const baseDir = '/opt/mh-assistant/docs';
+  const baseDir = path.join(BASE_DIR, 'docs');
 
   return {
     baseDir,
@@ -6767,7 +6767,7 @@ function normalizeAssetRecord(projectName, asset = {}) {
     id: normalizeSetupTextValue(asset.id || asset.asset_id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
     asset_id: normalizeSetupTextValue(asset.asset_id || asset.id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
     file_name: fileName,
-    file_path: filePath,
+    file_path: normalizePath(filePath),
     type: canonicalType,
     asset_type: canonicalType,
     project: normalizedProject,
@@ -7990,6 +7990,28 @@ function parseCsvDocument(csvRaw = '') {
   return rows;
 }
 
+function normalizeAbsoluteProjectPath(value) {
+  if (typeof value !== 'string') return value;
+  return value.replaceAll('/opt/mh-assistant', BASE_DIR);
+}
+
+function normalizeObjectPaths(value) {
+  if (Array.isArray(value)) {
+    return value.map(normalizeObjectPaths);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        normalizeObjectPaths(item)
+      ])
+    );
+  }
+
+  return normalizeAbsoluteProjectPath(value);
+}
+
 function normalizeLibraryFolderCandidate(value = '') {
   return String(value || '')
     .trim()
@@ -8130,7 +8152,7 @@ function buildProjectLibraryFilesystemScan(projectName) {
   projectProductDataFiles.concat(mirrorProductDataFiles).forEach((filePath) => {
     scannedAssets.push({
       asset_type: 'product_csv',
-      file_path: filePath,
+      file_path: normalizePath(filePath),
       exists: true,
       scan_source: filePath.startsWith(projectProductsDir) ? 'project_products' : 'brand_product_csv'
     });
@@ -8139,7 +8161,7 @@ function buildProjectLibraryFilesystemScan(projectName) {
   frontFiles.forEach((filePath) => {
     scannedAssets.push({
       asset_type: 'product_photos',
-      file_path: filePath,
+      file_path: normalizePath(filePath),
       exists: true,
       scan_source: 'brand_products_images_recursive'
     });
@@ -8148,7 +8170,7 @@ function buildProjectLibraryFilesystemScan(projectName) {
   productVideoFiles.forEach((filePath) => {
     scannedAssets.push({
       asset_type: 'product_videos',
-      file_path: filePath,
+      file_path: normalizePath(filePath),
       exists: true,
       scan_source: 'brand_products_videos_recursive'
     });
@@ -8265,7 +8287,7 @@ function refreshProjectLibraryRegistry(projectName) {
       ...previous,
       id: previous.id || previous.asset_id,
       type: canonicalType,
-      file_path: filePath,
+      file_path: normalizePath(asset.file_path),
       source: previous.source || scanned.scan_source || 'library_refresh',
       source_of_truth: previous.source_of_truth,
       status: fs.existsSync(filePath) ? 'connected' : 'missing',
@@ -9511,7 +9533,8 @@ app.get('/public/media-manager/asset-catalog', (req, res) => {
 
 app.get('/media-manager/project/:project', (req, res) => {
   try {
-    return res.json(buildMediaManagerProjectPayload(req.params.project));
+    const payload = buildMediaManagerProjectPayload(req.params.project);
+    return res.json(normalizeObjectPaths(payload));
   } catch (error) {
     return res.status(400).json({
       error: error.message || 'Failed to build media manager payload'
@@ -11520,7 +11543,7 @@ function buildCampaignExecutionPackage(projectName, campaignName, productSlugs =
 
   return {
     ...packageData,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -11542,7 +11565,7 @@ function readCampaignExecutionPackage(projectName, campaignName) {
   const data = readJsonFile(filePath, {});
   return {
     ...data,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -11659,7 +11682,7 @@ function buildCampaignMediaJob(projectName, campaignName, channel) {
 
   return {
     ...job,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -11695,7 +11718,7 @@ function buildCampaignPublishPackage(projectName, campaignName, channel) {
 
   return {
     ...pkg,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -11733,7 +11756,7 @@ function buildCampaignEmailPackage(projectName, campaignName) {
 
   return {
     ...emailPackage,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -11833,7 +11856,7 @@ function writeExecutionBridgeLog(projectName, action, payload = {}) {
 
   return {
     ...record,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -12151,7 +12174,7 @@ function setExecutionMode(projectName, mode) {
 
   return {
     ...data,
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -12169,7 +12192,7 @@ function readExecutionMode(projectName) {
 
   return {
     ...readJsonFile(filePath, {}),
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -12189,7 +12212,7 @@ function getScheduledJobById(projectName, jobId) {
 
   return {
     ...readJsonFile(filePath, {}),
-    file_path: filePath
+    file_path: normalizePath(asset.file_path)
   };
 }
 
@@ -12266,7 +12289,7 @@ function executeScheduledJob(projectName, jobId) {
 
   return {
     ...result,
-    file_path: filePath
+    file_path: normalizePath(filePath)
   };
 }
 
@@ -12305,7 +12328,7 @@ function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
 
   return {
     ...result,
-    file_path: filePath
+    file_path: normalizePath(filePath)
   };
 }
 
@@ -12464,7 +12487,7 @@ function reviewExecutionResult(projectName, jobId) {
 
   return {
     ...readJsonFile(filePath, {}),
-    file_path: filePath
+    file_path: normalizePath(filePath)
   };
 }
 

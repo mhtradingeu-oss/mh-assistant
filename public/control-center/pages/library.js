@@ -476,7 +476,7 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
       id: asset.asset_id || asset.id || `asset-${index}`,
       asset_id: asset.asset_id || asset.id || `asset-${index}`,
       name: fileName || asString(asset.file_name || "Asset"),
-      file_path: filePath,
+      file_path: normalizePath(asset.file_path),
       asset_type: canonicalType || asString(asset.asset_type || "asset"),
       category_label: asString(category.display_label || category.label || catalogItem.display_label || catalogItem.label || canonicalType || asset.asset_type || "Asset"),
       category_status: asString(category.status || "Uploaded"),

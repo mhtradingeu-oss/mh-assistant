@@ -25,8 +25,8 @@ const {
   createHandoff
 } = require('./backbone');
 
-const PROJECTS_DIR = '/opt/mh-assistant/data/projects';
-
+const APP_ROOT = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
+const PROJECTS_DIR = path.join(APP_ROOT, 'data', 'projects');
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
