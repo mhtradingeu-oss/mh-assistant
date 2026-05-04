@@ -11156,10 +11156,18 @@ app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
     const filePath = path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html');
     const html = fs.readFileSync(filePath, 'utf8');
     const bootstrapScript = buildControlCenterBootstrapScript(req);
-    const body = bootstrapScript
-      ? html.replace('<script type="module" src="./app.js"></script>', `${bootstrapScript}\n  <script type="module" src="./app.js"></script>`)
-      : html;
+    const appScriptPattern = /<script\s+type="module"\s+src="\.\/app\.js(?:\?[^"\s]*)?"\s*><\/script>/i;
 
+    let body = html;
+    if (bootstrapScript) {
+      if (appScriptPattern.test(html)) {
+        body = html.replace(appScriptPattern, (match) => `${bootstrapScript}\n  ${match}`);
+      } else {
+        body = html.replace('</body>', `${bootstrapScript}\n</body>`);
+      }
+    }
+
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     return res.type('html').send(body);
   } catch (error) {
     return next(error);
@@ -11168,7 +11176,11 @@ app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
 
 app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
   index: false,
-  redirect: false
+  redirect: false,
+  etag: false,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  }
 }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 

@@ -1,6 +1,7 @@
 // public/control-center/api.js
 
 let API_BASE_URL = "";
+const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
 
 export function setApiBaseUrl(value = "") {
   API_BASE_URL = value || "";
@@ -71,43 +72,74 @@ async function parseJson(response, fallbackMessage = "Request failed") {
     const error = new Error(message);
     error.status = response.status;
     error.payload = payload;
+    error.endpoint = response?.url || "";
     throw error;
   }
 
   return payload;
 }
 
-async function getJson(path, fallbackMessage) {
-  const response = await fetch(buildUrl(path), {
+async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = controller
+    ? setTimeout(() => controller.abort(), Math.max(1, Number(timeoutMs) || DEFAULT_REQUEST_TIMEOUT_MS))
+    : null;
+
+  try {
+    return await fetch(buildUrl(path), {
+      ...init,
+      signal: controller ? controller.signal : init.signal
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      const timeoutError = new Error(`Request timed out after ${timeoutMs}ms: ${path}`);
+      timeoutError.endpoint = path;
+      timeoutError.isTimeout = true;
+      throw timeoutError;
+    }
+
+    if (error && typeof error === "object" && !error.endpoint) {
+      error.endpoint = path;
+    }
+    throw error;
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  }
+}
+
+async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const response = await fetchWithTimeout(path, {
     method: "GET",
     headers: buildReadHeaders()
-  });
+  }, timeoutMs);
 
   return parseJson(response, fallbackMessage);
 }
 
-async function sendJson(path, method, body, fallbackMessage) {
-  const response = await fetch(buildUrl(path), {
+async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const response = await fetchWithTimeout(path, {
     method,
     headers: buildWriteHeaders(),
     body: body == null ? undefined : JSON.stringify(body)
-  });
+  }, timeoutMs);
 
   return parseJson(response, fallbackMessage);
 }
 
-async function sendForm(path, formData, fallbackMessage) {
+async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
   const headers = {};
   const key = readControlKey();
   if (key) {
     headers["x-mh-control-key"] = key;
   }
 
-  const response = await fetch(buildUrl(path), {
+  const response = await fetchWithTimeout(path, {
     method: "POST",
     headers,
     body: formData
-  });
+  }, timeoutMs);
 
   return parseJson(response, fallbackMessage);
 }
@@ -157,7 +189,8 @@ export async function fetchProjects() {
   try {
     const payload = await getJson(
       "/media-manager/projects",
-      "Failed to load projects"
+      "Failed to load projects",
+      12000
     );
 
     return normalizeProjectsPayload(payload);
@@ -183,7 +216,8 @@ export async function fetchAllCoreProjectData(projectName) {
 
   const payload = await getJson(
     `/media-manager/project/${encodeURIComponent(projectName)}`,
-    "Failed to load project dashboard"
+    "Failed to load project dashboard",
+    30000
   );
 
   return normalizeProjectDashboardPayload(payload);
@@ -225,7 +259,8 @@ export async function fetchProjectOperations(projectName) {
 
   return getJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
-    "Failed to load project operations"
+    "Failed to load project operations",
+    15000
   );
 }
 
