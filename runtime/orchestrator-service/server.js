@@ -92,6 +92,18 @@ const runtimeCompatLogger = createConsoleLikeLogger(appLogger, {
 
 const CONTROL_WRITE_KEY_HEADER = 'x-mh-control-key';
 const CONTROL_WRITE_KEY_ENV = 'MH_CONTROL_CENTER_WRITE_KEY';
+// Temporary local/server diagnostic bypass. Do not enable in production.
+const CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV = 'MH_CONTROL_CENTER_DISABLE_ACCESS_KEY';
+const CONTROL_CENTER_KEY_BYPASS_HEADER = 'X-MH-Control-Key-Bypass';
+const CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE = 'temporary';
+const CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED = String(
+  process.env[CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV] || ''
+).trim() === '1';
+
+if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+  console.warn('CONTROL CENTER ACCESS KEY DISABLED - TEMPORARY TEST MODE');
+}
+
 const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
   /^\/task\/?$/i,
   /^\/ingest\/?$/i,
@@ -196,6 +208,11 @@ function isProtectedControlReadRequest(req) {
 
 function requireProtectedReadKey(req, res, next) {
   if (!isProtectedControlReadRequest(req)) {
+    return next();
+  }
+
+  if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
+    res.set(CONTROL_CENTER_KEY_BYPASS_HEADER, CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE);
     return next();
   }
 

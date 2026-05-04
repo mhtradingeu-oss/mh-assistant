@@ -527,6 +527,12 @@ button:focus-visible,
   border: 1px solid rgba(239, 91, 91, 0.6);
 }
 
+.btn-warning {
+  color: #2b1900;
+  background: linear-gradient(135deg, #f6c76b, #ecab38);
+  border: 1px solid rgba(240, 178, 74, 0.72);
+}
+
 .btn-key-active {
   background: rgba(51, 190, 132, 0.2);
   border: 1px solid rgba(51, 190, 132, 0.45);
@@ -1936,6 +1942,10 @@ textarea {
   border-radius: var(--radius-xs);
   border: 1px solid rgba(50, 83, 111, 0.8);
   padding: 8px 10px;
+  white-space: pre-wrap;
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .access-key-status--success {
@@ -2025,10 +2035,79 @@ textarea {
   flex-wrap: wrap;
 }
 
+.startup-unlock-bar {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  z-index: 145;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(240, 178, 74, 0.55);
+  background: rgba(71, 46, 9, 0.94);
+  box-shadow: var(--shadow-md);
+  color: #ffe9c0;
+}
+
+.startup-trace-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 146;
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(68vh, 720px);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(50, 83, 111, 0.9);
+  background: rgba(7, 19, 32, 0.97);
+  box-shadow: var(--shadow-lg);
+}
+
+.startup-trace-panel.is-visible {
+  display: flex;
+}
+
+.startup-trace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.startup-trace-meta {
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(50, 83, 111, 0.75);
+  background: rgba(10, 30, 47, 0.82);
+  padding: 10px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  font-size: 12px;
+}
+
+.startup-trace-body {
+  margin: 0;
+  min-height: 180px;
+  max-height: min(44vh, 460px);
+  overflow: auto;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(50, 83, 111, 0.75);
+  background: rgba(3, 10, 17, 0.86);
+  padding: 10px;
+  color: #d9ebfb;
+  white-space: pre-wrap;
+  font-size: 12px;
+}
+
 .loading-overlay {
   position: fixed;
   inset: 0;
-  display: flex;
+  display: none;
   z-index: 130;
   align-items: center;
   justify-content: center;
@@ -2040,9 +2119,18 @@ textarea {
 }
 
 .loading-overlay.is-visible {
+  display: flex;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+.loading-overlay[aria-hidden="true"],
+.loading-overlay:not(.is-visible) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .loading-card {
