@@ -15,6 +15,15 @@
     <!-- Global feedback -->
     <div id="globalMessage" class="global-message" aria-live="polite"></div>
     <div id="globalError" class="global-error" aria-live="assertive"></div>
+    <section id="fatalErrorPanel" class="fatal-error-panel" aria-live="assertive" aria-hidden="true" hidden>
+      <h3 id="fatalErrorTitle">Control Center startup failed</h3>
+      <p id="fatalErrorText">The app could not finish loading.</p>
+      <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
+      <div class="fatal-error-actions">
+        <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
+        <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
+      </div>
+    </section>
 
     <!-- Global loading -->
     <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
@@ -177,6 +186,78 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js"></script>
+  <script>
+    (function bootstrapControlCenterFallback() {
+      function showFatalStartupError(message, details) {
+        var overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          overlay.classList.remove("is-visible");
+          overlay.setAttribute("aria-hidden", "true");
+        }
+
+        var panel = document.getElementById("fatalErrorPanel");
+        var text = document.getElementById("fatalErrorText");
+        var diagnostics = document.getElementById("fatalErrorDetails");
+        var globalError = document.getElementById("globalError");
+
+        if (text) text.textContent = message || "The app failed to initialize.";
+        if (diagnostics) diagnostics.textContent = details || "No additional diagnostics available.";
+
+        if (panel) {
+          panel.hidden = false;
+          panel.classList.add("is-visible");
+          panel.setAttribute("aria-hidden", "false");
+        }
+
+        if (globalError) {
+          globalError.textContent = message || "The app failed to initialize.";
+          globalError.style.display = "block";
+        }
+      }
+
+      var retryBtn = document.getElementById("fatalRetryBtn");
+      if (retryBtn) {
+        retryBtn.addEventListener("click", function () {
+          window.location.reload();
+        });
+      }
+
+      var accessKeyBtn = document.getElementById("fatalAccessKeyBtn");
+      if (accessKeyBtn) {
+        accessKeyBtn.addEventListener("click", function () {
+          try {
+            var entered = window.prompt("Paste Control Center access key:", "");
+            if (entered && entered.trim()) {
+              window.localStorage.setItem("mh-control-write-key", entered.trim());
+              window.location.reload();
+            }
+          } catch (_) {
+            // Ignore localStorage errors in restricted contexts.
+          }
+        });
+      }
+
+      window.addEventListener("error", function (event) {
+        if (window.__mhControlCenterStarted) return;
+        var target = event && event.target;
+        var src = target && target.src ? String(target.src) : "";
+        var isModuleLoadError = target && target.tagName === "SCRIPT" && src.indexOf("/control-center/app.js") !== -1;
+        if (!isModuleLoadError) return;
+
+        showFatalStartupError(
+          "Control Center JavaScript failed to load.",
+          src || "Module script load error"
+        );
+      }, true);
+
+      window.addEventListener("unhandledrejection", function (event) {
+        if (window.__mhControlCenterStarted) return;
+        var reason = event && event.reason;
+        var message = reason && reason.message ? reason.message : String(reason || "Unhandled startup rejection");
+        showFatalStartupError("Control Center startup promise failed.", message);
+      });
+    })();
+  </script>
+  <script type="module" src="./app.js?v=20260504"></script>
 </body>
 </html>

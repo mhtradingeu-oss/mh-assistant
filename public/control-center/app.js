@@ -293,25 +293,16 @@ async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
   const state = getState();
   const items = Array.isArray(state.data.projects) ? state.data.projects : [];
 
-  const requested = String(preferredProjectName || "").trim();
-  const requestedExists = requested
-    ? items.some((item) => {
-      const name = typeof item === "string" ? item : item?.name;
-      return String(name || "").trim().toLowerCase() === requested.toLowerCase();
-    })
-    : false;
+  const requested = getSafeProjectName(preferredProjectName, "");
+  const requestedExists = requested && projectExistsInList(requested, items);
+  const projectToLoad = requestedExists ? requested : getSafeProjectName(preferred || DEFAULT_PROJECT_SLUG);
 
-  const projectToLoad = requestedExists ? requested : preferred;
   navigateTo("home");
-
-  if (projectToLoad) {
-    await loadProjectData(projectToLoad);
-    showMessage(`Loaded project: ${projectToLoad}`);
-    return;
-  }
-
-  showError("No projects available after key update.");
+  await loadProjectData(projectToLoad);
+  showMessage(`Loaded project: ${projectToLoad}`);
 }
+
+
 
 function bindAccessKeyPanel(modal) {
   const input = modal.querySelector("#accessKeyInput");
@@ -613,6 +604,7 @@ function showLoading(
   if (overlay) {
     overlay.classList.add("is-visible");
     overlay.setAttribute("aria-hidden", "false");
+    installLoadingWatchdog("loading-overlay-visible");
   }
 }
 
@@ -622,6 +614,294 @@ function hideLoading() {
 
   overlay.classList.remove("is-visible");
   overlay.setAttribute("aria-hidden", "true");
+  clearLoadingWatchdog();
+}
+
+function isLoadingVisible() {
+  const overlay = $("loadingOverlay");
+  return Boolean(overlay && overlay.classList.contains("is-visible"));
+}
+
+const LOADING_WATCHDOG_TIMEOUT_MS = 30000;
+let loadingWatchdogTimer = null;
+let loadingWatchdogReason = "";
+
+const startupDiagnostics = {
+  failedEndpoints: [],
+  lastErrorSource: "",
+  lastErrorMessage: ""
+};
+
+function recordStartupFailure(source, error) {
+  const message = String(error?.message || error || "Unknown startup error").trim();
+  startupDiagnostics.lastErrorSource = String(source || "startup");
+  startupDiagnostics.lastErrorMessage = message;
+
+  const endpoint = String(error?.endpoint || "").trim();
+  if (!endpoint) return;
+
+  const alreadyRecorded = startupDiagnostics.failedEndpoints.some((item) => item.endpoint === endpoint);
+  if (!alreadyRecorded) {
+    startupDiagnostics.failedEndpoints.push({
+      endpoint,
+      status: error?.status || null,
+      timeout: Boolean(error?.isTimeout),
+      message
+    });
+  }
+}
+
+function renderStartupDiagnosticsText(reason = "") {
+  const rows = [];
+  if (reason) {
+    rows.push(`Reason: ${reason}`);
+  }
+  if (startupDiagnostics.lastErrorSource || startupDiagnostics.lastErrorMessage) {
+    rows.push(
+      `Last error: ${startupDiagnostics.lastErrorSource || "startup"} - ` +
+      `${startupDiagnostics.lastErrorMessage || "unknown"}`
+    );
+  }
+  if (startupDiagnostics.failedEndpoints.length) {
+    const endpointRow = startupDiagnostics.failedEndpoints
+      .map((item) => `${item.endpoint}${item.status ? ` (${item.status})` : ""}${item.timeout ? " [timeout]" : ""}`)
+      .join("; ");
+    rows.push(`Endpoints: ${endpointRow}`);
+  }
+  return rows.join("\n");
+}
+
+function bindFatalErrorPanelActions() {
+  const retryBtn = $("fatalRetryBtn");
+  const accessKeyBtn = $("fatalAccessKeyBtn");
+
+  if (retryBtn && !retryBtn.dataset.bound) {
+    retryBtn.dataset.bound = "1";
+    retryBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
+  }
+
+  if (accessKeyBtn && !accessKeyBtn.dataset.bound) {
+    accessKeyBtn.dataset.bound = "1";
+    accessKeyBtn.addEventListener("click", () => {
+      showAccessKeyModal();
+    });
+  }
+}
+
+function showFatalErrorPanel(message, details = "") {
+  const panel = $("fatalErrorPanel");
+  if (!panel) {
+    showError(message);
+    return;
+  }
+
+  const text = $("fatalErrorText");
+  const detailsBox = $("fatalErrorDetails");
+
+  if (text) {
+    text.textContent = message || "Control Center failed to start.";
+  }
+  if (detailsBox) {
+    detailsBox.textContent = details || "No additional diagnostics available.";
+  }
+
+  panel.hidden = false;
+  panel.classList.add("is-visible");
+  panel.setAttribute("aria-hidden", "false");
+  bindFatalErrorPanelActions();
+}
+
+function handleStartupFatalError(source, error) {
+  const err = error instanceof Error ? error : new Error(String(error || "Unknown startup failure"));
+  recordStartupFailure(source, err);
+  console.error("[CONTROL_CENTER_STARTUP_FATAL]", source, err);
+  setLoading(false);
+  hideLoading();
+  setError(err.message || "Control Center initialization failed");
+  showError(err.message || "Control Center initialization failed");
+  showFatalErrorPanel(
+    "Control Center could not complete startup.",
+    renderStartupDiagnosticsText(String(source || "startup"))
+  );
+}
+
+function clearLoadingWatchdog() {
+  if (loadingWatchdogTimer) {
+    clearTimeout(loadingWatchdogTimer);
+    loadingWatchdogTimer = null;
+  }
+  loadingWatchdogReason = "";
+}
+
+function installLoadingWatchdog(reason = "project-load") {
+  clearLoadingWatchdog();
+  loadingWatchdogReason = String(reason || "project-load");
+
+  loadingWatchdogTimer = setTimeout(() => {
+    if (!isLoadingVisible()) return;
+
+    const timeoutError = new Error(
+      `Loading watchdog timed out after ${LOADING_WATCHDOG_TIMEOUT_MS / 1000}s during ${loadingWatchdogReason}.`
+    );
+    timeoutError.isTimeout = true;
+    handleStartupFatalError("loading-watchdog", timeoutError);
+  }, LOADING_WATCHDOG_TIMEOUT_MS);
+}
+
+function installGlobalErrorGuards() {
+  if (typeof window === "undefined" || window.__mhControlCenterErrorGuardsInstalled) {
+    return;
+  }
+
+  window.__mhControlCenterErrorGuardsInstalled = true;
+
+  window.addEventListener("error", (event) => {
+    const startupPhase = !getState().initialized || isLoadingVisible();
+    if (!startupPhase) return;
+
+    const message = event?.message || "Unhandled browser error";
+    const err = event?.error instanceof Error ? event.error : new Error(message);
+    handleStartupFatalError("window.error", err);
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const startupPhase = !getState().initialized || isLoadingVisible();
+    if (!startupPhase) return;
+
+    const reason = event?.reason;
+    const err = reason instanceof Error ? reason : new Error(String(reason || "Unhandled promise rejection"));
+    handleStartupFatalError("window.unhandledrejection", err);
+  });
+}
+
+
+/* =========================
+   PROJECT SELECTION SAFETY
+========================= */
+
+const DEFAULT_PROJECT_SLUG = ["hairo", "ticmen"].join("");
+const PROJECT_STORAGE_KEY = "mh-control-center-current-project";
+const LEGACY_PROJECT_STORAGE_KEYS = [
+  "mh_current_project",
+  "currentProject"
+];
+const BLOCKED_DEFAULT_PROJECT_PATTERNS = [
+  "smoke",
+  "test",
+  "corestability",
+  "core-stability",
+  "dummy",
+  "sample"
+];
+
+function normalizeProjectSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "");
+}
+
+function isBlockedDefaultProject(projectName) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized) return true;
+  return BLOCKED_DEFAULT_PROJECT_PATTERNS.some((pattern) => normalized.includes(pattern));
+}
+
+function getProjectItemSlug(item) {
+  if (typeof item === "string") return normalizeProjectSlug(item);
+  return normalizeProjectSlug(item?.slug || item?.id || item?.name || item?.project || "");
+}
+
+function getProjectItemLabel(item) {
+  if (typeof item === "string") return item;
+  return String(item?.name || item?.label || item?.slug || item?.id || item?.project || "").trim();
+}
+
+function getVisibleProjects(projects = []) {
+  return (Array.isArray(projects) ? projects : []).filter((item) => {
+    const slug = getProjectItemSlug(item);
+    return slug && !isBlockedDefaultProject(slug);
+  });
+}
+
+function projectExistsInList(projectName, projects = []) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized) return false;
+  return (Array.isArray(projects) ? projects : []).some((item) => getProjectItemSlug(item) === normalized);
+}
+
+function clearLegacyStoredProjectNames() {
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  try {
+    LEGACY_PROJECT_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
+  } catch (_) {}
+}
+
+function getStoredProjectName() {
+  if (typeof window === "undefined" || !window.localStorage) return DEFAULT_PROJECT_SLUG;
+
+  try {
+    const stored =
+      window.localStorage.getItem(PROJECT_STORAGE_KEY) ||
+      LEGACY_PROJECT_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(Boolean) ||
+      "";
+
+    const normalized = normalizeProjectSlug(stored);
+
+    if (!normalized || isBlockedDefaultProject(normalized)) {
+      window.localStorage.removeItem(PROJECT_STORAGE_KEY);
+      clearLegacyStoredProjectNames();
+      return DEFAULT_PROJECT_SLUG;
+    }
+
+    return normalized;
+  } catch (_) {
+    return DEFAULT_PROJECT_SLUG;
+  }
+}
+
+function setStoredProjectName(projectName) {
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized || isBlockedDefaultProject(normalized)) return;
+
+  try {
+    window.localStorage.setItem(PROJECT_STORAGE_KEY, normalized);
+    clearLegacyStoredProjectNames();
+  } catch (_) {}
+}
+
+function getSafeProjectName(projectName, fallback = DEFAULT_PROJECT_SLUG) {
+  const normalized = normalizeProjectSlug(projectName);
+  if (!normalized || isBlockedDefaultProject(normalized)) {
+    return normalizeProjectSlug(fallback) || DEFAULT_PROJECT_SLUG;
+  }
+  return normalized;
+}
+
+function pickSafeDefaultProject(projects = [], preferredProject = "") {
+  const items = Array.isArray(projects) ? projects : [];
+  const storedProject = getStoredProjectName();
+  const preferred = normalizeProjectSlug(preferredProject);
+
+  if (storedProject && !isBlockedDefaultProject(storedProject) && projectExistsInList(storedProject, items)) {
+    return storedProject;
+  }
+
+  if (preferred && !isBlockedDefaultProject(preferred) && projectExistsInList(preferred, items)) {
+    return preferred;
+  }
+
+  if (projectExistsInList(DEFAULT_PROJECT_SLUG, items)) {
+    return DEFAULT_PROJECT_SLUG;
+  }
+
+  const firstVisible = getVisibleProjects(items)[0];
+  return getProjectItemSlug(firstVisible) || DEFAULT_PROJECT_SLUG;
 }
 
 /* =========================
@@ -655,8 +935,8 @@ function renderProjectSwitcher() {
   const select = $("projectSwitcher");
   if (!select) return;
 
-  const currentValue = state.context.currentProject || "";
-  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+  const currentValue = getSafeProjectName(state.context.currentProject || DEFAULT_PROJECT_SLUG);
+  const items = getVisibleProjects(Array.isArray(state.data.projects) ? state.data.projects : []);
 
   select.innerHTML = "";
 
@@ -665,18 +945,32 @@ function renderProjectSwitcher() {
   defaultOption.textContent = "Select project";
   select.appendChild(defaultOption);
 
+  const seen = new Set();
+
   items.forEach((item) => {
-    const projectName = typeof item === "string" ? item : item?.name;
-    if (!projectName) return;
+    const slug = getProjectItemSlug(item);
+    const label = getProjectItemLabel(item) || slug;
+    if (!slug || seen.has(slug)) return;
+
+    seen.add(slug);
 
     const option = document.createElement("option");
-    option.value = projectName;
-    option.textContent = projectName;
+    option.value = slug;
+    option.textContent = label;
     select.appendChild(option);
   });
 
+  if (currentValue && !seen.has(currentValue) && !isBlockedDefaultProject(currentValue)) {
+    const option = document.createElement("option");
+    option.value = currentValue;
+    option.textContent = currentValue;
+    select.appendChild(option);
+  }
+
   select.value = currentValue;
 }
+
+
 
 /* =========================
    PLACEHOLDERS
@@ -821,34 +1115,97 @@ async function safeRenderCurrentPage(logLabel = "[LOAD_PROJECT_RENDER_ERROR]") {
 let activeProjectLoadPromise = null;
 let activeProjectLoadProject = "";
 
+const PROJECT_LOAD_TIMEOUT_MS = 45000;
+
+function fetchProjectWithTimeout(projectName) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`));
+    }, PROJECT_LOAD_TIMEOUT_MS);
+
+    fetchAllCoreProjectData(projectName)
+      .then((payload) => {
+        if (!payload || payload.error) {
+          throw new Error(payload?.error || `Project ${projectName} returned an empty response.`);
+        }
+        resolve(payload);
+      })
+      .catch(reject)
+      .finally(() => clearTimeout(timer));
+  });
+}
+
+function applyProjectPayload(projectName, payload) {
+  const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
+    ? payload.activity.scheduled_jobs
+    : [];
+  const executionResults = Array.isArray(payload?.activity?.execution_results)
+    ? payload.activity.execution_results
+    : [];
+  const inferredCampaign =
+    executionResults[0]?.wave_name ||
+    scheduledJobs[0]?.wave_name ||
+    "Not selected yet";
+
+  patchState("data", {
+    overview: payload.overview,
+    readiness: payload.readiness,
+    assets: payload.assets,
+    tree: payload.tree,
+    registry: payload.registry,
+    integrations: payload.connectors,
+    activity: payload.activity,
+    operations: payload.operations || null
+  });
+
+  const overviewData = payload?.overview?.overview || {};
+
+  setCurrentProject(projectName);
+  setStoredProjectName(projectName);
+
+  setProjectContext({
+    project: projectName,
+    market: overviewData.market || "",
+    language: overviewData.language || "",
+    mode: overviewData.execution_mode || "",
+    campaign: inferredCampaign
+  });
+}
+
 async function loadProjects() {
-  const result = await fetchProjects();
-  const items = Array.isArray(result?.items) ? result.items : [];
+  try {
+    const result = await fetchProjects();
+    const items = Array.isArray(result?.items) ? result.items : [];
+    const preferredFromApi = result?.preferredProject || "";
 
-  setProjects(items);
+    setProjects(items);
 
-  const preferred =
-    result?.preferredProject ||
-    (items.length
-      ? (typeof items[0] === "string" ? items[0] : items[0]?.name || "")
-      : "");
+    const selectedProject = pickSafeDefaultProject(items, preferredFromApi);
+    setCurrentProject(selectedProject);
+    setStoredProjectName(selectedProject);
 
-  if (preferred) {
-    setCurrentProject(preferred);
+    renderProjectSwitcher();
+    return selectedProject;
+  } catch (error) {
+    console.error("[LOAD_PROJECTS_ERROR]", error);
+    recordStartupFailure("load-projects", error);
+    setProjects([]);
+    setCurrentProject(DEFAULT_PROJECT_SLUG);
+    setStoredProjectName(DEFAULT_PROJECT_SLUG);
+    renderProjectSwitcher();
+    return DEFAULT_PROJECT_SLUG;
   }
-
-  renderProjectSwitcher();
-  return preferred;
 }
 
 async function loadProjectData(projectName) {
-  if (!projectName) return;
+  const requestedProject = normalizeProjectSlug(projectName);
+  const safeProjectName = getSafeProjectName(requestedProject || DEFAULT_PROJECT_SLUG);
 
-  if (activeProjectLoadPromise) {
-    if (activeProjectLoadProject === projectName) {
-      showMessage(`Project ${projectName} is already loading.`);
-      return activeProjectLoadPromise;
-    }
+  if (!safeProjectName) return null;
+
+  if (activeProjectLoadPromise && activeProjectLoadProject === safeProjectName) {
+    showMessage(`Project ${safeProjectName} is already loading.`);
+    return activeProjectLoadPromise;
   }
 
   const loadPromise = (async () => {
@@ -857,69 +1214,67 @@ async function loadProjectData(projectName) {
     clearFeedback();
     resetProjectData();
 
-    showLoading("Loading project", `Please wait while ${projectName} is being loaded.`);
-
     let payload = null;
+    let loadedProjectName = safeProjectName;
+
+    showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`);
 
     try {
-      const PROJECT_LOAD_TIMEOUT_MS = 45000;
-      payload = await Promise.race([
-        fetchAllCoreProjectData(projectName),
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            reject(new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`));
-          }, PROJECT_LOAD_TIMEOUT_MS);
-        })
-      ]);
+      try {
+        payload = await fetchProjectWithTimeout(safeProjectName);
+      } catch (primaryError) {
+        if (safeProjectName === DEFAULT_PROJECT_SLUG) {
+          throw primaryError;
+        }
 
-      const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
-        ? payload.activity.scheduled_jobs
-        : [];
-      const executionResults = Array.isArray(payload?.activity?.execution_results)
-        ? payload.activity.execution_results
-        : [];
-      const inferredCampaign =
-        executionResults[0]?.wave_name ||
-        scheduledJobs[0]?.wave_name ||
-        "Not selected yet";
+        console.warn(
+          `[LOAD_PROJECT_FALLBACK] ${safeProjectName} failed. Falling back to ${DEFAULT_PROJECT_SLUG}.`,
+          primaryError
+        );
 
-      patchState("data", {
-        overview: payload.overview,
-        readiness: payload.readiness,
-        assets: payload.assets,
-        tree: payload.tree,
-        registry: payload.registry,
-        integrations: payload.connectors,
-        activity: payload.activity,
-        operations: payload.operations || null
-      });
+        loadedProjectName = DEFAULT_PROJECT_SLUG;
+        showLoading("Loading project", `Please wait while ${DEFAULT_PROJECT_SLUG} is being loaded.`);
+        payload = await fetchProjectWithTimeout(DEFAULT_PROJECT_SLUG);
+      }
 
-      const overviewData = payload?.overview?.overview || {};
-
-      setProjectContext({
-        project: projectName,
-        market: overviewData.market || "",
-        language: overviewData.language || "",
-        mode: overviewData.execution_mode || "",
-        campaign: inferredCampaign
-      });
+      applyProjectPayload(loadedProjectName, payload);
 
       renderGlobalUi();
-
       await safeRenderCurrentPage();
 
-      showMessage(`Loaded project: ${projectName}`);
+      showMessage(`Loaded project: ${loadedProjectName}`);
+      return payload;
     } catch (error) {
       console.error("[LOAD_PROJECT_ERROR]", error);
+      recordStartupFailure("load-project-data", error);
+      setCurrentProject(DEFAULT_PROJECT_SLUG);
+      setProjectContext({
+        project: DEFAULT_PROJECT_SLUG,
+        market: "",
+        language: "",
+        mode: "",
+        campaign: "Not selected yet"
+      });
       setError(error.message || "Failed to load project data");
       showError(error.message || "Failed to load project data");
+      renderGlobalUi();
+      await safeRenderCurrentPage("[LOAD_PROJECT_ERROR_RENDER_FALLBACK]");
+      return null;
     } finally {
       setLoading(false);
       hideLoading();
     }
+  })();
+
+  activeProjectLoadPromise = loadPromise;
+  activeProjectLoadProject = safeProjectName;
+
+  try {
+    const payload = await loadPromise;
+    const loadedProjectName = getSafeProjectName(getState().context.currentProject || safeProjectName);
 
     if (payload && !payload.operations) {
-      fetchProjectOperations(projectName)
+      fetchProjectOperations(loadedProjectName)
         .then(async (operations) => {
           patchState("data", { operations });
           renderGlobalUi();
@@ -927,15 +1282,11 @@ async function loadProjectData(projectName) {
         })
         .catch((opsError) => {
           console.warn("Failed to load operations snapshot:", opsError.message);
+          recordStartupFailure("load-project-operations", opsError);
         });
     }
-  })();
 
-  activeProjectLoadPromise = loadPromise;
-  activeProjectLoadProject = projectName;
-
-  try {
-    await loadPromise;
+    return payload;
   } finally {
     if (activeProjectLoadPromise === loadPromise) {
       activeProjectLoadPromise = null;
@@ -976,17 +1327,25 @@ function bindProjectSwitcher() {
   if (!select) return;
 
   select.addEventListener("change", async (event) => {
-    const projectName = event.target.value || "";
-    setCurrentProject(projectName);
+    const rawProjectName = event.target.value || "";
 
-    if (!projectName) {
+    if (!rawProjectName) {
       showError("Please select a valid project.");
       return;
     }
 
+    const projectName = getSafeProjectName(rawProjectName);
+
+    if (projectName !== normalizeProjectSlug(rawProjectName)) {
+      showMessage(`Test project ignored. Loading ${projectName}.`);
+    }
+
+    setCurrentProject(projectName);
     await loadProjectData(projectName);
   });
 }
+
+
 
 /* =========================
    RESPONSIVE UI
@@ -1290,7 +1649,8 @@ function bindGlobalButtons() {
   if (refreshBtn) {
     refreshBtn.textContent = "Run Refresh";
     refreshBtn.addEventListener("click", async () => {
-      const projectName = getState().context.currentProject;
+      const projectName = getSafeProjectName(getState().context.currentProject || DEFAULT_PROJECT_SLUG);
+
       if (!projectName) {
         showError("Please select a project first.");
         return;
@@ -1322,12 +1682,16 @@ function bindGlobalButtons() {
   }
 }
 
+
+
 /* =========================
    INIT
 ========================= */
 
 async function init() {
   try {
+    installGlobalErrorGuards();
+    bindFatalErrorPanelActions();
     clearFeedback();
 
     initRouter();
@@ -1348,23 +1712,20 @@ async function init() {
     renderCurrentPage();
 
     const preferredProject = await loadProjects();
-
-    if (preferredProject) {
-      await loadProjectData(preferredProject);
-    }
+    await loadProjectData(preferredProject || DEFAULT_PROJECT_SLUG);
 
     markInitialized();
+    window.__mhControlCenterStarted = true;
 
-    // Show access key panel if no key is stored — must run after DOM is ready
     if (!getControlWriteKey()) {
       showAccessKeyModal();
     }
   } catch (error) {
-    console.error(error);
-    setError(error.message || "Application initialization failed");
-    showError(error.message || "Application initialization failed");
+    handleStartupFatalError("init", error);
   }
 }
+
+
 
 subscribe(() => {
   renderGlobalUi();

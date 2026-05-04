@@ -1906,7 +1906,7 @@ textarea {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 120;
+  z-index: 160;
   background: rgba(2, 8, 15, 0.72);
 }
 
@@ -1978,18 +1978,71 @@ textarea {
   background: rgba(99, 26, 26, 0.85);
 }
 
+.fatal-error-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, calc(100% - 32px));
+  z-index: 150;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(239, 91, 91, 0.62);
+  background: linear-gradient(180deg, rgba(56, 16, 16, 0.97), rgba(32, 10, 10, 0.97));
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+  display: none;
+}
+
+.fatal-error-panel.is-visible {
+  display: block;
+}
+
+.fatal-error-panel h3 {
+  margin: 0 0 8px;
+}
+
+.fatal-error-panel p {
+  margin: 0 0 10px;
+  color: #ffdada;
+}
+
+.fatal-error-details {
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(239, 91, 91, 0.4);
+  background: rgba(18, 6, 6, 0.6);
+  color: #ffeaea;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.fatal-error-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .loading-overlay {
   position: fixed;
   inset: 0;
-  display: none;
+  display: flex;
   z-index: 130;
   align-items: center;
   justify-content: center;
   background: rgba(3, 10, 17, 0.72);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease;
 }
 
 .loading-overlay.is-visible {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .loading-card {
