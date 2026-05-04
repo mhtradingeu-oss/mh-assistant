@@ -101,12 +101,14 @@ const DEFAULT_ROUTE_ROLE_ACCESS = {
 function getControlWriteKey() {
   if (typeof window === "undefined") return "";
 
-  const runtimeValue = typeof window.__MH_CONTROL_WRITE_KEY__ === "string"
-    ? window.__MH_CONTROL_WRITE_KEY__.trim()
-    : "";
+  const runtimeValue = [
+    window.__MH_CONTROL_CENTER_READ_KEY__,
+    window.__MH_CONTROL_CENTER_WRITE_KEY__,
+    window.__MH_CONTROL_WRITE_KEY__
+  ].find((value) => typeof value === "string" && value.trim()) || "";
 
   if (runtimeValue) {
-    return runtimeValue;
+    return runtimeValue.trim();
   }
 
   try {
@@ -286,6 +288,31 @@ function setAccessKeyStatus(message, type) {
   status.className = "access-key-status access-key-status--" + (type || "info");
 }
 
+async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
+  const preferred = await loadProjects();
+  const state = getState();
+  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+
+  const requested = String(preferredProjectName || "").trim();
+  const requestedExists = requested
+    ? items.some((item) => {
+      const name = typeof item === "string" ? item : item?.name;
+      return String(name || "").trim().toLowerCase() === requested.toLowerCase();
+    })
+    : false;
+
+  const projectToLoad = requestedExists ? requested : preferred;
+  navigateTo("home");
+
+  if (projectToLoad) {
+    await loadProjectData(projectToLoad);
+    showMessage(`Loaded project: ${projectToLoad}`);
+    return;
+  }
+
+  showError("No projects available after key update.");
+}
+
 function bindAccessKeyPanel(modal) {
   const input = modal.querySelector("#accessKeyInput");
   const saveBtn = modal.querySelector("#accessKeySaveBtn");
@@ -294,7 +321,7 @@ function bindAccessKeyPanel(modal) {
   const closeBtn = modal.querySelector("#accessKeyCloseBtn");
 
   if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
+    saveBtn.addEventListener("click", async () => {
       const val = (input?.value || "").trim();
       if (!val) {
         setAccessKeyStatus("No key entered.", "error");
@@ -307,8 +334,15 @@ function bindAccessKeyPanel(modal) {
         return;
       }
       if (input) input.value = "";
-      setAccessKeyStatus("Key saved. Use Test Key to verify access.", "success");
+      setAccessKeyStatus("Key saved. Reloading front page and projects…", "success");
       updateAccessKeyButton();
+
+      try {
+        await refreshProjectsAfterKeyUpdate();
+        setAccessKeyStatus("Key saved and project loaded.", "success");
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
     });
   }
 
@@ -332,7 +366,18 @@ function bindAccessKeyPanel(modal) {
           }
         });
         if (response.ok) {
-          setAccessKeyStatus("Valid key — endpoint returned OK.", "success");
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              localStorage.setItem(CONTROL_WRITE_KEY_STORAGE_KEY, inputVal);
+              updateAccessKeyButton();
+            }
+            await refreshProjectsAfterKeyUpdate();
+            setAccessKeyStatus("Valid key and project loaded.", "success");
+          } catch (error) {
+            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+          }
         } else if (response.status === 401 || response.status === 403) {
           setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
         } else {
@@ -757,9 +802,24 @@ function renderGlobalUi() {
   renderTopContext();
 }
 
+async function safeRenderCurrentPage(logLabel = "[LOAD_PROJECT_RENDER_ERROR]") {
+  try {
+    await Promise.resolve(renderCurrentPage());
+    return true;
+  } catch (renderError) {
+    console.error(logLabel, renderError);
+    setError(renderError.message || "Failed to render project page");
+    showError(renderError.message || "Failed to render project page");
+    return false;
+  }
+}
+
 /* =========================
    DATA LOAD
 ========================= */
+
+let activeProjectLoadPromise = null;
+let activeProjectLoadProject = "";
 
 async function loadProjects() {
   const result = await fetchProjects();
@@ -784,80 +844,103 @@ async function loadProjects() {
 async function loadProjectData(projectName) {
   if (!projectName) return;
 
-  setLoading(true);
-  clearError();
-  clearFeedback();
-  resetProjectData();
-
-  showLoading("Loading project", `Please wait while ${projectName} is being loaded.`);
-
-  let payload = null;
-
-  try {
-    payload = await fetchAllCoreProjectData(projectName);
-
-    const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
-      ? payload.activity.scheduled_jobs
-      : [];
-    const executionResults = Array.isArray(payload?.activity?.execution_results)
-      ? payload.activity.execution_results
-      : [];
-    const inferredCampaign =
-      executionResults[0]?.wave_name ||
-      scheduledJobs[0]?.wave_name ||
-      "Not selected yet";
-
-    patchState("data", {
-      overview: payload.overview,
-      readiness: payload.readiness,
-      assets: payload.assets,
-      tree: payload.tree,
-      registry: payload.registry,
-      integrations: payload.connectors,
-      activity: payload.activity,
-      operations: payload.operations || null
-    });
-
-    const overviewData = payload?.overview?.overview || {};
-
-    setProjectContext({
-      project: projectName,
-      market: overviewData.market || "",
-      language: overviewData.language || "",
-      mode: overviewData.execution_mode || "",
-      campaign: inferredCampaign
-    });
-
-    renderGlobalUi();
-
-    try {
-      renderCurrentPage();
-    } catch (renderError) {
-      console.error("[LOAD_PROJECT_RENDER_ERROR]", renderError);
-      setError(renderError.message || "Failed to render project page");
-      showError(renderError.message || "Failed to render project page");
+  if (activeProjectLoadPromise) {
+    if (activeProjectLoadProject === projectName) {
+      showMessage(`Project ${projectName} is already loading.`);
+      return activeProjectLoadPromise;
     }
-
-    showMessage(`Loaded project: ${projectName}`);
-  } catch (error) {
-    console.error("[LOAD_PROJECT_ERROR]", error);
-    setError(error.message || "Failed to load project data");
-    showError(error.message || "Failed to load project data");
-  } finally {
-    setLoading(false);
-    hideLoading();
   }
 
-  if (payload && !payload.operations) {
-    fetchProjectOperations(projectName)
-      .then((operations) => {
-        patchState("data", { operations });
-        renderGlobalUi();
-        renderCurrentPage();
-      })
-      .catch((opsError) => {
-        console.warn("Failed to load operations snapshot:", opsError.message);
+  const loadPromise = (async () => {
+    setLoading(true);
+    clearError();
+    clearFeedback();
+    resetProjectData();
+
+    showLoading("Loading project", `Please wait while ${projectName} is being loaded.`);
+
+    let payload = null;
+
+    try {
+      const PROJECT_LOAD_TIMEOUT_MS = 45000;
+      payload = await Promise.race([
+        fetchAllCoreProjectData(projectName),
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`));
+          }, PROJECT_LOAD_TIMEOUT_MS);
+        })
+      ]);
+
+      const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
+        ? payload.activity.scheduled_jobs
+        : [];
+      const executionResults = Array.isArray(payload?.activity?.execution_results)
+        ? payload.activity.execution_results
+        : [];
+      const inferredCampaign =
+        executionResults[0]?.wave_name ||
+        scheduledJobs[0]?.wave_name ||
+        "Not selected yet";
+
+      patchState("data", {
+        overview: payload.overview,
+        readiness: payload.readiness,
+        assets: payload.assets,
+        tree: payload.tree,
+        registry: payload.registry,
+        integrations: payload.connectors,
+        activity: payload.activity,
+        operations: payload.operations || null
       });
+
+      const overviewData = payload?.overview?.overview || {};
+
+      setProjectContext({
+        project: projectName,
+        market: overviewData.market || "",
+        language: overviewData.language || "",
+        mode: overviewData.execution_mode || "",
+        campaign: inferredCampaign
+      });
+
+      renderGlobalUi();
+
+      await safeRenderCurrentPage();
+
+      showMessage(`Loaded project: ${projectName}`);
+    } catch (error) {
+      console.error("[LOAD_PROJECT_ERROR]", error);
+      setError(error.message || "Failed to load project data");
+      showError(error.message || "Failed to load project data");
+    } finally {
+      setLoading(false);
+      hideLoading();
+    }
+
+    if (payload && !payload.operations) {
+      fetchProjectOperations(projectName)
+        .then(async (operations) => {
+          patchState("data", { operations });
+          renderGlobalUi();
+          await safeRenderCurrentPage("[LOAD_PROJECT_BACKGROUND_RENDER_ERROR]");
+        })
+        .catch((opsError) => {
+          console.warn("Failed to load operations snapshot:", opsError.message);
+        });
+    }
+  })();
+
+  activeProjectLoadPromise = loadPromise;
+  activeProjectLoadProject = projectName;
+
+  try {
+    await loadPromise;
+  } finally {
+    if (activeProjectLoadPromise === loadPromise) {
+      activeProjectLoadPromise = null;
+      activeProjectLoadProject = "";
+    }
   }
 }
 

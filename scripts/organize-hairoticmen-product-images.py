@@ -5,7 +5,7 @@ import re
 import shutil
 from pathlib import Path
 
-ROOT = Path("/opt/mh-assistant")
+ROOT = Path(os.environ.get("MH_ASSISTANT_ROOT", Path(__file__).resolve().parents[1]))
 PROJECT = os.environ.get("MH_IMAGE_PROJECT") or os.environ.get("MH_DEFAULT_PROJECT") or "project-name"
 IMAGES_ROOT = ROOT / f"data/brand-assets/{PROJECT}/products/images"
 

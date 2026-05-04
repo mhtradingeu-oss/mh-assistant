@@ -15,11 +15,17 @@
 
 const fs = require('fs');
 const path = require('path');
+
+if (process.env.ALLOW_MUTATING_TESTS !== '1') {
+  console.error('Refusing to run mutating intelligence loop verification. Set ALLOW_MUTATING_TESTS=1 to record feedback and optimization data.');
+  process.exit(1);
+}
+
 const { app } = require('../runtime/orchestrator-service/server');
 
 const EXTERNAL_HOST = String(process.env.MH_HOST || '').trim();
 const TEST_PROJECT = String(process.env.MH_PROJECT || 'hairoticmen').trim().toLowerCase();
-const DATA_BASE = '/opt/mh-assistant/data/projects';
+const DATA_BASE = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..'), 'data', 'projects');
 
 let HOST = EXTERNAL_HOST ? EXTERNAL_HOST.replace(/\/$/, '') : '';
 let embeddedServer = null;

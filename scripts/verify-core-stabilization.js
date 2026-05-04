@@ -2,6 +2,13 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
+
+if (process.env.ALLOW_MUTATING_TESTS !== '1') {
+  console.error('Refusing to run mutating core stabilization smoke test. Set ALLOW_MUTATING_TESTS=1 to create/update smoke project data.');
+  process.exit(1);
+}
+
 const {
   __stability: {
     createProject,
@@ -21,6 +28,7 @@ const {
 
 const projectName = process.env.MH_STABILITY_PROJECT || 'corestabilitysmokev2';
 const campaignName = 'stability-launch';
+const ROOT = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..');
 let passed = 0;
 
 function assert(label, condition) {
@@ -147,7 +155,7 @@ function cleanupRegistryEntry() {
     return;
   }
 
-  const registryPath = '/opt/mh-assistant/data/projects/registry.json';
+  const registryPath = path.join(ROOT, 'data', 'projects', 'registry.json');
   const registry = readJsonFile(registryPath, []);
   if (!Array.isArray(registry)) {
     return;

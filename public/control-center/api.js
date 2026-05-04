@@ -12,8 +12,15 @@ function buildUrl(path = "") {
 
 function readControlKey() {
   try {
-    if (typeof window !== "undefined" && window.__MH_CONTROL_WRITE_KEY__) {
-      return String(window.__MH_CONTROL_WRITE_KEY__);
+    if (typeof window !== "undefined") {
+      const runtimeKey =
+        window.__MH_CONTROL_CENTER_READ_KEY__ ||
+        window.__MH_CONTROL_CENTER_WRITE_KEY__ ||
+        window.__MH_CONTROL_WRITE_KEY__;
+
+      if (runtimeKey) {
+        return String(runtimeKey);
+      }
     }
     if (typeof localStorage !== "undefined") {
       const stored = localStorage.getItem("mh-control-write-key");

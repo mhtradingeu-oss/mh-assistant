@@ -6,7 +6,7 @@ const {
   isPathWithinRoot
 } = require('../security/project-isolation');
 
-const DATA_ROOT = path.join(process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant', 'data');
+const DATA_ROOT = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data');
 const PROJECTS_ROOT = path.join(DATA_ROOT, 'projects');
 const EXECUTION_ROOT = path.join(DATA_ROOT, 'execution', 'projects');
 const LEGACY_ROOT = path.join(DATA_ROOT, 'brand-assets');

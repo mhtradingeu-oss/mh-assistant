@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE = '/opt/mh-assistant';
+const BASE = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..');
 const HOST = String(process.env.P2_VERIFY_HOST || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const CONTROL_KEY = String(process.env.MH_CONTROL_CENTER_WRITE_KEY || '').trim();
 

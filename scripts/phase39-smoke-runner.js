@@ -3,10 +3,16 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+
+if (process.env.ALLOW_MUTATING_TESTS !== '1') {
+  console.error('Refusing to run mutating phase39 smoke runner. Set ALLOW_MUTATING_TESTS=1 to seed project data and execute smoke commands.');
+  process.exit(1);
+}
+
 const { UnifiedDataPathResolver } = require('../runtime/orchestrator-service/lib/data/unified-data-path-resolver');
 const { ExecutionArtifactWriterAdapter } = require('../runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter');
 
-const BASE = '/opt/mh-assistant';
+const BASE = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..');
 const PROJECT = String(process.argv[2] || 'phase39smoke').trim().toLowerCase();
 const HOST = process.env.PHASE39_HOST || 'http://127.0.0.1:3300';
 const resolver = new UnifiedDataPathResolver({ logger: console });

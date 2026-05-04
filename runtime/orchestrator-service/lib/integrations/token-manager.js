@@ -7,7 +7,7 @@ const {
   writeJsonFile
 } = require('./storage');
 
-const SYSTEM_DIR = path.join(process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant', 'data', 'system');
+const SYSTEM_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'system');
 const KEY_PATH = path.join(SYSTEM_DIR, 'integration-secret.key.json');
 
 /**
