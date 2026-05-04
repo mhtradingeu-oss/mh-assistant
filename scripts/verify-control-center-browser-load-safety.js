@@ -56,8 +56,8 @@ function main() {
   check(
     checks,
     'app_hides_loading_in_critical_paths',
-    /async function loadProjectData[\s\S]*finally[\s\S]*setLoading\(false\)[\s\S]*hideLoading\(\)/.test(app) &&
-      /async function init[\s\S]*catch[\s\S]*(handleStartupFatalError|hideLoading\(\))/.test(app),
+    /async function loadProjectData[\s\S]*finally[\s\S]*setLoading\(false\)[\s\S]*hideLoading\(\s*(?:\{[\s\S]*?\})?\s*\)/.test(app) &&
+      /async function init[\s\S]*catch[\s\S]*(handleStartupFatalError|hideLoading\(\s*(?:\{[\s\S]*?\})?\s*\))/.test(app),
     'app.js dismisses loading in loadProjectData finally and init failure path.'
   );
 

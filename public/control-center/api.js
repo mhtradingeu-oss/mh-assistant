@@ -2,6 +2,25 @@
 
 let API_BASE_URL = "";
 const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
+const CONTROL_WRITE_KEY_STORAGE_KEY = "mh-control-write-key";
+
+export class AccessKeyError extends Error {
+  constructor(message, diagnostics = {}) {
+    super(String(message || "Project data requires a valid access key."));
+    this.name = "AccessKeyError";
+    this.code = "ACCESS_KEY_ERROR";
+    this.status = diagnostics?.status || null;
+    this.endpoint = String(diagnostics?.endpoint || "");
+    this.payload = diagnostics?.payload ?? null;
+    this.diagnostics = {
+      keyPresent: Boolean(diagnostics?.keyPresent),
+      authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+      endpoint: this.endpoint,
+      status: this.status,
+      contentType: String(diagnostics?.contentType || "")
+    };
+  }
+}
 
 export function setApiBaseUrl(value = "") {
   API_BASE_URL = value || "";
@@ -24,13 +43,42 @@ function readControlKey() {
       }
     }
     if (typeof localStorage !== "undefined") {
-      const stored = localStorage.getItem("mh-control-write-key");
+      const stored = localStorage.getItem(CONTROL_WRITE_KEY_STORAGE_KEY);
       if (stored) return String(stored);
     }
   } catch (_) {
     // Ignore storage access errors in restricted contexts
   }
   return "";
+}
+
+function isMissingReadKeyErrorMessage(message) {
+  return /missing\s+read\s+key/i.test(String(message || ""));
+}
+
+function isTopLevelErrorPayload(payload) {
+  return Boolean(
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    typeof payload.error === "string" &&
+    payload.error.trim()
+  );
+}
+
+function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
+  const endpoint = String(response?.url || requestMeta?.endpoint || "");
+  const status = Number.isFinite(response?.status) ? Number(response.status) : null;
+  const contentType = String(response?.headers?.get?.("content-type") || "");
+
+  return {
+    keyPresent: Boolean(requestMeta?.keyPresent),
+    authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+    endpoint,
+    status,
+    contentType,
+    payload
+  };
 }
 
 function buildReadHeaders() {
@@ -54,7 +102,7 @@ function buildWriteHeaders() {
   return headers;
 }
 
-async function parseJson(response, fallbackMessage = "Request failed") {
+async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
   let payload = null;
 
   try {
@@ -63,16 +111,50 @@ async function parseJson(response, fallbackMessage = "Request failed") {
     payload = null;
   }
 
+  const diagnostics = buildResponseDiagnostics(response, requestMeta, payload);
+
   if (!response.ok) {
     const message =
       payload?.error ||
       payload?.message ||
       `${fallbackMessage} (${response.status})`;
 
+    if (isMissingReadKeyErrorMessage(message)) {
+      throw new AccessKeyError(message, diagnostics);
+    }
+
     const error = new Error(message);
-    error.status = response.status;
+    error.status = diagnostics.status;
     error.payload = payload;
-    error.endpoint = response?.url || "";
+    error.endpoint = diagnostics.endpoint;
+    error.diagnostics = {
+      keyPresent: diagnostics.keyPresent,
+      authHeaderPresent: diagnostics.authHeaderPresent,
+      endpoint: diagnostics.endpoint,
+      status: diagnostics.status,
+      contentType: diagnostics.contentType
+    };
+    throw error;
+  }
+
+  if (isTopLevelErrorPayload(payload)) {
+    const message = String(payload.error || fallbackMessage);
+
+    if (isMissingReadKeyErrorMessage(message)) {
+      throw new AccessKeyError(message, diagnostics);
+    }
+
+    const error = new Error(message);
+    error.status = diagnostics.status;
+    error.payload = payload;
+    error.endpoint = diagnostics.endpoint;
+    error.diagnostics = {
+      keyPresent: diagnostics.keyPresent,
+      authHeaderPresent: diagnostics.authHeaderPresent,
+      endpoint: diagnostics.endpoint,
+      status: diagnostics.status,
+      contentType: diagnostics.contentType
+    };
     throw error;
   }
 
@@ -110,22 +192,32 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
 }
 
 async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const headers = buildReadHeaders();
   const response = await fetchWithTimeout(path, {
     method: "GET",
-    headers: buildReadHeaders()
+    headers
   }, timeoutMs);
 
-  return parseJson(response, fallbackMessage);
+  return parseJson(response, fallbackMessage, {
+    endpoint: buildUrl(path),
+    keyPresent: Boolean(headers["x-mh-control-key"]),
+    authHeaderPresent: Boolean(headers.Authorization || headers.authorization)
+  });
 }
 
 async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const headers = buildWriteHeaders();
   const response = await fetchWithTimeout(path, {
     method,
-    headers: buildWriteHeaders(),
+    headers,
     body: body == null ? undefined : JSON.stringify(body)
   }, timeoutMs);
 
-  return parseJson(response, fallbackMessage);
+  return parseJson(response, fallbackMessage, {
+    endpoint: buildUrl(path),
+    keyPresent: Boolean(headers["x-mh-control-key"]),
+    authHeaderPresent: Boolean(headers.Authorization || headers.authorization)
+  });
 }
 
 async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
@@ -141,7 +233,11 @@ async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQ
     body: formData
   }, timeoutMs);
 
-  return parseJson(response, fallbackMessage);
+  return parseJson(response, fallbackMessage, {
+    endpoint: buildUrl(path),
+    keyPresent: Boolean(headers["x-mh-control-key"]),
+    authHeaderPresent: Boolean(headers.Authorization || headers.authorization)
+  });
 }
 
 /* =========================
