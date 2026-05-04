@@ -807,6 +807,9 @@ export const homeRoute = {
     const state = getState();
     const loadDiagnostics = asObject(state.data.loadDiagnostics);
     const optionalFailures = asArray(loadDiagnostics.optional);
+    const startupSteps = asArray(state.data.startupSteps);
+    const loadingTransitions = asArray(state.data.loadingTransitions);
+    const lastProjectLoad = asObject(state.data.lastProjectLoad);
     const dashboard = buildExecutiveData(state);
     const systemIntelligence = buildSystemIntelligence(state);
     const globalTopActions = asArray(systemIntelligence.topActions).slice(0, 3);
@@ -824,6 +827,37 @@ export const homeRoute = {
 
     root.innerHTML = `
       <div class="home-decision-shell">
+        ${(startupSteps.length || loadingTransitions.length || Object.keys(lastProjectLoad).length)
+          ? `<section class="card home-decision-section">
+              <div class="home-decision-section-head">
+                <div>
+                  <p class="card-label">Startup Diagnostics</p>
+                  <h3>Loading lifecycle trace</h3>
+                </div>
+                <span class="card-badge neutral">${escapeHtml(`${startupSteps.length} steps`)}</span>
+              </div>
+              <div class="home-decision-kpi-grid">
+                <article class="home-decision-kpi-card">
+                  <span class="data-label">Last project load</span>
+                  <strong>${escapeHtml(compact(lastProjectLoad.project || state.context.currentProject, "Not available"))}</strong>
+                </article>
+                <article class="home-decision-kpi-card">
+                  <span class="data-label">Last load token</span>
+                  <strong>${escapeHtml(compact(lastProjectLoad.token, "Not available"))}</strong>
+                </article>
+                <article class="home-decision-kpi-card">
+                  <span class="data-label">Overlay transitions</span>
+                  <strong>${escapeHtml(formatCount(loadingTransitions.length))}</strong>
+                </article>
+              </div>
+              ${startupSteps.length
+                ? `<ul class="home-decision-list home-decision-list-spaced">
+                    ${startupSteps.slice(-6).map((item) => `<li><strong>${escapeHtml(item.step || "step")}</strong>${item.token ? ` [${escapeHtml(item.token)}]` : ""}${item.detail ? ` - ${escapeHtml(item.detail)}` : ""}</li>`).join("")}
+                  </ul>`
+                : `<div class="empty-box">No startup steps recorded yet.</div>`}
+            </section>`
+          : ""}
+
         ${optionalFailures.length
           ? `<section class="card home-decision-section">
               <div class="home-decision-section-head">
