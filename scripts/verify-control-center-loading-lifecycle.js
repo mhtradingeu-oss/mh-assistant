@@ -9,6 +9,7 @@ const root = process.cwd();
 const appPath = path.join(root, "public/control-center/app.js");
 const stylesPath = path.join(root, "public/control-center/styles.css");
 const apiPath = path.join(root, "public/control-center/api.js");
+const constantsPath = path.join(root, "public/control-center/constants.js");
 
 function read(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -25,6 +26,7 @@ function main() {
   const app = read(appPath);
   const styles = read(stylesPath);
   const api = read(apiPath);
+  const constants = read(constantsPath);
   
 function extractFunctionBody(source, functionName) {
   const pattern = new RegExp(`(?:async\\s+)?function\\s+${functionName}\\s*\\([^)]*\\)\\s*{`);
@@ -69,6 +71,14 @@ function extractFunctionBody(source, functionName) {
 
 const checks = [];
   const loadProjectDataBody = extractFunctionBody(app, "loadProjectData");
+  const requiredDoneIdx = loadProjectDataBody.indexOf('recordStartupStep("loadProjectData.required.done"');
+  const hideDoneIdx = loadProjectDataBody.indexOf('recordStartupStep("loadProjectData.hideLoading.done"');
+  const optionalApplyIdx = app.indexOf("void applyOptionalProjectPayload(payload, loadToken)");
+  const hideRequiredIdx = loadProjectDataBody.indexOf('hideLoading({ token: loadToken, reason: "required-load-done" })');
+  const renderGlobalStartIdx = loadProjectDataBody.indexOf('recordStartupStep("loadProjectData.renderGlobalUi.start"');
+  const renderGlobalCatchIdx = loadProjectDataBody.indexOf('forceHideLoadingOverlay("render-global-ui-error")');
+  const safeRenderStartIdx = loadProjectDataBody.indexOf('recordStartupStep("loadProjectData.safeRenderCurrentPage.start"');
+  const safeRenderCatchIdx = loadProjectDataBody.indexOf('forceHideLoadingOverlay("safe-render-current-page-error")');
 
   check(
     checks,
@@ -94,12 +104,163 @@ const checks = [];
 
   check(
     checks,
+    "required_done_and_hide_steps_recorded",
+    requiredDoneIdx !== -1 && hideDoneIdx !== -1,
+    "Required payload lifecycle records loadProjectData.required.done and loadProjectData.hideLoading.done."
+  );
+
+  check(
+    checks,
+    "hide_loading_before_optional_payload",
+    hideRequiredIdx !== -1 && hideDoneIdx !== -1 && optionalApplyIdx !== -1 && app.indexOf('recordStartupStep("loadProjectData.hideLoading.done"') < optionalApplyIdx,
+    "Required payload path hides loading before optional background payload starts."
+  );
+
+  check(
+    checks,
+    "render_errors_force_hide_loading",
+    renderGlobalStartIdx !== -1 && renderGlobalCatchIdx !== -1 &&
+      safeRenderStartIdx !== -1 && safeRenderCatchIdx !== -1,
+    "renderGlobalUi and safeRenderCurrentPage error paths force-hide loading overlay."
+  );
+
+  check(
+    checks,
     "hide_loading_force_clears_dom",
     /function hideLoading\([\s\S]*overlay\.classList\.remove\("is-visible"\)/.test(app) &&
+      /function hideLoading\([\s\S]*overlay\.hidden\s*=\s*true/.test(app) &&
       /function hideLoading\([\s\S]*overlay\.setAttribute\("aria-hidden",\s*"true"\)/.test(app) &&
-      /function hideLoading\([\s\S]*overlay\.style\.display\s*=\s*"none"/.test(app) &&
-      /function hideLoading\([\s\S]*overlay\.style\.pointerEvents\s*=\s*"none"/.test(app),
-    "hideLoading force-clears class, aria state, display, and pointer events."
+      /function hideLoading\([\s\S]*overlay\.style\.setProperty\("display",\s*"none",\s*"important"\)/.test(app) &&
+      /function hideLoading\([\s\S]*overlay\.style\.visibility\s*=\s*"hidden"/.test(app) &&
+      /function hideLoading\([\s\S]*overlay\.style\.opacity\s*=\s*"0"/.test(app) &&
+      /function hideLoading\([\s\S]*overlay\.style\.pointerEvents\s*=\s*"none"/.test(app) &&
+      /function removeLoadingBodyClasses\(/.test(app),
+    "hideLoading force-clears class, aria state, display, visibility, opacity, pointer events, and body loading classes."
+  );
+
+  check(
+    checks,
+    "startup_unlock_watchdog_exists",
+    /const\s+STARTUP_UNLOCK_TIMEOUT_MS\s*=\s*8000/.test(app) &&
+      /const\s+LOADING_WATCHDOG_INTERVAL_MS\s*=\s*1000/.test(app) &&
+      /function\s+installGlobalLoadingWatchdog\(/.test(app) &&
+      /unlockStartupUi\("global-watchdog"\)/.test(app),
+    "app.js installs a 1s global watchdog that unlocks the UI after 8 seconds."
+  );
+
+  check(
+    checks,
+    "unlock_ui_controls_exist",
+    /function\s+bindStartupRecoveryControls\(/.test(app) &&
+      /startupUnlockBtn/.test(app) &&
+      /startupTraceUnlockBtn/.test(app) &&
+      /Unlock UI/.test(read(path.join(root, "public/control-center/index.html"))),
+    "Unlock UI controls exist in both the startup bar and debug trace panel."
+  );
+
+  check(
+    checks,
+    "runtime_trace_persisted",
+    /const\s+RUNTIME_TRACE_STORAGE_KEY\s*=\s*"mh-control-center-runtime-trace"/.test(app) &&
+      /safeStorageSet\(RUNTIME_TRACE_STORAGE_KEY,\s*JSON\.stringify\(payload\)\)/.test(app) &&
+      /function\s+renderStartupRuntimeTrace\(/.test(app),
+    "Runtime trace is persisted to mh-control-center-runtime-trace and rendered in-browser."
+  );
+
+  check(
+    checks,
+    "debug_startup_mode_exists",
+    /function\s+isDebugStartupMode\(/.test(app) &&
+      /debugStartup/.test(app) &&
+      /startupTracePanel/.test(read(path.join(root, "public/control-center/index.html"))),
+    "debugStartup query mode exposes the full in-browser startup trace panel."
+  );
+
+  check(
+    checks,
+    "fetch_timeout_uses_promise_race",
+    /function\s+fetchProjectWithTimeout\([\s\S]*Promise\.race\(\[fetchAllCoreProjectData\(safeProjectName\),\s*timeoutPromise\]\)/.test(app),
+    "fetchProjectWithTimeout uses Promise.race to guarantee a hard timeout outcome."
+  );
+
+  check(
+    checks,
+    "api_body_read_and_parse_diagnostics_exist",
+    /function\s+readResponseText\(/.test(api) &&
+      /emitApiRuntimeTrace\("response\.text\.start"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.parse\.start"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.parse\.done"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.parse\.error"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.parse\.timeout"/.test(api) &&
+      /JSON\.parse\(rawText\)/.test(api),
+    "api.js traces response body reads and JSON parsing for large payload diagnostics."
+  );
+
+  check(
+    checks,
+    "fetch_parse_watchdog_exists",
+    /const\s+PARSE_WATCHDOG_TIMEOUT_MS\s*=\s*2000/.test(app) &&
+      /function\s+fetchProjectWithTimeout[\s\S]*response\.text\.done/.test(app) &&
+      /function\s+fetchProjectWithTimeout[\s\S]*api\.response\.parse\.done/.test(app) &&
+      /function\s+fetchProjectWithTimeout[\s\S]*phase\s*=\s*"parse-watchdog"/.test(app) &&
+      /loadProjectData\.parse-watchdog/.test(app) &&
+      /forceHideLoadingOverlay\("parse-watchdog"\)/.test(app),
+    "fetchProjectWithTimeout enforces a 2s parse watchdog after response.text.done and unlocks the UI on parse stalls."
+  );
+
+  check(
+    checks,
+    "manual_unlock_force_hides_overlay",
+    /recordStartupStep\("manualUnlock\.start"/.test(app) &&
+      /recordStartupStep\("manualUnlock\.done"/.test(app) &&
+      /forceHideLoadingOverlay\("manual-unlock"\)/.test(app) &&
+      /startupRuntimeState\.manualUnlockActive\s*=\s*reason\s*===\s*"manual-unlock"/.test(app) &&
+      /overlay\.style\.setProperty\("display",\s*"none",\s*"important"\)/.test(app),
+    "Manual Unlock always hard-hides overlay and records manual unlock trace steps."
+  );
+
+  check(
+    checks,
+    "force_hide_overlay_steps_recorded",
+    /recordStartupStep\("forceHideLoadingOverlay\.start"/.test(app) &&
+      /recordStartupStep\("forceHideLoadingOverlay\.done"/.test(app),
+    "forceHideLoadingOverlay emits start/done startup trace steps."
+  );
+
+  check(
+    checks,
+    "styles_hidden_overlay_absolute",
+    /\.loading-overlay\[aria-hidden="true"\],\s*\.loading-overlay:not\(\.is-visible\)\s*\{[\s\S]*display:\s*none\s*!important[\s\S]*visibility:\s*hidden\s*!important[\s\S]*opacity:\s*0\s*!important[\s\S]*pointer-events:\s*none\s*!important/.test(styles),
+    "Hidden loading overlay CSS uses absolute !important rules for aria-hidden and non-visible states."
+  );
+
+  check(
+    checks,
+    "shared_canonical_key_constant_used",
+    /export\s+const\s+CONTROL_ACCESS_KEY_STORAGE_KEY\s*=\s*"mh-control-write-key"/.test(constants) &&
+      /from\s+"\.\/constants\.js"/.test(app) &&
+      /from\s+"\.\/constants\.js"/.test(api) &&
+      /localStorage\.setItem\(CONTROL_ACCESS_KEY_STORAGE_KEY,\s*val\)/.test(app),
+    "Set Access Key and API fetches use the same canonical storage key constant."
+  );
+
+  check(
+    checks,
+    "required_requests_include_control_key_header_when_present",
+    /function\s+buildReadHeaders\([\s\S]*headers\["x-mh-control-key"\]\s*=\s*keyMeta\.key/.test(api) &&
+      /const\s+requiredDashboardPromise\s*=\s*getJson\([\s\S]*\/media-manager\/project\/.+/.test(api) &&
+      /parseJson\(response,\s*fallbackMessage,\s*\{[\s\S]*keyPresent,[\s\S]*keySource,[\s\S]*authHeaderPresent/.test(api),
+    "Required project requests include x-mh-control-key when a key exists and expose non-secret auth diagnostics."
+  );
+
+  check(
+    checks,
+    "missing_key_recovery_visible_and_non_blocking",
+    /handleAccessKeyStartupRecovery/.test(app) &&
+      /showAccessKeyModal\(\)/.test(app) &&
+      /unlockStartupUi\("global-watchdog"\)/.test(app) &&
+      /hideLoading\(\{\s*token:\s*loadToken,\s*reason:\s*"access-key-required"\s*\}\)/.test(app),
+    "Missing key opens the access-key recovery panel and cannot leave the UI permanently modal-blocked."
   );
 
   check(
@@ -123,10 +284,20 @@ const checks = [];
   check(
     checks,
     "overlay_recovery_after_required_success",
-    /const\s+OVERLAY_RECOVERY_DELAY_MS\s*=\s*3000/.test(app) &&
-      /scheduleOverlayRecoveryCheck\(loadToken,\s*loadedProjectName\)/.test(loadProjectDataBody) &&
+    /const\s+OVERLAY_RECOVERY_DELAY_MS\s*=\s*10000/.test(app) &&
+      /scheduleOverlayRecoveryCheck\(loadToken,\s*loadedProjectName,\s*loadStartedAtMs,\s*\(\)\s*=>\s*requiredPayloadSucceeded\)/.test(loadProjectDataBody) &&
+      /if\s*\(!requiredSucceeded\)\s*\{\s*return;\s*\}/.test(app) &&
       /Project loaded, optional data may still be syncing\./.test(app),
-    "Required payload success schedules browser-visible overlay recovery."
+    "Required payload success schedules a 10s hard guard that force-hides loading when optional work lags."
+  );
+
+  check(
+    checks,
+    "optional_404_non_blocking_warning_diagnostics",
+    /Optional \$\{section\} endpoint returned 404 and was skipped\./.test(api) &&
+      /warning:\s*Boolean\(isOptionalNotFound\)/.test(api) &&
+      /if \(entry\?\.warning\)\s*\{[\s\S]*recordStartupStep\("loadProjectData.optional.warning"/.test(app),
+    "Optional insights/learning 404 responses are recorded as non-blocking warning diagnostics."
   );
 
   check(
@@ -172,7 +343,7 @@ const checks = [];
     checks,
     "app_has_clear_saved_key_reload_action",
     /Clear saved key and reload/.test(app) &&
-      /localStorage\.removeItem\(CONTROL_WRITE_KEY_STORAGE_KEY\)/.test(app) &&
+      /localStorage\.removeItem\(CONTROL_ACCESS_KEY_STORAGE_KEY\)/.test(app) &&
       /window\.location\.reload\(\)/.test(app),
     "app.js exposes a Clear saved key and reload recovery action."
   );
@@ -203,8 +374,9 @@ const checks = [];
     "startup_diagnostics_css_visible",
     /\.startup-step-banner\s*\{[\s\S]*position:\s*fixed/.test(styles) &&
       /\.fatal-startup-steps\s*\{[\s\S]*white-space:\s*pre-wrap/.test(styles) &&
+      /\.startup-trace-panel\.is-visible\s*\{[\s\S]*display:\s*flex/.test(styles) &&
       !/fatal-startup-steps|startup-step-banner/.test(ctrlBuildTaskBody),
-    "Startup diagnostics CSS is visible and not nested inside another rule."
+    "Startup diagnostics CSS is visible, includes the trace panel, and is not nested inside another rule."
   );
 
   const failed = checks.filter((item) => !item.pass);

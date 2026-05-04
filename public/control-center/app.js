@@ -55,6 +55,10 @@ import {
   publishPublishingItem,
   failPublishingItem
 } from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
 
 /* =========================
    CONFIG
@@ -62,7 +66,6 @@ import {
 
 setApiBaseUrl("");
 
-const CONTROL_WRITE_KEY_STORAGE_KEY = "mh-control-write-key";
 const CONTROL_WRITE_HEADER = "x-mh-control-key";
 const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
 const DEFAULT_ACTIVE_ROLE = "admin";
@@ -99,21 +102,60 @@ const DEFAULT_ROUTE_ROLE_ACCESS = {
   settings: ["admin"]
 };
 
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+  } catch (_) {}
+}
+
+function setRuntimeControlKey(key) {
+  const normalized = String(key || "").trim();
+  try {
+    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_WRITE_KEY__ = normalized;
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__ = normalized;
+    window.__MH_CONTROL_ACCESS_KEY__ = normalized;
+    window.__MH_ACCESS_KEY__ = normalized;
+  } catch (_) {}
+}
+
 function getControlWriteKey() {
   if (typeof window === "undefined") return "";
 
   const runtimeValue = [
     window.__MH_CONTROL_CENTER_READ_KEY__,
     window.__MH_CONTROL_CENTER_WRITE_KEY__,
-    window.__MH_CONTROL_WRITE_KEY__
+    window.__MH_CONTROL_WRITE_KEY__,
+    window.__MH_CONTROL_CENTER_ACCESS_KEY__,
+    window.__MH_CONTROL_ACCESS_KEY__,
+    window.__MH_ACCESS_KEY__
   ].find((value) => typeof value === "string" && value.trim()) || "";
 
   if (runtimeValue) {
-    return runtimeValue.trim();
+    const normalizedRuntimeKey = runtimeValue.trim();
+    persistCanonicalControlKey(normalizedRuntimeKey);
+    return normalizedRuntimeKey;
   }
 
   try {
-    return String(window.localStorage?.getItem(CONTROL_WRITE_KEY_STORAGE_KEY) || "").trim();
+    const canonical = String(window.localStorage?.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    if (canonical) {
+      return canonical;
+    }
+
+    const legacy = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+      .map((key) => String(window.localStorage?.getItem(key) || "").trim())
+      .find(Boolean) || "";
+
+    if (legacy) {
+      persistCanonicalControlKey(legacy);
+    }
+
+    return legacy;
   } catch (_) {
     return "";
   }
@@ -179,6 +221,7 @@ function installProtectedWriteFetch() {
 
     if (controlKey) {
       headers.set(CONTROL_WRITE_HEADER, controlKey);
+      headers.set("Authorization", `Bearer ${controlKey}`);
     }
 
     const nextInit = {
@@ -273,6 +316,7 @@ function createAccessKeyModal() {
       <div class="access-key-actions">
         <button id="accessKeySaveBtn" class="btn btn-primary" type="button">Save Key</button>
         <button id="accessKeyTestBtn" class="btn btn-secondary" type="button">Test Key</button>
+        <button id="accessKeyDiagBtn" class="btn btn-secondary" type="button">Run Diagnostic</button>
         <button id="accessKeyClearBtn" class="btn btn-danger" type="button">Clear Key</button>
         <button id="accessKeyClearReloadBtn" class="btn btn-danger" type="button">Clear saved key and reload</button>
         <button id="accessKeyCloseBtn" class="btn btn-ghost" type="button">Close</button>
@@ -288,6 +332,161 @@ function setAccessKeyStatus(message, type) {
   if (!status) return;
   status.textContent = message;
   status.className = "access-key-status access-key-status--" + (type || "info");
+}
+
+function getCurrentAccessKeyInputValue() {
+  const input = document.getElementById("accessKeyInput");
+  return String(input?.value || "").trim();
+}
+
+function collectAccessKeyDiagnostics() {
+  const currentInputValue = getCurrentAccessKeyInputValue();
+  const diagnostics = {
+    canonicalStorageKey: CONTROL_ACCESS_KEY_STORAGE_KEY,
+    canonicalValuePresent: false,
+    canonicalValueLength: 0,
+    currentInputPresent: Boolean(currentInputValue),
+    currentInputLength: currentInputValue.length,
+    runtimeSources: [],
+    legacySources: [],
+    resolvedKeyPresent: false,
+    resolvedKeyLength: 0,
+    resolvedSource: "none"
+  };
+
+  try {
+    const canonical = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+    diagnostics.canonicalValuePresent = Boolean(canonical);
+    diagnostics.canonicalValueLength = canonical.length;
+
+    CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => {
+      const value = String(localStorage.getItem(legacyKey) || "").trim();
+      if (value) {
+        diagnostics.legacySources.push({ key: legacyKey, length: value.length });
+      }
+    });
+  } catch (_) {}
+
+  const runtimeCandidates = [
+    { key: "window.__MH_CONTROL_CENTER_READ_KEY__", value: window.__MH_CONTROL_CENTER_READ_KEY__ },
+    { key: "window.__MH_CONTROL_CENTER_WRITE_KEY__", value: window.__MH_CONTROL_CENTER_WRITE_KEY__ },
+    { key: "window.__MH_CONTROL_WRITE_KEY__", value: window.__MH_CONTROL_WRITE_KEY__ },
+    { key: "window.__MH_CONTROL_CENTER_ACCESS_KEY__", value: window.__MH_CONTROL_CENTER_ACCESS_KEY__ },
+    { key: "window.__MH_CONTROL_ACCESS_KEY__", value: window.__MH_CONTROL_ACCESS_KEY__ },
+    { key: "window.__MH_ACCESS_KEY__", value: window.__MH_ACCESS_KEY__ }
+  ];
+
+  runtimeCandidates.forEach((candidate) => {
+    const value = String(candidate.value || "").trim();
+    if (value) {
+      diagnostics.runtimeSources.push({ key: candidate.key, length: value.length });
+    }
+  });
+
+  const resolved = getControlWriteKey();
+  diagnostics.resolvedKeyPresent = Boolean(resolved);
+  diagnostics.resolvedKeyLength = String(resolved || "").length;
+
+  if (diagnostics.runtimeSources.length) {
+    diagnostics.resolvedSource = diagnostics.runtimeSources[0].key;
+  } else if (diagnostics.canonicalValuePresent) {
+    diagnostics.resolvedSource = `localStorage:${CONTROL_ACCESS_KEY_STORAGE_KEY}`;
+  } else if (diagnostics.legacySources.length) {
+    diagnostics.resolvedSource = `localStorage:${diagnostics.legacySources[0].key}`;
+  }
+
+  return diagnostics;
+}
+
+function formatAccessKeyDiagnostics(diagnostics, requestResult = null) {
+  const lines = [
+    "Access Key Diagnostic",
+    `canonical key: ${diagnostics.canonicalStorageKey}`,
+    `canonical value: ${diagnostics.canonicalValuePresent ? `present (len=${diagnostics.canonicalValueLength})` : "missing"}`,
+    `current input present: ${diagnostics.currentInputPresent ? `yes (len=${diagnostics.currentInputLength})` : "no"}`,
+    `legacy keys with values: ${diagnostics.legacySources.length}`,
+    `runtime key globals: ${diagnostics.runtimeSources.length}`,
+    `resolved by getControlWriteKey(): ${diagnostics.resolvedKeyPresent ? `present (len=${diagnostics.resolvedKeyLength})` : "missing"}`,
+    `resolved source: ${diagnostics.resolvedSource}`
+  ];
+
+  if (diagnostics.legacySources.length) {
+    lines.push(
+      "legacy matches: " + diagnostics.legacySources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+    );
+  }
+
+  if (diagnostics.runtimeSources.length) {
+    lines.push(
+      "runtime matches: " + diagnostics.runtimeSources.map((item) => `${item.key}(len=${item.length})`).join(", ")
+    );
+  }
+
+  if (requestResult) {
+    lines.push(
+      `probe /media-manager/projects: status=${requestResult.status || "request-failed"} auth=${requestResult.authMode}`
+    );
+    if (requestResult.message) {
+      lines.push(`probe message: ${requestResult.message}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+async function runAccessKeyDiagnosticProbe(inputValue = "") {
+  const diagnostics = collectAccessKeyDiagnostics();
+  const latestInputKey = getCurrentAccessKeyInputValue();
+  const explicitInputKey = String(inputValue || "").trim();
+  const inputKey = latestInputKey || explicitInputKey;
+  const key = inputKey || (diagnostics.canonicalValuePresent
+    ? String(localStorage.getItem("mh-control-write-key") || "").trim()
+    : (diagnostics.resolvedKeyPresent ? getControlWriteKey() : ""));
+
+  if (!key) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "none",
+        message: "No key available from input/runtime/localStorage"
+      })
+    };
+  }
+
+  try {
+    const response = await fetch("/media-manager/projects", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "x-mh-control-key": key,
+        Authorization: `Bearer ${key}`
+      }
+    });
+
+    const text = formatAccessKeyDiagnostics(diagnostics, {
+      status: response.status,
+      authMode: "x-mh-control-key + Authorization",
+      message: response.ok ? "ok" : "not-ok"
+    });
+
+    return {
+      diagnostics,
+      type: response.ok ? "success" : (response.status === 401 || response.status === 403 ? "error" : "warn"),
+      text
+    };
+  } catch (error) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "x-mh-control-key + Authorization",
+        message: error?.message || "request failed"
+      })
+    };
+  }
 }
 
 async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
@@ -310,33 +509,53 @@ function bindAccessKeyPanel(modal) {
   const input = modal.querySelector("#accessKeyInput");
   const saveBtn = modal.querySelector("#accessKeySaveBtn");
   const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
   const clearBtn = modal.querySelector("#accessKeyClearBtn");
   const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
   const closeBtn = modal.querySelector("#accessKeyCloseBtn");
 
   if (saveBtn) {
     saveBtn.addEventListener("click", async () => {
-      const val = (input?.value || "").trim();
+      const val = getCurrentAccessKeyInputValue();
       if (!val) {
         setAccessKeyStatus("No key entered.", "error");
         return;
       }
+
       try {
-        localStorage.setItem(CONTROL_WRITE_KEY_STORAGE_KEY, val);
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
       } catch (_) {
-        setAccessKeyStatus("Could not save key to localStorage.", "error");
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
         return;
       }
-      if (input) input.value = "";
-      setAccessKeyStatus("Key saved. Reloading front page and projects…", "success");
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
       updateAccessKeyButton();
 
       try {
-        await refreshProjectsAfterKeyUpdate();
-        setAccessKeyStatus("Key saved and project loaded.", "success");
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
       } catch (error) {
         setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
       }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
     });
   }
 
@@ -345,7 +564,14 @@ function bindAccessKeyPanel(modal) {
       setAccessKeyStatus("Testing…", "info");
       const inputVal = (input?.value || "").trim();
       let storedVal = "";
-      try { storedVal = localStorage.getItem(CONTROL_WRITE_KEY_STORAGE_KEY) || ""; } catch (_) {}
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
       const keyToTest = inputVal || storedVal;
       if (!keyToTest) {
         setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
@@ -364,7 +590,10 @@ function bindAccessKeyPanel(modal) {
 
           try {
             if (inputVal) {
-              localStorage.setItem(CONTROL_WRITE_KEY_STORAGE_KEY, inputVal);
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+              } catch (_) {}
               updateAccessKeyButton();
             }
             await refreshProjectsAfterKeyUpdate();
@@ -385,7 +614,11 @@ function bindAccessKeyPanel(modal) {
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
-      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
       if (input) input.value = "";
       setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
       updateAccessKeyButton();
@@ -394,7 +627,11 @@ function bindAccessKeyPanel(modal) {
 
   if (clearReloadBtn) {
     clearReloadBtn.addEventListener("click", () => {
-      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
       window.location.reload();
     });
   }
@@ -619,6 +856,12 @@ function showLoading(
     return;
   }
 
+  if (startupRuntimeState.manualUnlockActive && token === startupRuntimeState.manualUnlockToken) {
+    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+    return;
+  }
+
+  const wasVisible = isLoadingVisible();
   const overlay = $("loadingOverlay");
   const loadingTitle = $("loadingTitle");
   const loadingText = $("loadingText");
@@ -627,14 +870,30 @@ function showLoading(
   if (loadingText) loadingText.textContent = text;
 
   if (overlay) {
+    overlay.hidden = false;
     overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.style.visibility = "visible";
     overlay.style.pointerEvents = "auto";
     overlay.classList.add("is-visible");
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("is-loading", "loading", "loading-locked");
-    installLoadingWatchdog("loading-overlay-visible");
+    installLoadingWatchdog(reason, wasVisible);
     recordLoadingTransition("show", { token, reason });
   }
+}
+
+function removeLoadingBodyClasses() {
+  const body = document.body;
+  if (!body) return;
+
+  body.classList.remove("is-loading", "loading", "loading-locked", "app-loading", "app-locked");
+
+  Array.from(body.classList).forEach((className) => {
+    if (/loading|locked/i.test(className)) {
+      body.classList.remove(className);
+    }
+  });
 }
 
 function hideLoading(options = {}) {
@@ -651,23 +910,21 @@ function hideLoading(options = {}) {
   if (!overlay) return false;
 
   overlay.classList.remove("is-visible");
+  overlay.hidden = true;
   overlay.setAttribute("aria-hidden", "true");
-  overlay.style.display = "none";
+  overlay.style.setProperty("display", "none", "important");
+  overlay.style.opacity = "0";
+  overlay.style.visibility = "hidden";
   overlay.style.pointerEvents = "none";
 
-  const body = document.body;
-  if (body) {
-    body.classList.remove("is-loading", "loading", "loading-locked", "app-loading", "app-locked");
-
-    Array.from(body.classList).forEach((className) => {
-      if (/loading|locked/i.test(className)) {
-        body.classList.remove(className);
-      }
-    });
-  }
+  removeLoadingBodyClasses();
 
   clearLoadingWatchdog();
+  startupRuntimeState.hideLoadingCalled = true;
+  startupRuntimeState.hideLoadingReason = reason;
+  startupRuntimeState.hideLoadingAt = new Date().toISOString();
   recordLoadingTransition(force ? "hide-force" : "hide", { token, reason });
+  persistRuntimeTrace();
   return true;
 }
 
@@ -683,27 +940,224 @@ function isLoadingVisible() {
   return Boolean(classVisible || ariaVisible || pointerBlocking || displayBlocking);
 }
 
-const LOADING_WATCHDOG_TIMEOUT_MS = 30000;
-const OVERLAY_RECOVERY_DELAY_MS = 3000;
+const STARTUP_UNLOCK_TIMEOUT_MS = 8000;
+const LOADING_WATCHDOG_TIMEOUT_MS = STARTUP_UNLOCK_TIMEOUT_MS;
+const LOADING_WATCHDOG_INTERVAL_MS = 1000;
+const OVERLAY_RECOVERY_DELAY_MS = 10000;
+const PARSE_WATCHDOG_TIMEOUT_MS = 2000;
 const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
 const LAST_PROJECT_LOAD_STORAGE_KEY = "mh-control-center-last-project-load";
 const LOADING_TRANSITIONS_STORAGE_KEY = "mh-control-center-loading-transitions";
 const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
 const FETCH_DIAGNOSTICS_STORAGE_KEY = "mh-control-center-fetch-diagnostics";
+const STARTUP_UNLOCK_STORAGE_KEY = "mh-control-center-startup-unlock";
+const RUNTIME_TRACE_STORAGE_KEY = "mh-control-center-runtime-trace";
 const STARTUP_HISTORY_LIMIT = 60;
 const LOADING_TRANSITION_LIMIT = 80;
+const RUNTIME_TRACE_LIMIT = 120;
 
-let loadingWatchdogTimer = null;
+let globalLoadingWatchdogTimer = null;
+let loadingWatchdogVisibleSinceMs = 0;
 let loadingWatchdogReason = "";
 
 const startupStepHistory = [];
 const loadingTransitionHistory = [];
+const runtimeTraceHistory = [];
 
 const startupDiagnostics = {
   failedEndpoints: [],
   lastErrorSource: "",
-  lastErrorMessage: ""
+  lastErrorMessage: "",
+  requestAuth: {
+    keyPresent: false,
+    keySource: "none",
+    authHeaderPresent: false,
+    endpoint: ""
+  }
 };
+
+const startupRuntimeState = {
+  startupStartedAtMs: 0,
+  currentProject: "",
+  currentToken: "",
+  projectPayloadSuccess: false,
+  payloadSuccessAt: "",
+  hideLoadingCalled: false,
+  hideLoadingReason: "",
+  hideLoadingAt: "",
+  unlocked: false,
+  unlockReason: "",
+  unlockAt: "",
+  unlockVisible: false,
+  lastApiStage: "",
+  lastApiMessage: "",
+  lastApiEndpoint: "",
+  manualUnlockActive: false,
+  manualUnlockToken: "",
+  initialized: false,
+  initReadyAt: ""
+};
+
+function isDebugStartupMode() {
+  if (typeof window === "undefined") return false;
+
+  try {
+    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function getOverlayState() {
+  const overlay = $("loadingOverlay");
+  const body = document.body;
+  const overlayNodes = typeof document !== "undefined"
+    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+    : [];
+
+  return {
+    exists: Boolean(overlay),
+    count: overlayNodes.length,
+    className: String(overlay?.className || ""),
+    display: String(overlay?.style?.display || ""),
+    visibility: String(overlay?.style?.visibility || ""),
+    opacity: String(overlay?.style?.opacity || ""),
+    pointerEvents: String(overlay?.style?.pointerEvents || ""),
+    ariaHidden: String(overlay?.getAttribute?.("aria-hidden") || ""),
+    bodyClasses: body ? body.className : ""
+  };
+}
+
+function formatRuntimeTraceEntry(entry) {
+  if (!entry) return "";
+
+  const tokenText = entry.token ? ` [${entry.token}]` : "";
+  const detailText = entry.detail ? ` - ${entry.detail}` : "";
+  const endpointText = entry.endpoint ? ` (${entry.endpoint})` : "";
+  return `${entry.at} ${entry.stage}${tokenText}${endpointText}${detailText}`;
+}
+
+function boundedTracePush(stage, details = {}) {
+  const entry = {
+    at: new Date().toISOString(),
+    stage: String(stage || "startup.trace"),
+    token: String(details.token || startupRuntimeState.currentToken || ""),
+    detail: String(details.detail || details.message || ""),
+    endpoint: String(details.endpoint || "")
+  };
+
+  boundedPush(runtimeTraceHistory, entry, RUNTIME_TRACE_LIMIT);
+  return entry;
+}
+
+function renderStartupRuntimeTrace(cachedPayload = null) {
+  const state = getState();
+  const payload = cachedPayload || {
+    debugStartup: isDebugStartupMode(),
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    appLoading: Boolean(state.loading),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+  const panel = $("startupTracePanel");
+  const meta = $("startupTraceMeta");
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace() {
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup: isDebugStartupMode(),
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    appLoading: Boolean(state.loading),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+function recordRuntimeTrace(stage, details = {}) {
+  boundedTracePush(stage, details);
+  persistRuntimeTrace();
+}
+
+function updateStartupUnlockVisibility(visible) {
+  const nextVisible = Boolean(visible);
+  if (startupRuntimeState.unlockVisible === nextVisible) {
+    return;
+  }
+
+  startupRuntimeState.unlockVisible = nextVisible;
+  recordRuntimeTrace(nextVisible ? "startup.unlock.available" : "startup.unlock.hidden", {
+    detail: startupRuntimeState.currentProject || startupRuntimeState.currentToken || "startup"
+  });
+}
 
 function safeStorageSet(key, value) {
   try {
@@ -748,6 +1202,8 @@ function renderStartupStepDiagnostics() {
     startupSteps: startupStepHistory.slice(-20),
     loadingTransitions: loadingTransitionHistory.slice(-20)
   });
+
+  persistRuntimeTrace();
 }
 
 function recordStartupStep(step, details = {}) {
@@ -760,6 +1216,10 @@ function recordStartupStep(step, details = {}) {
 
   boundedPush(startupStepHistory, entry, STARTUP_HISTORY_LIMIT);
   safeStorageSet(STARTUP_STEPS_STORAGE_KEY, JSON.stringify(startupStepHistory));
+  boundedTracePush(entry.step, {
+    token: entry.token,
+    detail: entry.detail
+  });
   renderStartupStepDiagnostics();
 }
 
@@ -778,6 +1238,11 @@ function recordLoadingTransition(action, details = {}) {
 
   boundedPush(loadingTransitionHistory, entry, LOADING_TRANSITION_LIMIT);
   safeStorageSet(LOADING_TRANSITIONS_STORAGE_KEY, JSON.stringify(loadingTransitionHistory));
+  boundedTracePush(`loading.${entry.action}`, {
+    token: entry.token,
+    detail: `${entry.reason || ""} class=${entry.classVisible ? "visible" : "hidden"} display=${entry.display || "unset"}`,
+    endpoint: "overlay"
+  });
   renderStartupStepDiagnostics();
 }
 
@@ -792,6 +1257,7 @@ function recordLastProjectLoad(summary) {
 
 function recordStartupFailure(source, error) {
   const message = String(error?.message || error || "Unknown startup error").trim();
+  const diagnostics = error?.diagnostics || {};
   safeStorageSet(LAST_STARTUP_ERROR_STORAGE_KEY, JSON.stringify({
     at: new Date().toISOString(),
     source: String(source || "startup"),
@@ -803,13 +1269,23 @@ function recordStartupFailure(source, error) {
     at: new Date().toISOString(),
     source: String(source || "startup"),
     message,
-    diagnostics: error?.diagnostics || null,
+    diagnostics: diagnostics || null,
     endpoint: String(error?.endpoint || ""),
     status: error?.status || null
   }));
 
   startupDiagnostics.lastErrorSource = String(source || "startup");
   startupDiagnostics.lastErrorMessage = message;
+  startupDiagnostics.requestAuth = {
+    keyPresent: Boolean(diagnostics?.keyPresent),
+    keySource: String(diagnostics?.keySource || "none"),
+    authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+    endpoint: String(diagnostics?.endpoint || error?.endpoint || "")
+  };
+  recordRuntimeTrace("startup.failure", {
+    detail: `${String(source || "startup")}: ${message}`,
+    endpoint: String(error?.endpoint || "")
+  });
 
   const endpoint = String(error?.endpoint || "").trim();
   if (!endpoint) return;
@@ -846,19 +1322,122 @@ function renderStartupDiagnosticsText(reason = "") {
     const recentSteps = startupStepHistory.slice(-6).map((entry) => formatStepEntry(entry)).join(" | ");
     rows.push(`Steps: ${recentSteps}`);
   }
+  const requestAuth = startupDiagnostics.requestAuth || {};
+  const authEndpoint = String(requestAuth.endpoint || "").trim();
+  if (authEndpoint || requestAuth.keyPresent || requestAuth.authHeaderPresent) {
+    rows.push(
+      `Request auth: keyPresent=${requestAuth.keyPresent ? "true" : "false"}, ` +
+      `keySource=${requestAuth.keySource || "none"}, ` +
+      `authHeaderPresent=${requestAuth.authHeaderPresent ? "true" : "false"}, ` +
+      `endpoint=${authEndpoint || "unknown"}`
+    );
+  }
   return rows.join("\n");
 }
 
 function forceHideLoadingOverlay(reason = "access-key-recovery") {
+  recordStartupStep("forceHideLoadingOverlay.start", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
   hideLoading({ reason, force: true });
 
   const overlay = $("loadingOverlay");
-  if (!overlay) return;
+  if (!overlay) {
+    recordStartupStep("forceHideLoadingOverlay.done", {
+      token: activeProjectLoadToken,
+      detail: reason
+    });
+    return;
+  }
 
   overlay.classList.remove("is-visible");
+  overlay.hidden = true;
   overlay.setAttribute("aria-hidden", "true");
-  overlay.style.display = "none";
+  overlay.style.setProperty("display", "none", "important");
+  overlay.style.opacity = "0";
+  overlay.style.visibility = "hidden";
   overlay.style.pointerEvents = "none";
+  removeLoadingBodyClasses();
+  clearLoadingWatchdog();
+  recordRuntimeTrace("loading.force-hide", {
+    token: activeProjectLoadToken,
+    detail: reason,
+    endpoint: "overlay"
+  });
+  recordStartupStep("forceHideLoadingOverlay.done", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+}
+
+function recordStartupUnlock(reason = "manual-unlock") {
+  const payload = {
+    at: new Date().toISOString(),
+    reason,
+    project: startupRuntimeState.currentProject || getState().context.currentProject || "",
+    token: startupRuntimeState.currentToken || activeProjectLoadToken || ""
+  };
+
+  startupRuntimeState.unlocked = true;
+  startupRuntimeState.unlockReason = reason;
+  startupRuntimeState.unlockAt = payload.at;
+  startupRuntimeState.unlockVisible = true;
+  safeStorageSet(STARTUP_UNLOCK_STORAGE_KEY, JSON.stringify(payload));
+  recordRuntimeTrace("startup.unlock", {
+    token: payload.token,
+    detail: reason
+  });
+}
+
+function unlockStartupUi(reason = "manual-unlock") {
+  recordStartupStep("manualUnlock.start", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+  startupRuntimeState.manualUnlockActive = reason === "manual-unlock";
+  startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+  if (reason === "manual-unlock") {
+    forceHideLoadingOverlay("manual-unlock");
+  } else {
+    forceHideLoadingOverlay(reason);
+  }
+  setLoading(false);
+  removeLoadingBodyClasses();
+
+  const overlay = $("loadingOverlay");
+  if (overlay) {
+    overlay.classList.remove("is-visible");
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.hidden = true;
+    overlay.style.setProperty("display", "none", "important");
+    overlay.style.visibility = "hidden";
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
+  }
+
+  recordStartupUnlock(reason);
+  showError("Startup is still syncing. The interface has been unlocked.");
+  showMessage("Startup is still syncing. The interface has been unlocked.");
+  recordStartupStep("manualUnlock.done", {
+    token: activeProjectLoadToken,
+    detail: reason
+  });
+  renderStartupRuntimeTrace();
+}
+
+function bindStartupRecoveryControls() {
+  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+    const button = $(id);
+    if (!button || button.dataset.bound) {
+      return;
+    }
+
+    button.dataset.bound = "1";
+    button.addEventListener("click", () => {
+      unlockStartupUi("manual-unlock");
+    });
+  });
 }
 
 function isMissingReadKeyMessage(message) {
@@ -944,7 +1523,10 @@ function bindFatalErrorPanelActions() {
   if (clearSavedKeyReloadBtn && !clearSavedKeyReloadBtn.dataset.bound) {
     clearSavedKeyReloadBtn.dataset.bound = "1";
     clearSavedKeyReloadBtn.addEventListener("click", () => {
-      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
       window.location.reload();
     });
   }
@@ -992,32 +1574,67 @@ function handleStartupFatalError(source, error) {
 }
 
 function clearLoadingWatchdog() {
-  if (loadingWatchdogTimer) {
-    clearTimeout(loadingWatchdogTimer);
-    loadingWatchdogTimer = null;
-  }
+  loadingWatchdogVisibleSinceMs = 0;
   loadingWatchdogReason = "";
+  updateStartupUnlockVisibility(false);
 }
 
-function installLoadingWatchdog(reason = "project-load") {
-  clearLoadingWatchdog();
+function installLoadingWatchdog(reason = "project-load", preserveStart = false) {
+  if (!preserveStart || !loadingWatchdogVisibleSinceMs) {
+    loadingWatchdogVisibleSinceMs = Date.now();
+  }
   loadingWatchdogReason = String(reason || "project-load");
+}
 
-  loadingWatchdogTimer = setTimeout(() => {
-    if (!isLoadingVisible()) return;
+function installGlobalLoadingWatchdog() {
+  if (globalLoadingWatchdogTimer || typeof window === "undefined") {
+    return;
+  }
 
-    const timeoutError = new Error(
-      `Loading watchdog timed out after ${LOADING_WATCHDOG_TIMEOUT_MS / 1000}s during ${loadingWatchdogReason}.`
-    );
-    timeoutError.isTimeout = true;
-    handleStartupFatalError("loading-watchdog", timeoutError);
-  }, LOADING_WATCHDOG_TIMEOUT_MS);
+  globalLoadingWatchdogTimer = window.setInterval(() => {
+    const startupAgeMs = startupRuntimeState.startupStartedAtMs
+      ? Date.now() - startupRuntimeState.startupStartedAtMs
+      : 0;
+    const overlayVisibleMs = loadingWatchdogVisibleSinceMs
+      ? Date.now() - loadingWatchdogVisibleSinceMs
+      : 0;
+
+    if (!startupRuntimeState.unlocked && startupAgeMs >= STARTUP_UNLOCK_TIMEOUT_MS) {
+      updateStartupUnlockVisibility(true);
+    }
+
+    if (
+      isLoadingVisible() &&
+      loadingWatchdogVisibleSinceMs &&
+      overlayVisibleMs >= LOADING_WATCHDOG_TIMEOUT_MS
+    ) {
+      unlockStartupUi("global-watchdog");
+    }
+  }, LOADING_WATCHDOG_INTERVAL_MS);
 }
 
 function installGlobalErrorGuards() {
   if (typeof window === "undefined" || window.__mhControlCenterErrorGuardsInstalled) {
     return;
   }
+
+  window.addEventListener("mh:control-center-api-trace", (event) => {
+    const detail = event?.detail || {};
+    const stage = String(detail.stage || "trace");
+    const traceStage = stage.startsWith("api.") ? stage : `api.${stage}`;
+    startupRuntimeState.lastApiStage = String(detail.stage || "");
+    startupRuntimeState.lastApiMessage = String(detail.message || "");
+    startupRuntimeState.lastApiEndpoint = String(detail.endpoint || "");
+    recordRuntimeTrace(traceStage, {
+      token: activeProjectLoadToken,
+      detail: [
+        detail.message,
+        detail.status ? `status=${detail.status}` : "",
+        detail.bodyLength ? `bytes=${detail.bodyLength}` : ""
+      ].filter(Boolean).join(" "),
+      endpoint: detail.endpoint || ""
+    });
+  });
 
   window.__mhControlCenterErrorGuardsInstalled = true;
 
@@ -1394,21 +2011,152 @@ function isActiveProjectLoadToken(token) {
 }
 
 function fetchProjectWithTimeout(projectName) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`));
-    }, PROJECT_LOAD_TIMEOUT_MS);
+  const safeProjectName = String(projectName || "");
 
-    fetchAllCoreProjectData(projectName)
+  return new Promise((resolve, reject) => {
+    let timer = null;
+    let parseWatchdogTimer = null;
+    let settled = false;
+    let sawResponseTextDone = false;
+    let sawParseTerminalEvent = false;
+
+    const parseTerminalStages = new Set([
+      "api.response.parse.done",
+      "api.response.parse.error",
+      "api.response.parse.timeout",
+      "response.parse.done",
+      "response.parse.error",
+      "response.parse.timeout"
+    ]);
+
+    function cleanup() {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      if (parseWatchdogTimer) {
+        clearTimeout(parseWatchdogTimer);
+        parseWatchdogTimer = null;
+      }
+      if (typeof window !== "undefined") {
+        window.removeEventListener("mh:control-center-api-trace", onApiTrace);
+      }
+    }
+
+    function settleResolve(payload) {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(payload);
+    }
+
+    function settleReject(error) {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    }
+
+    function onApiTrace(event) {
+      const detail = event?.detail || {};
+      const stage = String(detail.stage || "");
+      if (!stage) return;
+
+      if (parseTerminalStages.has(stage)) {
+        sawParseTerminalEvent = true;
+        if (parseWatchdogTimer) {
+          clearTimeout(parseWatchdogTimer);
+          parseWatchdogTimer = null;
+        }
+        return;
+      }
+
+      if (stage === "response.text.done" || stage === "api.response.text.done") {
+        sawResponseTextDone = true;
+        if (parseWatchdogTimer) {
+          clearTimeout(parseWatchdogTimer);
+        }
+        parseWatchdogTimer = setTimeout(() => {
+          if (settled || sawParseTerminalEvent || !sawResponseTextDone) {
+            return;
+          }
+
+          const error = new Error("Project response was received but could not be processed.");
+          error.phase = "parse-watchdog";
+          error.isParseWatchdog = true;
+          error.visible = true;
+          recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
+            token: activeProjectLoadToken,
+            detail: safeProjectName
+          });
+          settleReject(error);
+        }, PARSE_WATCHDOG_TIMEOUT_MS);
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("mh:control-center-api-trace", onApiTrace);
+    }
+
+    const timeoutPromise = new Promise((_, rejectTimeout) => {
+      timer = setTimeout(() => {
+        const error = new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`);
+        error.isTimeout = true;
+        error.phase = "timeout";
+        rejectTimeout(error);
+      }, PROJECT_LOAD_TIMEOUT_MS);
+    });
+
+    Promise.race([fetchAllCoreProjectData(safeProjectName), timeoutPromise])
       .then((payload) => {
         if (!payload || payload.error) {
-          throw new Error(payload?.error || `Project ${projectName} returned an empty response.`);
+          const error = new Error(payload?.error || `Project ${safeProjectName} returned an empty response.`);
+          error.phase = "payload";
+          throw error;
         }
-        resolve(payload);
+
+        startupRuntimeState.projectPayloadSuccess = true;
+        startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+        recordRuntimeTrace("fetchProjectWithTimeout.success", {
+          token: activeProjectLoadToken,
+          detail: safeProjectName
+        });
+        settleResolve(payload);
       })
-      .catch(reject)
-      .finally(() => clearTimeout(timer));
+      .catch((error) => {
+        const nextError = error instanceof Error ? error : new Error(String(error || "Project fetch failed"));
+        if (!nextError.phase) {
+          nextError.phase = nextError.isTimeout
+            ? "timeout"
+            : nextError.isParseWatchdog
+              ? "parse-watchdog"
+            : isAccessKeyStartupError(nextError)
+              ? "access-key"
+              : "payload";
+        }
+        recordRuntimeTrace("fetchProjectWithTimeout.error", {
+          token: activeProjectLoadToken,
+          detail: `${nextError.phase}: ${nextError.message}`,
+          endpoint: nextError.endpoint || ""
+        });
+        settleReject(nextError);
+      })
+      .finally(() => {
+        cleanup();
+      });
   });
+}
+
+function validateRequiredProjectPayload(payload, projectName) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`Project ${projectName} returned an invalid payload.`);
+  }
+
+  const requiredSections = ["overview", "readiness", "assets"];
+  const missing = requiredSections.filter((section) => payload?.[section] == null);
+
+  if (missing.length) {
+    throw new Error(`Project ${projectName} missing required sections: ${missing.join(", ")}.`);
+  }
 }
 
 function applyProjectPayload(projectName, payload, loadToken = "") {
@@ -1493,9 +2241,21 @@ function buildOptionalLoadWarning(diagnostics) {
   return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
 }
 
-function scheduleOverlayRecoveryCheck(loadToken, projectName) {
+function scheduleOverlayRecoveryCheck(loadToken, projectName, loadStartedAtMs, didRequiredLoadSucceed) {
+  const startedAt = Number(loadStartedAtMs) || Date.now();
+  const elapsedMs = Math.max(0, Date.now() - startedAt);
+  const delayMs = Math.max(0, OVERLAY_RECOVERY_DELAY_MS - elapsedMs);
+
   setTimeout(() => {
     if (!isActiveProjectLoadToken(loadToken)) {
+      return;
+    }
+
+    const requiredSucceeded = typeof didRequiredLoadSucceed === "function"
+      ? Boolean(didRequiredLoadSucceed())
+      : Boolean(didRequiredLoadSucceed);
+
+    if (!requiredSucceeded) {
       return;
     }
 
@@ -1518,7 +2278,7 @@ function scheduleOverlayRecoveryCheck(loadToken, projectName) {
       setError(warning);
       showError(warning);
     }
-  }, OVERLAY_RECOVERY_DELAY_MS);
+  }, delayMs);
 }
 
 async function applyOptionalProjectPayload(payload, loadToken = "") {
@@ -1573,6 +2333,14 @@ async function applyOptionalProjectPayload(payload, loadToken = "") {
 
       const optionalFailures = Array.isArray(diagnostics?.optional) ? diagnostics.optional : [];
       optionalFailures.forEach((entry) => {
+        if (entry?.warning) {
+          recordStartupStep("loadProjectData.optional.warning", {
+            token: loadToken,
+            detail: String(entry?.message || entry?.section || "Optional warning")
+          });
+          return;
+        }
+
         const failure = new Error(String(entry?.message || "Optional endpoint failed"));
         failure.endpoint = entry?.endpoint || entry?.section || "optional";
         failure.status = entry?.status || null;
@@ -1641,6 +2409,20 @@ async function loadProjectData(projectName) {
 
   const loadToken = createProjectLoadToken(safeProjectName);
   activeProjectLoadToken = loadToken;
+  startupRuntimeState.currentToken = loadToken;
+  startupRuntimeState.currentProject = safeProjectName;
+  startupRuntimeState.projectPayloadSuccess = false;
+  startupRuntimeState.payloadSuccessAt = "";
+  startupRuntimeState.hideLoadingCalled = false;
+  startupRuntimeState.hideLoadingReason = "";
+  startupRuntimeState.hideLoadingAt = "";
+  startupRuntimeState.unlocked = false;
+  startupRuntimeState.unlockReason = "";
+  startupRuntimeState.unlockAt = "";
+  startupRuntimeState.startupStartedAtMs = Date.now();
+  startupRuntimeState.unlockVisible = false;
+  startupRuntimeState.manualUnlockActive = false;
+  startupRuntimeState.manualUnlockToken = "";
 
   recordStartupStep("loadProjectData.start", {
     token: loadToken,
@@ -1667,6 +2449,10 @@ async function loadProjectData(projectName) {
 
     let payload = null;
     let loadedProjectName = safeProjectName;
+    const loadStartedAtMs = Date.now();
+    let requiredPayloadSucceeded = false;
+
+    scheduleOverlayRecoveryCheck(loadToken, loadedProjectName, loadStartedAtMs, () => requiredPayloadSucceeded);
 
     showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`, {
       token: loadToken,
@@ -1712,28 +2498,118 @@ async function loadProjectData(projectName) {
         });
       }
 
+      recordStartupStep("loadProjectData.payload.validate.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      validateRequiredProjectPayload(payload, loadedProjectName);
+      recordStartupStep("loadProjectData.payload.validate.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      recordStartupStep("loadProjectData.applyPayload.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
       const applied = applyProjectPayload(loadedProjectName, payload, loadToken);
+      recordStartupStep("loadProjectData.applyPayload.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
       if (!applied) {
         return null;
       }
 
-      recordStartupStep("loadProjectData.renderGlobalUi", {
+      requiredPayloadSucceeded = true;
+      startupRuntimeState.projectPayloadSuccess = true;
+      startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+      recordStartupStep("loadProjectData.required.done", {
         token: loadToken,
         detail: loadedProjectName
       });
-      renderGlobalUi();
-      recordStartupStep("loadProjectData.safeRenderCurrentPage", {
-        token: loadToken,
-        detail: loadedProjectName
-      });
-      await safeRenderCurrentPage();
 
-      scheduleOverlayRecoveryCheck(loadToken, loadedProjectName);
+      setLoading(false);
+      hideLoading({ token: loadToken, reason: "required-load-done" });
+      hideLoading({ token: loadToken, reason: "required-load-done-hard-clear", force: true });
+      recordStartupStep("loadProjectData.hideLoading.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      recordStartupStep("loadProjectData.renderGlobalUi.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      try {
+        renderGlobalUi();
+      } catch (renderGlobalError) {
+        recordStartupFailure("load-project-render-global-ui", renderGlobalError);
+        setLoading(false);
+        forceHideLoadingOverlay("render-global-ui-error");
+        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+        setError(renderMessage);
+        showError(renderMessage);
+        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("renderGlobalUi"));
+        recordStartupStep("loadProjectData.renderGlobalUi.error", {
+          token: loadToken,
+          detail: String(renderMessage)
+        });
+        return payload;
+      }
+      recordStartupStep("loadProjectData.renderGlobalUi.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+
+      recordStartupStep("loadProjectData.safeRenderCurrentPage.start", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
+      try {
+        const rendered = await safeRenderCurrentPage();
+        if (!rendered) {
+          throw new Error("Failed to render current page.");
+        }
+      } catch (pageRenderError) {
+        recordStartupFailure("load-project-safe-render-current-page", pageRenderError);
+        setLoading(false);
+        forceHideLoadingOverlay("safe-render-current-page-error");
+        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+        setError(renderMessage);
+        showError(renderMessage);
+        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("safeRenderCurrentPage"));
+        recordStartupStep("loadProjectData.safeRenderCurrentPage.error", {
+          token: loadToken,
+          detail: String(renderMessage)
+        });
+        return payload;
+      }
+      recordStartupStep("loadProjectData.safeRenderCurrentPage.done", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
 
       showMessage(`Loaded project: ${loadedProjectName}`);
       return payload;
     } catch (error) {
       console.error("[LOAD_PROJECT_ERROR]", error);
+
+      if (error?.phase === "parse-watchdog" || error?.isParseWatchdog) {
+        recordStartupStep("loadProjectData.parse-watchdog", {
+          token: loadToken,
+          detail: String(error?.message || "parse-watchdog")
+        });
+        setLoading(false);
+        forceHideLoadingOverlay("parse-watchdog");
+        const warning = "Project response was received but could not be processed.";
+        setError(warning);
+        showError(warning);
+        showMessage(warning);
+        renderGlobalUi();
+        await safeRenderCurrentPage("[LOAD_PROJECT_PARSE_WATCHDOG_RENDER_FALLBACK]");
+        return null;
+      }
 
       if (isAccessKeyStartupError(error)) {
         handleAccessKeyStartupRecovery(error, {
@@ -1744,6 +2620,8 @@ async function loadProjectData(projectName) {
       }
 
       recordStartupFailure("load-project-data", error);
+      setLoading(false);
+      forceHideLoadingOverlay(`load-project-error-${String(error?.phase || "unknown")}`);
       setCurrentProject(DEFAULT_PROJECT_SLUG);
       setProjectContext({
         project: DEFAULT_PROJECT_SLUG,
@@ -1754,6 +2632,10 @@ async function loadProjectData(projectName) {
       });
       setError(error.message || "Failed to load project data");
       showError(error.message || "Failed to load project data");
+      showFatalErrorPanel(
+        error.message || "Failed to load project data",
+        renderStartupDiagnosticsText("load-project-data")
+      );
       renderGlobalUi();
       await safeRenderCurrentPage("[LOAD_PROJECT_ERROR_RENDER_FALLBACK]");
       recordStartupStep("loadProjectData.error", {
@@ -2196,9 +3078,12 @@ function bindGlobalButtons() {
 
 async function init() {
   try {
+    startupRuntimeState.startupStartedAtMs = Date.now();
     recordStartupStep("init.start");
     installGlobalErrorGuards();
+    installGlobalLoadingWatchdog();
     bindFatalErrorPanelActions();
+    bindStartupRecoveryControls();
     clearFeedback();
 
     initRouter();
@@ -2228,6 +3113,9 @@ async function init() {
     recordStartupStep("init.loadProjectData.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
 
     markInitialized();
+    startupRuntimeState.initialized = true;
+    startupRuntimeState.initReadyAt = new Date().toISOString();
+    updateStartupUnlockVisibility(false);
     window.__mhControlCenterStarted = true;
     recordStartupStep("init.ready");
 
@@ -2243,6 +3131,7 @@ async function init() {
 
 subscribe(() => {
   renderGlobalUi();
+  persistRuntimeTrace();
 });
 
 window.addEventListener("DOMContentLoaded", init);
