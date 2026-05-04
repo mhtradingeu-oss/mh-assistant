@@ -18,9 +18,14 @@
 const fs = require('fs');
 const path = require('path');
 
+if (process.env.ALLOW_MUTATING_TESTS !== '1') {
+  console.error('Refusing to run mutating scheduler automation verification. Set ALLOW_MUTATING_TESTS=1 to create scheduler jobs and execution logs.');
+  process.exit(1);
+}
+
 const HOST = String(process.env.MH_HOST || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const TEST_PROJECT = 'hairoticmen';
-const DATA_BASE = '/opt/mh-assistant/data';
+const DATA_BASE = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..'), 'data');
 
 // ---------------------------------------------------------------------------
 // Helpers

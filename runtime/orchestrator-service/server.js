@@ -458,7 +458,7 @@ const upload = multer({
 });
 
 
-const BASE_DIR = process.env.MH_ASSISTANT_ROOT || '/opt/mh-assistant';
+const BASE_DIR = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
 const CONTEXTS_DIR = path.join(BASE_DIR, 'contexts');
 const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
 const DATA_DIR = path.join(BASE_DIR, 'data');
@@ -838,6 +838,10 @@ function hasMatchingEntries(dirPath, matcher) {
 }
 
 function writeReadRedirectionTelemetry(resolution, entry) {
+  if (String(process.env.MH_DISABLE_READ_TELEMETRY || '').trim() === '1') {
+    return;
+  }
+
   try {
     const telemetryDir = path.join(resolution.executionRoot, 'telemetry');
     ensureDir(telemetryDir);
@@ -3269,6 +3273,46 @@ function getGermanLaunchPaths(projectName) {
   };
 }
 
+function normalizeLaunchProductText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getLaunchProductStableKey(product) {
+  const id = String(product?.product_id || product?.id || '').trim().toLowerCase();
+  if (id) return `id:${id}`;
+
+  const slug = String(product?.product_slug || product?.slug || '').trim().toLowerCase();
+  if (slug) return `slug:${slug}`;
+
+  return '';
+}
+
+function productMatchesLaunchTheme(product, themes = []) {
+  const normalizedThemes = themes
+    .map((theme) => normalizeLaunchProductText(theme))
+    .filter(Boolean);
+
+  if (!normalizedThemes.length) {
+    return true;
+  }
+
+  const category = normalizeLaunchProductText(product?.category);
+  const productType = normalizeLaunchProductText(product?.marketing_intelligence?.product_type);
+  const haystack = `${category} ${productType}`.trim();
+  const tokens = new Set(haystack.split(' ').filter(Boolean));
+
+  return normalizedThemes.some((theme) => {
+    if (category === theme || productType === theme) return true;
+    if (tokens.has(theme)) return true;
+    return haystack.includes(theme);
+  });
+}
+
 function selectLaunchReadyProducts(products, projectName, context = 'launch') {
   if (!Array.isArray(products)) {
     appLogger.warn('launch_products_invalid', {
@@ -3280,15 +3324,35 @@ function selectLaunchReadyProducts(products, projectName, context = 'launch') {
     return [];
   }
 
-  const launchReadyProducts = products.filter(p =>
-    p &&
-    p.status === 'publish' &&
-    p.product_slug &&
-    p.product_name &&
-    !String(p.product_name).includes('(Copy)') &&
-    !String(p.product_name).includes('[DRAFT') &&
-    !String(p.product_name).toLowerCase().includes('clone')
-  );
+  const seen = new Set();
+  const launchReadyProducts = [];
+
+  for (const product of products) {
+    if (!product || typeof product !== 'object') {
+      continue;
+    }
+
+    const status = String(product.status || '').trim().toLowerCase();
+    const slug = String(product.product_slug || product.slug || '').trim();
+    const name = String(product.product_name || product.name || '').trim();
+    const stableKey = getLaunchProductStableKey(product);
+
+    if (status !== 'publish' || !slug || !name || !stableKey) {
+      continue;
+    }
+
+    const lowerName = name.toLowerCase();
+    if (name.includes('(Copy)') || name.includes('[DRAFT') || lowerName.includes('clone')) {
+      continue;
+    }
+
+    if (seen.has(stableKey)) {
+      continue;
+    }
+
+    seen.add(stableKey);
+    launchReadyProducts.push(product);
+  }
 
   if (!launchReadyProducts.length) {
     appLogger.warn('launch_ready_products_empty', {
@@ -3404,27 +3468,15 @@ function buildLaunchWave(projectName, waveName) {
   let launchReadyProducts = selectLaunchReadyProducts(products, projectName, 'build_launch_wave');
 
   if (safeWaveName.includes('beard')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'beard' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'beard'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['beard']));
   }
 
   if (safeWaveName.includes('hair')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'hair' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'hair'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['hair']));
   }
 
   if (safeWaveName.includes('skin') || safeWaveName.includes('face')) {
-    launchReadyProducts = launchReadyProducts.filter(
-      p =>
-        String(p.category || '').toLowerCase() === 'skin' ||
-        String(p.marketing_intelligence?.product_type || '').toLowerCase() === 'skin'
-    );
+    launchReadyProducts = launchReadyProducts.filter((p) => productMatchesLaunchTheme(p, ['skin', 'face']));
   }
 
   const selectedProducts = launchReadyProducts.slice(0, 5).map(p => ({
@@ -11066,12 +11118,52 @@ app.get(/^\/control-center$/, (req, res) => {
   return res.redirect(302, '/control-center/');
 });
 
+function buildControlCenterBootstrapScript(req) {
+  const hostname = String(req.hostname || '').trim().toLowerCase();
+  const isLocalRequest = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+
+  if (!isLocalRequest) {
+    return '';
+  }
+
+  const controlKey =
+    process.env.MH_CONTROL_CENTER_READ_KEY ||
+    process.env.MH_CONTROL_CENTER_WRITE_KEY ||
+    process.env.MH_CONTROL_KEY ||
+    '';
+
+  if (!controlKey) {
+    return '';
+  }
+
+  const serializedKey = JSON.stringify(String(controlKey));
+
+  return [
+    '<script>',
+    `window.__MH_CONTROL_CENTER_READ_KEY__ = ${serializedKey};`,
+    `window.__MH_CONTROL_CENTER_WRITE_KEY__ = ${serializedKey};`,
+    `window.__MH_CONTROL_WRITE_KEY__ = ${serializedKey};`,
+    '</script>'
+  ].join('');
+}
+
 app.use(/^\/control-center\/(?:index\.html)?$/, (req, res, next) => {
   if (!['GET', 'HEAD'].includes(String(req.method || '').toUpperCase())) {
     return next();
   }
 
-  return res.sendFile(path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html'));
+  try {
+    const filePath = path.join(CONTROL_CENTER_PUBLIC_DIR, 'index.html');
+    const html = fs.readFileSync(filePath, 'utf8');
+    const bootstrapScript = buildControlCenterBootstrapScript(req);
+    const body = bootstrapScript
+      ? html.replace('<script type="module" src="./app.js"></script>', `${bootstrapScript}\n  <script type="module" src="./app.js"></script>`)
+      : html;
+
+    return res.type('html').send(body);
+  } catch (error) {
+    return next(error);
+  }
 });
 
 app.use('/control-center', express.static(CONTROL_CENTER_PUBLIC_DIR, {
@@ -11579,6 +11671,9 @@ function buildChannelExecutionPayload(projectName, campaignName, channel) {
 }
 function getCampaignFinalizationPaths(projectName) {
   const safeProject = String(projectName || '').trim().toLowerCase();
+  // Semi-auto campaign artifacts are still dual-path during stabilization:
+  // canonical reads are preferred when present, with legacy brand-assets as
+  // the required fallback for existing HAIROTICMEN dry-run packages.
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
     domain: 'campaign-finalization',
     operation: 'read'
@@ -12187,11 +12282,16 @@ function getScheduledJobById(projectName, jobId) {
 }
 
 function executeScheduledJob(projectName, jobId) {
-  assertPublishingMutationAllowed(projectName, 'publish', {
-    jobId,
-    status: 'published'
-  });
   const mode = readExecutionMode(projectName);
+  const normalizedMode = String(mode?.mode || 'semi_auto').trim().toLowerCase();
+
+  if (normalizedMode !== 'semi_auto') {
+    assertPublishingMutationAllowed(projectName, 'publish', {
+      jobId,
+      status: 'published'
+    });
+  }
+
   const job = getScheduledJobById(projectName, jobId);
   const execPaths = getExecutionPaths(projectName);
 
@@ -12199,6 +12299,7 @@ function executeScheduledJob(projectName, jobId) {
     execution_id: `exec_${Date.now()}`,
     project: projectName,
     job_id: jobId,
+    campaign_name: job.campaign_name || null,
     wave_name: job.wave_name,
     channel: job.channel,
     mode: mode.mode,
@@ -12206,6 +12307,7 @@ function executeScheduledJob(projectName, jobId) {
     source_status: job.status,
     execution_status: 'pending',
     action_type: null,
+    external_publish: normalizedMode !== 'semi_auto',
     notes: []
   };
 
@@ -12260,6 +12362,176 @@ function executeScheduledJob(projectName, jobId) {
   return {
     ...result,
     file_path: filePath
+  };
+}
+
+function pickFirstExistingPath(candidates = []) {
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return '';
+}
+
+function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+  const safeProject = String(projectName || '').trim().toLowerCase();
+  const safeCampaign = String(campaignName || '').trim();
+  const safeChannel = String(channel || '').trim().toLowerCase();
+  const safeJobId = String(jobId || '').trim();
+  const safeOperator = String(operator || '').trim();
+  const safePostUrl = String(postUrl || '').trim();
+  const safeNotes = String(notes || '').trim();
+
+  if (!safeProject) {
+    const error = new Error('Missing project');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeCampaign) {
+    const error = new Error('Missing campaign');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeChannel) {
+    const error = new Error('Missing channel');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeJobId) {
+    const error = new Error('Missing job_id');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safeOperator) {
+    const error = new Error('Missing operator');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!safePostUrl) {
+    const error = new Error('Missing post_url');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const projectPaths = getProjectBasePaths(safeProject);
+  if (!fs.existsSync(projectPaths.projectFilePath)) {
+    const error = new Error('Project not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const mode = readExecutionMode(safeProject);
+  if (String(mode?.mode || '').trim().toLowerCase() !== 'semi_auto') {
+    const error = new Error('Manual publish recording is allowed only in semi_auto mode.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const campaignSafe = safeCampaign.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+  const executionCampaignPackagePath = path.join(DATA_DIR, 'execution', 'projects', safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+  const projectCampaignPackagePath = path.join(DATA_DIR, 'projects', safeProject, 'brand-assets', 'campaign-execution', 'packages', `${campaignSafe}.json`);
+  const legacyCampaignPackagePath = path.join(LEGACY_BRAND_ASSETS_DIR, safeProject, 'campaign-execution', 'packages', `${campaignSafe}.json`);
+
+  const campaignPackagePath = pickFirstExistingPath([
+    executionCampaignPackagePath,
+    projectCampaignPackagePath,
+    legacyCampaignPackagePath
+  ]);
+
+  if (!campaignPackagePath) {
+    const error = new Error('Campaign package not found for this project/campaign.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const nowIso = new Date().toISOString();
+  const timestampSafe = nowIso.replace(/[:.]/g, '-');
+  const manualPublishDir = path.join(projectPaths.executionDir, 'manual-publish');
+  ensureDir(manualPublishDir);
+
+  const record = {
+    project: safeProject,
+    campaign: safeCampaign,
+    channel: safeChannel,
+    job_id: safeJobId,
+    operator: safeOperator,
+    published_at: nowIso,
+    post_url: safePostUrl,
+    notes: safeNotes,
+    external_publish: false,
+    manual_publish: true,
+    recorded_at: nowIso
+  };
+
+  const recordFilePath = path.join(
+    manualPublishDir,
+    `${campaignSafe}_${safeChannel}_${timestampSafe}.json`
+  );
+  writeJsonFile(recordFilePath, record);
+
+  const touchedFiles = [recordFilePath];
+  const warnings = [];
+
+  const executionResultPath = resolveExecutionReadCandidate({
+    projectName: safeProject,
+    domain: 'execution-results',
+    relativePath: `${safeJobId}.json`,
+    pathType: 'file',
+    requestedIdentifier: safeJobId,
+    requestedFile: `execution-results/${safeJobId}.json`
+  }).selectedPath;
+
+  if (fs.existsSync(executionResultPath)) {
+    const existingResult = readJsonFile(executionResultPath, {});
+    const updatedResult = {
+      ...existingResult,
+      manual_publish_recorded: true,
+      manual_publish_url: safePostUrl,
+      manual_publish_operator: safeOperator,
+      manual_publish_recorded_at: nowIso,
+      final_status: 'manually_published',
+      manual_publish: true,
+      external_publish: false,
+      campaign_name: existingResult.campaign_name || safeCampaign,
+      channel: String(existingResult.channel || safeChannel).trim().toLowerCase(),
+      notes: Array.from(new Set([
+        ...normalizePublishingNotes(existingResult.notes),
+        ...normalizePublishingNotes(safeNotes)
+      ]))
+    };
+
+    const execPaths = getExecutionPaths(safeProject);
+    const legacyExecutionResultPath = path.join(execPaths.legacyResultsDir, `${safeJobId}.json`);
+
+    executionArtifactWriter.writeJson({
+      project: safeProject,
+      domain: 'execution-results',
+      artifactType: 'publishing_execution_result',
+      identifier: safeJobId,
+      legacyPath: legacyExecutionResultPath,
+      data: updatedResult
+    });
+
+    touchedFiles.push(execPaths.resultsDir ? path.join(execPaths.resultsDir, `${safeJobId}.json`) : executionResultPath);
+    touchedFiles.push(legacyExecutionResultPath);
+  } else {
+    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+  }
+
+  return {
+    project: safeProject,
+    campaign: safeCampaign,
+    channel: safeChannel,
+    job_id: safeJobId,
+    manual_publish_recorded: true,
+    external_publish: false,
+    manual_publish: true,
+    recorded_at: nowIso,
+    file_path: recordFilePath,
+    touched_files: Array.from(new Set(touchedFiles)),
+    warnings,
+    campaign_package_path: campaignPackagePath
   };
 }
 
@@ -12671,7 +12943,7 @@ function listFilesRecursiveSafe(dir, predicate = () => true) {
 }
 
 function buildProjectProductMediaSummary(projectName) {
-  const brandRoot = path.join(DATA_DIR, 'brand-assets', projectName);
+  const brandRoot = path.join(DATA_DIR, 'projects', projectName, 'brand-assets');
   const productsRoot = path.join(brandRoot, 'products');
   const imagesRoot = path.join(productsRoot, 'images');
   const videosRoot = path.join(productsRoot, 'videos');
@@ -16832,38 +17104,6 @@ if (command === '/review_generation_job') {
     });
   }
 }
-if (command === '/review_generation_job') {
-  const projectName = (args[0] || '').trim().toLowerCase();
-
-  if (!projectName) {
-    return res.json({ error: 'Missing project name' });
-  }
-
-  try {
-    const outputPaths = getGenerationOutputPaths(projectName);
-    const files = fs.readdirSync(outputPaths.jobsDir)
-      .filter(name => name.endsWith('.json'))
-      .sort()
-      .reverse();
-
-    if (!files.length) {
-      return res.json({ error: 'No generation jobs found' });
-    }
-
-    const latestPath = path.join(outputPaths.jobsDir, files[0]);
-    const data = readJsonFile(latestPath, {});
-
-    return res.json({
-      command,
-      result: data
-    });
-  } catch (error) {
-    return res.json({
-      error: 'Failed to review generation job',
-      details: error.message
-    });
-  }
-}
 if (command === '/build_render_request') {
   const projectName = (args[0] || '').trim().toLowerCase();
 
@@ -18188,6 +18428,31 @@ if (command === '/update_scheduled_job_status') {
   } catch (error) {
     return res.status(error.statusCode || 400).json({
       error: 'Failed to update scheduled job status',
+      details: error.message
+    });
+  }
+}
+if (command === '/record_manual_publish') {
+  const projectName = (args[0] || '').trim().toLowerCase();
+  const campaignName = (args[1] || '').trim();
+  const channel = (args[2] || '').trim().toLowerCase();
+  const jobId = (args[3] || '').trim();
+  const operator = (args[4] || '').trim();
+  const postUrl = (args[5] || '').trim();
+  const notes = args.slice(6).join(' ').trim();
+
+  if (!projectName || !campaignName || !channel || !jobId || !operator || !postUrl) {
+    return res.json({
+      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+    });
+  }
+
+  try {
+    const result = recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes);
+    return res.json({ command, result });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      error: 'Failed to record manual publish',
       details: error.message
     });
   }
@@ -19841,6 +20106,18 @@ function updateIntelligenceLoop(projectName, context = {}) {
   const safeProject = normalizeProjectSlug(projectName);
   const summary = buildPerformanceSummary(safeProject);
   const recommendations = generateOptimizationRecommendations(safeProject);
+  const allowLocalDryRun = String(process.env.ALLOW_LOCAL_DRY_RUN || '').trim() === '1';
+  const allowLearningUpdates = String(process.env.ALLOW_LEARNING_UPDATES || '').trim() === '1';
+
+  if (allowLocalDryRun && !allowLearningUpdates) {
+    return {
+      summary,
+      recommendations,
+      learning_updates: [],
+      alerts: recommendations.alerts,
+      skipped_persistence: true
+    };
+  }
 
   const recommendationStore = readRecommendationsStore(safeProject);
   recommendationStore.latest = recommendations;
@@ -20721,8 +20998,14 @@ module.exports = {
     readCanonicalJsonWithLegacyFallback,
     getProductIntelligencePaths,
     buildGermanLaunchPlan,
+    buildLaunchWave,
+    selectLaunchReadyProducts,
     buildCampaignExecutionPackage,
+    buildCampaignMediaJob,
+    buildCampaignEmailPackage,
     buildCampaignPublishPackage,
+    recordManualPublish,
+    reviewCampaignFinalization,
     readJsonFile,
     writeJsonFile,
     upsertCampaign

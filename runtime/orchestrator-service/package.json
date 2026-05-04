@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ../../scripts/verify-core-stabilization.js"
+    "test": "npm run verify:read-only",
+    "verify:read-only": "node --check server.js && node ../../scripts/verify-ai-marketing-engine.js && node ../../scripts/verify-control-center-ui.js && node ../../scripts/verify-launch-wave-selection.js && node ../../scripts/verify-campaign-finalization-readiness.js && node ../../scripts/verify-semi-auto-dry-run-readiness.js",
+    "test:mutating": "ALLOW_MUTATING_TESTS=1 node ../../scripts/verify-core-stabilization.js"
   },
   "keywords": [],
   "author": "",

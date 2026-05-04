@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const ROOT = '/opt/mh-assistant';
+const ROOT = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..');
 const CC_DIR = path.join(ROOT, 'public/control-center');
 const PAGES_DIR = path.join(CC_DIR, 'pages');
 
