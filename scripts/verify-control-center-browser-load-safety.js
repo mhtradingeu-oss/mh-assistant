@@ -94,8 +94,18 @@ function main() {
     'styles_loading_overlay_default_hidden',
     /\.loading-overlay\s*\{[\s\S]*display:\s*none[\s\S]*visibility:\s*hidden[\s\S]*pointer-events:\s*none/.test(styles) &&
       /\.loading-overlay\.is-visible\s*\{[\s\S]*display:\s*flex[\s\S]*visibility:\s*visible[\s\S]*pointer-events:\s*auto/.test(styles) &&
-      /\.loading-overlay\[aria-hidden="true"\],\s*\.loading-overlay:not\(\.is-visible\)\s*\{[\s\S]*display:\s*none\s*!important[\s\S]*visibility:\s*hidden\s*!important/.test(styles),
+      /\.loading-overlay\[aria-hidden="true"\],\s*\.loading-overlay:not\(\.is-visible\),\s*\.loading-overlay\[hidden\]\s*\{[\s\S]*display:\s*none\s*!important[\s\S]*visibility:\s*hidden\s*!important/.test(styles),
     'styles.css defines loading overlay hidden by default and visible only under is-visible.'
+  );
+
+  check(
+    checks,
+    'api_response_text_timeout_and_fallback_exist',
+    /emitApiRuntimeTrace\("response\.text\.start"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.text\.timeout"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.json\.fallback\.done"/.test(api) &&
+      /class\s+ProjectPayloadError\s+extends\s+Error/.test(api),
+    'api.js emits response.text timeout and JSON fallback terminal events for stalled body reads.'
   );
 
   check(
@@ -104,9 +114,19 @@ function main() {
     /emitApiRuntimeTrace\("api\.response\.parse\.start"/.test(api) &&
       /emitApiRuntimeTrace\("api\.response\.parse\.done"/.test(api) &&
       /emitApiRuntimeTrace\("api\.response\.parse\.error"/.test(api) &&
-      /emitApiRuntimeTrace\("api\.response\.parse\.timeout"/.test(api) &&
       /class\s+ProjectPayloadError\s+extends\s+Error/.test(api),
     'api.js emits parse terminal events and exposes ProjectPayloadError for post-text parse failures.'
+  );
+
+  check(
+    checks,
+    'app_response_text_watchdog_unlocks_ui',
+    /const\s+RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS\s*=\s*4000/.test(app) &&
+      /fetchProjectWithTimeout\.response-text-watchdog/.test(app) &&
+      /error\.phase\s*=\s*"response-text-watchdog"/.test(app) &&
+      /forceHideLoadingOverlay\("response-text-watchdog"\)/.test(app) &&
+      /loadProjectData\.responseTextWatchdog\.unlock/.test(app),
+    'app.js includes a response-text watchdog that force-hides the modal and unlocks the shell.'
   );
 
   check(
@@ -124,6 +144,8 @@ function main() {
     checks,
     'manual_unlock_calls_force_hide',
     /function\s+unlockStartupUi\([\s\S]*forceHideLoadingOverlay\(reason\)/.test(app) &&
+      /startupRuntimeState\.manualUnlockToken\s*=\s*activeProjectLoadToken/.test(app) &&
+      /startupRuntimeState\.manualUnlockActive\s*&&\s*token\s*===\s*startupRuntimeState\.manualUnlockToken/.test(app) &&
       /recordStartupStep\("manualUnlock\.start"/.test(app) &&
       /recordStartupStep\("manualUnlock\.done"/.test(app),
     'Unlock UI button flow calls forceHideLoadingOverlay and records manual unlock lifecycle steps.'

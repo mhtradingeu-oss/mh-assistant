@@ -190,12 +190,25 @@ const checks = [];
     "api_body_read_and_parse_diagnostics_exist",
     /function\s+readResponseText\(/.test(api) &&
       /emitApiRuntimeTrace\("response\.text\.start"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.text\.timeout"/.test(api) &&
+      /emitApiRuntimeTrace\("api\.response\.json\.fallback\.done"/.test(api) &&
       /emitApiRuntimeTrace\("api\.response\.parse\.start"/.test(api) &&
       /emitApiRuntimeTrace\("api\.response\.parse\.done"/.test(api) &&
       /emitApiRuntimeTrace\("api\.response\.parse\.error"/.test(api) &&
-      /emitApiRuntimeTrace\("api\.response\.parse\.timeout"/.test(api) &&
       /JSON\.parse\(rawText\)/.test(api),
-    "api.js traces response body reads and JSON parsing for large payload diagnostics."
+    "api.js traces response body timeout, JSON fallback, and JSON parsing diagnostics."
+  );
+
+  check(
+    checks,
+    "response_text_watchdog_unlock_exists",
+    /const\s+RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS\s*=\s*4000/.test(app) &&
+      /fetchProjectWithTimeout\.response-text-watchdog/.test(app) &&
+      /error\.phase\s*=\s*"response-text-watchdog"/.test(app) &&
+      /loadProjectData\.responseTextWatchdog\.unlock/.test(app) &&
+      /forceHideLoadingOverlay\("response-text-watchdog"\)/.test(app) &&
+      /Project response is still being processed\. Interface unlocked\./.test(app),
+    "A 4s response.text watchdog unlocks the UI and records responseTextWatchdog.unlock."
   );
 
   check(
@@ -203,7 +216,6 @@ const checks = [];
     "fetch_parse_watchdog_exists",
     /const\s+PARSE_WATCHDOG_TIMEOUT_MS\s*=\s*2000/.test(app) &&
       /function\s+fetchProjectWithTimeout[\s\S]*response\.text\.done/.test(app) &&
-      /function\s+fetchProjectWithTimeout[\s\S]*api\.response\.parse\.done/.test(app) &&
       /function\s+fetchProjectWithTimeout[\s\S]*phase\s*=\s*"parse-watchdog"/.test(app) &&
       /loadProjectData\.parse-watchdog/.test(app) &&
       /forceHideLoadingOverlay\("parse-watchdog"\)/.test(app),
@@ -217,8 +229,10 @@ const checks = [];
       /recordStartupStep\("manualUnlock\.done"/.test(app) &&
       /forceHideLoadingOverlay\("manual-unlock"\)/.test(app) &&
       /startupRuntimeState\.manualUnlockActive\s*=\s*reason\s*===\s*"manual-unlock"/.test(app) &&
+      /startupRuntimeState\.manualUnlockToken\s*=\s*activeProjectLoadToken/.test(app) &&
+      /startupRuntimeState\.manualUnlockActive\s*&&\s*token\s*===\s*startupRuntimeState\.manualUnlockToken/.test(app) &&
       /overlay\.style\.setProperty\("display",\s*"none",\s*"important"\)/.test(app),
-    "Manual Unlock always hard-hides overlay and records manual unlock trace steps."
+    "Manual Unlock hard-hides overlay and blocks same-token showLoading reopen attempts."
   );
 
   check(
@@ -232,8 +246,18 @@ const checks = [];
   check(
     checks,
     "styles_hidden_overlay_absolute",
-    /\.loading-overlay\[aria-hidden="true"\],\s*\.loading-overlay:not\(\.is-visible\)\s*\{[\s\S]*display:\s*none\s*!important[\s\S]*visibility:\s*hidden\s*!important[\s\S]*opacity:\s*0\s*!important[\s\S]*pointer-events:\s*none\s*!important/.test(styles),
-    "Hidden loading overlay CSS uses absolute !important rules for aria-hidden and non-visible states."
+    /\.loading-overlay\[aria-hidden="true"\],\s*\.loading-overlay:not\(\.is-visible\),\s*\.loading-overlay\[hidden\]\s*\{[\s\S]*display:\s*none\s*!important[\s\S]*visibility:\s*hidden\s*!important[\s\S]*opacity:\s*0\s*!important[\s\S]*pointer-events:\s*none\s*!important/.test(styles),
+    "Hidden loading overlay CSS uses absolute !important rules for aria-hidden, non-visible, and [hidden] states."
+  );
+
+  check(
+    checks,
+    "required_payload_stall_has_partial_fallback",
+    /function\s+applyRequiredProjectFallback\(/.test(app) &&
+      /fetchProjects\(\)/.test(app) &&
+      /Project details are still syncing\./.test(app) &&
+      /loadProjectData\.hideLoading\.done/.test(app),
+    "Required payload stall path verifies /media-manager/projects and keeps the shell unlocked with syncing warning."
   );
 
   check(

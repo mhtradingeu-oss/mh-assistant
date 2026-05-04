@@ -122,10 +122,24 @@ check(
 check(
   "api_traces_large_payload_parsing",
   /function\s+readResponseText\(/.test(api) &&
+    /emitApiRuntimeTrace\("response\.text\.start"/.test(api) &&
+    /emitApiRuntimeTrace\("api\.response\.text\.timeout"/.test(api) &&
+    /emitApiRuntimeTrace\("api\.response\.json\.fallback\.done"/.test(api) &&
     /emitApiRuntimeTrace\("api\.response\.parse\.start"/.test(api) &&
     /emitApiRuntimeTrace\("api\.response\.parse\.done"/.test(api) &&
-    /emitApiRuntimeTrace\("api\.response\.parse\.timeout"/.test(api),
-  "API client records response text and JSON parse diagnostics for large payloads."
+    /emitApiRuntimeTrace\("api\.response\.parse\.error"/.test(api),
+  "API client records response text timeout/fallback and JSON parse diagnostics for large payloads."
+);
+
+check(
+  "response_text_watchdog_unlock_contract",
+  /const\s+RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS\s*=\s*4000/.test(app) &&
+    /loadProjectData\.responseTextWatchdog\.unlock/.test(app) &&
+    /forceHideLoadingOverlay\("response-text-watchdog"\)/.test(app) &&
+    /Project response is still being processed\. Interface unlocked\./.test(app) &&
+    /function\s+applyRequiredProjectFallback\(/.test(app) &&
+    /Project details are still syncing\./.test(app),
+  "A 4s response-text watchdog unlock path exists and applies required-project fallback diagnostics."
 );
 
 check(

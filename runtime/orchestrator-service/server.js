@@ -79,7 +79,10 @@ const {
 } = require('./lib/ops/backbone');
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 
+const compression = require('compression');
+
 const app = express();
+app.use(compression());
 app.use(express.json());
 
 const appLogger = createLogger({

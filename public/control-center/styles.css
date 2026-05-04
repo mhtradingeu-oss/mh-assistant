@@ -6025,22 +6025,20 @@ section[data-page="workflows"] .wfexec-empty {
   font-size: var(--font-size-body);
 }
 
-/* TEMPORARY RESCUE MODE - prevent startup overlay from blocking the interface.
-   Remove after the Control Center startup lifecycle is fully fixed. */
-body.is-loading,
-body.loading,
-body.loading-locked {
-  overflow: auto !important;
-  cursor: auto !important;
+/* Startup diagnostics surfaces must not steal clicks from the main UI shell.
+   Their own buttons remain interactive for recovery actions. */
+#startupUnlockBar,
+#startupTracePanel,
+#startupStepBanner,
+.startup-unlock-bar,
+.startup-trace-panel,
+.startup-step-banner {
+  pointer-events: none;
 }
 
-.loading-overlay,
-.loading-overlay.is-visible,
-.loading-overlay[aria-hidden="false"],
-.loading-overlay[aria-hidden="true"],
-.loading-overlay[hidden] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+#startupUnlockBar button,
+#startupTracePanel button,
+.startup-unlock-bar button,
+.startup-trace-panel button {
+  pointer-events: auto;
 }

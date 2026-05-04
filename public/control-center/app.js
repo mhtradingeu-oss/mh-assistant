@@ -861,6 +861,11 @@ function showLoading(
     return;
   }
 
+  if (startupRuntimeState.manualUnlockActive && token !== startupRuntimeState.manualUnlockToken) {
+    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+    return;
+  }
+
   const wasVisible = isLoadingVisible();
   const overlay = $("loadingOverlay");
   const loadingTitle = $("loadingTitle");
@@ -945,6 +950,7 @@ const LOADING_WATCHDOG_TIMEOUT_MS = STARTUP_UNLOCK_TIMEOUT_MS;
 const LOADING_WATCHDOG_INTERVAL_MS = 1000;
 const OVERLAY_RECOVERY_DELAY_MS = 10000;
 const PARSE_WATCHDOG_TIMEOUT_MS = 2000;
+const RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS = 4000;
 const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
 const LAST_PROJECT_LOAD_STORAGE_KEY = "mh-control-center-last-project-load";
 const LOADING_TRANSITIONS_STORAGE_KEY = "mh-control-center-loading-transitions";
@@ -952,9 +958,11 @@ const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
 const FETCH_DIAGNOSTICS_STORAGE_KEY = "mh-control-center-fetch-diagnostics";
 const STARTUP_UNLOCK_STORAGE_KEY = "mh-control-center-startup-unlock";
 const RUNTIME_TRACE_STORAGE_KEY = "mh-control-center-runtime-trace";
+const LAST_CLICK_STORAGE_KEY = "mh-control-center-last-click";
 const STARTUP_HISTORY_LIMIT = 60;
 const LOADING_TRANSITION_LIMIT = 80;
 const RUNTIME_TRACE_LIMIT = 120;
+const INIT_LOAD_PROJECTS_TIMEOUT_MS = 6000;
 
 let globalLoadingWatchdogTimer = null;
 let loadingWatchdogVisibleSinceMs = 0;
@@ -991,12 +999,14 @@ const startupRuntimeState = {
   unlockAt: "",
   unlockVisible: false,
   lastApiStage: "",
+  lastApiStageAtMs: 0,
   lastApiMessage: "",
   lastApiEndpoint: "",
   manualUnlockActive: false,
   manualUnlockToken: "",
   initialized: false,
-  initReadyAt: ""
+  initReadyAt: "",
+  responseTextWatchdogUnlocked: false
 };
 
 function isDebugStartupMode() {
@@ -1063,6 +1073,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
     unlocked: Boolean(startupRuntimeState.unlocked),
     unlockReason: String(startupRuntimeState.unlockReason || ""),
     lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastClick: readLastClickDiagnostic(),
     accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
     overlay: getOverlayState(),
@@ -1096,7 +1107,8 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
       `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
       `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
       `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
-      `overlay.count: ${payload.overlay.count || 0}`
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
     ].join("\n");
   }
 
@@ -1136,6 +1148,7 @@ function persistRuntimeTrace() {
     lastApiStage: String(startupRuntimeState.lastApiStage || ""),
     lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
     lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
     accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
     overlay: getOverlayState(),
@@ -1149,6 +1162,71 @@ function persistRuntimeTrace() {
 function recordRuntimeTrace(stage, details = {}) {
   boundedTracePush(stage, details);
   persistRuntimeTrace();
+}
+
+function readLastClickDiagnostic() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage?.getItem(LAST_CLICK_STORAGE_KEY) || "";
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function formatLastClickSummary(payload) {
+  if (!payload || typeof payload !== "object") {
+    return "none";
+  }
+
+  const parts = [
+    payload.tag ? String(payload.tag).toLowerCase() : "",
+    payload.id ? `#${payload.id}` : "",
+    payload.className ? `.${String(payload.className).split(/\s+/).filter(Boolean).join(".")}` : "",
+    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+    payload.dataPage ? `page=${payload.dataPage}` : "",
+    payload.href ? `href=${payload.href}` : "",
+    payload.text ? `text=${payload.text}` : ""
+  ].filter(Boolean);
+
+  return parts.join(" ") || "none";
+}
+
+function installClickDiagnosticCapture() {
+  if (typeof document === "undefined" || window.__mhControlCenterClickDiagnosticInstalled) {
+    return;
+  }
+
+  document.addEventListener("click", (event) => {
+    const element = event.target instanceof Element
+      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+      : null;
+
+    if (!element || !(element instanceof Element)) {
+      return;
+    }
+
+    const payload = {
+      at: new Date().toISOString(),
+      tag: String(element.tagName || "").toLowerCase(),
+      id: String(element.id || ""),
+      className: String(element.className || "").trim(),
+      text: String(element.textContent || "").trim().replace(/\s+/g, " ").slice(0, 120),
+      dataRoute: String(element.getAttribute("data-route") || ""),
+      dataPage: String(element.getAttribute("data-page") || ""),
+      href: String(element.getAttribute("href") || "")
+    };
+
+    safeStorageSet(LAST_CLICK_STORAGE_KEY, JSON.stringify(payload));
+    if (isDebugStartupMode()) {
+      renderStartupRuntimeTrace();
+    }
+  }, { capture: true });
+
+  window.__mhControlCenterClickDiagnosticInstalled = true;
 }
 
 function updateStartupUnlockVisibility(visible) {
@@ -1608,6 +1686,44 @@ function installGlobalLoadingWatchdog() {
     const overlayVisibleMs = loadingWatchdogVisibleSinceMs
       ? Date.now() - loadingWatchdogVisibleSinceMs
       : 0;
+    const apiStageAgeMs = startupRuntimeState.lastApiStageAtMs
+      ? Date.now() - startupRuntimeState.lastApiStageAtMs
+      : 0;
+    const stalledOnResponseText = (
+      startupRuntimeState.lastApiStage === "response.text.start" ||
+      startupRuntimeState.lastApiStage === "api.response.text.start" ||
+      startupRuntimeState.lastApiStage === "api.response.text.timeout"
+    );
+
+    if (
+      isLoadingVisible() &&
+      stalledOnResponseText &&
+      apiStageAgeMs >= RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS &&
+      !startupRuntimeState.responseTextWatchdogUnlocked
+    ) {
+      startupRuntimeState.responseTextWatchdogUnlocked = true;
+      startupRuntimeState.manualUnlockActive = true;
+      startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+      startupRuntimeState.projectPayloadSuccess = false;
+      startupRuntimeState.payloadSuccessAt = "";
+
+      recordStartupStep("loadProjectData.responseTextWatchdog.unlock", {
+        token: activeProjectLoadToken,
+        detail: "global-watchdog"
+      });
+      setLoading(false);
+      forceHideLoadingOverlay("response-text-watchdog");
+      recordStartupStep("loadProjectData.hideLoading.done", {
+        token: activeProjectLoadToken,
+        detail: "response-text-watchdog"
+      });
+
+      const unlockMessage = "Project response is still being processed. Interface unlocked.";
+      setError(unlockMessage);
+      showError(unlockMessage);
+      showMessage(unlockMessage);
+      void applyRequiredProjectFallback(startupRuntimeState.currentProject || DEFAULT_PROJECT_SLUG, activeProjectLoadToken);
+    }
 
     if (!startupRuntimeState.unlocked && startupAgeMs >= STARTUP_UNLOCK_TIMEOUT_MS) {
       updateStartupUnlockVisibility(true);
@@ -1633,6 +1749,7 @@ function installGlobalErrorGuards() {
     const stage = String(detail.stage || "trace");
     const traceStage = stage.startsWith("api.") ? stage : `api.${stage}`;
     startupRuntimeState.lastApiStage = String(detail.stage || "");
+    startupRuntimeState.lastApiStageAtMs = Date.now();
     startupRuntimeState.lastApiMessage = String(detail.message || "");
     startupRuntimeState.lastApiEndpoint = String(detail.endpoint || "");
     recordRuntimeTrace(traceStage, {
@@ -2026,6 +2143,7 @@ function fetchProjectWithTimeout(projectName) {
   return new Promise((resolve, reject) => {
     let timer = null;
     let parseWatchdogTimer = null;
+    let responseTextWatchdogTimer = null;
     let settled = false;
     let sawResponseTextDone = false;
     let sawParseTerminalEvent = false;
@@ -2046,6 +2164,10 @@ function fetchProjectWithTimeout(projectName) {
       if (parseWatchdogTimer) {
         clearTimeout(parseWatchdogTimer);
         parseWatchdogTimer = null;
+      }
+      if (responseTextWatchdogTimer) {
+        clearTimeout(responseTextWatchdogTimer);
+        responseTextWatchdogTimer = null;
       }
       if (typeof window !== "undefined") {
         window.removeEventListener("mh:control-center-api-trace", onApiTrace);
@@ -2077,11 +2199,42 @@ function fetchProjectWithTimeout(projectName) {
           clearTimeout(parseWatchdogTimer);
           parseWatchdogTimer = null;
         }
+        if (responseTextWatchdogTimer) {
+          clearTimeout(responseTextWatchdogTimer);
+          responseTextWatchdogTimer = null;
+        }
+        return;
+      }
+
+      if (stage === "response.text.start" || stage === "api.response.text.start") {
+        if (responseTextWatchdogTimer) {
+          clearTimeout(responseTextWatchdogTimer);
+        }
+
+        responseTextWatchdogTimer = setTimeout(() => {
+          if (settled || sawResponseTextDone || sawParseTerminalEvent) {
+            return;
+          }
+
+          const error = new Error("Project response is still being processed. Interface unlocked.");
+          error.phase = "response-text-watchdog";
+          error.isResponseTextWatchdog = true;
+          error.visible = true;
+          recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
+            token: activeProjectLoadToken,
+            detail: safeProjectName
+          });
+          settleReject(error);
+        }, RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS);
         return;
       }
 
       if (stage === "response.text.done" || stage === "api.response.text.done") {
         sawResponseTextDone = true;
+        if (responseTextWatchdogTimer) {
+          clearTimeout(responseTextWatchdogTimer);
+          responseTextWatchdogTimer = null;
+        }
         if (parseWatchdogTimer) {
           clearTimeout(parseWatchdogTimer);
         }
@@ -2100,6 +2253,18 @@ function fetchProjectWithTimeout(projectName) {
           });
           settleReject(error);
         }, PARSE_WATCHDOG_TIMEOUT_MS);
+        return;
+      }
+
+      if (
+        stage === "response.text.error" ||
+        stage === "api.response.json.fallback.done" ||
+        stage === "api.response.json.fallback.error"
+      ) {
+        if (responseTextWatchdogTimer) {
+          clearTimeout(responseTextWatchdogTimer);
+          responseTextWatchdogTimer = null;
+        }
       }
     }
 
@@ -2249,6 +2414,76 @@ function buildOptionalLoadWarning(diagnostics) {
   const unique = Array.from(new Set(labels));
 
   return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
+}
+
+async function applyRequiredProjectFallback(projectName, loadToken = "", fallbackDetails = null) {
+  recordStartupStep("loadProjectData.requiredFallback.start", {
+    token: loadToken,
+    detail: projectName
+  });
+
+  let fallback = fallbackDetails;
+
+  if (!fallback) {
+    try {
+      const projectsResult = await fetchProjects();
+      const items = Array.isArray(projectsResult?.items) ? projectsResult.items : [];
+      const projectExists = items.some((item) => {
+        const name = typeof item === "string" ? item : item?.name;
+        return String(name || "").trim() === projectName;
+      });
+
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: true,
+        projectExists,
+        projectName,
+        warning: "Project details are still syncing."
+      };
+    } catch (fallbackError) {
+      fallback = {
+        endpoint: "/media-manager/projects",
+        verified: false,
+        projectExists: false,
+        projectName,
+        warning: "Project details are still syncing.",
+        message: String(fallbackError?.message || "Failed to verify project fallback")
+      };
+    }
+  }
+
+  const fallbackProjectName = fallback?.projectExists
+    ? getSafeProjectName(projectName || DEFAULT_PROJECT_SLUG)
+    : DEFAULT_PROJECT_SLUG;
+
+  setCurrentProject(fallbackProjectName);
+  setStoredProjectName(fallbackProjectName);
+  setProjectContext({
+    project: fallbackProjectName,
+    market: "",
+    language: "",
+    mode: "",
+    campaign: "Not selected yet"
+  });
+
+  patchState("data", {
+    loadDiagnostics: {
+      ...(getState().data?.loadDiagnostics || {}),
+      requiredFallback: fallback
+    }
+  });
+
+  setError("Project details are still syncing.");
+  showError("Project details are still syncing.");
+  showMessage("Project details are still syncing.");
+
+  renderGlobalUi();
+  await safeRenderCurrentPage("[LOAD_PROJECT_REQUIRED_FALLBACK_RENDER]");
+
+  recordStartupStep("loadProjectData.requiredFallback.done", {
+    token: loadToken,
+    detail: `${fallbackProjectName} verified=${fallback?.verified ? "true" : "false"}`
+  });
 }
 
 function scheduleOverlayRecoveryCheck(loadToken, projectName, loadStartedAtMs, didRequiredLoadSucceed) {
@@ -2433,6 +2668,7 @@ async function loadProjectData(projectName) {
   startupRuntimeState.unlockVisible = false;
   startupRuntimeState.manualUnlockActive = false;
   startupRuntimeState.manualUnlockToken = "";
+  startupRuntimeState.responseTextWatchdogUnlocked = false;
 
   recordStartupStep("loadProjectData.start", {
     token: loadToken,
@@ -2616,6 +2852,37 @@ async function loadProjectData(projectName) {
     } catch (error) {
       console.error("[LOAD_PROJECT_ERROR]", error);
 
+      if (error?.phase === "response-text-watchdog" || error?.isResponseTextWatchdog) {
+        recordStartupStep("loadProjectData.responseTextWatchdog.unlock", {
+          token: loadToken,
+          detail: String(error?.message || "response-text-watchdog")
+        });
+
+        startupRuntimeState.manualUnlockActive = true;
+        startupRuntimeState.manualUnlockToken = loadToken;
+        startupRuntimeState.responseTextWatchdogUnlocked = true;
+        startupRuntimeState.projectPayloadSuccess = false;
+        startupRuntimeState.payloadSuccessAt = "";
+        setLoading(false);
+        forceHideLoadingOverlay("response-text-watchdog");
+        recordStartupStep("loadProjectData.hideLoading.done", {
+          token: loadToken,
+          detail: "response-text-watchdog"
+        });
+
+        const unlockMessage = "Project response is still being processed. Interface unlocked.";
+        setError(unlockMessage);
+        showError(unlockMessage);
+        showMessage(unlockMessage);
+
+        await applyRequiredProjectFallback(
+          loadedProjectName,
+          loadToken,
+          error?._requiredProjectFallback || error?._diagnostics?.requiredProjectFallback || null
+        );
+        return null;
+      }
+
       if (error?.phase === "parse-watchdog" || error?.isParseWatchdog) {
         recordStartupStep("loadProjectData.parse-watchdog", {
           token: loadToken,
@@ -2709,14 +2976,127 @@ async function loadProjectData(projectName) {
 ========================= */
 
 function bindNavigation() {
-  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+  const fallbackLabelRoutes = {
+    Home: "home",
+    Setup: "setup",
+    Library: "library",
+    Integrations: "integrations",
+    "AI Command": "ai-command",
+    Workflows: "workflows",
+    Publishing: "publishing"
+  };
 
+  const navItems = Array.from(document.querySelectorAll(".nav-item"));
   navItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      const route = item.getAttribute("data-route") || "home";
-      navigateTo(route);
+    const labeledRoute = fallbackLabelRoutes[String(item.textContent || "").trim()] || "";
+    const route = item.getAttribute("data-route") || labeledRoute;
+    if (!route) return;
+    item.setAttribute("data-route", route);
+    item.setAttribute("data-page", route);
+  });
+}
+
+function bindDelegatedClickRouting() {
+  if (typeof document === "undefined" || window.__mhControlCenterDelegatedClickBound) {
+    return;
+  }
+
+  const sidebarRouteMap = {
+    home: "home",
+    setup: "setup",
+    library: "library",
+    integrations: "integrations",
+    "ai-command": "ai-command",
+    workflows: "workflows",
+    publishing: "publishing"
+  };
+
+  const actionRouteMap = {
+    "open-ai-command": "ai-command",
+    "open-campaign-studio": "campaign-studio",
+    "open-publishing": "publishing",
+    "send-ai-command": "ai-command"
+  };
+
+  async function executeMappedAction(actionName) {
+    if (!actionName) return false;
+
+    if (actionName === "search") {
+      if (typeof executeSearch === "function") {
+        executeSearch();
+      } else {
+        showMessage("Search handler is not available.");
+      }
+      return true;
+    }
+
+    if (actionName === "refresh-project") {
+      const projectName = getSafeProjectName(getState().context.currentProject || DEFAULT_PROJECT_SLUG);
+      if (!projectName) {
+        showError("Please select a project first.");
+        return true;
+      }
+
+      await loadProjectData(projectName);
+      navigateTo("home");
+      return true;
+    }
+
+    if (actionName === "send-ai-command") {
+      if (typeof executeQuickCommand === "function") {
+        executeQuickCommand();
+      } else {
+        navigateTo("ai-command");
+        showMessage("AI Command opened.");
+      }
+      return true;
+    }
+
+    const targetRoute = actionRouteMap[actionName];
+    if (targetRoute) {
+      navigateTo(targetRoute);
+      return true;
+    }
+
+    return false;
+  }
+
+  document.addEventListener("click", (event) => {
+    const candidate = event.target instanceof Element
+      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+      : null;
+    if (!candidate) {
+      return;
+    }
+
+    const routeAttr = String(candidate.getAttribute("data-route") || candidate.getAttribute("data-page") || "").trim();
+    if (routeAttr && sidebarRouteMap[routeAttr]) {
+      event.preventDefault();
+      navigateTo(sidebarRouteMap[routeAttr]);
+      return;
+    }
+
+    const inferredAction =
+      String(candidate.getAttribute("data-action") || "").trim() ||
+      (candidate.closest("#refreshAllBtn") ? "refresh-project" : "") ||
+      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+      (candidate.closest("#runSearchBtn") ? "search" : "") ||
+      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+      (candidate.closest("#newCampaignBtn") ? "open-campaign-studio" : "") ||
+      (candidate.closest("#scheduleBtn") ? "open-publishing" : "");
+
+    if (!inferredAction) {
+      return;
+    }
+
+    event.preventDefault();
+    void executeMappedAction(inferredAction).catch((error) => {
+      console.error("[DELEGATED_CLICK_ACTION_ERROR]", inferredAction, error);
+      showError(error?.message || "Action failed.");
     });
   });
+
+  window.__mhControlCenterDelegatedClickBound = true;
 }
 
 function bindRouteListener() {
@@ -3018,7 +3398,7 @@ function bindCommandInputs() {
   }
 
   if (searchBtn) {
-    searchBtn.onclick = executeSearch;
+    searchBtn.setAttribute("data-action", "search");
   }
 
   if (commandInput) {
@@ -3041,7 +3421,7 @@ function bindCommandInputs() {
 
   if (runBtn) {
     runBtn.textContent = "Send to AI Command";
-    runBtn.onclick = executeQuickCommand;
+    runBtn.setAttribute("data-action", "send-ai-command");
   }
 }
 
@@ -3057,37 +3437,21 @@ function bindGlobalButtons() {
 
   if (refreshBtn) {
     refreshBtn.textContent = "Run Refresh";
-    refreshBtn.addEventListener("click", async () => {
-      const projectName = getSafeProjectName(getState().context.currentProject || DEFAULT_PROJECT_SLUG);
-
-      if (!projectName) {
-        showError("Please select a project first.");
-        return;
-      }
-
-      await loadProjectData(projectName);
-      navigateTo("home");
-    });
+    refreshBtn.setAttribute("data-action", "refresh-project");
   }
 
   if (openAiBtn) {
-    openAiBtn.addEventListener("click", () => {
-      navigateTo("ai-command");
-    });
+    openAiBtn.setAttribute("data-action", "open-ai-command");
   }
 
   if (newCampaignBtn) {
     newCampaignBtn.textContent = "Open Campaign Studio";
-    newCampaignBtn.addEventListener("click", () => {
-      navigateTo("campaign-studio");
-    });
+    newCampaignBtn.setAttribute("data-action", "open-campaign-studio");
   }
 
   if (scheduleBtn) {
     scheduleBtn.textContent = "Open Publishing";
-    scheduleBtn.addEventListener("click", () => {
-      navigateTo("publishing");
-    });
+    scheduleBtn.setAttribute("data-action", "open-publishing");
   }
 }
 
@@ -3105,12 +3469,14 @@ async function init() {
     installGlobalLoadingWatchdog();
     bindFatalErrorPanelActions();
     bindStartupRecoveryControls();
+    installClickDiagnosticCapture();
     clearFeedback();
 
     initRouter();
     setCurrentRoute("home");
 
     bindNavigation();
+    bindDelegatedClickRouting();
     bindRouteListener();
     bindProjectSwitcher();
     bindGlobalButtons();
@@ -3126,8 +3492,22 @@ async function init() {
     renderCurrentPage();
 
     recordStartupStep("init.loadProjects.start");
-    const preferredProject = await loadProjects();
-    recordStartupStep("init.loadProjects.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+    const projectsPromise = loadProjects();
+    projectsPromise.catch(() => {});
+
+    const preferredProject = await Promise.race([
+      projectsPromise,
+      new Promise((resolve) => {
+        window.setTimeout(() => resolve(""), INIT_LOAD_PROJECTS_TIMEOUT_MS);
+      })
+    ]);
+
+    if (preferredProject) {
+      recordStartupStep("init.loadProjects.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+    } else {
+      recordStartupStep("init.loadProjects.timeout", { detail: `${INIT_LOAD_PROJECTS_TIMEOUT_MS}ms` });
+      showMessage("Project list is still syncing. Continuing with default project.");
+    }
 
     recordStartupStep("init.loadProjectData.start", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
     await loadProjectData(preferredProject || DEFAULT_PROJECT_SLUG);

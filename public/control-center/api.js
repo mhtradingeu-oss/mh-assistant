@@ -9,6 +9,7 @@ let API_BASE_URL = "";
 const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
 const DEFAULT_RESPONSE_TEXT_TIMEOUT_MS = 20000;
 const DEFAULT_PARSE_TIMEOUT_MS = 2000;
+const REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS = 3000;
 
 export class AccessKeyError extends Error {
   constructor(message, diagnostics = {}) {
@@ -209,6 +210,7 @@ async function readResponseText(response, requestMeta = {}) {
   const timeoutMs = Math.max(1, Number(requestMeta?.responseTextTimeoutMs) || DEFAULT_RESPONSE_TEXT_TIMEOUT_MS);
   const startedAt = Date.now();
   let timer = null;
+  const responseClone = typeof response?.clone === "function" ? response.clone() : null;
 
   emitApiRuntimeTrace("response.text.start", {
     endpoint,
@@ -218,51 +220,155 @@ async function readResponseText(response, requestMeta = {}) {
   });
 
   try {
-    return await Promise.race([
+    const rawText = await Promise.race([
       response.text(),
       new Promise((_, reject) => {
         timer = setTimeout(() => {
           const error = new Error(`Response body timed out after ${timeoutMs}ms.`);
           error.endpoint = endpoint;
           error.isTimeout = true;
-          error.parseStage = "response.text";
+          error.parseStage = "response.text.timeout";
           reject(error);
         }, timeoutMs);
       })
     ]);
-  } finally {
-    if (timer) {
-      clearTimeout(timer);
-    }
+
     emitApiRuntimeTrace("response.text.done", {
       endpoint,
       status: response?.status,
       contentType: response?.headers?.get?.("content-type") || "",
-      durationMs: Date.now() - startedAt
+      durationMs: Date.now() - startedAt,
+      bodyLength: String(rawText || "").length
     });
+
+    return {
+      mode: "text",
+      rawText: String(rawText || ""),
+      bodyLength: String(rawText || "").length,
+      parseStage: "response.text.done"
+    };
+  } catch (error) {
+    const isTimeout = Boolean(error?.isTimeout);
+
+    if (isTimeout) {
+      emitApiRuntimeTrace("api.response.text.timeout", {
+        endpoint,
+        status: response?.status,
+        contentType: response?.headers?.get?.("content-type") || "",
+        timeoutMs,
+        durationMs: Date.now() - startedAt,
+        message: error?.message || "Response body read timed out"
+      });
+
+      if (responseClone) {
+        try {
+          let fallbackTimer = null;
+          const fallbackPayload = await Promise.race([
+            responseClone.json(),
+            new Promise((_, reject) => {
+              fallbackTimer = setTimeout(() => {
+                const fallbackTimeoutError = new Error(`JSON fallback timed out after ${timeoutMs}ms.`);
+                fallbackTimeoutError.endpoint = endpoint;
+                fallbackTimeoutError.isTimeout = true;
+                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+                reject(fallbackTimeoutError);
+              }, timeoutMs);
+            })
+          ]).finally(() => {
+            if (fallbackTimer) {
+              clearTimeout(fallbackTimer);
+            }
+          });
+
+          const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+          emitApiRuntimeTrace("api.response.json.fallback.done", {
+            endpoint,
+            status: response?.status,
+            contentType: response?.headers?.get?.("content-type") || "",
+            bodyLength: fallbackBodyLength,
+            durationMs: Date.now() - startedAt
+          });
+
+          return {
+            mode: "json-fallback",
+            payload: fallbackPayload,
+            bodyLength: fallbackBodyLength,
+            parseStage: "api.response.json.fallback.done"
+          };
+        } catch (fallbackError) {
+          const fallbackParseStage = fallbackError?.isTimeout
+            ? "api.response.json.fallback.timeout"
+            : "api.response.json.fallback.error";
+
+          emitApiRuntimeTrace("api.response.json.fallback.error", {
+            endpoint,
+            status: response?.status,
+            contentType: response?.headers?.get?.("content-type") || "",
+            durationMs: Date.now() - startedAt,
+            message: fallbackError?.message || "JSON fallback failed"
+          });
+
+          throw new ProjectPayloadError("Project response was received but could not be processed.", {
+            keyPresent: Boolean(requestMeta?.keyPresent),
+            keySource: String(requestMeta?.keySource || "none"),
+            authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+            endpoint,
+            status: Number.isFinite(response?.status) ? Number(response.status) : null,
+            contentType: String(response?.headers?.get?.("content-type") || ""),
+            bodyLength: 0,
+            parseStage: fallbackParseStage,
+            responseSnippet: ""
+          });
+        }
+      }
+
+      throw new ProjectPayloadError("Project response was received but could not be processed.", {
+        keyPresent: Boolean(requestMeta?.keyPresent),
+        keySource: String(requestMeta?.keySource || "none"),
+        authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+        endpoint,
+        status: Number.isFinite(response?.status) ? Number(response.status) : null,
+        contentType: String(response?.headers?.get?.("content-type") || ""),
+        bodyLength: 0,
+        parseStage: "api.response.text.timeout",
+        responseSnippet: ""
+      });
+    }
+
+    emitApiRuntimeTrace("response.text.error", {
+      endpoint,
+      status: response?.status,
+      contentType: response?.headers?.get?.("content-type") || "",
+      durationMs: Date.now() - startedAt,
+      message: error?.message || "Failed to read response body"
+    });
+
+    throw error;
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
   }
 }
 
 async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
   let payload = null;
   let rawText = "";
+  let parseStage = "response.empty";
 
-  try {
-    rawText = await readResponseText(response, requestMeta);
-  } catch (error) {
-    emitApiRuntimeTrace("response.text.error", {
-      endpoint: response?.url || requestMeta?.endpoint || "",
-      status: response?.status,
-      contentType: response?.headers?.get?.("content-type") || "",
-      message: error?.message || "Failed to read response body"
-    });
-    throw error;
+  const bodyReadResult = await readResponseText(response, requestMeta);
+
+  if (bodyReadResult?.mode === "json-fallback") {
+    payload = bodyReadResult.payload;
+    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+  } else {
+    rawText = String(bodyReadResult?.rawText || "");
   }
 
-  const bodyLength = rawText.length;
+  const bodyLength = Number(bodyReadResult?.bodyLength || rawText.length || 0);
   const trimmed = rawText.trim();
 
-  if (trimmed) {
+  if (trimmed && !payload) {
     const parseStartedAt = Date.now();
     const parseTimeoutMs = Math.max(1, Number(requestMeta?.parseTimeoutMs) || DEFAULT_PARSE_TIMEOUT_MS);
 
@@ -274,49 +380,18 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
       timeoutMs: parseTimeoutMs
     });
 
-    let parseTimer = null;
-    const parseOutcome = await Promise.race([
-      Promise.resolve()
-        .then(() => JSON.parse(rawText))
-        .then((value) => ({ type: "done", value }))
-        .catch((error) => ({ type: "error", error })),
-      new Promise((resolve) => {
-        parseTimer = setTimeout(() => {
-          resolve({ type: "timeout" });
-        }, parseTimeoutMs);
-      })
-    ]);
-
-    if (parseTimer) {
-      clearTimeout(parseTimer);
-    }
-
-    if (parseOutcome?.type === "timeout") {
-      emitApiRuntimeTrace("api.response.parse.timeout", {
+    try {
+      payload = JSON.parse(rawText);
+      parseStage = "api.response.parse.done";
+      emitApiRuntimeTrace("api.response.parse.done", {
         endpoint: response?.url || requestMeta?.endpoint || "",
         status: response?.status,
         contentType: response?.headers?.get?.("content-type") || "",
         bodyLength,
-        durationMs: Date.now() - parseStartedAt,
-        timeoutMs: parseTimeoutMs,
-        message: "Parse watchdog timed out"
+        durationMs: Date.now() - parseStartedAt
       });
-
-      throw new ProjectPayloadError("Project response was received but could not be processed.", {
-        keyPresent: Boolean(requestMeta?.keyPresent),
-        keySource: String(requestMeta?.keySource || "none"),
-        authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
-        endpoint: String(response?.url || requestMeta?.endpoint || ""),
-        status: Number.isFinite(response?.status) ? Number(response.status) : null,
-        contentType: String(response?.headers?.get?.("content-type") || ""),
-        bodyLength,
-        parseStage: "api.response.parse.timeout",
-        responseSnippet: trimmed.slice(0, 240)
-      });
-    }
-
-    if (parseOutcome?.type === "error") {
-      const parseFailure = parseOutcome.error;
+    } catch (parseFailure) {
+      parseStage = "api.response.parse.error";
       emitApiRuntimeTrace("api.response.parse.error", {
         endpoint: response?.url || requestMeta?.endpoint || "",
         status: response?.status,
@@ -334,25 +409,16 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
         status: Number.isFinite(response?.status) ? Number(response.status) : null,
         contentType: String(response?.headers?.get?.("content-type") || ""),
         bodyLength,
-        parseStage: "api.response.parse.error",
+        parseStage,
         responseSnippet: trimmed.slice(0, 240)
       });
     }
-
-    payload = parseOutcome?.value;
-    emitApiRuntimeTrace("api.response.parse.done", {
-      endpoint: response?.url || requestMeta?.endpoint || "",
-      status: response?.status,
-      contentType: response?.headers?.get?.("content-type") || "",
-      bodyLength,
-      durationMs: Date.now() - parseStartedAt
-    });
   }
 
   const diagnostics = buildResponseDiagnostics(response, {
     ...requestMeta,
     bodyLength,
-    parseStage: trimmed ? "api.response.parse" : "response.empty"
+    parseStage
   }, payload);
 
   if (!response.ok) {
@@ -427,23 +493,49 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
 }
 
 async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const normalizedTimeoutMs = Math.max(1, Number(timeoutMs) || DEFAULT_REQUEST_TIMEOUT_MS);
   const controller = typeof AbortController === "function" ? new AbortController() : null;
-  const timer = controller
-    ? setTimeout(() => controller.abort(), Math.max(1, Number(timeoutMs) || DEFAULT_REQUEST_TIMEOUT_MS))
-    : null;
+  const createTimeoutError = () => {
+    const timeoutError = new Error(`Request timed out after ${normalizedTimeoutMs}ms: ${path}`);
+    timeoutError.endpoint = path;
+    timeoutError.isTimeout = true;
+    timeoutError.parseStage = "request";
+    return timeoutError;
+  };
+
+  let timer = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      if (controller) {
+        try {
+          controller.abort();
+        } catch (_) {}
+      }
+
+      const timeoutError = createTimeoutError();
+      emitApiRuntimeTrace("request.timeout", {
+        endpoint: buildUrl(path),
+        method: String(init?.method || "GET").toUpperCase(),
+        timeoutMs: normalizedTimeoutMs,
+        message: timeoutError.message
+      });
+      reject(timeoutError);
+    }, normalizedTimeoutMs);
+  });
   const method = String(init?.method || "GET").toUpperCase();
 
   emitApiRuntimeTrace("request.start", {
     endpoint: buildUrl(path),
     method,
-    timeoutMs
+    timeoutMs: normalizedTimeoutMs
   });
 
   try {
-    const response = await fetch(buildUrl(path), {
+    const requestPromise = fetch(buildUrl(path), {
       ...init,
       signal: controller ? controller.signal : init.signal
     });
+    const response = await Promise.race([requestPromise, timeoutPromise]);
     emitApiRuntimeTrace("request.response", {
       endpoint: response?.url || buildUrl(path),
       method,
@@ -452,18 +544,12 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
     });
     return response;
   } catch (error) {
+    if (error?.isTimeout) {
+      throw error;
+    }
+
     if (error?.name === "AbortError") {
-      const timeoutError = new Error(`Request timed out after ${timeoutMs}ms: ${path}`);
-      timeoutError.endpoint = path;
-      timeoutError.isTimeout = true;
-      timeoutError.parseStage = "request";
-      emitApiRuntimeTrace("request.timeout", {
-        endpoint: buildUrl(path),
-        method,
-        timeoutMs,
-        message: timeoutError.message
-      });
-      throw timeoutError;
+      throw createTimeoutError();
     }
 
     if (error && typeof error === "object" && !error.endpoint) {
@@ -482,7 +568,7 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
   }
 }
 
-async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, requestOptions = {}) {
   const { headers, keyPresent, keySource } = buildReadHeaders();
   const response = await fetchWithTimeout(path, {
     method: "GET",
@@ -494,7 +580,8 @@ async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOU
     keyPresent,
     keySource,
     authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
-    responseTextTimeoutMs: timeoutMs
+    responseTextTimeoutMs: Number(requestOptions?.responseTextTimeoutMs) || timeoutMs,
+    parseTimeoutMs: Number(requestOptions?.parseTimeoutMs) || DEFAULT_PARSE_TIMEOUT_MS
   });
 }
 
@@ -652,6 +739,7 @@ function toDiagnosticEntry(section, error, required = false) {
     endpoint: String(error?.endpoint || ""),
     status,
     timeout: Boolean(error?.isTimeout),
+    parseStage: String(error?.diagnostics?.parseStage || error?.parseStage || ""),
     keyPresent: Boolean(requestDiagnostics?.keyPresent),
     keySource: String(requestDiagnostics?.keySource || "none"),
     authHeaderPresent: Boolean(requestDiagnostics?.authHeaderPresent),
@@ -726,7 +814,10 @@ export async function fetchAllCoreProjectData(projectName) {
   const requiredDashboardPromise = getJson(
     `/media-manager/project/${encodedProjectName}`,
     "Failed to load project dashboard",
-    18000
+    18000,
+    {
+      responseTextTimeoutMs: REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS
+    }
   );
 
   let requestAuthDiagnostics = {
@@ -762,6 +853,39 @@ export async function fetchAllCoreProjectData(projectName) {
   });
 
   if (requiredDiagnostics.length > 0) {
+    const hasResponseTextTimeout = requiredDiagnostics.some((entry) =>
+      String(entry?.parseStage || "").includes("response.text.timeout")
+    );
+    let requiredProjectFallback = null;
+
+    if (hasResponseTextTimeout) {
+      try {
+        const fallbackProjects = await fetchProjects();
+        const fallbackItems = Array.isArray(fallbackProjects?.items) ? fallbackProjects.items : [];
+        const projectExists = fallbackItems.some((item) => {
+          const name = typeof item === "string" ? item : item?.name;
+          return String(name || "").trim() === safeProjectName;
+        });
+
+        requiredProjectFallback = {
+          endpoint: "/media-manager/projects",
+          verified: true,
+          projectExists,
+          projectName: safeProjectName,
+          warning: projectExists ? "Project details are still syncing." : "Project not found in projects index."
+        };
+      } catch (fallbackError) {
+        requiredProjectFallback = {
+          endpoint: "/media-manager/projects",
+          verified: false,
+          projectExists: false,
+          projectName: safeProjectName,
+          warning: "Project details are still syncing.",
+          message: String(fallbackError?.message || "Failed to verify project fallback")
+        };
+      }
+    }
+
     const message = requiredDiagnostics
       .map((item) => `${item.section}: ${item.message}`)
       .join("; ");
@@ -779,6 +903,7 @@ export async function fetchAllCoreProjectData(projectName) {
       required: requiredDiagnostics,
       optional: optionalDiagnostics,
       requestAuth: requestAuthDiagnostics,
+      requiredProjectFallback,
       optionalPending: [
         "activity",
         "operations",
@@ -789,6 +914,8 @@ export async function fetchAllCoreProjectData(projectName) {
         "learning"
       ]
     };
+    error._requiredProjectFallback = requiredProjectFallback;
+    error.isResponseTextTimeout = hasResponseTextTimeout;
     throw error;
   }
 
