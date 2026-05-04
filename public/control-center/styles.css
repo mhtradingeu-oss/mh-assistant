@@ -2126,7 +2126,8 @@ textarea {
 }
 
 .loading-overlay[aria-hidden="true"],
-.loading-overlay:not(.is-visible) {
+.loading-overlay:not(.is-visible),
+.loading-overlay[hidden] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -6022,4 +6023,24 @@ section[data-page="workflows"] .wfexec-empty {
   margin: 0;
   color: var(--muted);
   font-size: var(--font-size-body);
+}
+
+/* TEMPORARY RESCUE MODE - prevent startup overlay from blocking the interface.
+   Remove after the Control Center startup lifecycle is fully fixed. */
+body.is-loading,
+body.loading,
+body.loading-locked {
+  overflow: auto !important;
+  cursor: auto !important;
+}
+
+.loading-overlay,
+.loading-overlay.is-visible,
+.loading-overlay[aria-hidden="false"],
+.loading-overlay[aria-hidden="true"],
+.loading-overlay[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
