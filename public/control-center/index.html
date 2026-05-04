@@ -15,10 +15,12 @@
     <!-- Global feedback -->
     <div id="globalMessage" class="global-message" aria-live="polite"></div>
     <div id="globalError" class="global-error" aria-live="assertive"></div>
+    <div id="startupStepBanner" class="startup-step-banner" aria-live="polite" hidden>Startup step: idle</div>
     <section id="fatalErrorPanel" class="fatal-error-panel" aria-live="assertive" aria-hidden="true" hidden>
       <h3 id="fatalErrorTitle">Control Center startup failed</h3>
       <p id="fatalErrorText">The app could not finish loading.</p>
       <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
+      <div id="fatalStartupSteps" class="fatal-startup-steps">No startup steps recorded yet.</div>
       <div class="fatal-error-actions">
         <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
         <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
@@ -193,6 +195,8 @@
         if (overlay) {
           overlay.classList.remove("is-visible");
           overlay.setAttribute("aria-hidden", "true");
+          overlay.style.display = "none";
+          overlay.style.pointerEvents = "none";
         }
 
         var panel = document.getElementById("fatalErrorPanel");

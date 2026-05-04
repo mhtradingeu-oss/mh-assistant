@@ -592,8 +592,23 @@ function autoHideMessage(delay = 2500) {
 
 function showLoading(
   title = "Loading project",
-  text = "Please wait while the system loads the workspace."
+  text = "Please wait while the system loads the workspace.",
+  options = {}
 ) {
+  const token = String(options.token || "");
+  const reason = String(options.reason || "project-load");
+  const explicitLoad = Boolean(options.explicitLoad);
+
+  if (!explicitLoad) {
+    recordLoadingTransition("show-blocked-non-explicit", { token, reason });
+    return;
+  }
+
+  if (token && !isActiveProjectLoadToken(token)) {
+    recordLoadingTransition("show-blocked-stale-token", { token, reason });
+    return;
+  }
+
   const overlay = $("loadingOverlay");
   const loadingTitle = $("loadingTitle");
   const loadingText = $("loadingText");
@@ -602,19 +617,48 @@ function showLoading(
   if (loadingText) loadingText.textContent = text;
 
   if (overlay) {
+    overlay.style.display = "flex";
+    overlay.style.pointerEvents = "auto";
     overlay.classList.add("is-visible");
     overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("is-loading", "loading", "loading-locked");
     installLoadingWatchdog("loading-overlay-visible");
+    recordLoadingTransition("show", { token, reason });
   }
 }
 
-function hideLoading() {
+function hideLoading(options = {}) {
+  const token = String(options.token || "");
+  const reason = String(options.reason || "project-load-complete");
+  const force = Boolean(options.force);
+
+  if (token && !force && !isActiveProjectLoadToken(token)) {
+    recordLoadingTransition("hide-blocked-stale-token", { token, reason });
+    return false;
+  }
+
   const overlay = $("loadingOverlay");
-  if (!overlay) return;
+  if (!overlay) return false;
 
   overlay.classList.remove("is-visible");
   overlay.setAttribute("aria-hidden", "true");
+  overlay.style.display = "none";
+  overlay.style.pointerEvents = "none";
+
+  const body = document.body;
+  if (body) {
+    body.classList.remove("is-loading", "loading", "loading-locked", "app-loading", "app-locked");
+
+    Array.from(body.classList).forEach((className) => {
+      if (/loading|locked/i.test(className)) {
+        body.classList.remove(className);
+      }
+    });
+  }
+
   clearLoadingWatchdog();
+  recordLoadingTransition(force ? "hide-force" : "hide", { token, reason });
+  return true;
 }
 
 function isLoadingVisible() {
@@ -623,14 +667,106 @@ function isLoadingVisible() {
 }
 
 const LOADING_WATCHDOG_TIMEOUT_MS = 30000;
+const OVERLAY_RECOVERY_DELAY_MS = 3000;
+const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
+const LAST_PROJECT_LOAD_STORAGE_KEY = "mh-control-center-last-project-load";
+const LOADING_TRANSITIONS_STORAGE_KEY = "mh-control-center-loading-transitions";
+const STARTUP_HISTORY_LIMIT = 60;
+const LOADING_TRANSITION_LIMIT = 80;
+
 let loadingWatchdogTimer = null;
 let loadingWatchdogReason = "";
+
+const startupStepHistory = [];
+const loadingTransitionHistory = [];
 
 const startupDiagnostics = {
   failedEndpoints: [],
   lastErrorSource: "",
   lastErrorMessage: ""
 };
+
+function safeStorageSet(key, value) {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+  } catch (_) {}
+}
+
+function boundedPush(list, value, limit) {
+  list.push(value);
+  if (list.length > limit) {
+    list.splice(0, list.length - limit);
+  }
+}
+
+function formatStepEntry(entry) {
+  if (!entry) return "";
+  const tokenText = entry.token ? ` [${entry.token}]` : "";
+  const detailText = entry.detail ? ` - ${entry.detail}` : "";
+  return `${entry.at} ${entry.step}${tokenText}${detailText}`;
+}
+
+function renderStartupStepDiagnostics() {
+  const latest = startupStepHistory[startupStepHistory.length - 1] || null;
+  const banner = $("startupStepBanner");
+  if (banner) {
+    banner.hidden = false;
+    banner.textContent = latest
+      ? `Startup: ${latest.step}${latest.token ? ` [${latest.token}]` : ""}`
+      : "Startup: idle";
+  }
+
+  const stepsBox = $("fatalStartupSteps");
+  if (stepsBox) {
+    const lines = startupStepHistory.slice(-10).map((entry) => formatStepEntry(entry));
+    stepsBox.textContent = lines.length ? lines.join("\n") : "No startup steps recorded yet.";
+  }
+
+  patchState("data", {
+    startupStep: latest?.step || "",
+    startupSteps: startupStepHistory.slice(-20),
+    loadingTransitions: loadingTransitionHistory.slice(-20)
+  });
+}
+
+function recordStartupStep(step, details = {}) {
+  const entry = {
+    at: new Date().toISOString(),
+    step: String(step || "startup.step"),
+    token: String(details.token || ""),
+    detail: String(details.detail || "")
+  };
+
+  boundedPush(startupStepHistory, entry, STARTUP_HISTORY_LIMIT);
+  safeStorageSet(STARTUP_STEPS_STORAGE_KEY, JSON.stringify(startupStepHistory));
+  renderStartupStepDiagnostics();
+}
+
+function recordLoadingTransition(action, details = {}) {
+  const overlay = $("loadingOverlay");
+  const entry = {
+    at: new Date().toISOString(),
+    action: String(action || "loading.transition"),
+    token: String(details.token || ""),
+    reason: String(details.reason || ""),
+    visible: Boolean(overlay && overlay.classList.contains("is-visible"))
+  };
+
+  boundedPush(loadingTransitionHistory, entry, LOADING_TRANSITION_LIMIT);
+  safeStorageSet(LOADING_TRANSITIONS_STORAGE_KEY, JSON.stringify(loadingTransitionHistory));
+  renderStartupStepDiagnostics();
+}
+
+function recordLastProjectLoad(summary) {
+  const payload = {
+    at: new Date().toISOString(),
+    ...summary
+  };
+  safeStorageSet(LAST_PROJECT_LOAD_STORAGE_KEY, JSON.stringify(payload));
+  patchState("data", { lastProjectLoad: payload });
+}
 
 function recordStartupFailure(source, error) {
   const message = String(error?.message || error || "Unknown startup error").trim();
@@ -667,6 +803,10 @@ function renderStartupDiagnosticsText(reason = "") {
       .map((item) => `${item.endpoint}${item.status ? ` (${item.status})` : ""}${item.timeout ? " [timeout]" : ""}`)
       .join("; ");
     rows.push(`Endpoints: ${endpointRow}`);
+  }
+  if (startupStepHistory.length) {
+    const recentSteps = startupStepHistory.slice(-6).map((entry) => formatStepEntry(entry)).join(" | ");
+    rows.push(`Steps: ${recentSteps}`);
   }
   return rows.join("\n");
 }
@@ -715,10 +855,13 @@ function showFatalErrorPanel(message, details = "") {
 
 function handleStartupFatalError(source, error) {
   const err = error instanceof Error ? error : new Error(String(error || "Unknown startup failure"));
+  recordStartupStep("startup.fatal", {
+    detail: `${String(source || "startup")}: ${String(err.message || "unknown error")}`
+  });
   recordStartupFailure(source, err);
   console.error("[CONTROL_CENTER_STARTUP_FATAL]", source, err);
   setLoading(false);
-  hideLoading();
+  hideLoading({ reason: "startup-fatal", force: true });
   setError(err.message || "Control Center initialization failed");
   showError(err.message || "Control Center initialization failed");
   showFatalErrorPanel(
@@ -1114,8 +1257,20 @@ async function safeRenderCurrentPage(logLabel = "[LOAD_PROJECT_RENDER_ERROR]") {
 
 let activeProjectLoadPromise = null;
 let activeProjectLoadProject = "";
+let activeProjectLoadToken = "";
+let projectLoadTokenCounter = 0;
 
 const PROJECT_LOAD_TIMEOUT_MS = 45000;
+
+function createProjectLoadToken(projectName) {
+  projectLoadTokenCounter += 1;
+  return `${Date.now()}-${projectLoadTokenCounter}-${normalizeProjectSlug(projectName || "project") || "project"}`;
+}
+
+function isActiveProjectLoadToken(token) {
+  const normalized = String(token || "");
+  return Boolean(normalized) && normalized === activeProjectLoadToken;
+}
 
 function fetchProjectWithTimeout(projectName) {
   return new Promise((resolve, reject) => {
@@ -1135,7 +1290,20 @@ function fetchProjectWithTimeout(projectName) {
   });
 }
 
-function applyProjectPayload(projectName, payload) {
+function applyProjectPayload(projectName, payload, loadToken = "") {
+  if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+    recordStartupStep("loadProjectData.applyProjectPayload.stale-skip", {
+      token: loadToken,
+      detail: `Skipping stale payload for ${projectName}`
+    });
+    return false;
+  }
+
+  recordStartupStep("loadProjectData.applyProjectPayload", {
+    token: loadToken,
+    detail: `Applying payload for ${projectName}`
+  });
+
   const scheduledJobs = Array.isArray(payload?.activity?.scheduled_jobs)
     ? payload.activity.scheduled_jobs
     : [];
@@ -1161,6 +1329,10 @@ function applyProjectPayload(projectName, payload) {
 
   const overviewData = payload?.overview?.overview || {};
 
+  recordStartupStep("loadProjectData.setCurrentProject", {
+    token: loadToken,
+    detail: projectName
+  });
   setCurrentProject(projectName);
   setStoredProjectName(projectName);
 
@@ -1171,6 +1343,18 @@ function applyProjectPayload(projectName, payload) {
     mode: overviewData.execution_mode || "",
     campaign: inferredCampaign
   });
+
+  const summary = {
+    project: projectName,
+    token: loadToken,
+    requiredSummary: payload?._requiredSummary || null,
+    diagnostics: payload?._diagnostics || null,
+    scheduledJobs: scheduledJobs.length,
+    executionResults: executionResults.length,
+    overviewProject: String(overviewData.project_name || "")
+  };
+  recordLastProjectLoad(summary);
+  return true;
 }
 
 function buildOptionalLoadWarning(diagnostics) {
@@ -1188,14 +1372,67 @@ function buildOptionalLoadWarning(diagnostics) {
   return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
 }
 
-async function applyOptionalProjectPayload(payload) {
+function scheduleOverlayRecoveryCheck(loadToken, projectName) {
+  setTimeout(() => {
+    if (!isActiveProjectLoadToken(loadToken)) {
+      return;
+    }
+
+    if (!isLoadingVisible()) {
+      return;
+    }
+
+    const hidden = hideLoading({
+      token: loadToken,
+      reason: "post-required-success-recovery",
+      force: true
+    });
+
+    if (hidden) {
+      recordStartupStep("loadProjectData.overlay-recovery.force-hide", {
+        token: loadToken,
+        detail: projectName
+      });
+      const warning = "Project loaded, optional data may still be syncing.";
+      setError(warning);
+      showError(warning);
+    }
+  }, OVERLAY_RECOVERY_DELAY_MS);
+}
+
+async function applyOptionalProjectPayload(payload, loadToken = "") {
+  recordStartupStep("loadProjectData.optional.start", {
+    token: loadToken,
+    detail: "Starting optional background payload"
+  });
+
+  if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+    recordStartupStep("loadProjectData.optional.skip-stale", {
+      token: loadToken,
+      detail: "Optional payload skipped due to stale load token"
+    });
+    return;
+  }
+
   const optionalReady = payload?._optionalReady;
   if (!optionalReady || typeof optionalReady.then !== "function") {
+    recordStartupStep("loadProjectData.optional.noop", {
+      token: loadToken,
+      detail: "No optional background payload present"
+    });
     return;
   }
 
   try {
     const optionalResult = await optionalReady;
+    if (loadToken && !isActiveProjectLoadToken(loadToken)) {
+      recordStartupStep("loadProjectData.optional.skip-after-await", {
+        token: loadToken,
+        detail: "Optional payload resolved after token changed"
+      });
+      return;
+    }
+
     const patch = optionalResult?.patch || {};
     const diagnostics = optionalResult?._diagnostics || payload?._diagnostics || null;
 
@@ -1225,9 +1462,17 @@ async function applyOptionalProjectPayload(payload) {
 
     renderGlobalUi();
     await safeRenderCurrentPage("[LOAD_PROJECT_OPTIONAL_RENDER_ERROR]");
+    recordStartupStep("loadProjectData.optional.end", {
+      token: loadToken,
+      detail: "Optional background payload applied"
+    });
   } catch (optionalError) {
     console.warn("Optional project data failed:", optionalError?.message || optionalError);
     recordStartupFailure("load-project-optional-data", optionalError);
+    recordStartupStep("loadProjectData.optional.error", {
+      token: loadToken,
+      detail: String(optionalError?.message || optionalError || "Optional payload error")
+    });
     setError("Loaded required project data, but optional sections failed to refresh.");
     showError("Loaded required project data, but optional sections failed to refresh.");
   }
@@ -1265,12 +1510,36 @@ async function loadProjectData(projectName) {
   if (!safeProjectName) return null;
 
   if (activeProjectLoadPromise && activeProjectLoadProject === safeProjectName) {
+    recordStartupStep("loadProjectData.reuse-active-promise", {
+      token: activeProjectLoadToken,
+      detail: safeProjectName
+    });
     showMessage(`Project ${safeProjectName} is already loading.`);
     return activeProjectLoadPromise;
   }
 
+  const loadToken = createProjectLoadToken(safeProjectName);
+  activeProjectLoadToken = loadToken;
+
+  recordStartupStep("loadProjectData.start", {
+    token: loadToken,
+    detail: safeProjectName
+  });
+
   const loadPromise = (async () => {
+    if (!isActiveProjectLoadToken(loadToken)) {
+      recordStartupStep("loadProjectData.skip-stale-before-start", {
+        token: loadToken,
+        detail: safeProjectName
+      });
+      return null;
+    }
+
     setLoading(true);
+    recordStartupStep("loadProjectData.setLoading.true", {
+      token: loadToken,
+      detail: safeProjectName
+    });
     clearError();
     clearFeedback();
     resetProjectData();
@@ -1278,11 +1547,23 @@ async function loadProjectData(projectName) {
     let payload = null;
     let loadedProjectName = safeProjectName;
 
-    showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`);
+    showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`, {
+      token: loadToken,
+      reason: "required-load-start",
+      explicitLoad: true
+    });
 
     try {
       try {
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.start", {
+          token: loadToken,
+          detail: safeProjectName
+        });
         payload = await fetchProjectWithTimeout(safeProjectName);
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.success", {
+          token: loadToken,
+          detail: safeProjectName
+        });
       } catch (primaryError) {
         if (safeProjectName === DEFAULT_PROJECT_SLUG) {
           throw primaryError;
@@ -1294,14 +1575,39 @@ async function loadProjectData(projectName) {
         );
 
         loadedProjectName = DEFAULT_PROJECT_SLUG;
-        showLoading("Loading project", `Please wait while ${DEFAULT_PROJECT_SLUG} is being loaded.`);
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.fallback", {
+          token: loadToken,
+          detail: `${safeProjectName} -> ${DEFAULT_PROJECT_SLUG}`
+        });
+        showLoading("Loading project", `Please wait while ${DEFAULT_PROJECT_SLUG} is being loaded.`, {
+          token: loadToken,
+          reason: "required-load-fallback",
+          explicitLoad: true
+        });
         payload = await fetchProjectWithTimeout(DEFAULT_PROJECT_SLUG);
+        recordStartupStep("loadProjectData.fetchProjectWithTimeout.success", {
+          token: loadToken,
+          detail: DEFAULT_PROJECT_SLUG
+        });
       }
 
-      applyProjectPayload(loadedProjectName, payload);
+      const applied = applyProjectPayload(loadedProjectName, payload, loadToken);
+      if (!applied) {
+        return null;
+      }
 
+      recordStartupStep("loadProjectData.renderGlobalUi", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
       renderGlobalUi();
+      recordStartupStep("loadProjectData.safeRenderCurrentPage", {
+        token: loadToken,
+        detail: loadedProjectName
+      });
       await safeRenderCurrentPage();
+
+      scheduleOverlayRecoveryCheck(loadToken, loadedProjectName);
 
       showMessage(`Loaded project: ${loadedProjectName}`);
       return payload;
@@ -1320,10 +1626,30 @@ async function loadProjectData(projectName) {
       showError(error.message || "Failed to load project data");
       renderGlobalUi();
       await safeRenderCurrentPage("[LOAD_PROJECT_ERROR_RENDER_FALLBACK]");
+      recordStartupStep("loadProjectData.error", {
+        token: loadToken,
+        detail: String(error.message || "Failed to load project data")
+      });
       return null;
     } finally {
-      setLoading(false);
-      hideLoading();
+      if (isActiveProjectLoadToken(loadToken)) {
+        setLoading(false);
+        recordStartupStep("loadProjectData.finally.setLoading.false", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+        hideLoading({ token: loadToken, reason: "required-load-finally" });
+        hideLoading();
+        recordStartupStep("loadProjectData.finally.hideLoading", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+      } else {
+        recordStartupStep("loadProjectData.finally.stale-skip", {
+          token: loadToken,
+          detail: loadedProjectName
+        });
+      }
     }
   })();
 
@@ -1333,7 +1659,7 @@ async function loadProjectData(projectName) {
   try {
     const payload = await loadPromise;
     if (payload) {
-      void applyOptionalProjectPayload(payload);
+      void applyOptionalProjectPayload(payload, loadToken);
     }
 
     return payload;
@@ -1341,6 +1667,9 @@ async function loadProjectData(projectName) {
     if (activeProjectLoadPromise === loadPromise) {
       activeProjectLoadPromise = null;
       activeProjectLoadProject = "";
+      if (activeProjectLoadToken === loadToken) {
+        activeProjectLoadToken = "";
+      }
     }
   }
 }
@@ -1740,6 +2069,7 @@ function bindGlobalButtons() {
 
 async function init() {
   try {
+    recordStartupStep("init.start");
     installGlobalErrorGuards();
     bindFatalErrorPanelActions();
     clearFeedback();
@@ -1758,14 +2088,21 @@ async function init() {
     injectAccessKeyButton();
     injectRoleSwitcher();
 
+    recordStartupStep("init.initial-render");
     renderGlobalUi();
     renderCurrentPage();
 
+    recordStartupStep("init.loadProjects.start");
     const preferredProject = await loadProjects();
+    recordStartupStep("init.loadProjects.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+
+    recordStartupStep("init.loadProjectData.start", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
     await loadProjectData(preferredProject || DEFAULT_PROJECT_SLUG);
+    recordStartupStep("init.loadProjectData.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
 
     markInitialized();
     window.__mhControlCenterStarted = true;
+    recordStartupStep("init.ready");
 
     if (!getControlWriteKey()) {
       showAccessKeyModal();

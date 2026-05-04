@@ -26,7 +26,11 @@ const state = {
     integrations: null,
     activity: null,
     operations: null,
-    loadDiagnostics: null
+    loadDiagnostics: null,
+    startupStep: "",
+    startupSteps: [],
+    loadingTransitions: [],
+    lastProjectLoad: null
   }
 };
 
@@ -154,6 +158,10 @@ export function resetProjectData() {
   state.data.activity = null;
   state.data.operations = null;
   state.data.loadDiagnostics = null;
+  state.data.startupStep = "";
+  state.data.startupSteps = [];
+  state.data.loadingTransitions = [];
+  state.data.lastProjectLoad = null;
   notify();
 }
 

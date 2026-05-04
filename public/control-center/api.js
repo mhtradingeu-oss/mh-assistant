@@ -449,6 +449,12 @@ export async function fetchAllCoreProjectData(projectName) {
     });
 
   const normalized = normalizeProjectDashboardPayload(basePayload);
+  normalized._requiredSummary = {
+    project: safeProjectName,
+    requiredSections,
+    optionalSections: optionalLoaders.map((entry) => entry.section),
+    fetchedAt: new Date().toISOString()
+  };
   normalized._diagnostics = {
     required: requiredDiagnostics,
     optional: optionalDiagnostics,
