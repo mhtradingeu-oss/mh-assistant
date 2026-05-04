@@ -10,6 +10,7 @@ const appPath = path.join(root, "public/control-center/app.js");
 const stylesPath = path.join(root, "public/control-center/styles.css");
 const apiPath = path.join(root, "public/control-center/api.js");
 const constantsPath = path.join(root, "public/control-center/constants.js");
+const serverPath = path.join(root, "runtime/orchestrator-service/server.js");
 
 function read(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -27,6 +28,7 @@ function main() {
   const styles = read(stylesPath);
   const api = read(apiPath);
   const constants = read(constantsPath);
+  const server = read(serverPath);
   
 function extractFunctionBody(source, functionName) {
   const pattern = new RegExp(`(?:async\\s+)?function\\s+${functionName}\\s*\\([^)]*\\)\\s*{`);
@@ -316,6 +318,42 @@ const checks = [];
       /isMissingReadKeyErrorMessage\(/.test(api) &&
       /throw\s+new\s+AccessKeyError\(message,\s*diagnostics\)/.test(api),
     "api.js throws AccessKeyError when a missing read key error is returned."
+  );
+
+  check(
+    checks,
+    "server_bypass_env_flag_is_explicitly_gated",
+    /CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV\s*=\s*'MH_CONTROL_CENTER_DISABLE_ACCESS_KEY'/.test(server) &&
+      /CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED[\s\S]*===\s*'1'/.test(server),
+    "server.js enables bypass only when MH_CONTROL_CENTER_DISABLE_ACCESS_KEY is exactly \"1\"."
+  );
+
+  check(
+    checks,
+    "server_bypass_sets_temporary_response_header",
+    /CONTROL_CENTER_KEY_BYPASS_HEADER\s*=\s*'X-MH-Control-Key-Bypass'/.test(server) &&
+      /CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE\s*=\s*'temporary'/.test(server) &&
+      /requireProtectedReadKey[\s\S]*res\.set\(CONTROL_CENTER_KEY_BYPASS_HEADER,\s*CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE\)/.test(server),
+    "Read-route bypass tags responses with X-MH-Control-Key-Bypass: temporary."
+  );
+
+  check(
+    checks,
+    "server_write_protection_still_enforced",
+    /function\s+requireProtectedControlWriteKey\([\s\S]*Protected write routes are disabled until/.test(server) &&
+      /function\s+requireProtectedControlWriteKey\([\s\S]*Missing protected write key/.test(server) &&
+      /function\s+requireProtectedControlWriteKey\([\s\S]*Invalid protected write key/.test(server),
+    "Write/destructive routes still enforce protected write key checks."
+  );
+
+  check(
+    checks,
+    "api_and_app_surface_access_key_bypass_diagnostics",
+    /x-mh-control-key-bypass/.test(api) &&
+      /accessKeyBypass/.test(api) &&
+      /accessKeyBypass/.test(app) &&
+      /isAccessKeyStartupError[\s\S]*diagnostics\?\.accessKeyBypass/.test(app),
+    "Frontend diagnostics surface accessKeyBypass=true and bypass mode avoids access-key-required handling."
   );
 
   check(

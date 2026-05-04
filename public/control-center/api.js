@@ -134,11 +134,13 @@ function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
   const endpoint = String(response?.url || requestMeta?.endpoint || "");
   const status = Number.isFinite(response?.status) ? Number(response.status) : null;
   const contentType = String(response?.headers?.get?.("content-type") || "");
+  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "").trim().toLowerCase() === "temporary";
 
   return {
     keyPresent: Boolean(requestMeta?.keyPresent),
     keySource: String(requestMeta?.keySource || "none"),
     authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+    accessKeyBypass,
     endpoint,
     status,
     contentType,
@@ -404,6 +406,23 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
     throw error;
   }
 
+  if (payload && typeof payload === "object") {
+    Object.defineProperty(payload, "__mhRequestDiagnostics", {
+      value: {
+        keyPresent: diagnostics.keyPresent,
+        keySource: diagnostics.keySource,
+        authHeaderPresent: diagnostics.authHeaderPresent,
+        accessKeyBypass: Boolean(diagnostics.accessKeyBypass),
+        endpoint: diagnostics.endpoint,
+        status: diagnostics.status,
+        contentType: diagnostics.contentType
+      },
+      configurable: true,
+      enumerable: false,
+      writable: true
+    });
+  }
+
   return payload;
 }
 
@@ -635,7 +654,19 @@ function toDiagnosticEntry(section, error, required = false) {
     timeout: Boolean(error?.isTimeout),
     keyPresent: Boolean(requestDiagnostics?.keyPresent),
     keySource: String(requestDiagnostics?.keySource || "none"),
-    authHeaderPresent: Boolean(requestDiagnostics?.authHeaderPresent)
+    authHeaderPresent: Boolean(requestDiagnostics?.authHeaderPresent),
+    accessKeyBypass: Boolean(requestDiagnostics?.accessKeyBypass)
+  };
+}
+
+function extractRequestAuthDiagnostics(payload = null) {
+  const diagnostics = payload?.__mhRequestDiagnostics || {};
+  return {
+    keyPresent: Boolean(diagnostics?.keyPresent),
+    keySource: String(diagnostics?.keySource || "none"),
+    authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+    accessKeyBypass: Boolean(diagnostics?.accessKeyBypass),
+    endpoint: String(diagnostics?.endpoint || "")
   };
 }
 
@@ -698,6 +729,20 @@ export async function fetchAllCoreProjectData(projectName) {
     18000
   );
 
+  let requestAuthDiagnostics = {
+    keyPresent: false,
+    keySource: "none",
+    authHeaderPresent: false,
+    accessKeyBypass: false,
+    endpoint: `/media-manager/project/${encodedProjectName}`
+  };
+
+  requiredDashboardPromise
+    .then((payload) => {
+      requestAuthDiagnostics = extractRequestAuthDiagnostics(payload);
+    })
+    .catch(() => {});
+
   const requiredSections = ["overview", "readiness", "assets"];
   const requiredResults = await Promise.allSettled(
     requiredSections.map((section) =>
@@ -727,11 +772,13 @@ export async function fetchAllCoreProjectData(projectName) {
       keyPresent: Boolean(authProbe?.keyPresent),
       keySource: String(authProbe?.keySource || "none"),
       authHeaderPresent: Boolean(authProbe?.authHeaderPresent),
+      accessKeyBypass: Boolean(authProbe?.accessKeyBypass),
       endpoint: String(authProbe?.endpoint || `/media-manager/project/${encodedProjectName}`)
     };
     error._diagnostics = {
       required: requiredDiagnostics,
       optional: optionalDiagnostics,
+      requestAuth: requestAuthDiagnostics,
       optionalPending: [
         "activity",
         "operations",
@@ -834,6 +881,7 @@ export async function fetchAllCoreProjectData(projectName) {
         _diagnostics: {
           required: requiredDiagnostics,
           optional: optionalDiagnostics,
+          requestAuth: requestAuthDiagnostics,
           optionalPending: []
         }
       };
@@ -849,6 +897,7 @@ export async function fetchAllCoreProjectData(projectName) {
   normalized._diagnostics = {
     required: requiredDiagnostics,
     optional: optionalDiagnostics,
+    requestAuth: requestAuthDiagnostics,
     optionalPending: optionalLoaders.map((entry) => entry.section)
   };
   normalized._optionalReady = optionalReady;

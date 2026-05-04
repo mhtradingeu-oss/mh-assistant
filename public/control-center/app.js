@@ -972,6 +972,7 @@ const startupDiagnostics = {
     keyPresent: false,
     keySource: "none",
     authHeaderPresent: false,
+    accessKeyBypass: false,
     endpoint: ""
   }
 };
@@ -1062,6 +1063,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
     unlocked: Boolean(startupRuntimeState.unlocked),
     unlockReason: String(startupRuntimeState.unlockReason || ""),
     lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
     overlay: getOverlayState(),
     trace: runtimeTraceHistory.slice(-20)
@@ -1088,6 +1090,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
       `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
       `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
       `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
       `overlay.className: ${payload.overlay.className || "-"}`,
       `overlay.display: ${payload.overlay.display || "-"}`,
       `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
@@ -1133,6 +1136,7 @@ function persistRuntimeTrace() {
     lastApiStage: String(startupRuntimeState.lastApiStage || ""),
     lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
     lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
     overlay: getOverlayState(),
     trace: runtimeTraceHistory.slice(-20)
@@ -1280,6 +1284,7 @@ function recordStartupFailure(source, error) {
     keyPresent: Boolean(diagnostics?.keyPresent),
     keySource: String(diagnostics?.keySource || "none"),
     authHeaderPresent: Boolean(diagnostics?.authHeaderPresent),
+    accessKeyBypass: Boolean(diagnostics?.accessKeyBypass),
     endpoint: String(diagnostics?.endpoint || error?.endpoint || "")
   };
   recordRuntimeTrace("startup.failure", {
@@ -1324,11 +1329,12 @@ function renderStartupDiagnosticsText(reason = "") {
   }
   const requestAuth = startupDiagnostics.requestAuth || {};
   const authEndpoint = String(requestAuth.endpoint || "").trim();
-  if (authEndpoint || requestAuth.keyPresent || requestAuth.authHeaderPresent) {
+  if (authEndpoint || requestAuth.keyPresent || requestAuth.authHeaderPresent || requestAuth.accessKeyBypass) {
     rows.push(
       `Request auth: keyPresent=${requestAuth.keyPresent ? "true" : "false"}, ` +
       `keySource=${requestAuth.keySource || "none"}, ` +
       `authHeaderPresent=${requestAuth.authHeaderPresent ? "true" : "false"}, ` +
+      `accessKeyBypass=${requestAuth.accessKeyBypass ? "true" : "false"}, ` +
       `endpoint=${authEndpoint || "unknown"}`
     );
   }
@@ -1445,6 +1451,10 @@ function isMissingReadKeyMessage(message) {
 }
 
 function isAccessKeyStartupError(error) {
+  if (Boolean(error?.diagnostics?.accessKeyBypass)) {
+    return false;
+  }
+
   const status = Number(error?.status || 0);
   const message = String(error?.message || "");
   const payloadError = String(error?.payload?.error || "");
@@ -2507,6 +2517,17 @@ async function loadProjectData(projectName) {
         token: loadToken,
         detail: loadedProjectName
       });
+
+      const requestAuthDiagnostics = payload?._diagnostics?.requestAuth || null;
+      if (requestAuthDiagnostics) {
+        startupDiagnostics.requestAuth = {
+          keyPresent: Boolean(requestAuthDiagnostics?.keyPresent),
+          keySource: String(requestAuthDiagnostics?.keySource || "none"),
+          authHeaderPresent: Boolean(requestAuthDiagnostics?.authHeaderPresent),
+          accessKeyBypass: Boolean(requestAuthDiagnostics?.accessKeyBypass),
+          endpoint: String(requestAuthDiagnostics?.endpoint || "")
+        };
+      }
 
       recordStartupStep("loadProjectData.applyPayload.start", {
         token: loadToken,
