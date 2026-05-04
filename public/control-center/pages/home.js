@@ -805,6 +805,8 @@ export const homeRoute = {
   `,
   render({ getState, $, escapeHtml, navigateTo, showMessage }) {
     const state = getState();
+    const loadDiagnostics = asObject(state.data.loadDiagnostics);
+    const optionalFailures = asArray(loadDiagnostics.optional);
     const dashboard = buildExecutiveData(state);
     const systemIntelligence = buildSystemIntelligence(state);
     const globalTopActions = asArray(systemIntelligence.topActions).slice(0, 3);
@@ -822,6 +824,21 @@ export const homeRoute = {
 
     root.innerHTML = `
       <div class="home-decision-shell">
+        ${optionalFailures.length
+          ? `<section class="card home-decision-section">
+              <div class="home-decision-section-head">
+                <div>
+                  <p class="card-label">Partial Data Warning</p>
+                  <h3>Optional sections failed to load</h3>
+                </div>
+                <span class="card-badge warning">${escapeHtml(`${optionalFailures.length} warning${optionalFailures.length === 1 ? "" : "s"}`)}</span>
+              </div>
+              <ul class="home-decision-list home-decision-list-spaced">
+                ${optionalFailures.map((item) => `<li><strong>${escapeHtml(humanizeStatus(item.section || "optional"))}</strong> - ${escapeHtml(item.message || "Failed to load")}</li>`).join("")}
+              </ul>
+            </section>`
+          : ""}
+
         <section class="card home-decision-section">
           <div class="home-decision-section-head">
             <div>

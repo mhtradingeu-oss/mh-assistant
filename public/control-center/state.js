@@ -25,7 +25,8 @@ const state = {
     registry: null,
     integrations: null,
     activity: null,
-    operations: null
+    operations: null,
+    loadDiagnostics: null
   }
 };
 
@@ -152,6 +153,7 @@ export function resetProjectData() {
   state.data.integrations = null;
   state.data.activity = null;
   state.data.operations = null;
+  state.data.loadDiagnostics = null;
   notify();
 }
 

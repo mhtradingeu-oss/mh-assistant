@@ -5,6 +5,7 @@ const path = require("path");
 
 const root = process.cwd();
 const appPath = path.join(root, "public/control-center/app.js");
+const apiPath = path.join(root, "public/control-center/api.js");
 
 function read(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -14,6 +15,7 @@ function read(filePath) {
 }
 
 const app = read(appPath);
+const api = read(apiPath);
 
 const checks = [];
 
@@ -86,6 +88,27 @@ check(
   "loading_overlay_finally_hidden",
   /async function loadProjectData[\s\S]*finally[\s\S]*setLoading\(false\)[\s\S]*hideLoading\(\)/.test(app),
   "Loading overlay is always dismissed in finally."
+);
+
+check(
+  "core_project_data_uses_allsettled",
+  /export async function fetchAllCoreProjectData[\s\S]*Promise\.allSettled/.test(api),
+  "fetchAllCoreProjectData uses Promise.allSettled for startup-resilient loading."
+);
+
+check(
+  "optional_project_data_non_blocking",
+  /fetchAllCoreProjectData[\s\S]*Promise\.allSettled/.test(api) &&
+    /_optionalReady/.test(api) &&
+    /loadProjectData[\s\S]*applyOptionalProjectPayload/.test(app),
+  "Optional project endpoints load in the background and do not block initial project render."
+);
+
+check(
+  "optional_diagnostics_exposed",
+  /fetchAllCoreProjectData[\s\S]*_diagnostics/.test(api) &&
+    /patchState\("data", \{[\s\S]*loadDiagnostics/.test(app),
+  "Optional endpoint diagnostics are exposed to UI state for visible warning surfaces."
 );
 
 check(

@@ -1155,7 +1155,8 @@ function applyProjectPayload(projectName, payload) {
     registry: payload.registry,
     integrations: payload.connectors,
     activity: payload.activity,
-    operations: payload.operations || null
+    operations: payload.operations || null,
+    loadDiagnostics: payload?._diagnostics || null
   });
 
   const overviewData = payload?.overview?.overview || {};
@@ -1170,6 +1171,66 @@ function applyProjectPayload(projectName, payload) {
     mode: overviewData.execution_mode || "",
     campaign: inferredCampaign
   });
+}
+
+function buildOptionalLoadWarning(diagnostics) {
+  const optionalFailures = Array.isArray(diagnostics?.optional)
+    ? diagnostics.optional
+    : [];
+
+  if (!optionalFailures.length) {
+    return "";
+  }
+
+  const labels = optionalFailures.map((entry) => String(entry?.section || "optional").trim()).filter(Boolean);
+  const unique = Array.from(new Set(labels));
+
+  return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
+}
+
+async function applyOptionalProjectPayload(payload) {
+  const optionalReady = payload?._optionalReady;
+  if (!optionalReady || typeof optionalReady.then !== "function") {
+    return;
+  }
+
+  try {
+    const optionalResult = await optionalReady;
+    const patch = optionalResult?.patch || {};
+    const diagnostics = optionalResult?._diagnostics || payload?._diagnostics || null;
+
+    patchState("data", {
+      activity: patch.activity,
+      tree: patch.tree,
+      registry: patch.registry,
+      integrations: patch.connectors,
+      operations: patch.operations,
+      loadDiagnostics: diagnostics
+    });
+
+    const warning = buildOptionalLoadWarning(diagnostics);
+    if (warning) {
+      setError(warning);
+      showError(warning);
+
+      const optionalFailures = Array.isArray(diagnostics?.optional) ? diagnostics.optional : [];
+      optionalFailures.forEach((entry) => {
+        const failure = new Error(String(entry?.message || "Optional endpoint failed"));
+        failure.endpoint = entry?.endpoint || entry?.section || "optional";
+        failure.status = entry?.status || null;
+        failure.isTimeout = Boolean(entry?.timeout);
+        recordStartupFailure("optional-project-data", failure);
+      });
+    }
+
+    renderGlobalUi();
+    await safeRenderCurrentPage("[LOAD_PROJECT_OPTIONAL_RENDER_ERROR]");
+  } catch (optionalError) {
+    console.warn("Optional project data failed:", optionalError?.message || optionalError);
+    recordStartupFailure("load-project-optional-data", optionalError);
+    setError("Loaded required project data, but optional sections failed to refresh.");
+    showError("Loaded required project data, but optional sections failed to refresh.");
+  }
 }
 
 async function loadProjects() {
@@ -1271,19 +1332,8 @@ async function loadProjectData(projectName) {
 
   try {
     const payload = await loadPromise;
-    const loadedProjectName = getSafeProjectName(getState().context.currentProject || safeProjectName);
-
-    if (payload && !payload.operations) {
-      fetchProjectOperations(loadedProjectName)
-        .then(async (operations) => {
-          patchState("data", { operations });
-          renderGlobalUi();
-          await safeRenderCurrentPage("[LOAD_PROJECT_BACKGROUND_RENDER_ERROR]");
-        })
-        .catch((opsError) => {
-          console.warn("Failed to load operations snapshot:", opsError.message);
-          recordStartupFailure("load-project-operations", opsError);
-        });
+    if (payload) {
+      void applyOptionalProjectPayload(payload);
     }
 
     return payload;
