@@ -11127,11 +11127,11 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, 
 });
 
 app.get('/media-manager', (req, res) => {
-  return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
+  return res.redirect(302, '/control-center/');
 });
 
 app.get('/media-manager/', (req, res) => {
-  return res.sendFile(path.join(__dirname, 'public', 'media-manager.html'));
+  return res.redirect(302, '/control-center/');
 });
 
 app.get(/^\/control-center$/, (req, res) => {
