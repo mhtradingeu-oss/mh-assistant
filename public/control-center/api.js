@@ -181,6 +181,98 @@ function normalizeProjectDashboardPayload(payload) {
   };
 }
 
+function toProjectName(value) {
+  const projectName = String(value || "").trim();
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+  return projectName;
+}
+
+function createOptionalFallback(projectName, section) {
+  const project = String(projectName || "").trim();
+
+  if (section === "activity") {
+    return {
+      project,
+      scheduled_jobs: [],
+      execution_results: [],
+      insights: null,
+      learning: null
+    };
+  }
+
+  if (section === "tree") {
+    return {
+      project,
+      tree: []
+    };
+  }
+
+  if (section === "registry") {
+    return {
+      project,
+      total_assets: 0,
+      assets: []
+    };
+  }
+
+  if (section === "connectors") {
+    return {
+      project,
+      readiness: {
+        readiness_score: 0,
+        checks: {},
+        missing: []
+      },
+      sources: {}
+    };
+  }
+
+  if (section === "operations") {
+    return null;
+  }
+
+  if (section === "insights") {
+    return null;
+  }
+
+  if (section === "learning") {
+    return null;
+  }
+
+  return null;
+}
+
+function toDiagnosticEntry(section, error, required = false) {
+  return {
+    section,
+    required: Boolean(required),
+    message: String(error?.message || error || "Unknown error"),
+    endpoint: String(error?.endpoint || ""),
+    status: error?.status || null,
+    timeout: Boolean(error?.isTimeout)
+  };
+}
+
+function extractDashboardSection(payload, section) {
+  const value = payload?.[section];
+  if (value != null) {
+    return value;
+  }
+
+  const panelError = payload?.errors?.[section];
+  if (panelError) {
+    const err = new Error(`Failed to load ${section}: ${panelError}`);
+    err.endpoint = `/media-manager/project/:project (${section})`;
+    throw err;
+  }
+
+  const err = new Error(`Missing ${section} payload`);
+  err.endpoint = `/media-manager/project/:project (${section})`;
+  throw err;
+}
+
 /* =========================
    PROJECTS
 ========================= */
@@ -210,17 +302,161 @@ export async function fetchProjects() {
 ========================= */
 
 export async function fetchAllCoreProjectData(projectName) {
-  if (!projectName) {
-    throw new Error("Missing project name");
+  const safeProjectName = toProjectName(projectName);
+  const encodedProjectName = encodeURIComponent(safeProjectName);
+
+  const requiredDiagnostics = [];
+  const optionalDiagnostics = [];
+
+  const requiredDashboardPromise = getJson(
+    `/media-manager/project/${encodedProjectName}`,
+    "Failed to load project dashboard",
+    18000
+  );
+
+  const requiredSections = ["overview", "readiness", "assets"];
+  const requiredResults = await Promise.allSettled(
+    requiredSections.map((section) =>
+      requiredDashboardPromise.then((payload) => extractDashboardSection(payload, section))
+    )
+  );
+
+  const requiredData = {};
+  requiredResults.forEach((result, index) => {
+    const section = requiredSections[index];
+    if (result.status === "fulfilled") {
+      requiredData[section] = result.value;
+      return;
+    }
+
+    requiredDiagnostics.push(toDiagnosticEntry(section, result.reason, true));
+  });
+
+  if (requiredDiagnostics.length > 0) {
+    const message = requiredDiagnostics
+      .map((item) => `${item.section}: ${item.message}`)
+      .join("; ");
+    const error = new Error(`Required project data failed: ${message}`);
+    error.endpoint = `/media-manager/project/${encodedProjectName}`;
+    error._diagnostics = {
+      required: requiredDiagnostics,
+      optional: optionalDiagnostics,
+      optionalPending: [
+        "activity",
+        "operations",
+        "tree",
+        "registry",
+        "connectors",
+        "insights",
+        "learning"
+      ]
+    };
+    throw error;
   }
 
-  const payload = await getJson(
-    `/media-manager/project/${encodeURIComponent(projectName)}`,
-    "Failed to load project dashboard",
+  const basePayload = {
+    overview: requiredData.overview,
+    readiness: requiredData.readiness,
+    assets: requiredData.assets,
+    tree: createOptionalFallback(safeProjectName, "tree"),
+    registry: createOptionalFallback(safeProjectName, "registry"),
+    connectors: createOptionalFallback(safeProjectName, "connectors"),
+    activity: createOptionalFallback(safeProjectName, "activity"),
+    operations: createOptionalFallback(safeProjectName, "operations")
+  };
+
+  const optionalDashboardPromise = getJson(
+    `/media-manager/project/${encodedProjectName}`,
+    "Failed to load optional project dashboard sections",
     30000
   );
 
-  return normalizeProjectDashboardPayload(payload);
+  const optionalLoaders = [
+    {
+      section: "activity",
+      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "activity"))
+    },
+    {
+      section: "tree",
+      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "tree"))
+    },
+    {
+      section: "registry",
+      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "registry"))
+    },
+    {
+      section: "connectors",
+      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "connectors"))
+    },
+    {
+      section: "operations",
+      load: () => fetchProjectOperations(safeProjectName)
+    },
+    {
+      section: "insights",
+      load: () => fetchProjectInsights(safeProjectName)
+    },
+    {
+      section: "learning",
+      load: () => fetchProjectLearning(safeProjectName)
+    }
+  ];
+
+  const optionalReady = Promise.allSettled(optionalLoaders.map((entry) => entry.load()))
+    .then((results) => {
+      const optionalPatch = {
+        activity: createOptionalFallback(safeProjectName, "activity"),
+        tree: createOptionalFallback(safeProjectName, "tree"),
+        registry: createOptionalFallback(safeProjectName, "registry"),
+        connectors: createOptionalFallback(safeProjectName, "connectors"),
+        operations: createOptionalFallback(safeProjectName, "operations")
+      };
+
+      results.forEach((result, index) => {
+        const section = optionalLoaders[index].section;
+        if (result.status === "fulfilled") {
+          if (section === "insights" || section === "learning") {
+            optionalPatch.activity = {
+              ...(optionalPatch.activity || {}),
+              [section]: result.value ?? createOptionalFallback(safeProjectName, section)
+            };
+          } else {
+            optionalPatch[section] = result.value ?? createOptionalFallback(safeProjectName, section);
+          }
+          return;
+        }
+
+        optionalDiagnostics.push(toDiagnosticEntry(section, result.reason, false));
+
+        if (section === "insights" || section === "learning") {
+          optionalPatch.activity = {
+            ...(optionalPatch.activity || {}),
+            [section]: createOptionalFallback(safeProjectName, section)
+          };
+        } else {
+          optionalPatch[section] = createOptionalFallback(safeProjectName, section);
+        }
+      });
+
+      return {
+        patch: optionalPatch,
+        _diagnostics: {
+          required: requiredDiagnostics,
+          optional: optionalDiagnostics,
+          optionalPending: []
+        }
+      };
+    });
+
+  const normalized = normalizeProjectDashboardPayload(basePayload);
+  normalized._diagnostics = {
+    required: requiredDiagnostics,
+    optional: optionalDiagnostics,
+    optionalPending: optionalLoaders.map((entry) => entry.section)
+  };
+  normalized._optionalReady = optionalReady;
+
+  return normalized;
 }
 
 export async function fetchAssetCatalog() {
