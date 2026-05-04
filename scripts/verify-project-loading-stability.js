@@ -86,7 +86,7 @@ check(
 
 check(
   "loading_overlay_finally_hidden",
-  /async function loadProjectData[\s\S]*finally[\s\S]*setLoading\(false\)[\s\S]*hideLoading\(\)/.test(app),
+  /async function loadProjectData[\s\S]*finally[\s\S]*setLoading\(false\)[\s\S]*hideLoading\(\s*(?:\{[\s\S]*?\})?\s*\)/.test(app),
   "Loading overlay is always dismissed in finally."
 );
 

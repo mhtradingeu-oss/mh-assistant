@@ -24,6 +24,7 @@ import {
 } from "./state.js";
 import {
   setApiBaseUrl,
+  AccessKeyError,
   fetchProjects,
   fetchAllCoreProjectData,
   fetchProjectInsights,
@@ -273,6 +274,7 @@ function createAccessKeyModal() {
         <button id="accessKeySaveBtn" class="btn btn-primary" type="button">Save Key</button>
         <button id="accessKeyTestBtn" class="btn btn-secondary" type="button">Test Key</button>
         <button id="accessKeyClearBtn" class="btn btn-danger" type="button">Clear Key</button>
+        <button id="accessKeyClearReloadBtn" class="btn btn-danger" type="button">Clear saved key and reload</button>
         <button id="accessKeyCloseBtn" class="btn btn-ghost" type="button">Close</button>
       </div>
       <div id="accessKeyStatus" class="access-key-status" aria-live="polite"></div>
@@ -309,6 +311,7 @@ function bindAccessKeyPanel(modal) {
   const saveBtn = modal.querySelector("#accessKeySaveBtn");
   const testBtn = modal.querySelector("#accessKeyTestBtn");
   const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
   const closeBtn = modal.querySelector("#accessKeyCloseBtn");
 
   if (saveBtn) {
@@ -386,6 +389,13 @@ function bindAccessKeyPanel(modal) {
       if (input) input.value = "";
       setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
       updateAccessKeyButton();
+    });
+  }
+
+  if (clearReloadBtn) {
+    clearReloadBtn.addEventListener("click", () => {
+      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      window.location.reload();
     });
   }
 
@@ -604,7 +614,7 @@ function showLoading(
     return;
   }
 
-  if (token && !isActiveProjectLoadToken(token)) {
+  if (!token || !isActiveProjectLoadToken(token)) {
     recordLoadingTransition("show-blocked-stale-token", { token, reason });
     return;
   }
@@ -663,7 +673,14 @@ function hideLoading(options = {}) {
 
 function isLoadingVisible() {
   const overlay = $("loadingOverlay");
-  return Boolean(overlay && overlay.classList.contains("is-visible"));
+  if (!overlay) return false;
+
+  const classVisible = overlay.classList.contains("is-visible");
+  const ariaVisible = overlay.getAttribute("aria-hidden") === "false";
+  const pointerBlocking = overlay.style.pointerEvents && overlay.style.pointerEvents !== "none";
+  const displayBlocking = overlay.style.display && overlay.style.display !== "none";
+
+  return Boolean(classVisible || ariaVisible || pointerBlocking || displayBlocking);
 }
 
 const LOADING_WATCHDOG_TIMEOUT_MS = 30000;
@@ -671,6 +688,8 @@ const OVERLAY_RECOVERY_DELAY_MS = 3000;
 const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
 const LAST_PROJECT_LOAD_STORAGE_KEY = "mh-control-center-last-project-load";
 const LOADING_TRANSITIONS_STORAGE_KEY = "mh-control-center-loading-transitions";
+const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
+const FETCH_DIAGNOSTICS_STORAGE_KEY = "mh-control-center-fetch-diagnostics";
 const STARTUP_HISTORY_LIMIT = 60;
 const LOADING_TRANSITION_LIMIT = 80;
 
@@ -751,7 +770,10 @@ function recordLoadingTransition(action, details = {}) {
     action: String(action || "loading.transition"),
     token: String(details.token || ""),
     reason: String(details.reason || ""),
-    visible: Boolean(overlay && overlay.classList.contains("is-visible"))
+    visible: isLoadingVisible(),
+    classVisible: Boolean(overlay && overlay.classList.contains("is-visible")),
+    display: String(overlay?.style?.display || ""),
+    pointerEvents: String(overlay?.style?.pointerEvents || "")
   };
 
   boundedPush(loadingTransitionHistory, entry, LOADING_TRANSITION_LIMIT);
@@ -770,6 +792,22 @@ function recordLastProjectLoad(summary) {
 
 function recordStartupFailure(source, error) {
   const message = String(error?.message || error || "Unknown startup error").trim();
+  safeStorageSet(LAST_STARTUP_ERROR_STORAGE_KEY, JSON.stringify({
+    at: new Date().toISOString(),
+    source: String(source || "startup"),
+    message,
+    endpoint: String(error?.endpoint || ""),
+    status: error?.status || null
+  }));
+  safeStorageSet(FETCH_DIAGNOSTICS_STORAGE_KEY, JSON.stringify({
+    at: new Date().toISOString(),
+    source: String(source || "startup"),
+    message,
+    diagnostics: error?.diagnostics || null,
+    endpoint: String(error?.endpoint || ""),
+    status: error?.status || null
+  }));
+
   startupDiagnostics.lastErrorSource = String(source || "startup");
   startupDiagnostics.lastErrorMessage = message;
 
@@ -811,9 +849,83 @@ function renderStartupDiagnosticsText(reason = "") {
   return rows.join("\n");
 }
 
+function forceHideLoadingOverlay(reason = "access-key-recovery") {
+  hideLoading({ reason, force: true });
+
+  const overlay = $("loadingOverlay");
+  if (!overlay) return;
+
+  overlay.classList.remove("is-visible");
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.style.display = "none";
+  overlay.style.pointerEvents = "none";
+}
+
+function isMissingReadKeyMessage(message) {
+  return /missing\s+read\s+key/i.test(String(message || ""));
+}
+
+function isAccessKeyStartupError(error) {
+  const status = Number(error?.status || 0);
+  const message = String(error?.message || "");
+  const payloadError = String(error?.payload?.error || "");
+
+  return (
+    error instanceof AccessKeyError ||
+    status === 401 ||
+    status === 403 ||
+    isMissingReadKeyMessage(message) ||
+    isMissingReadKeyMessage(payloadError)
+  );
+}
+
+function ensureFatalClearSavedKeyReloadButton() {
+  const panel = $("fatalErrorPanel");
+  if (!panel) return;
+
+  const actions = panel.querySelector(".fatal-error-actions");
+  if (!actions || panel.querySelector("#fatalClearSavedKeyReloadBtn")) {
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = "fatalClearSavedKeyReloadBtn";
+  button.className = "btn btn-danger";
+  button.type = "button";
+  button.textContent = "Clear saved key and reload";
+  actions.appendChild(button);
+}
+
+function handleAccessKeyStartupRecovery(error, options = {}) {
+  const source = String(options.source || "load-project-data");
+  const loadToken = String(options.token || "");
+  const message = "Project data requires a valid access key.";
+
+  recordStartupFailure(source, error);
+  recordStartupStep("loadProjectData.access-key-required", {
+    token: loadToken,
+    detail: String(error?.message || "missing read key")
+  });
+
+  setLoading(false);
+  hideLoading({ token: loadToken, reason: "access-key-required" });
+  forceHideLoadingOverlay("access-key-required-force");
+
+  setError(message);
+  showError(message);
+  showMessage(message);
+  setAccessKeyStatus(message, "error");
+
+  updateAccessKeyButton();
+  ensureFatalClearSavedKeyReloadButton();
+  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+  showAccessKeyModal();
+}
+
 function bindFatalErrorPanelActions() {
   const retryBtn = $("fatalRetryBtn");
   const accessKeyBtn = $("fatalAccessKeyBtn");
+  const clearSavedKeyReloadBtn = $("fatalClearSavedKeyReloadBtn");
 
   if (retryBtn && !retryBtn.dataset.bound) {
     retryBtn.dataset.bound = "1";
@@ -826,6 +938,14 @@ function bindFatalErrorPanelActions() {
     accessKeyBtn.dataset.bound = "1";
     accessKeyBtn.addEventListener("click", () => {
       showAccessKeyModal();
+    });
+  }
+
+  if (clearSavedKeyReloadBtn && !clearSavedKeyReloadBtn.dataset.bound) {
+    clearSavedKeyReloadBtn.dataset.bound = "1";
+    clearSavedKeyReloadBtn.addEventListener("click", () => {
+      try { localStorage.removeItem(CONTROL_WRITE_KEY_STORAGE_KEY); } catch (_) {}
+      window.location.reload();
     });
   }
 }
@@ -850,6 +970,7 @@ function showFatalErrorPanel(message, details = "") {
   panel.hidden = false;
   panel.classList.add("is-visible");
   panel.setAttribute("aria-hidden", "false");
+  ensureFatalClearSavedKeyReloadButton();
   bindFatalErrorPanelActions();
 }
 
@@ -1613,6 +1734,15 @@ async function loadProjectData(projectName) {
       return payload;
     } catch (error) {
       console.error("[LOAD_PROJECT_ERROR]", error);
+
+      if (isAccessKeyStartupError(error)) {
+        handleAccessKeyStartupRecovery(error, {
+          source: "load-project-data",
+          token: loadToken
+        });
+        return null;
+      }
+
       recordStartupFailure("load-project-data", error);
       setCurrentProject(DEFAULT_PROJECT_SLUG);
       setProjectContext({
@@ -1639,7 +1769,7 @@ async function loadProjectData(projectName) {
           detail: loadedProjectName
         });
         hideLoading({ token: loadToken, reason: "required-load-finally" });
-        hideLoading();
+        hideLoading({ token: loadToken, reason: "required-load-finally-hard-clear", force: true });
         recordStartupStep("loadProjectData.finally.hideLoading", {
           token: loadToken,
           detail: loadedProjectName
@@ -1667,9 +1797,6 @@ async function loadProjectData(projectName) {
     if (activeProjectLoadPromise === loadPromise) {
       activeProjectLoadPromise = null;
       activeProjectLoadProject = "";
-      if (activeProjectLoadToken === loadToken) {
-        activeProjectLoadToken = "";
-      }
     }
   }
 }
