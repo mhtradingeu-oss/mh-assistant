@@ -551,6 +551,94 @@ function dashboardLabelFromScore(score) {
   if (score >= 65) return "Stable with gaps";
   return "Recovery needed";
 }
+function renderBadge(tone, label, escapeHtml) {
+  return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
+}
+
+function renderCompactList(items, escapeHtml, emptyText = "Nothing to show yet.") {
+  const safeItems = asArray(items).slice(0, 5);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
+  }
+
+  return `
+    <ul class="home-compact-list">
+      ${safeItems.map((item) => `
+        <li>${escapeHtml(asString(item))}</li>
+      `).join("")}
+    </ul>
+  `;
+}
+
+function renderBlockerColumn(title, items, tone, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 5);
+
+  return `
+    <article class="home-blocker-card">
+      <div class="home-blocker-head">
+        <span class="data-label">${escapeHtml(title)}</span>
+        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
+      </div>
+      ${renderCompactList(safeItems, escapeHtml, "No blocker detected.")}
+    </article>
+  `;
+}
+
+function renderActivityItems(items, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 6);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">No recent activity recorded yet.</p>`;
+  }
+
+  return `
+    <div class="home-activity-list">
+      ${safeItems.map((item) => `
+        <article class="home-activity-item">
+          <div>
+            <span class="data-label">${escapeHtml(item.kind || "Activity")}</span>
+            <strong>${escapeHtml(item.title || "Untitled activity")}</strong>
+            <p>${escapeHtml(item.detail || "")}</p>
+          </div>
+          <div class="home-activity-meta">
+            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAiTeamCards(cards, escapeHtml) {
+  const safeCards = asArray(cards).slice(0, 7);
+
+  if (!safeCards.length) {
+    return `<p class="home-empty-note">AI team status is not available yet.</p>`;
+  }
+
+  return `
+    <div class="home-ai-team-grid">
+      ${safeCards.map((agent) => `
+        <article class="home-ai-team-card">
+          <div class="home-ai-team-card-head">
+            <strong>${escapeHtml(agent.name)}</strong>
+            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+          </div>
+          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function setGlobalAiPrompt($, prompt) {
+  const input = $("quickCommandInput");
+  if (input) {
+    input.value = prompt;
+    input.focus?.();
+  }
+}
 
 export const homeRoute = {
   id: "home",
@@ -564,49 +652,56 @@ export const homeRoute = {
       <div id="homeExecRoot"></div>
     </section>
   `,
-    render({ getState, $, escapeHtml, navigateTo, showMessage }) {
-    const state = getState();
+  render({ getState, $, escapeHtml, navigateTo, showMessage }) {    const state = getState();
     const dashboard = buildExecutiveData(state);
+    const aiTeamCards = buildAiTeamCards(state);
 
     const root = $("homeExecRoot");
     if (!root) return;
 
+    const capabilityCards = asArray(dashboard.capabilities).slice(0, 5);
+    const statusItems = asArray(dashboard.statusBoard).slice(0, 6);
+    const campaignChannels = asArray(dashboard.campaign.channels);
+
     root.innerHTML = `
-      <div class="home-decision-shell">
-        <section class="card home-decision-section">
-          <div class="home-decision-section-head">
+      <div class="home-command-center">
+        <section class="card home-exec-hero">
+          <div class="home-exec-hero-content">
             <div>
-              <p class="card-label">Executive Overview</p>
-              <h3>Operating Snapshot</h3>
+              <p class="card-label">Executive Command Center</p>
+              <h2>${escapeHtml(compact(dashboard.projectName, "Project not selected"))}</h2>
+              <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
             </div>
-            <span class="card-badge ${escapeHtml(statusTone("score", dashboard.health.systemScore))}">
-              ${escapeHtml(formatPercent(dashboard.health.systemScore))}
-            </span>
+
+            <div class="home-exec-hero-status">
+              ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+              <strong>${escapeHtml(formatPercent(dashboard.health.systemScore))}</strong>
+              <span class="data-label">System Health</span>
+            </div>
           </div>
 
-          <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
-
-          <div class="home-decision-kpi-grid">
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Active Project</span>
-              <strong>${escapeHtml(compact(dashboard.projectName, "Not selected"))}</strong>
-            </article>
-
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Readiness Score</span>
-              <strong>${escapeHtml(formatPercent(dashboard.health.projectReadiness))}</strong>
-            </article>
-
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Connector Status</span>
-              <strong>${escapeHtml(dashboard.health.connectorCoverage)}</strong>
-            </article>
-
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Critical Alerts</span>
-              <strong>${escapeHtml(formatCount(dashboard.health.criticalAlerts))}</strong>
-            </article>
+          <div class="home-exec-hero-actions">
+            <button id="homePrimaryActionBtn" class="btn btn-primary" type="button">
+              ${escapeHtml(dashboard.primaryActionLabel)}
+            </button>
+            <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+              ${escapeHtml(dashboard.secondaryActionLabel)}
+            </button>
+            <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+              Ask Executive AI
+            </button>
           </div>
+        </section>
+
+        <section class="home-kpi-grid">
+          ${capabilityCards.map((item) => `
+            <article class="card home-kpi-card">
+              <span class="data-label">${escapeHtml(item.title)}</span>
+              <strong>${escapeHtml(item.value)}</strong>
+              <p>${escapeHtml(item.detail)}</p>
+              ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+            </article>
+          `).join("")}
         </section>
 
         <section class="card home-decision-section">
@@ -621,8 +716,160 @@ export const homeRoute = {
           <div class="home-decision-next">
             <p class="home-decision-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
             <p class="home-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
-            <button id="homeNextActionBtn" class="btn btn-primary" type="button">
-              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+            <div class="home-inline-actions">
+              <button id="homeNextActionBtn" class="btn btn-primary" type="button">
+                ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+              </button>
+              <button id="homeAskNextActionBtn" class="btn btn-secondary" type="button">
+                Ask AI About This
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Critical Gaps</p>
+              <h3>What is blocking progress?</h3>
+            </div>
+            ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
+          </div>
+
+          <div class="home-blocker-grid">
+            ${renderBlockerColumn("Integrations", dashboard.blockers.integrations, "warning", escapeHtml)}
+            ${renderBlockerColumn("Assets", dashboard.blockers.assets, "warning", escapeHtml)}
+            ${renderBlockerColumn("Failed Jobs", dashboard.blockers.failedJobs, "danger", escapeHtml)}
+            ${renderBlockerColumn("Readiness Gaps", dashboard.blockers.readinessGaps, "warning", escapeHtml)}
+          </div>
+        </section>
+
+        <section class="home-two-column-grid">
+          <article class="card home-decision-section">
+            <div class="home-decision-section-head">
+              <div>
+                <p class="card-label">Launch Snapshot</p>
+                <h3>Are we ready to publish?</h3>
+              </div>
+              ${renderBadge(
+                dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
+                dashboard.launchSnapshot.campaignReadiness,
+                escapeHtml
+              )}
+            </div>
+
+            <div class="home-status-grid">
+              <article>
+                <span class="data-label">Publish Ready</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+              </article>
+              <article>
+                <span class="data-label">Media Ready</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+              </article>
+              <article>
+                <span class="data-label">Email</span>
+                <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+              </article>
+              <article>
+                <span class="data-label">Scheduled Jobs</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+              </article>
+            </div>
+          </article>
+
+          <article class="card home-decision-section">
+            <div class="home-decision-section-head">
+              <div>
+                <p class="card-label">Active Campaign</p>
+                <h3>${escapeHtml(compact(dashboard.campaign.name, "No active campaign"))}</h3>
+              </div>
+              ${renderBadge(dashboard.campaign.name ? "success" : "warning", dashboard.campaign.currentStage, escapeHtml)}
+            </div>
+
+            <div class="home-campaign-summary">
+              <p><strong>Execution Mode:</strong> ${escapeHtml(dashboard.campaign.executionMode)}</p>
+              <p><strong>Next Scheduled:</strong> ${escapeHtml(dashboard.campaign.nextScheduledAction)}</p>
+              <p><strong>Channels:</strong> ${escapeHtml(campaignChannels.length ? campaignChannels.join(", ") : "No channels selected")}</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Status Board</p>
+              <h3>Operating state at a glance</h3>
+            </div>
+          </div>
+
+          <div class="home-status-board">
+            ${statusItems.map((item) => `
+              <article class="home-status-board-card">
+                <span class="data-label">${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.value)}</strong>
+                <p>${escapeHtml(item.hint)}</p>
+                ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+              </article>
+            `).join("")}
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Recent Activity</p>
+              <h3>What happened recently?</h3>
+            </div>
+            <button id="homeOpenOperationsBtn" class="btn btn-secondary" type="button">
+              Open Operations
+            </button>
+          </div>
+
+          ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">AI Team Snapshot</p>
+              <h3>Who should help next?</h3>
+            </div>
+            <button id="homeOpenAiTeamBtn" class="btn btn-secondary" type="button">
+              Open AI Command
+            </button>
+          </div>
+
+          ${renderAiTeamCards(aiTeamCards, escapeHtml)}
+        </section>
+
+        <section class="card home-decision-section home-ai-panel">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Ask Executive AI</p>
+              <h3>Get guidance without leaving the dashboard</h3>
+            </div>
+          </div>
+
+          <div class="home-ai-prompt-grid">
+            <button id="homePromptNextBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">What should I do next?</span>
+              <span class="home-action-meta">Ask AI to prioritize today’s move.</span>
+            </button>
+
+            <button id="homePromptReadinessBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Why is readiness low?</span>
+              <span class="home-action-meta">Ask AI to explain blockers clearly.</span>
+            </button>
+
+            <button id="homePromptLaunchBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Summarize launch blockers</span>
+              <span class="home-action-meta">Prepare a short launch risk summary.</span>
+            </button>
+
+            <button id="homePromptPlanBtn" class="quick-action-btn" type="button">
+              <span class="home-action-title">Prepare today’s action plan</span>
+              <span class="home-action-meta">Turn the dashboard into next tasks.</span>
             </button>
           </div>
         </section>
@@ -662,69 +909,88 @@ export const homeRoute = {
             </button>
           </div>
         </section>
-
-        <section class="card home-decision-section">
-          <div class="home-decision-section-head">
-            <div>
-              <p class="card-label">System Health</p>
-              <h3>Can we trust the current state?</h3>
-            </div>
-          </div>
-
-          <div class="home-decision-health-grid">
-            <article class="home-decision-kpi-card">
-              <span class="data-label">API Status</span>
-              <strong>${escapeHtml(dashboard.systemHealth.apiStatus)}</strong>
-            </article>
-
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Source of Truth</span>
-              <strong>${escapeHtml(dashboard.systemHealth.sourceOfTruth)}</strong>
-            </article>
-
-            <article class="home-decision-kpi-card">
-              <span class="data-label">Missing Required Data</span>
-              <strong>${escapeHtml(formatCount(dashboard.systemHealth.missingRequiredData))}</strong>
-            </article>
-          </div>
-        </section>
       </div>
     `;
+
+    const openRoute = (route, message = "") => {
+      navigateTo(route);
+      if (message) showMessage?.(message);
+    };
+
+    const openAiWithPrompt = (prompt) => {
+      setGlobalAiPrompt($, prompt);
+      navigateTo("ai-command");
+      showMessage?.("Prompt prepared in AI Command.");
+    };
+
+    const primaryActionBtn = $("homePrimaryActionBtn");
+    if (primaryActionBtn) primaryActionBtn.onclick = () => openRoute(dashboard.primaryActionRoute, "Primary action opened.");
+
+    const secondaryActionBtn = $("homeSecondaryActionBtn");
+    if (secondaryActionBtn) secondaryActionBtn.onclick = () => openRoute(dashboard.secondaryActionRoute, "Setup foundation opened.");
+
+    const askExecutiveAiBtn = $("homeAskExecutiveAiBtn");
+    if (askExecutiveAiBtn) {
+      askExecutiveAiBtn.onclick = () => openAiWithPrompt(`Summarize the current project status and recommend the best next action for ${dashboard.projectName || "this project"}.`);
+    }
 
     const nextBtn = $("homeNextActionBtn");
     if (nextBtn) {
       nextBtn.onclick = () => {
         if (dashboard.nextBestAction.route === "ai-command") {
-          const input = $("quickCommandInput");
-          if (input) {
-            input.value = dashboard.nextBestAction.recommendation;
-          }
+          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
         }
 
-        navigateTo(dashboard.nextBestAction.route);
-        showMessage?.("Next best action opened.");
+        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
       };
     }
 
+    const askNextActionBtn = $("homeAskNextActionBtn");
+    if (askNextActionBtn) {
+      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+    }
+
+    const operationsBtn = $("homeOpenOperationsBtn");
+    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+
+    const aiTeamBtn = $("homeOpenAiTeamBtn");
+    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+
     const quickCampaignBtn = $("homeQuickStartCampaignBtn");
-    if (quickCampaignBtn) quickCampaignBtn.onclick = () => navigateTo("campaign-studio");
+    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
 
     const quickAssetBtn = $("homeQuickUploadAssetBtn");
-    if (quickAssetBtn) quickAssetBtn.onclick = () => navigateTo("library");
+    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
 
     const quickConnectBtn = $("homeQuickConnectPlatformBtn");
-    if (quickConnectBtn) quickConnectBtn.onclick = () => navigateTo("integrations");
+    if (quickConnectBtn) quickConnectBtn.onclick = () => openRoute("integrations");
 
     const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
-    if (quickReadinessBtn) quickReadinessBtn.onclick = () => navigateTo("setup");
+    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
 
     const quickAiBtn = $("homeQuickOpenAiBtn");
     if (quickAiBtn) {
-      quickAiBtn.onclick = () => {
-        const input = $("quickCommandInput");
-        if (input) input.value = dashboard.nextBestAction.recommendation;
-        navigateTo("ai-command");
-      };
+      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+    }
+
+    const promptNextBtn = $("homePromptNextBtn");
+    if (promptNextBtn) {
+      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+    }
+
+    const promptReadinessBtn = $("homePromptReadinessBtn");
+    if (promptReadinessBtn) {
+      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+    }
+
+    const promptLaunchBtn = $("homePromptLaunchBtn");
+    if (promptLaunchBtn) {
+      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+    }
+
+    const promptPlanBtn = $("homePromptPlanBtn");
+    if (promptPlanBtn) {
+      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today’s action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
     }
   }
 };
