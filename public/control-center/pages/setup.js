@@ -1121,7 +1121,16 @@ export const setupRoute = {
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
               <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
               <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+              <span class="setup-save-note">Changes are saved to the active project.</span>
             </div>
+          </div>
+
+          <div class="setup-guidance-strip">
+            <div>
+              <strong>Project Source of Truth</strong>
+              <p>Setup defines the business, brand, market, audience, goals, and channels used by AI, campaigns, publishing, and insights.</p>
+            </div>
+            <span class="card-badge neutral">Guided setup</span>
           </div>
 
           <div class="setup-smart-overview-grid">
