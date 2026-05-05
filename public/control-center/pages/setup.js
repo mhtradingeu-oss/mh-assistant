@@ -633,16 +633,22 @@ function updateWizardDashboard({
   const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
   const missingFieldCount = missingFields.length;
   const hasMissing = missingFieldCount > 0;
-  const disabledText = `Disabled - ${missingFieldCount} required field${missingFieldCount === 1 ? "" : "s"} missing`;
+  const warningText = `${missingFieldCount} required field${missingFieldCount === 1 ? "" : "s"} still missing`;
+
   if (continueLibraryBtn) {
-    continueLibraryBtn.disabled = hasMissing;
-    continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${disabledText})` : "Continue to Library";
-    continueLibraryBtn.title = hasMissing ? "Complete required setup fields before moving to Library." : "Proceed to Library.";
+    continueLibraryBtn.disabled = false;
+    continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${warningText})` : "Continue to Library";
+    continueLibraryBtn.title = hasMissing
+      ? "You can continue, but setup readiness will remain incomplete until required fields are complete."
+      : "Proceed to Library.";
   }
+
   if (continueIntegrationsBtn) {
-    continueIntegrationsBtn.disabled = hasMissing;
-    continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${disabledText})` : "Continue to Integrations";
-    continueIntegrationsBtn.title = hasMissing ? "Complete required setup fields before moving to Integrations." : "Proceed to Integrations.";
+    continueIntegrationsBtn.disabled = false;
+    continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${warningText})` : "Continue to Integrations";
+    continueIntegrationsBtn.title = hasMissing
+      ? "You can continue, but setup readiness will remain incomplete until required fields are complete."
+      : "Proceed to Integrations.";
   }
 
   const stepCounter = document.getElementById("setupStepCounter");
@@ -763,23 +769,69 @@ function bindSetupActions({
     }
   };
 
-  form.oninput = refreshSummary;
-  form.onchange = refreshSummary;
+  let draftAutoSaveTimer = null;
 
-  form.addEventListener("click", (event) => {
+  const refreshAndPersistDraft = () => {
+    const values = refreshSummary();
+
+    if (draftAutoSaveTimer) {
+      clearTimeout(draftAutoSaveTimer);
+    }
+
+    draftAutoSaveTimer = setTimeout(() => {
+      saveSetupDraft(projectName, values);
+    }, 250);
+
+    return values;
+  };
+
+  form.oninput = refreshAndPersistDraft;
+  form.onchange = refreshAndPersistDraft;
+
+  const keepSetupFieldFocused = (event) => {
+    const field = event.target?.closest?.(".setup-input, .setup-textarea");
+    if (!field) return;
+
+    event.stopPropagation();
+
+    window.setTimeout(() => {
+      if (document.activeElement !== field && typeof field.focus === "function") {
+        field.focus();
+      }
+    }, 0);
+  };
+
+  form.addEventListener("click", keepSetupFieldFocused);
+  form.addEventListener("mouseup", keepSetupFieldFocused);
+  form.addEventListener("pointerup", keepSetupFieldFocused);
+
+  const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
+
+  setupRoot.onclick = (event) => {
     const jumpBtn = event.target.closest("[data-setup-jump-field]");
     if (!jumpBtn) return;
+
+    event.preventDefault();
+
     const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
     const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
-    if (stepId) activateStep(stepId);
-    const input = form.querySelector(`[name="${fieldName}"]`);
-    if (input && typeof input.focus === "function") {
-      input.focus();
-      if (typeof input.scrollIntoView === "function") {
-        input.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+
+    if (stepId) {
+      activateStep(stepId);
     }
-  });
+
+    window.setTimeout(() => {
+      const input = form.querySelector(`[name="${fieldName}"]`);
+
+      if (input && typeof input.focus === "function") {
+        input.focus();
+
+        if (typeof input.scrollIntoView === "function") {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }, 0);
+  };
 
   refreshSummary();
 
@@ -801,8 +853,11 @@ function bindSetupActions({
       const values = refreshSummary();
       const requestedProjectName = asString(values.project_name).trim().toLowerCase();
       const payload = buildSetupPersistencePayload(values);
+      const previousLabel = saveBackendBtn.textContent;
 
       saveBackendBtn.disabled = true;
+      saveBackendBtn.textContent = "Saving...";
+      showMessage?.(`Saving setup for ${draftKeyName}...`);
 
       try {
         await saveProjectSetup?.(projectName, payload);
@@ -815,10 +870,16 @@ function bindSetupActions({
             : "";
 
         showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
+        saveBackendBtn.textContent = "Saved";
       } catch (error) {
         showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
       } finally {
         saveBackendBtn.disabled = false;
+        window.setTimeout(() => {
+          if (saveBackendBtn && saveBackendBtn.textContent !== previousLabel) {
+            saveBackendBtn.textContent = previousLabel;
+          }
+        }, 1400);
       }
     };
   }
@@ -1308,12 +1369,6 @@ export const setupRoute = {
       </div>
     `;
 
-    const saveBottomBtn = $("setupSaveBackendBtnBottom");
-    const saveTopBtn = $("setupSaveBackendBtn");
-    if (saveBottomBtn && saveTopBtn) {
-      saveBottomBtn.onclick = () => saveTopBtn.click();
-    }
-
     bindSetupActions({
       $,
       navigateTo,
@@ -1329,5 +1384,11 @@ export const setupRoute = {
       readinessStatus,
       criticalGaps
     });
+
+    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+    const saveTopBtn = $("setupSaveBackendBtn");
+    if (saveBottomBtn && saveTopBtn) {
+      saveBottomBtn.onclick = () => saveTopBtn.click();
+    }
   }
 };
