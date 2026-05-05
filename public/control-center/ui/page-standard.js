@@ -1134,7 +1134,7 @@ function renderAdvancedDetails(container, route, m) {
 
 export function applyStandardPageLayout(context) {
   const route = asString(context.route);
-  const state = asObject(context.state);
+
   if (!REQUIRED_ROUTES.includes(route)) return;
 
   const page = document.querySelector(`#pageRoot .page[data-page="${route}"]`);
@@ -1142,8 +1142,7 @@ export function applyStandardPageLayout(context) {
 
   const shell = ensureShell(page);
   const copy = ROUTE_COPY[route] || ROUTE_COPY.home;
-  const ai = ROUTE_AI[route] || ROUTE_AI.home;
-  const m = metrics(state);
+
 
   const eyebrow = shell.querySelector("#stdPageEyebrow");
   const title = shell.querySelector("#stdPageTitle");
@@ -1155,10 +1154,7 @@ export function applyStandardPageLayout(context) {
   const aiDescription = shell.querySelector("#stdAiDescription");
   const nextTitle = shell.querySelector("#stdNextTitle");
   const nextBest = shell.querySelector("#stdNextBestAction");
-  const smartStrip = shell.querySelector("#stdSmartStrip");
-  const smartStripTitle = shell.querySelector("#stdSmartStripTitle");
-  const smartStripReason = shell.querySelector("#stdSmartStripReason");
-  const smartStripBtn = shell.querySelector("#stdSmartStripBtn");
+
 
   if (eyebrow) eyebrow.textContent = copy.eyebrow;
   if (title) title.textContent = copy.title;
@@ -1166,49 +1162,51 @@ export function applyStandardPageLayout(context) {
   if (powerTitle) powerTitle.textContent = `${copy.title} capabilities`;
   if (statusTitle) statusTitle.textContent = `${copy.title} status`;
   if (actionTitle) actionTitle.textContent = `${copy.title} actions`;
-  if (aiTitle) aiTitle.textContent = ai.title;
-  if (aiDescription) aiDescription.textContent = ai.description;
+  if (aiTitle) aiTitle.textContent = "Contextual AI Agent";
+  if (aiDescription) aiDescription.textContent = "AI assistance is available from AI Command.";
   if (nextTitle) nextTitle.textContent = `${copy.eyebrow} recommendation`;
-  if (nextBest) nextBest.textContent = nextBestAction(route, m);
+  if (nextBest) nextBest.textContent = "Open AI Command for the next recommended action.";
 
-  const globalAction = getGlobalNextBestAction(state);
-  const showSmartStrip = Boolean(globalAction?.title) && route !== "home";
-  if (smartStrip) smartStrip.hidden = !showSmartStrip;
-  if (showSmartStrip) {
-    if (smartStripTitle) smartStripTitle.textContent = asString(globalAction.title);
-    if (smartStripReason) smartStripReason.textContent = asString(globalAction.reason || "");
-    if (smartStripBtn) {
-      smartStripBtn.textContent = asString(globalAction.actionLabel || "Open");
-      smartStripBtn.onclick = () => {
-        const quickInput = document.getElementById("quickCommandInput");
-        if (quickInput && globalAction?.draftPayload?.prompt) {
-          quickInput.value = asString(globalAction.draftPayload.prompt);
-        }
-        context.navigateTo(asString(globalAction.targetPage) || "ai-command");
-      };
-    }
-  }
-
-  const routeContext = { ...context, state };
-
-  bindHeaderAction(shell.querySelector("#stdPrimaryAction"), copy.primary, routeContext);
-  bindHeaderAction(shell.querySelector("#stdSecondaryAction"), copy.secondary, routeContext);
+  bindHeaderAction(shell.querySelector("#stdPrimaryAction"), copy.primary, context);
+  bindHeaderAction(shell.querySelector("#stdSecondaryAction"), copy.secondary, context);
 
   const nextBestBtn = shell.querySelector("#stdNextBestActionBtn");
   if (nextBestBtn) {
     nextBestBtn.onclick = () => {
-      const input = document.getElementById("quickCommandInput");
-      if (input) input.value = nextBestAction(route, m);
+      
       context.navigateTo("ai-command");
-      context.showMessage?.("Next best action sent to AI Command.");
+      context.showMessage?.("AI Command opened.");
     };
   }
 
-  renderMetricCards(shell.querySelector("#stdKpiGrid"), kpiCards(route, m));
-  renderStatus(shell.querySelector("#stdStatusGrid"), statusCards(route, m));
-  renderActions(shell.querySelector("#stdActionsList"), route, routeContext);
-  renderAiPrompts(shell.querySelector("#stdAiPrompts"), route, routeContext);
-  renderAdvancedDetails(shell.querySelector("#stdAdvancedDetails"), route, m);
+  renderMetricCards(shell.querySelector("#stdKpiGrid"), [
+    card("Route", route, "Current workspace is loaded.", "success"),
+    card("Project", context?.state?.context?.currentProject || "-", "Active project context.", "neutral")
+  ]);
+
+  renderStatus(shell.querySelector("#stdStatusGrid"), [
+    card("Status", "Ready", "Standard layout loaded in lightweight mode.", "success")
+  ]);
+
+  const actionsList = shell.querySelector("#stdActionsList");
+  if (actionsList) {
+    actionsList.innerHTML = "";
+  }
+
+  const aiPrompts = shell.querySelector("#stdAiPrompts");
+  if (aiPrompts) {
+    aiPrompts.innerHTML = "";
+  }
+
+  const advancedDetails = shell.querySelector("#stdAdvancedDetails");
+  if (advancedDetails) {
+    advancedDetails.innerHTML = "";
+  }
+
+  const smartStrip = shell.querySelector("#stdSmartStrip");
+  if (smartStrip) {
+    smartStrip.hidden = true;
+  }
 }
 
 export function getRequiredStandardRoutes() {

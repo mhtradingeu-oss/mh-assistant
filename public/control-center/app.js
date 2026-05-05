@@ -24,6 +24,7 @@ import {
 } from "./state.js";
 import {
   setApiBaseUrl,
+  isDebugStartupMode,
   AccessKeyError,
   fetchProjects,
   fetchAllCoreProjectData,
@@ -53,7 +54,11 @@ import {
   reschedulePublishingItem,
   approvePublishingItem,
   publishPublishingItem,
-  failPublishingItem
+  failPublishingItem,
+  fetchProjectTaskCenter,
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
 } from "./api.js";
 import {
   CONTROL_ACCESS_KEY_STORAGE_KEY,
@@ -1009,15 +1014,7 @@ const startupRuntimeState = {
   responseTextWatchdogUnlocked: false
 };
 
-function isDebugStartupMode() {
-  if (typeof window === "undefined") return false;
 
-  try {
-    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
-  } catch (_) {
-    return false;
-  }
-}
 
 function getOverlayState() {
   const overlay = $("loadingOverlay");
@@ -1130,11 +1127,23 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
   }
 }
 
-function persistRuntimeTrace() {
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
   const state = getState();
   const payload = {
     at: new Date().toISOString(),
-    debugStartup: isDebugStartupMode(),
+    debugStartup,
     currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
     currentToken: startupRuntimeState.currentToken || "",
     payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
@@ -1159,9 +1168,26 @@ function persistRuntimeTrace() {
   renderStartupRuntimeTrace(payload);
 }
 
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+    persistRuntimeTrace({ force });
+  }, 250);
+}
+
 function recordRuntimeTrace(stage, details = {}) {
   boundedTracePush(stage, details);
-  persistRuntimeTrace();
+  scheduleRuntimeTracePersist(false);
 }
 
 function readLastClickDiagnostic() {
@@ -1265,12 +1291,16 @@ function formatStepEntry(entry) {
 
 function renderStartupStepDiagnostics() {
   const latest = startupStepHistory[startupStepHistory.length - 1] || null;
+  const debugStartup = isDebugStartupMode();
+
   const banner = $("startupStepBanner");
   if (banner) {
-    banner.hidden = false;
-    banner.textContent = latest
-      ? `Startup: ${latest.step}${latest.token ? ` [${latest.token}]` : ""}`
-      : "Startup: idle";
+    banner.hidden = !debugStartup;
+    if (debugStartup) {
+      banner.textContent = latest
+        ? `Startup: ${latest.step}${latest.token ? ` [${latest.token}]` : ""}`
+        : "Startup: idle";
+    }
   }
 
   const stepsBox = $("fatalStartupSteps");
@@ -1279,13 +1309,17 @@ function renderStartupStepDiagnostics() {
     stepsBox.textContent = lines.length ? lines.join("\n") : "No startup steps recorded yet.";
   }
 
+  if (!debugStartup) {
+    return;
+  }
+
   patchState("data", {
     startupStep: latest?.step || "",
     startupSteps: startupStepHistory.slice(-20),
     loadingTransitions: loadingTransitionHistory.slice(-20)
   });
 
-  persistRuntimeTrace();
+  scheduleRuntimeTracePersist(false);
 }
 
 function recordStartupStep(step, details = {}) {
@@ -1986,35 +2020,35 @@ function renderProjectSwitcher() {
 
 function renderPlaceholders() {
   const placeholders = [
-    ["aiCommandChat", "Feature not connected."],
-    ["aiCommandSuggestions", "Not implemented yet."],
-    ["aiCommandHistory", "Not implemented yet."],
+    ["aiCommandChat", "This section is currently unavailable."],
+    ["aiCommandSuggestions", "No data is available yet."],
+    ["aiCommandHistory", "No data is available yet."],
 
-    ["workflowsCatalog", "Not implemented yet."],
+    ["workflowsCatalog", "No data is available yet."],
 
-    ["campaignBuilder", "Not implemented yet."],
-    ["campaignWaves", "Not implemented yet."],
-    ["campaignAssets", "Feature not connected."],
+    ["campaignBuilder", "No data is available yet."],
+    ["campaignWaves", "No data is available yet."],
+    ["campaignAssets", "Open the related setup page to complete this section."],
 
-    ["contentQueue", "Not implemented yet."],
-    ["contentPreview", "Feature not connected."],
+    ["contentQueue", "No data is available yet."],
+    ["contentPreview", "This section is currently unavailable."],
 
-    ["mediaImages", "Feature not connected."],
-    ["mediaVideoAudio", "Feature not connected."],
-    ["mediaOutputs", "Not implemented yet."],
+    ["mediaImages", "This section is currently unavailable."],
+    ["mediaVideoAudio", "This section is currently unavailable."],
+    ["mediaOutputs", "No data is available yet."],
 
-    ["publishingCalendar", "Not implemented yet."],
-    ["publishingQueue", "Feature not connected."],
-    ["publishingChannels", "Feature not connected."],
+    ["publishingCalendar", "No data is available yet."],
+    ["publishingQueue", "Open the related setup page to complete this section."],
+    ["publishingChannels", "Open the related setup page to complete this section."],
 
-    ["adsBudget", "Feature not connected."],
-    ["adsPerformance", "Feature not connected."],
+    ["adsBudget", "This section is currently unavailable."],
+    ["adsPerformance", "This section is currently unavailable."],
 
-    ["insightsOverview", "Feature not connected."],
-    ["insightsReports", "Not implemented yet."],
+    ["insightsOverview", "This section is currently unavailable."],
+    ["insightsReports", "No data is available yet."],
 
-    ["settingsProject", "Feature not connected."],
-    ["settingsSystem", "Not implemented yet."]
+    ["settingsProject", "Open the related setup page to complete this section."],
+    ["settingsSystem", "No data is available yet."]
   ];
 
   placeholders.forEach(([id, text]) => {
@@ -2073,7 +2107,11 @@ function renderCurrentPage() {
       reschedulePublishingItem,
       approvePublishingItem,
       publishPublishingItem,
-      failPublishingItem
+      failPublishingItem,
+      fetchProjectTaskCenter,
+      fetchProjectQueueCenter,
+      fetchProjectJobMonitor,
+      fetchProjectNotificationCenter
     });
 
     if (!routeDef.disableStandardLayout) {
@@ -2088,7 +2126,7 @@ function renderCurrentPage() {
     return;
   }
 
-  renderPlaceholders();
+
 
   applyStandardPageLayout({
     route: currentRoute,
@@ -2137,187 +2175,195 @@ function isActiveProjectLoadToken(token) {
   return Boolean(normalized) && normalized === activeProjectLoadToken;
 }
 
+function withTimeout(promise, timeoutMs, message = "Operation timed out.") {
+  let timer = null;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(message);
+      error.phase = "timeout";
+      error.isTimeout = true;
+      reject(error);
+    }, Math.max(1, Number(timeoutMs) || 1));
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  });
+}
+
 function fetchProjectWithTimeout(projectName) {
   const safeProjectName = String(projectName || "");
 
-  return new Promise((resolve, reject) => {
-    let timer = null;
-    let parseWatchdogTimer = null;
-    let responseTextWatchdogTimer = null;
-    let settled = false;
-    let sawResponseTextDone = false;
-    let sawParseTerminalEvent = false;
+  recordRuntimeTrace("fetchProjectWithTimeout.request.start", {
+    token: activeProjectLoadToken,
+    detail: safeProjectName
+  });
 
-    const parseTerminalStages = new Set([
-      "api.response.parse.done",
-      "api.response.parse.error",
-      "api.response.parse.timeout",
-      "response.parse.done",
-      "response.parse.error",
-      "response.parse.timeout"
-    ]);
+  let settled = false;
+  let hardTimeoutTimer = null;
+  let responseTextWatchdogTimer = null;
+  let parseWatchdogTimer = null;
 
-    function cleanup() {
-      if (timer) {
-        clearTimeout(timer);
-      }
-      if (parseWatchdogTimer) {
-        clearTimeout(parseWatchdogTimer);
-        parseWatchdogTimer = null;
-      }
-      if (responseTextWatchdogTimer) {
-        clearTimeout(responseTextWatchdogTimer);
-        responseTextWatchdogTimer = null;
-      }
-      if (typeof window !== "undefined") {
-        window.removeEventListener("mh:control-center-api-trace", onApiTrace);
-      }
-    }
-
-    function settleResolve(payload) {
+  const timeoutPromise = new Promise((_, reject) => {
+    hardTimeoutTimer = setTimeout(() => {
       if (settled) return;
-      settled = true;
-      cleanup();
-      resolve(payload);
-    }
-
-    function settleReject(error) {
-      if (settled) return;
-      settled = true;
-      cleanup();
+      const error = new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`);
+      error.phase = "timeout";
+      error.isTimeout = true;
       reject(error);
-    }
+    }, PROJECT_LOAD_TIMEOUT_MS);
+  });
 
-    function onApiTrace(event) {
-      const detail = event?.detail || {};
-      const stage = String(detail.stage || "");
-      if (!stage) return;
+  const responseTextWatchdogPromise = new Promise((_, reject) => {
+    responseTextWatchdogTimer = setTimeout(() => {
+      if (settled) return;
 
-      if (parseTerminalStages.has(stage)) {
-        sawParseTerminalEvent = true;
-        if (parseWatchdogTimer) {
-          clearTimeout(parseWatchdogTimer);
-          parseWatchdogTimer = null;
-        }
-        if (responseTextWatchdogTimer) {
-          clearTimeout(responseTextWatchdogTimer);
-          responseTextWatchdogTimer = null;
-        }
+      const isBodyReadStage = (
+        startupRuntimeState.lastApiStage === "response.text.start" ||
+        startupRuntimeState.lastApiStage === "api.response.text.start" ||
+        startupRuntimeState.lastApiStage === "api.response.text.timeout"
+      );
+
+      if (!isBodyReadStage) {
         return;
       }
 
-      if (stage === "response.text.start" || stage === "api.response.text.start") {
-        if (responseTextWatchdogTimer) {
-          clearTimeout(responseTextWatchdogTimer);
-        }
+      recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
 
-        responseTextWatchdogTimer = setTimeout(() => {
-          if (settled || sawResponseTextDone || sawParseTerminalEvent) {
-            return;
-          }
+      const error = new Error("Project response is still being processed.");
+      error.phase = "response-text-watchdog";
+      error.isResponseTextWatchdog = true;
+      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+      reject(error);
+    }, RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS);
+  });
 
-          const error = new Error("Project response is still being processed. Interface unlocked.");
-          error.phase = "response-text-watchdog";
-          error.isResponseTextWatchdog = true;
-          error.visible = true;
-          recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
-            token: activeProjectLoadToken,
-            detail: safeProjectName
-          });
-          settleReject(error);
-        }, RESPONSE_TEXT_WATCHDOG_TIMEOUT_MS);
+  const parseWatchdogPromise = new Promise((_, reject) => {
+    let parseWatchdogStartedAt = 0;
+    parseWatchdogTimer = setInterval(() => {
+      if (settled) {
         return;
       }
 
-      if (stage === "response.text.done" || stage === "api.response.text.done") {
-        sawResponseTextDone = true;
-        if (responseTextWatchdogTimer) {
-          clearTimeout(responseTextWatchdogTimer);
-          responseTextWatchdogTimer = null;
-        }
-        if (parseWatchdogTimer) {
-          clearTimeout(parseWatchdogTimer);
-        }
-        parseWatchdogTimer = setTimeout(() => {
-          if (settled || sawParseTerminalEvent || !sawResponseTextDone) {
-            return;
-          }
+      const lastStage = String(startupRuntimeState.lastApiStage || "");
+      const parseHasStarted = (
+        lastStage === "response.text.done" ||
+        lastStage === "api.response.text.done" ||
+        lastStage === "api.response.parse.start"
+      );
 
-          const error = new Error("Project response was received but could not be processed.");
-          error.phase = "parse-watchdog";
-          error.isParseWatchdog = true;
-          error.visible = true;
-          recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
-            token: activeProjectLoadToken,
-            detail: safeProjectName
-          });
-          settleReject(error);
-        }, PARSE_WATCHDOG_TIMEOUT_MS);
+      if (!parseHasStarted) {
+        parseWatchdogStartedAt = 0;
         return;
       }
 
-      if (
-        stage === "response.text.error" ||
-        stage === "api.response.json.fallback.done" ||
-        stage === "api.response.json.fallback.error"
-      ) {
-        if (responseTextWatchdogTimer) {
-          clearTimeout(responseTextWatchdogTimer);
-          responseTextWatchdogTimer = null;
-        }
+      if (!parseWatchdogStartedAt) {
+        parseWatchdogStartedAt = Date.now();
+        return;
       }
+
+      if (Date.now() - parseWatchdogStartedAt < PARSE_WATCHDOG_TIMEOUT_MS) {
+        return;
+      }
+
+      recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+
+      const error = new Error("Project response was received but could not be processed.");
+      error.phase = "parse-watchdog";
+      error.isParseWatchdog = true;
+      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+      reject(error);
+    }, 100);
+  });
+
+  const requiredLoadPromise = Promise.race([fetchAllCoreProjectData(safeProjectName), timeoutPromise]);
+
+  return Promise.race([
+    requiredLoadPromise,
+    responseTextWatchdogPromise,
+    parseWatchdogPromise
+  ]).then((payload) => {
+    settled = true;
+    if (!payload || payload.error) {
+      const error = new Error(payload?.error || `Project ${safeProjectName} returned an empty response.`);
+      error.phase = "payload";
+      throw error;
     }
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("mh:control-center-api-trace", onApiTrace);
-    }
+    startupRuntimeState.projectPayloadSuccess = true;
+    startupRuntimeState.payloadSuccessAt = new Date().toISOString();
 
-    const timeoutPromise = new Promise((_, rejectTimeout) => {
-      timer = setTimeout(() => {
-        const error = new Error(`Project load timed out after ${PROJECT_LOAD_TIMEOUT_MS / 1000}s.`);
-        error.isTimeout = true;
-        error.phase = "timeout";
-        rejectTimeout(error);
-      }, PROJECT_LOAD_TIMEOUT_MS);
+    recordRuntimeTrace("fetchProjectWithTimeout.success", {
+      token: activeProjectLoadToken,
+      detail: safeProjectName
     });
 
-    Promise.race([fetchAllCoreProjectData(safeProjectName), timeoutPromise])
-      .then((payload) => {
-        if (!payload || payload.error) {
-          const error = new Error(payload?.error || `Project ${safeProjectName} returned an empty response.`);
-          error.phase = "payload";
-          throw error;
-        }
+    return payload;
+  }).catch((error) => {
+    settled = true;
+    const nextError = error instanceof Error ? error : new Error(String(error || "Project fetch failed"));
 
-        startupRuntimeState.projectPayloadSuccess = true;
-        startupRuntimeState.payloadSuccessAt = new Date().toISOString();
-        recordRuntimeTrace("fetchProjectWithTimeout.success", {
-          token: activeProjectLoadToken,
-          detail: safeProjectName
-        });
-        settleResolve(payload);
-      })
-      .catch((error) => {
-        const nextError = error instanceof Error ? error : new Error(String(error || "Project fetch failed"));
-        if (!nextError.phase) {
-          nextError.phase = nextError.isTimeout
-            ? "timeout"
-            : nextError.isParseWatchdog
-              ? "parse-watchdog"
-            : isAccessKeyStartupError(nextError)
-              ? "access-key"
-              : "payload";
-        }
-        recordRuntimeTrace("fetchProjectWithTimeout.error", {
-          token: activeProjectLoadToken,
-          detail: `${nextError.phase}: ${nextError.message}`,
-          endpoint: nextError.endpoint || ""
-        });
-        settleReject(nextError);
-      })
-      .finally(() => {
-        cleanup();
+    const parseStage = String(nextError?.diagnostics?.parseStage || nextError?.parseStage || "");
+
+    if (!nextError.phase && parseStage.includes("response.text.timeout")) {
+      nextError.phase = "response-text-watchdog";
+      nextError.isResponseTextWatchdog = true;
+      recordRuntimeTrace("fetchProjectWithTimeout.response-text-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
       });
+    }
+
+    if (
+      !nextError.phase &&
+      (
+        parseStage.includes("api.response.parse") ||
+        parseStage.includes("api.response.json.fallback")
+      )
+    ) {
+      nextError.phase = "parse-watchdog";
+      nextError.isParseWatchdog = true;
+      recordRuntimeTrace("fetchProjectWithTimeout.parse-watchdog", {
+        token: activeProjectLoadToken,
+        detail: safeProjectName
+      });
+    }
+
+    if (!nextError.phase) {
+      nextError.phase = nextError.isTimeout
+        ? "timeout"
+        : isAccessKeyStartupError(nextError)
+          ? "access-key"
+          : "payload";
+    }
+
+    recordRuntimeTrace("fetchProjectWithTimeout.error", {
+      token: activeProjectLoadToken,
+      detail: `${nextError.phase}: ${nextError.message}`,
+      endpoint: nextError.endpoint || ""
+    });
+
+    throw nextError;
+  }).finally(() => {
+    settled = true;
+    if (hardTimeoutTimer) {
+      clearTimeout(hardTimeoutTimer);
+    }
+    if (responseTextWatchdogTimer) {
+      clearTimeout(responseTextWatchdogTimer);
+    }
+    if (parseWatchdogTimer) {
+      clearInterval(parseWatchdogTimer);
+    }
   });
 }
 
@@ -2956,14 +3002,19 @@ async function loadProjectData(projectName) {
   activeProjectLoadPromise = loadPromise;
   activeProjectLoadProject = safeProjectName;
 
-  try {
-    const payload = await loadPromise;
-    if (payload) {
-      void applyOptionalProjectPayload(payload, loadToken);
-    }
+try {
+  const payload = await loadPromise;
 
-    return payload;
-  } finally {
+  /*
+   * Optional project payload is intentionally deferred.
+   * The required startup payload renders the page first; optional sections
+   * can be restored later with route-level lazy loading to avoid startup
+   * render pressure.
+   */
+
+  return payload;
+} finally {
+
     if (activeProjectLoadPromise === loadPromise) {
       activeProjectLoadPromise = null;
       activeProjectLoadProject = "";
@@ -3001,15 +3052,7 @@ function bindDelegatedClickRouting() {
     return;
   }
 
-  const sidebarRouteMap = {
-    home: "home",
-    setup: "setup",
-    library: "library",
-    integrations: "integrations",
-    "ai-command": "ai-command",
-    workflows: "workflows",
-    publishing: "publishing"
-  };
+
 
   const actionRouteMap = {
     "open-ai-command": "ai-command",
@@ -3070,9 +3113,9 @@ function bindDelegatedClickRouting() {
     }
 
     const routeAttr = String(candidate.getAttribute("data-route") || candidate.getAttribute("data-page") || "").trim();
-    if (routeAttr && sidebarRouteMap[routeAttr]) {
+    if (routeAttr) {
       event.preventDefault();
-      navigateTo(sidebarRouteMap[routeAttr]);
+      navigateTo(routeAttr);
       return;
     }
 
@@ -3104,6 +3147,14 @@ function bindRouteListener() {
     const route = event?.detail?.route || "home";
     setCurrentRoute(route);
     renderCurrentPage();
+  });
+
+  // Back/Forward support — hashchange fires when the user navigates browser history
+  window.addEventListener("hashchange", () => {
+    const route = (location.hash.slice(1) || "home").trim();
+    if (route && route !== getState().currentRoute) {
+      navigateTo(route);
+    }
   });
 }
 
@@ -3301,28 +3352,8 @@ function bindShellMeasurements() {
   const topbar = document.querySelector(".topbar");
   if (!appRoot || !topbar) return;
 
-  let rafId = 0;
-
-  const update = () => {
-    rafId = 0;
-    const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
-    appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
-  };
-
-  const scheduleUpdate = () => {
-    if (rafId) return;
-    rafId = window.requestAnimationFrame(update);
-  };
-
-  update();
-
-  if (typeof window.ResizeObserver === "function") {
-    const observer = new window.ResizeObserver(scheduleUpdate);
-    observer.observe(topbar);
-  }
-
-  window.addEventListener("resize", scheduleUpdate);
-  window.addEventListener("orientationchange", scheduleUpdate);
+  const measured = Math.max(56, Math.round(topbar.getBoundingClientRect().height || 64));
+  appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
 }
 
 /* =========================
@@ -3473,7 +3504,9 @@ async function init() {
     clearFeedback();
 
     initRouter();
-    setCurrentRoute("home");
+    // Restore the route from the URL hash on refresh or deep-link
+    const startRoute = (location.hash.slice(1) || "home").trim();
+    setCurrentRoute(startRoute || "home");
 
     bindNavigation();
     bindDelegatedClickRouting();
@@ -3485,7 +3518,13 @@ async function init() {
     bindCommandInputs();
 
     injectAccessKeyButton();
-    injectRoleSwitcher();
+    if (
+      window.__MH_DEV_MODE__ === true ||
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1"
+    ) {
+      injectRoleSwitcher();
+    }
 
     recordStartupStep("init.initial-render");
     renderGlobalUi();
@@ -3532,7 +3571,10 @@ async function init() {
 
 subscribe(() => {
   renderGlobalUi();
-  persistRuntimeTrace();
+
+  if (isDebugStartupMode()) {
+    scheduleRuntimeTracePersist(false);
+  }
 });
 
 window.addEventListener("DOMContentLoaded", init);

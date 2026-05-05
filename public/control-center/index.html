@@ -4,23 +4,43 @@
   <meta charset="utf-8">
   <title>MH Assistant OS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MH Assistant OS - Marketing Operating System">
+  <meta name="description" content="MH Assistant OS - AI Marketing Operating System">
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
   <div id="app" class="app-shell">
-    <!-- Overlay for mobile sidebar -->
+    <!-- Mobile sidebar backdrop -->
     <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
 
     <!-- Global feedback -->
-    <div id="globalMessage" class="global-message" aria-live="polite"></div>
-    <div id="globalError" class="global-error" aria-live="assertive"></div>
-    <div id="startupStepBanner" class="startup-step-banner" aria-live="polite" hidden>Startup step: idle</div>
-    <div id="startupUnlockBar" class="startup-unlock-bar" aria-live="assertive" aria-hidden="true" hidden>
+    <div id="globalMessage" class="global-message" role="status" aria-live="polite"></div>
+    <div id="globalError" class="global-error" role="alert" aria-live="assertive"></div>
+
+    <!-- Startup diagnostics -->
+    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+      Startup step: idle
+    </div>
+
+    <div
+      id="startupUnlockBar"
+      class="startup-unlock-bar"
+      role="alert"
+      aria-live="assertive"
+      aria-hidden="true"
+      hidden
+    >
       <span id="startupUnlockText">Startup is taking longer than expected.</span>
       <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
     </div>
-    <aside id="startupTracePanel" class="startup-trace-panel" aria-live="polite" aria-hidden="true" hidden>
+
+    <aside
+      id="startupTracePanel"
+      class="startup-trace-panel"
+      aria-live="polite"
+      aria-hidden="true"
+      hidden
+    >
       <div class="startup-trace-head">
         <strong>Startup Trace</strong>
         <button id="startupTraceUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
@@ -28,7 +48,15 @@
       <div id="startupTraceMeta" class="startup-trace-meta">Startup trace is idle.</div>
       <div id="startupTraceBody" class="startup-trace-body">No startup events recorded yet.</div>
     </aside>
-    <section id="fatalErrorPanel" class="fatal-error-panel" aria-live="assertive" aria-hidden="true" hidden>
+
+    <section
+      id="fatalErrorPanel"
+      class="fatal-error-panel"
+      role="alert"
+      aria-live="assertive"
+      aria-hidden="true"
+      hidden
+    >
       <h3 id="fatalErrorTitle">Control Center startup failed</h3>
       <p id="fatalErrorText">The app could not finish loading.</p>
       <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
@@ -41,8 +69,8 @@
 
     <!-- Global loading -->
     <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
-      <div class="loading-card">
-        <div class="loading-spinner"></div>
+      <div class="loading-card" role="status" aria-live="polite">
+        <div class="loading-spinner" aria-hidden="true"></div>
         <h3 id="loadingTitle">Loading project</h3>
         <p id="loadingText">Please wait while the system loads the workspace.</p>
       </div>
@@ -74,39 +102,51 @@
             <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
             <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
             <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
-            <button class="nav-item" data-route="insights" type="button">Insights</button>
+            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
           </div>
 
           <div class="nav-group">
             <div class="nav-group-title">Secondary</div>
-            <button class="nav-item" data-route="campaign-studio" type="button">Campaign Studio</button>
-            <button class="nav-item" data-route="content-studio" type="button">Content Studio</button>
-            <button class="nav-item" data-route="media-studio" type="button">Media Studio</button>
-            <button class="nav-item" data-route="ads-manager" type="button">Ads Manager</button>
-            <button class="nav-item" data-route="research" type="button">Research</button>
+            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
           </div>
 
           <div class="nav-group">
             <div class="nav-group-title">System</div>
-            <button class="nav-item" data-route="task-center" type="button">Task Center</button>
-            <button class="nav-item" data-route="queue-center" type="button">Queue Center</button>
-            <button class="nav-item" data-route="job-monitor" type="button">Job Monitor</button>
-            <button class="nav-item" data-route="notification-center" type="button">Notifications</button>
-            <button class="nav-item" data-route="governance" type="button">Governance</button>
-            <button class="nav-item" data-route="settings" type="button">Settings</button>
+            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
           </div>
         </nav>
 
         <div class="sidebar-actions">
-          <button id="refreshAllBtn" class="btn btn-primary" data-action="refresh-project" type="button">Refresh All</button>
-          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">Open AI Command</button>
+          <button id="refreshAllBtn" class="btn btn-primary" data-action="refresh-project" type="button">
+            Refresh All
+          </button>
+          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+            Open AI Command
+          </button>
         </div>
       </aside>
 
       <!-- Main shell -->
       <div class="main-shell">
-        <header class="topbar">
-          <button id="sidebarToggleBtn" class="sidebar-toggle" type="button" aria-label="Toggle sidebar" aria-controls="sidebarNav" aria-expanded="false">
+        <!-- Topbar -->
+        <header id="topbar" class="topbar" role="banner">
+          <button
+            id="sidebarToggleBtn"
+            class="sidebar-toggle"
+            type="button"
+            aria-label="Toggle sidebar"
+            aria-controls="sidebarNav"
+            aria-expanded="false"
+          >
             ☰
           </button>
 
@@ -118,27 +158,32 @@
           </div>
 
           <div class="topbar-right">
-            <div class="context-cards">
+            <div class="context-cards" aria-label="Current workspace context">
               <div class="context-card">
                 <span class="context-label">Project</span>
                 <strong id="ctxProject">-</strong>
               </div>
-              <div class="context-card">
+
+              <div class="context-card ctx-card-hide-md">
                 <span class="context-label">Market</span>
                 <strong id="ctxMarket">-</strong>
               </div>
-              <div class="context-card ctx-card-hide-sm">
+
+              <div class="context-card ctx-card-hide-md">
                 <span class="context-label">Mode</span>
                 <strong id="ctxMode">-</strong>
               </div>
-              <div class="context-card ctx-card-hide-sm">
+
+              <div class="context-card ctx-card-hide-lg">
                 <span class="context-label">Campaign</span>
                 <strong id="ctxCampaign">-</strong>
               </div>
+
               <div class="context-card">
                 <span class="context-label">Route</span>
                 <strong id="ctxRoute">home</strong>
               </div>
+
               <div class="context-card">
                 <span class="context-label">Alerts</span>
                 <strong id="ctxAlerts">0</strong>
@@ -158,10 +203,12 @@
               </button>
             </div>
           </div>
-          <!-- pageDescription kept hidden; used by applyStandardPageLayout -->
+
+          <!-- Kept hidden; app.js/page-standard.js may update or read it -->
           <p id="pageDescription" class="page-description" hidden></p>
         </header>
 
+        <!-- Command bar -->
         <div id="commandBackdrop" class="command-backdrop" aria-hidden="true"></div>
 
         <section id="globalCommandBar" class="command-bar" aria-label="Global command bar">
@@ -172,6 +219,7 @@
               type="text"
               placeholder="Search pages, assets, campaigns, workflows..."
               aria-label="Global search"
+              autocomplete="off"
             >
           </div>
 
@@ -182,6 +230,7 @@
               type="text"
               placeholder="Talk to the system: e.g. build a launch campaign for Germany"
               aria-label="Quick command"
+              autocomplete="off"
             >
           </div>
 
@@ -193,7 +242,8 @@
           </div>
         </section>
 
-        <main id="workspace" class="workspace page-container" aria-live="polite">
+        <!-- Workspace -->
+        <main id="workspace" class="workspace page-container" role="main" aria-live="polite">
           <div id="pageRoot" class="section"></div>
         </main>
       </div>
@@ -202,22 +252,31 @@
 
   <script>
     (function bootstrapControlCenterFallback() {
-      function showFatalStartupError(message, details) {
+      function hideLoadingOverlay() {
         var overlay = document.getElementById("loadingOverlay");
-        if (overlay) {
-          overlay.classList.remove("is-visible");
-          overlay.setAttribute("aria-hidden", "true");
-          overlay.style.display = "none";
-          overlay.style.pointerEvents = "none";
-        }
+        if (!overlay) return;
+
+        overlay.classList.remove("is-visible");
+        overlay.setAttribute("aria-hidden", "true");
+        overlay.style.display = "none";
+        overlay.style.pointerEvents = "none";
+      }
+
+      function showFatalStartupError(message, details) {
+        hideLoadingOverlay();
 
         var panel = document.getElementById("fatalErrorPanel");
         var text = document.getElementById("fatalErrorText");
         var diagnostics = document.getElementById("fatalErrorDetails");
         var globalError = document.getElementById("globalError");
 
-        if (text) text.textContent = message || "The app failed to initialize.";
-        if (diagnostics) diagnostics.textContent = details || "No additional diagnostics available.";
+        if (text) {
+          text.textContent = message || "The app failed to initialize.";
+        }
+
+        if (diagnostics) {
+          diagnostics.textContent = details || "No additional diagnostics available.";
+        }
 
         if (panel) {
           panel.hidden = false;
@@ -255,9 +314,14 @@
 
       window.addEventListener("error", function (event) {
         if (window.__mhControlCenterStarted) return;
+
         var target = event && event.target;
         var src = target && target.src ? String(target.src) : "";
-        var isModuleLoadError = target && target.tagName === "SCRIPT" && src.indexOf("/control-center/app.js") !== -1;
+        var tagName = target && target.tagName ? String(target.tagName).toUpperCase() : "";
+        var isModuleLoadError =
+          tagName === "SCRIPT" &&
+          src.indexOf("/control-center/app.js") !== -1;
+
         if (!isModuleLoadError) return;
 
         showFatalStartupError(
@@ -268,12 +332,17 @@
 
       window.addEventListener("unhandledrejection", function (event) {
         if (window.__mhControlCenterStarted) return;
+
         var reason = event && event.reason;
-        var message = reason && reason.message ? reason.message : String(reason || "Unhandled startup rejection");
+        var message = reason && reason.message
+          ? reason.message
+          : String(reason || "Unhandled startup rejection");
+
         showFatalStartupError("Control Center startup promise failed.", message);
       });
     })();
   </script>
+
   <script type="module" src="./app.js?v=20260504"></script>
 </body>
 </html>

@@ -135,7 +135,9 @@ function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
   const endpoint = String(response?.url || requestMeta?.endpoint || "");
   const status = Number.isFinite(response?.status) ? Number(response.status) : null;
   const contentType = String(response?.headers?.get?.("content-type") || "");
-  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "").trim().toLowerCase() === "temporary";
+  const accessKeyBypass = String(response?.headers?.get?.("x-mh-control-key-bypass") || "")
+    .trim()
+    .toLowerCase() === "temporary";
 
   return {
     keyPresent: Boolean(requestMeta?.keyPresent),
@@ -151,7 +153,50 @@ function buildResponseDiagnostics(response, requestMeta = {}, payload = null) {
   };
 }
 
+export function isDebugStartupMode() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return new URLSearchParams(window.location.search).get("debugStartup") === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function shouldEmitApiRuntimeTrace(stage) {
+  const normalized = String(stage || "");
+
+  // Keep watchdog-critical and error traces in normal mode.
+  // Verbose request traces are emitted only when ?debugStartup=1.
+  if (
+    normalized === "response.text.start" ||
+    normalized === "response.text.done" ||
+    normalized === "response.text.error" ||
+    normalized === "api.response.text.start" ||
+    normalized === "api.response.text.done" ||
+    normalized === "api.response.text.timeout" ||
+    normalized === "api.response.parse.start" ||
+    normalized === "api.response.parse.done" ||
+    normalized === "api.response.parse.error" ||
+    normalized === "api.response.json.fallback.done" ||
+    normalized === "api.response.json.fallback.error" ||
+    normalized === "api.response.json.fallback.timeout" ||
+    normalized === "request.timeout" ||
+    normalized === "request.error"
+  ) {
+    return true;
+  }
+
+  return isDebugStartupMode();
+}
+
 function emitApiRuntimeTrace(stage, details = {}) {
+  if (!shouldEmitApiRuntimeTrace(stage)) {
+    return;
+  }
+
   if (typeof window === "undefined" || typeof window.dispatchEvent !== "function") {
     return;
   }
@@ -177,10 +222,12 @@ function emitApiRuntimeTrace(stage, details = {}) {
 function buildReadHeaders() {
   const headers = { Accept: "application/json" };
   const keyMeta = readControlKeyMeta();
+
   if (keyMeta.key) {
     headers["x-mh-control-key"] = keyMeta.key;
     headers.Authorization = `Bearer ${keyMeta.key}`;
   }
+
   return {
     headers,
     keyPresent: Boolean(keyMeta.key),
@@ -194,10 +241,12 @@ function buildWriteHeaders() {
     "Content-Type": "application/json"
   };
   const keyMeta = readControlKeyMeta();
+
   if (keyMeta.key) {
     headers["x-mh-control-key"] = keyMeta.key;
     headers.Authorization = `Bearer ${keyMeta.key}`;
   }
+
   return {
     headers,
     keyPresent: Boolean(keyMeta.key),
@@ -281,6 +330,7 @@ async function readResponseText(response, requestMeta = {}) {
           });
 
           const fallbackBodyLength = JSON.stringify(fallbackPayload || null).length;
+
           emitApiRuntimeTrace("api.response.json.fallback.done", {
             endpoint,
             status: response?.status,
@@ -351,6 +401,72 @@ async function readResponseText(response, requestMeta = {}) {
   }
 }
 
+function nextFrame() {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(() => resolve());
+      return;
+    }
+
+    setTimeout(resolve, 0);
+  });
+}
+
+async function parseJsonTextSafely(rawText, response, requestMeta = {}, bodyLength = 0) {
+  const endpoint = response?.url || requestMeta?.endpoint || "";
+  const parseStartedAt = Date.now();
+  const parseTimeoutMs = Math.max(1, Number(requestMeta?.parseTimeoutMs) || DEFAULT_PARSE_TIMEOUT_MS);
+
+  emitApiRuntimeTrace("api.response.parse.start", {
+    endpoint,
+    status: response?.status,
+    contentType: response?.headers?.get?.("content-type") || "",
+    bodyLength,
+    timeoutMs: parseTimeoutMs
+  });
+
+  // Give the browser one frame before heavy synchronous JSON parsing.
+  // This helps the startup UI/watchdogs update before parsing large payloads.
+  if (bodyLength > 250000) {
+    await nextFrame();
+  }
+
+  try {
+    const payload = JSON.parse(rawText);
+
+    emitApiRuntimeTrace("api.response.parse.done", {
+      endpoint,
+      status: response?.status,
+      contentType: response?.headers?.get?.("content-type") || "",
+      bodyLength,
+      durationMs: Date.now() - parseStartedAt
+    });
+
+    return payload;
+  } catch (parseFailure) {
+    emitApiRuntimeTrace("api.response.parse.error", {
+      endpoint,
+      status: response?.status,
+      contentType: response?.headers?.get?.("content-type") || "",
+      bodyLength,
+      durationMs: Date.now() - parseStartedAt,
+      message: parseFailure?.message || "Invalid JSON payload"
+    });
+
+    throw new ProjectPayloadError("Project response was received but could not be processed.", {
+      keyPresent: Boolean(requestMeta?.keyPresent),
+      keySource: String(requestMeta?.keySource || "none"),
+      authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
+      endpoint: String(endpoint || ""),
+      status: Number.isFinite(response?.status) ? Number(response.status) : null,
+      contentType: String(response?.headers?.get?.("content-type") || ""),
+      bodyLength,
+      parseStage: "api.response.parse.error",
+      responseSnippet: String(rawText || "").trim().slice(0, 240)
+    });
+  }
+}
+
 async function parseJson(response, fallbackMessage = "Request failed", requestMeta = {}) {
   let payload = null;
   let rawText = "";
@@ -369,49 +485,12 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
   const trimmed = rawText.trim();
 
   if (trimmed && !payload) {
-    const parseStartedAt = Date.now();
-    const parseTimeoutMs = Math.max(1, Number(requestMeta?.parseTimeoutMs) || DEFAULT_PARSE_TIMEOUT_MS);
-
-    emitApiRuntimeTrace("api.response.parse.start", {
-      endpoint: response?.url || requestMeta?.endpoint || "",
-      status: response?.status,
-      contentType: response?.headers?.get?.("content-type") || "",
-      bodyLength,
-      timeoutMs: parseTimeoutMs
-    });
-
     try {
-      payload = JSON.parse(rawText);
+      payload = await parseJsonTextSafely(rawText, response, requestMeta, bodyLength);
       parseStage = "api.response.parse.done";
-      emitApiRuntimeTrace("api.response.parse.done", {
-        endpoint: response?.url || requestMeta?.endpoint || "",
-        status: response?.status,
-        contentType: response?.headers?.get?.("content-type") || "",
-        bodyLength,
-        durationMs: Date.now() - parseStartedAt
-      });
     } catch (parseFailure) {
       parseStage = "api.response.parse.error";
-      emitApiRuntimeTrace("api.response.parse.error", {
-        endpoint: response?.url || requestMeta?.endpoint || "",
-        status: response?.status,
-        contentType: response?.headers?.get?.("content-type") || "",
-        bodyLength,
-        durationMs: Date.now() - parseStartedAt,
-        message: parseFailure?.message || "Invalid JSON payload"
-      });
-
-      throw new ProjectPayloadError("Project response was received but could not be processed.", {
-        keyPresent: Boolean(requestMeta?.keyPresent),
-        keySource: String(requestMeta?.keySource || "none"),
-        authHeaderPresent: Boolean(requestMeta?.authHeaderPresent),
-        endpoint: String(response?.url || requestMeta?.endpoint || ""),
-        status: Number.isFinite(response?.status) ? Number(response.status) : null,
-        contentType: String(response?.headers?.get?.("content-type") || ""),
-        bodyLength,
-        parseStage,
-        responseSnippet: trimmed.slice(0, 240)
-      });
+      throw parseFailure;
     }
   }
 
@@ -495,6 +574,7 @@ async function parseJson(response, fallbackMessage = "Request failed", requestMe
 async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
   const normalizedTimeoutMs = Math.max(1, Number(timeoutMs) || DEFAULT_REQUEST_TIMEOUT_MS);
   const controller = typeof AbortController === "function" ? new AbortController() : null;
+
   const createTimeoutError = () => {
     const timeoutError = new Error(`Request timed out after ${normalizedTimeoutMs}ms: ${path}`);
     timeoutError.endpoint = path;
@@ -513,15 +593,18 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
       }
 
       const timeoutError = createTimeoutError();
+
       emitApiRuntimeTrace("request.timeout", {
         endpoint: buildUrl(path),
         method: String(init?.method || "GET").toUpperCase(),
         timeoutMs: normalizedTimeoutMs,
         message: timeoutError.message
       });
+
       reject(timeoutError);
     }, normalizedTimeoutMs);
   });
+
   const method = String(init?.method || "GET").toUpperCase();
 
   emitApiRuntimeTrace("request.start", {
@@ -535,13 +618,16 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
       ...init,
       signal: controller ? controller.signal : init.signal
     });
+
     const response = await Promise.race([requestPromise, timeoutPromise]);
+
     emitApiRuntimeTrace("request.response", {
       endpoint: response?.url || buildUrl(path),
       method,
       status: response?.status,
       contentType: response?.headers?.get?.("content-type") || ""
     });
+
     return response;
   } catch (error) {
     if (error?.isTimeout) {
@@ -555,11 +641,13 @@ async function fetchWithTimeout(path, init = {}, timeoutMs = DEFAULT_REQUEST_TIM
     if (error && typeof error === "object" && !error.endpoint) {
       error.endpoint = path;
     }
+
     emitApiRuntimeTrace("request.error", {
       endpoint: buildUrl(path),
       method,
       message: error?.message || "Request failed"
     });
+
     throw error;
   } finally {
     if (timer) {
@@ -598,13 +686,15 @@ async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT
     keyPresent,
     keySource,
     authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
-    responseTextTimeoutMs: timeoutMs
+    responseTextTimeoutMs: timeoutMs,
+    parseTimeoutMs: DEFAULT_PARSE_TIMEOUT_MS
   });
 }
 
 async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
   const headers = {};
   const keyMeta = readControlKeyMeta();
+
   if (keyMeta.key) {
     headers["x-mh-control-key"] = keyMeta.key;
     headers.Authorization = `Bearer ${keyMeta.key}`;
@@ -620,7 +710,9 @@ async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQ
     endpoint: buildUrl(path),
     keyPresent: Boolean(headers["x-mh-control-key"]),
     keySource: keyMeta.source,
-    authHeaderPresent: Boolean(headers.Authorization || headers.authorization)
+    authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+    responseTextTimeoutMs: timeoutMs,
+    parseTimeoutMs: DEFAULT_PARSE_TIMEOUT_MS
   });
 }
 
@@ -663,9 +755,11 @@ function normalizeProjectDashboardPayload(payload) {
 
 function toProjectName(value) {
   const projectName = String(value || "").trim();
+
   if (!projectName) {
     throw new Error("Missing project name");
   }
+
   return projectName;
 }
 
@@ -749,6 +843,7 @@ function toDiagnosticEntry(section, error, required = false) {
 
 function extractRequestAuthDiagnostics(payload = null) {
   const diagnostics = payload?.__mhRequestDiagnostics || {};
+
   return {
     keyPresent: Boolean(diagnostics?.keyPresent),
     keySource: String(diagnostics?.keySource || "none"),
@@ -760,11 +855,13 @@ function extractRequestAuthDiagnostics(payload = null) {
 
 function extractDashboardSection(payload, section) {
   const value = payload?.[section];
+
   if (value != null) {
     return value;
   }
 
   const panelError = payload?.errors?.[section];
+
   if (panelError) {
     const err = new Error(`Failed to load ${section}: ${panelError}`);
     err.endpoint = `/media-manager/project/:project (${section})`;
@@ -812,9 +909,9 @@ export async function fetchAllCoreProjectData(projectName) {
   const optionalDiagnostics = [];
 
   const requiredDashboardPromise = getJson(
-    `/media-manager/project/${encodedProjectName}`,
-    "Failed to load project dashboard",
-    18000,
+    `/media-manager/project/${encodedProjectName}/startup`,
+    "Failed to load project startup dashboard",
+    12000,
     {
       responseTextTimeoutMs: REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS
     }
@@ -842,8 +939,10 @@ export async function fetchAllCoreProjectData(projectName) {
   );
 
   const requiredData = {};
+
   requiredResults.forEach((result, index) => {
     const section = requiredSections[index];
+
     if (result.status === "fulfilled") {
       requiredData[section] = result.value;
       return;
@@ -891,7 +990,10 @@ export async function fetchAllCoreProjectData(projectName) {
       .join("; ");
     const error = new Error(`Required project data failed: ${message}`);
     error.endpoint = `/media-manager/project/${encodedProjectName}`;
-    const authProbe = requiredDiagnostics.find((item) => item.keyPresent || item.authHeaderPresent || item.keySource !== "none") || null;
+    const authProbe = requiredDiagnostics.find((item) =>
+      item.keyPresent || item.authHeaderPresent || item.keySource !== "none"
+    ) || null;
+
     error.diagnostics = {
       keyPresent: Boolean(authProbe?.keyPresent),
       keySource: String(authProbe?.keySource || "none"),
@@ -919,39 +1021,38 @@ export async function fetchAllCoreProjectData(projectName) {
     throw error;
   }
 
+  const requiredDashboardPayload = await requiredDashboardPromise;
+
   const basePayload = {
+    project: requiredDashboardPayload?.project || safeProjectName,
+    capabilities: requiredDashboardPayload?.capabilities || {},
     overview: requiredData.overview,
     readiness: requiredData.readiness,
     assets: requiredData.assets,
-    tree: createOptionalFallback(safeProjectName, "tree"),
-    registry: createOptionalFallback(safeProjectName, "registry"),
-    connectors: createOptionalFallback(safeProjectName, "connectors"),
+    tree: requiredDashboardPayload?.tree || createOptionalFallback(safeProjectName, "tree"),
+    registry: requiredDashboardPayload?.registry || createOptionalFallback(safeProjectName, "registry"),
+    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
     activity: createOptionalFallback(safeProjectName, "activity"),
-    operations: createOptionalFallback(safeProjectName, "operations")
+    operations: createOptionalFallback(safeProjectName, "operations"),
+    errors: requiredDashboardPayload?.errors || {}
   };
-
-  const optionalDashboardPromise = getJson(
-    `/media-manager/project/${encodedProjectName}`,
-    "Failed to load optional project dashboard sections",
-    30000
-  );
 
   const optionalLoaders = [
     {
       section: "activity",
-      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "activity"))
+      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "activity"))
     },
     {
       section: "tree",
-      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "tree"))
+      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "tree"))
     },
     {
       section: "registry",
-      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "registry"))
+      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "registry"))
     },
     {
       section: "connectors",
-      load: () => optionalDashboardPromise.then((payload) => extractDashboardSection(payload, "connectors"))
+      load: (dashboardPromise) => dashboardPromise.then((payload) => extractDashboardSection(payload, "connectors"))
     },
     {
       section: "operations",
@@ -967,22 +1068,42 @@ export async function fetchAllCoreProjectData(projectName) {
     }
   ];
 
-  const optionalReady = Promise.allSettled(optionalLoaders.map((entry) => entry.load()))
-    .then((results) => {
-      const optionalPatch = {
-        activity: createOptionalFallback(safeProjectName, "activity"),
-        tree: createOptionalFallback(safeProjectName, "tree"),
-        registry: createOptionalFallback(safeProjectName, "registry"),
-        connectors: createOptionalFallback(safeProjectName, "connectors"),
-        operations: createOptionalFallback(safeProjectName, "operations")
-      };
+const optionalReady = () => {
+  const optionalPatch = {
+    activity: requiredDashboardPayload?.activity || createOptionalFallback(safeProjectName, "activity"),
+    tree: requiredDashboardPayload?.tree || createOptionalFallback(safeProjectName, "tree"),
+    registry: requiredDashboardPayload?.registry || createOptionalFallback(safeProjectName, "registry"),
+    connectors: requiredDashboardPayload?.connectors || createOptionalFallback(safeProjectName, "connectors"),
+    operations: createOptionalFallback(safeProjectName, "operations")
+  };
 
+  const lightweightOptionalLoaders = [
+    {
+      section: "operations",
+      load: () => fetchProjectOperations(safeProjectName)
+    },
+    {
+      section: "insights",
+      load: () => fetchProjectInsights(safeProjectName)
+    },
+    {
+      section: "learning",
+      load: () => fetchProjectLearning(safeProjectName)
+    }
+  ];
+
+  return new Promise((resolve) => {
+    setTimeout(resolve, 750);
+  })
+    .then(() => Promise.allSettled(lightweightOptionalLoaders.map((entry) => entry.load())))
+    .then((results) => {
       results.forEach((result, index) => {
-        const section = optionalLoaders[index].section;
+        const section = lightweightOptionalLoaders[index].section;
+
         if (result.status === "fulfilled") {
           if (section === "insights" || section === "learning") {
             optionalPatch.activity = {
-              ...(optionalPatch.activity || {}),
+              ...(optionalPatch.activity || createOptionalFallback(safeProjectName, "activity")),
               [section]: result.value ?? createOptionalFallback(safeProjectName, section)
             };
           } else {
@@ -995,7 +1116,7 @@ export async function fetchAllCoreProjectData(projectName) {
 
         if (section === "insights" || section === "learning") {
           optionalPatch.activity = {
-            ...(optionalPatch.activity || {}),
+            ...(optionalPatch.activity || createOptionalFallback(safeProjectName, "activity")),
             [section]: createOptionalFallback(safeProjectName, section)
           };
         } else {
@@ -1013,8 +1134,13 @@ export async function fetchAllCoreProjectData(projectName) {
         }
       };
     });
+};
 
   const normalized = normalizeProjectDashboardPayload(basePayload);
+  normalized.project = normalized.project || safeProjectName;
+  normalized.capabilities = normalized.capabilities || basePayload.capabilities || {};
+  normalized.connectors = normalized.connectors || basePayload.connectors || {};
+  normalized.errors = normalized.errors || basePayload.errors || {};
   normalized._requiredSummary = {
     project: safeProjectName,
     requiredSections,
@@ -1027,7 +1153,7 @@ export async function fetchAllCoreProjectData(projectName) {
     requestAuth: requestAuthDiagnostics,
     optionalPending: optionalLoaders.map((entry) => entry.section)
   };
-  normalized._optionalReady = optionalReady;
+  normalized._optionalReady = Promise.resolve().then(optionalReady);
 
   return normalized;
 }
@@ -1219,7 +1345,11 @@ export async function fetchProjectGovernance(projectName, params = {}) {
   }
 
   const search = new URLSearchParams();
-  if (params.timeline_limit) search.set("timeline_limit", String(params.timeline_limit));
+
+  if (params.timeline_limit) {
+    search.set("timeline_limit", String(params.timeline_limit));
+  }
+
   const suffix = search.toString() ? `?${search.toString()}` : "";
 
   return getJson(
@@ -1572,6 +1702,7 @@ export async function listProjectCampaigns(projectName, limit) {
   }
 
   const suffix = limit ? `?limit=${encodeURIComponent(limit)}` : "";
+
   return getJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/campaigns${suffix}`,
     "Failed to load campaigns"
@@ -1606,8 +1737,15 @@ export async function listProjectContentItems(projectName, params = {}) {
   }
 
   const search = new URLSearchParams();
-  if (params.limit) search.set("limit", String(params.limit));
-  if (params.campaign_id) search.set("campaign_id", String(params.campaign_id));
+
+  if (params.limit) {
+    search.set("limit", String(params.limit));
+  }
+
+  if (params.campaign_id) {
+    search.set("campaign_id", String(params.campaign_id));
+  }
+
   const suffix = search.toString() ? `?${search.toString()}` : "";
 
   return getJson(
@@ -1644,9 +1782,19 @@ export async function listProjectMediaJobs(projectName, params = {}) {
   }
 
   const search = new URLSearchParams();
-  if (params.limit) search.set("limit", String(params.limit));
-  if (params.campaign_id) search.set("campaign_id", String(params.campaign_id));
-  if (params.content_item_id) search.set("content_item_id", String(params.content_item_id));
+
+  if (params.limit) {
+    search.set("limit", String(params.limit));
+  }
+
+  if (params.campaign_id) {
+    search.set("campaign_id", String(params.campaign_id));
+  }
+
+  if (params.content_item_id) {
+    search.set("content_item_id", String(params.content_item_id));
+  }
+
   const suffix = search.toString() ? `?${search.toString()}` : "";
 
   return getJson(
@@ -1737,10 +1885,23 @@ export async function listProjectHandoffs(projectName, params = {}) {
   }
 
   const search = new URLSearchParams();
-  if (params.limit) search.set("limit", String(params.limit));
-  if (params.destination_page) search.set("destination_page", String(params.destination_page));
-  if (params.source_page) search.set("source_page", String(params.source_page));
-  if (params.status) search.set("status", String(params.status));
+
+  if (params.limit) {
+    search.set("limit", String(params.limit));
+  }
+
+  if (params.destination_page) {
+    search.set("destination_page", String(params.destination_page));
+  }
+
+  if (params.source_page) {
+    search.set("source_page", String(params.source_page));
+  }
+
+  if (params.status) {
+    search.set("status", String(params.status));
+  }
+
   const suffix = search.toString() ? `?${search.toString()}` : "";
 
   return getJson(
@@ -1785,6 +1946,7 @@ export async function listProjectEvents(projectName, limit) {
   }
 
   const suffix = limit ? `?limit=${encodeURIComponent(limit)}` : "";
+
   return getJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/events${suffix}`,
     "Failed to load event log"

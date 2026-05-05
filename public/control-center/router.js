@@ -239,6 +239,12 @@ export function renderRouteTemplate(route) {
 export function navigateTo(route, emit = true) {
   renderRouteTemplate(route);
 
+  // Sync browser URL — setting the same hash value does not re-fire hashchange
+  const newHash = `#${route}`;
+  if (typeof location !== "undefined" && location.hash !== newHash) {
+    location.hash = newHash;
+  }
+
   if (emit) {
     window.dispatchEvent(
       new CustomEvent("mh:route-change", {

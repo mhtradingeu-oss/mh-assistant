@@ -3221,7 +3221,7 @@ textarea {
   }
 
   .home-exec-team-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .home-decision-kpi-grid,
@@ -6041,4 +6041,280 @@ section[data-page="workflows"] .wfexec-empty {
 .startup-unlock-bar button,
 .startup-trace-panel button {
   pointer-events: auto;
+}
+
+/* Production guard: stale loading overlays must not block the UI after app loading is cleared */
+body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,
+body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay,
+body[data-loading-state="idle"] #loadingOverlay,
+body[data-loading-state="idle"] .loading-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hard production safety: stale startup overlays must never trap the Control Center */
+body[data-loading-state="idle"] #loadingOverlay,
+body[data-loading-state="idle"] .loading-overlay,
+body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,
+body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Production UI safety: stale startup overlays must never block the Control Center */
+#loadingOverlay,
+.loading-overlay,
+#startupUnlockBar,
+.startup-unlock-bar {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.is-loading,
+body.loading,
+body.loading-locked,
+body.app-loading,
+body.app-locked,
+html.is-loading,
+html.loading,
+html.loading-locked,
+html.app-loading,
+html.app-locked {
+  overflow: auto !important;
+  pointer-events: auto !important;
+}
+
+@media (max-width: 768px) {
+  .home-decision-kpi-grid,
+  .home-decision-health-grid,
+  .home-decision-blockers-grid,
+  .home-decision-quick-actions,
+  .home-exec-health-grid,
+  .home-exec-team-grid,
+  .home-exec-recent-grid,
+  .home-ai-team-grid,
+  .kpi-grid,
+  .std-kpi-grid,
+  .std-status-grid,
+  .info-grid,
+  .data-grid,
+  .page-grid,
+  .dashboard-grid,
+  .section-grid,
+  .home-main-grid,
+  .home-section-grid,
+  .ops-workspace-grid,
+  .ops-resolution-grid,
+  .ops-detail-grid,
+  .ops-metric-grid,
+  .ops-toolbar,
+  .ops-toolbar-compact {
+    grid-template-columns: 1fr;
+  }
+
+  section[data-page="task-center"],
+  section[data-page="queue-center"],
+  section[data-page="job-monitor"],
+  section[data-page="notification-center"] {
+    overflow-x: hidden;
+  }
+
+  .ops-shell,
+  .ops-workspace,
+  .ops-workspace-grid > *,
+  .ops-resolution-grid > *,
+  .ops-detail-grid > *,
+  .panel,
+  .card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ops-action-row {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .ops-action-row .btn,
+  .home-decision-row-actions .btn {
+    width: 100%;
+  }
+
+  section[data-page="task-center"] .ops-table-wrap,
+  section[data-page="queue-center"] .ops-table-wrap,
+  section[data-page="job-monitor"] .ops-table-wrap,
+  section[data-page="notification-center"] .ops-table-wrap,
+  .home-decision-feed-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  section[data-page="task-center"] .ops-table,
+  section[data-page="queue-center"] .ops-table,
+  section[data-page="job-monitor"] .ops-table,
+  section[data-page="notification-center"] .ops-table,
+  .home-decision-feed-table {
+    width: 100%;
+    min-width: 640px;
+  }
+}
+/* ============================================================
+   FINAL APP SHELL LAYOUT FIX
+   Prevent topbar / command bar overlap and restore clean scroll
+============================================================ */
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-shell {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.os-layout {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main-shell {
+  height: 100vh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.topbar {
+  position: relative !important;
+  top: auto !important;
+  z-index: 30;
+  height: auto !important;
+  min-height: 64px;
+  max-height: none;
+  flex-wrap: wrap;
+  align-content: center;
+}
+
+.command-bar {
+  position: relative !important;
+  top: auto !important;
+  z-index: 20;
+}
+
+.workspace {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-5);
+  scroll-padding-top: 24px;
+}
+
+#pageRoot {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Keep page sections below the shell bars with natural spacing */
+#pageRoot > .page,
+#pageRoot > section,
+#pageRoot > div {
+  min-width: 0;
+}
+
+/* Prevent topbar context badges from forcing overlap */
+.context-cards {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.context-card {
+  max-width: 220px;
+}
+
+.context-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Medium screens: reduce header density instead of allowing overlap */
+@media (max-width: 1280px) {
+  .topbar {
+    align-items: flex-start;
+    padding: 8px 14px;
+  }
+
+  .ctx-card-hide-lg,
+  .context-card:nth-child(n + 5) {
+    display: none !important;
+  }
+
+  .command-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .command-bar-right {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* Mobile command bar remains overlay only when explicitly opened */
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  .topbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 30;
+    padding: 8px 10px;
+  }
+
+  .command-bar {
+    position: relative !important;
+    top: auto !important;
+    left: auto;
+    right: auto;
+    z-index: 20;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+  }
+
+  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+    display: none;
+  }
+
+  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+    display: grid;
+  }
+
+  .command-backdrop {
+    display: none !important;
+  }
+
+  .workspace {
+    padding: 12px;
+  }
 }
