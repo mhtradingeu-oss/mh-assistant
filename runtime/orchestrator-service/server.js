@@ -80,8 +80,53 @@ const {
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 
 const compression = require('compression');
+const helmet = require('helmet');
+const cors = require('cors');
+
+process.on('uncaughtException', (err) => {
+  try {
+    appLogger.error('uncaught_exception', {
+      route: 'process',
+      action: 'uncaught_exception',
+      error: serializeErrorForLog(err)
+    });
+  } catch (_) {
+    console.error('[uncaughtException]', err);
+  }
+  // Allow systemd to restart the process
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    appLogger.error('unhandled_rejection', {
+      route: 'process',
+      action: 'unhandled_rejection',
+      error: serializeErrorForLog(reason instanceof Error ? reason : new Error(String(reason)))
+    });
+  } catch (_) {
+    console.error('[unhandledRejection]', reason);
+  }
+});
 
 const app = express();
+app.use(helmet({
+  contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
+}));
+app.use(cors({
+  origin: [
+    /^https:\/\/[a-z0-9-]+\.hairoticmen\.de$/i,
+    /^http:\/\/localhost(:\d+)?$/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-mh-control-write-key',
+    'x-mh-access-key'
+  ],
+  credentials: true
+}));
 app.use(compression());
 app.use(express.json());
 
@@ -9568,6 +9613,26 @@ app.get('/public/media-manager/asset-catalog', (req, res) => {
   return res.json({
     asset_catalog: getAssetTypeCatalog()
   });
+});
+
+app.get('/media-manager/project/:project/startup', (req, res) => {
+  try {
+    return res.json(buildMediaManagerProjectStartupPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to build media manager startup payload'
+    });
+  }
+});
+
+app.get('/public/media-manager/project/:project/startup', (req, res) => {
+  try {
+    return res.json(buildMediaManagerProjectStartupPayload(req.params.project));
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message || 'Failed to build media manager startup payload'
+    });
+  }
 });
 
 app.get('/media-manager/project/:project', (req, res) => {
@@ -20346,6 +20411,51 @@ function executeJobBridge(job) {
   err.code = 'UNKNOWN_JOB_TYPE';
   throw err;
 }
+function buildMediaManagerProjectStartupPayload(projectName) {
+  const full = buildMediaManagerProjectPayload(projectName);
+
+  return {
+    project: full.project,
+    capabilities: full.capabilities,
+    overview: full.overview,
+    readiness: full.readiness,
+    assets: {
+      project: full.assets?.project || full.project,
+      generated_at: full.assets?.generated_at || new Date().toISOString(),
+      summary: {
+        total: Array.isArray(full.assets?.assets) ? full.assets.assets.length : 0,
+        existing: Array.isArray(full.assets?.assets)
+          ? full.assets.assets.filter((asset) => asset?.exists !== false).length
+          : 0,
+        missing: Array.isArray(full.assets?.assets)
+          ? full.assets.assets.filter((asset) => asset?.exists === false).length
+          : 0
+      },
+      assets: []
+    },
+    tree: {
+      project: full.project,
+      tree: []
+    },
+    registry: {
+      project: full.project,
+      total_assets: full.registry?.total_assets || 0,
+      assets: []
+    },
+    connectors: full.connectors || {},
+    activity: {
+      project: full.project,
+      items: [],
+      summary: {}
+    },
+    operations: {
+      project: full.project,
+      summary: {},
+      items: []
+    },
+    errors: full.errors || {}
+  };
+}
 
 app.post('/schedule_execution_job', (req, res) => {
   let projectName = '';
@@ -21004,11 +21114,27 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     appLogger.info('service_started', {
       route: '/health',
       action: 'listen',
       port: Number(PORT)
+    });
+  });
+
+  process.on('SIGTERM', () => {
+    appLogger.info('sigterm_received', { route: 'process', action: 'shutdown' });
+    server.close((err) => {
+      if (err) {
+        appLogger.error('shutdown_error', {
+          route: 'process',
+          action: 'shutdown',
+          error: serializeErrorForLog(err)
+        });
+        process.exit(1);
+      }
+      appLogger.info('shutdown_complete', { route: 'process', action: 'shutdown' });
+      process.exit(0);
     });
   });
 }

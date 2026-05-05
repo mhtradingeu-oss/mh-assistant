@@ -230,6 +230,29 @@ class UnifiedDataPathResolver {
       };
     }
 
+    if (domain === 'media-intelligence') {
+      const canonicalReadPath = path.join(roots.projectRoot, 'products');
+      const legacyReadPath = roots.legacyRoot;
+
+      if (this.featureFlags.execution_canonical_read) {
+        return {
+          activeReadPath: canonicalReadPath,
+          activeWritePath: canonicalReadPath,
+          reason: 'media-intelligence-canonical-read-enabled',
+          fallbackUsed: false,
+          mirrorWritePath: null
+        };
+      }
+
+      return {
+        activeReadPath: legacyReadPath,
+        activeWritePath: legacyReadPath,
+        reason: 'media-intelligence-canonical-read-disabled',
+        fallbackUsed: false,
+        mirrorWritePath: null
+      };
+    }
+
     const executionEligibleDomains = new Set([
       'generated',
       'publishing',
