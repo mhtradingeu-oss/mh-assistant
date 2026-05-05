@@ -226,7 +226,14 @@ function buildSetupValues(state) {
     audience_geography: overviewData.audience_geography || context.currentMarket || "",
     competitors: toListText(overviewData.competitors),
     differentiation: overviewData.differentiation || "",
-    social_channels: toListText(overviewData.social_channels || overviewData.social_links),
+    social_channels: toListText(
+      overviewData.social_channels ||
+      overviewData.channels ||
+      overviewData.social_links ||
+      overviewData.setup_payload?.social_channels ||
+      overviewData.setup_payload?.channels ||
+      overviewData.setup_payload?.social_links
+    ),
     operator_notes: toListText(readinessDashboard.operator_notes)
   };
 }
