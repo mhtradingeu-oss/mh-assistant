@@ -2616,6 +2616,10 @@ export const aiCommandRoute = {
   const aiArtifactsTotal = Number(operations.ai_artifacts?.total || 0);
   const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
 
+  const session = ensureSession(projectName || "__default__");
+  hydrateSessionDraft(projectName || "__default__", session);
+
+  const currentMode = getModeMeta(session.modeId || "operations");
   const root = $("ctrlRoomRoot");
   if (!root) return;
 
@@ -2623,7 +2627,7 @@ export const aiCommandRoute = {
     <div class="aicmd-shell">
       <section class="aicmd-section aicmd-overview">
         <div class="aicmd-section-head">
-          <h3>AI Command Center</h3>
+          <h3>AI Team Control Room</h3>
           <span class="card-badge success">Ready</span>
         </div>
 
@@ -2662,7 +2666,41 @@ export const aiCommandRoute = {
 
       <section class="aicmd-section">
         <div class="aicmd-section-head">
-          <h3>Command Composer</h3>
+          <h3>Choose your AI specialist</h3>
+          <span class="card-badge neutral">${escapeHtml(currentMode.label)}</span>
+        </div>
+
+        <div class="aicmd-agent-grid">
+          ${AGENT_CARDS.map((agent) => `
+            <article class="aicmd-agent-card${agent.id === session.modeId ? " is-active" : ""}">
+              <h4>${escapeHtml(agent.name)}</h4>
+              <div class="aicmd-agent-meta">
+                <span>Purpose</span>
+                <p>${escapeHtml(agent.purpose)}</p>
+              </div>
+              <div class="aicmd-agent-meta">
+                <span>Best use</span>
+                <p>${escapeHtml(agent.bestUse)}</p>
+              </div>
+              <div class="aicmd-agent-meta">
+                <span>Suggested prompt</span>
+                <p>${escapeHtml(agent.suggestedPrompt)}</p>
+              </div>
+              <button
+                class="aicmd-btn aicmd-btn-secondary"
+                type="button"
+                data-aicmd-start-agent="${escapeHtml(agent.id)}"
+              >
+                Start with ${escapeHtml(agent.name)}
+              </button>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="aicmd-section">
+        <div class="aicmd-section-head">
+          <h3>${escapeHtml(currentMode.icon)} ${escapeHtml(currentMode.label)} Command Composer</h3>
         </div>
 
         <div>
@@ -2671,19 +2709,57 @@ export const aiCommandRoute = {
             id="ctrlComposerInput"
             class="aicmd-textarea"
             rows="7"
-            placeholder="Write what you want the AI team to do for this project..."
-          ></textarea>
+            placeholder="Ask ${escapeHtml(currentMode.label)} what to do next for this project..."
+          >${escapeHtml(session.draftMessage || "")}</textarea>
         </div>
 
         <div class="aicmd-action-row">
-          <button id="aiCommandSendBtn" class="aicmd-btn aicmd-btn-primary" type="button">Prepare Command</button>
-          <button id="aicmdOpenWorkflowsBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Open Workflows</button>
-          <button id="aicmdOpenCampaignBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Open Campaign Studio</button>
-          <button id="aicmdOpenInsightsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Open Insights</button>
+          <button id="aiCommandSendBtn" class="aicmd-btn aicmd-btn-primary" type="button">
+            Prepare Command
+          </button>
+          <button id="aicmdSaveDraftBtn" class="aicmd-btn aicmd-btn-secondary" type="button">
+            Save Draft
+          </button>
+          <button id="aicmdClearBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
+            Clear
+          </button>
+          <button id="aicmdOpenWorkflowsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
+            Open Workflows
+          </button>
+          <button id="aicmdOpenCampaignBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
+            Open Campaign Studio
+          </button>
+          <button id="aicmdOpenInsightsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
+            Open Insights
+          </button>
         </div>
 
-        <div id="aicmdLightweightStatus" class="aicmd-draft-state">
-          AI Command is ready. Prepare prompts, route work to the global AI bar, and continue execution from the relevant workspace.
+        <div id="aicmdStatus" class="aicmd-draft-state">
+          ${escapeHtml(session.draftStatus || "AI Team is ready. Choose a specialist, prepare a command, then run it from the global AI bar.")}
+        </div>
+      </section>
+
+      <section class="aicmd-section">
+        <div class="aicmd-section-head">
+          <h3>Quick Actions</h3>
+        </div>
+
+        <div class="aicmd-suggestions">
+          ${QUICK_ACTIONS.map((action) => `
+            <article class="aicmd-suggestion-card">
+              <h4>${escapeHtml(action.icon)} ${escapeHtml(action.label)}</h4>
+              <p>${escapeHtml(action.sub)}</p>
+              <div class="aicmd-action-row">
+                <button
+                  class="aicmd-btn aicmd-btn-secondary"
+                  type="button"
+                  data-aicmd-quick-template="${escapeHtml(action.template.replace("{project}", projectName || "this project"))}"
+                >
+                  Use Prompt
+                </button>
+              </div>
+            </article>
+          `).join("")}
         </div>
       </section>
 
@@ -2693,6 +2769,11 @@ export const aiCommandRoute = {
         </div>
 
         <div class="aicmd-overview-grid">
+          <div class="aicmd-stat">
+            <span>Selected specialist</span>
+            <strong>${escapeHtml(currentMode.label)}</strong>
+          </div>
+
           <div class="aicmd-stat">
             <span>AI commands</span>
             <strong>${escapeHtml(String(aiCommandsTotal))}</strong>
@@ -2713,12 +2794,48 @@ export const aiCommandRoute = {
   `;
 
   const input = $("ctrlComposerInput");
-  const status = $("aicmdLightweightStatus");
+  const status = $("aicmdStatus");
+
+  Array.from(document.querySelectorAll("[data-aicmd-start-agent]")).forEach((button) => {
+    button.onclick = () => {
+      const agentId = button.getAttribute("data-aicmd-start-agent") || "operations";
+      const card = AGENT_CARDS.find((item) => item.id === agentId);
+      session.modeId = agentId;
+      session.draftMessage = card?.suggestedPrompt || "";
+      persistSessionDraft(projectName || "__default__", session, "Agent prompt loaded");
+      aiCommandRoute.render(context);
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-aicmd-quick-template]")).forEach((button) => {
+    button.onclick = () => {
+      const template = button.getAttribute("data-aicmd-quick-template") || "";
+      session.draftMessage = template;
+      if (input) input.value = template;
+      persistSessionDraft(projectName || "__default__", session, "Quick prompt loaded");
+      if (status) status.textContent = "Quick prompt loaded. Review it before running.";
+    };
+  });
+
+  if (input) {
+    input.oninput = () => {
+      session.draftMessage = input.value || "";
+      persistSessionDraft(projectName || "__default__", session, "Draft auto-saved locally");
+    };
+
+    input.onkeydown = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        const sendBtn = $("aiCommandSendBtn");
+        sendBtn?.click?.();
+      }
+    };
+  }
 
   const sendBtn = $("aiCommandSendBtn");
   if (sendBtn) {
     sendBtn.onclick = () => {
-      const value = asString(input?.value || "").trim();
+      const value = asString(input?.value || session.draftMessage || "").trim();
 
       if (!value) {
         if (status) status.textContent = "Please write a command first.";
@@ -2726,16 +2843,40 @@ export const aiCommandRoute = {
         return;
       }
 
+      session.draftMessage = value;
+      persistSessionDraft(projectName || "__default__", session, "Command prepared");
+
       const globalInput = $("quickCommandInput");
       if (globalInput) {
-        globalInput.value = value;
+        globalInput.value = `[${currentMode.label}] ${value}`;
       }
 
       if (status) {
         status.textContent = "Command prepared in the global AI bar. Review it, then run it from the command controls.";
       }
 
-      showMessage?.("AI command prepared.");
+      showMessage?.(`${currentMode.label} command prepared.`);
+    };
+  }
+
+  const saveDraftBtn = $("aicmdSaveDraftBtn");
+  if (saveDraftBtn) {
+    saveDraftBtn.onclick = () => {
+      session.draftMessage = asString(input?.value || session.draftMessage || "");
+      persistSessionDraft(projectName || "__default__", session, "Draft saved");
+      if (status) status.textContent = "Draft saved locally.";
+      showMessage?.("AI draft saved.");
+    };
+  }
+
+  const clearBtn = $("aicmdClearBtn");
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      session.draftMessage = "";
+      persistSessionDraft(projectName || "__default__", session, "Draft cleared");
+      if (input) input.value = "";
+      if (status) status.textContent = "Draft cleared.";
+      showMessage?.("AI draft cleared.");
     };
   }
 
