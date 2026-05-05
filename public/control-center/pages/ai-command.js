@@ -2592,59 +2592,166 @@ export const aiCommandRoute = {
 		</section>
 	`,
 	render(context) {
-		const {
-			getState,
-			$,
-			escapeHtml,
-			navigateTo,
-			showMessage,
-			showError,
-			reloadProjectData,
-			fetchProjectInsights,
-			fetchProjectLearning,
-			createProjectHandoff,
-			consumeProjectHandoff,
-			executeProjectAiCommand,
-			saveProjectAiDraft
-		} = context;
+  const {
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  } = context;
 
-		const render = () => {
-			const state = getState();
-			const projectName = state.context.currentProject || "";
-			const session = ensureSession(projectName);
-			session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
-			hydrateSessionDraft(projectName, session);
+  const state = getState();
+  const projectName = asString(state.context.currentProject || "");
+  const market = asString(state.context.currentMarket || "");
+  const language = asString(state.context.currentLanguage || "");
+  const campaign = asString(state.context.activeCampaign || "");
+  const executionMode = asString(state.context.executionMode || "");
 
-			lastRenderContext = { ...context, render };
-			ensureAiCommandBridge();
-			applyDurableAiHandoff(projectName, state.data.operations, session, consumeProjectHandoff, showMessage);
-			ensureIntelligenceLoaded({ projectName, session, getState, reloadProjectData, fetchProjectInsights, fetchProjectLearning, rerender: render });
+  const overview = asObject(state.data.overview?.overview || state.data.overview);
+  const readiness = asObject(state.data.readiness?.dashboard || state.data.readiness);
+  const operations = asObject(state.data.operations);
 
-			const aiContext = buildUnifiedAiContext(state, session.intelligence);
-			const globalIntelligence = buildSystemIntelligence(state);
-			const intelligenceStatus = session.intelligence.status || "idle";
+  const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
+  const aiArtifactsTotal = Number(operations.ai_artifacts?.total || 0);
+  const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
 
-			const root = $("ctrlRoomRoot");
-			if (!root) return;
+  const root = $("ctrlRoomRoot");
+  if (!root) return;
 
-			root.innerHTML = renderAiOperatingCenter(aiContext, session, intelligenceStatus, globalIntelligence, escapeHtml);
+  root.innerHTML = `
+    <div class="aicmd-shell">
+      <section class="aicmd-section aicmd-overview">
+        <div class="aicmd-section-head">
+          <h3>AI Command Center</h3>
+          <span class="card-badge success">Ready</span>
+        </div>
 
-			bindAiOperatingCenter({
-				$,
-				getState,
-				navigateTo,
-				showMessage,
-				showError,
-				createProjectHandoff,
-				executeProjectAiCommand,
-				reloadProjectData,
-				fetchProjectInsights,
-				fetchProjectLearning,
-				render,
-				saveProjectAiDraft
-			});
-		};
+        <div class="aicmd-overview-grid">
+          <div class="aicmd-stat">
+            <span>Current project</span>
+            <strong>${escapeHtml(projectName || "Not selected")}</strong>
+          </div>
 
-		render();
-	}
+          <div class="aicmd-stat">
+            <span>Readiness</span>
+            <strong>${escapeHtml(readinessScore == null ? "--" : `${readinessScore}/100`)}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Market</span>
+            <strong>${escapeHtml(market || "Not set")}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Language</span>
+            <strong>${escapeHtml(language || "Not set")}</strong>
+          </div>
+
+          <div class="aicmd-stat aicmd-stat-wide">
+            <span>Active campaign</span>
+            <strong>${escapeHtml(campaign || "Not selected")}</strong>
+          </div>
+
+          <div class="aicmd-stat aicmd-stat-wide">
+            <span>Execution mode</span>
+            <strong>${escapeHtml(executionMode || "Not set")}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="aicmd-section">
+        <div class="aicmd-section-head">
+          <h3>Command Composer</h3>
+        </div>
+
+        <div>
+          <label class="aicmd-label" for="ctrlComposerInput">Prompt</label>
+          <textarea
+            id="ctrlComposerInput"
+            class="aicmd-textarea"
+            rows="7"
+            placeholder="Write what you want the AI team to do for this project..."
+          ></textarea>
+        </div>
+
+        <div class="aicmd-action-row">
+          <button id="aiCommandSendBtn" class="aicmd-btn aicmd-btn-primary" type="button">Prepare Command</button>
+          <button id="aicmdOpenWorkflowsBtn" class="aicmd-btn aicmd-btn-secondary" type="button">Open Workflows</button>
+          <button id="aicmdOpenCampaignBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Open Campaign Studio</button>
+          <button id="aicmdOpenInsightsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">Open Insights</button>
+        </div>
+
+        <div id="aicmdLightweightStatus" class="aicmd-draft-state">
+          AI Command is ready. Prepare prompts, route work to the global AI bar, and continue execution from the relevant workspace.
+        </div>
+      </section>
+
+      <section class="aicmd-section">
+        <div class="aicmd-section-head">
+          <h3>Current AI State</h3>
+        </div>
+
+        <div class="aicmd-overview-grid">
+          <div class="aicmd-stat">
+            <span>AI commands</span>
+            <strong>${escapeHtml(String(aiCommandsTotal))}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>AI artifacts</span>
+            <strong>${escapeHtml(String(aiArtifactsTotal))}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Open recommendations</span>
+            <strong>${escapeHtml(String(recommendationsTotal))}</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+
+  const input = $("ctrlComposerInput");
+  const status = $("aicmdLightweightStatus");
+
+  const sendBtn = $("aiCommandSendBtn");
+  if (sendBtn) {
+    sendBtn.onclick = () => {
+      const value = asString(input?.value || "").trim();
+
+      if (!value) {
+        if (status) status.textContent = "Please write a command first.";
+        input?.focus?.();
+        return;
+      }
+
+      const globalInput = $("quickCommandInput");
+      if (globalInput) {
+        globalInput.value = value;
+      }
+
+      if (status) {
+        status.textContent = "Command prepared in the global AI bar. Review it, then run it from the command controls.";
+      }
+
+      showMessage?.("AI command prepared.");
+    };
+  }
+
+  const workflowsBtn = $("aicmdOpenWorkflowsBtn");
+  if (workflowsBtn) {
+    workflowsBtn.onclick = () => navigateTo("workflows");
+  }
+
+  const campaignBtn = $("aicmdOpenCampaignBtn");
+  if (campaignBtn) {
+    campaignBtn.onclick = () => navigateTo("campaign-studio");
+  }
+
+  const insightsBtn = $("aicmdOpenInsightsBtn");
+  if (insightsBtn) {
+    insightsBtn.onclick = () => navigateTo("insights");
+  }
+}
 };

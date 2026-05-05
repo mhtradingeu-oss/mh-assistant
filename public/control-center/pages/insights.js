@@ -52,6 +52,28 @@ const PLATFORM_DEFS = [
   }
 ];
 
+const insightsRefreshState = new Map();
+
+function getInsightsRefreshState(projectName) {
+  const key = asString(projectName || "__default__");
+  if (!insightsRefreshState.has(key)) {
+    insightsRefreshState.set(key, {
+      loading: false,
+      error: ""
+    });
+  }
+  return insightsRefreshState.get(key);
+}
+
+function setInsightsRefreshState(projectName, nextState) {
+  const key = asString(projectName || "__default__");
+  const current = getInsightsRefreshState(projectName);
+  insightsRefreshState.set(key, {
+    ...current,
+    ...asObject(nextState)
+  });
+}
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -209,6 +231,11 @@ function getInsightRoot(state) {
     activity.performance_insights ||
     overview.insights
   );
+}
+
+function hasInsightPayload(data) {
+  const payload = asObject(data);
+  return Object.keys(payload).length > 0;
 }
 
 function normalizeSummary(raw) {
@@ -1016,10 +1043,13 @@ export const insightsRoute = {
     safeText,
     navigateTo,
     showMessage,
+    showError,
+    fetchProjectInsights,
     createProjectHandoff
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
+    const refreshState = getInsightsRefreshState(projectName);
     const overview = asObject(state.data.overview?.overview);
     const currency = overview.currency || "USD";
     const connections = getConnections(state);
@@ -1031,6 +1061,12 @@ export const insightsRoute = {
       seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
       paid: asObject(insightRoot.paid || insightRoot.paid_media || {})
     };
+    const hasInsights = hasInsightPayload(insightRoot);
+    const refreshLabel = refreshState.loading
+      ? "Refreshing..."
+      : hasInsights
+        ? "Refresh insights"
+        : "Retry insights";
 
     const contentItems = buildContentInventory(state, feeds);
     const executive = buildExecutiveOverview(feeds, contentItems, connections, currency);
@@ -1095,8 +1131,12 @@ export const insightsRoute = {
         <section class="card">
           <div class="card-head">
             <h3>Insights Overview</h3>
-            <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
+            <div class="insights-assistant-toolbar">
+              <button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>
+              <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
+            </div>
           </div>
+          ${refreshState.error ? `<div class="empty-box">${escapeHtml(refreshState.error)}</div>` : ""}
           <p class="insights-section-copy">
             Focus this page on the current signal, the biggest risks, and the next action to take across content, website, SEO, and paid performance.
           </p>
@@ -1377,6 +1417,102 @@ export const insightsRoute = {
       prompts: optimization.prompts,
       projectName,
       createProjectHandoff
+    });
+
+    root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {
+      if (!projectName) {
+        const message = "Insights: No active project selected.";
+        setInsightsRefreshState(projectName, { loading: false, error: message });
+        showError?.(message);
+        insightsRoute.render({
+          getState,
+          $,
+          escapeHtml,
+          safeText,
+          navigateTo,
+          showMessage,
+          showError,
+          fetchProjectInsights,
+          createProjectHandoff
+        });
+        return;
+      }
+
+      if (!fetchProjectInsights) {
+        const message = "Insights: Live refresh is unavailable in this context.";
+        setInsightsRefreshState(projectName, { loading: false, error: message });
+        showError?.(message);
+        insightsRoute.render({
+          getState,
+          $,
+          escapeHtml,
+          safeText,
+          navigateTo,
+          showMessage,
+          showError,
+          fetchProjectInsights,
+          createProjectHandoff
+        });
+        return;
+      }
+
+      setInsightsRefreshState(projectName, { loading: true, error: "" });
+      insightsRoute.render({
+        getState,
+        $,
+        escapeHtml,
+        safeText,
+        navigateTo,
+        showMessage,
+        showError,
+        fetchProjectInsights,
+        createProjectHandoff
+      });
+
+      fetchProjectInsights(projectName)
+        .then((liveData) => {
+          const currentState = getState();
+          const currentData = asObject(currentState.data);
+          const currentActivity = asObject(currentData.activity);
+
+          currentState.data = {
+            ...currentData,
+            activity: {
+              ...currentActivity,
+              insights: asObject(liveData)
+            }
+          };
+
+          setInsightsRefreshState(projectName, { loading: false, error: "" });
+          insightsRoute.render({
+            getState,
+            $,
+            escapeHtml,
+            safeText,
+            navigateTo,
+            showMessage,
+            showError,
+            fetchProjectInsights,
+            createProjectHandoff
+          });
+          showMessage?.("Insights refreshed.");
+        })
+        .catch((error) => {
+          const message = `Insights: ${error?.message || "Failed to refresh insights."}`;
+          setInsightsRefreshState(projectName, { loading: false, error: message });
+          insightsRoute.render({
+            getState,
+            $,
+            escapeHtml,
+            safeText,
+            navigateTo,
+            showMessage,
+            showError,
+            fetchProjectInsights,
+            createProjectHandoff
+          });
+          showError?.(message);
+        });
     });
   }
 };

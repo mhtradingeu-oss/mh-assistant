@@ -1734,104 +1734,218 @@ export const workflowsRoute = {
       <div id="workflowsRoot"></div>
     </section>
   `,
-  render({
+    render({
     getState,
     $,
     escapeHtml,
     navigateTo,
-    showMessage,
-    showError,
-    reloadProjectData,
-    fetchProjectInsights,
-    fetchProjectLearning,
-    runProjectWorkflow,
-    runProjectAiWorkflow,
-    createProjectTask,
-    createProjectHandoff,
-    consumeProjectHandoff
+    showMessage
   }) {
-    const render = () => {
-      const state = getState();
-      const projectName = state.context.currentProject || "";
-      const defaults = createDefaultInputs(state);
-      const session = ensureSession(projectName, defaults, state.data.operations);
+    const state = getState();
+    const projectName = asString(state.context.currentProject || "");
+    const campaignName = asString(state.context.activeCampaign || "");
+    const executionMode = asString(state.context.executionMode || "");
 
-      applyDurableWorkflowHandoff({
-        projectName,
-        session,
-        operations: state.data.operations,
-        consumeProjectHandoff,
-        showMessage
-      });
+    const overview = asObject(state.data.overview?.overview || state.data.overview);
+    const readinessRoot = asObject(state.data.readiness?.dashboard || state.data.readiness);
+    const operations = asObject(state.data.operations);
 
-      registerWorkflowBridge({
-        getState,
-        reloadProjectData,
-        fetchProjectInsights,
-        fetchProjectLearning,
-        runProjectWorkflow,
-        runProjectAiWorkflow,
-        render,
-        showMessage,
-        showError
-      });
+    const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
+    const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
 
-      ensureWorkflowIntelligenceLoaded({
-        projectName,
-        session,
-        getState,
-        reloadProjectData,
-        fetchProjectInsights,
-        fetchProjectLearning,
-        rerender: render
-      });
+    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+    const tasksTotal = Number(operations.tasks?.total || 0);
+    const approvalsTotal = Number(operations.approvals?.total || 0);
 
-      const workflow = getWorkflowDef(session.selectedWorkflowId);
-      const inputs = asObject(session.inputsByWorkflow[workflow.id]);
-      const run = asObject(session.runsByWorkflow[workflow.id]);
-      const contextModel = buildWorkflowContext(state, session);
-      const metrics = buildOverviewMetrics(session, contextModel);
-      const recommendation = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(state));
-      const automationPlan = buildAutomationPlan(state);
-      const autoFixPlan = getAutoFixPlan(state);
-      const autoModeState = getAutoModeState();
-      const blockedRequirements = getBlockedRequirements(workflow, inputs, contextModel);
+    const root = $("workflowsRoot");
+    if (!root) return;
 
-      const root = $("workflowsRoot");
-      if (!root) return;
+    root.innerHTML = `
+      <div class="wfexec-shell">
+        <section class="wfexec-section wfexec-overview">
+          <div class="wfexec-head">
+            <h3>Workflow Overview</h3>
+            <span class="card-badge success">Ready</span>
+          </div>
 
-      root.innerHTML = renderWorkflowExecutionLoop({
-        metrics,
-        context: contextModel,
-        recommendation,
-        automationPlan,
-        autoFixPlan,
-        autoMode: autoModeState,
-        session,
-        workflow,
-        inputs,
-        run,
-        blockedRequirements,
-        escapeHtml
-      });
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Current project</span>
+              <strong>${escapeHtml(projectName || "Not selected")}</strong>
+            </article>
 
-      bindWorkflowExecutionLoop({
-        $,
-        getState,
-        navigateTo,
-        showMessage,
-        showError,
-        reloadProjectData,
-        fetchProjectInsights,
-        fetchProjectLearning,
-        runProjectWorkflow,
-        runProjectAiWorkflow,
-        createProjectTask,
-        createProjectHandoff,
-        render
-      });
-    };
+            <article class="wfexec-stat">
+              <span>Active campaign</span>
+              <strong>${escapeHtml(campaignName || "Not selected")}</strong>
+            </article>
 
-    render();
+            <article class="wfexec-stat">
+              <span>Readiness</span>
+              <strong>${escapeHtml(readinessScore == null ? "Unknown" : `${readinessScore}/100`)}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Status</span>
+              <strong>${escapeHtml(readinessStatus)}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Execution mode</span>
+              <strong>${escapeHtml(executionMode || "Not set")}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Workflow Builder</h3>
+          </div>
+
+          <div class="wfexec-field-grid">
+            <div>
+              <label class="wfexec-label" for="wfLightWorkflowType">Workflow type</label>
+              <select id="wfLightWorkflowType" class="wfexec-select">
+                ${WORKFLOW_CATALOG.map((workflow) => `
+                  <option value="${escapeHtml(workflow.id)}">${escapeHtml(workflow.title)}</option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightProject">Project</label>
+              <input id="wfLightProject" class="wfexec-input" type="text" value="${escapeHtml(projectName)}" placeholder="Current project">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightCampaign">Campaign</label>
+              <input id="wfLightCampaign" class="wfexec-input" type="text" value="${escapeHtml(campaignName)}" placeholder="Campaign name">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightGoal">Goal</label>
+              <input id="wfLightGoal" class="wfexec-input" type="text" placeholder="Workflow goal">
+            </div>
+          </div>
+
+          <div class="wfexec-action-row">
+            <button id="wfLightPrepareBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow</button>
+            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Command</button>
+            <button id="wfLightCampaignBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Campaign Studio</button>
+            <button id="wfLightTasksBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Task Center</button>
+          </div>
+
+          <div id="wfLightStatus" class="wfexec-meta">
+            Workflows is ready. Prepare workflow inputs, send them to AI Command, or continue from Campaign Studio and Task Center.
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Current Operations State</h3>
+          </div>
+
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Tasks</span>
+              <strong>${escapeHtml(String(tasksTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+      </div>
+    `;
+
+    const status = $("wfLightStatus");
+
+    const prepareBtn = $("wfLightPrepareBtn");
+    if (prepareBtn) {
+      prepareBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Workflow: ${workflow.title}`,
+          `Project: ${$("wfLightProject")?.value || projectName || "not set"}`,
+          `Campaign: ${$("wfLightCampaign")?.value || campaignName || "not set"}`,
+          `Goal: ${goal || "Prepare an execution-ready workflow plan."}`,
+          `Purpose: ${workflow.purpose}`
+        ].join("\\n");
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        if (status) {
+          status.textContent = "Workflow prompt prepared in the global AI bar. Review it before running or routing it to AI Command.";
+        }
+
+        showMessage?.("Workflow prepared.");
+      };
+    }
+
+    const aiBtn = $("wfLightAiBtn");
+    if (aiBtn) {
+      aiBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Build a workflow execution package.`,
+          `Workflow: ${workflow.title}`,
+          `Project: ${projectName || "not set"}`,
+          `Campaign: ${campaignName || "not set"}`,
+          `Goal: ${goal || workflow.purpose}`
+        ].join("\\n");
+
+        setSharedAiDraft(projectName, {
+          projectName,
+          modeId: workflow.aiModeId,
+          lastCommand: prompt,
+          lastResponseTitle: workflow.title,
+          routeSuggestions: [
+            {
+              label: "Workflows",
+              route: "workflows",
+              reason: "Return to workflows after AI refinement."
+            }
+          ],
+          updatedAt: nowIso()
+        });
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        navigateTo("ai-command");
+      };
+    }
+
+    const campaignBtn = $("wfLightCampaignBtn");
+    if (campaignBtn) {
+      campaignBtn.onclick = () => navigateTo("campaign-studio");
+    }
+
+    const tasksBtn = $("wfLightTasksBtn");
+    if (tasksBtn) {
+      tasksBtn.onclick = () => navigateTo("task-center");
+    }
   }
 };

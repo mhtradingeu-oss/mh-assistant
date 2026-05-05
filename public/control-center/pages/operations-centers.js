@@ -568,7 +568,20 @@ function renderTaskCenter(context, state, projectName) {
   });
 
   const rerender = () => renderTaskCenter(context, context.getState(), projectName);
-  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", () => context.reloadProjectData?.(projectName));
+  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", () => {
+    if (context.fetchProjectTaskCenter && projectName) {
+      context.fetchProjectTaskCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.task_center = liveData;
+          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => context.showError?.(`Task Center: ${error?.message || "Failed to refresh."}`));
+    } else {
+      context.reloadProjectData?.(projectName);
+    }
+  });
   bindOpsFocusButtons(root, (focus) => {
     session.focus = focus || "all";
     rerender();
@@ -705,7 +718,20 @@ function renderQueueCenter(context, state, projectName) {
   });
 
   const rerender = () => renderQueueCenter(context, context.getState(), projectName);
-  root.querySelector("#queueCenterRefreshBtn")?.addEventListener("click", () => context.reloadProjectData?.(projectName));
+  root.querySelector("#queueCenterRefreshBtn")?.addEventListener("click", () => {
+    if (context.fetchProjectQueueCenter && projectName) {
+      context.fetchProjectQueueCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.queue_center = liveData;
+          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => context.showError?.(`Queue Center: ${error?.message || "Failed to refresh."}`));
+    } else {
+      context.reloadProjectData?.(projectName);
+    }
+  });
   bindOpsFocusButtons(root, (focus) => {
     session.focus = focus || "all";
     rerender();
@@ -872,7 +898,20 @@ function renderJobMonitor(context, state, projectName) {
   });
 
   const rerender = () => renderJobMonitor(context, context.getState(), projectName);
-  root.querySelector("#jobMonitorRefreshBtn")?.addEventListener("click", () => context.reloadProjectData?.(projectName));
+  root.querySelector("#jobMonitorRefreshBtn")?.addEventListener("click", () => {
+    if (context.fetchProjectJobMonitor && projectName) {
+      context.fetchProjectJobMonitor(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.job_monitor = liveData;
+          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => context.showError?.(`Job Monitor: ${error?.message || "Failed to refresh."}`));
+    } else {
+      context.reloadProjectData?.(projectName);
+    }
+  });
   bindOpsFocusButtons(root, (focus) => {
     session.focus = focus || "all";
     rerender();
@@ -1092,7 +1131,20 @@ function renderNotificationCenter(context, state, projectName) {
   });
 
   const rerender = () => renderNotificationCenter(context, context.getState(), projectName);
-  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", () => context.reloadProjectData?.(projectName));
+  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", () => {
+    if (context.fetchProjectNotificationCenter && projectName) {
+      context.fetchProjectNotificationCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.notification_center = liveData;
+          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => context.showError?.(`Notification Center: ${error?.message || "Failed to refresh."}`));
+    } else {
+      context.reloadProjectData?.(projectName);
+    }
+  });
   bindOpsFocusButtons(root, (focus) => {
     session.focus = focus || "all";
     rerender();
@@ -1137,7 +1189,26 @@ export const taskCenterRoute = {
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject || "";
-    renderTaskCenter(context, state, projectName);
+
+    // Render immediately from state as fallback
+    renderTaskCenter(context, context.getState(), projectName);
+
+    // Fetch live data and re-render on success
+    function doFetch() {
+      if (!projectName || !context.fetchProjectTaskCenter) return;
+      context.fetchProjectTaskCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.task_center = liveData;
+          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+          context.showError?.(`Task Center: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
   }
 };
 
@@ -1152,7 +1223,24 @@ export const queueCenterRoute = {
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject || "";
-    renderQueueCenter(context, state, projectName);
+
+    renderQueueCenter(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectQueueCenter) return;
+      context.fetchProjectQueueCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.queue_center = liveData;
+          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+          context.showError?.(`Queue Center: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
   }
 };
 
@@ -1167,7 +1255,24 @@ export const jobMonitorRoute = {
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject || "";
-    renderJobMonitor(context, state, projectName);
+
+    renderJobMonitor(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectJobMonitor) return;
+      context.fetchProjectJobMonitor(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.job_monitor = liveData;
+          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+          context.showError?.(`Job Monitor: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
   }
 };
 
@@ -1182,6 +1287,23 @@ export const notificationCenterRoute = {
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject || "";
-    renderNotificationCenter(context, state, projectName);
+
+    renderNotificationCenter(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectNotificationCenter) return;
+      context.fetchProjectNotificationCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.notification_center = liveData;
+          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+          context.showError?.(`Notification Center: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
   }
 };

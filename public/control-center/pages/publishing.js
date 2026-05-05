@@ -36,6 +36,53 @@ const publishingAutomationState = {
   result: ""
 };
 let publishingAutoModeUnsubscribe = null;
+let publishingAutoModeControllerReady = false;
+let publishingRenderCallback = null;
+let publishingRenderTimer = null;
+
+function schedulePublishingRender(render) {
+  if (typeof render === "function") {
+    publishingRenderCallback = render;
+  }
+
+  if (publishingRenderTimer) {
+    return;
+  }
+
+  publishingRenderTimer = window.setTimeout(() => {
+    publishingRenderTimer = null;
+
+    if (typeof publishingRenderCallback === "function") {
+      publishingRenderCallback();
+    }
+  }, 120);
+}
+
+function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+  publishingRenderCallback = render;
+
+  if (!publishingAutoModeControllerReady) {
+    createAutoModeController(getState, { getState, navigateTo });
+    publishingAutoModeControllerReady = true;
+  }
+
+  if (publishingAutoModeUnsubscribe) {
+    return;
+  }
+
+  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+    const autoState = getAutoModeState();
+    const status = asString(autoState.status || "idle");
+
+    if (status === "idle") {
+      return;
+    }
+
+    schedulePublishingRender();
+  });
+}
+
+
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -1281,18 +1328,17 @@ function bindPublishingWorkspace({
   queue,
   handoff
 }) {
+
   const state = getState();
   const projectName = state.context.currentProject || "";
   const session = ensureSession(projectName, state);
-  createAutoModeController(getState, { getState, navigateTo });
-  if (publishingAutoModeUnsubscribe) publishingAutoModeUnsubscribe();
-  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
-    rerender();
-  });
+
+  ensurePublishingAutoModeBinding(getState, navigateTo, render);
 
   function rerender() {
-    render();
+    schedulePublishingRender(render);
   }
+
 
   function selected() {
     return getSelectedItem(queue, session.selectedId);
@@ -1620,8 +1666,8 @@ function bindPublishingWorkspace({
         mode: "auto_until_approval",
         context: { getState, navigateTo, projectName },
         onProgress: ({ index, total, step, result }) => {
-          publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
-          rerender();
+        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        schedulePublishingRender(render);
         }
       });
 
