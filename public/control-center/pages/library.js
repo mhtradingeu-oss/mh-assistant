@@ -21,6 +21,12 @@ const librarySessionStore = new Map();
 let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 const libraryProtectedUrlCache = new Map();
+const LIBRARY_PAGE_SIZE = 10;
+const libraryProtectedUrlPromiseCache = new Map();
+const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
+const LIBRARY_THUMB_BATCH_LIMIT = 18;
+let libraryThumbLoadsInFlight = 0;
+const libraryThumbLoadQueue = [];
 
 const SMART_CATEGORY_BUCKETS = [
   { key: "logos", label: "Logos", types: ["logo"] },
@@ -173,6 +179,17 @@ function shortPath(filePath = "", maxSegments = 4) {
   return `.../${parts.slice(parts.length - maxSegments).join("/")}`;
 }
 
+function assetContextHint(asset) {
+  const filePath = asString(asset?.file_path || "").trim();
+  if (!filePath) return "Library";
+
+  const parts = filePath.split("/").filter(Boolean);
+  if (!parts.length) return "Library";
+
+  const tail = parts.slice(-3).join("/");
+  return tail || shortPath(filePath);
+}
+
 function shortAssetId(value = "") {
   const id = asString(value).trim();
   if (!id) return "-";
@@ -231,11 +248,25 @@ function requiresProtectedMediaFetch(fileUrl = "") {
   return value.includes("/media/file/");
 }
 
+function getAssetPreviewUrl(asset) {
+  if (!asset) return "";
+  return asString(
+    asset.preview_url
+    || asset.image_url
+    || asset.video_url
+    || asset.audio_url
+    || ""
+  ).trim();
+}
+
 function buildProtectedCacheKey(projectName, asset) {
+  const resolvedAssetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();
+  const resolvedFilePath = asString(asset.file_path || asset.local_path || asset.path || "").trim();
   return [
     projectKey(projectName),
-    asString(asset.asset_id || asset.id || asset.file_path || asset.name),
-    asString(asset.preview_url || "")
+    resolvedAssetId || "no-asset-id",
+    resolvedFilePath || "no-file-path",
+    getAssetPreviewUrl(asset)
   ].join("::");
 }
 
@@ -247,8 +278,41 @@ function revokeLibraryProtectedUrl(key) {
   libraryProtectedUrlCache.delete(key);
 }
 
+function runNextLibraryThumbLoad() {
+  if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {
+    return;
+  }
+
+  const nextJob = libraryThumbLoadQueue.shift();
+  if (!nextJob) {
+    return;
+  }
+
+  libraryThumbLoadsInFlight += 1;
+  Promise.resolve()
+    .then(nextJob)
+    .finally(() => {
+      libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);
+      runNextLibraryThumbLoad();
+    });
+}
+
+function enqueueLibraryThumbLoad(job) {
+  return new Promise((resolve, reject) => {
+    libraryThumbLoadQueue.push(async () => {
+      try {
+        resolve(await job());
+      } catch (error) {
+        reject(error);
+      }
+    });
+
+    runNextLibraryThumbLoad();
+  });
+}
+
 async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {
-  const previewUrl = asString(asset?.preview_url || "");
+  const previewUrl = getAssetPreviewUrl(asset);
   const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");
 
   if (!requiresProtectedMediaFetch(previewUrl)) {
@@ -275,20 +339,37 @@ async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {
     revokeLibraryProtectedUrl(cacheKey);
   }
 
-  const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl);
-  const objectUrl = URL.createObjectURL(blob);
-  libraryProtectedUrlCache.set(cacheKey, {
-    objectUrl,
-    contentType,
-    createdAt: Date.now()
-  });
+  const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);
+  if (inFlight && !options.force) {
+    return inFlight;
+  }
 
-  return {
-    objectUrl,
-    contentType,
-    fileName,
-    fromProtectedFetch: true
-  };
+  const loadPromise = (async () => {
+    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+    const objectUrl = URL.createObjectURL(blob);
+    libraryProtectedUrlCache.set(cacheKey, {
+      objectUrl,
+      contentType,
+      createdAt: Date.now()
+    });
+
+    return {
+      objectUrl,
+      contentType,
+      fileName,
+      fromProtectedFetch: true
+    };
+  })();
+
+  libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);
+
+  try {
+    return await loadPromise;
+  } finally {
+    if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {
+      libraryProtectedUrlPromiseCache.delete(cacheKey);
+    }
+  }
 }
 
 async function openLibraryAsset(projectName, asset) {
@@ -377,7 +458,8 @@ function ensureLibrarySession(projectName) {
       selectedSource: "all",
       sortBy: "updated_desc",
       folderKey: "all_assets",
-      viewMode: "list",
+      viewMode: "grid",
+      page: 1,
       uploadType: "logo",
       uploading: false,
       recentUploads: []
@@ -878,33 +960,10 @@ function renderPreview(asset, escapeHtml) {
     return `<div class="empty-box">Select an asset to preview.</div>`;
   }
 
-  const protectedPreview = requiresProtectedMediaFetch(asset.preview_url);
+  const previewUrl = getAssetPreviewUrl(asset);
+  const protectedPreview = requiresProtectedMediaFetch(previewUrl);
 
-  if (asset.is_image && asset.image_url) {
-    return `
-      <div class="library-preview-frame">
-        <img src="${escapeHtml(asset.image_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
-      </div>
-    `;
-  }
-
-  if (asset.is_video && asset.video_url) {
-    return `
-      <div class="library-preview-frame">
-        <video class="library-preview-video" controls src="${escapeHtml(asset.video_url)}"></video>
-      </div>
-    `;
-  }
-
-  if (asset.is_audio && asset.audio_url) {
-    return `
-      <div class="library-preview-frame">
-        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asset.audio_url)}"></audio>
-      </div>
-    `;
-  }
-
-  if (asset.is_image && asset.preview_url) {
+  if (asset.is_image && asString(asset.image_url || previewUrl).trim()) {
     if (protectedPreview) {
       return `
         <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
@@ -915,12 +974,12 @@ function renderPreview(asset, escapeHtml) {
 
     return `
       <div class="library-preview-frame">
-        <img src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
       </div>
     `;
   }
 
-  if (asset.is_video && asset.preview_url) {
+  if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {
     if (protectedPreview) {
       return `
         <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
@@ -931,7 +990,47 @@ function renderPreview(asset, escapeHtml) {
 
     return `
       <div class="library-preview-frame">
-        <video class="library-preview-video" controls src="${escapeHtml(asset.preview_url)}"></video>
+        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+      </div>
+    `;
+  }
+
+  if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {
+    return `
+      <div class="library-preview-frame">
+        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+      </div>
+    `;
+  }
+
+  if (asset.is_image && previewUrl) {
+    if (protectedPreview) {
+      return `
+        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+          <div class="library-preview-fallback">Loading protected image preview...</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="library-preview-frame">
+        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+      </div>
+    `;
+  }
+
+  if (asset.is_video && previewUrl) {
+    if (protectedPreview) {
+      return `
+        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+          <div class="library-preview-fallback">Loading protected video preview...</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="library-preview-frame">
+        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
       </div>
     `;
   }
@@ -960,14 +1059,16 @@ async function hydrateProtectedAssetPreview({
   escapeHtml,
   showError
 }) {
-  if (!previewNode || !asset || !requiresProtectedMediaFetch(asset.preview_url)) {
+  if (!previewNode || !asset || !requiresProtectedMediaFetch(getAssetPreviewUrl(asset))) {
     return;
   }
 
   const expectedId = asString(asset.id || asset.asset_id || "");
 
   try {
-    const resolved = await getProtectedAssetObjectUrl(projectName, asset);
+    const resolved = await getProtectedAssetObjectUrl(projectName, asset, {
+      timeoutMs: 45000
+    });
     if (!previewNode.isConnected) {
       return;
     }
@@ -1000,6 +1101,65 @@ async function hydrateProtectedAssetPreview({
       showError?.(message);
     }
   }
+}
+
+async function hydrateProtectedImageNode({
+  node,
+  projectName,
+  asset,
+  className,
+  alt,
+  fallbackMarkup,
+  showError
+}) {
+  if (!node || !asset) return;
+
+  try {
+    const resolved = await enqueueLibraryThumbLoad(() => getProtectedAssetObjectUrl(projectName, asset, {
+      timeoutMs: 30000
+    }));
+    if (!node.isConnected) return;
+
+    const image = document.createElement("img");
+    image.className = className;
+    image.alt = alt || asset.name || "Asset preview";
+    image.src = resolved.objectUrl;
+    image.onerror = () => {
+      if (!node.isConnected) return;
+      node.innerHTML = fallbackMarkup;
+    };
+
+    node.innerHTML = "";
+    node.appendChild(image);
+  } catch (error) {
+    if (!node.isConnected) return;
+    node.innerHTML = fallbackMarkup;
+
+    if (error instanceof AccessKeyError) {
+      return;
+    }
+
+    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+  }
+}
+
+function protectLibraryInteractiveControls(scope) {
+  if (!scope || typeof scope.querySelectorAll !== "function") return;
+
+  const interactiveNodes = scope.querySelectorAll(
+    ".library-action-menu, .library-action-dropdown, .library-action-dropdown button, .library-drop-zone, .library-finder-toolbar button"
+  );
+
+  interactiveNodes.forEach((node) => {
+    if (node.dataset.libraryInteractionGuard === "true") return;
+    node.dataset.libraryInteractionGuard = "true";
+
+    ["pointerdown", "mousedown", "touchstart", "click", "dblclick"].forEach((eventName) => {
+      node.addEventListener(eventName, (event) => {
+        event.stopPropagation();
+      });
+    });
+  });
 }
 
 function getWorkspaceAssetItems(assetsData, registry) {
@@ -1198,6 +1358,11 @@ function bindLibraryWorkspace({
   const categoryBuckets = buildCategoryBuckets(categoryReadiness);
   const bucketMap = new Map(categoryBuckets.map((item) => [item.key, item]));
   const filteredAssets = getFilteredAssets(allAssets, session, bucketMap);
+  const totalPages = Math.max(1, Math.ceil(filteredAssets.length / LIBRARY_PAGE_SIZE));
+  session.page = Math.min(Math.max(Number(session.page) || 1, 1), totalPages);
+  const pageStart = (session.page - 1) * LIBRARY_PAGE_SIZE;
+  const paginatedAssets = filteredAssets.slice(pageStart, pageStart + LIBRARY_PAGE_SIZE);
+  const pageEnd = Math.min(pageStart + paginatedAssets.length, filteredAssets.length);
   const selectedAssetExists = filteredAssets.some((asset) => asset.id === session.selectedAssetId);
   if (!selectedAssetExists) {
     session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
@@ -1300,6 +1465,7 @@ function bindLibraryWorkspace({
     `).join("");
     typeSelect.onchange = (event) => {
       session.selectedType = event.target.value || "all";
+      session.page = 1;
       bindLibraryWorkspace({
         $,
         projectName,
@@ -1323,6 +1489,7 @@ function bindLibraryWorkspace({
     statusSelect.value = session.selectedStatus;
     statusSelect.onchange = (event) => {
       session.selectedStatus = event.target.value || "all";
+      session.page = 1;
       bindLibraryWorkspace({
         $,
         projectName,
@@ -1348,6 +1515,7 @@ function bindLibraryWorkspace({
     `).join("");
     sourceSelect.onchange = (event) => {
       session.selectedSource = event.target.value || "all";
+      session.page = 1;
       bindLibraryWorkspace({
         $,
         projectName,
@@ -1371,6 +1539,7 @@ function bindLibraryWorkspace({
     sortSelect.value = session.sortBy;
     sortSelect.onchange = (event) => {
       session.sortBy = event.target.value || "updated_desc";
+      session.page = 1;
       bindLibraryWorkspace({
         $,
         projectName,
@@ -1389,65 +1558,18 @@ function bindLibraryWorkspace({
     };
   }
 
-  const tableBody = $("libraryAssetTableBody");
-  if (tableBody) {
-    tableBody.innerHTML = filteredAssets.length
-      ? filteredAssets.map((asset) => {
-        const tone = toStatusTone(asset.status);
-        const statusLabel = toStatusLabel(asset.status);
-        return `
-          <tr class="${session.selectedAssetId === asset.id ? "is-active" : ""}" data-asset-row-id="${escapeHtml(asset.asset_id)}" data-asset-status="${escapeHtml(asset.status)}" data-library-row-select="${escapeHtml(asset.id)}" tabindex="0">
-            <td>
-              <div class="library-asset-primary">${escapeHtml(asset.name)}</div>
-              <small class="library-asset-meta">${escapeHtml(asset.filename || basename(asset.file_path || "") || "-")}</small>
-              <small class="library-asset-meta">${escapeHtml(shortPath(asset.file_path || ""))}</small>
-            </td>
-            <td>
-              <div>${escapeHtml(asset.category_label)}</div>
-              <small class="library-table-type">${escapeHtml(asset.asset_type)}</small><br>
-              <small class="library-table-type">${escapeHtml(shortAssetId(asset.asset_id || asset.mutation_id || asset.id))}</small>
-            </td>
-            <td><span class="card-badge ${tone}" data-asset-status-badge>${escapeHtml(statusLabel)}</span></td>
-            <td><span class="card-badge ${asset.source_of_truth ? "success" : "neutral"}">${escapeHtml(asset.source_of_truth ? "Source" : "Not Source")}</span></td>
-            <td>${escapeHtml(asset.used_in.join(", ") || "Library")}</td>
-            <td>
-              <div class="library-table-actions">
-                <button class="btn btn-secondary" type="button" data-library-select="${escapeHtml(asset.id)}">Select</button>
-                <div class="library-actions">
-                  ${asset.preview_url ? `<button class="btn btn-primary btn-sm" type="button" data-library-open="${escapeHtml(asset.id)}">Open</button>` : `<button class="btn btn-primary btn-sm" type="button" disabled>Open</button>`}
-                  ${asset.kind === "managed_media"
-      ? `<button class="btn btn-secondary btn-sm" type="button" disabled>${escapeHtml(asset.source_label || "Managed")}</button>`
-      : `<button class="btn btn-secondary btn-sm" type="button" data-library-source-truth="${escapeHtml(asset.id)}">${escapeHtml(asset.source_of_truth ? "Source" : "Set SoT")}</button>
-                    <div class="library-action-menu">
-                      <button class="btn btn-secondary btn-sm library-action-toggle" type="button">Actions ▾</button>
-                      <div class="library-action-dropdown">
-                        <button type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Approve</button>
-                        <button type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Needs Review</button>
-                        <button type="button" data-asset-status-action="rejected" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Reject</button>
-                        <button type="button" data-library-archive="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Archive</button>
-                        <button type="button" data-library-rename="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Rename</button>
-                        <button type="button" data-library-delete="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Delete</button>
-                      </div>
-                    </div>`}
-                  <button class="btn btn-secondary btn-sm" type="button" data-copy-asset-path="${escapeHtml(asset.file_path || asset.local_path || asset.preview_url || "")}">Copy Path</button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("")
-      : `<tr><td colspan="6"><div class="empty-box">No assets match this view. Adjust type/status filters or search.</div></td></tr>`;
-  }
-
   const gridBody = $("libraryAssetGridBody");
   if (gridBody) {
-    gridBody.innerHTML = filteredAssets.length
-      ? filteredAssets.map((asset) => {
+    gridBody.innerHTML = paginatedAssets.length
+      ? paginatedAssets.map((asset) => {
         const tone = toStatusTone(asset.status);
         const statusLabel = toStatusLabel(asset.status);
-        const parentFolder = basename(asString(asset.file_path || "").split("/").slice(0, -1).join("/"));
-        const previewNode = asset.is_image && asset.preview_url
-          ? `<img class="library-grid-thumb" src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.name)}">`
+        const pathHint = assetContextHint(asset);
+        const assetPreviewUrl = getAssetPreviewUrl(asset);
+        const previewNode = asset.is_image && assetPreviewUrl
+          ? requiresProtectedMediaFetch(assetPreviewUrl)
+            ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
+            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
 
         return `
@@ -1455,7 +1577,7 @@ function bindLibraryWorkspace({
             <div class="library-grid-preview">${previewNode}</div>
             <div class="library-grid-title">${escapeHtml(asset.name)}</div>
             <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
-            <div class="library-grid-meta">${escapeHtml(parentFolder || shortPath(asset.file_path || ""))}</div>
+            <div class="library-grid-meta">${escapeHtml(pathHint)}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
@@ -1465,6 +1587,48 @@ function bindLibraryWorkspace({
       }).join("")
       : `<div class="empty-box">No assets match this view. Adjust folder/filter/search.</div>`;
   }
+
+  const gridPagination = $("libraryGridPagination");
+  if (gridPagination) {
+    const showingStart = filteredAssets.length ? pageStart + 1 : 0;
+    const showingEnd = pageEnd;
+
+    gridPagination.innerHTML = `
+      <div class="library-grid-page-info">Showing ${escapeHtml(String(showingStart))}-${escapeHtml(String(showingEnd))} of ${escapeHtml(String(filteredAssets.length))}</div>
+      <div class="library-grid-page-actions">
+        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+        <span>Page ${escapeHtml(String(session.page))} / ${escapeHtml(String(totalPages))}</span>
+        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+      </div>
+    `;
+  }
+
+  const protectedThumbNodes = Array.from(document.querySelectorAll("[data-library-protected-thumb]"));
+  const prioritizedThumbNodes = protectedThumbNodes
+    .sort((left, right) => {
+      const leftId = left.getAttribute("data-library-protected-thumb") || "";
+      const rightId = right.getAttribute("data-library-protected-thumb") || "";
+      if (leftId === session.selectedAssetId) return -1;
+      if (rightId === session.selectedAssetId) return 1;
+      return 0;
+    })
+    .slice(0, LIBRARY_THUMB_BATCH_LIMIT);
+
+  prioritizedThumbNodes.forEach((node) => {
+    const assetId = node.getAttribute("data-library-protected-thumb") || "";
+    const asset = allAssets.find((item) => item.id === assetId);
+    if (!asset) return;
+
+    hydrateProtectedImageNode({
+      node,
+      projectName,
+      asset,
+      className: "library-grid-thumb",
+      alt: asset.name,
+      fallbackMarkup: `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`,
+      showError
+    });
+  });
 
   const previewVisual = $("libraryPreviewVisual");
   if (previewVisual) {
@@ -1486,27 +1650,38 @@ function bindLibraryWorkspace({
   if (previewMeta) {
     previewMeta.innerHTML = selectedAsset
       ? `
-        <div class="data-stack">
-          <div class="data-row"><span>Name</span><strong>${escapeHtml(selectedAsset.name)}</strong></div>
-          <div class="data-row"><span>Filename</span><strong>${escapeHtml(selectedAsset.filename || basename(selectedAsset.file_path || "") || "-")}</strong></div>
-          <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-")}</strong></div>
-          <div class="data-row"><span>Type</span><strong>${escapeHtml(selectedAsset.asset_type)}</strong></div>
-          <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
-          <div class="data-row"><span>Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
-          <div class="data-row"><span>Source of truth</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</strong></div>
-          <div class="data-row"><span>Version</span><strong>${escapeHtml(selectedAsset.version_id || "-")}</strong></div>
-          <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
-          <div class="data-row"><span>Short path</span><strong>${escapeHtml(shortPath(selectedAsset.file_path || ""))}</strong></div>
-          <div class="data-row"><span>Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
+        <div class="library-inspector-title">
+          <strong>${escapeHtml(selectedAsset.name)}</strong>
+          <span>${escapeHtml(selectedAsset.filename || basename(selectedAsset.file_path || "") || "-")}</span>
         </div>
+
+        <div class="library-inspector-quick">
+          <span class="card-badge ${escapeHtml(toStatusTone(selectedAsset.status))}">${escapeHtml(toStatusLabel(selectedAsset.status))}</span>
+          <span class="card-badge ${selectedAsset.source_of_truth ? "success" : "neutral"}">${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</span>
+          <span class="card-badge neutral">${escapeHtml(selectedAsset.asset_type)}</span>
+        </div>
+
+        <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
+
+        <details class="library-inspector-more">
+          <summary>More details</summary>
+          <div class="data-stack">
+            <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(shortAssetId(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-"))}</strong></div>
+            <div class="data-row"><span>Full Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
+            <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
+            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+            <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
+          </div>
+        </details>
+
         <div class="library-preview-actions">
-          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open Asset</button>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
+          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
           <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
           ${selectedAsset.kind === "managed_media"
-      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed media")}</button>`
-      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Source of Truth" : "Set as Source of Truth")}</button>
+      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed")}</button>`
+      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
           <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Needs Review</button>
+          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
           <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
           <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
           <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
@@ -1690,6 +1865,7 @@ function bindLibraryWorkspace({
     button.onclick = () => {
       const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
       session.folderKey = folderKey;
+      session.page = 1;
       if (folderKey === "archived") {
         session.selectedStatus = "archived";
       }
@@ -1701,7 +1877,8 @@ function bindLibraryWorkspace({
   viewToggleButtons.forEach((button) => {
     button.onclick = () => {
       const mode = button.getAttribute("data-library-view-mode") || "list";
-      session.viewMode = mode === "grid" ? "grid" : "list";
+      session.viewMode = "grid";
+      session.page = 1;
       rerender();
     };
   });
@@ -1709,6 +1886,7 @@ function bindLibraryWorkspace({
   const finderWorkspace = $("libraryFinderWorkspace");
   if (finderWorkspace) {
     finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+    protectLibraryInteractiveControls(finderWorkspace);
   }
 
   const toolbarUpload = $("libraryToolbarUploadBtn");
@@ -1980,12 +2158,30 @@ function bindLibraryWorkspace({
     };
   });
 
+  const gridPageButtons = Array.from(document.querySelectorAll("[data-library-grid-page]"));
+  gridPageButtons.forEach((button) => {
+    button.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const action = button.getAttribute("data-library-grid-page");
+      if (action === "prev") {
+        session.page = Math.max(1, (Number(session.page) || 1) - 1);
+      } else if (action === "next") {
+        session.page = Math.min(totalPages, (Number(session.page) || 1) + 1);
+      }
+
+      rerender();
+    };
+  });
+
   const searchInput = $("librarySearchInput");
   if (searchInput) {
     searchInput.value = session.searchQuery;
     searchInput.oninput = (event) => {
       const input = event.target;
       session.searchQuery = input.value || "";
+      session.page = 1;
 
       const selectionStart = typeof input.selectionStart === "number" ? input.selectionStart : session.searchQuery.length;
       const selectionEnd = typeof input.selectionEnd === "number" ? input.selectionEnd : selectionStart;
@@ -2297,6 +2493,7 @@ export const libraryRoute = {
     };
     const operations = asObject(state.data.operations);
     const session = ensureLibrarySession(projectName);
+    session.viewMode = "grid";
     const categoryReadiness = getCategoryReadinessList(assetsData);
     const missingRequiredAssets = getMissingAssetLabels(assetsData);
     const renderCatalog = getAssetCatalog(assetsData);
@@ -2368,34 +2565,29 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <h3>Asset Workspace</h3>
-            <span class="card-badge neutral">Table + Preview</span>
+            <span class="card-badge neutral">Finder Grid + Inspector</span>
           </div>
-          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "list")}">
-            <aside class="library-finder-sidebar">
-              <div class="library-finder-sidebar-title">Folders</div>
-              <div class="library-folder-list">
-                ${LIBRARY_FOLDERS.map((folder) => {
+          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+            <div class="library-workspace-main">
+              <div class="library-finder-topbar">
+                <div class="library-finder-sidebar-title">Folders</div>
+                <div class="library-folder-list">
+                  ${LIBRARY_FOLDERS.map((folder) => {
       const count = folderCounts.find((item) => item.key === folder.key)?.count || 0;
       const active = (session.folderKey || "all_assets") === folder.key;
       return `
-                    <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
-                      <span>${escapeHtml(folder.label)}</span>
-                      <small>${escapeHtml(formatCount(count))}</small>
-                    </button>
-                  `;
+                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+                        <span>${escapeHtml(folder.label)}</span>
+                        <small>${escapeHtml(formatCount(count))}</small>
+                      </button>
+                    `;
     }).join("")}
+                </div>
               </div>
-            </aside>
 
-            <div class="library-workspace-main">
               <div class="library-finder-toolbar">
                 <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
-                <div class="library-view-toggle" role="group" aria-label="Library view mode">
-                  <button type="button" class="btn btn-secondary ${session.viewMode === "grid" ? "is-active" : ""}" data-library-view-mode="grid">Grid</button>
-                  <button type="button" class="btn btn-secondary ${session.viewMode !== "grid" ? "is-active" : ""}" data-library-view-mode="list">List</button>
-                </div>
                 <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
-                <button id="libraryToolbarDeleteBtn" class="btn btn-secondary" type="button">Delete</button>
                 <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
                 <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
               </div>
@@ -2440,41 +2632,18 @@ export const libraryRoute = {
                 </div>
               </div>
 
-              <div class="library-table-wrap">
-                <table class="library-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                      <th>Source of Truth</th>
-                      <th>Used in</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="libraryAssetTableBody"></tbody>
-                </table>
-              </div>
-
               <div id="libraryAssetGridBody" class="library-grid-body"></div>
+              <div id="libraryGridPagination" class="library-grid-pagination"></div>
             </div>
 
             <aside class="library-workspace-side">
               <section class="card library-preview-card">
                 <div class="card-head">
                   <h3>Asset Detail</h3>
-                  <span class="card-badge neutral">Preview + Decisions</span>
+                  <span class="card-badge neutral">Preview + Actions</span>
                 </div>
                 <div id="libraryPreviewVisual"></div>
                 <div id="libraryPreviewMeta" style="margin-top: 12px;"></div>
-              </section>
-
-              <section class="card">
-                <div class="card-head">
-                  <h3>Activity / Recent Assets</h3>
-                  <span class="card-badge neutral">Latest updates</span>
-                </div>
-                <div id="libraryRecentActivity"></div>
               </section>
             </aside>
           </div>
