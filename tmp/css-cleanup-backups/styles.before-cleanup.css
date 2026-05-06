@@ -7076,76 +7076,177 @@ body {
 }
 
 /* =========================
-   Library Stable Interaction Layer
-   Scope: library only
+   Library Interaction Hotfix
 ========================= */
 
-[data-page="library"] .library-filter-bar,
-[data-page="library"] .library-filter-field,
-[data-page="library"] .library-upload-grid,
-[data-page="library"] .library-upload-controls,
-[data-page="library"] .library-drop-zone,
-[data-page="library"] .library-action-toolbar {
-  position: relative;
-  z-index: 20;
-  overflow: visible;
-  pointer-events: auto;
+#libraryFilterTypeSelect,
+#libraryFilterStatusSelect,
+#libraryFilterSourceSelect,
+#librarySortSelect,
+#libraryUploadTypeSelect,
+#librarySearchInput,
+#libraryUploadInput,
+#libraryUploadBtn,
+#libraryChooseFilesBtn,
+#libraryDropZone {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 500 !important;
 }
 
-[data-page="library"] #libraryFilterTypeSelect,
-[data-page="library"] #libraryFilterStatusSelect,
-[data-page="library"] #libraryFilterSourceSelect,
-[data-page="library"] #librarySortSelect,
-[data-page="library"] #libraryUploadTypeSelect,
-[data-page="library"] #librarySearchInput,
-[data-page="library"] #libraryUploadBtn,
-[data-page="library"] #libraryChooseFilesBtn,
-[data-page="library"] #libraryDropZone {
-  position: relative;
-  z-index: 21;
-  pointer-events: auto;
-  transform: none;
-  opacity: 1;
-  visibility: visible;
+.library-filter-bar,
+.library-filter-field,
+.library-upload-grid,
+.library-upload-controls,
+.library-drop-zone {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 400 !important;
 }
 
-[data-page="library"] .library-file-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0.01;
-  overflow: hidden;
-  pointer-events: none;
+.library-grid-card {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-[data-page="library"] #libraryChooseFilesBtn {
-  display: inline-flex;
-  width: fit-content;
-  margin-top: 10px;
-  cursor: pointer;
-  pointer-events: auto;
+.library-workspace-main,
+.library-workspace-side {
+  pointer-events: auto !important;
 }
 
-[data-page="library"] #libraryAssetGridBody,
-[data-page="library"] .library-grid-card,
-[data-page="library"] .library-grid-preview,
-[data-page="library"] .library-grid-thumb-shell {
-  position: relative;
-  z-index: 1;
+/* End Library Interaction Hotfix */
+
+
+/* =========================
+   Library Real Interaction Fix
+   Fix off-viewport select/search hit testing
+========================= */
+
+/* Do not make the whole main workspace an internal scroll container.
+   It breaks native select hit-testing in Chrome/VSCode browser. */
+.library-workspace-main {
+  max-height: none !important;
+  overflow: visible !important;
 }
 
-[data-page="library"] .library-workspace-main {
-  max-height: none;
-  overflow: visible;
+/* Only the asset grid itself may scroll if needed. */
+#libraryAssetGridBody {
+  max-height: calc(100vh - 430px) !important;
+  overflow: auto !important;
+  padding-right: 4px !important;
 }
 
-[data-page="library"] #libraryAssetGridBody {
-  max-height: calc(100vh - 430px);
-  overflow: auto;
-  padding-right: 4px;
+/* Keep filter controls in normal document flow and above cards. */
+.library-filter-bar {
+  position: relative !important;
+  z-index: 2000 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
 }
 
-/* End Library Stable Interaction Layer */
+.library-filter-field {
+  position: relative !important;
+  z-index: 2001 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+#libraryFilterTypeSelect,
+#libraryFilterStatusSelect,
+#libraryFilterSourceSelect,
+#librarySortSelect,
+#librarySearchInput,
+#libraryUploadTypeSelect {
+  position: relative !important;
+  z-index: 2002 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Do not allow cards to sit over controls. */
+.library-grid-card,
+.library-grid-preview,
+.library-grid-thumb-shell {
+  z-index: 1 !important;
+}
+
+/* Upload picker fallback button must be clearly clickable. */
+#libraryChooseFilesBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 10px !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 2002 !important;
+}
+
+/* End Library Real Interaction Fix */
+
+
+/* =========================
+   Library Native Controls Reset
+========================= */
+
+.library-filter-bar,
+.library-filter-field,
+.library-upload-grid,
+.library-upload-controls,
+.library-drop-zone {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+  overflow: visible !important;
+}
+
+#libraryFilterTypeSelect,
+#libraryFilterStatusSelect,
+#libraryFilterSourceSelect,
+#librarySortSelect,
+#libraryUploadTypeSelect,
+#librarySearchInput,
+#libraryChooseFilesBtn,
+#libraryUploadBtn {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 11 !important;
+  transform: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Do not let cards sit over filters. */
+#libraryAssetGridBody,
+.library-grid-card {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* End Library Native Controls Reset */
+
+/* =========================
+   Library Upload Picker Fix
+========================= */
+
+.library-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0.01 !important;
+  overflow: hidden !important;
+}
+
+#libraryChooseFilesBtn {
+  display: inline-flex !important;
+  width: fit-content !important;
+  margin-top: 10px !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* End Library Upload Picker Fix */
 
 /* =========================
    Campaign Studio Readable Layout Fix
