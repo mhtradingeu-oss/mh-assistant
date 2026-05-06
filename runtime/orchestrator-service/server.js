@@ -20426,6 +20426,10 @@ function buildMediaManagerProjectStartupPayload(projectName) {
     assets: {
       project: full.assets?.project || full.project,
       generated_at: full.assets?.generated_at || new Date().toISOString(),
+      assets: Array.isArray(full.assets?.assets) ? full.assets.assets : [],
+      asset_catalog: Array.isArray(full.assets?.asset_catalog) ? full.assets.asset_catalog : [],
+      category_readiness: full.assets?.category_readiness || null,
+      missing_assets: full.assets?.missing_assets || null,
       summary: {
         total: Array.isArray(full.assets?.assets) ? full.assets.assets.length : 0,
         existing: Array.isArray(full.assets?.assets)

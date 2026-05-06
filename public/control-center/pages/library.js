@@ -8,6 +8,7 @@ import {
 } from "../asset-library.js";
 
 const librarySessionStore = new Map();
+let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 
 const SMART_CATEGORY_BUCKETS = [
@@ -1218,25 +1219,72 @@ function bindLibraryWorkspace({
     };
   });
 
+  const keepLibraryControlFocused = (event) => {
+    const control = event.target?.closest?.(
+      "#librarySearchInput, #libraryUploadTypeSelect, #libraryFilterTypeSelect, #libraryFilterStatusSelect, #libraryFilterSourceSelect, #librarySortSelect"
+    );
+
+    if (!control) return;
+
+    event.stopPropagation();
+
+    window.setTimeout(() => {
+      if (document.activeElement !== control && typeof control.focus === "function") {
+        control.focus();
+      }
+    }, 0);
+  };
+
+  ["click", "mouseup", "pointerup"].forEach((eventName) => {
+    const root = $("libraryRoot");
+    if (root) {
+      root.addEventListener(eventName, keepLibraryControlFocused);
+    }
+  });
+
   const searchInput = $("librarySearchInput");
   if (searchInput) {
     searchInput.value = session.searchQuery;
     searchInput.oninput = (event) => {
-      session.searchQuery = event.target.value || "";
-      bindLibraryWorkspace({
-        $,
-        projectName,
-        session,
-        assetsData,
-        registry,
-        categoryReadiness,
-        missingRequiredAssets,
-        navigateTo,
-        reloadProjectData,
-        showMessage,
-        showError,
-        escapeHtml
-      });
+      const input = event.target;
+      session.searchQuery = input.value || "";
+
+      const selectionStart = typeof input.selectionStart === "number" ? input.selectionStart : session.searchQuery.length;
+      const selectionEnd = typeof input.selectionEnd === "number" ? input.selectionEnd : selectionStart;
+
+      if (librarySearchRenderTimer) {
+        window.clearTimeout(librarySearchRenderTimer);
+      }
+
+      librarySearchRenderTimer = window.setTimeout(() => {
+        bindLibraryWorkspace({
+          $,
+          projectName,
+          session,
+          assetsData,
+          registry,
+          categoryReadiness,
+          missingRequiredAssets,
+          navigateTo,
+          reloadProjectData,
+          showMessage,
+          showError,
+          escapeHtml
+        });
+
+        window.setTimeout(() => {
+          const nextInput = $("librarySearchInput");
+          if (nextInput && typeof nextInput.focus === "function") {
+            nextInput.focus();
+
+            if (typeof nextInput.setSelectionRange === "function") {
+              const safeStart = Math.min(selectionStart, nextInput.value.length);
+              const safeEnd = Math.min(selectionEnd, nextInput.value.length);
+              nextInput.setSelectionRange(safeStart, safeEnd);
+            }
+          }
+        }, 0);
+      }, 650);
     };
   }
 
@@ -1461,9 +1509,15 @@ export const libraryRoute = {
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
-    const assetsData = asObject(state.data.assets);
-    const operations = asObject(state.data.operations);
     const registry = asObject(state.data.registry);
+    const baseAssetsData = Array.isArray(state.data.assets) ? { assets: state.data.assets } : asObject(state.data.assets);
+    const registryAssets = asArray(registry.assets || registry.items || registry.records);
+    const assetsDataAssets = asArray(baseAssetsData.assets);
+    const assetsData = {
+      ...baseAssetsData,
+      assets: assetsDataAssets.length ? assetsDataAssets : registryAssets
+    };
+    const operations = asObject(state.data.operations);
     const session = ensureLibrarySession(projectName);
     const categoryReadiness = getCategoryReadinessList(assetsData);
     const missingRequiredAssets = getMissingAssetLabels(assetsData);

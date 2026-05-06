@@ -231,6 +231,49 @@ function asString(value) {
   return String(value);
 }
 
+function getAssetItems(assetsData = {}) {
+  if (Array.isArray(assetsData)) return assetsData;
+
+  const sources = [
+    assetsData.assets,
+    assetsData.items,
+    assetsData.records,
+    assetsData.registry,
+    assetsData.asset_registry,
+    assetsData.assets_registry,
+    assetsData.library_assets,
+    assetsData.data?.assets,
+    assetsData.data?.items,
+    assetsData.data?.registry,
+    assetsData.missing_assets?.assets,
+    assetsData.missing_assets?.items,
+    assetsData.missing_assets?.registered_assets
+  ];
+
+  for (const source of sources) {
+    if (Array.isArray(source)) return source;
+  }
+
+  return [];
+}
+
+function getAssetTypeValue(asset = {}) {
+  return asString(asset.asset_type || asset.type || asset.category || asset.assetCategory);
+}
+
+function getAssetCountValue(category = {}) {
+  const direct = Number(
+    category.count ??
+    category.total_count ??
+    category.uploaded_count ??
+    category.approved_count ??
+    category.files_count ??
+    0
+  );
+
+  return Number.isFinite(direct) ? Math.max(0, direct) : 0;
+}
+
 export function titleCaseAssetKey(value) {
   return asString(value)
     .replace(/[_-]+/g, " ")
@@ -290,9 +333,9 @@ export function getCanonicalAssetType(assetType, catalog = FALLBACK_ASSET_CATEGO
 }
 
 function deriveCategoryStatus(assetsData, category) {
-  const assets = asArray(assetsData.assets);
+  const assets = getAssetItems(assetsData);
   const catalog = getAssetCatalog(assetsData);
-  const matching = assets.filter((asset) => getCanonicalAssetType(asset.asset_type, catalog) === category.asset_type);
+  const matching = assets.filter((asset) => getCanonicalAssetType(getAssetTypeValue(asset), catalog) === category.asset_type);
   if (!matching.length) return "Missing";
 
   const statuses = matching.map((asset) => asString(
@@ -304,29 +347,52 @@ function deriveCategoryStatus(assetsData, category) {
   ).toLowerCase());
 
   if (matching.some((asset, index) => asset.approved === true || statuses[index] === "approved")) return "Approved";
-  if (matching.some((asset) => asset.exists === false)) return "Needs Review";
+  if (matching.some((asset) => asset.exists === false || statuses.includes("missing"))) return "Needs Review";
   return "Uploaded";
 }
 
 export function getCategoryReadinessList(assetsData = {}) {
-  const fromServer = asArray(assetsData.category_readiness?.categories);
+  const assetItems = getAssetItems(assetsData);
+  const catalog = getAssetCatalog(assetsData);
+  const fromServer = asArray(assetsData.category_readiness?.categories || assetsData.missing_assets?.category_readiness?.categories);
+
   if (fromServer.length) {
-    return fromServer.map((item) => normalizeAssetCategory({
-      ...item,
-      status: asString(item.status || "Missing"),
-      count: Number(item.count || 0) || 0,
-      blocker: Boolean(item.blocker)
-    }));
+    return fromServer.map((item) => {
+      const normalized = normalizeAssetCategory({
+        ...item,
+        status: asString(item.status || "Missing"),
+        count: getAssetCountValue(item),
+        blocker: Boolean(item.blocker)
+      });
+
+      const matchingCount = assetItems.filter((asset) =>
+        getCanonicalAssetType(getAssetTypeValue(asset), catalog) === normalized.asset_type
+      ).length;
+
+      const count = Math.max(getAssetCountValue(item), matchingCount);
+      const status = count > 0 && normalized.status === "Missing" ? "Uploaded" : normalized.status;
+
+      return {
+        ...normalized,
+        status,
+        count,
+        uploaded_count: Number(item.uploaded_count || 0) || (status === "Uploaded" ? count : 0),
+        approved_count: Number(item.approved_count || 0) || (status === "Approved" ? count : 0),
+        blocker: normalized.required && ["Missing", "Needs Review"].includes(status)
+      };
+    });
   }
 
-  return getAssetCatalog(assetsData).map((category) => {
+  return catalog.map((category) => {
     const status = deriveCategoryStatus(assetsData, category);
-    const catalog = getAssetCatalog(assetsData);
-    const count = asArray(assetsData.assets).filter((asset) => getCanonicalAssetType(asset.asset_type, catalog) === category.asset_type).length;
+    const count = assetItems.filter((asset) => getCanonicalAssetType(getAssetTypeValue(asset), catalog) === category.asset_type).length;
+
     return normalizeAssetCategory({
       ...category,
       status,
       count,
+      uploaded_count: status === "Uploaded" ? count : 0,
+      approved_count: status === "Approved" ? count : 0,
       blocker: category.required && ["Missing", "Needs Review"].includes(status),
       next_action:
         status === "Missing"
