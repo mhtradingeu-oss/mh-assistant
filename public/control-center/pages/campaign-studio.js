@@ -1268,10 +1268,15 @@ function bindCampaignStudio({
     form.oninput = (event) => {
       const target = event.target;
       if (!target?.name) return;
+
       session.values[target.name] = target.value || "";
       syncCampaignStudioBridge(projectName, session.values);
       scheduleCampaignPersistence(projectName, session, saveProjectCampaign);
-      render();
+
+      // Do not rerender on every keystroke.
+      // Rerendering here replaces the focused input and breaks typing/focus.
+      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+      // persist the latest session values.
     };
   }
 
