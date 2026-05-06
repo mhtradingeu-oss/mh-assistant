@@ -124,6 +124,13 @@ function isLibraryInteractiveElement(target) {
   ));
 }
 
+function bindLibraryControlEventShield(scope) {
+  // No-op by design.
+  // Do not stop events on native controls. Select/input/file controls must
+  // receive pointer/click/input events directly from the browser.
+  return;
+}
+
 function titleCase(value = "") {
   return asString(value)
     .replace(/[_-]+/g, " ")
@@ -1144,22 +1151,7 @@ async function hydrateProtectedImageNode({
 }
 
 function protectLibraryInteractiveControls(scope) {
-  if (!scope || typeof scope.querySelectorAll !== "function") return;
-
-  const interactiveNodes = scope.querySelectorAll(
-    ".library-action-menu, .library-action-dropdown, .library-action-dropdown button, .library-drop-zone, .library-finder-toolbar button"
-  );
-
-  interactiveNodes.forEach((node) => {
-    if (node.dataset.libraryInteractionGuard === "true") return;
-    node.dataset.libraryInteractionGuard = "true";
-
-    ["pointerdown", "mousedown", "touchstart", "click", "dblclick"].forEach((eventName) => {
-      node.addEventListener(eventName, (event) => {
-        event.stopPropagation();
-      });
-    });
-  });
+  return;
 }
 
 function getWorkspaceAssetItems(assetsData, registry) {
@@ -1463,6 +1455,9 @@ function bindLibraryWorkspace({
     typeSelect.innerHTML = typeOptions.map((option) => `
       <option value="${escapeHtml(option.value)}"${session.selectedType === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
     `).join("");
+    typeSelect.value = session.selectedType || "all";
+    typeSelect.removeAttribute("disabled");
+    typeSelect.removeAttribute("readonly");
     typeSelect.onchange = (event) => {
       session.selectedType = event.target.value || "all";
       session.page = 1;
@@ -1513,6 +1508,9 @@ function bindLibraryWorkspace({
     sourceSelect.innerHTML = sourceOptions.map((option) => `
       <option value="${escapeHtml(option.value)}"${session.selectedSource === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
     `).join("");
+    sourceSelect.value = session.selectedSource || "all";
+    sourceSelect.removeAttribute("disabled");
+    sourceSelect.removeAttribute("readonly");
     sourceSelect.onchange = (event) => {
       session.selectedSource = event.target.value || "all";
       session.page = 1;
@@ -2179,47 +2177,16 @@ function bindLibraryWorkspace({
   if (searchInput) {
     searchInput.value = session.searchQuery;
     searchInput.oninput = (event) => {
-      const input = event.target;
-      session.searchQuery = input.value || "";
+      session.searchQuery = event.target.value || "";
       session.page = 1;
-
-      const selectionStart = typeof input.selectionStart === "number" ? input.selectionStart : session.searchQuery.length;
-      const selectionEnd = typeof input.selectionEnd === "number" ? input.selectionEnd : selectionStart;
 
       if (librarySearchRenderTimer) {
         window.clearTimeout(librarySearchRenderTimer);
       }
 
       librarySearchRenderTimer = window.setTimeout(() => {
-        bindLibraryWorkspace({
-          $,
-          projectName,
-          session,
-          assetsData,
-          operations,
-          registry,
-          categoryReadiness,
-          missingRequiredAssets,
-          navigateTo,
-          reloadProjectData,
-          showMessage,
-          showError,
-          escapeHtml
-        });
-
-        window.setTimeout(() => {
-          const nextInput = $("librarySearchInput");
-          if (nextInput && typeof nextInput.focus === "function") {
-            nextInput.focus();
-
-            if (typeof nextInput.setSelectionRange === "function") {
-              const safeStart = Math.min(selectionStart, nextInput.value.length);
-              const safeEnd = Math.min(selectionEnd, nextInput.value.length);
-              nextInput.setSelectionRange(safeStart, safeEnd);
-            }
-          }
-        }, 0);
-      }, 650);
+        rerender();
+      }, 1000);
     };
   }
 
@@ -2299,6 +2266,15 @@ function bindLibraryWorkspace({
       });
 
       dropZone.dataset.libraryDndBound = "1";
+    }
+
+    const chooseFilesBtn = $("libraryChooseFilesBtn");
+    if (chooseFilesBtn) {
+      chooseFilesBtn.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        uploadInput.click();
+      };
     }
 
     updateUploadUiState();
@@ -2546,6 +2522,7 @@ export const libraryRoute = {
               <strong>Upload Assets</strong>
               <span>Drop files here or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
+              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
               <input id="libraryUploadInput" type="file" multiple hidden>
             </div>
             <div class="library-upload-controls">
@@ -2650,7 +2627,6 @@ export const libraryRoute = {
         </section>
       </div>
     `;
-
     bindLibraryWorkspace({
       $,
       projectName,
