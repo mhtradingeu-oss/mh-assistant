@@ -2228,6 +2228,10 @@ function bindLibraryWorkspace({
     };
 
     dropZone.onclick = (event) => {
+      if (event.target?.closest?.("#libraryChooseFilesBtn")) {
+        return;
+      }
+
       event.preventDefault();
       event.stopPropagation();
       uploadInput.click();
@@ -2271,9 +2275,9 @@ function bindLibraryWorkspace({
     const chooseFilesBtn = $("libraryChooseFilesBtn");
     if (chooseFilesBtn) {
       chooseFilesBtn.onclick = (event) => {
-        event.preventDefault();
+
         event.stopPropagation();
-        uploadInput.click();
+
       };
     }
 
@@ -2522,8 +2526,8 @@ export const libraryRoute = {
               <strong>Upload Assets</strong>
               <span>Drop files here or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
-              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
-              <input id="libraryUploadInput" type="file" multiple hidden>
+              <label id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" for="libraryUploadInput">Choose Files</label>
+              <input id="libraryUploadInput" class="library-file-input" type="file" multiple>
             </div>
             <div class="library-upload-controls">
               <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>

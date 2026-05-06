@@ -117,6 +117,14 @@ function readControlKeyMeta() {
   return empty;
 }
 
+export function getControlCenterAccessKeyMeta() {
+  const keyMeta = readControlKeyMeta();
+  return {
+    key: String(keyMeta?.key || ""),
+    source: String(keyMeta?.source || "none")
+  };
+}
+
 function isMissingReadKeyErrorMessage(message) {
   return /missing\s+read\s+key/i.test(String(message || ""));
 }
@@ -716,6 +724,60 @@ async function sendForm(path, formData, fallbackMessage, timeoutMs = DEFAULT_REQ
   });
 }
 
+export async function fetchProtectedMediaBlob(path, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const normalizedPath = String(path || "").trim();
+  if (!normalizedPath) {
+    throw new Error("Missing file URL.");
+  }
+
+  const { headers, keyPresent, keySource } = buildReadHeaders();
+  if (!keyPresent) {
+    throw new AccessKeyError("Missing Control Center access key.", {
+      keyPresent,
+      keySource,
+      endpoint: buildUrl(normalizedPath)
+    });
+  }
+
+  const response = await fetchWithTimeout(normalizedPath, {
+    method: "GET",
+    headers
+  }, timeoutMs);
+
+  if (!response.ok) {
+    const rawText = await response.text().catch(() => "");
+    let payload = null;
+
+    try {
+      payload = rawText ? JSON.parse(rawText) : null;
+    } catch (_) {
+      payload = null;
+    }
+
+    const message = String(payload?.error || rawText || `Failed to load protected file (${response.status}).`).trim();
+    const lowerMessage = message.toLowerCase();
+
+    if (response.status === 401 || response.status === 403 || /read key|access key|invalid.*key/.test(lowerMessage)) {
+      throw new AccessKeyError(message, {
+        status: response.status,
+        endpoint: buildUrl(normalizedPath),
+        payload,
+        keyPresent,
+        keySource,
+        authHeaderPresent: Boolean(headers.Authorization || headers.authorization),
+        contentType: String(response.headers.get("content-type") || "")
+      });
+    }
+
+    throw new Error(message);
+  }
+
+  return {
+    blob: await response.blob(),
+    contentType: String(response.headers.get("content-type") || "")
+  };
+}
+
 /* =========================
    NORMALIZERS
 ========================= */
@@ -1222,6 +1284,99 @@ export async function refreshProjectLibrary(projectName) {
     "POST",
     {},
     "Failed to refresh project library"
+  );
+}
+
+export async function updateProjectAssetStatus(projectName, assetId, status, note = "") {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
+    "POST",
+    {
+      status: String(status || "").trim().toLowerCase(),
+      note: String(note || "").trim()
+    },
+    "Failed to update asset status"
+  );
+}
+
+export async function renameProjectAsset(projectName, assetId, name) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  const normalizedName = String(name || "").trim();
+  if (!normalizedName) {
+    throw new Error("Missing asset name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/rename`,
+    "POST",
+    { name: normalizedName },
+    "Failed to rename asset"
+  );
+}
+
+export async function setProjectAssetSourceOfTruth(projectName, assetId, sourceOfTruth) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/source-of-truth`,
+    "POST",
+    { source_of_truth: Boolean(sourceOfTruth) },
+    "Failed to update source of truth"
+  );
+}
+
+export async function archiveProjectAsset(projectName, assetId, note = "") {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/archive`,
+    "POST",
+    { note: String(note || "").trim() },
+    "Failed to archive asset"
+  );
+}
+
+export async function deleteProjectAsset(projectName, assetId, note = "") {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/delete`,
+    "POST",
+    { note: String(note || "").trim() },
+    "Failed to delete asset"
   );
 }
 

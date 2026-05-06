@@ -492,6 +492,149 @@ function resolveMediaFilePath(projectName, type, filename) {
   return path.join(uploadTarget.dir, safeFilename);
 }
 
+function isPathInsideRoot(rootPath, targetPath) {
+  const absoluteRoot = path.resolve(String(rootPath || ''));
+  const absoluteTarget = path.resolve(String(targetPath || ''));
+  const relative = path.relative(absoluteRoot, absoluteTarget);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function decodeMediaQueryPath(value) {
+  const raw = String(value || '').replace(/\0/g, '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  try {
+    return decodeURIComponent(raw);
+  } catch (_) {
+    return raw;
+  }
+}
+
+function getAllowedMediaRoots(projectName) {
+  const project = normalizeProjectSlug(projectName);
+  const basePaths = getProjectBasePaths(project);
+  const brandPaths = getProjectBrandPaths(project);
+  const roots = [
+    basePaths.baseDir,
+    basePaths.brandAssetsDir,
+    basePaths.productsDir,
+    basePaths.mediaDir,
+    brandPaths.baseDir,
+    brandPaths.legacyBaseDir,
+    path.join(LEGACY_BRAND_ASSETS_DIR, project)
+  ]
+    .filter(Boolean)
+    .map((entry) => path.resolve(entry));
+
+  return [...new Set(roots)];
+}
+
+function findProjectAssetFilePathById(projectName, assetId) {
+  const project = normalizeProjectSlug(projectName);
+  const requestedId = String(assetId || '').trim();
+
+  if (!requestedId) {
+    return null;
+  }
+
+  try {
+    const assetPaths = getProjectAssetPaths(project);
+    const assets = readJsonFile(assetPaths.assetsRegistryPath, []);
+    const match = assets.find((asset) => {
+      const candidate = String(asset?.asset_id || asset?.assetId || asset?.id || '').trim();
+      return candidate && candidate === requestedId;
+    });
+
+    const candidatePath = String(
+      match?.file_path ||
+      match?.local_path ||
+      match?.path ||
+      ''
+    ).trim();
+
+    return candidatePath || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveMediaFilePathFromQuery(projectName, requestedPath, assetId) {
+  const project = normalizeProjectSlug(projectName);
+  const decodedPath = decodeMediaQueryPath(requestedPath);
+  const decodedAssetId = decodeMediaQueryPath(assetId);
+  const allowedRoots = getAllowedMediaRoots(project);
+
+  const resolveCandidate = (candidatePath) => {
+    const candidate = path.resolve(String(candidatePath || ''));
+    if (!candidate || !fs.existsSync(candidate)) {
+      return null;
+    }
+
+    const allowed = allowedRoots.some((root) => isPathInsideRoot(root, candidate));
+    if (!allowed) {
+      return null;
+    }
+
+    try {
+      const stat = fs.statSync(candidate);
+      if (!stat.isFile()) {
+        return null;
+      }
+    } catch (_) {
+      return null;
+    }
+
+    return candidate;
+  };
+
+  if (decodedPath) {
+    const normalizedRelative = decodedPath.replace(/^[/\\]+/, '');
+    const candidates = [];
+
+    if (path.isAbsolute(decodedPath)) {
+      candidates.push(decodedPath);
+    }
+
+    allowedRoots.forEach((root) => {
+      candidates.push(path.join(root, normalizedRelative));
+    });
+
+    for (const candidate of candidates) {
+      const resolved = resolveCandidate(candidate);
+      if (resolved) {
+        return {
+          filePath: resolved,
+          source: 'query_path'
+        };
+      }
+    }
+
+    return {
+      filePath: null,
+      source: 'query_path',
+      invalidPath: true
+    };
+  }
+
+  if (decodedAssetId) {
+    const byAssetId = findProjectAssetFilePathById(project, decodedAssetId);
+    const resolved = resolveCandidate(byAssetId);
+    if (resolved) {
+      return {
+        filePath: resolved,
+        source: 'query_asset_id'
+      };
+    }
+  }
+
+  return {
+    filePath: null,
+    source: decodedAssetId ? 'query_asset_id' : null
+  };
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -6863,6 +7006,7 @@ function normalizeAssetRecord(projectName, asset = {}) {
   const canonicalType = getCanonicalAssetType(asset.type || asset.asset_type) || normalizeSetupTextValue(asset.type || asset.asset_type).toLowerCase();
   const filePath = normalizeSetupTextValue(asset.file_path || asset.path);
   const fileName = normalizeSetupTextValue(asset.file_name || (filePath ? path.basename(filePath) : ''));
+  const displayName = normalizeSetupTextValue(asset.display_name || asset.name || asset.title || fileName);
   const createdAt = normalizeSetupTextValue(asset.created_at || asset.registered_at) || now;
   const status = normalizeSetupTextValue(asset.status)
     || (normalizeSetupTextValue(asset.exists) === 'false' ? 'missing' : 'connected');
@@ -6874,15 +7018,41 @@ function normalizeAssetRecord(projectName, asset = {}) {
     asset_id: normalizeSetupTextValue(asset.asset_id || asset.id) || `asset_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
     file_name: fileName,
     file_path: filePath,
+    name: displayName || fileName,
+    title: normalizeSetupTextValue(asset.title || displayName || fileName),
+    display_name: displayName || fileName,
     type: canonicalType,
     asset_type: canonicalType,
     project: normalizedProject,
     source,
     tags: normalizeAssetTags(asset.tags),
     status,
+    readiness_status: normalizeSetupTextValue(asset.readiness_status || status) || status,
+    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
     created_at: createdAt,
     updated_at: now,
     source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth),
+    use_as_source_of_truth: Boolean(asset.use_as_source_of_truth || asset.source_of_truth),
+    approved: Boolean(asset.approved),
+    approved_at: normalizeSetupTextValue(asset.approved_at),
+    approval_note: normalizeSetupTextValue(asset.approval_note),
+    rejected: Boolean(asset.rejected),
+    rejected_at: normalizeSetupTextValue(asset.rejected_at),
+    rejection_note: normalizeSetupTextValue(asset.rejection_note),
+    needs_review: Boolean(asset.needs_review),
+    reviewed_at: normalizeSetupTextValue(asset.reviewed_at),
+    reviewed_by: normalizeSetupTextValue(asset.reviewed_by),
+    archived: Boolean(asset.archived),
+    archived_at: normalizeSetupTextValue(asset.archived_at),
+    archive_note: normalizeSetupTextValue(asset.archive_note),
+    deleted: Boolean(asset.deleted),
+    deleted_at: normalizeSetupTextValue(asset.deleted_at),
+    deleted_by: normalizeSetupTextValue(asset.deleted_by),
+    delete_note: normalizeSetupTextValue(asset.delete_note),
+    source_of_truth_updated_at: normalizeSetupTextValue(asset.source_of_truth_updated_at),
+    source_of_truth_updated_by: normalizeSetupTextValue(asset.source_of_truth_updated_by),
+    renamed_at: normalizeSetupTextValue(asset.renamed_at),
+    renamed_by: normalizeSetupTextValue(asset.renamed_by),
     exists: fs.existsSync(filePath),
     metadata: asset.metadata && typeof asset.metadata === 'object' ? asset.metadata : {}
   };
@@ -9575,8 +9745,19 @@ app.get('/media/file/:project/:type/:filename', (req, res) => {
   const project = normalizeProjectSlug(req.params.project);
   const type = String(req.params.type || '').trim().toLowerCase();
   const filename = String(req.params.filename || '').trim();
+  const requestedPath = String(req.query?.path || '').trim();
+  const requestedAssetId = String(req.query?.assetId || req.query?.asset_id || '').trim();
 
   let filePath = null;
+
+  const queryResolution = resolveMediaFilePathFromQuery(project, requestedPath, requestedAssetId);
+  if (queryResolution.filePath) {
+    return res.sendFile(queryResolution.filePath);
+  }
+
+  if (queryResolution.invalidPath) {
+    return res.status(400).send('Invalid media path');
+  }
 
   try {
     filePath = resolveMediaFilePath(project, type, filename);
@@ -9656,34 +9837,141 @@ app.get('/public/media-manager/project/:project', (req, res) => {
 });
 
 
-app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
-  try {
-    const providedKey =
-      req.headers['x-mh-control-key'] ||
-      (String(req.headers.authorization || '').startsWith('Bearer ')
-        ? String(req.headers.authorization || '').slice('Bearer '.length)
-        : '');
 
-    const validWriteKey =
-      process.env.MH_CONTROL_CENTER_WRITE_KEY ||
-      process.env.MH_CONTROL_CENTER_READ_KEY ||
-      process.env.MH_CONTROL_KEY ||
-      '';
+function getProjectAssetsRegistryMeta(projectName) {
+  const project = normalizeProjectSlug(projectName);
+  const root = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
+  const registryPath = path.join(root, 'data', 'projects', project, 'assets-registry.json');
+  return { project, registryPath };
+}
 
-    if (!validWriteKey || providedKey !== validWriteKey) {
-      return res.status(401).json({
-        error: 'Missing or invalid protected write key. Provide x-mh-control-key or Authorization: Bearer <key>.'
-      });
+function matchesProjectAssetId(value, assetId) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const requested = String(assetId || '').trim();
+  if (!requested) return false;
+
+  const byPrimaryId = (
+    String(value.asset_id || '') === requested ||
+    String(value.assetId || '') === requested ||
+    String(value.id || '') === requested
+  );
+  if (byPrimaryId) return true;
+
+  if (requested.startsWith('path:')) {
+    const requestedPath = requested.slice(5).trim();
+    if (!requestedPath) return false;
+    const localPath = String(value.local_path || value.file_path || value.path || '').trim();
+    return Boolean(localPath && localPath === requestedPath);
+  }
+
+  if (requested.startsWith('name:')) {
+    const requestedName = requested.slice(5).trim().toLowerCase();
+    if (!requestedName) return false;
+    const candidateName = String(
+      value.filename ||
+      value.file_name ||
+      value.name ||
+      value.title ||
+      path.basename(String(value.local_path || value.file_path || value.path || ''))
+    ).trim().toLowerCase();
+    return Boolean(candidateName && candidateName === requestedName);
+  }
+
+  return false;
+}
+
+function mutateProjectAssetRegistry(projectName, assetId, mutator) {
+  const { project, registryPath } = getProjectAssetsRegistryMeta(projectName);
+
+  if (!assetId) {
+    throw Object.assign(new Error('Missing asset id.'), { statusCode: 400 });
+  }
+
+  if (!fs.existsSync(registryPath)) {
+    throw Object.assign(new Error('Assets registry not found.'), {
+      statusCode: 404,
+      details: { project, registryPath }
+    });
+  }
+
+  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  const now = new Date().toISOString();
+  let matched = 0;
+
+  function walk(value) {
+    if (!value || typeof value !== 'object') {
+      return;
     }
 
-    const project = String(req.params.project || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+      return;
+    }
+
+    if (matchesProjectAssetId(value, assetId)) {
+      matched += 1;
+      mutator(value, now);
+      value.updated_at = now;
+    }
+
+    Object.values(value).forEach(walk);
+  }
+
+  walk(registry);
+
+  if (!matched) {
+    throw Object.assign(new Error('Asset not found in registry.'), {
+      statusCode: 404,
+      details: { project, assetId }
+    });
+  }
+
+  if (registry && typeof registry === 'object' && !Array.isArray(registry)) {
+    registry.updated_at = now;
+    registry.last_reviewed_at = now;
+  }
+
+  writeJsonFile(registryPath, registry);
+
+  return {
+    ok: true,
+    project,
+    assetId,
+    matched,
+    registryPath,
+    updated_at: now
+  };
+}
+
+function sendAssetMutationError(res, error, fallbackMessage) {
+  const statusCode = Number(error?.statusCode || 0);
+  const payload = {
+    error: error?.message || fallbackMessage,
+    ...(error?.details && typeof error.details === 'object' ? error.details : {})
+  };
+
+  if (statusCode >= 400 && statusCode < 600) {
+    return res.status(statusCode).json(payload);
+  }
+
+  return res.status(500).json({
+    error: fallbackMessage,
+    details: error?.message || String(error)
+  });
+}
+
+app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+  try {
     const assetId = String(req.params.assetId || '').trim();
     const status = String(req.body?.status || '').trim().toLowerCase();
     const note = String(req.body?.note || '').trim();
 
     const allowed = new Set(['approved', 'needs_review', 'rejected', 'archived']);
-    if (!project || !assetId) {
-      return res.status(400).json({ error: 'Missing project or assetId.' });
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
     }
 
     if (!allowed.has(status)) {
@@ -9693,101 +9981,184 @@ app.post('/media-manager/project/:project/assets/:assetId/status', express.json(
       });
     }
 
-    const root = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../..');
-    const registryPath = path.join(root, 'data', 'projects', project, 'assets-registry.json');
-
-    if (!fs.existsSync(registryPath)) {
-      return res.status(404).json({
-        error: 'Assets registry not found.',
-        registryPath
-      });
-    }
-
-    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-    const now = new Date().toISOString();
-
-    let matched = 0;
-
-    function matchesAsset(obj) {
-      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
-
-      return (
-        String(obj.asset_id || '') === assetId ||
-        String(obj.assetId || '') === assetId ||
-        String(obj.id || '') === assetId
-      );
-    }
-
-    function updateAsset(obj) {
-      matched += 1;
-
-      obj.status = status;
-      obj.review_status = status;
-      obj.needs_review = status === 'needs_review';
-      obj.approved = status === 'approved';
-      obj.rejected = status === 'rejected';
-      obj.archived = status === 'archived';
-      obj.reviewed_at = now;
-      obj.reviewed_by = 'control_center';
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.status = status;
+      asset.readiness_status = status;
+      asset.review_status = status;
+      asset.needs_review = status === 'needs_review';
+      asset.approved = status === 'approved';
+      asset.rejected = status === 'rejected';
+      asset.archived = status === 'archived';
+      asset.reviewed_at = now;
+      asset.reviewed_by = 'control_center';
 
       if (status === 'approved') {
-        obj.approved_at = now;
-        obj.approval_note = note || obj.approval_note || 'Approved from Control Center Library.';
+        asset.approved_at = now;
+        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
       }
 
       if (status === 'rejected') {
-        obj.rejected_at = now;
-        obj.rejection_note = note || obj.rejection_note || 'Rejected from Control Center Library.';
+        asset.rejected_at = now;
+        asset.rejection_note = note || asset.rejection_note || 'Rejected from Control Center Library.';
       }
 
       if (status === 'archived') {
-        obj.archived_at = now;
-        obj.archive_note = note || obj.archive_note || 'Archived from Control Center Library.';
+        asset.archived_at = now;
+        asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
       }
-    }
-
-    function walk(value) {
-      if (!value || typeof value !== 'object') return;
-
-      if (Array.isArray(value)) {
-        value.forEach(walk);
-        return;
-      }
-
-      if (matchesAsset(value)) {
-        updateAsset(value);
-      }
-
-      Object.values(value).forEach(walk);
-    }
-
-    walk(registry);
-
-    if (!matched) {
-      return res.status(404).json({
-        error: 'Asset not found in registry.',
-        project,
-        assetId
-      });
-    }
-
-    registry.updated_at = now;
-    registry.last_reviewed_at = now;
-
-    fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n');
+    });
 
     return res.json({
-      ok: true,
-      project,
-      assetId,
-      status,
-      matched,
-      registryPath
+      ...result,
+      status
     });
   } catch (error) {
-    return res.status(500).json({
-      error: error.message || 'Failed to update asset status.'
+    return sendAssetMutationError(res, error, 'Failed to update asset status.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const name = String(req.body?.name || req.body?.display_name || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    if (!name) {
+      return res.status(400).json({ error: 'Missing asset name.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.name = name;
+      asset.title = name;
+      asset.display_name = name;
+      asset.renamed_at = now;
+      asset.renamed_by = 'control_center';
     });
+
+    return res.json({
+      ...result,
+      name
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to rename asset.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const sourceOfTruth = Boolean(req.body?.source_of_truth);
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.source_of_truth = sourceOfTruth;
+      asset.use_as_source_of_truth = sourceOfTruth;
+      asset.source_of_truth_updated_at = now;
+      asset.source_of_truth_updated_by = 'control_center';
+    });
+
+    return res.json({
+      ...result,
+      source_of_truth: sourceOfTruth
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to update source of truth.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = now;
+      asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+      asset.reviewed_by = 'control_center';
+    });
+
+    return res.json({
+      ...result,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to archive asset.');
+  }
+});
+
+app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+  }
+});
+
+app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      asset.deleted = true;
+      asset.deleted_at = now;
+      asset.deleted_by = 'control_center';
+      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+      asset.status = 'archived';
+      asset.readiness_status = 'archived';
+      asset.review_status = 'archived';
+      asset.archived = true;
+      asset.archived_at = asset.archived_at || now;
+    });
+
+    return res.json({
+      ...result,
+      deleted: true,
+      status: 'archived'
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to delete asset.');
   }
 });
 
