@@ -7247,3 +7247,215 @@ body {
 }
 
 /* End Library Upload Picker Fix */
+
+/* =========================
+   Campaign Studio Readable Layout Fix
+   Scope: campaign-studio only
+========================= */
+
+/* Default: readable single-column workspace.
+   The main app already has sidebar + topbar, so forcing 2 columns at 1112px makes forms unusable. */
+[data-page="campaign-studio"] .campaign-studio-wrapper {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+[data-page="campaign-studio"] .campaign-studio-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+[data-page="campaign-studio"] .campaign-studio-main,
+[data-page="campaign-studio"] .campaign-studio-side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+}
+
+[data-page="campaign-studio"] .campaign-studio-side {
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Keep the form readable. Two columns only when there is enough real content width. */
+[data-page="campaign-studio"] .setup-form-grid,
+[data-page="campaign-studio"] .setup-form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+[data-page="campaign-studio"] .setup-field-group,
+[data-page="campaign-studio"] .card,
+[data-page="campaign-studio"] .panel,
+[data-page="campaign-studio"] .data-row {
+  min-width: 0;
+}
+
+[data-page="campaign-studio"] .setup-field-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+[data-page="campaign-studio"] .setup-label {
+  line-height: 1.35;
+}
+
+[data-page="campaign-studio"] .setup-input,
+[data-page="campaign-studio"] .setup-textarea {
+  width: 100%;
+  min-height: 42px;
+}
+
+[data-page="campaign-studio"] .setup-textarea {
+  line-height: 1.55;
+  resize: vertical;
+}
+
+[data-page="campaign-studio"] .setup-helper,
+[data-page="campaign-studio"] .page-subtitle,
+[data-page="campaign-studio"] p,
+[data-page="campaign-studio"] small {
+  line-height: 1.5;
+}
+
+[data-page="campaign-studio"] .campaign-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+[data-page="campaign-studio"] .campaign-toolbar .btn {
+  min-height: 42px;
+}
+
+[data-page="campaign-studio"] .campaign-overview-grid,
+[data-page="campaign-studio"] .campaign-wave-grid,
+[data-page="campaign-studio"] .campaign-recommendation-grid,
+[data-page="campaign-studio"] .campaign-readiness-grid,
+[data-page="campaign-studio"] .campaign-routing-grid,
+[data-page="campaign-studio"] .quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+[data-page="campaign-studio"] .campaign-overview-item,
+[data-page="campaign-studio"] .campaign-strategy-item,
+[data-page="campaign-studio"] .campaign-wave-meta-item,
+[data-page="campaign-studio"] .campaign-wave-card,
+[data-page="campaign-studio"] .campaign-readiness-block,
+[data-page="campaign-studio"] .campaign-studio-panel-block,
+[data-page="campaign-studio"] .campaign-channel-card {
+  border: 1px solid rgba(50, 83, 111, 0.72);
+  border-radius: 14px;
+  background: rgba(7, 24, 38, 0.42);
+  padding: 14px;
+  min-width: 0;
+}
+
+[data-page="campaign-studio"] .campaign-overview-item span,
+[data-page="campaign-studio"] .campaign-strategy-item span,
+[data-page="campaign-studio"] .campaign-wave-meta-item span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted-2);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-page="campaign-studio"] .campaign-overview-item strong,
+[data-page="campaign-studio"] .campaign-strategy-item strong,
+[data-page="campaign-studio"] .campaign-wave-meta-item strong,
+[data-page="campaign-studio"] .data-row strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+[data-page="campaign-studio"] .quick-action-btn {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  align-items: start;
+  min-height: 58px;
+  width: 100%;
+}
+
+[data-page="campaign-studio"] .home-action-title {
+  display: block;
+  font-weight: 700;
+}
+
+[data-page="campaign-studio"] .home-action-meta {
+  display: block;
+  color: var(--muted-2);
+  line-height: 1.45;
+}
+
+/* Medium desktop: allow compact 2-column cards, but keep page itself single-column. */
+@media (min-width: 1180px) {
+  [data-page="campaign-studio"] .setup-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="campaign-studio"] .setup-form-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  [data-page="campaign-studio"] .campaign-overview-grid,
+  [data-page="campaign-studio"] .campaign-readiness-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="campaign-studio"] .campaign-wave-grid,
+  [data-page="campaign-studio"] .campaign-recommendation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Very wide screens only: add side panel. */
+@media (min-width: 1500px) {
+  [data-page="campaign-studio"] .campaign-studio-wrapper {
+    max-width: 1480px;
+  }
+
+  [data-page="campaign-studio"] .campaign-studio-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  }
+
+  [data-page="campaign-studio"] .campaign-studio-side {
+    position: sticky;
+    top: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  [data-page="campaign-studio"] .campaign-toolbar .btn {
+    flex: 1 1 100%;
+  }
+
+  [data-page="campaign-studio"] .campaign-wave-head,
+  [data-page="campaign-studio"] .campaign-readiness-head,
+  [data-page="campaign-studio"] .campaign-channel-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* End Campaign Studio UX Polish */
