@@ -13082,7 +13082,30 @@ function buildProjectProductMediaSummary(projectName) {
 }
 
 function buildProjectControlCenterAssets(projectName) {
-  const assets = listProjectAssets(projectName);
+  const safeProjectName = normalizeProjectSlug(projectName);
+  let assets = listProjectAssets(projectName);
+
+  if (!Array.isArray(assets) || assets.length === 0) {
+    try {
+      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
+      const parsed = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+
+      if (Array.isArray(parsed)) {
+        assets = parsed;
+      } else if (Array.isArray(parsed?.assets)) {
+        assets = parsed.assets;
+      } else if (Array.isArray(parsed?.items)) {
+        assets = parsed.items;
+      } else if (Array.isArray(parsed?.records)) {
+        assets = parsed.records;
+      } else {
+        assets = [];
+      }
+    } catch (_) {
+      assets = [];
+    }
+  }
+
   const routes = reviewProjectAssetRoutes(projectName);
   const missingAssets = reviewProjectMissingAssets(projectName);
   const folderHealth = reviewProjectFolderHealth(projectName);
@@ -20417,6 +20440,27 @@ function executeJobBridge(job) {
 }
 function buildMediaManagerProjectStartupPayload(projectName) {
   const full = buildMediaManagerProjectPayload(projectName);
+  const safeProjectName = normalizeProjectSlug(projectName);
+  let startupAssets = Array.isArray(full.assets?.assets) ? full.assets.assets : [];
+
+  if (!startupAssets.length) {
+    try {
+      const registryPath = path.join(DATA_DIR, "projects", safeProjectName, "assets-registry.json");
+      const parsed = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+
+      if (Array.isArray(parsed)) {
+        startupAssets = parsed;
+      } else if (Array.isArray(parsed?.assets)) {
+        startupAssets = parsed.assets;
+      } else if (Array.isArray(parsed?.items)) {
+        startupAssets = parsed.items;
+      } else if (Array.isArray(parsed?.records)) {
+        startupAssets = parsed.records;
+      }
+    } catch (_) {
+      startupAssets = [];
+    }
+  }
 
   return {
     project: full.project,
@@ -20426,20 +20470,15 @@ function buildMediaManagerProjectStartupPayload(projectName) {
     assets: {
       project: full.assets?.project || full.project,
       generated_at: full.assets?.generated_at || new Date().toISOString(),
-      assets: Array.isArray(full.assets?.assets) ? full.assets.assets : [],
+      assets: startupAssets,
       asset_catalog: Array.isArray(full.assets?.asset_catalog) ? full.assets.asset_catalog : [],
       category_readiness: full.assets?.category_readiness || null,
       missing_assets: full.assets?.missing_assets || null,
       summary: {
-        total: Array.isArray(full.assets?.assets) ? full.assets.assets.length : 0,
-        existing: Array.isArray(full.assets?.assets)
-          ? full.assets.assets.filter((asset) => asset?.exists !== false).length
-          : 0,
-        missing: Array.isArray(full.assets?.assets)
-          ? full.assets.assets.filter((asset) => asset?.exists === false).length
-          : 0
-      },
-      assets: []
+        total: startupAssets.length,
+        existing: startupAssets.filter((asset) => asset?.exists !== false).length,
+        missing: startupAssets.filter((asset) => asset?.exists === false).length
+      }
     },
     tree: {
       project: full.project,
@@ -20447,8 +20486,8 @@ function buildMediaManagerProjectStartupPayload(projectName) {
     },
     registry: {
       project: full.project,
-      total_assets: full.registry?.total_assets || 0,
-      assets: []
+      total_assets: startupAssets.length,
+      assets: startupAssets
     },
     connectors: full.connectors || {},
     activity: {

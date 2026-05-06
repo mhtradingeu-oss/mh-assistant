@@ -452,47 +452,93 @@ function toStatusTone(status = "") {
 function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {
   const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));
 
+  const registryItems = asArray(
+    legacyRegistry?.assets ||
+    legacyRegistry?.items ||
+    legacyRegistry?.records
+  );
+
+  const assetItems = asArray(assetsData?.assets).length
+    ? asArray(assetsData.assets)
+    : registryItems;
+
   const registryByPath = new Map();
   const registryByName = new Map();
-  asArray(legacyRegistry?.assets).forEach((item) => {
-    const localPath = asString(item.local_path || item.file_path).trim();
-    const fileName = basename(localPath || item.filename || "");
+
+  registryItems.forEach((item) => {
+    const localPath = asString(item.local_path || item.file_path || item.path).trim();
+    const fileName = basename(localPath || item.file_name || item.filename || item.name || "");
+
     if (localPath) registryByPath.set(localPath, item);
     if (fileName) registryByName.set(fileName, item);
   });
 
-  return asArray(assetsData?.assets).map((asset, index) => {
-    const canonicalType = getCanonicalAssetType(asset.asset_type, catalog);
-    const filePath = asString(asset.file_path).trim();
-    const fileName = basename(filePath || asset.file_name || asset.filename || "");
+  return assetItems.map((asset, index) => {
+    const rawType = asset.asset_type || asset.type || asset.category || asset.assetCategory || "";
+    const canonicalType = getCanonicalAssetType(rawType, catalog);
+    const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.url || "").trim();
+    const fileName = basename(filePath || asset.file_name || asset.filename || asset.name || `asset-${index + 1}`);
     const extension = getFileExtension(fileName);
     const category = categoryByType.get(canonicalType) || {};
     const catalogItem = catalogMap.get(canonicalType) || {};
-    const legacy = registryByPath.get(filePath) || registryByName.get(fileName) || null;
-    const usedIn = asArray(category.guidance?.used_in).length
-      ? asArray(category.guidance?.used_in)
-      : asArray(catalogItem.guidance?.used_in);
+    const registryMatch = registryByPath.get(filePath) || registryByName.get(fileName) || {};
+    const merged = {
+      ...registryMatch,
+      ...asset
+    };
+
+    const status = normalizeReadinessStatus(
+      merged.readiness_status ||
+      merged.review_status ||
+      merged.approval_status ||
+      merged.status ||
+      category.status ||
+      "uploaded"
+    );
+
+    const id = asString(
+      merged.asset_id ||
+      merged.assetId ||
+      merged.id ||
+      `${canonicalType || "asset"}-${index}-${fileName}`
+    );
+
+    const previewUrl = merged.preview_url ||
+      merged.public_url ||
+      merged.url ||
+      buildPreviewUrl(projectName, {
+        ...merged,
+        asset_type: canonicalType,
+        file_path: filePath,
+        filename: fileName
+      });
 
     return {
-      id: asset.asset_id || asset.id || `asset-${index}`,
-      asset_id: asset.asset_id || asset.id || `asset-${index}`,
-      name: fileName || asString(asset.file_name || "Asset"),
+      ...merged,
+      id,
+      asset_id: id,
+      kind: "library_asset",
+      name: asString(merged.name || merged.title || fileName || id),
+      asset_type: canonicalType || "asset",
+      type_label: catalogItem.display_label || catalogItem.label || titleCase(canonicalType || "asset"),
+      status,
+      source_label: asString(merged.source_label || merged.source || merged.scan_source || "Library"),
+      source_key: asString(merged.source_key || merged.source || merged.scan_source || "library").toLowerCase(),
+      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth),
+      used_in: asArray(merged.used_in || catalogItem.guidance?.used_in || ["Library"]),
+      uploaded_at: merged.uploaded_at || merged.updated_at || merged.created_at || merged.registered_at || "",
+      version_id: merged.version_id || merged.version || "",
       file_path: filePath,
-      asset_type: canonicalType || asString(asset.asset_type || "asset"),
-      category_label: asString(category.display_label || category.label || catalogItem.display_label || catalogItem.label || canonicalType || asset.asset_type || "Asset"),
-      category_status: asString(category.status || "Uploaded"),
-      status: normalizeReadinessStatus(asset.readiness_status || asset.review_status || asset.approval_status || asset.status || category.status || "uploaded"),
-      exists: asset.exists !== false,
-      source_of_truth: Boolean(asset.source_of_truth || asset.use_as_source_of_truth || legacy?.use_as_source_of_truth),
-      used_in: usedIn,
-      uploaded_at: asset.created_at || asset.updated_at || null,
-      preview_url: buildPreviewUrl(projectName, asset),
+      filename: fileName,
       extension,
+      preview_url: previewUrl,
       is_image: isImageExtension(extension),
-      is_video: isVideoExtension(extension)
+      is_video: isVideoExtension(extension),
+      is_audio: ["mp3", "wav", "m4a", "ogg"].includes(extension)
     };
   });
 }
+
 
 function inferManagedAssetType(asset = {}) {
   const mediaType = toKey(asset.media_type);
@@ -800,6 +846,23 @@ function renderPreview(asset, escapeHtml) {
   `;
 }
 
+function getWorkspaceAssetItems(assetsData, registry) {
+  const candidates = [
+    assetsData.assets,
+    assetsData.items,
+    assetsData.records,
+    registry.assets,
+    registry.items,
+    registry.records
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate) && candidate.length) return candidate;
+  }
+
+  return [];
+}
+
 function buildAiPrompt(projectName, mode, payload = {}) {
   const project = asString(projectName).trim() || "this project";
   if (mode === "classify") {
@@ -831,9 +894,14 @@ function bindLibraryWorkspace({
   const catalog = getAssetCatalog(assetsData);
   const categoryByType = getCategoryByType(categoryReadiness);
   const managedAssets = getManagedMediaAssets(projectName, operations);
+  const workspaceAssetItems = getWorkspaceAssetItems(assetsData, registry);
+  const workspaceAssetsData = {
+    ...assetsData,
+    assets: workspaceAssetItems
+  };
   const allAssets = [
     ...managedAssets,
-    ...normalizeAssets(projectName, assetsData, registry, categoryByType, catalog)
+    ...normalizeAssets(projectName, workspaceAssetsData, registry, categoryByType, catalog)
   ];
   const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
   const categoryBuckets = buildCategoryBuckets(categoryReadiness);
@@ -942,6 +1010,7 @@ function bindLibraryWorkspace({
         projectName,
         session,
         assetsData,
+        operations,
         registry,
         categoryReadiness,
         missingRequiredAssets,
@@ -964,6 +1033,7 @@ function bindLibraryWorkspace({
         projectName,
         session,
         assetsData,
+        operations,
         registry,
         categoryReadiness,
         missingRequiredAssets,
@@ -1011,6 +1081,7 @@ function bindLibraryWorkspace({
         projectName,
         session,
         assetsData,
+        operations,
         registry,
         categoryReadiness,
         missingRequiredAssets,
@@ -1152,6 +1223,7 @@ function bindLibraryWorkspace({
           projectName,
           session,
           assetsData,
+          operations,
           registry,
           categoryReadiness,
           missingRequiredAssets,
@@ -1180,6 +1252,7 @@ function bindLibraryWorkspace({
         projectName,
         session,
         assetsData,
+        operations,
         registry,
         categoryReadiness,
         missingRequiredAssets,
@@ -1262,6 +1335,7 @@ function bindLibraryWorkspace({
           projectName,
           session,
           assetsData,
+          operations,
           registry,
           categoryReadiness,
           missingRequiredAssets,
@@ -1376,6 +1450,7 @@ function bindLibraryWorkspace({
         projectName,
         session,
         assetsData,
+        operations,
         registry,
         categoryReadiness,
         missingRequiredAssets,
@@ -1666,6 +1741,7 @@ export const libraryRoute = {
       projectName,
       session,
       assetsData,
+      operations,
       registry,
       categoryReadiness,
       missingRequiredAssets,
