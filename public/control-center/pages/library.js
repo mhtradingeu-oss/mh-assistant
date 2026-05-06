@@ -1,4 +1,14 @@
-import { refreshProjectLibrary, uploadProjectAsset } from "../api.js";
+import {
+  AccessKeyError,
+  archiveProjectAsset,
+  deleteProjectAsset,
+  fetchProtectedMediaBlob,
+  refreshProjectLibrary,
+  renameProjectAsset,
+  setProjectAssetSourceOfTruth,
+  updateProjectAssetStatus,
+  uploadProjectAsset
+} from "../api.js";
 import {
   getAssetCatalog,
   getCanonicalAssetType,
@@ -10,6 +20,7 @@ import {
 const librarySessionStore = new Map();
 let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+const libraryProtectedUrlCache = new Map();
 
 const SMART_CATEGORY_BUCKETS = [
   { key: "logos", label: "Logos", types: ["logo"] },
@@ -73,6 +84,21 @@ const REQUIRED_ASSET_REQUIREMENTS = [
   }
 ];
 
+const LIBRARY_FOLDERS = [
+  { key: "all_assets", label: "All Assets" },
+  { key: "logos", label: "Logos", types: ["logo"] },
+  { key: "product_data", label: "Product Data", types: ["product_csv"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos"] },
+  { key: "packaging_images", label: "Packaging Images", types: ["packaging_images"] },
+  { key: "videos", label: "Videos", types: ["product_videos"] },
+  { key: "legal_pricing", label: "Legal & Pricing", types: ["legal_doc", "pricing_doc"] },
+  { key: "brand_guidelines", label: "Brand Guidelines", types: ["brand_guideline"] },
+  { key: "research_certificates", label: "Research / Certificates", types: ["partner_docs", "testimonials_reviews", "certificates"] },
+  { key: "uploaded_session", label: "Uploaded This Session" },
+  { key: "source_of_truth", label: "Source of Truth" },
+  { key: "archived", label: "Archived" }
+];
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -84,6 +110,12 @@ function asObject(value) {
 function asString(value) {
   if (value == null) return "";
   return String(value);
+}
+
+function isLibraryInteractiveElement(target) {
+  return Boolean(target?.closest?.(
+    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+  ));
 }
 
 function titleCase(value = "") {
@@ -133,6 +165,21 @@ function getFileExtension(name = "") {
   return index >= 0 ? value.slice(index + 1).toLowerCase() : "";
 }
 
+function shortPath(filePath = "", maxSegments = 4) {
+  const value = asString(filePath).trim();
+  if (!value) return "-";
+  const parts = value.split("/").filter(Boolean);
+  if (parts.length <= maxSegments) return `/${parts.join("/")}`;
+  return `.../${parts.slice(parts.length - maxSegments).join("/")}`;
+}
+
+function shortAssetId(value = "") {
+  const id = asString(value).trim();
+  if (!id) return "-";
+  if (id.length <= 20) return id;
+  return `${id.slice(0, 10)}...${id.slice(-8)}`;
+}
+
 function formatCount(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return "0";
@@ -156,77 +203,103 @@ function isVideoExtension(extension = "") {
 
 function buildPreviewUrl(projectName, asset) {
   if (!projectName) return "";
-  const fileName = basename(asset.file_path || asset.filename || "");
+  const fullPath = asString(asset.file_path || asset.local_path || asset.path || "").trim();
+  const fileName = basename(fullPath || asset.filename || asset.file_name || asset.name || "");
+  const assetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();
   const assetType = asString(asset.asset_type || asset.type || "asset").trim().toLowerCase();
   if (!fileName || !assetType) return "";
-  return `/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}`;
+
+  const base = `/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}`;
+  const params = [];
+
+  if (fullPath) {
+    params.push(`path=${encodeURIComponent(fullPath)}`);
+  }
+
+  if (assetId) {
+    params.push(`assetId=${encodeURIComponent(assetId)}`);
+  }
+
+  return params.length ? `${base}?${params.join("&")}` : base;
 }
 
-function getStoredControlCenterAccessKey() {
-  const directKeys = [
-    "mh_control_key",
-    "mh_control_center_key",
-    "MH_CONTROL_CENTER_KEY",
-    "control_center_key",
-    "mhControlKey",
-    "mh_access_key",
-    "controlCenterAccessKey"
-  ];
-
-  for (const key of directKeys) {
-    const value = localStorage.getItem(key);
-    if (value && value.trim()) return value.trim();
-  }
-
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index) || "";
-    const normalized = key.toLowerCase();
-    if (
-      normalized.includes("control") ||
-      normalized.includes("access") ||
-      normalized.includes("mh_") ||
-      normalized.includes("key")
-    ) {
-      const value = localStorage.getItem(key);
-      if (value && value.trim() && value.trim().length >= 8) {
-        return value.trim();
-      }
-    }
-  }
-
-  return "";
+function requiresProtectedMediaFetch(fileUrl = "") {
+  const value = asString(fileUrl).trim();
+  if (!value) return false;
+  if (/^blob:/i.test(value) || /^data:/i.test(value)) return false;
+  if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;
+  return value.includes("/media/file/");
 }
 
-async function openProtectedLibraryFile(fileUrl, filename) {
-  const accessKey = getStoredControlCenterAccessKey();
+function buildProtectedCacheKey(projectName, asset) {
+  return [
+    projectKey(projectName),
+    asString(asset.asset_id || asset.id || asset.file_path || asset.name),
+    asString(asset.preview_url || "")
+  ].join("::");
+}
 
-  if (!accessKey) {
-    alert("Missing Control Center access key. Click Control Center Access, paste the key, then Save Key.");
-    return;
+function revokeLibraryProtectedUrl(key) {
+  const entry = libraryProtectedUrlCache.get(key);
+  if (entry?.objectUrl) {
+    URL.revokeObjectURL(entry.objectUrl);
+  }
+  libraryProtectedUrlCache.delete(key);
+}
+
+async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {
+  const previewUrl = asString(asset?.preview_url || "");
+  const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");
+
+  if (!requiresProtectedMediaFetch(previewUrl)) {
+    return {
+      objectUrl: previewUrl,
+      contentType: "",
+      fileName,
+      fromProtectedFetch: false
+    };
   }
 
-  let response;
-  try {
-    response = await fetch(fileUrl, {
-      headers: {
-        "x-mh-control-key": accessKey
-      }
-    });
-  } catch (error) {
-    alert(`Could not open file: ${error.message}`);
-    return;
+  const cacheKey = buildProtectedCacheKey(projectName, asset);
+  const cached = libraryProtectedUrlCache.get(cacheKey);
+  if (cached?.objectUrl && !options.force) {
+    return {
+      objectUrl: cached.objectUrl,
+      contentType: cached.contentType,
+      fileName,
+      fromProtectedFetch: true
+    };
   }
 
-  if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    alert(`Could not open file: ${response.status} ${message}`);
-    return;
+  if (options.force) {
+    revokeLibraryProtectedUrl(cacheKey);
   }
 
-  const blob = await response.blob();
+  const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl);
   const objectUrl = URL.createObjectURL(blob);
-  const contentType = response.headers.get("content-type") || "";
-  const safeFilename = filename || "download";
+  libraryProtectedUrlCache.set(cacheKey, {
+    objectUrl,
+    contentType,
+    createdAt: Date.now()
+  });
+
+  return {
+    objectUrl,
+    contentType,
+    fileName,
+    fromProtectedFetch: true
+  };
+}
+
+async function openLibraryAsset(projectName, asset) {
+  if (!asset) {
+    throw new Error("Select an asset before opening.");
+  }
+
+  const resolved = await getProtectedAssetObjectUrl(projectName, asset);
+  const objectUrl = resolved.objectUrl;
+  const contentType = asString(resolved.contentType);
+  const safeFilename = asString(resolved.fileName || "download");
 
   if (
     contentType.startsWith("image/") ||
@@ -235,7 +308,7 @@ async function openProtectedLibraryFile(fileUrl, filename) {
     /\.(png|jpg|jpeg|webp|gif|svg|avif|mp4|mov|webm|m4v|pdf)$/i.test(safeFilename)
   ) {
     window.open(objectUrl, "_blank", "noopener,noreferrer");
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+   
     return;
   }
 
@@ -245,94 +318,13 @@ async function openProtectedLibraryFile(fileUrl, filename) {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
 }
 
-
-async function updateLibraryAssetStatus(assetId, status, projectName) {
-  const accessKey = getStoredControlCenterAccessKey();
-
-  if (!accessKey) {
-    alert("Missing Control Center access key. Click Control Center Access, paste the key, then Save Key.");
-    return;
-  }
-
-  if (!assetId) {
-    alert("Missing asset id.");
-    return;
-  }
-
-  if (!projectName) {
-    alert("Select a project before updating asset status.");
-    return;
-  }
-
-  const confirmed = status === "approved"
-    ? true
-    : confirm(`Set this asset status to "${status}"?`);
-
-  if (!confirmed) return;
-
-  let response;
-  try {
-    response = await fetch(
-      `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/status`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-mh-control-key": accessKey
-        },
-        body: JSON.stringify({
-          status,
-          note: `Status changed to ${status} from Control Center Library.`
-        })
-      }
-    );
-  } catch (error) {
-    alert(`Could not update asset status: ${error.message}`);
-    return;
-  }
-
-  const payloadText = await response.text();
-  let payload = {};
-  try {
-    payload = payloadText ? JSON.parse(payloadText) : {};
-  } catch {
-    payload = { raw: payloadText };
-  }
-
-  if (!response.ok || !payload.ok) {
-    alert(`Could not update asset status: ${response.status} ${payload.error || payloadText}`);
-    return;
-  }
-
-  const row = document.querySelector(`[data-asset-row-id="${CSS.escape(assetId)}"]`);
-  if (row) {
-    row.dataset.assetStatus = status;
-    const badge = row.querySelector("[data-asset-status-badge]");
-    if (badge) {
-      badge.textContent = status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-      badge.className = `card-badge ${status === "approved" ? "success" : status === "rejected" ? "danger" : status === "archived" ? "muted" : status === "uploaded" ? "neutral" : "warning"}`;
-    }
-  }
-
-  alert(`Asset status updated to: ${status}`);
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", () => {
+    Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+  });
 }
-
-document.addEventListener("click", (event) => {
-  const button = event.target.closest?.("[data-asset-status-action]");
-  if (!button) return;
-
-  event.preventDefault();
-
-  updateLibraryAssetStatus(
-    button.getAttribute("data-asset-id") || "",
-    button.getAttribute("data-asset-status-action") || "needs_review",
-    button.getAttribute("data-asset-project") || ""
-  );
-});
 
 document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("[data-copy-asset-path]");
@@ -360,8 +352,17 @@ document.addEventListener("click", (event) => {
 
   event.preventDefault();
 
-  const filename = decodeURIComponent(fileUrl.split("/").pop() || "download");
-  openProtectedLibraryFile(fileUrl, filename);
+  const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");
+  openLibraryAsset("", {
+    preview_url: fileUrl,
+    filename: assetName,
+    name: assetName
+  }).catch((error) => {
+    const message = error instanceof AccessKeyError
+      ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+      : `Could not open file: ${error.message || "Unknown error."}`;
+    alert(message);
+  });
 });
 
 function ensureLibrarySession(projectName) {
@@ -372,9 +373,11 @@ function ensureLibrarySession(projectName) {
       selectedAssetId: "",
       searchQuery: "",
       selectedType: "all",
-      selectedStatus: "all",
+      selectedStatus: "active",
       selectedSource: "all",
       sortBy: "updated_desc",
+      folderKey: "all_assets",
+      viewMode: "list",
       uploadType: "logo",
       uploading: false,
       recentUploads: []
@@ -382,6 +385,21 @@ function ensureLibrarySession(projectName) {
   }
   return librarySessionStore.get(key);
 }
+
+function closeAllLibraryActionDropdowns() {
+  Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {
+    item.classList.remove("is-open");
+    item.style.display = "";
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (event.target?.closest?.(".library-action-menu")) {
+    return;
+  }
+
+  closeAllLibraryActionDropdowns();
+});
 
 function getSafeAssetType(value = "") {
   return asString(value)
@@ -464,13 +482,16 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
 
   const registryByPath = new Map();
   const registryByName = new Map();
+  const registryById = new Map();
 
   registryItems.forEach((item) => {
     const localPath = asString(item.local_path || item.file_path || item.path).trim();
     const fileName = basename(localPath || item.file_name || item.filename || item.name || "");
+    const assetId = asString(item.asset_id || item.assetId || item.id).trim();
 
     if (localPath) registryByPath.set(localPath, item);
     if (fileName) registryByName.set(fileName, item);
+    if (assetId) registryById.set(assetId, item);
   });
 
   return assetItems.map((asset, index) => {
@@ -481,10 +502,11 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
     const extension = getFileExtension(fileName);
     const category = categoryByType.get(canonicalType) || {};
     const catalogItem = catalogMap.get(canonicalType) || {};
-    const registryMatch = registryByPath.get(filePath) || registryByName.get(fileName) || {};
+    const rawId = asString(asset.asset_id || asset.assetId || asset.id).trim();
+    const registryMatch = registryById.get(rawId) || registryByPath.get(filePath) || registryByName.get(fileName) || {};
     const merged = {
-      ...registryMatch,
-      ...asset
+      ...asset,
+      ...registryMatch
     };
 
     const status = normalizeReadinessStatus(
@@ -502,6 +524,12 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
       merged.id ||
       `${canonicalType || "asset"}-${index}-${fileName}`
     );
+    const mutationId = asString(
+      merged.asset_id ||
+      merged.assetId ||
+      merged.id ||
+      (filePath ? `path:${filePath}` : fileName ? `name:${fileName}` : id)
+    );
 
     const previewUrl = merged.preview_url ||
       merged.public_url ||
@@ -517,6 +545,7 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
       ...merged,
       id,
       asset_id: id,
+      mutation_id: mutationId,
       kind: "library_asset",
       name: asString(merged.name || merged.title || fileName || id),
       asset_type: canonicalType || "asset",
@@ -745,27 +774,65 @@ function buildRequiredAssetGroups(categoryReadiness) {
 }
 
 function getFilteredAssets(allAssets, session, bucketMap) {
+  const selectedFolderKey = session.folderKey || "all_assets";
   const selectedCategoryKey = session.selectedCategoryKey || "all";
   const selectedBucket = bucketMap.get(selectedCategoryKey) || null;
   const selectedType = session.selectedType || "all";
-  const selectedStatus = session.selectedStatus || "all";
+  const selectedStatus = session.selectedStatus || "active";
+  const effectiveSelectedStatus = selectedFolderKey === "archived" && selectedStatus === "active"
+    ? "archived"
+    : selectedStatus;
   const selectedSource = session.selectedSource || "all";
   const sortBy = session.sortBy || "updated_desc";
   const allowedTypes = selectedBucket ? new Set(selectedBucket.types) : null;
   const searchValue = asString(session.searchQuery).trim();
   const searchRegex = searchValue ? new RegExp(escapeRegExp(searchValue), "i") : null;
+  const recentUploadedNames = new Set(
+    asArray(session.recentUploads)
+      .filter((entry) => entry && entry.status === "success")
+      .map((entry) => asString(entry.filename).trim())
+      .filter(Boolean)
+  );
+
+  const folderMatches = (asset) => {
+    const statusValue = normalizeReadinessStatus(asset.status);
+    const assetType = asString(asset.asset_type).trim().toLowerCase();
+    if (selectedFolderKey === "all_assets") return true;
+    if (selectedFolderKey === "source_of_truth") return Boolean(asset.source_of_truth);
+    if (selectedFolderKey === "archived") return statusValue === "archived";
+    if (selectedFolderKey === "uploaded_session") {
+      const filename = asString(asset.filename || basename(asset.file_path || "")).trim();
+      return Boolean(filename && recentUploadedNames.has(filename));
+    }
+
+    const folder = LIBRARY_FOLDERS.find((item) => item.key === selectedFolderKey);
+    if (folder && Array.isArray(folder.types) && folder.types.length) {
+      return folder.types.includes(assetType);
+    }
+
+    return true;
+  };
 
   const filtered = allAssets.filter((asset) => {
+    const isDeleted = Boolean(asset.deleted || asset.is_deleted);
+    if (isDeleted) return false;
+
     const matchesBucket = !allowedTypes || allowedTypes.has(asset.asset_type);
+    const matchesFolder = folderMatches(asset);
     const matchesType = selectedType === "all" || asset.asset_type === selectedType;
-    const matchesStatus = selectedStatus === "all" || asset.status === selectedStatus;
+    const statusValue = normalizeReadinessStatus(asset.status);
+    const matchesStatus = effectiveSelectedStatus === "all"
+      ? statusValue !== "archived"
+      : effectiveSelectedStatus === "active"
+        ? statusValue !== "archived"
+        : statusValue === effectiveSelectedStatus;
     const matchesSource = selectedSource === "all"
       || (selectedSource === "media-studio" && asset.kind === "managed_media")
       || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
       || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
     const haystack = `${asset.name} ${asset.asset_type} ${asset.category_label} ${asset.file_path} ${asset.used_in.join(" ")}`;
     const matchesSearch = !searchRegex || searchRegex.test(haystack);
-    return matchesBucket && matchesType && matchesStatus && matchesSource && matchesSearch;
+    return matchesBucket && matchesFolder && matchesType && matchesStatus && matchesSource && matchesSearch;
   });
 
   const toTimestamp = (value) => {
@@ -784,15 +851,39 @@ function getFilteredAssets(allAssets, session, bucketMap) {
   return sorted;
 }
 
+function computeFolderCounts(allAssets, session) {
+  return LIBRARY_FOLDERS.map((folder) => {
+    const count = allAssets.filter((asset) => {
+      const statusValue = normalizeReadinessStatus(asset.status);
+      const assetType = asString(asset.asset_type).trim().toLowerCase();
+      const filename = asString(asset.filename || basename(asset.file_path || "")).trim();
+      const inRecent = asArray(session.recentUploads).some((entry) => entry?.status === "success" && asString(entry.filename).trim() === filename);
+
+      if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);
+      if (folder.key === "source_of_truth") return Boolean(asset.source_of_truth);
+      if (folder.key === "archived") return statusValue === "archived";
+      if (folder.key === "uploaded_session") return inRecent;
+      return Array.isArray(folder.types) ? folder.types.includes(assetType) : false;
+    }).length;
+
+    return {
+      ...folder,
+      count
+    };
+  });
+}
+
 function renderPreview(asset, escapeHtml) {
   if (!asset) {
     return `<div class="empty-box">Select an asset to preview.</div>`;
   }
 
+  const protectedPreview = requiresProtectedMediaFetch(asset.preview_url);
+
   if (asset.is_image && asset.image_url) {
     return `
       <div class="library-preview-frame">
-        <img src="${escapeHtml(asset.image_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">
+        <img src="${escapeHtml(asset.image_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
       </div>
     `;
   }
@@ -814,14 +905,30 @@ function renderPreview(asset, escapeHtml) {
   }
 
   if (asset.is_image && asset.preview_url) {
+    if (protectedPreview) {
+      return `
+        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+          <div class="library-preview-fallback">Loading protected image preview...</div>
+        </div>
+      `;
+    }
+
     return `
       <div class="library-preview-frame">
-        <img src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">
+        <img src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
       </div>
     `;
   }
 
   if (asset.is_video && asset.preview_url) {
+    if (protectedPreview) {
+      return `
+        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+          <div class="library-preview-fallback">Loading protected video preview...</div>
+        </div>
+      `;
+    }
+
     return `
       <div class="library-preview-frame">
         <video class="library-preview-video" controls src="${escapeHtml(asset.preview_url)}"></video>
@@ -844,6 +951,55 @@ function renderPreview(asset, escapeHtml) {
       <div class="library-preview-copy">Preview not available for this file type.</div>
     </div>
   `;
+}
+
+async function hydrateProtectedAssetPreview({
+  previewNode,
+  projectName,
+  asset,
+  escapeHtml,
+  showError
+}) {
+  if (!previewNode || !asset || !requiresProtectedMediaFetch(asset.preview_url)) {
+    return;
+  }
+
+  const expectedId = asString(asset.id || asset.asset_id || "");
+
+  try {
+    const resolved = await getProtectedAssetObjectUrl(projectName, asset);
+    if (!previewNode.isConnected) {
+      return;
+    }
+
+    const currentId = previewNode.getAttribute("data-preview-asset-id") || "";
+    if (currentId && expectedId && currentId !== expectedId) {
+      return;
+    }
+
+    if (asset.is_image) {
+      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+      return;
+    }
+
+    if (asset.is_video) {
+      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+    }
+  } catch (error) {
+    if (!previewNode.isConnected) {
+      return;
+    }
+
+    const message = error instanceof AccessKeyError
+      ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+
+    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+
+    if (!(error instanceof AccessKeyError)) {
+      showError?.(message);
+    }
+  }
 }
 
 function getWorkspaceAssetItems(assetsData, registry) {
@@ -876,6 +1032,112 @@ function buildAiPrompt(projectName, mode, payload = {}) {
   return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
 }
 
+function promptForTextInput(title, initialValue = "") {
+  const initial = asString(initialValue);
+
+  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+    try {
+      return Promise.resolve(window.prompt(title, initial));
+    } catch (_) {
+      // Fall through to custom modal when prompt is blocked.
+    }
+  }
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0,0,0,0.45)";
+    overlay.style.zIndex = "9999";
+    overlay.style.display = "grid";
+    overlay.style.placeItems = "center";
+
+    const modal = document.createElement("div");
+    modal.style.width = "min(480px, 92vw)";
+    modal.style.background = "#11141a";
+    modal.style.border = "1px solid rgba(255,255,255,0.12)";
+    modal.style.borderRadius = "12px";
+    modal.style.padding = "16px";
+    modal.style.color = "#f3f6fb";
+
+    const heading = document.createElement("div");
+    heading.textContent = title || "Enter value";
+    heading.style.fontWeight = "600";
+    heading.style.marginBottom = "10px";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = initial;
+    input.style.width = "100%";
+    input.style.padding = "10px 12px";
+    input.style.borderRadius = "8px";
+    input.style.border = "1px solid rgba(255,255,255,0.2)";
+    input.style.background = "#0d1016";
+    input.style.color = "#f3f6fb";
+
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.justifyContent = "flex-end";
+    actions.style.gap = "8px";
+    actions.style.marginTop = "12px";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.className = "btn btn-secondary";
+
+    const submitBtn = document.createElement("button");
+    submitBtn.type = "button";
+    submitBtn.textContent = "Save";
+    submitBtn.className = "btn btn-primary";
+
+    const cleanup = () => {
+      overlay.remove();
+    };
+
+    cancelBtn.onclick = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    submitBtn.onclick = () => {
+      const value = input.value;
+      cleanup();
+      resolve(value);
+    };
+
+    overlay.onclick = (event) => {
+      if (event.target === overlay) {
+        cleanup();
+        resolve(null);
+      }
+    };
+
+    input.onkeydown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitBtn.click();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelBtn.click();
+      }
+    };
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(submitBtn);
+    modal.appendChild(heading);
+    modal.appendChild(input);
+    modal.appendChild(actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    input.focus();
+    input.select();
+  });
+}
+
 function bindLibraryWorkspace({
   $,
   projectName,
@@ -891,6 +1153,35 @@ function bindLibraryWorkspace({
   showError,
   escapeHtml
 }) {
+  const resolveActiveProjectName = () => asString(projectName || $("projectSwitcher")?.value || "").trim().toLowerCase();
+
+  const rerender = () => {
+    bindLibraryWorkspace({
+      $,
+      projectName,
+      session,
+      assetsData,
+      operations,
+      registry,
+      categoryReadiness,
+      missingRequiredAssets,
+      navigateTo,
+      reloadProjectData,
+      showMessage,
+      showError,
+      escapeHtml
+    });
+  };
+
+  const reloadOrRerender = async () => {
+    if (typeof reloadProjectData === "function") {
+      await reloadProjectData(projectName);
+      return;
+    }
+
+    rerender();
+  };
+
   const catalog = getAssetCatalog(assetsData);
   const categoryByType = getCategoryByType(categoryReadiness);
   const managedAssets = getManagedMediaAssets(projectName, operations);
@@ -912,7 +1203,9 @@ function bindLibraryWorkspace({
     session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
   }
 
-  const selectedAsset = allAssets.find((asset) => asset.id === session.selectedAssetId) || null;
+  const selectedAsset = filteredAssets.find((asset) => asset.id === session.selectedAssetId)
+    || allAssets.find((asset) => asset.id === session.selectedAssetId)
+    || null;
   const overview = buildAssetOverview({
     assets: allAssets,
     requiredGroups
@@ -938,6 +1231,8 @@ function bindLibraryWorkspace({
     { value: "generated-media", label: "Generated Media" },
     { value: "publishing-ready", label: "Publishing Ready" }
   ];
+
+  const folderCounts = computeFolderCounts(allAssets, session);
 
   const overviewBox = $("libraryOverviewCards");
   if (overviewBox) {
@@ -1101,30 +1396,37 @@ function bindLibraryWorkspace({
         const tone = toStatusTone(asset.status);
         const statusLabel = toStatusLabel(asset.status);
         return `
-          <tr class="${session.selectedAssetId === asset.id ? "is-active" : ""}" data-asset-row-id="${escapeHtml(asset.asset_id)}" data-asset-status="${escapeHtml(asset.status)}">
-            <td>${escapeHtml(asset.name)}</td>
+          <tr class="${session.selectedAssetId === asset.id ? "is-active" : ""}" data-asset-row-id="${escapeHtml(asset.asset_id)}" data-asset-status="${escapeHtml(asset.status)}" data-library-row-select="${escapeHtml(asset.id)}" tabindex="0">
+            <td>
+              <div class="library-asset-primary">${escapeHtml(asset.name)}</div>
+              <small class="library-asset-meta">${escapeHtml(asset.filename || basename(asset.file_path || "") || "-")}</small>
+              <small class="library-asset-meta">${escapeHtml(shortPath(asset.file_path || ""))}</small>
+            </td>
             <td>
               <div>${escapeHtml(asset.category_label)}</div>
-              <small class="library-table-type">${escapeHtml(asset.asset_type)}</small>
+              <small class="library-table-type">${escapeHtml(asset.asset_type)}</small><br>
+              <small class="library-table-type">${escapeHtml(shortAssetId(asset.asset_id || asset.mutation_id || asset.id))}</small>
             </td>
             <td><span class="card-badge ${tone}" data-asset-status-badge>${escapeHtml(statusLabel)}</span></td>
-            <td><span class="card-badge ${asset.source_of_truth ? "success" : "neutral"}">${escapeHtml(asset.source_of_truth ? "Yes" : "No")}</span></td>
+            <td><span class="card-badge ${asset.source_of_truth ? "success" : "neutral"}">${escapeHtml(asset.source_of_truth ? "Source" : "Not Source")}</span></td>
             <td>${escapeHtml(asset.used_in.join(", ") || "Library")}</td>
             <td>
               <div class="library-table-actions">
                 <button class="btn btn-secondary" type="button" data-library-select="${escapeHtml(asset.id)}">Select</button>
                 <div class="library-actions">
-                  ${asset.preview_url ? `<a class="btn btn-primary btn-sm library-link-btn" href="${escapeHtml(asset.preview_url)}" target="_blank" rel="noreferrer">Open</a>` : `<button class="btn btn-primary btn-sm" type="button" disabled>Open</button>`}
+                  ${asset.preview_url ? `<button class="btn btn-primary btn-sm" type="button" data-library-open="${escapeHtml(asset.id)}">Open</button>` : `<button class="btn btn-primary btn-sm" type="button" disabled>Open</button>`}
                   ${asset.kind === "managed_media"
       ? `<button class="btn btn-secondary btn-sm" type="button" disabled>${escapeHtml(asset.source_label || "Managed")}</button>`
       : `<button class="btn btn-secondary btn-sm" type="button" data-library-source-truth="${escapeHtml(asset.id)}">${escapeHtml(asset.source_of_truth ? "Source" : "Set SoT")}</button>
                     <div class="library-action-menu">
                       <button class="btn btn-secondary btn-sm library-action-toggle" type="button">Actions ▾</button>
                       <div class="library-action-dropdown">
-                        <button type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
-                        <button type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>
-                        <button type="button" data-asset-status-action="rejected" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Reject</button>
-                        <button type="button" data-asset-status-action="archived" data-asset-id="${escapeHtml(asset.asset_id || asset.assetId || asset.id || "")}" data-asset-project="${escapeHtml(projectName)}">Archive</button>
+                        <button type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Approve</button>
+                        <button type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Needs Review</button>
+                        <button type="button" data-asset-status-action="rejected" data-library-asset="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Reject</button>
+                        <button type="button" data-library-archive="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Archive</button>
+                        <button type="button" data-library-rename="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Rename</button>
+                        <button type="button" data-library-delete="${escapeHtml(asset.id)}" data-asset-id="${escapeHtml(asset.mutation_id || asset.asset_id || asset.assetId || asset.id || "")}">Delete</button>
                       </div>
                     </div>`}
                   <button class="btn btn-secondary btn-sm" type="button" data-copy-asset-path="${escapeHtml(asset.file_path || asset.local_path || asset.preview_url || "")}">Copy Path</button>
@@ -1137,9 +1439,47 @@ function bindLibraryWorkspace({
       : `<tr><td colspan="6"><div class="empty-box">No assets match this view. Adjust type/status filters or search.</div></td></tr>`;
   }
 
+  const gridBody = $("libraryAssetGridBody");
+  if (gridBody) {
+    gridBody.innerHTML = filteredAssets.length
+      ? filteredAssets.map((asset) => {
+        const tone = toStatusTone(asset.status);
+        const statusLabel = toStatusLabel(asset.status);
+        const parentFolder = basename(asString(asset.file_path || "").split("/").slice(0, -1).join("/"));
+        const previewNode = asset.is_image && asset.preview_url
+          ? `<img class="library-grid-thumb" src="${escapeHtml(asset.preview_url)}" alt="${escapeHtml(asset.name)}">`
+          : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
+
+        return `
+          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
+            <div class="library-grid-preview">${previewNode}</div>
+            <div class="library-grid-title">${escapeHtml(asset.name)}</div>
+            <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
+            <div class="library-grid-meta">${escapeHtml(parentFolder || shortPath(asset.file_path || ""))}</div>
+            <div class="library-grid-foot">
+              <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
+              <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+            </div>
+          </article>
+        `;
+      }).join("")
+      : `<div class="empty-box">No assets match this view. Adjust folder/filter/search.</div>`;
+  }
+
   const previewVisual = $("libraryPreviewVisual");
   if (previewVisual) {
     previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+
+    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+    if (protectedPreviewNode && selectedAsset) {
+      hydrateProtectedAssetPreview({
+        previewNode: protectedPreviewNode,
+        projectName,
+        asset: selectedAsset,
+        escapeHtml,
+        showError
+      });
+    }
   }
 
   const previewMeta = $("libraryPreviewMeta");
@@ -1148,22 +1488,28 @@ function bindLibraryWorkspace({
       ? `
         <div class="data-stack">
           <div class="data-row"><span>Name</span><strong>${escapeHtml(selectedAsset.name)}</strong></div>
+          <div class="data-row"><span>Filename</span><strong>${escapeHtml(selectedAsset.filename || basename(selectedAsset.file_path || "") || "-")}</strong></div>
+          <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-")}</strong></div>
           <div class="data-row"><span>Type</span><strong>${escapeHtml(selectedAsset.asset_type)}</strong></div>
           <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
           <div class="data-row"><span>Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
-          <div class="data-row"><span>Source of truth</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Yes" : "No")}</strong></div>
+          <div class="data-row"><span>Source of truth</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</strong></div>
           <div class="data-row"><span>Version</span><strong>${escapeHtml(selectedAsset.version_id || "-")}</strong></div>
           <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+          <div class="data-row"><span>Short path</span><strong>${escapeHtml(shortPath(selectedAsset.file_path || ""))}</strong></div>
           <div class="data-row"><span>Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
         </div>
         <div class="library-preview-actions">
-          ${selectedAsset.preview_url ? `<a class="btn btn-primary library-link-btn" href="${escapeHtml(selectedAsset.preview_url)}" target="_blank" rel="noreferrer">Open Asset</a>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
+          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open Asset</button>` : `<button class="btn btn-primary" type="button" disabled>Open Asset</button>`}
           <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
           ${selectedAsset.kind === "managed_media"
       ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed media")}</button>`
       : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Source of Truth" : "Set as Source of Truth")}</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-asset-id="${escapeHtml(selectedAsset.asset_id)}" data-asset-project="${escapeHtml(projectName)}">Needs Review</button>`}
+          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
+          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Needs Review</button>
+          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
+          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
+          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
         </div>
       `
       : `<div class="empty-box">Select an asset to view details.</div>`;
@@ -1245,7 +1591,9 @@ function bindLibraryWorkspace({
 
   const selectButtons = Array.from(document.querySelectorAll("[data-library-select]"));
   selectButtons.forEach((button) => {
-    button.onclick = () => {
+    button.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       session.selectedAssetId = button.getAttribute("data-library-select") || "";
       bindLibraryWorkspace({
         $,
@@ -1265,17 +1613,357 @@ function bindLibraryWorkspace({
     };
   });
 
+  const selectableRows = Array.from(document.querySelectorAll("[data-library-row-select]"));
+  selectableRows.forEach((row) => {
+    row.onclick = (event) => {
+      if (isLibraryInteractiveElement(event.target)) {
+        return;
+      }
+
+      const nextId = row.getAttribute("data-library-row-select") || "";
+      if (!nextId) return;
+
+      session.selectedAssetId = nextId;
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        operations,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
+
+    row.onkeydown = (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      const nextId = row.getAttribute("data-library-row-select") || "";
+      if (!nextId) return;
+      session.selectedAssetId = nextId;
+      bindLibraryWorkspace({
+        $,
+        projectName,
+        session,
+        assetsData,
+        operations,
+        registry,
+        categoryReadiness,
+        missingRequiredAssets,
+        navigateTo,
+        reloadProjectData,
+        showMessage,
+        showError,
+        escapeHtml
+      });
+    };
+  });
+
+  const selectableCards = Array.from(document.querySelectorAll("[data-library-grid-select]"));
+  selectableCards.forEach((card) => {
+    card.onclick = (event) => {
+      if (isLibraryInteractiveElement(event.target)) return;
+      const nextId = card.getAttribute("data-library-grid-select") || "";
+      if (!nextId) return;
+      session.selectedAssetId = nextId;
+      rerender();
+    };
+
+    card.onkeydown = (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      const nextId = card.getAttribute("data-library-grid-select") || "";
+      if (!nextId) return;
+      session.selectedAssetId = nextId;
+      rerender();
+    };
+  });
+
+  const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
+  folderButtons.forEach((button) => {
+    button.onclick = () => {
+      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+      session.folderKey = folderKey;
+      if (folderKey === "archived") {
+        session.selectedStatus = "archived";
+      }
+      rerender();
+    };
+  });
+
+  const viewToggleButtons = Array.from(document.querySelectorAll("[data-library-view-mode]"));
+  viewToggleButtons.forEach((button) => {
+    button.onclick = () => {
+      const mode = button.getAttribute("data-library-view-mode") || "list";
+      session.viewMode = mode === "grid" ? "grid" : "list";
+      rerender();
+    };
+  });
+
+  const finderWorkspace = $("libraryFinderWorkspace");
+  if (finderWorkspace) {
+    finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+  }
+
+  const toolbarUpload = $("libraryToolbarUploadBtn");
+  if (toolbarUpload) {
+    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+  }
+
+  const triggerToolbarAction = (selector, message) => {
+    const target = document.querySelector(selector);
+    if (!target) {
+      showError?.(message || "Select an asset first.");
+      return;
+    }
+    target.click();
+  };
+
+  const toolbarRename = $("libraryToolbarRenameBtn");
+  if (toolbarRename) {
+    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
+  }
+
+  const toolbarDelete = $("libraryToolbarDeleteBtn");
+  if (toolbarDelete) {
+    toolbarDelete.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-delete]", "Select an asset to delete.");
+  }
+
+  const toolbarApprove = $("libraryToolbarApproveBtn");
+  if (toolbarApprove) {
+    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
+  }
+
+  const toolbarSource = $("libraryToolbarSourceBtn");
+  if (toolbarSource) {
+    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+  }
+
+  const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+  openButtons.forEach((button) => {
+    button.onclick = async () => {
+      const id = button.getAttribute("data-library-open") || "";
+      const asset = allAssets.find((item) => item.id === id);
+      if (!asset) {
+        showError?.("Asset not found.");
+        return;
+      }
+
+      try {
+        await openLibraryAsset(projectName, asset);
+      } catch (error) {
+        const message = error instanceof AccessKeyError
+          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+          : `Could not open file: ${error.message || "Unknown error."}`;
+        showError?.(message);
+      }
+    };
+  });
+
   const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
   sourceOfTruthButtons.forEach((button) => {
-    button.onclick = () => {
+    button.onclick = async () => {
+      closeAllLibraryActionDropdowns();
+      const activeProjectName = resolveActiveProjectName();
+      if (!activeProjectName) {
+        showError?.("Select a project before updating source of truth.");
+        return;
+      }
+
       const assetId = button.getAttribute("data-library-source-truth") || "";
       const asset = allAssets.find((item) => item.id === assetId);
-      const input = $("quickCommandInput");
-      if (input) {
-        input.value = `For ${projectName || "this project"}, set ${asset?.name || "the selected asset"} as source-of-truth if valid and explain any risks before approval.`;
+      if (!asset) {
+        showError?.("Asset not found.");
+        return;
       }
-      navigateTo("ai-command");
-      showMessage?.("Source-of-truth action routed to AI Command.");
+
+      try {
+        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+        session.selectedAssetId = asset.id;
+        await reloadOrRerender();
+        showMessage?.(`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.`);
+      } catch (error) {
+        const message = error instanceof AccessKeyError
+          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+          : (error.message || "Failed to update source of truth.");
+        showError?.(message);
+      }
+    };
+  });
+
+  const statusActionButtons = Array.from(document.querySelectorAll("[data-asset-status-action]"));
+  statusActionButtons.forEach((button) => {
+    button.onclick = async () => {
+      closeAllLibraryActionDropdowns();
+      const activeProjectName = resolveActiveProjectName();
+      if (!activeProjectName) {
+        showError?.("Select a project before updating asset status.");
+        return;
+      }
+
+      const status = button.getAttribute("data-asset-status-action") || "needs_review";
+      const id = button.getAttribute("data-library-asset") || "";
+      const assetId = button.getAttribute("data-asset-id") || "";
+      const asset = allAssets.find((item) => item.id === id) || allAssets.find((item) => asString(item.asset_id || item.id) === assetId);
+
+      if (!assetId) {
+        showError?.("Missing asset id.");
+        return;
+      }
+
+      const confirmed = status === "approved" ? true : confirm(`Set this asset status to "${status}"?`);
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        await updateProjectAssetStatus(activeProjectName, assetId, status, `Status changed to ${status} from Control Center Library.`);
+        if (asset?.id) session.selectedAssetId = asset.id;
+        await reloadOrRerender();
+        showMessage?.(`Asset status updated to ${toStatusLabel(status)}.`);
+      } catch (error) {
+        const message = error instanceof AccessKeyError
+          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+          : (error.message || "Failed to update asset status.");
+        showError?.(message);
+      }
+    };
+  });
+
+  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+  archiveButtons.forEach((button) => {
+    button.onclick = async () => {
+      closeAllLibraryActionDropdowns();
+      const activeProjectName = resolveActiveProjectName();
+      if (!activeProjectName) {
+        showError?.("Select a project before archiving assets.");
+        return;
+      }
+
+      const id = button.getAttribute("data-library-archive") || "";
+      const assetId = button.getAttribute("data-asset-id") || "";
+      const asset = allAssets.find((item) => item.id === id) || allAssets.find((item) => asString(item.asset_id || item.id) === assetId);
+
+      if (!assetId) {
+        showError?.("Missing asset id.");
+        return;
+      }
+
+      if (!confirm("Archive this asset?")) {
+        return;
+      }
+
+      try {
+        await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");
+        if (asset?.id) session.selectedAssetId = asset.id;
+        await reloadOrRerender();
+        showMessage?.("Asset archived.");
+      } catch (error) {
+        showError?.(error.message || "Failed to archive asset.");
+      }
+    };
+  });
+
+  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+  renameButtons.forEach((button) => {
+    button.onclick = async () => {
+      closeAllLibraryActionDropdowns();
+      const activeProjectName = resolveActiveProjectName();
+      if (!activeProjectName) {
+        showError?.("Select a project before renaming assets.");
+        return;
+      }
+
+      const id = button.getAttribute("data-library-rename") || "";
+      const assetId = button.getAttribute("data-asset-id") || "";
+      const asset = allAssets.find((item) => item.id === id) || allAssets.find((item) => asString(item.asset_id || item.id) === assetId);
+
+      if (!asset || !assetId) {
+        showError?.("Asset not found.");
+        return;
+      }
+
+      const nextName = await promptForTextInput("Rename asset", asset.name || "");
+      if (nextName == null) {
+        return;
+      }
+
+      const normalized = nextName.trim();
+      if (!normalized) {
+        showError?.("Asset name cannot be empty.");
+        return;
+      }
+
+      try {
+        await renameProjectAsset(activeProjectName, assetId, normalized);
+        session.selectedAssetId = asset.id;
+        await reloadOrRerender();
+        showMessage?.("Asset renamed.");
+      } catch (error) {
+        showError?.(error.message || "Failed to rename asset.");
+      }
+    };
+  });
+
+  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+  deleteButtons.forEach((button) => {
+    button.onclick = async () => {
+      closeAllLibraryActionDropdowns();
+      const activeProjectName = resolveActiveProjectName();
+      if (!activeProjectName) {
+        showError?.("Select a project before deleting assets.");
+        return;
+      }
+
+      const id = button.getAttribute("data-library-delete") || "";
+      const assetId = button.getAttribute("data-asset-id") || "";
+      const asset = allAssets.find((item) => item.id === id) || allAssets.find((item) => asString(item.asset_id || item.id) === assetId);
+
+      if (!assetId) {
+        showError?.("Missing asset id.");
+        return;
+      }
+
+      if (!confirm("Soft-delete this asset? It will be archived in the registry.")) {
+        return;
+      }
+
+      try {
+        await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");
+        if (asset?.id === session.selectedAssetId) {
+          session.selectedAssetId = "";
+        }
+        await reloadOrRerender();
+        showMessage?.("Asset deleted (soft delete).");
+      } catch (error) {
+        showError?.(error.message || "Failed to delete asset.");
+      }
+    };
+  });
+
+  const actionToggleButtons = Array.from(document.querySelectorAll(".library-action-toggle"));
+  actionToggleButtons.forEach((button) => {
+    button.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const menu = button.closest(".library-action-menu");
+      const dropdown = menu?.querySelector(".library-action-dropdown");
+      if (!dropdown) return;
+
+      const open = dropdown.classList.contains("is-open");
+      closeAllLibraryActionDropdowns();
+
+      if (!open) {
+        dropdown.classList.add("is-open");
+        dropdown.style.display = "block";
+      }
     };
   });
 
@@ -1290,29 +1978,6 @@ function bindLibraryWorkspace({
       }
       showMessage?.(`Upload category set to ${uploadType}.`);
     };
-  });
-
-  const keepLibraryControlFocused = (event) => {
-    const control = event.target?.closest?.(
-      "#librarySearchInput, #libraryUploadTypeSelect, #libraryFilterTypeSelect, #libraryFilterStatusSelect, #libraryFilterSourceSelect, #librarySortSelect"
-    );
-
-    if (!control) return;
-
-    event.stopPropagation();
-
-    window.setTimeout(() => {
-      if (document.activeElement !== control && typeof control.focus === "function") {
-        control.focus();
-      }
-    }, 0);
-  };
-
-  ["click", "mouseup", "pointerup"].forEach((eventName) => {
-    const root = $("libraryRoot");
-    if (root) {
-      root.addEventListener(eventName, keepLibraryControlFocused);
-    }
   });
 
   const searchInput = $("librarySearchInput");
@@ -1372,7 +2037,22 @@ function bindLibraryWorkspace({
 
   const dropZone = $("libraryDropZone");
   const uploadInput = $("libraryUploadInput");
+  const uploadBtn = $("libraryUploadBtn");
   if (dropZone && uploadInput) {
+    const updateUploadUiState = () => {
+      const files = Array.from(uploadInput.files || []);
+      const names = files.slice(0, 6).map((file) => file.name).join(", ");
+      const suffix = files.length > 6 ? ` +${files.length - 6} more` : "";
+      const message = files.length ? `${files.length} file${files.length === 1 ? "" : "s"} selected: ${names}${suffix}` : "No files selected";
+      const info = $("libraryDropInfo");
+      if (info) info.textContent = message;
+
+      if (uploadBtn) {
+        uploadBtn.disabled = session.uploading || files.length === 0;
+        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+      }
+    };
+
     const syncDroppedFilesToInput = (files) => {
       try {
         const transfer = new DataTransfer();
@@ -1381,46 +2061,60 @@ function bindLibraryWorkspace({
       } catch (_) {
         // Browser may block synthetic file assignment.
       }
-      const names = files.slice(0, 6).map((file) => file.name).join(", ");
-      const suffix = files.length > 6 ? ` +${files.length - 6} more` : "";
-      const message = files.length ? `${files.length} file${files.length === 1 ? "" : "s"} selected: ${names}${suffix}` : "No files selected";
-      const info = $("libraryDropInfo");
-      if (info) info.textContent = message;
+      updateUploadUiState();
     };
 
-    dropZone.onclick = () => uploadInput.click();
+    dropZone.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      uploadInput.click();
+    };
+
+    dropZone.onkeydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        uploadInput.click();
+      }
+    };
     uploadInput.onchange = () => {
       const files = Array.from(uploadInput.files || []);
       syncDroppedFilesToInput(files);
     };
 
-    ["dragenter", "dragover"].forEach((eventName) => {
-      dropZone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.add("is-drag-active");
+    if (!dropZone.dataset.libraryDndBound) {
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.add("is-drag-active");
+        });
       });
-    });
 
-    ["dragleave", "drop"].forEach((eventName) => {
-      dropZone.addEventListener(eventName, (event) => {
-        event.preventDefault();
-        dropZone.classList.remove("is-drag-active");
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.remove("is-drag-active");
+        });
       });
-    });
 
-    dropZone.addEventListener("drop", (event) => {
-      const files = Array.from(event.dataTransfer?.files || []);
-      if (!files.length) return;
-      syncDroppedFilesToInput(files);
-    });
+      dropZone.addEventListener("drop", (event) => {
+        const files = Array.from(event.dataTransfer?.files || []);
+        if (!files.length) return;
+        syncDroppedFilesToInput(files);
+      });
+
+      dropZone.dataset.libraryDndBound = "1";
+    }
+
+    updateUploadUiState();
   }
 
-  const uploadBtn = $("libraryUploadBtn");
   if (uploadBtn) {
-    uploadBtn.disabled = session.uploading;
-    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload";
+    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
     uploadBtn.onclick = async () => {
-      if (!projectName) {
+      const activeProjectName = resolveActiveProjectName();
+
+      if (!activeProjectName) {
         showError?.("Select a project before uploading.");
         return;
       }
@@ -1443,6 +2137,7 @@ function bindLibraryWorkspace({
 
       const uploaded = [];
       const failed = [];
+      let reloadedFromServer = false;
 
       session.uploading = true;
       bindLibraryWorkspace({
@@ -1464,7 +2159,7 @@ function bindLibraryWorkspace({
       try {
         for (const file of files) {
           try {
-            const result = await uploadProjectAsset(projectName, assetType, file);
+            const result = await uploadProjectAsset(activeProjectName, assetType, file);
             uploaded.push({
               filename: result?.filename || file.name,
               asset_type: assetType,
@@ -1485,13 +2180,16 @@ function bindLibraryWorkspace({
         session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);
 
         if (uploaded.length && typeof reloadProjectData === "function") {
-          await reloadProjectData(projectName);
+          await reloadProjectData(activeProjectName);
+          reloadedFromServer = true;
         }
 
         const input = $("libraryUploadInput");
         if (input) input.value = "";
         const dropInfo = $("libraryDropInfo");
         if (dropInfo) dropInfo.textContent = "No files selected";
+        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
 
         if (uploaded.length && !failed.length) {
           showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.`);
@@ -1502,6 +2200,11 @@ function bindLibraryWorkspace({
         }
       } finally {
         session.uploading = false;
+        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+        if (!reloadedFromServer) {
+          rerender();
+        }
       }
     };
   }
@@ -1596,6 +2299,18 @@ export const libraryRoute = {
     const session = ensureLibrarySession(projectName);
     const categoryReadiness = getCategoryReadinessList(assetsData);
     const missingRequiredAssets = getMissingAssetLabels(assetsData);
+    const renderCatalog = getAssetCatalog(assetsData);
+    const renderCategoryByType = getCategoryByType(categoryReadiness);
+    const renderManagedAssets = getManagedMediaAssets(projectName, operations);
+    const renderWorkspaceAssetsData = {
+      ...assetsData,
+      assets: getWorkspaceAssetItems(assetsData, registry)
+    };
+    const renderAllAssets = [
+      ...renderManagedAssets,
+      ...normalizeAssets(projectName, renderWorkspaceAssetsData, registry, renderCategoryByType, renderCatalog)
+    ];
+    const folderCounts = computeFolderCounts(renderAllAssets, session);
     const root = $("libraryRoot");
     if (!root) return;
 
@@ -1655,8 +2370,36 @@ export const libraryRoute = {
             <h3>Asset Workspace</h3>
             <span class="card-badge neutral">Table + Preview</span>
           </div>
-          <div class="library-workspace-grid">
+          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "list")}">
+            <aside class="library-finder-sidebar">
+              <div class="library-finder-sidebar-title">Folders</div>
+              <div class="library-folder-list">
+                ${LIBRARY_FOLDERS.map((folder) => {
+      const count = folderCounts.find((item) => item.key === folder.key)?.count || 0;
+      const active = (session.folderKey || "all_assets") === folder.key;
+      return `
+                    <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+                      <span>${escapeHtml(folder.label)}</span>
+                      <small>${escapeHtml(formatCount(count))}</small>
+                    </button>
+                  `;
+    }).join("")}
+              </div>
+            </aside>
+
             <div class="library-workspace-main">
+              <div class="library-finder-toolbar">
+                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
+                <div class="library-view-toggle" role="group" aria-label="Library view mode">
+                  <button type="button" class="btn btn-secondary ${session.viewMode === "grid" ? "is-active" : ""}" data-library-view-mode="grid">Grid</button>
+                  <button type="button" class="btn btn-secondary ${session.viewMode !== "grid" ? "is-active" : ""}" data-library-view-mode="list">List</button>
+                </div>
+                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
+                <button id="libraryToolbarDeleteBtn" class="btn btn-secondary" type="button">Delete</button>
+                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+              </div>
+
               <div class="library-filter-bar">
                 <div class="library-filter-field">
                   <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
@@ -1665,6 +2408,7 @@ export const libraryRoute = {
                 <div class="library-filter-field">
                   <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
                   <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+                    <option value="active">Active (non-archived)</option>
                     <option value="all">All statuses</option>
                     <option value="draft">Draft</option>
                     <option value="approved">Approved</option>
@@ -1711,6 +2455,8 @@ export const libraryRoute = {
                   <tbody id="libraryAssetTableBody"></tbody>
                 </table>
               </div>
+
+              <div id="libraryAssetGridBody" class="library-grid-body"></div>
             </div>
 
             <aside class="library-workspace-side">
