@@ -1535,8 +1535,9 @@ function unlockStartupUi(reason = "manual-unlock") {
   }
 
   recordStartupUnlock(reason);
-  showError("Startup is still syncing. The interface has been unlocked.");
-  showMessage("Startup is still syncing. The interface has been unlocked.");
+  // Unlock should recover the interface quietly.
+  // Do not show a persistent error after the user manually unlocks the UI.
+  showMessage("Interface unlocked.");
   recordStartupStep("manualUnlock.done", {
     token: activeProjectLoadToken,
     detail: reason

@@ -5961,54 +5961,51 @@ section[data-page="workflows"] .wfexec-empty {
 .startup-unlock-bar button,
 .startup-trace-panel button {
   pointer-events: auto;
+}\n\n/* =========================
+   Startup / Loading Overlay Safety
+   Keep overlays from trapping clicks after app startup.
+========================= */
+
+/* Diagnostics surfaces should not block the application shell.
+   Recovery buttons inside those panels remain clickable. */
+#startupUnlockBar,
+#startupTracePanel,
+#startupStepBanner,
+.startup-unlock-bar,
+.startup-trace-panel,
+.startup-step-banner {
+  pointer-events: none;
 }
 
-/* Production guard: stale loading overlays must not block the UI after app loading is cleared */
+#startupUnlockBar button,
+#startupTracePanel button,
+.startup-unlock-bar button,
+.startup-trace-panel button {
+  pointer-events: auto;
+}
+
+/* Hide stale loading overlays only when the app is not actively loading. */
 body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,
 body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay,
-body[data-loading-state="idle"] #loadingOverlay,
-body[data-loading-state="idle"] .loading-overlay {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
 
-/* Hard production safety: stale startup overlays must never trap the Control Center */
 body[data-loading-state="idle"] #loadingOverlay,
 body[data-loading-state="idle"] .loading-overlay,
-body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,
-body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay {
+.loading-overlay[aria-hidden="true"],
+.loading-overlay:not(.is-visible),
+.loading-overlay[hidden] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* Production UI safety: stale startup overlays must never block the Control Center */
-#loadingOverlay,
-.loading-overlay,
-#startupUnlockBar,
-.startup-unlock-bar {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-body.is-loading,
-body.loading,
-body.loading-locked,
-body.app-loading,
-body.app-locked,
-html.is-loading,
-html.loading,
-html.loading-locked,
-html.app-loading,
-html.app-locked {
-  overflow: auto !important;
+/* Allow the app shell to recover even if a loading class becomes stale. */
+body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked),
+html:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) {
   pointer-events: auto !important;
 }
+
+/* End Startup / Loading Overlay Safety */
 
 @media (max-width: 768px) {
   .home-decision-kpi-grid,
@@ -7358,3 +7355,20 @@ body {
 }
 
 /* End Campaign Studio UX Polish */
+
+/* =========================
+   Startup Hidden State Fix
+   Ensure hidden startup recovery UI is actually invisible.
+========================= */
+
+#startupUnlockBar[aria-hidden="true"],
+#startupStepBanner[aria-hidden="true"],
+.startup-unlock-bar[aria-hidden="true"],
+.startup-step-banner[aria-hidden="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* End Startup Hidden State Fix */
