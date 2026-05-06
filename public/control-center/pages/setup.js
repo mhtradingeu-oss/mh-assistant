@@ -18,7 +18,6 @@ const STEP_DEFINITIONS = [
   {
     id: "business-basics",
     title: "Business Basics",
-    description: "Start with the core project record used across all workflows.",
     fields: ["project_name", "project_type", "website_url", "launch_window"]
   },
   {
@@ -81,6 +80,20 @@ const FIELD_IMPORTANCE_REASON = {
   primary_goal: "Aligns optimization priorities and readiness evaluation.",
   competitors: "Supports differentiation and benchmark-aware recommendations.",
   social_channels: "Defines where campaign and publishing workflows should execute."
+};
+
+const SETUP_FIELD_INFO = {
+  project_name: "This name is used as the main project identity across the Control Center.",
+  project_type: "Helps AI choose better defaults for workflows, campaigns, and recommendations.",
+  website_url: "Used as the main destination for website-aware content and campaign routing.",
+  brand_promise: "Defines the core value AI should protect in every output.",
+  market: "Controls regional assumptions, audience context, and localization.",
+  language: "Sets the default language for content, AI suggestions, and campaign outputs.",
+  currency: "Used for pricing, offers, budgets, and commercial planning.",
+  audience_primary: "Defines the main customer group the system should optimize messages for.",
+  primary_goal: "Tells the system what success means for this project.",
+  competitors: "Helps AI create differentiated positioning instead of generic copy.",
+  social_channels: "Defines where campaigns and publishing workflows should prepare content."
 };
 
 function asArray(value) {
@@ -337,10 +350,15 @@ function renderField({
   const indicatorClass = required ? (filled ? "is-ready" : "is-missing") : (filled ? "is-ready" : "is-optional");
   const indicatorText = required ? (filled ? "Ready" : "Missing") : (filled ? "Loaded" : "Optional");
 
+  const infoText = SETUP_FIELD_INFO[name] || helper || "";
+
   return `
     <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
       <div class="setup-field-head">
-        <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
+        <div class="setup-label-with-info">
+          <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
+          ${infoText ? `<button class="setup-info-icon" type="button" aria-label="Info about ${escapeHtml(label)}" title="${escapeHtml(infoText)}">i<span class="setup-info-tooltip" role="tooltip">${escapeHtml(infoText)}</span></button>` : ""}
+        </div>
         <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
       </div>
       ${
@@ -620,7 +638,7 @@ function updateWizardDashboard({
         ? "Needs required data"
         : status.tone === "warning"
           ? "Partially complete"
-          : "Looks good";
+          : "";
     }
   });
 
@@ -1121,7 +1139,7 @@ export const setupRoute = {
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
               <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
               <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
-              <span class="setup-save-note">Changes are saved to the active project.</span>
+              <span class="setup-save-note"></span>
             </div>
           </div>
 
@@ -1188,7 +1206,7 @@ export const setupRoute = {
                       <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
                     </button>
                     <p>${escapeHtml(step.description)}</p>
-                    <div class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : "Looks good"}</div>
+                    <div class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</div>
                     <button class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(step.id)}">Open Step</button>
                   </article>
                 `;
@@ -1211,7 +1229,7 @@ export const setupRoute = {
             <form id="setupProjectForm" class="setup-v2-form">
               <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
                 <h4>Business Basics</h4>
-                <p class="home-section-copy">Project identity and foundational business metadata.</p>
+                <p class="home-section-copy"></p>
                 <div class="setup-form-grid setup-form-grid-2">
                   ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
                   ${renderField({ name: "project_type", label: "Project type", value: values.project_type, helper: "Broad business model.", placeholder: "e.g. Ecommerce", escapeHtml, required: true })}
