@@ -1915,7 +1915,7 @@ export const campaignStudioRoute = {
                 <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>
               </div>
               <div class="campaign-section-copy">
-                Send to AI Command prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
+                Send to AI Workspace prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
               </div>
               <div class="data-stack">
                 ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
@@ -1927,7 +1927,7 @@ export const campaignStudioRoute = {
               </div>
               <div class="quick-actions">
                 <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to AI Command</span>
+                  <span class="home-action-title">Send to AI Workspace</span>
                   <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
                 </button>
               </div>

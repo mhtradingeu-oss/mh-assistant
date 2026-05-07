@@ -3452,7 +3452,7 @@ function bindCommandInputs() {
   }
 
   if (runBtn) {
-    runBtn.textContent = "Send to AI Command";
+    runBtn.textContent = "Send to AI Workspace";
     runBtn.setAttribute("data-action", "send-ai-command");
   }
 }

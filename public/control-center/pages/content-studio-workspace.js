@@ -1231,7 +1231,7 @@ function renderComposer(session, state, handoff, escapeHtml) {
         <button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
         <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send to Media Studio</button>
         <button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
-        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Send to AI Command</button>
+        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Send to AI Workspace</button>
       </div>
 
       ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
@@ -1429,7 +1429,7 @@ function renderAgents(escapeHtml) {
             <div class="content-agent-actions" style="margin-top:10px;">
               <button class="btn btn-secondary" type="button" data-content-agent-use="${escapeHtml(agent.id)}">Use Prompt</button>
               <button class="btn btn-secondary" type="button" data-content-agent-save="${escapeHtml(agent.id)}">Save Draft</button>
-              <button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Command</button>
+              <button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>
             </div>
           </article>
         `).join("")}

@@ -1573,7 +1573,7 @@ function renderSettingsAssistant(session, escapeHtml) {
         </div>
       </div>
       <div class="settings-toolbar">
-        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI Command</button>
+        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI Workspace</button>
       </div>
       <div class="quick-actions">
         ${prompts.map((item, index) => `

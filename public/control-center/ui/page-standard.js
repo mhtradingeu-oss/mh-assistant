@@ -22,7 +22,7 @@ const ROUTE_COPY = {
     eyebrow: "Executive",
     title: "Executive Command Center",
     description: "Understand system health, readiness, active work, blockers, and the next best move in one scan.",
-    primary: { label: "Open AI Command", route: "ai-command" },
+    primary: { label: "Open AI Workspace", route: "ai-command" },
     secondary: { label: "Refresh Project", action: "refresh" }
   },
   setup: {
@@ -47,8 +47,8 @@ const ROUTE_COPY = {
     secondary: { label: "Open Insights", route: "insights" }
   },
   "ai-command": {
-    eyebrow: "AI Team",
-    title: "AI Team Control Room",
+    eyebrow: "AI Workspace",
+    title: "AI Workspace",
     description: "Direct role-aware AI agents, structured tasks, artifacts, recommendations, and operating decisions.",
     primary: { label: "Run Structured Task", action: "focus-ai-send" },
     secondary: { label: "Open Workflows", route: "workflows" }
@@ -167,7 +167,7 @@ const ROUTE_ACTIONS = {
   ],
   workflows: [
     { label: "Run workflow", description: "Execute the selected workflow with current project inputs.", action: "focus-run-workflow" },
-    { label: "Build custom workflow with AI", description: "Ask AI to assemble a workflow for the current blocker.", action: "focus-build-workflow" },
+    { label: "Build custom workflow with AI", description: "Use AI Workspace to assemble a workflow for the current blocker.", action: "focus-build-workflow" },
     { label: "View running workflows", description: "Inspect active and recent execution state.", route: "job-monitor" },
     { label: "Send output forward", description: "Route the latest workflow result into the owning workspace.", action: "focus-workflow-route" }
   ],
@@ -197,12 +197,12 @@ const ROUTE_ACTIONS = {
   ],
   "ads-manager": [
     { label: "Build ad brief", description: "Turn campaign inputs into a paid growth plan.", route: "campaign-studio" },
-    { label: "Generate variants", description: "Ask AI for ad angles, copy variants, and test matrix.", prompt: "Build paid ad variants for the active campaign using current audience, channel, and readiness signals." },
+    { label: "Generate variants", description: "Generate ad angles, copy variants, and test matrix.", prompt: "Build paid ad variants for the active campaign using current audience, channel, and readiness signals." },
     { label: "Suggest budget", description: "Review budget inputs and paid readiness before launch.", action: "focus-save-budget" },
     { label: "Send to Campaign", description: "Route paid plan back into Campaign Studio.", route: "campaign-studio" }
   ],
   insights: [
-    { label: "Generate recommendations", description: "Ask AI to turn performance signals into priorities.", route: "ai-command" },
+    { label: "Generate recommendations", description: "Turn performance signals into priorities.", route: "ai-command" },
     { label: "Record feedback", description: "Preserve what worked and what failed in learning memory.", route: "ai-command" },
     { label: "Scale winner", description: "Send winning signals into campaign planning.", route: "campaign-studio" },
     { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
@@ -755,7 +755,7 @@ function statusCards(route, m) {
   return asArray(cards[route] || [
     card("Ready", m.systemScore >= 80 ? "Ready" : "Needs attention", "Current route readiness.", tone(m.systemScore)),
     card("Needs attention", String(m.criticalAlerts + m.failed), "Critical alerts and execution failures.", m.criticalAlerts + m.failed ? "warning" : "success"),
-    card("Next step", firstText([m.recommendations[0]], "Ask AI for guidance"), "Recommended operating move.", m.recommendations.length ? "warning" : "neutral")
+    card("Next step", firstText([m.recommendations[0]], "Open AI Workspace for guidance"), "Recommended operating move.", m.recommendations.length ? "warning" : "neutral")
   ]);
 }
 
@@ -922,7 +922,7 @@ function renderStatus(container, items) {
 function quickActions(route) {
   const common = [
     { label: "Open Home", route: "home" },
-    { label: "Open AI Command", route: "ai-command" },
+    { label: "Open AI Workspace", route: "ai-command" },
     { label: "Open Insights", route: "insights" }
   ];
 
@@ -1163,9 +1163,9 @@ export function applyStandardPageLayout(context) {
   if (statusTitle) statusTitle.textContent = `${copy.title} status`;
   if (actionTitle) actionTitle.textContent = `${copy.title} actions`;
   if (aiTitle) aiTitle.textContent = "Contextual AI Agent";
-  if (aiDescription) aiDescription.textContent = "AI assistance is available from AI Command.";
+  if (aiDescription) aiDescription.textContent = "AI assistance is available from AI Workspace.";
   if (nextTitle) nextTitle.textContent = `${copy.eyebrow} recommendation`;
-  if (nextBest) nextBest.textContent = "Open AI Command for the next recommended action.";
+  if (nextBest) nextBest.textContent = "Open AI Workspace for the next recommended action.";
 
   bindHeaderAction(shell.querySelector("#stdPrimaryAction"), copy.primary, context);
   bindHeaderAction(shell.querySelector("#stdSecondaryAction"), copy.secondary, context);

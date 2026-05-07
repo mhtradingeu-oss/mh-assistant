@@ -1393,10 +1393,10 @@ export const insightsRoute = {
             <span class="card-badge neutral">${escapeHtml(`${promptItems.length} prompt starters`)}</span>
           </div>
           <p class="insights-section-copy">
-            Ask AI to dig deeper into the current signal. Opening AI Command only navigates. Sending a prompt prefills context and navigates.
+            Use AI Workspace to dig deeper into the current signal. Opening AI Workspace only navigates. Sending a prompt prefills context and navigates.
           </p>
           <div class="insights-assistant-toolbar">
-            <button class="btn ghost" type="button" data-insights-open>Open AI Command</button>
+            <button class="btn ghost" type="button" data-insights-open>Open AI Workspace</button>
           </div>
           <div class="insights-prompt-list">
             ${promptItems.map((item, index) => `

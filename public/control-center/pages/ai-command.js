@@ -1089,7 +1089,7 @@ function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeH
 		<div class="ctrl-room-header">
 			<div class="ctrl-room-header-top">
 				<div>
-					<div class="ctrl-room-eyebrow">AI Team</div>
+					<div class="ctrl-room-eyebrow">AI Workspace</div>
 					<h2 class="ctrl-room-title">Control Room</h2>
 				</div>
 				<div style="display:flex;align-items:center;gap:12px;">
@@ -1603,7 +1603,7 @@ export const aiCommandRoute = {
 	id: "ai-command",
 	meta: {
 		eyebrow: "AI & Build",
-		title: "AI Team Control Room",
+		title: "AI Workspace",
 		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
 	},
 	template: `
@@ -1647,7 +1647,7 @@ export const aiCommandRoute = {
     <div class="aicmd-shell">
       <section class="aicmd-section aicmd-overview">
         <div class="aicmd-section-head">
-          <h3>AI Team Control Room</h3>
+          <h3>AI Workspace</h3>
           <span class="card-badge success">Ready</span>
         </div>
 
@@ -1755,7 +1755,7 @@ export const aiCommandRoute = {
         </div>
 
         <div id="aicmdStatus" class="aicmd-draft-state">
-          ${escapeHtml(session.draftStatus || "AI Team is ready. Choose a specialist, prepare a command, then run it from the global AI bar.")}
+          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then run it from the global AI bar.")}
         </div>
       </section>
 

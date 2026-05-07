@@ -1395,7 +1395,7 @@ export const setupRoute = {
           <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">AI Audience</button>
           <button id="setupAiToneBtn" class="btn btn-ghost" type="button">AI Tone</button>
           <button id="setupAiFillMissingBtn" class="btn btn-ghost" type="button">AI Fill Missing</button>
-          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command</button>
+          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Workspace</button>
           <p id="setupAiPositioningText"></p>
           <p id="setupAiAudienceText"></p>
           <p id="setupAiToneText"></p>

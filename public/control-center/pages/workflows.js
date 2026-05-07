@@ -527,7 +527,7 @@ function buildFallbackOutput(workflow, inputs, context) {
         reason: `Continue execution in ${titleCase(workflow.routeHint)}.`
       },
       {
-        label: "Open AI Command",
+        label: "Open AI Workspace",
         route: "ai-command",
         reason: "Refine this workflow package with AI reasoning."
       }
@@ -629,7 +629,7 @@ function renderRecommendationSection(recommendation, escapeHtml) {
       <div class="wfexec-action-row">
         <button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>
         <button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
-        <button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Command</button>
+        <button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
       </div>
     </section>
   `;
@@ -1834,7 +1834,7 @@ export const workflowsRoute = {
 
           <div class="wfexec-action-row">
             <button id="wfLightPrepareBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow</button>
-            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Command</button>
+            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
             <button id="wfLightCampaignBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Campaign Studio</button>
             <button id="wfLightTasksBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Task Center</button>
           </div>

@@ -1580,7 +1580,7 @@ function renderRecommendation(recommendation, metrics, selectedItem, handoff, es
       <div class="media-action-row">
         <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
         <button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Send to AI Command</button>
+        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Send to AI Workspace</button>
         <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Send to Publishing if ready</button>
       </div>
     </section>
@@ -2207,7 +2207,7 @@ function renderSpecialists(escapeHtml) {
             <div class="media-action-row">
               <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Use Prompt</button>
               <button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>
-              <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Send to AI Command</button>
+              <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Send to AI Workspace</button>
             </div>
           </article>
         `).join("")}

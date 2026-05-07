@@ -1579,8 +1579,8 @@ export const researchRoute = {
             <span class="card-badge success">Active partner</span>
           </div>
           <div class="research-toolbar">
-            <button class="btn ghost" type="button" data-research-open>Open AI Command</button>
-            <button class="btn btn-secondary" type="button" data-research-route="ai">Send to AI Command</button>
+            <button class="btn ghost" type="button" data-research-open>Open AI Workspace</button>
+            <button class="btn btn-secondary" type="button" data-research-route="ai">Send to AI Workspace</button>
           </div>
           <div class="quick-actions">
             ${aiPrompts.map((item, index) => `

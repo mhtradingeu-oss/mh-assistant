@@ -829,11 +829,11 @@ function renderPage(projectName, session, escapeHtml) {
             <div>
               <div class="panel-kicker">6. Governance AI Assistant</div>
               <h3>Governance AI Assistant</h3>
-              <p>Ask AI for governance help after you review the current state and selected decision item.</p>
+              <p>AI Workspace for governance help after you review the current state and selected decision item.</p>
             </div>
           </div>
           <div class="governance-ai-toolbar">
-            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Command</button>
+            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Workspace</button>
           </div>
           <div class="quick-actions">
             ${prompts.map((item, index) => `

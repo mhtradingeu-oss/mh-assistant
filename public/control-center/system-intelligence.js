@@ -384,7 +384,7 @@ export function buildSystemIntelligence(state) {
     reason: "Core readiness is stable. Continue with optimization and output quality improvements.",
     priority: "optional",
     targetPage: "ai-command",
-    actionLabel: "Open AI Command",
+    actionLabel: "Open AI Workspace",
     impactChips: ["Optimization", "Automation"],
     blockerType: "none",
     confidenceScore: 0.65

@@ -471,7 +471,7 @@ function renderOperationsScaffold({
               </div>
             </div>
             <div class="ops-action-row">
-              <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Command</button>
+              <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
             </div>
             <div class="quick-actions">
               ${assistantPrompts.map((item, index) => `

@@ -394,7 +394,7 @@ function buildExecutiveData(state) {
     oneLineSummary: projectName
       ? `${projectName} is at ${formatPercent(readinessScore)} readiness with ${formatPercent(connectorScore)} connector coverage and ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
       : "Select a project to view executive status, system health, and clear next actions.",
-    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Command" : `Open ${humanizeStatus(nextActionRoute)}`,
+    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
     primaryActionRoute: nextActionRoute,
     secondaryActionLabel: "Review Setup Foundation",
     secondaryActionRoute: "setup",
@@ -721,7 +721,7 @@ export const homeRoute = {
                 ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
               </button>
               <button id="homeAskNextActionBtn" class="btn btn-secondary" type="button">
-                Ask AI About This
+                Open AI Workspace
               </button>
             </div>
           </div>
@@ -832,11 +832,11 @@ export const homeRoute = {
         <section class="card home-decision-section">
           <div class="home-decision-section-head">
             <div>
-              <p class="card-label">AI Team Snapshot</p>
+              <p class="card-label">AI Workspace Snapshot</p>
               <h3>Who should help next?</h3>
             </div>
             <button id="homeOpenAiTeamBtn" class="btn btn-secondary" type="button">
-              Open AI Command
+              Open AI Workspace
             </button>
           </div>
 
@@ -854,12 +854,12 @@ export const homeRoute = {
           <div class="home-ai-prompt-grid">
             <button id="homePromptNextBtn" class="quick-action-btn" type="button">
               <span class="home-action-title">What should I do next?</span>
-              <span class="home-action-meta">Ask AI to prioritize today’s move.</span>
+              <span class="home-action-meta">Use AI Workspace to prioritize today’s move.</span>
             </button>
 
             <button id="homePromptReadinessBtn" class="quick-action-btn" type="button">
               <span class="home-action-title">Why is readiness low?</span>
-              <span class="home-action-meta">Ask AI to explain blockers clearly.</span>
+              <span class="home-action-meta">Use AI Workspace to explain blockers clearly.</span>
             </button>
 
             <button id="homePromptLaunchBtn" class="quick-action-btn" type="button">
@@ -904,7 +904,7 @@ export const homeRoute = {
             </button>
 
             <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Open AI Command</span>
+              <span class="home-action-title">Open AI Workspace</span>
               <span class="home-action-meta">Send current next action to AI for guidance.</span>
             </button>
           </div>

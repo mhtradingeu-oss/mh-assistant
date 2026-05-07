@@ -947,7 +947,7 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
       <div class="publishing-action-row">
         <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
         <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Command</button>
+        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Workspace</button>
         <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
         <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
       </div>
