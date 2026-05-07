@@ -1,5 +1,11 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const {
+  generateWorkerId,
+  isJobDue,
+  isJobLockExpired,
+  buildSchedulerJobRecord
+} = require('./lib/execution/scheduler-helpers');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -20694,57 +20700,11 @@ function buildSmartSuggestions(projectName) {
   };
 }
 
-function generateJobId() {
-  return `job-${crypto.randomBytes(8).toString('hex')}`;
-}
-
-function generateWorkerId() {
-  return `worker-${crypto.randomBytes(4).toString('hex')}`;
-}
-
-function isJobDue(job) {
-  if (job.status !== 'pending' && job.status !== 'retryable') return false;
-  const scheduledAt = new Date(job.scheduled_at).getTime();
-  return !isNaN(scheduledAt) && scheduledAt <= Date.now();
-}
-
-function isJobLockExpired(job) {
-  if (!job.locked_at) return false;
-  const lockedAt = new Date(job.locked_at).getTime();
-  return !isNaN(lockedAt) && (Date.now() - lockedAt) > SCHEDULER_LOCK_TIMEOUT_MS;
-}
-
-function buildSchedulerJobRecord(params) {
-  const now = new Date().toISOString();
-  const typeMap = {
-    publish: '/execute_publish_package',
-    email: '/execute_email_package',
-    media: '/generate_media_from_prompt',
-    ads: '/build_ad_execution_package'
-  };
-
-  return {
-    id: generateJobId(),
-    project: String(params.project || '').trim(),
-    type: String(params.type || '').trim(),
-    source_package_id: String(params.source_package_id || '').trim() || null,
-    channel: String(params.channel || '').trim() || null,
-    execution_endpoint: typeMap[String(params.type || '').trim()] || null,
-    execution_state: 'pending',
-    scheduled_at: String(params.scheduled_at || '').trim(),
-    mode: String(params.mode || 'semi_auto').trim(),
-    package_payload: params.package_payload || null,
-    status: 'pending',
-    attempts: 0,
-    max_attempts: Number(params.max_attempts) > 0
-      ? Number(params.max_attempts)
-      : SCHEDULER_DEFAULT_MAX_ATTEMPTS,
-    locked_at: null,
-    locked_by: null,
-    last_error: null,
-    created_at: now,
-    updated_at: now
-  };
+function buildSchedulerJobRecordWithDefaults(params) {
+  return buildSchedulerJobRecord(params, {
+    crypto,
+    defaultMaxAttempts: SCHEDULER_DEFAULT_MAX_ATTEMPTS
+  });
 }
 
 function executeJobBridge(job) {
@@ -20930,7 +20890,7 @@ app.post('/schedule_execution_job', (req, res) => {
       throw err;
     }
 
-    const job = buildSchedulerJobRecord({
+    const job = buildSchedulerJobRecordWithDefaults({
       project: projectName,
       type,
       source_package_id: req.body?.source_package_id,
@@ -20994,7 +20954,7 @@ app.get('/scheduler_queue', (req, res) => {
       }
 
       if (job.status === 'running') {
-        running.push(isJobLockExpired(job) ? { ...job, lock_expired: true } : job);
+        running.push(isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS) ? { ...job, lock_expired: true } : job);
         continue;
       }
 
@@ -21051,7 +21011,7 @@ app.post('/run_scheduler_worker_once', (req, res) => {
 
   try {
     projectName = requireProjectContext(req, { allowFallback: false });
-    const workerId = generateWorkerId();
+    const workerId = generateWorkerId(crypto);
     const lockTimestamp = new Date().toISOString();
     const results = [];
 
@@ -21062,7 +21022,7 @@ app.post('/run_scheduler_worker_once', (req, res) => {
       if (job.status === 'completed') continue;
       if (job.status === 'failed' && job.attempts >= job.max_attempts) continue;
 
-      const isStaleRunning = job.status === 'running' && isJobLockExpired(job);
+      const isStaleRunning = job.status === 'running' && isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS);
       const isDue = isJobDue(job);
 
       if (!isDue && !isStaleRunning) continue;
