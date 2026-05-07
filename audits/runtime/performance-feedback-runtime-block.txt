@@ -1,0 +1,671 @@
+  ensureDir(aiDir);
+
+  return {
+    project: safeProject,
+    projectRoot,
+    analyticsDir,
+    aiDir,
+    performancePath: path.join(analyticsDir, 'performance.json'),
+    recommendationsPath: path.join(aiDir, 'recommendations.json'),
+    learningPath: path.join(aiDir, 'learning.json')
+  };
+}
+
+function toFiniteNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeFeedbackMetrics(input = {}) {
+  const metrics = {
+    impressions: Math.max(0, toFiniteNumber(input.impressions, 0)),
+    clicks: Math.max(0, toFiniteNumber(input.clicks, 0)),
+    engagement: Math.max(0, toFiniteNumber(input.engagement, 0)),
+    conversions: Math.max(0, toFiniteNumber(input.conversions, 0)),
+    revenue: Math.max(0, toFiniteNumber(input.revenue, 0))
+  };
+
+  if (Object.prototype.hasOwnProperty.call(input || {}, 'cost')) {
+    metrics.cost = Math.max(0, toFiniteNumber(input.cost, 0));
+  }
+
+  return metrics;
+}
+
+function derivePerformanceStats(metrics = {}) {
+  const impressions = Math.max(0, toFiniteNumber(metrics.impressions, 0));
+  const clicks = Math.max(0, toFiniteNumber(metrics.clicks, 0));
+  const engagement = Math.max(0, toFiniteNumber(metrics.engagement, 0));
+  const conversions = Math.max(0, toFiniteNumber(metrics.conversions, 0));
+  const revenue = Math.max(0, toFiniteNumber(metrics.revenue, 0));
+  const cost = Math.max(0, toFiniteNumber(metrics.cost, 0));
+
+  const ctr = impressions > 0 ? clicks / impressions : 0;
+  const engagementRate = impressions > 0 ? engagement / impressions : 0;
+  const conversionRate = clicks > 0 ? conversions / clicks : 0;
+  const roas = cost > 0 ? revenue / cost : (revenue > 0 ? null : 0);
+  const cpa = conversions > 0 && cost > 0 ? cost / conversions : null;
+
+  const weightedScore = (
+    (ctr * 100 * 0.3)
+    + (engagementRate * 100 * 0.2)
+    + (conversionRate * 100 * 0.35)
+    + ((roas == null ? 1 : roas) * 10 * 0.15)
+  );
+
+  return {
+    ctr: Number(ctr.toFixed(4)),
+    engagement_rate: Number(engagementRate.toFixed(4)),
+    conversion_rate: Number(conversionRate.toFixed(4)),
+    roas: roas == null ? null : Number(roas.toFixed(3)),
+    cpa: cpa == null ? null : Number(cpa.toFixed(3)),
+    performance_score: Number(Math.max(0, weightedScore).toFixed(2))
+  };
+}
+
+function readPerformanceStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.performancePath, {
+    version: 1,
+    project: paths.project,
+    records: []
+  });
+
+  if (!payload || typeof payload !== 'object') {
+    return {
+      version: 1,
+      project: paths.project,
+      updated_at: new Date().toISOString(),
+      records: []
+    };
+  }
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload.updated_at || '').trim() || null,
+    records: Array.isArray(payload.records) ? payload.records : []
+  };
+}
+
+function writePerformanceStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    records: Array.isArray(store?.records) ? store.records : []
+  };
+  writeJsonFile(paths.performancePath, payload);
+  return payload;
+}
+
+function readLearningStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.learningPath, {
+    version: 1,
+    project: paths.project,
+    patterns: [],
+    history: []
+  });
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload?.updated_at || '').trim() || null,
+    patterns: Array.isArray(payload?.patterns) ? payload.patterns : [],
+    history: Array.isArray(payload?.history) ? payload.history : []
+  };
+}
+
+function writeLearningStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    patterns: Array.isArray(store?.patterns) ? store.patterns : [],
+    history: Array.isArray(store?.history) ? store.history : []
+  };
+  writeJsonFile(paths.learningPath, payload);
+  return payload;
+}
+
+function readRecommendationsStore(projectName) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = readJsonFile(paths.recommendationsPath, {
+    version: 1,
+    project: paths.project,
+    latest: null,
+    history: []
+  });
+
+  return {
+    version: 1,
+    project: paths.project,
+    updated_at: String(payload?.updated_at || '').trim() || null,
+    latest: payload?.latest && typeof payload.latest === 'object' ? payload.latest : null,
+    history: Array.isArray(payload?.history) ? payload.history : []
+  };
+}
+
+function writeRecommendationsStore(projectName, store) {
+  const paths = getIntelligencePaths(projectName);
+  const payload = {
+    version: 1,
+    project: paths.project,
+    updated_at: new Date().toISOString(),
+    latest: store?.latest && typeof store.latest === 'object' ? store.latest : null,
+    history: Array.isArray(store?.history) ? store.history : []
+  };
+  writeJsonFile(paths.recommendationsPath, payload);
+  return payload;
+}
+
+function inferPerformanceContextFromJob(job = {}) {
+  const payload = job && typeof job.package_payload === 'object' ? job.package_payload : {};
+  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+    ? payload.publish_package
+    : {};
+  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+  const firstAsset = assets[0] && typeof assets[0] === 'object' ? assets[0] : {};
+
+  return {
+    campaign_id: String(
+      payload.campaign_id
+      || publishPackage.campaign_id
+      || job.source_package_id
+      || ''
+    ).trim() || null,
+    product_slug: String(
+      payload.product_slug
+      || firstAsset.product_slug
+      || firstAsset.product_id
+      || ''
+    ).trim() || null,
+    hook: String(
+      payload.hook
+      || payload.primary_hook
+      || firstAsset.hook
+      || ''
+    ).trim() || null
+  };
+}
+
+function appendPerformanceRecord(projectName, input = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const store = readPerformanceStore(safeProject);
+  const schedulerJobs = readSchedulerJobs(safeProject);
+  const matchedJob = schedulerJobs.find((job) => String(job.id || '').trim() === String(input.job_id || '').trim()) || null;
+  const inferred = inferPerformanceContextFromJob(matchedJob || {});
+  const normalizedChannel = String(input.channel || matchedJob?.channel || '').trim().toLowerCase();
+  const metrics = normalizeFeedbackMetrics(input.metrics || {});
+  const stats = derivePerformanceStats(metrics);
+  const recordedAt = new Date().toISOString();
+
+  const record = {
+    record_id: `perf_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
+    recorded_at: recordedAt,
+    project: safeProject,
+    job_id: String(input.job_id || '').trim(),
+    channel: normalizedChannel,
+    campaign_id: String(input.campaign_id || inferred.campaign_id || '').trim() || null,
+    product_slug: String(input.product_slug || inferred.product_slug || '').trim() || null,
+    hook: String(input.hook || inferred.hook || '').trim() || null,
+    metrics,
+    stats
+  };
+
+  store.records.push(record);
+  writePerformanceStore(safeProject, store);
+
+  return {
+    record,
+    total_records: store.records.length
+  };
+}
+
+function calculateEntityPerformance(records, key) {
+  const map = new Map();
+
+  for (const record of records) {
+    const id = String(record?.[key] || '').trim();
+    if (!id) continue;
+
+    const current = map.get(id) || {
+      key: id,
+      count: 0,
+      score_sum: 0,
+      ctr_sum: 0,
+      conversion_rate_sum: 0,
+      roas_sum: 0,
+      roas_count: 0,
+      revenue_sum: 0,
+      conversions_sum: 0
+    };
+
+    current.count += 1;
+    current.score_sum += toFiniteNumber(record?.stats?.performance_score, 0);
+    current.ctr_sum += toFiniteNumber(record?.stats?.ctr, 0);
+    current.conversion_rate_sum += toFiniteNumber(record?.stats?.conversion_rate, 0);
+    current.revenue_sum += toFiniteNumber(record?.metrics?.revenue, 0);
+    current.conversions_sum += toFiniteNumber(record?.metrics?.conversions, 0);
+
+    const roas = record?.stats?.roas;
+    if (Number.isFinite(roas)) {
+      current.roas_sum += roas;
+      current.roas_count += 1;
+    }
+
+    map.set(id, current);
+  }
+
+  return Array.from(map.values()).map((value) => ({
+    key: value.key,
+    count: value.count,
+    avg_score: Number((value.score_sum / Math.max(1, value.count)).toFixed(2)),
+    avg_ctr: Number((value.ctr_sum / Math.max(1, value.count)).toFixed(4)),
+    avg_conversion_rate: Number((value.conversion_rate_sum / Math.max(1, value.count)).toFixed(4)),
+    avg_roas: value.roas_count > 0
+      ? Number((value.roas_sum / value.roas_count).toFixed(3))
+      : null,
+    total_revenue: Number(value.revenue_sum.toFixed(2)),
+    total_conversions: value.conversions_sum
+  }));
+}
+
+function buildTrendSnapshot(records, channel) {
+  const scoped = records
+    .filter((record) => String(record.channel || '').trim().toLowerCase() === channel)
+    .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+
+  if (!scoped.length) {
+    return {
+      channel,
+      direction: 'stable',
+      change_pct: 0,
+      recent_avg_score: 0,
+      previous_avg_score: 0,
+      sample_size: 0
+    };
+  }
+
+  const recent = scoped.slice(-3);
+  const previous = scoped.slice(-6, -3);
+
+  const average = (items) => {
+    if (!items.length) return 0;
+    const total = items.reduce((sum, item) => sum + toFiniteNumber(item?.stats?.performance_score, 0), 0);
+    return total / items.length;
+  };
+
+  const recentAvg = average(recent);
+  const previousAvg = average(previous);
+  const delta = previousAvg > 0 ? ((recentAvg - previousAvg) / previousAvg) * 100 : 0;
+
+  let direction = 'stable';
+  if (delta > 8) direction = 'up';
+  if (delta < -8) direction = 'down';
+
+  return {
+    channel,
+    direction,
+    change_pct: Number(delta.toFixed(2)),
+    recent_avg_score: Number(recentAvg.toFixed(2)),
+    previous_avg_score: Number(previousAvg.toFixed(2)),
+    sample_size: scoped.length
+  };
+}
+
+function buildPerformanceSummary(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const store = readPerformanceStore(safeProject);
+  const records = Array.isArray(store.records) ? store.records : [];
+  const topCampaigns = calculateEntityPerformance(records, 'campaign_id')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+  const topProducts = calculateEntityPerformance(records, 'product_slug')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+  const channels = calculateEntityPerformance(records, 'channel')
+    .sort((a, b) => b.avg_score - a.avg_score);
+  const topChannels = channels.slice(0, 3);
+  const weakChannels = channels.filter((channel) => channel.avg_score < 22 || channel.avg_conversion_rate < 0.01);
+  const hooks = calculateEntityPerformance(records, 'hook')
+    .sort((a, b) => b.avg_score - a.avg_score)
+    .slice(0, 5);
+
+  const trendChannels = Array.from(
+    new Set(records.map((record) => String(record.channel || '').trim().toLowerCase()).filter(Boolean))
+  );
+  const trends = trendChannels
+    .map((channel) => buildTrendSnapshot(records, channel))
+    .sort((a, b) => b.recent_avg_score - a.recent_avg_score);
+
+  return {
+    project: safeProject,
+    records_tracked: records.length,
+    top_performing_campaigns: topCampaigns,
+    top_performing_products: topProducts,
+    top_channels: topChannels,
+    weak_channels: weakChannels,
+    best_hooks: hooks,
+    performance_trends: trends
+  };
+}
+
+function collectExecutionSignals(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const jobs = readSchedulerJobs(safeProject);
+  const completed = jobs.filter((job) => job.status === 'completed');
+  const failed = jobs.filter((job) => job.status === 'failed');
+  const retryable = jobs.filter((job) => job.status === 'retryable');
+
+  const byChannel = new Map();
+  for (const job of jobs) {
+    const channel = String(job.channel || '').trim().toLowerCase();
+    if (!channel) continue;
+
+    const current = byChannel.get(channel) || {
+      channel,
+      total_jobs: 0,
+      completed: 0,
+      failed: 0,
+      retryable: 0
+    };
+
+    current.total_jobs += 1;
+    if (job.status === 'completed') current.completed += 1;
+    if (job.status === 'failed') current.failed += 1;
+    if (job.status === 'retryable') current.retryable += 1;
+    byChannel.set(channel, current);
+  }
+
+  const channelStatus = Array.from(byChannel.values()).map((entry) => ({
+    ...entry,
+    failure_rate: entry.total_jobs > 0
+      ? Number(((entry.failed + entry.retryable) / entry.total_jobs).toFixed(4))
+      : 0
+  }));
+
+  return {
+    total_jobs: jobs.length,
+    completed_jobs: completed.length,
+    failed_jobs: failed.length,
+    retryable_jobs: retryable.length,
+    channel_status: channelStatus
+  };
+}
+
+function buildRiskAlerts(summary, records) {
+  const alerts = [];
+
+  for (const trend of summary.performance_trends || []) {
+    if (trend.direction === 'down' && trend.sample_size >= 4) {
+      alerts.push({
+        type: 'declining_performance',
+        severity: 'high',
+        channel: trend.channel,
+        message: `${trend.channel} is declining (${trend.change_pct}% recent score trend).`
+      });
+    }
+  }
+
+  const recentRecords = records
+    .slice(-20)
+    .filter((record) => record && typeof record === 'object');
+
+  for (const record of recentRecords) {
+    const engagementRate = toFiniteNumber(record?.stats?.engagement_rate, 0);
+    if (engagementRate > 0 && engagementRate < 0.01) {
+      alerts.push({
+        type: 'low_engagement',
+        severity: 'medium',
+        channel: record.channel,
+        job_id: record.job_id,
+        message: `Low engagement detected on ${record.channel} (ER ${Number((engagementRate * 100).toFixed(2))}%).`
+      });
+    }
+
+    const cost = toFiniteNumber(record?.metrics?.cost, 0);
+    const conversions = toFiniteNumber(record?.metrics?.conversions, 0);
+    const roas = record?.stats?.roas;
+    if (cost > 0 && (conversions === 0 || (Number.isFinite(roas) && roas < 1))) {
+      alerts.push({
+        type: 'wasted_budget',
+        severity: conversions === 0 ? 'high' : 'medium',
+        channel: record.channel,
+        job_id: record.job_id,
+        message: `Budget inefficiency on ${record.channel} (cost ${cost}, conversions ${conversions}, roas ${roas == null ? 'n/a' : roas}).`
+      });
+    }
+  }
+
+  return alerts.slice(0, 25);
+}
+
+function generateOptimizationRecommendations(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const executionSignals = collectExecutionSignals(safeProject);
+  const records = readPerformanceStore(safeProject).records;
+  const alerts = buildRiskAlerts(summary, records);
+
+  const stop = [];
+  const scale = [];
+  const improve = [];
+  const newAngles = [];
+
+  for (const channel of summary.weak_channels || []) {
+    stop.push(`Pause low-performing ${channel.key} creatives with avg score ${channel.avg_score}.`);
+  }
+
+  for (const channel of summary.top_channels || []) {
+    scale.push(`Scale ${channel.key} where avg score is ${channel.avg_score} and conversion rate is ${channel.avg_conversion_rate}.`);
+  }
+
+  for (const hook of summary.best_hooks || []) {
+    if (hook.count >= 2) {
+      scale.push(`Reuse hook "${hook.key}" across adjacent campaigns (avg score ${hook.avg_score}).`);
+    }
+  }
+
+  for (const signal of executionSignals.channel_status || []) {
+    if (signal.failure_rate > 0.3) {
+      improve.push(`Improve ${signal.channel} execution reliability (failure rate ${signal.failure_rate}).`);
+    }
+  }
+
+  if (!(summary.best_hooks || []).length) {
+    newAngles.push('Test 3 hook families: pain-point opener, quick transformation, and authority-led proof.');
+  } else {
+    const primaryHook = summary.best_hooks[0].key;
+    newAngles.push(`Create a variant ladder for "${primaryHook}": short CTA variant, social-proof variant, and urgency variant.`);
+  }
+
+  if ((summary.top_performing_products || []).length) {
+    const topProduct = summary.top_performing_products[0].key;
+    newAngles.push(`Build product-led storytelling around ${topProduct} with channel-native edits per platform.`);
+  }
+
+  return {
+    generated_at: new Date().toISOString(),
+    project: safeProject,
+    based_on: {
+      records_tracked: summary.records_tracked,
+      scheduler_jobs_tracked: executionSignals.total_jobs,
+      completed_jobs: executionSignals.completed_jobs
+    },
+    stop: Array.from(new Set(stop)).slice(0, 8),
+    scale: Array.from(new Set(scale)).slice(0, 8),
+    improve: Array.from(new Set(improve)).slice(0, 8),
+    new_angles_to_test: Array.from(new Set(newAngles)).slice(0, 8),
+    alerts,
+    summary
+  };
+}
+
+function upsertLearningPattern(learningStore, pattern) {
+  const safePattern = String(pattern.pattern || '').trim();
+  if (!safePattern) return null;
+
+  const existingIndex = learningStore.patterns.findIndex(
+    (item) => String(item.pattern || '').trim().toLowerCase() === safePattern.toLowerCase()
+      && String(item.channel || '').trim().toLowerCase() === String(pattern.channel || '').trim().toLowerCase()
+  );
+
+  const now = new Date().toISOString();
+  if (existingIndex >= 0) {
+    const current = learningStore.patterns[existingIndex];
+    learningStore.patterns[existingIndex] = {
+      ...current,
+      confidence: Number(Math.max(current.confidence || 0, pattern.confidence || 0).toFixed(2)),
+      support_count: Number(current.support_count || 0) + Number(pattern.support_count || 1),
+      last_observed_at: now,
+      evidence: Array.from(new Set([...(current.evidence || []), ...(pattern.evidence || [])])).slice(-8)
+    };
+    return learningStore.patterns[existingIndex];
+  }
+
+  const entry = {
+    id: `learn_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`,
+    pattern: safePattern,
+    channel: String(pattern.channel || '').trim().toLowerCase() || null,
+    confidence: Number(toFiniteNumber(pattern.confidence, 0.5).toFixed(2)),
+    support_count: Number(pattern.support_count || 1),
+    learned_from: String(pattern.learned_from || 'performance_feedback').trim(),
+    evidence: Array.isArray(pattern.evidence) ? pattern.evidence.slice(0, 8) : [],
+    first_observed_at: now,
+    last_observed_at: now
+  };
+
+  learningStore.patterns.push(entry);
+  return entry;
+}
+
+function buildLearningCandidates(summary, recommendations) {
+  const candidates = [];
+
+  for (const channel of summary.top_channels || []) {
+    if (channel.count >= 2 && channel.avg_ctr >= 0.02) {
+      candidates.push({
+        pattern: `${channel.key} consistently drives above-baseline CTR`,
+        channel: channel.key,
+        confidence: Math.min(0.95, 0.55 + (channel.avg_ctr * 3)),
+        support_count: channel.count,
+        learned_from: 'performance_summary',
+        evidence: [`avg_ctr=${channel.avg_ctr}`, `avg_score=${channel.avg_score}`]
+      });
+    }
+  }
+
+  for (const hook of summary.best_hooks || []) {
+    if (hook.count >= 2) {
+      candidates.push({
+        pattern: `Hook "${hook.key}" converts better across sampled runs`,
+        confidence: Math.min(0.95, 0.5 + (hook.avg_conversion_rate * 5)),
+        support_count: hook.count,
+        learned_from: 'hook_analysis',
+        evidence: [`avg_conversion_rate=${hook.avg_conversion_rate}`, `avg_score=${hook.avg_score}`]
+      });
+    }
+  }
+
+  for (const recommendation of recommendations.scale || []) {
+    if (/tiktok/i.test(recommendation)) {
+      candidates.push({
+        pattern: 'Short-form channel momentum suggests concise, mobile-first creative variants',
+        channel: 'tiktok',
+        confidence: 0.68,
+        support_count: 1,
+        learned_from: 'recommendation_engine',
+        evidence: [recommendation]
+      });
+    }
+  }
+
+  return candidates;
+}
+
+function updateIntelligenceLoop(projectName, context = {}) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const recommendations = generateOptimizationRecommendations(safeProject);
+  const allowLocalDryRun = String(process.env.ALLOW_LOCAL_DRY_RUN || '').trim() === '1';
+  const allowLearningUpdates = String(process.env.ALLOW_LEARNING_UPDATES || '').trim() === '1';
+
+  if (allowLocalDryRun && !allowLearningUpdates) {
+    return {
+      summary,
+      recommendations,
+      learning_updates: [],
+      alerts: recommendations.alerts,
+      skipped_persistence: true
+    };
+  }
+
+  const recommendationStore = readRecommendationsStore(safeProject);
+  recommendationStore.latest = recommendations;
+  recommendationStore.history.push({
+    generated_at: recommendations.generated_at,
+    trigger: String(context.trigger || 'manual').trim(),
+    stop_count: recommendations.stop.length,
+    scale_count: recommendations.scale.length,
+    improve_count: recommendations.improve.length,
+    angle_count: recommendations.new_angles_to_test.length,
+    alert_count: recommendations.alerts.length
+  });
+  writeRecommendationsStore(safeProject, recommendationStore);
+
+  const learningStore = readLearningStore(safeProject);
+  const candidates = buildLearningCandidates(summary, recommendations);
+  const updates = [];
+  for (const candidate of candidates) {
+    const updated = upsertLearningPattern(learningStore, candidate);
+    if (updated) updates.push(updated);
+  }
+
+  learningStore.history.push({
+    generated_at: new Date().toISOString(),
+    trigger: String(context.trigger || 'manual').trim(),
+    records_tracked: summary.records_tracked,
+    recommendations_generated: {
+      stop: recommendations.stop.length,
+      scale: recommendations.scale.length,
+      improve: recommendations.improve.length,
+      new_angles: recommendations.new_angles_to_test.length
+    },
+    alerts_count: recommendations.alerts.length,
+    learning_updates: updates.length,
+    feedback_record_id: context.feedbackRecord?.record_id || null,
+    job_id: context.jobRecord?.id || context.feedbackRecord?.job_id || null
+  });
+  writeLearningStore(safeProject, learningStore);
+
+  return {
+    summary,
+    recommendations,
+    learning_updates: updates,
+    alerts: recommendations.alerts
+  };
+}
+
+function buildSmartSuggestions(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const summary = buildPerformanceSummary(safeProject);
+  const recommendationStore = readRecommendationsStore(safeProject);
+  const learningStore = readLearningStore(safeProject);
+  const latest = recommendationStore.latest || generateOptimizationRecommendations(safeProject);
+
+  const topChannel = summary.top_channels?.[0]?.key || null;
+  const topProduct = summary.top_performing_products?.[0]?.key || null;
+  const topHook = summary.best_hooks?.[0]?.key || null;
+  const strongestPattern = (learningStore.patterns || [])
+    .slice()
+    .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
+
+  return {
+    project: safeProject,
+    generated_at: new Date().toISOString(),
+    next_best_action: latest.scale[0] || latest.improve[0] || 'Collect more feedback records to unlock stronger suggestions.',
+    next_campaign_idea: topProduct
