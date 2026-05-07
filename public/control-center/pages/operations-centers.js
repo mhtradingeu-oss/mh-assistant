@@ -247,6 +247,132 @@ function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel
   ];
 }
 
+
+function readOpsState(context) {
+  const state = typeof context.getState === "function" ? context.getState() : {};
+  return asObject(asObject(state.data).operations);
+}
+
+function buildExecutiveRuntimeSignals(context) {
+  const ops = readOpsState(context);
+  const taskCenter = asObject(ops.task_center);
+  const queueCenter = asObject(ops.queue_center);
+  const jobMonitor = asObject(ops.job_monitor);
+  const notificationCenter = asObject(ops.notification_center);
+
+  const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);
+  const queueItems = Number(queueCenter.active_count || queueCenter.total_active || asArray(queueCenter.items).length || 0);
+  const failedJobs = Number(jobMonitor.failed_count || 0);
+  const runningJobs = Number(jobMonitor.running_count || 0);
+  const criticalAlerts = Number(notificationCenter.critical_count || 0);
+  const unreadNotifications = Number(notificationCenter.unread_count || 0);
+
+  const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;
+  const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;
+  const publishAlerts = asArray(notificationCenter.publish_alerts).length;
+  const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;
+
+  const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";
+  const runtimeLabel = failedJobs || criticalAlerts
+    ? "Needs attention"
+    : runningJobs || queueItems || activeTasks
+      ? "Active"
+      : "Healthy";
+
+  return [
+    {
+      label: "Runtime",
+      value: runtimeLabel,
+      helper: failedJobs || criticalAlerts ? "Failures or critical alerts detected" : "No critical runtime issue detected",
+      tone: runtimeTone,
+      route: "job-monitor"
+    },
+    {
+      label: "Queue Pressure",
+      value: formatCount(queueItems),
+      helper: "Active queue items",
+      tone: queueItems ? "warning" : "success",
+      route: "queue-center"
+    },
+    {
+      label: "Failed Jobs",
+      value: formatCount(failedJobs),
+      helper: "Execution jobs needing review",
+      tone: failedJobs ? "danger" : "success",
+      route: "job-monitor"
+    },
+    {
+      label: "Critical Alerts",
+      value: formatCount(criticalAlerts),
+      helper: "Highest priority notifications",
+      tone: criticalAlerts ? "danger" : "success",
+      route: "notification-center"
+    },
+    {
+      label: "Approvals",
+      value: formatCount(approvalAlerts),
+      helper: "Pending approval signals",
+      tone: approvalAlerts ? "warning" : "success",
+      route: "notification-center"
+    },
+    {
+      label: "Publishing",
+      value: formatCount(publishAlerts),
+      helper: "Publishing alerts",
+      tone: publishAlerts ? "warning" : "success",
+      route: "publishing"
+    },
+    {
+      label: "Providers",
+      value: formatCount(providerAlerts),
+      helper: "Disconnected provider alerts",
+      tone: providerAlerts ? "warning" : "success",
+      route: "integrations"
+    },
+    {
+      label: "Claim Risk",
+      value: formatCount(claimAlerts),
+      helper: "Compliance review signals",
+      tone: claimAlerts ? "danger" : "success",
+      route: "governance"
+    },
+    {
+      label: "Inbox",
+      value: formatCount(unreadNotifications),
+      helper: "Unread operational notifications",
+      tone: unreadNotifications ? "warning" : "success",
+      route: "notification-center"
+    }
+  ];
+}
+
+function renderExecutiveRuntimeStrip(context) {
+  const signals = buildExecutiveRuntimeSignals(context);
+
+  return `
+    <section class="panel ops-executive-strip">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">0. Executive Runtime</div>
+          <h3>Operations Command Signal</h3>
+          <p>Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.</p>
+        </div>
+        <span class="card-badge neutral">Live context</span>
+      </div>
+      <div class="ops-runtime-signal-grid">
+        ${signals.map((signal) => `
+          <button class="ops-runtime-signal" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
+            <span class="card-badge ${context.escapeHtml(signal.tone)}">${context.escapeHtml(signal.label)}</span>
+            <strong>${context.escapeHtml(asString(signal.value))}</strong>
+            <small>${context.escapeHtml(signal.helper)}</small>
+          </button>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+
 function renderOperationsScaffold({
   context,
   pageKey,
@@ -274,6 +400,7 @@ function renderOperationsScaffold({
   return `
     <section class="page is-active" data-page="${context.escapeHtml(pageKey)}">
       <div class="ops-shell ops-workspace">
+        ${renderExecutiveRuntimeStrip(context)}
         <section class="panel">
           <div class="panel-header">
             <div>
