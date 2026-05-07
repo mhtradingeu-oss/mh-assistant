@@ -416,7 +416,7 @@ if (typeof window !== "undefined") {
 
 document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("[data-copy-asset-path]");
-  if (!button) return;
+  if (!button || !button.closest(".library-workspace")) return;
 
   event.preventDefault();
 
@@ -433,7 +433,7 @@ document.addEventListener("click", async (event) => {
 
 document.addEventListener("click", (event) => {
   const link = event.target.closest?.("a.library-link-btn");
-  if (!link) return;
+  if (!link || !link.closest(".library-workspace")) return;
 
   const fileUrl = link.getAttribute("href") || "";
   if (!fileUrl.includes("/media/file/")) return;
@@ -483,6 +483,9 @@ function closeAllLibraryActionDropdowns() {
 }
 
 document.addEventListener("click", (event) => {
+  const root = event.target?.closest?.(".library-workspace");
+  if (!root) return;
+
   if (event.target?.closest?.(".library-action-menu")) {
     return;
   }
