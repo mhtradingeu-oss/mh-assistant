@@ -21,6 +21,7 @@ const {
 const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
 const { createLearningPatterns } = require('./lib/execution/learning-patterns');
 const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
+const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -20318,40 +20319,18 @@ const {
   updateIntelligenceLoop
 } = intelligenceLoop;
 
-function buildSmartSuggestions(projectName) {
-  const safeProject = normalizeProjectSlug(projectName);
-  const summary = buildPerformanceSummary(safeProject);
-  const recommendationStore = readRecommendationsStore(safeProject);
-  const learningStore = readLearningStore(safeProject);
-  const latest = recommendationStore.latest || generateOptimizationRecommendations(safeProject);
 
-  const topChannel = summary.top_channels?.[0]?.key || null;
-  const topProduct = summary.top_performing_products?.[0]?.key || null;
-  const topHook = summary.best_hooks?.[0]?.key || null;
-  const strongestPattern = (learningStore.patterns || [])
-    .slice()
-    .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
+const smartSuggestions = createSmartSuggestions({
+  normalizeProjectSlug,
+  buildPerformanceSummary,
+  readRecommendationsStore,
+  readLearningStore,
+  generateOptimizationRecommendations
+});
 
-  return {
-    project: safeProject,
-    generated_at: new Date().toISOString(),
-    next_best_action: latest.scale[0] || latest.improve[0] || 'Collect more feedback records to unlock stronger suggestions.',
-    next_campaign_idea: topProduct
-      ? `Launch a 3-creative sprint for ${topProduct}${topHook ? ` using hook "${topHook}"` : ''}.`
-      : 'Launch a 3-creative sprint around the top-converting product category this week.',
-    best_channel_to_focus: topChannel,
-    content_to_regenerate: latest.improve[0] || latest.stop[0] || 'Regenerate low-engagement creatives with a shorter hook and stronger CTA.',
-    learning_signal: strongestPattern
-      ? {
-        pattern: strongestPattern.pattern,
-        confidence: strongestPattern.confidence,
-        channel: strongestPattern.channel
-      }
-      : null,
-    alerts: latest.alerts || []
-  };
-}
-
+const {
+  buildSmartSuggestions
+} = smartSuggestions;
 
 const executionJobBridge = createExecutionJobBridge({
   resolvePublishPackageForExecution,
