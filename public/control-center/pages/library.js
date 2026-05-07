@@ -23,6 +23,7 @@ const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 const libraryProtectedUrlCache = new Map();
 const LIBRARY_PAGE_SIZE = 10;
 const libraryProtectedUrlPromiseCache = new Map();
+let libraryGlobalListenersInitialized = false;
 const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
 const LIBRARY_THUMB_BATCH_LIMIT = 18;
 let libraryThumbLoadsInFlight = 0;
@@ -414,44 +415,63 @@ if (typeof window !== "undefined") {
   });
 }
 
-document.addEventListener("click", async (event) => {
-  const button = event.target.closest?.("[data-copy-asset-path]");
-  if (!button || !button.closest(".library-workspace")) return;
+function initializeLibraryGlobalListeners() {
+  if (libraryGlobalListenersInitialized) return;
+  libraryGlobalListenersInitialized = true;
 
-  event.preventDefault();
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest?.("[data-copy-asset-path]");
+    if (!button || !button.closest(".library-workspace")) return;
 
-  const value = button.getAttribute("data-copy-asset-path") || "";
-  if (!value) return;
+    event.preventDefault();
 
-  try {
-    await navigator.clipboard.writeText(value);
-    alert("Asset path copied.");
-  } catch {
-    window.prompt("Copy asset path:", value);
-  }
-});
+    const value = button.getAttribute("data-copy-asset-path") || "";
+    if (!value) return;
 
-document.addEventListener("click", (event) => {
-  const link = event.target.closest?.("a.library-link-btn");
-  if (!link || !link.closest(".library-workspace")) return;
-
-  const fileUrl = link.getAttribute("href") || "";
-  if (!fileUrl.includes("/media/file/")) return;
-
-  event.preventDefault();
-
-  const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");
-  openLibraryAsset("", {
-    preview_url: fileUrl,
-    filename: assetName,
-    name: assetName
-  }).catch((error) => {
-    const message = error instanceof AccessKeyError
-      ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
-      : `Could not open file: ${error.message || "Unknown error."}`;
-    alert(message);
+    try {
+      await navigator.clipboard.writeText(value);
+      alert("Asset path copied.");
+    } catch {
+      window.prompt("Copy asset path:", value);
+    }
   });
-});
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a.library-link-btn");
+    if (!link || !link.closest(".library-workspace")) return;
+
+    const fileUrl = link.getAttribute("href") || "";
+    if (!fileUrl.includes("/media/file/")) return;
+
+    event.preventDefault();
+
+    const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");
+    openLibraryAsset("", {
+      preview_url: fileUrl,
+      filename: assetName,
+      name: assetName
+    }).catch((error) => {
+      const message = error instanceof AccessKeyError
+        ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+        : `Could not open file: ${error.message || "Unknown error."}`;
+      alert(message);
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    const root = event.target?.closest?.(".library-workspace");
+    if (!root) return;
+
+    if (event.target?.closest?.(".library-action-menu")) {
+      return;
+    }
+
+    closeAllLibraryActionDropdowns();
+  });
+
+}
+
+initializeLibraryGlobalListeners();
 
 function ensureLibrarySession(projectName) {
   const key = projectName || "__default__";
@@ -482,16 +502,6 @@ function closeAllLibraryActionDropdowns() {
   });
 }
 
-document.addEventListener("click", (event) => {
-  const root = event.target?.closest?.(".library-workspace");
-  if (!root) return;
-
-  if (event.target?.closest?.(".library-action-menu")) {
-    return;
-  }
-
-  closeAllLibraryActionDropdowns();
-});
 
 function getSafeAssetType(value = "") {
   return asString(value)
