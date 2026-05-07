@@ -1,0 +1,416 @@
+169:function isProtectedControlWriteRequest(req) {
+180:function readProvidedControlWriteKey(req) {
+191:function controlWriteKeyMatches(expected, provided) {
+202:function requireProtectedControlWriteKey(req, res, next) {
+247:function isProtectedControlReadRequest(req) {
+257:function requireProtectedReadKey(req, res, next) {
+301:function getRateLimitIdentity(req) {
+309:function shouldApplyAiRateLimit(req) {
+318:function applyRouteRateLimit(req, res, next) {
+371:function resolveMediaProjectName(req) {
+377:function maybePersistMediaGenerationResult(req, {
+438:function buildAssetRoleFromType(type) {
+449:function resolveUploadTarget(projectName, type) {
+487:function resolveMediaFilePath(projectName, type, filename) {
+495:function isPathInsideRoot(rootPath, targetPath) {
+502:function decodeMediaQueryPath(value) {
+515:function getAllowedMediaRoots(projectName) {
+534:function findProjectAssetFilePathById(projectName, assetId) {
+563:function resolveMediaFilePathFromQuery(projectName, requestedPath, assetId) {
+696:function sanitizeErrorMessage(rawMessage, fallbackMessage) {
+705:function getErrorStatusCode(error, fallbackStatus = 500) {
+721:function sendError(res, {
+735:function sendInvalidProjectSlug(res) {
+751:function getRequestRawPath(req) {
+756:function extractRawProjectSlug(rawPath) {
+767:function validateRawProjectSlugPathSegment(req, res, next) {
+801:function validateOptionalProjectSlugFields(req, res, next) {
+822:function sanitizeErrorPayloadForClient(payload) {
+834:function logCriticalFailure(action, req, error, context = {}) {
+845:function isDataDirectoryWritable() {
+858:function detectIntegrationSecretUsage(projects = []) {
+897:function buildReadinessState() {
+1007:function classifyImmediateFallbackReason(telemetryEntry = {}) {
+1023:function readFileSafe(filePath) {
+1031:function hasMatchingEntries(dirPath, matcher) {
+1048:function writeReadRedirectionTelemetry(resolution, entry) {
+1069:function buildCandidatePaths(canonicalBase, legacyBase, relativePath = '') {
+1078:function resolveReadCandidateFromBases(options = {}) {
+1184:function resolveExecutionReadCandidate(options = {}) {
+1247:function getEmailDomainPaths(projectName) {
+1270:function getEmailArtifactContract(projectName, artifactType) {
+1338:function resolveEmailReadCandidate(options = {}) {
+1361:function readEmailArtifactArray(projectName, artifactType, requestedIdentifier) {
+1374:function writeEmailArtifactArray(projectName, artifactType, data) {
+1391:function requireQueueProjectName(projectName) {
+1402:function readLiveEmailQueue(projectName, requestedIdentifier = 'email-draft-queue') {
+1406:function writeLiveEmailQueue(projectName, queue = []) {
+1410:function readLiveEmailMediaQueue(projectName, requestedIdentifier = 'email-media-queue') {
+1414:function writeLiveEmailMediaQueue(projectName, queue = []) {
+1418:function getLegacyExecutionRoot(projectName) {
+1422:function getLegacyContentQueuePath(projectName, queueType) {
+1441:function readLegacyContentQueue(projectName, queueType) {
+1445:function writeLegacyContentQueue(projectName, queueType, queue = []) {
+1449:function getProjectBackupDir(projectName) {
+1455:function getProjectMediaDir(projectName) {
+1461:function getProjectBlogImageQueuePath(projectName) {
+1476:function readJsonLines(filePath) {
+1500:function toDualWriteIndex(dualWriteEntries = []) {
+1524:function classifyFallbackWithParityContext(readEntry, dualWriteIndex) {
+1568:function createDomainStats() {
+1585:function summarizeProjectParity(projectName) {
+1696:function summarizeParityAcrossProjects() {
+1741:function getLatestRenderedImage(projectName) {
+1764:function evaluateEmailReadiness(projectName) {
+1795:function getEmailPreparePaths(projectName) {
+1812:function getLatestRenderedOutput(projectName) {
+1836:function buildEmailPreparePackage(projectName) {
+1870:function buildEmailHtmlFromPreparePackage(packageData) {
+1918:function autoPrepareEmailAsset(projectName, rawText = '') {
+1997:function reviewEmailPreparePackage(projectName) {
+2011:function extractFlagValue(text, flagName) {
+2017:function isValidHttpUrl(value) {
+2026:function buildPublicImageUrl(projectName, outputPath) {
+2033:function validateEmailPreparePackage(packageData) {
+2075:function buildHardenedEmailHtml(packageData) {
+2119:function getLatestRenderRequest(projectName) {
+2143:function buildAssetFidelityRules(sourceOfTruth = {}, goal = '') {
+2178:function buildCreativeMap(product) {
+2250:function buildFidelityPrompt(renderRequest) {
+2381:function getEmailDeliveryPaths(projectName) {
+2408:function getLatestPreparedEmailPackage(projectName) {
+2430:function evaluatePreparedEmailForSend(projectName) {
+2468:function writeEmailDeliveryRecord(projectName, data) {
+2519:function ensureWooEnv() {
+2564:function mapWooProductSummary(product) {
+2575:function mapWooProductFull(product) {
+2645:function buildWcSyncSummary(projectName) {
+2690:function getLatestGeneratedImage(projectName) {
+2727:function getMetaExecutionPaths(projectName) {
+2744:function getMetaPlacementRules(placement) {
+2783:function buildMetaIntelligence(projectName, placement, goal) {
+2802:function buildMetaCaption(projectName, placement, goal) {
+2836:function buildMetaCompliance(projectName, placement, imageInfo) {
+2861:function buildMetaPackage(projectName, placement, goal) {
+2900:function reviewLatestMetaPackage(projectName) {
+2922:function getVideoExecutionPaths(projectName) {
+2942:function buildTikTokIntelligence(projectName, goal) {
+2954:function buildTikTokCompliance(projectName, imageInfo) {
+2973:function buildTikTokPackage(projectName, goal) {
+3021:function reviewLatestTikTokPackage(projectName) {
+3044:function getYouTubeFormatRules(format) {
+3065:function buildYouTubeIntelligence(projectName, format, goal) {
+3093:function buildYouTubeCompliance(projectName, format, imageInfo) {
+3118:function buildYouTubePackage(projectName, format, goal) {
+3181:function reviewLatestYouTubePackage(projectName) {
+3203:function getMarketplaceExecutionPaths(projectName) {
+3226:function getMarketplaceRules(marketplace) {
+3255:function buildMarketplaceIntelligence(projectName, marketplace, goal) {
+3276:function buildAmazonPackage(projectName, goal) {
+3340:function buildEbayPackage(projectName, goal) {
+3395:function buildMarketplacePackage(projectName, marketplace, goal) {
+3407:function reviewLatestMarketplacePackage(projectName, marketplace) {
+3446:function getGermanLaunchPaths(projectName) {
+3484:function normalizeLaunchProductText(value) {
+3493:function getLaunchProductStableKey(product) {
+3503:function productMatchesLaunchTheme(product, themes = []) {
+3524:function selectLaunchReadyProducts(products, projectName, context = 'launch') {
+3576:function buildGermanLaunchPlan(projectName) {
+3657:function readGermanLaunchPlan(projectName) {
+3671:function buildLaunchWave(projectName, waveName) {
+3735:function readLaunchWave(projectName, waveName) {
+3751:function getLaunchOpsPaths(projectName) {
+3788:function buildChannelConnectorPayload(projectName, waveName, channel) {
+3837:function scheduleLaunchJob(projectName, waveName, channel, scheduledFor) {
+3873:function normalizePublishingJobStatus(value, fallback = 'draft') {
+3901:function normalizePublishingNotes(value) {
+3926:function buildPublishingDisplayTitle(title, waveName, channel) {
+3942:function buildPublishingPreviewBase(input = {}, existingPreview = null) {
+3980:function buildPublishingPreviewFromConnectorPayload(payload, input = {}) {
+4021:function getPublishingJobFilePath(projectName, jobId) {
+4026:function hydrateScheduledJobRecord(projectName, job) {
+4074:function saveScheduledJobRecord(projectName, job) {
+4096:function tryBuildPublishingConnector(projectName, waveName, channel, input = {}) {
+4127:function upsertScheduledJob(projectName, input = {}, options = {}) {
+4209:function reviewScheduledJobs(projectName) {
+4234:function updateScheduledJobRecord(projectName, jobId, updates = {}) {
+4243:function updateScheduledJobStatus(projectName, jobId, status) {
+4252:function getOptimizationPaths(projectName) {
+4296:function getProductBySlug(projectName, productSlug) {
+4311:function getChannelAssetForProduct(product, channel) {
+4317:function buildPostReview(projectName, channel, productSlug) {
+4391:function buildImprovedChannelPost(projectName, channel, productSlug) {
+4456:function savePostPerformance(projectName, channel, productSlug, metricJson) {
+4505:function reviewProductPerformance(projectName, productSlug) {
+4531:function reviewChannelLearning(projectName, channel) {
+4565:function getDocsPaths() {
+4576:function listSystemDocs() {
+4598:function readSystemDoc(docName) {
+4621:function getRenderOutputPaths(projectName) {
+4664:function getLatestGenerationJob(projectName) {
+4688:function buildRenderRequestFromJob(projectName, job) {
+4712:function buildRenderRequest(projectName) {
+4730:function reviewLatestRenderRequest(projectName) {
+4754:function markRenderResult(projectName, renderId, status, resultData = {}) {
+4785:function evaluateExecutionReadiness(projectName, assetType) {
+4823:function getGenerationOutputPaths(projectName) {
+4860:function evaluateGenerationEligibility(projectName, assetType) {
+4896:function buildGenerationPrompt(projectName, assetType, goal) {
+4933:function buildGenerationJob(projectName, assetType, goal) {
+4970:function buildExecutionInstructions(projectName, assetType, goal) {
+4998:function buildExecutionPackage(projectName, assetType, goal) {
+5016:function resolveSourceOfTruthAssets(projectName) {
+5041:function buildPromptGuardrails(projectName) {
+5064:function buildPromptEngineContext(projectName) {
+5093:function generateBrandControlledPrompt(projectName, assetType, goal) {
+5144:function ensureDir(dirPath) {
+5148:function ensureJsonFile(filePath, defaultValue = []) {
+5157:function readJsonFile(filePath, fallback = []) {
+5173:function writeJsonFile(filePath, data) {
+5209:function normalizeAssetRole(input) {
+5228:function getProjectBrandPaths(projectName) {
+5250:function uniqueValues(values) {
+5254:function hasProjectProfile(projectName) {
+5264:function listProjectNamesWithProfiles() {
+5293:function listLegacyMediaProjectNames() {
+5303:function listMediaManagerProjects() {
+5334:function buildLegacyMediaTree(projectName) {
+5359:function buildLegacyMediaRegistry(projectName) {
+5373:function findRegisteredMediaFilePath(projectName, type, filename) {
+5430:function buildMediaManagerProjectPayload(projectName) {
+5504:function getAssetDirByRole(paths, assetRole) {
+5513:function appendAudit(entry) {
+5528:function detectProject(message) {
+5555:function normalizeOptionalProjectSlug(value) {
+5566:function getPreferredProjectName() {
+5583:function extractProjectFlag(args = []) {
+5600:function stripProjectFlagArgs(args = []) {
+5621:function resolveRequestProjectName(req, options = {}) {
+5640:function requireProjectContext(req, options = {}) {
+5652:function buildProjectHashtag(projectName) {
+5661:function getProjectDisplayName(projectName) {
+5678:function getProjectWebsiteUrl(projectName) {
+5690:function detectTaskType(message) {
+5753:function inferProductIntelligenceFromSource(sourceOfTruth = {}) {
+5790:function inferDesignIntent(goal = '') {
+5855:function enrichProductIntelligenceData(product) {
+5915:function decideMode(message) {
+5940:function selectAgent(taskType) {
+5955:function buildTaskResult({
+6029:function getProjectRegistryPaths() {
+6045:function getProjectBasePaths(projectName) {
+6071:function getLegacyProjectBasePaths(projectName) {
+6082:function getProjectBaselinePaths(projectName) {
+6106:function stableJsonHash(value) {
+6113:function logProjectDataMismatch(projectName, entry = {}) {
+6144:function readCanonicalJsonWithLegacyFallback(projectName, options = {}) {
+6211:function normalizeAssetsRegistry(value) {
+6215:function normalizeSourceStatus(value) {
+6223:function computeSourceStatus(entry = {}) {
+6251:function normalizeSourceRegistry(value) {
+6258:function buildSourceOfTruthRegistry(sources = {}) {
+6301:function buildDefaultBrandProfile(projectName, projectData = {}) {
+6335:function buildBrandProfileFromProject(projectName, projectData = {}, existing = {}) {
+6344:function ensureProjectBaselineFiles(projectName, projectDataInput = {}) {
+6484:function persistProjectSetupArtifacts(projectName, projectData = {}) {
+6549:function ensureProjectBaseStructure(projectName) {
+6573:function createProject(projectName, market, language, projectType, websiteUrl) {
+6630:function normalizeSetupTextValue(value) {
+6635:function normalizeSetupListValue(value) {
+6648:function normalizeProjectSetupPayload(payload = {}) {
+6694:function updateProjectSetup(projectName, payload = {}) {
+6749:function listProjects() {
+6754:function reviewProject(projectName) {
+6764:function reviewProjectCanonicalParity(projectName) {
+6848:function reviewProjectReadiness(projectName) {
+6987:function getProjectAssetPaths(projectName) {
+6994:function normalizeAssetTags(value) {
+7004:function normalizeAssetRecord(projectName, asset = {}) {
+7061:function registerProjectAsset(projectName, assetType, filePath) {
+7088:function listProjectAssets(projectName) {
+7101:function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
+7128:function removeProjectSourceOfTruth(projectName, sourceType) {
+7155:function reviewProjectSources(projectName) {
+7183:function asPlainObject(value) {
+7187:function normalizeTextValue(value) {
+7191:function normalizeStringArray(value) {
+7203:function isSensitiveIntegrationField(fieldKey) {
+7207:function sanitizeIntegrationId(value) {
+7214:function getProjectIntegrationPaths(projectName) {
+7238:function readProjectIntegrationRegistry(projectName) {
+7252:function writeProjectIntegrationRegistry(projectName, registry = {}) {
+7268:function maskIntegrationCredentialValue(value) {
+7276:function maskPrimaryValueForClient(record = {}) {
+7289:function summarizeCredentialState(credentials = {}, authFields = []) {
+7308:function mergeIntegrationConfig(existing = {}, incoming = {}) {
+7323:function mergeIntegrationCredentials(existing = {}, incoming = {}) {
+7338:function getIntegrationCredentials(record = {}) {
+7342:function buildIntegrationFieldSnapshot(record = {}) {
+7362:function determineIntegrationStatus(record = {}) {
+7428:function sanitizeIntegrationConfigForClient(record = {}) {
+7441:function summarizeIntegrationRecord(record = {}) {
+7512:function buildLegacyIntegrationRecords(projectName) {
+7542:function reviewProjectIntegrationControlCenter(projectName) {
+7749:function assertIntegrationReadyForAction(record = {}, actionLabel = 'run this action') {
+7866:function reviewProjectMissingAssets(projectName) {
+7899:function getAssetTypeCatalog() {
+8112:function getCanonicalAssetType(assetType) {
+8126:function getAssetCategoryDefinition(assetType) {
+8131:function getAssetCategoryStatus(asset, projectName) {
+8167:function listFilesByExtensions(rootDir, extensions = [], recursive = true) {
+8203:function listDirectChildDirectories(rootDir) {
+8214:function parseCsvDocument(csvRaw = '') {
+8269:function normalizeLibraryFolderCandidate(value = '') {
+8278:function listFrontImageFiles(rootDir) {
+8283:function buildProjectLibraryFilesystemScan(projectName) {
+8495:function refreshProjectLibraryRegistry(projectName) {
+8586:function buildProjectAssetCategoryReadiness(projectName, assetsInput = null, options = {}) {
+8709:function reviewProjectUploadMapping(projectName) {
+8736:function reviewProjectConnectorReadiness(projectName) {
+8780:function getTargetFolderForAssetType(projectName, assetType) {
+8814:function routeProjectAsset(projectName, assetType, sourceFilePath) {
+8846:function reviewProjectAssetRoutes(projectName) {
+8886:function reviewProjectFolderHealth(projectName) {
+9652:function applySingleMediaUpload(req, res, next) {
+9841:function getProjectAssetsRegistryMeta(projectName) {
+9848:function matchesProjectAssetId(value, assetId) {
+9886:function mutateProjectAssetRegistry(projectName, assetId, mutator) {
+9949:function sendAssetMutationError(res, error, fallbackMessage) {
+10195:function handleGetProjectOperations(req, res) {
+10208:function handleGetTaskCenter(req, res) {
+10222:function handleGetQueueCenter(req, res) {
+10236:function handleGetJobMonitor(req, res) {
+10250:function handleGetNotificationCenter(req, res) {
+10273:function handleGetOperationsSchema(req, res) {
+10283:function handleGetProjectTeam(req, res) {
+10296:function handleUpdateProjectTeam(req, res) {
+10314:function handleListCampaigns(req, res) {
+10329:function handleUpsertCampaign(req, res) {
+10343:function handleGetCampaign(req, res) {
+10378:function handleListContentItems(req, res) {
+10394:function handleUpsertContentItem(req, res) {
+10408:function handleGetContentItem(req, res) {
+10443:function handleListMediaJobs(req, res) {
+10460:function handleUpsertMediaJob(req, res) {
+10474:function handleGetMediaJob(req, res) {
+10509:function handleListWorkflowRuns(req, res) {
+10527:function handleGetWorkflowRun(req, res) {
+10544:function handleRunWorkflow(req, res) {
+10635:function handleExecuteAiWorkflow(req, res) {
+10653:function handleListAiCommands(req, res) {
+10668:function handleGetAiCommand(req, res) {
+10682:function handleListAiArtifacts(req, res) {
+10698:function handleListAiRecommendations(req, res) {
+10714:function handleListAiMemory(req, res) {
+10745:function handleListTasks(req, res) {
+10760:function handleCreateTask(req, res) {
+10805:function handleListApprovals(req, res) {
+10820:function handleCreateApproval(req, res) {
+10834:function handleApprovalDecision(req, res) {
+10862:function handleGetGovernance(req, res) {
+10876:function handleUpdateGovernancePolicy(req, res) {
+10890:function handleGetGovernancePolicy(req, res) {
+10910:function handleListNotifications(req, res) {
+10954:function handleListHandoffs(req, res) {
+10972:function handleCreateHandoff(req, res) {
+10986:function handleConsumeHandoff(req, res) {
+11007:function handleListEvents(req, res) {
+11025:function handleGetProjectInsights(req, res) {
+11035:function handleGetProjectLearning(req, res) {
+11124:function handleGetProjectIntegrationControlCenter(req, res) {
+11134:function getIntegrationErrorHttpStatus(error) {
+11577:function buildControlCenterBootstrapScript(req) {
+11668:function getProductIntelligencePaths(projectName) {
+11686:function normalizeProductCategoryFromText(text = '') {
+11696:function inferLineFromText(text = '') {
+11706:function inferSizeFromText(text = '') {
+11711:function buildDefaultContentDesignRules(productRecord) {
+11752:function buildProductIntelligenceRecordFromWoo(product) {
+11801:function upsertProductIntelligenceRecord(projectName, record) {
+11831:function listProductIntelligence(projectName) {
+11836:function reviewProductIntelligence(projectName, productSlug) {
+11850:function buildProductPromptPack(product) {
+11916:function buildChannelPack(product) {
+11994:function getCampaignExecutionPaths(projectName) {
+12026:function buildCampaignExecutionPackage(projectName, campaignName, productSlugs = []) {
+12080:function readCampaignExecutionPackage(projectName, campaignName) {
+12102:function buildChannelExecutionPayload(projectName, campaignName, channel) {
+12140:function getCampaignFinalizationPaths(projectName) {
+12187:function buildCampaignMediaJob(projectName, campaignName, channel) {
+12222:function buildCampaignPublishPackage(projectName, campaignName, channel) {
+12258:function buildCampaignEmailPackage(projectName, campaignName) {
+12296:function reviewCampaignFinalization(projectName, campaignName) {
+12342:function escapeHtml(value) {
+12351:function getExecutionBridgeLogDirectory(projectName) {
+12363:function writeExecutionBridgeLog(projectName, action, payload = {}) {
+12396:function resolveProjectNameForLog(req) {
+12403:function assertExecutionPackageAssets(pkg, packageName = 'package') {
+12415:function resolvePublishPackageForExecution(projectName, input = {}) {
+12435:function buildSocialExecutionPayload(publishPackage) {
+12482:function resolveEmailPackageForExecution(projectName, input = {}) {
+12501:function buildEmailReadyPayload(emailPackage) {
+12538:function buildMediaGenerationMock(promptPack = {}, input = {}) {
+12582:function resolveCampaignPackageForAds(projectName, input = {}) {
+12601:function buildAdExecutionPackage(campaignPackage, input = {}) {
+12645:function getExecutionPaths(projectName) {
+12683:function setExecutionMode(projectName, mode) {
+12714:function readExecutionMode(projectName) {
+12732:function getScheduledJobById(projectName, jobId) {
+12752:function executeScheduledJob(projectName, jobId) {
+12836:function pickFirstExistingPath(candidates = []) {
+12845:function recordManualPublish(projectName, campaignName, channel, jobId, operator, postUrl, notes = '') {
+13006:function recordPublishingExecutionOutcome(projectName, jobId, options = {}) {
+13045:function buildPublishingGovernanceError(message, details = {}) {
+13052:function getLatestPublishingApproval(projectName, jobId) {
+13065:function assertPublishingMutationAllowed(projectName, action, options = {}) {
+13146:function hydratePublishingExecutionResult(projectName, result, scheduledJobs = []) {
+13184:function reviewExecutionResult(projectName, jobId) {
+13204:function listExecutionResults(projectName) {
+13224:function reviewProjectAlignmentStatus(projectName) {
+13247:function reviewProjectMissingPriorities(projectName) {
+13287:function reviewProjectDashboard(projectName) {
+13339:function buildProjectControlCenterOverview(projectName) {
+13394:function listFilesRecursiveSafe(dir, predicate = () => true) {
+13417:function buildProjectProductMediaSummary(projectName) {
+13455:function buildProjectControlCenterAssets(projectName) {
+13505:function buildProjectControlCenterConnectors(projectName) {
+13519:function buildProjectControlCenterReadiness(projectName) {
+13533:function getProjectInsightsEnginePayload(projectName) {
+13543:function getProjectLearningEnginePayload(projectName) {
+13553:function buildProjectControlCenterActivity(projectName) {
+13618:function buildProjectOperationsPayload(projectName) {
+13622:function getAiOrchestrator() {
+13636:function resolveLegacyExecutionProjectPaths(projectName) {
+19965:function getSchedulerFilePath(projectName) {
+19973:function readSchedulerJobs(projectName) {
+19977:function writeSchedulerJobs(projectName, jobs) {
+19981:function writeSchedulerAuditLog(projectName, entry) {
+20004:function getIntelligencePaths(projectName) {
+20024:function toFiniteNumber(value, fallback = 0) {
+20029:function normalizeFeedbackMetrics(input = {}) {
+20045:function derivePerformanceStats(metrics = {}) {
+20076:function readPerformanceStore(projectName) {
+20101:function writePerformanceStore(projectName, store) {
+20113:function readLearningStore(projectName) {
+20131:function writeLearningStore(projectName, store) {
+20144:function readRecommendationsStore(projectName) {
+20162:function writeRecommendationsStore(projectName, store) {
+20175:function inferPerformanceContextFromJob(job = {}) {
+20205:function appendPerformanceRecord(projectName, input = {}) {
+20238:function calculateEntityPerformance(records, key) {
+20287:function buildTrendSnapshot(records, channel) {
+20330:function buildPerformanceSummary(projectName) {
+20367:function collectExecutionSignals(projectName) {
+20410:function buildRiskAlerts(summary, records) {
+20457:function generateOptimizationRecommendations(projectName) {
+20518:function upsertLearningPattern(learningStore, pattern) {
+20556:function buildLearningCandidates(summary, recommendations) {
+20600:function updateIntelligenceLoop(projectName, context = {}) {
+20663:function buildSmartSuggestions(projectName) {
+20697:function generateJobId() {
+20701:function generateWorkerId() {
+20705:function isJobDue(job) {
+20711:function isJobLockExpired(job) {
+20717:function buildSchedulerJobRecord(params) {
+20750:function executeJobBridge(job) {
+20812:function buildMediaManagerProjectStartupPayload(projectName) {
