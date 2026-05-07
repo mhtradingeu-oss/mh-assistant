@@ -6,6 +6,7 @@ const {
   isJobLockExpired,
   buildSchedulerJobRecord
 } = require('./lib/execution/scheduler-helpers');
+const { createSchedulerStorage } = require('./lib/execution/scheduler-storage');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -19968,44 +19969,25 @@ const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'a
 const SCHEDULER_DEFAULT_MAX_ATTEMPTS = 3;
 const SCHEDULER_VALID_MODES = Object.freeze(['manual', 'semi_auto', 'auto']);
 
-function getSchedulerFilePath(projectName) {
-  const safeProject = normalizeProjectSlug(projectName);
-  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
-  const executionDir = path.join(projectRoot, 'execution');
-  ensureDir(executionDir);
-  return path.join(executionDir, 'scheduler.json');
-}
 
-function readSchedulerJobs(projectName) {
-  return readJsonFile(getSchedulerFilePath(projectName), []);
-}
-
-function writeSchedulerJobs(projectName, jobs) {
-  writeJsonFile(getSchedulerFilePath(projectName), jobs);
-}
-
-function writeSchedulerAuditLog(projectName, entry) {
-  const safeProject = normalizeProjectSlug(projectName);
-  const projectRoot = resolveProjectPath(path.join(DATA_DIR, 'projects'), safeProject).projectRoot;
-  const logsDir = path.join(projectRoot, 'execution', 'logs');
-  ensureDir(logsDir);
-
-  const timestamp = new Date().toISOString();
-  const fileSafeStamp = timestamp.replace(/[:.]/g, '-');
-  const logPath = path.join(logsDir, `scheduler-${fileSafeStamp}.jsonl`);
-
-  const record = {
-    timestamp,
-    job_id: String(entry.job_id || ''),
-    action: String(entry.action || 'worker_action'),
-    status: String(entry.status || ''),
-    error: entry.error ? sanitizeErrorMessage(entry.error, 'Worker error') : null,
-    result_reference: entry.result_reference != null ? sanitizeValue(entry.result_reference) : null
-  };
-
-  fs.appendFileSync(logPath, JSON.stringify(record) + '\n', 'utf8');
-  return logPath;
-}
+const schedulerStorage = createSchedulerStorage({
+  path,
+  fs,
+  dataDir: DATA_DIR,
+  normalizeProjectSlug,
+  resolveProjectPath,
+  ensureDir,
+  readJsonFile,
+  writeJsonFile,
+  sanitizeErrorMessage,
+  sanitizeValue
+});
+const {
+  getSchedulerFilePath,
+  readSchedulerJobs,
+  writeSchedulerJobs,
+  writeSchedulerAuditLog
+} = schedulerStorage;
 
 function getIntelligencePaths(projectName) {
   const safeProject = normalizeProjectSlug(projectName);
