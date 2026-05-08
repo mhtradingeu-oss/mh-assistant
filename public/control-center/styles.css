@@ -7773,3 +7773,272 @@ body {
     width: 100%;
   }
 }
+
+/* Floating AI Operating Layer */
+
+.ai-dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.ai-dock-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 18px;
+  border: 1px solid rgba(120,130,160,0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15,23,42,0.92),
+      rgba(15,23,42,0.82)
+    );
+  color: #eaf2ff;
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.ai-dock-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #6ee7b7;
+  box-shadow: 0 0 12px rgba(110,231,183,0.7);
+}
+
+.ai-dock-label {
+  font-weight: 800;
+}
+
+.ai-dock-state {
+  color: rgba(234,242,255,0.72);
+  font-size: 0.82rem;
+}
+
+.ai-dock-panel {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  border-radius: 28px;
+  border: 1px solid rgba(120,130,160,0.14);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15,23,42,0.96),
+      rgba(15,23,42,0.92)
+    );
+  color: #eaf2ff;
+  backdrop-filter: blur(24px);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.38);
+  overflow: hidden;
+  display: none;
+}
+
+.ai-dock.is-open .ai-dock-panel {
+  display: block;
+}
+
+.ai-dock-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid rgba(120,130,160,0.12);
+}
+
+.ai-dock-header p {
+  margin-top: 6px;
+  color: rgba(234,242,255,0.72);
+  font-size: 0.88rem;
+}
+
+.ai-dock-close {
+  border: none;
+  background: transparent;
+  color: rgba(234,242,255,0.7);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.ai-dock-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ai-dock-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-dock-section-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(234,242,255,0.48);
+}
+
+.ai-dock-suggestion {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(120,130,160,0.14);
+  background: rgba(255,255,255,0.04);
+  color: #eaf2ff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  transition: all 160ms ease;
+}
+
+.ai-dock-suggestion:hover {
+  background: rgba(103,232,249,0.08);
+  border-color: rgba(103,232,249,0.24);
+}
+
+.ai-dock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ai-dock-chip {
+  border: 1px solid rgba(120,130,160,0.14);
+  background: rgba(255,255,255,0.05);
+  color: #eaf2ff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 860px) {
+  .ai-dock {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .ai-dock-panel {
+    width: min(100vw - 24px, 420px);
+  }
+}
+
+/* B1.1 International Executive Header */
+.topbar {
+  height: 58px;
+  min-height: 58px;
+  padding: 0 18px;
+  gap: 12px;
+}
+
+.page-context {
+  gap: 8px;
+}
+
+.page-eyebrow {
+  display: none;
+}
+
+.topbar .page-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.workspace-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(120,130,160,0.14);
+  background: rgba(255,255,255,0.045);
+  color: #eaf2ff;
+  max-width: 220px;
+}
+
+.workspace-chip strong {
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #6ee7b7;
+  box-shadow: 0 0 10px rgba(110,231,183,0.55);
+  flex: 0 0 auto;
+}
+
+.topbar-mobile-controls,
+.role-switcher,
+.access-key-btn,
+.command-toggle {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    height: 56px;
+    min-height: 56px;
+    padding: 0 12px;
+  }
+
+  .topbar-left {
+    flex: 1 1 auto;
+  }
+
+  .topbar-right {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
+  .workspace-chip {
+    max-width: 128px;
+    padding: 0 10px;
+  }
+
+  .exec-action-cluster {
+    margin-left: 0;
+    gap: 6px;
+  }
+
+  #execAskAiBtn {
+    padding-inline: 10px;
+    font-size: 0;
+  }
+
+  #execAskAiBtn::after {
+    content: "AI";
+    font-size: 12px;
+  }
+
+  #execNewBtn {
+    width: 38px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  #execNewBtn::after {
+    content: "+";
+    font-size: 18px;
+    line-height: 1;
+  }
+}
+

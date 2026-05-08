@@ -684,18 +684,7 @@ function updateAccessKeyButton() {
 }
 
 function injectAccessKeyButton() {
-  const topbarRight = document.querySelector(".topbar-right");
-  if (!topbarRight || document.getElementById("accessKeyBtn")) return;
-
-  const btn = document.createElement("button");
-  btn.id = "accessKeyBtn";
-  btn.className = "btn btn-secondary access-key-btn";
-  btn.type = "button";
-  btn.title = "Manage Control Center access key";
-  btn.textContent = "Set Access Key";
-
-  topbarRight.insertBefore(btn, topbarRight.firstChild);
-  btn.addEventListener("click", showAccessKeyModal);
+  // Access key management moved out of the global header.
   updateAccessKeyButton();
 }
 
@@ -704,45 +693,7 @@ function injectAccessKeyButton() {
 ========================= */
 
 function injectRoleSwitcher() {
-  const topbarRight = document.querySelector(".topbar-right");
-  if (!topbarRight || document.getElementById("roleSwitcherWrap")) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.id = "roleSwitcherWrap";
-  wrapper.className = "role-switcher";
-
-  const label = document.createElement("label");
-  label.htmlFor = "roleSwitcherSelect";
-  label.className = "role-switcher-label";
-  label.textContent = "Role";
-
-  const select = document.createElement("select");
-  select.id = "roleSwitcherSelect";
-  select.className = "role-switcher-select";
-  select.title = "Internal test role override (stored in localStorage)";
-
-  ACTIVE_ROUTE_ROLES.forEach((r) => {
-    const opt = document.createElement("option");
-    opt.value = r;
-    opt.textContent = r;
-    select.appendChild(opt);
-  });
-
-  const currentRole = getActiveRole();
-  select.value = currentRole;
-
-  select.addEventListener("change", () => {
-    const role = select.value;
-    try { localStorage.setItem(CONTROL_ROLE_STORAGE_KEY, role); } catch (_) {}
-    const { currentRoute } = getState();
-    navigateTo(currentRoute, false);
-    renderGlobalUi();
-    renderCurrentPage();
-  });
-
-  wrapper.appendChild(label);
-  wrapper.appendChild(select);
-  topbarRight.insertBefore(wrapper, topbarRight.firstChild);
+  // Role switching belongs in System/Settings, not the global header.
 }
 
 
@@ -3467,6 +3418,67 @@ function bindCommandInputs() {
 }
 
 
+
+/* =========================
+   AI DOCK
+========================= */
+
+function initializeAiDock() {
+  const dock = $("aiDock");
+  const toggle = $("aiDockToggle");
+  const panel = $("aiDockPanel");
+  const closeBtn = $("aiDockClose");
+
+  if (!dock || !toggle || !panel) return;
+
+  const setOpen = (open) => {
+    dock.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    panel.setAttribute("aria-hidden", String(!open));
+  };
+
+  toggle.onclick = () => {
+    const open = dock.classList.contains("is-open");
+    setOpen(!open);
+  };
+
+  closeBtn?.addEventListener("click", () => setOpen(false));
+
+  Array.from(document.querySelectorAll("[data-ai-suggestion]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const prompt = button.getAttribute("data-ai-suggestion") || "";
+      const input = $("quickCommandInput");
+
+      if (input && prompt) {
+        input.value = prompt;
+      }
+
+      openGlobalCommandBar?.();
+      showMessage("AI suggestion loaded.");
+    });
+  });
+
+  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const route = button.getAttribute("data-ai-route");
+      if (!route) return;
+      navigateTo(route);
+      setOpen(false);
+    });
+  });
+
+  const context = $("aiDockContext");
+
+  window.addEventListener("hashchange", () => {
+    const route = window.location.hash.replace(/^#/, "") || "home";
+
+    if (context) {
+      context.textContent = `Current workspace: ${route}`;
+    }
+  });
+}
+
+
 /* =========================
    EXECUTIVE NEW LAUNCHER
 ========================= */
@@ -3633,6 +3645,7 @@ async function init() {
     bindDelegatedClickRouting();
     bindRouteListener();
     bindProjectSwitcher();
+    initializeAiDock();
     bindGlobalButtons();
     bindResponsiveUi();
     bindShellMeasurements();

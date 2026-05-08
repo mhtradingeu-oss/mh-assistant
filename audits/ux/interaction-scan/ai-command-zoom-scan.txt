@@ -1,0 +1,354 @@
+public/control-center/index.html:6:  <meta name="viewport" content="width=device-width, initial-scale=1">
+public/control-center/index.html:192:                aria-controls="globalCommandBar"
+public/control-center/index.html:205:        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true"></div>
+public/control-center/index.html:207:        <section id="globalCommandBar" class="command-bar" aria-label="Global command bar">
+public/control-center/index.html:208:          <div class="command-bar-left">
+public/control-center/index.html:219:          <div class="command-bar-center">
+public/control-center/index.html:221:              id="quickCommandInput"
+public/control-center/index.html:230:          <div class="command-bar-right">
+public/control-center/index.html:341:    <div id="aiDock" class="ai-dock">
+public/control-center/index.html:343:        id="aiDockToggle"
+public/control-center/index.html:344:        class="ai-dock-toggle"
+public/control-center/index.html:347:        aria-controls="aiDockPanel"
+public/control-center/index.html:349:        <span class="ai-dock-status-dot"></span>
+public/control-center/index.html:350:        <span class="ai-dock-label">MH Assistant</span>
+public/control-center/index.html:351:        <span class="ai-dock-state">Ready</span>
+public/control-center/index.html:355:        id="aiDockPanel"
+public/control-center/index.html:356:        class="ai-dock-panel"
+public/control-center/index.html:359:        <header class="ai-dock-header">
+public/control-center/index.html:362:            <p id="aiDockContext">AI operating layer ready.</p>
+public/control-center/index.html:366:            id="aiDockClose"
+public/control-center/index.html:367:            class="ai-dock-close"
+public/control-center/index.html:375:        <div class="ai-dock-body">
+public/control-center/index.html:376:          <div class="ai-dock-section">
+public/control-center/index.html:377:            <span class="ai-dock-section-label">Suggested next step</span>
+public/control-center/index.html:380:              class="ai-dock-suggestion"
+public/control-center/index.html:388:              class="ai-dock-suggestion"
+public/control-center/index.html:396:              class="ai-dock-suggestion"
+public/control-center/index.html:404:          <div class="ai-dock-section">
+public/control-center/index.html:405:            <span class="ai-dock-section-label">Quick actions</span>
+public/control-center/index.html:407:            <div class="ai-dock-actions">
+public/control-center/index.html:408:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+public/control-center/index.html:412:              <button class="ai-dock-chip" data-ai-route="content-studio">
+public/control-center/index.html:416:              <button class="ai-dock-chip" data-ai-route="media-studio">
+public/control-center/index.html:420:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/app.js:3200:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3202:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3224:      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+public/control-center/app.js:3227:      if (commandBackdrop) {
+public/control-center/app.js:3228:        commandBackdrop.classList.remove("is-visible");
+public/control-center/app.js:3229:        commandBackdrop.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3237:    appRoot.classList.toggle("is-mobile-command-open", expanded);
+public/control-center/app.js:3240:    if (commandBackdrop) {
+public/control-center/app.js:3241:      commandBackdrop.classList.toggle("is-visible", expanded);
+public/control-center/app.js:3242:      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3260:    const isOpen = appRoot.classList.contains("is-mobile-command-open");
+public/control-center/app.js:3305:      const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
+public/control-center/app.js:3310:  if (commandBackdrop) {
+public/control-center/app.js:3311:    commandBackdrop.onclick = () => setMobileCommandExpanded(false);
+public/control-center/app.js:3320:    if (!isCompactMobileViewport() || !appRoot?.classList.contains("is-mobile-command-open")) {
+public/control-center/app.js:3325:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+public/control-center/app.js:3335:    if (event.key === "Escape" && appRoot?.classList.contains("is-mobile-command-open")) {
+public/control-center/app.js:3357:  appRoot.style.setProperty("--shell-topbar-height", `${measured}px`);
+public/control-center/app.js:3403:function openGlobalCommandBar() {
+public/control-center/app.js:3405:  const commandInput = $("quickCommandInput");
+public/control-center/app.js:3407:  appRoot?.classList.add("is-command-open");
+public/control-center/app.js:3413:  const value = $("quickCommandInput")?.value?.trim() || "";
+public/control-center/app.js:3433:  const commandInput = $("quickCommandInput");
+public/control-center/app.js:3476:  const dock = $("aiDock");
+public/control-center/app.js:3477:  const toggle = $("aiDockToggle");
+public/control-center/app.js:3478:  const panel = $("aiDockPanel");
+public/control-center/app.js:3479:  const closeBtn = $("aiDockClose");
+public/control-center/app.js:3499:      const input = $("quickCommandInput");
+public/control-center/app.js:3505:      openGlobalCommandBar?.();
+public/control-center/app.js:3519:  const context = $("aiDockContext");
+public/control-center/app.js:3617:        const input = $("quickCommandInput");
+public/control-center/app.js:3621:        openGlobalCommandBar();
+public/control-center/app.js:3648:    execAskAiBtn.onclick = openGlobalCommandBar;
+public/control-center/styles.css:58:  --font-size-page: 20px;
+public/control-center/styles.css:59:  --font-size-h2: 18px;
+public/control-center/styles.css:60:  --font-size-h3: 16px;
+public/control-center/styles.css:61:  --font-size-body: 14px;
+public/control-center/styles.css:62:  --font-size-small: 12px;
+public/control-center/styles.css:68:  --shell-topbar-height: 64px;
+public/control-center/styles.css:144:  font-size: 20px;
+public/control-center/styles.css:151:  font-size: var(--font-size-small);
+public/control-center/styles.css:163:  font-size: 11px;
+public/control-center/styles.css:185:  font-size: 11px;
+public/control-center/styles.css:293:  font-size: 12px;
+public/control-center/styles.css:329:  font-size: var(--font-size-h2);
+public/control-center/styles.css:335:  font-size: 15px;
+public/control-center/styles.css:347:  font-size: var(--font-size-body);
+public/control-center/styles.css:376:  font-size: 12px;
+public/control-center/styles.css:391:.command-bar {
+public/control-center/styles.css:393:  top: var(--shell-topbar-height);
+public/control-center/styles.css:411:.command-bar-left,
+public/control-center/styles.css:412:.command-bar-center,
+public/control-center/styles.css:413:.command-bar-right {
+public/control-center/styles.css:422:.command-bar-left {
+public/control-center/styles.css:426:.command-bar-center {
+public/control-center/styles.css:430:.command-bar-right {
+public/control-center/styles.css:434:.command-bar-right .btn {
+public/control-center/styles.css:481:  font-size: 13px;
+public/control-center/styles.css:623:  font-size: 28px;
+public/control-center/styles.css:632:  font-size: 12px;
+public/control-center/styles.css:644:  font-size: 11px;
+public/control-center/styles.css:711:  font-size: 16px;
+public/control-center/styles.css:810:  font-size: 13px;
+public/control-center/styles.css:815:  font-size: 12px;
+public/control-center/styles.css:938:  font-size: 20px;
+public/control-center/styles.css:974:  font-size: 24px;
+public/control-center/styles.css:1024:  font-size: 16px;
+public/control-center/styles.css:1030:  font-size: 13px;
+public/control-center/styles.css:1037:  font-size: 13px;
+public/control-center/styles.css:1086:  font-size: 11px;
+public/control-center/styles.css:1097:  font-size: 12px;
+public/control-center/styles.css:1125:  font-size: 18px;
+public/control-center/styles.css:1145:  font-size: 18px;
+public/control-center/styles.css:1161:  font-size: 13px;
+public/control-center/styles.css:1181:  font-size: 14px;
+public/control-center/styles.css:1222:  font-size: 18px;
+public/control-center/styles.css:1327:  font-size: 14px;
+public/control-center/styles.css:1348:  font-size: 24px;
+public/control-center/styles.css:1457:  font-size: 30px;
+public/control-center/styles.css:1465:  font-size: 15px;
+public/control-center/styles.css:1486:  font-size: 26px;
+public/control-center/styles.css:1493:  font-size: 13px;
+public/control-center/styles.css:1524:  font-size: 18px;
+public/control-center/styles.css:1552:  font-size: 14px;
+public/control-center/styles.css:1576:  font-size: 13px;
+public/control-center/styles.css:1582:  font-size: 12px;
+public/control-center/styles.css:1602:  font-size: 13px;
+public/control-center/styles.css:1679:  font-size: 18px;
+public/control-center/styles.css:1701:  font-size: 14px;
+public/control-center/styles.css:1723:  font-size: 18px;
+public/control-center/styles.css:1756:  font-size: 11px;
+public/control-center/styles.css:1849:  font-size: 12px;
+public/control-center/styles.css:1885:  font-size: 10px;
+public/control-center/styles.css:1893:  font-size: 12px;
+public/control-center/styles.css:1905:  font-size: 12px;
+public/control-center/styles.css:1947:  font-size: 12px;
+public/control-center/styles.css:2090:  font-size: 12px;
+public/control-center/styles.css:2104:  font-size: 12px;
+public/control-center/styles.css:2192:  font-size: 14px;
+public/control-center/styles.css:2204:  font-size: 24px;
+public/control-center/styles.css:2235:  font-size: 16px;
+public/control-center/styles.css:2275:  font-size: 15px;
+public/control-center/styles.css:2281:  font-size: 13px;
+public/control-center/styles.css:2347:  font-size: 12px;
+public/control-center/styles.css:2425:  font-size: 28px;
+public/control-center/styles.css:2431:  font-size: 12px;
+public/control-center/styles.css:2452:  font-size: 16px;
+public/control-center/styles.css:2458:  font-size: 13px;
+public/control-center/styles.css:2555:  font-size: 13px;
+public/control-center/styles.css:2578:  font-size: 13px;
+public/control-center/styles.css:2645:  font-size: 13px;
+public/control-center/styles.css:2674:  font-size: 13px;
+public/control-center/styles.css:2684:  font-size: 13px;
+public/control-center/styles.css:2721:  font-size: 11px;
+public/control-center/styles.css:2737:  font-size: 12px;
+public/control-center/styles.css:2771:  font-size: 12px;
+public/control-center/styles.css:2805:  font-size: 12px;
+public/control-center/styles.css:2816:  font-size: 12px;
+public/control-center/styles.css:2876:  font-size: 12px;
+public/control-center/styles.css:2929:  font-size: 12px;
+public/control-center/styles.css:2935:  font-size: 11px;
+public/control-center/styles.css:2947:  font-size: 11px;
+public/control-center/styles.css:2980:  .command-bar {
+public/control-center/styles.css:2985:  .command-bar-right {
+public/control-center/styles.css:3065:  .command-bar {
+public/control-center/styles.css:3066:    top: var(--shell-topbar-height);
+public/control-center/styles.css:3280:    font-size: 24px;
+public/control-center/styles.css:3308:    font-size: 16px;
+public/control-center/styles.css:3316:  .command-bar {
+public/control-center/styles.css:3318:    top: var(--shell-topbar-height);
+public/control-center/styles.css:3334:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+public/control-center/styles.css:3344:    inset: var(--shell-topbar-height) 0 0;
+public/control-center/styles.css:3352:  .app-shell.is-mobile-shell.is-mobile-command-open .command-backdrop {
+public/control-center/styles.css:3357:  .command-bar-right {
+public/control-center/styles.css:3457:  .command-bar-right .btn {
+public/control-center/styles.css:3487:    --font-size-page: 24px;
+public/control-center/styles.css:3488:    --font-size-h2: 20px;
+public/control-center/styles.css:3489:    --font-size-body: 13px;
+public/control-center/styles.css:3503:  .command-bar-right {
+public/control-center/styles.css:3519:    font-size: 11px;
+public/control-center/styles.css:3532:    font-size: 24px;
+public/control-center/styles.css:3571:    font-size: 11px;
+public/control-center/styles.css:3580:    font-size: var(--font-size-h2);
+public/control-center/styles.css:3603:    font-size: 12px;
+public/control-center/styles.css:3620:    font-size: 11px;
+public/control-center/styles.css:3639:    font-size: 11px;
+public/control-center/styles.css:3650:    font-size: 12px;
+public/control-center/styles.css:3673:    font-size: 12px;
+public/control-center/styles.css:3679:    font-size: 11px;
+public/control-center/styles.css:3722:    font-size: 22px;
+public/control-center/styles.css:3727:    font-size: 11px;
+public/control-center/styles.css:3791:    font-size: 14px;
+public/control-center/styles.css:3817:    font-size: 11px;
+public/control-center/styles.css:3851:    font-size: 11px;
+public/control-center/styles.css:3865:    font-size: 11px;
+public/control-center/styles.css:3878:    font-size: 13px;
+public/control-center/styles.css:3890:    font-size: 12px;
+public/control-center/styles.css:3903:    font-size: 12px;
+public/control-center/styles.css:3920:    font-size: 11px;
+public/control-center/styles.css:3963:    font-size: 18px;
+public/control-center/styles.css:3969:    font-size: 12px;
+public/control-center/styles.css:3977:    font-size: 10px;
+public/control-center/styles.css:3993:    font-size: 11px;
+public/control-center/styles.css:4006:    font-size: 13px;
+public/control-center/styles.css:4023:    font-size: 12px;
+public/control-center/styles.css:4078:    font-size: 36px;
+public/control-center/styles.css:4083:    font-size: 15px;
+public/control-center/styles.css:4089:    font-size: 13px;
+public/control-center/styles.css:4100:    font-size: 12px;
+public/control-center/styles.css:4121:    font-size: 13px;
+public/control-center/styles.css:4127:    font-size: 10px;
+public/control-center/styles.css:4148:    font-size: 15px;
+public/control-center/styles.css:4161:    font-size: 11px;
+public/control-center/styles.css:4184:    font-size: 12px;
+public/control-center/styles.css:4191:    font-size: 14px;
+public/control-center/styles.css:4199:    font-size: 13px;
+public/control-center/styles.css:4211:    font-size: 10px;
+public/control-center/styles.css:4228:    font-size: 13px;
+public/control-center/styles.css:4242:    font-size: 13px;
+public/control-center/styles.css:4264:    font-size: 11px;
+public/control-center/styles.css:4309:    font-size: 18px;
+public/control-center/styles.css:4320:    font-size: 12px;
+public/control-center/styles.css:4330:    font-size: 11px;
+public/control-center/styles.css:4347:    font-size: 10px;
+public/control-center/styles.css:4366:    font-size: 10px;
+public/control-center/styles.css:4375:    font-size: 13px;
+public/control-center/styles.css:4383:    font-size: 12px;
+public/control-center/styles.css:4462:  font-size: 14px;
+public/control-center/styles.css:4498:  font-size: 10px;
+public/control-center/styles.css:4505:  font-size: 13px;
+public/control-center/styles.css:4517:  font-size: 16px;
+public/control-center/styles.css:4524:  font-size: 13px;
+public/control-center/styles.css:4545:  font-size: 11px;
+public/control-center/styles.css:4564:  font-size: 11px;
+public/control-center/styles.css:4578:  font-size: 13px;
+public/control-center/styles.css:4606:  font-size: 12px;
+public/control-center/styles.css:4627:  font-size: 12px;
+public/control-center/styles.css:4661:  font-size: 12px;
+public/control-center/styles.css:4682:  font-size: 14px;
+public/control-center/styles.css:4689:  font-size: 12px;
+public/control-center/styles.css:4702:  font-size: 10px;
+public/control-center/styles.css:4713:  font-size: 13px;
+public/control-center/styles.css:4718:  font-size: 11px;
+public/control-center/styles.css:4788:  font-size: 11px;
+public/control-center/styles.css:4797:  font-size: 20px;
+public/control-center/styles.css:4813:  font-size: 14px;
+public/control-center/styles.css:4845:  font-size: 10px;
+public/control-center/styles.css:4853:  font-size: 13px;
+public/control-center/styles.css:4873:  font-size: 10px;
+public/control-center/styles.css:4912:  font-size: 13px;
+public/control-center/styles.css:4919:  font-size: 11px;
+public/control-center/styles.css:4947:  font-size: 10px;
+public/control-center/styles.css:4956:  font-size: 13px;
+public/control-center/styles.css:4983:  font-size: 11px;
+public/control-center/styles.css:4998:  font-size: 12px;
+public/control-center/styles.css:5023:  font-size: 15px;
+public/control-center/styles.css:5029:  font-size: 12px;
+public/control-center/styles.css:5044:  font-size: 13px;
+public/control-center/styles.css:5057:  font-size: 14px;
+public/control-center/styles.css:5080:  font-size: 12px;
+public/control-center/styles.css:5100:  font-size: 13px;
+public/control-center/styles.css:5122:  font-size: 14px;
+public/control-center/styles.css:5155:  font-size: 14px;
+public/control-center/styles.css:5189:  font-size: 10px;
+public/control-center/styles.css:5196:  font-size: 13px;
+public/control-center/styles.css:5207:  font-size: 15px;
+public/control-center/styles.css:5214:  font-size: 13px;
+public/control-center/styles.css:5234:  font-size: 11px;
+public/control-center/styles.css:5252:  font-size: 11px;
+public/control-center/styles.css:5266:  font-size: 13px;
+public/control-center/styles.css:5290:  font-size: 12px;
+public/control-center/styles.css:5317:  font-size: 12px;
+public/control-center/styles.css:5329:  font-size: 12px;
+public/control-center/styles.css:5359:  font-size: 14px;
+public/control-center/styles.css:5367:  font-size: 12px;
+public/control-center/styles.css:5376:  font-size: 13px;
+public/control-center/styles.css:5392:  font-size: 11px;
+public/control-center/styles.css:5409:  font-size: 12px;
+public/control-center/styles.css:5427:  font-size: 13px;
+public/control-center/styles.css:5465:  font-size: 12px;
+public/control-center/styles.css:5492:  font-size: 11px;
+public/control-center/styles.css:5499:  font-size: 12px;
+public/control-center/styles.css:5513:  font-size: 13px;
+public/control-center/styles.css:5525:  font-size: 12px;
+public/control-center/styles.css:5550:  font-size: 12px;
+public/control-center/styles.css:5569:  font-size: 11px;
+public/control-center/styles.css:5590:  font-size: 12px;
+public/control-center/styles.css:5695:  font-size: 12px;
+public/control-center/styles.css:5764:  font-size: var(--font-size-h3);
+public/control-center/styles.css:5781:  font-size: 10px;
+public/control-center/styles.css:5815:  font-size: var(--font-size-body);
+public/control-center/styles.css:5846:  font-size: 12px;
+public/control-center/styles.css:5859:  font-size: var(--font-size-body);
+public/control-center/styles.css:5863:  font-size: var(--font-size-small);
+public/control-center/styles.css:5884:  font-size: 11px;
+public/control-center/styles.css:5893:  font-size: var(--font-size-small);
+public/control-center/styles.css:5913:  font-size: 11px;
+public/control-center/styles.css:5925:  font-size: var(--font-size-small);
+public/control-center/styles.css:5938:  font-size: var(--font-size-small);
+public/control-center/styles.css:5945:  font-size: var(--font-size-body);
+public/control-center/styles.css:6127:.command-bar {
+public/control-center/styles.css:6182:  .command-bar {
+public/control-center/styles.css:6186:  .command-bar-right {
+public/control-center/styles.css:6206:  .command-bar {
+public/control-center/styles.css:6222:  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+public/control-center/styles.css:6226:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+public/control-center/styles.css:6277:  font-size: 28px;
+public/control-center/styles.css:6296:  font-size: 26px;
+public/control-center/styles.css:6612:  font-size: 12px;
+public/control-center/styles.css:6666:  font-size: 11px;
+public/control-center/styles.css:6689:  font-size: 12px;
+public/control-center/styles.css:6751:  font-size: 12px;
+public/control-center/styles.css:6784:  font-size: 11px;
+public/control-center/styles.css:6816:  font-size: 12px;
+public/control-center/styles.css:6904:  font-size: 12px;
+public/control-center/styles.css:6911:  font-size: 12px;
+public/control-center/styles.css:6920:  font-size: 10.5px;
+public/control-center/styles.css:6937:  font-size: 10.5px;
+public/control-center/styles.css:6956:  font-size: 12px;
+public/control-center/styles.css:7013:  font-size: 11px;
+public/control-center/styles.css:7018:  font-size: 11px;
+public/control-center/styles.css:7034:  font-size: 11px;
+public/control-center/styles.css:7271:  font-size: 11px;
+public/control-center/styles.css:7408:  font-size: 1.15rem;
+public/control-center/styles.css:7445:  font-size: 0.82rem;
+public/control-center/styles.css:7559:  font-size: 1rem;
+public/control-center/styles.css:7564:  font-size: 0.9rem;
+public/control-center/styles.css:7580:.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {
+public/control-center/styles.css:7631:  font-size: 0.68rem;
+public/control-center/styles.css:7661:  font-size: 0.78rem;
+public/control-center/styles.css:7710:.command-bar {
+public/control-center/styles.css:7722:.command-bar input,
+public/control-center/styles.css:7723:.command-bar textarea {
+public/control-center/styles.css:7724:  font-size: 0.95rem;
+public/control-center/styles.css:7744:  font-size: 1rem;
+public/control-center/styles.css:7772:  .command-bar {
+public/control-center/styles.css:7779:.ai-dock {
+public/control-center/styles.css:7790:.ai-dock-toggle {
+public/control-center/styles.css:7811:.ai-dock-status-dot {
+public/control-center/styles.css:7819:.ai-dock-label {
+public/control-center/styles.css:7823:.ai-dock-state {
+public/control-center/styles.css:7825:  font-size: 0.82rem;
+public/control-center/styles.css:7828:.ai-dock-panel {
+public/control-center/styles.css:7847:.ai-dock.is-open .ai-dock-panel {
+public/control-center/styles.css:7851:.ai-dock-header {
+public/control-center/styles.css:7860:.ai-dock-header p {
+public/control-center/styles.css:7863:  font-size: 0.88rem;
+public/control-center/styles.css:7866:.ai-dock-close {
+public/control-center/styles.css:7870:  font-size: 1.4rem;
+public/control-center/styles.css:7874:.ai-dock-body {
+public/control-center/styles.css:7881:.ai-dock-section {
+public/control-center/styles.css:7887:.ai-dock-section-label {
+public/control-center/styles.css:7888:  font-size: 0.72rem;
+public/control-center/styles.css:7895:.ai-dock-suggestion {
+public/control-center/styles.css:7906:.ai-dock-suggestion:hover {
+public/control-center/styles.css:7911:.ai-dock-actions {
+public/control-center/styles.css:7917:.ai-dock-chip {
+public/control-center/styles.css:7923:  font-size: 0.82rem;
+public/control-center/styles.css:7927:  .ai-dock {
+public/control-center/styles.css:7932:  .ai-dock-panel {
