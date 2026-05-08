@@ -3379,6 +3379,53 @@ function executeQuickCommand() {
   }));
 }
 
+
+function closeGlobalCommandBarSafe() {
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
+  const toggleBtn = $("commandToggleBtn");
+
+  appRoot?.classList.remove("is-command-open", "is-mobile-command-open");
+  commandBar?.classList.add("is-collapsed");
+  commandBar?.setAttribute("aria-hidden", "true");
+  commandBackdrop?.classList.remove("is-visible");
+  commandBackdrop?.setAttribute("aria-hidden", "true");
+
+  if (toggleBtn) {
+    toggleBtn.setAttribute("aria-expanded", "false");
+    toggleBtn.textContent = "Command";
+  }
+}
+
+function bindCommandOutsideClose() {
+  const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+
+  document.addEventListener("click", (event) => {
+    if (!appRoot?.classList.contains("is-command-open")) return;
+
+    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+    const clickedDock = event.target.closest("#aiDock");
+
+    if (!clickedInsideCommand && !clickedAiButton && !clickedDock) {
+      closeGlobalCommandBarSafe();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeGlobalCommandBarSafe();
+    }
+  });
+
+  if (commandBar) {
+    commandBar.addEventListener("click", (event) => event.stopPropagation());
+  }
+}
+
+
 function bindCommandInputs() {
   const searchInput = $("globalSearch");
   const commandInput = $("quickCommandInput");
@@ -3437,12 +3484,24 @@ function initializeAiDock() {
     panel.setAttribute("aria-hidden", String(!open));
   };
 
-  toggle.onclick = () => {
+  toggle.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     const open = dock.classList.contains("is-open");
     setOpen(!open);
   };
 
   closeBtn?.addEventListener("click", () => setOpen(false));
+
+  document.addEventListener("click", (event) => {
+    if (!dock.classList.contains("is-open")) return;
+    if (event.target.closest("#aiDock")) return;
+    setOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
 
   Array.from(document.querySelectorAll("[data-ai-suggestion]")).forEach((button) => {
     button.addEventListener("click", () => {
@@ -3455,6 +3514,7 @@ function initializeAiDock() {
 
       openGlobalCommandBar?.();
       showMessage("AI suggestion loaded.");
+      setOpen(false);
     });
   });
 
@@ -3469,13 +3529,16 @@ function initializeAiDock() {
 
   const context = $("aiDockContext");
 
-  window.addEventListener("hashchange", () => {
+  const syncContext = () => {
     const route = window.location.hash.replace(/^#/, "") || "home";
 
     if (context) {
       context.textContent = `Current workspace: ${route}`;
     }
-  });
+  };
+
+  syncContext();
+  window.addEventListener("hashchange", syncContext);
 }
 
 
@@ -3650,6 +3713,7 @@ async function init() {
     bindResponsiveUi();
     bindShellMeasurements();
     bindCommandInputs();
+    bindCommandOutsideClose();
 
     injectAccessKeyButton();
     if (

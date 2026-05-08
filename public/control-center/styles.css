@@ -8042,3 +8042,164 @@ body {
   }
 }
 
+
+/* B1.2 Interaction + Responsive Polish */
+
+/* Compact AI command palette */
+.app-shell.is-command-open .command-backdrop,
+.app-shell.is-mobile-command-open .command-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(2, 8, 23, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+.command-bar {
+  position: fixed;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(420px, calc(100vh - 110px));
+  overflow: auto;
+  display: grid;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(240px, 1.2fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 24px;
+}
+
+.command-bar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.command-bar-right .btn {
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+/* Keep the global command closed unless explicitly opened */
+.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {
+  display: none;
+}
+
+/* Executive launcher: smaller, scrollable, mobile-safe */
+.executive-new-card {
+  width: min(880px, calc(100vw - 28px));
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  border-radius: 26px;
+}
+
+.executive-new-grid {
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.executive-new-option {
+  min-height: 112px;
+  padding: 16px;
+}
+
+.executive-new-option strong {
+  font-size: 0.95rem;
+}
+
+.executive-new-option span {
+  font-size: 0.84rem;
+}
+
+/* Make header actions always visible on mobile */
+@media (max-width: 860px) {
+  .exec-action-cluster {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .topbar-left {
+    min-width: 0;
+  }
+
+  .topbar .page-title {
+    max-width: 140px;
+  }
+
+  .workspace-chip {
+    max-width: 112px;
+  }
+
+  .exec-action-cluster {
+    flex: 0 0 auto;
+  }
+
+  .command-bar {
+    top: 66px;
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 86px);
+    grid-template-columns: 1fr;
+    border-radius: 22px;
+    padding: 12px;
+  }
+
+  .command-bar-right {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .executive-new-card {
+    width: calc(100vw - 18px);
+    max-height: 84vh;
+    border-radius: 22px;
+  }
+
+  .executive-new-head {
+    gap: 10px;
+  }
+
+  .executive-new-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .executive-new-option {
+    min-height: 96px;
+    padding: 14px;
+  }
+
+  .ai-dock {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .ai-dock-toggle {
+    min-height: 46px;
+    padding: 0 14px;
+  }
+
+  .ai-dock-label {
+    font-size: 0.88rem;
+  }
+
+  .ai-dock-state {
+    display: none;
+  }
+
+  .ai-dock-panel {
+    width: calc(100vw - 20px);
+    max-height: 72vh;
+    overflow: auto;
+    border-radius: 22px;
+  }
+}
