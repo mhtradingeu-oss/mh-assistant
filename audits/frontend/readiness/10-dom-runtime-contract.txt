@@ -1,0 +1,110 @@
+===== 10. DOM RUNTIME CONTRACT =====
+public/control-center/index.html:23:    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:80:    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+public/control-center/index.html:152:            id="sidebarToggleBtn"
+public/control-center/index.html:177:                id="commandToggleBtn"
+public/control-center/index.html:181:                aria-controls="globalCommandBar"
+public/control-center/index.html:187:                id="execNewBtn"
+public/control-center/index.html:194:                id="execAskAiBtn"
+public/control-center/index.html:208:        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:210:        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+public/control-center/index.html:251:      function hideLoadingOverlay() {
+public/control-center/index.html:252:        var overlay = document.getElementById("loadingOverlay");
+public/control-center/index.html:262:        hideLoadingOverlay();
+public/control-center/index.html:345:    <div id="aiDock" class="ai-dock">
+public/control-center/index.html:347:        id="aiDockToggle"
+public/control-center/index.html:351:        aria-controls="aiDockPanel"
+public/control-center/index.html:359:        id="aiDockPanel"
+public/control-center/index.html:366:            <p id="aiDockContext">AI operating layer ready.</p>
+public/control-center/index.html:370:            id="aiDockClose"
+public/control-center/app.js:828:  const overlay = $("loadingOverlay");
+public/control-center/app.js:873:  const overlay = $("loadingOverlay");
+public/control-center/app.js:897:  const overlay = $("loadingOverlay");
+public/control-center/app.js:975:  const overlay = $("loadingOverlay");
+public/control-center/app.js:978:    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+public/control-center/app.js:1300:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1413:function forceHideLoadingOverlay(reason = "access-key-recovery") {
+public/control-center/app.js:1414:  recordStartupStep("forceHideLoadingOverlay.start", {
+public/control-center/app.js:1420:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1422:    recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1443:  recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1476:    forceHideLoadingOverlay("manual-unlock");
+public/control-center/app.js:1478:    forceHideLoadingOverlay(reason);
+public/control-center/app.js:1483:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1572:  forceHideLoadingOverlay("access-key-required-force");
+public/control-center/app.js:1708:      forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:2811:        forceHideLoadingOverlay("render-global-ui-error");
+public/control-center/app.js:2839:        forceHideLoadingOverlay("safe-render-current-page-error");
+public/control-center/app.js:2872:        forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:2897:        forceHideLoadingOverlay("parse-watchdog");
+public/control-center/app.js:2917:      forceHideLoadingOverlay(`load-project-error-${String(error?.phase || "unknown")}`);
+public/control-center/app.js:3174:  const toggleBtn = $("sidebarToggleBtn");
+public/control-center/app.js:3175:  const backdrop = $("sidebarBackdrop");
+public/control-center/app.js:3177:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3178:  const commandToggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3179:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3198:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+public/control-center/app.js:3206:      if (commandBackdrop) {
+public/control-center/app.js:3207:        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+public/control-center/app.js:3208:        commandBackdrop.hidden = !desktopCommandOpen;
+public/control-center/app.js:3209:        commandBackdrop.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+public/control-center/app.js:3211:      commandToggleBtn.setAttribute("aria-expanded", desktopCommandOpen ? "true" : "false");
+public/control-center/app.js:3212:      commandToggleBtn.textContent = desktopCommandOpen ? "Close" : "Command";
+public/control-center/app.js:3221:    if (commandBackdrop) {
+public/control-center/app.js:3222:      commandBackdrop.classList.toggle("is-visible", expanded);
+public/control-center/app.js:3223:      commandBackdrop.hidden = !expanded;
+public/control-center/app.js:3224:      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3226:    commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+public/control-center/app.js:3227:    commandToggleBtn.textContent = expanded ? "Close" : "Command";
+public/control-center/app.js:3232:    if (!appRoot || !commandToggleBtn) return;
+public/control-center/app.js:3235:    commandToggleBtn.hidden = false;
+public/control-center/app.js:3291:  if (commandToggleBtn) {
+public/control-center/app.js:3292:    commandToggleBtn.onclick = (event) => {
+public/control-center/app.js:3297:          closeGlobalCommandBarSafe();
+public/control-center/app.js:3299:          openGlobalCommandBar();
+public/control-center/app.js:3308:  if (commandBackdrop) {
+public/control-center/app.js:3309:    commandBackdrop.onclick = () => {
+public/control-center/app.js:3311:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3325:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+public/control-center/app.js:3326:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+public/control-center/app.js:3404:function openGlobalCommandBar() {
+public/control-center/app.js:3406:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3407:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3409:  const toggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3424:  commandBackdrop?.classList.add("is-visible");
+public/control-center/app.js:3425:  if (commandBackdrop) {
+public/control-center/app.js:3426:    commandBackdrop.hidden = false;
+public/control-center/app.js:3428:  commandBackdrop?.setAttribute("aria-hidden", "false");
+public/control-center/app.js:3456:function closeGlobalCommandBarSafe() {
+public/control-center/app.js:3458:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3459:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3460:  const toggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3468:  commandBackdrop?.classList.remove("is-visible");
+public/control-center/app.js:3469:  if (commandBackdrop) {
+public/control-center/app.js:3470:    commandBackdrop.hidden = true;
+public/control-center/app.js:3472:  commandBackdrop?.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3484:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3490:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+public/control-center/app.js:3491:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+public/control-center/app.js:3492:    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+public/control-center/app.js:3493:    const clickedDock = event.target.closest("#aiDock");
+public/control-center/app.js:3496:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3502:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3556:function initializeAiDock() {
+public/control-center/app.js:3557:  if (window.__mhAiDockBound) return;
+public/control-center/app.js:3558:window.__mhAiDockBound = true;
+public/control-center/app.js:3559:  const dock = $("aiDock");
+public/control-center/app.js:3560:  const toggle = $("aiDockToggle");
+public/control-center/app.js:3561:  const panel = $("aiDockPanel");
+public/control-center/app.js:3562:  const closeBtn = $("aiDockClose");
+public/control-center/app.js:3587:    if (event.target.closest("#aiDock")) return;
+public/control-center/app.js:3604:      openGlobalCommandBar?.();
+public/control-center/app.js:3619:  const context = $("aiDockContext");
+public/control-center/app.js:3857:        openGlobalCommandBar();
+public/control-center/app.js:3888:  const execNewBtn = $("execNewBtn");
+public/control-center/app.js:3890:  const execAskAiBtn = $("execAskAiBtn");
+public/control-center/app.js:3892:  if (execNewBtn) {
+public/control-center/app.js:3893:    execNewBtn.onclick = showExecutiveNewLauncher;
+public/control-center/app.js:3896:  if (execAskAiBtn) {
+public/control-center/app.js:3897:    execAskAiBtn.onclick = openGlobalCommandBar;
+public/control-center/app.js:3946:    initializeAiDock();
