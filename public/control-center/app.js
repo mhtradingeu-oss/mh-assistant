@@ -3400,6 +3400,15 @@ function executeSearch() {
   navigateTo(top[0].route);
 }
 
+function openGlobalCommandBar() {
+  const appRoot = $("app");
+  const commandInput = $("quickCommandInput");
+  const toggleBtn = $("commandToggleBtn");
+  appRoot?.classList.add("is-command-open");
+  toggleBtn?.setAttribute("aria-expanded", "true");
+  setTimeout(() => commandInput?.focus(), 40);
+}
+
 function executeQuickCommand() {
   const value = $("quickCommandInput")?.value?.trim() || "";
   if (!value) {
@@ -3457,6 +3466,107 @@ function bindCommandInputs() {
   }
 }
 
+
+/* =========================
+   EXECUTIVE NEW LAUNCHER
+========================= */
+
+function createExecutiveNewLauncherModal() {
+  const modal = document.createElement("div");
+  modal.id = "executiveNewLauncherModal";
+  modal.className = "access-key-modal executive-new-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Create new workflow");
+
+  modal.innerHTML = `
+    <div class="access-key-card executive-new-card">
+      <div class="executive-new-head">
+        <div>
+          <h2 class="access-key-title">What do you want to create?</h2>
+          <p class="access-key-desc">
+            Start a guided AI workflow for content, campaigns, media, publishing, approvals, or operations.
+          </p>
+        </div>
+        <button id="executiveNewCloseBtn" class="btn btn-ghost" type="button">Close</button>
+      </div>
+
+      <div class="executive-new-grid">
+        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+          <strong>Campaign</strong>
+          <span>Launch plan, audience, channels, budget, content map.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+          <strong>Blog / Content</strong>
+          <span>Blog, captions, landing copy, SEO content.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+          <strong>Image / Video / Audio</strong>
+          <span>Creative assets, AI visuals, videos, voice concepts.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+          <strong>Publish</strong>
+          <span>Review, approve, schedule, publish.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+          <strong>Approval</strong>
+          <span>Governance, claim review, release approval.</span>
+        </button>
+
+        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+          <strong>Custom Workflow</strong>
+          <span>Multi-step AI workflow and execution routing.</span>
+        </button>
+      </div>
+
+      <div class="access-key-status">
+        Tip: choose a workflow type. The system will open the right workspace and prefill AI Workspace with guided instructions.
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+function hideExecutiveNewLauncher() {
+  const modal = document.getElementById("executiveNewLauncherModal");
+  if (modal) modal.classList.remove("is-visible");
+}
+
+function showExecutiveNewLauncher() {
+  let modal = document.getElementById("executiveNewLauncherModal");
+  if (!modal) {
+    modal = createExecutiveNewLauncherModal();
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) hideExecutiveNewLauncher();
+    });
+
+    modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
+
+    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+      button.addEventListener("click", () => {
+        const route = button.getAttribute("data-new-route") || "ai-command";
+        const prompt = button.getAttribute("data-new-prompt") || "";
+        const input = $("quickCommandInput");
+        if (input && prompt) input.value = prompt;
+        hideExecutiveNewLauncher();
+        navigateTo(route);
+        openGlobalCommandBar();
+        showMessage("Started guided workflow.");
+      });
+    });
+  }
+
+  modal.classList.add("is-visible");
+}
+
+
 /* =========================
    GLOBAL BUTTONS
 ========================= */
@@ -3465,7 +3575,17 @@ function bindGlobalButtons() {
   const refreshBtn = $("refreshAllBtn");
   const openAiBtn = $("openAiBtn");
   const newCampaignBtn = $("newCampaignBtn");
+  const execNewBtn = $("execNewBtn");
   const scheduleBtn = $("scheduleBtn");
+  const execAskAiBtn = $("execAskAiBtn");
+
+  if (execNewBtn) {
+    execNewBtn.onclick = showExecutiveNewLauncher;
+  }
+
+  if (execAskAiBtn) {
+    execAskAiBtn.onclick = openGlobalCommandBar;
+  }
 
   if (refreshBtn) {
     refreshBtn.textContent = "Run Refresh";
