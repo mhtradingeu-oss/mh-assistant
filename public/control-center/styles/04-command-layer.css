@@ -1,43 +1,141 @@
-/*
-  Control Center Command Layer
-  Purpose: one canonical command-bar/backdrop behavior before legacy overrides.
-*/
-
-/* Default desktop command bar: hidden unless command mode is open. */
-.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {
+.command-bar {
+  position: fixed;
+  top: calc(var(--shell-topbar-height, 64px) + 10px);
+  left: 50%;
+  z-index: var(--layer-command);
   display: none;
+  grid-template-columns: minmax(160px, 0.85fr) minmax(240px, 1.15fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(780px, calc(100vw - 32px));
+  max-height: min(420px, calc(100vh - 96px));
+  min-width: 0;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid rgba(122, 169, 205, 0.22);
+  border-radius: 18px;
+  background: rgba(8, 24, 38, 0.94);
+  box-shadow: var(--shadow-heavy);
+  backdrop-filter: blur(18px);
+  transform: translateX(-50%);
 }
 
-.command-bar {
-  z-index: var(--layer-command);
+.command-bar-left,
+.command-bar-center,
+.command-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
 }
 
-/* Backdrop is non-blocking by default. */
+.command-bar-center {
+  justify-content: stretch;
+}
+
+.command-bar-right {
+  justify-content: flex-end;
+}
+
+.command-input {
+  width: 100%;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+}
+
 .command-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--layer-command) - 1);
+  display: none;
+  background: rgba(2, 8, 15, 0.42);
+  backdrop-filter: blur(2px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  z-index: calc(var(--layer-command) - 1);
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
 }
 
-/* Open command state. */
+.app-shell.is-command-open .command-bar,
+.app-shell.is-mobile-command-open .command-bar {
+  display: grid;
+}
+
+.command-bar[aria-hidden="true"],
+.command-bar[hidden] {
+  display: none !important;
+}
+
 .app-shell.is-command-open .command-backdrop,
-.app-shell.is-mobile-command-open .command-backdrop,
-.command-backdrop.is-visible {
+.app-shell.is-mobile-command-open .command-backdrop {
+  display: block;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
-/* Mobile command opens only when explicitly requested. */
-@media (max-width: 768px) {
-  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
-    display: none;
+.command-backdrop[aria-hidden="true"],
+.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-backdrop {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.command-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.command-toggle[aria-expanded="true"] {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.16);
+  color: #d8ffff;
+}
+
+@media (max-width: 760px) {
+  .command-toggle:not([hidden]) {
+    display: inline-flex;
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    font-size: 0;
   }
 
-  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+  .command-toggle:not([hidden])::after {
+    content: "Cmd";
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .app-shell.is-mobile-command-open .command-toggle:not([hidden])::after {
+    content: "X";
+    font-size: 14px;
+  }
+
+  .command-bar {
+    top: calc(var(--shell-topbar-height, 56px) + 8px);
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 86px);
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+  }
+
+  .command-bar-left,
+  .command-bar-center,
+  .command-bar-right {
+    width: 100%;
+  }
+
+  .command-bar-right {
     display: grid;
+    grid-template-columns: 1fr;
   }
 
   .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-backdrop {

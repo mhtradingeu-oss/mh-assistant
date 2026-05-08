@@ -10,6 +10,13 @@ body {
 
 body {
   overflow: hidden;
+  color: var(--text-primary);
+  background:
+    radial-gradient(1100px 620px at 88% -20%, rgba(34, 211, 238, 0.14), transparent 64%),
+    radial-gradient(820px 480px at 8% 110%, rgba(45, 212, 191, 0.12), transparent 58%),
+    var(--bg-primary);
+  font-family: "Manrope", "Plus Jakarta Sans", "IBM Plex Sans", "Segoe UI", sans-serif;
+  line-height: 1.45;
 }
 
 .app-shell {
@@ -19,12 +26,16 @@ body {
 }
 
 .os-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 0;
   height: 100vh;
   overflow: hidden;
 }
 
 .main-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   height: 100vh;
@@ -35,6 +46,7 @@ body {
   min-width: 0;
   min-height: 0;
   height: 100%;
+  padding: 18px 18px 92px;
   overflow-y: auto;
   overflow-x: hidden;
   scroll-padding-top: 24px;
@@ -49,4 +61,38 @@ body {
 #pageRoot > section,
 #pageRoot > div {
   min-width: 0;
+}
+
+.page {
+  display: none;
+}
+
+.page.is-active {
+  display: block;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+}
+
+.workspace::-webkit-scrollbar {
+  width: 8px;
+}
+
+.workspace::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(122, 169, 205, 0.34);
+}
+
+@media (max-width: 1024px) {
+  .os-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    padding: 12px 12px 84px;
+  }
 }

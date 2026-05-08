@@ -834,6 +834,7 @@ function showLoading(
 
   if (overlay) {
     overlay.hidden = false;
+    overlay.inert = false;
     overlay.style.display = "flex";
     overlay.style.opacity = "1";
     overlay.style.visibility = "visible";
@@ -874,6 +875,7 @@ function hideLoading(options = {}) {
 
   overlay.classList.remove("is-visible");
   overlay.hidden = true;
+  overlay.inert = true;
   overlay.setAttribute("aria-hidden", "true");
   overlay.style.setProperty("display", "none", "important");
   overlay.style.opacity = "0";
@@ -1039,6 +1041,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
 
   if (panel) {
     panel.hidden = !showPanel;
+    panel.inert = !showPanel;
     panel.classList.toggle("is-visible", showPanel);
     panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
   }
@@ -1070,6 +1073,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
 
   if (unlockBar) {
     unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
     unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
   }
 
@@ -1481,6 +1485,7 @@ function unlockStartupUi(reason = "manual-unlock") {
     overlay.classList.remove("is-visible");
     overlay.setAttribute("aria-hidden", "true");
     overlay.hidden = true;
+    overlay.inert = true;
     overlay.style.setProperty("display", "none", "important");
     overlay.style.visibility = "hidden";
     overlay.style.opacity = "0";
@@ -3097,10 +3102,27 @@ function bindDelegatedClickRouting() {
 }
 
 function bindRouteListener() {
+  function resetShellScrollContext() {
+    const workspace = $("workspace");
+    if (workspace) {
+      workspace.scrollTop = 0;
+      workspace.scrollLeft = 0;
+    }
+
+    const sidebarNav = document.querySelector(".sidebar-nav");
+    if (sidebarNav) {
+      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+      if (activeItem && typeof activeItem.scrollIntoView === "function") {
+        activeItem.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }
+
   window.addEventListener("mh:route-change", (event) => {
     const route = event?.detail?.route || "home";
     setCurrentRoute(route);
     renderCurrentPage();
+    resetShellScrollContext();
   });
 
   // Back/Forward support — hashchange fires when the user navigates browser history
@@ -3177,23 +3199,28 @@ window.__mhResponsiveUiBound = true;
 
     if (!isCompactMobileViewport()) {
       appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
-      commandBar.classList.remove("is-collapsed");
-      commandBar.setAttribute("aria-hidden", "false");
+      const desktopCommandOpen = appRoot.classList.contains("is-command-open");
+      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+      commandBar.hidden = !desktopCommandOpen;
+      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
       if (commandBackdrop) {
-        commandBackdrop.classList.remove("is-visible");
-        commandBackdrop.setAttribute("aria-hidden", "true");
+        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+        commandBackdrop.hidden = !desktopCommandOpen;
+        commandBackdrop.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
       }
-      commandToggleBtn.setAttribute("aria-expanded", "false");
-      commandToggleBtn.textContent = "Command";
+      commandToggleBtn.setAttribute("aria-expanded", desktopCommandOpen ? "true" : "false");
+      commandToggleBtn.textContent = desktopCommandOpen ? "Close" : "Command";
       return;
     }
 
     appRoot.classList.add("is-mobile-shell");
     appRoot.classList.toggle("is-mobile-command-open", expanded);
     commandBar.classList.toggle("is-collapsed", !expanded);
+    commandBar.hidden = !expanded;
     commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
     if (commandBackdrop) {
       commandBackdrop.classList.toggle("is-visible", expanded);
+      commandBackdrop.hidden = !expanded;
       commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
     }
     commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -3205,7 +3232,7 @@ window.__mhResponsiveUiBound = true;
     if (!appRoot || !commandToggleBtn) return;
 
     appRoot.classList.toggle("is-mobile-shell", isCompact);
-    commandToggleBtn.hidden = !isCompact;
+    commandToggleBtn.hidden = false;
 
     if (!isCompact) {
       setMobileCommandExpanded(false);
@@ -3219,7 +3246,11 @@ window.__mhResponsiveUiBound = true;
   function openSidebar() {
     if (!sidebar || !isMobileViewport()) return;
     sidebar.classList.add("is-open");
-    if (backdrop) backdrop.classList.add("is-visible");
+    if (backdrop) {
+      backdrop.classList.add("is-visible");
+      backdrop.hidden = false;
+      backdrop.setAttribute("aria-hidden", "false");
+    }
     document.body.classList.add("sidebar-open");
     document.body.style.overflow = "hidden";
     syncToggleState(true);
@@ -3228,7 +3259,11 @@ window.__mhResponsiveUiBound = true;
   function closeSidebar() {
     if (!sidebar) return;
     sidebar.classList.remove("is-open");
-    if (backdrop) backdrop.classList.remove("is-visible");
+    if (backdrop) {
+      backdrop.classList.remove("is-visible");
+      backdrop.hidden = true;
+      backdrop.setAttribute("aria-hidden", "true");
+    }
     document.body.classList.remove("sidebar-open");
     document.body.style.overflow = "";
     syncToggleState(false);
@@ -3257,13 +3292,24 @@ window.__mhResponsiveUiBound = true;
     commandToggleBtn.onclick = (event) => {
       event.preventDefault();
       if (!appRoot) return;
+      if (!isCompactMobileViewport()) {
+        if (appRoot.classList.contains("is-command-open")) {
+          closeGlobalCommandBarSafe();
+        } else {
+          openGlobalCommandBar();
+        }
+        return;
+      }
       const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
       setMobileCommandExpanded(nextOpen);
     };
   }
 
   if (commandBackdrop) {
-    commandBackdrop.onclick = () => setMobileCommandExpanded(false);
+    commandBackdrop.onclick = () => {
+      setMobileCommandExpanded(false);
+      closeGlobalCommandBarSafe();
+    };
   }
 
   document.addEventListener("click", (event) => {
@@ -3357,10 +3403,33 @@ function executeSearch() {
 
 function openGlobalCommandBar() {
   const appRoot = $("app");
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
   const commandInput = $("quickCommandInput");
   const toggleBtn = $("commandToggleBtn");
-  appRoot?.classList.add("is-command-open");
+  const compact = window.innerWidth <= 768;
+
+  if (compact) {
+    appRoot?.classList.add("is-mobile-shell", "is-mobile-command-open");
+    appRoot?.classList.remove("is-command-open");
+  } else {
+    appRoot?.classList.add("is-command-open");
+    appRoot?.classList.remove("is-mobile-command-open");
+  }
+  commandBar?.classList.remove("is-collapsed");
+  if (commandBar) {
+    commandBar.hidden = false;
+  }
+  commandBar?.setAttribute("aria-hidden", "false");
+  commandBackdrop?.classList.add("is-visible");
+  if (commandBackdrop) {
+    commandBackdrop.hidden = false;
+  }
+  commandBackdrop?.setAttribute("aria-hidden", "false");
   toggleBtn?.setAttribute("aria-expanded", "true");
+  if (toggleBtn) {
+    toggleBtn.textContent = "Close";
+  }
   setTimeout(() => commandInput?.focus(), 40);
 }
 
@@ -3392,8 +3461,14 @@ function closeGlobalCommandBarSafe() {
 
   appRoot?.classList.remove("is-command-open", "is-mobile-command-open");
   commandBar?.classList.add("is-collapsed");
+  if (commandBar) {
+    commandBar.hidden = true;
+  }
   commandBar?.setAttribute("aria-hidden", "true");
   commandBackdrop?.classList.remove("is-visible");
+  if (commandBackdrop) {
+    commandBackdrop.hidden = true;
+  }
   commandBackdrop?.setAttribute("aria-hidden", "true");
 
   if (toggleBtn) {
@@ -3409,13 +3484,15 @@ window.__mhCommandOutsideBound = true;
   const commandBar = $("globalCommandBar");
 
   document.addEventListener("click", (event) => {
-    if (!appRoot?.classList.contains("is-command-open")) return;
+    const commandOpen = appRoot?.classList.contains("is-command-open") || appRoot?.classList.contains("is-mobile-command-open");
+    if (!commandOpen) return;
 
     const clickedInsideCommand = event.target.closest("#globalCommandBar");
+    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
     const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
     const clickedDock = event.target.closest("#aiDock");
 
-    if (!clickedInsideCommand && !clickedAiButton && !clickedDock) {
+    if (!clickedInsideCommand && !clickedCommandToggle && !clickedAiButton && !clickedDock) {
       closeGlobalCommandBarSafe();
     }
   });
@@ -3488,8 +3565,12 @@ window.__mhAiDockBound = true;
 
   const setOpen = (open) => {
     dock.classList.toggle("is-open", open);
+    dock.setAttribute("data-open", open ? "true" : "false");
     toggle.setAttribute("aria-expanded", String(open));
     panel.setAttribute("aria-hidden", String(!open));
+    panel.hidden = !open;
+    panel.inert = !open;
+    panel.style.pointerEvents = open ? "auto" : "none";
   };
 
   toggle.onclick = (event) => {

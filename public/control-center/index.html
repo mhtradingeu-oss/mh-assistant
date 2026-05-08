@@ -9,20 +9,18 @@
   <link rel="stylesheet" href="./styles/01-reset.css?v=20260508-reset-1">
   <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260508-layers-1">
   <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
   <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
   <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
-  <link rel="stylesheet" href="./styles/06-topbar.css?v=20260508-topbar-1">
-  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-1">
   <link rel="stylesheet" href="./styles/08-components-foundation.css?v=20260508-components-1">
-  <link rel="stylesheet" href="./styles/09-command-legacy-isolation.css?v=20260508-command-isolation-1">
-  <link rel="stylesheet" href="./styles.css?v=20260508-css-cleanup-1">
-  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-1">
+  <link rel="stylesheet" href="./styles/12-pages.css?v=20260508-pages-1">
 </head>
 
 <body>
   <div id="app" class="app-shell">
     <!-- Mobile sidebar backdrop -->
-    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
 
     <!-- Global feedback -->
     <div id="globalMessage" class="global-message" role="status" aria-live="polite"></div>
@@ -176,6 +174,16 @@
 
             <div class="exec-action-cluster" aria-label="Executive actions">
               <button
+                id="commandToggleBtn"
+                class="btn btn-secondary command-toggle"
+                type="button"
+                aria-label="Toggle command bar"
+                aria-controls="globalCommandBar"
+                aria-expanded="false"
+              >
+                Command
+              </button>
+              <button
                 id="execNewBtn"
                 class="btn btn-primary exec-action-btn"
                 type="button"
@@ -197,9 +205,9 @@
         </header>
 
         <!-- Command bar -->
-        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true"></div>
+        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
 
-        <section id="globalCommandBar" class="command-bar" aria-label="Global command bar">
+        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
           <div class="command-bar-left">
             <input
               id="globalSearch"
