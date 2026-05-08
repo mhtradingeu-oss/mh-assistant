@@ -1,0 +1,67 @@
+/*
+  Control Center AI Layer
+  Purpose: stabilize AI dock behavior and isolate AI surface hierarchy.
+*/
+
+.ai-dock {
+  z-index: var(--layer-ai);
+  pointer-events: none;
+}
+
+.ai-dock > * {
+  pointer-events: auto;
+}
+
+.ai-dock-toggle {
+  border-radius: var(--radius-xl);
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-base);
+}
+
+.ai-dock-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.ai-dock-panel {
+  max-height: min(78vh, 920px);
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-heavy);
+  background: var(--surface-2);
+  border: 1px solid var(--border-primary);
+}
+
+.ai-dock-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ai-dock-section {
+  min-width: 0;
+}
+
+.ai-dock-suggestion {
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.ai-dock-suggestion:hover {
+  transform: translateY(-1px);
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+
+  .ai-dock {
+    inset-inline: 12px;
+    bottom: 12px;
+  }
+
+  .ai-dock-panel {
+    width: min(100vw - 24px, 420px);
+    max-height: 72vh;
+  }
+}
