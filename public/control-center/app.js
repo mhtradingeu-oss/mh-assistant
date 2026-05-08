@@ -3894,7 +3894,9 @@ function bindGlobalButtons() {
   }
 
   if (execAskAiBtn) {
-    execAskAiBtn.onclick = openGlobalCommandBar;
+    execAskAiBtn.onclick = () => {
+      navigateTo("ai-command");
+    };
   }
 
   if (refreshBtn) {

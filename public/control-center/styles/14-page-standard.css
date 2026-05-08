@@ -1,0 +1,476 @@
+/*
+  Standard Page Compact UX
+  Final clean shared page shell for all operational pages.
+*/
+
+.std-page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.std-context-ribbon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+
+  padding: 14px 16px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.82),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.std-context-main {
+  min-width: 0;
+}
+
+.std-context-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.std-context-eyebrow {
+  flex: 0 0 auto;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color:
+    rgba(45, 212, 191, 0.9);
+}
+
+.std-context-title {
+  margin: 0;
+
+  min-width: 0;
+
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+
+  color:
+    var(--text-primary);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-context-description {
+  margin:
+    4px 0 0;
+
+  max-width: 960px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 0.9rem;
+  line-height: 1.45;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-context-metrics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-wrap: wrap;
+
+  margin-top: 10px;
+}
+
+.std-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 28px;
+
+  padding:
+    0 10px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  border:
+    1px solid rgba(148, 163, 184, 0.14);
+
+  color:
+    rgba(226, 232, 240, 0.78);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.std-context-chip strong {
+  color:
+    var(--text-primary);
+}
+
+.std-context-chip.is-success {
+  border-color:
+    rgba(45, 212, 191, 0.24);
+
+  background:
+    rgba(45, 212, 191, 0.08);
+}
+
+.std-context-chip.is-warning {
+  border-color:
+    rgba(245, 158, 11, 0.28);
+
+  background:
+    rgba(245, 158, 11, 0.08);
+}
+
+.std-context-chip.is-danger {
+  border-color:
+    rgba(248, 113, 113, 0.28);
+
+  background:
+    rgba(248, 113, 113, 0.08);
+}
+
+.std-context-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.std-context-btn {
+  min-height: 36px;
+
+  padding:
+    0 13px;
+
+  border-radius:
+    999px;
+
+  white-space: nowrap;
+}
+
+.std-smart-strip-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 12px 14px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(45, 212, 191, 0.06);
+
+  border:
+    1px solid rgba(45, 212, 191, 0.14);
+}
+
+.std-smart-strip-copy {
+  min-width: 0;
+}
+
+.std-smart-strip-copy strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color:
+    var(--text-primary);
+
+  font-size: 0.98rem;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-smart-strip-copy p {
+  margin:
+    3px 0 0;
+
+  max-width: 920px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-main-content-slot {
+  min-width: 0;
+}
+
+/* Retire old standard-card surfaces if old DOM survives before hard refresh. */
+.std-page-header,
+.std-section-block[data-ui-role="page-power-summary"],
+.std-section-block[data-ui-role="current-status"],
+.std-main-right {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+
+  .std-context-ribbon {
+    grid-template-columns: 1fr;
+  }
+
+  .std-context-actions {
+    justify-content: flex-start;
+  }
+
+  .std-smart-strip-compact {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 760px) {
+
+  .std-context-ribbon {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .std-context-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .std-context-description {
+    white-space: normal;
+  }
+
+  .std-context-chip {
+    min-height: 26px;
+    font-size: 0.74rem;
+  }
+
+  .std-context-actions {
+    width: 100%;
+  }
+
+  .std-context-btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* =========================================
+   Interaction Safety
+========================================= */
+
+.workspace,
+#pageRoot,
+.page,
+.std-page-shell,
+.std-main-content-slot {
+  pointer-events: auto;
+}
+
+.command-backdrop[hidden],
+.command-backdrop[aria-hidden="true"],
+.sidebar-backdrop[hidden],
+.sidebar-backdrop[aria-hidden="true"],
+.loading-overlay[hidden],
+.loading-overlay[aria-hidden="true"],
+.ai-dock-panel[hidden],
+.ai-dock-panel[aria-hidden="true"] {
+  pointer-events: none !important;
+}
+
+/* =========================================
+   Form / Input Click Safety
+========================================= */
+
+input,
+select,
+textarea,
+button,
+.setup-input,
+.setup-textarea {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+}
+
+/* =========================================
+   Fix Home Prompt Button Overflow
+========================================= */
+
+.home-ai-prompt-grid .quick-action-btn,
+.home-decision-quick-actions .quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+
+  min-height: 92px;
+  height: auto;
+
+  white-space: normal;
+  text-align: left;
+  overflow: hidden;
+}
+
+.home-ai-prompt-grid .quick-action-btn span,
+.home-decision-quick-actions .quick-action-btn span {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   Generic Page Surface Recovery
+========================================= */
+
+.page article,
+.page .card,
+.page .panel,
+.page .data-card,
+.page .status-card,
+.page .action-card {
+  color: var(--text-primary);
+}
+
+.page .card,
+.page .panel,
+.page article[class*="card"],
+.page div[class*="card"] {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16);
+
+  border-radius: 18px;
+}
+
+/* =========================================
+   Integration Row Recovery
+========================================= */
+
+.integration-card,
+.integration-row,
+.integration-source-card,
+.integration-platform-card,
+[data-integration-id],
+[data-integration-source],
+[data-integration-platform] {
+  color: var(--text-primary) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(8, 16, 26, 0.92)
+    ) !important;
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16) !important;
+
+  border-radius: 16px !important;
+
+  padding: 14px !important;
+}
+
+.integration-card *,
+.integration-row *,
+.integration-source-card *,
+.integration-platform-card *,
+[data-integration-id] *,
+[data-integration-source] *,
+[data-integration-platform] * {
+  color: inherit;
+}
+
+/* =========================================
+   AI Workspace Recovery
+========================================= */
+
+.ai-agent-card,
+.ai-role-card,
+.ai-command-card,
+.ai-specialist-card,
+[data-ai-agent],
+[data-ai-role] {
+  display: grid;
+  gap: 12px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.9),
+      rgba(8, 16, 26, 0.95)
+    );
+
+  border:
+    1px solid rgba(45, 212, 191, 0.14);
+}
+
+.ai-agent-card button,
+.ai-role-card button,
+.ai-command-card button,
+.ai-specialist-card button,
+[data-ai-agent] button,
+[data-ai-role] button {
+  width: fit-content;
+}
+
+/* =========================================
+   Better Wide / Dense Layouts
+========================================= */
+
+.std-main-content-slot > .card,
+.std-main-content-slot > section.card {
+  margin-bottom: 16px;
+}
+
+.home-two-column-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.7fr);
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .home-two-column-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,272 @@
+===== PAGE STANDARD SOURCE =====
+
+## page-standard file
+1214 public/control-center/ui/page-standard.js
+
+## page-standard functions/classes
+25:    primary: { label: "Open AI Workspace", route: "ai-command" },
+33:    secondary: { label: "Continue To Library", route: "library" }
+38:    description: "Upload, classify, review, and route source-of-truth assets for campaign, content, media, and publishing.",
+40:    secondary: { label: "Send To Campaign Studio", route: "campaign-studio" }
+47:    secondary: { label: "Open Insights", route: "insights" }
+54:    secondary: { label: "Open Workflows", route: "workflows" }
+59:    description: "Run repeatable workflows, build custom workflows with AI, and route outputs into the next workspace.",
+61:    secondary: { label: "Open Campaign Studio", route: "campaign-studio" }
+68:    secondary: { label: "Send To Content Studio", route: "content-studio" }
+73:    description: "Create, review, approve, rewrite, translate, and route platform copy into media or publishing.",
+75:    secondary: { label: "Send To Media Studio", route: "media-studio" }
+82:    secondary: { label: "Send To Publishing", route: "publishing" }
+89:    secondary: { label: "Open Job Monitor", route: "job-monitor" }
+94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+96:    secondary: { label: "Send To Campaign", route: "campaign-studio" }
+102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+103:    secondary: { label: "Open Research", route: "research" }
+110:    secondary: { label: "Send To Campaign", route: "campaign-studio" }
+115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+117:    secondary: { label: "Check Governance", route: "governance" }
+140:    { label: "Open setup priorities", description: "Check the foundation before running another campaign wave.", route: "setup" },
+141:    { label: "Review blockers", description: "Use readiness gaps and alerts as the operating queue.", route: "notification-center" },
+142:    { label: "Ask executive AI", description: "Turn system state into a short action plan.", route: "ai-command" }
+148:    { label: "Continue to Library", description: "Move from project foundation into required assets.", route: "library" }
+154:    { label: "Send to Campaign Studio", description: "Use approved assets as campaign inputs.", route: "campaign-studio" }
+163:    { label: "Ask Strategist", description: "Plan campaign priorities and launch sequencing.", prompt: "Act as the Strategist. Review current project readiness and propose the next campaign decision." },
+169:    { label: "Run workflow", description: "Execute the selected workflow with current project inputs.", action: "focus-run-workflow" },
+171:    { label: "View running workflows", description: "Inspect active and recent execution state.", route: "job-monitor" },
+172:    { label: "Send output forward", description: "Route the latest workflow result into the owning workspace.", action: "focus-workflow-route" }
+178:    { label: "Send to Content Studio", description: "Move campaign strategy into production copy.", route: "content-studio" }
+184:    { label: "Send to Publishing", description: "Route approved content into execution.", route: "publishing" }
+190:    { label: "Save to Library", description: "Route approved media assets back to the asset source.", route: "library" }
+194:    { label: "Run worker once", description: "Open job monitoring for worker and execution state.", route: "job-monitor" },
+199:    { label: "Build ad brief", description: "Turn campaign inputs into a paid growth plan.", route: "campaign-studio" },
+202:    { label: "Send to Campaign", description: "Route paid plan back into Campaign Studio.", route: "campaign-studio" }
+205:    { label: "Generate recommendations", description: "Turn performance signals into priorities.", route: "ai-command" },
+206:    { label: "Record feedback", description: "Preserve what worked and what failed in learning memory.", route: "ai-command" },
+207:    { label: "Scale winner", description: "Send winning signals into campaign planning.", route: "campaign-studio" },
+208:    { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
+214:    { label: "Send insight to Campaign", description: "Route positioning or opportunity notes into Campaign Studio.", route: "campaign-studio" }
+217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+219:    { label: "Update roles", description: "Inspect team permissions and route access.", action: "focus-settings-roles" },
+259:    description: "Use structured prompts to delegate work to the right AI role and route artifacts onward.",
+261:      "Build a structured task plan from current project signals.",
+267:    description: "Use AI to choose the next workflow, fill inputs, and route the generated output.",
+325:      "Summarize the top market opportunities and evidence gaps for this project.",
+334:      "Suggest the best AI automation mode for the current project maturity."
+353:  "focus-workflow-route": "#workflowPushAiBtn, #workflowPushAiBtnSecondary",
+377:function asArray(value) {
+381:function asObject(value) {
+385:function asString(value) {
+390:function asNumber(value, fallback = 0) {
+395:function pct(value) {
+399:function esc(value) {
+407:function titleize(value) {
+413:function textValue(value, fallback = "-") {
+422:    return textValue(value.title || value.label || value.name || value.action || value.summary || value.description || value.status, fallback);
+427:function firstText(values, fallback = "-") {
+435:function countByStatus(items, statuses) {
+436:  const wanted = new Set(statuses);
+437:  return asArray(items).filter((item) => wanted.has(asString(item?.status || item?.execution_status || item?.approval_status || item?.publish_status).toLowerCase())).length;
+440:function tone(input) {
+462:function metrics(state) {
+478:  const connectedSources = sourceRecords.filter((item) => /connected|active|ok/i.test(textValue(item.value || item.status || item.status_label, ""))).length;
+481:  const failed = executions.filter((item) => tone(item.execution_status) === "danger").length;
+482:  const completed = executions.filter((item) => tone(item.execution_status) === "success").length;
+497:      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+522:    projectReadiness: asNumber(readiness.readiness_score ?? overview.readiness_score, 0),
+541:      ...sourceRecords.filter((item) => /fail|error|expired|disconnect/i.test(textValue(item.status || item.status_label || item.health, "")))
+550:    activeCampaignRecords: asNumber(ops.campaigns?.active_count, campaigns.filter((item) => asString(item.status) === "active").length),
+556:    mediaOpen: asNumber(ops.media_jobs?.open_count, mediaJobs.filter((item) => !["completed", "failed", "cancelled"].includes(asString(item.status))).length),
+584:    securityStatus: ops.backbone?.status || "operational"
+588:function card(label, value, description, status = "neutral") {
+589:  return { label, value: textValue(value), description, status };
+592:function kpiCards(route, m) {
+597:      card("AI team", `${m.aiCommandsTotal} commands`, "Role-aware AI work and generated artifacts available to route.", m.aiCommandsTotal ? "success" : "neutral"),
+601:      card("Setup completion", pct(m.projectReadiness), "Brand, market, language, audience, and goal readiness.", tone(m.projectReadiness)),
+622:      card("Artifacts", String(m.aiArtifacts), "Generated outputs ready to inspect or route into workspaces.", m.aiArtifacts ? "success" : "warning"),
+641:      card("Approved content", String(m.contentApproved), "Items ready to route into publishing.", m.contentApproved ? "success" : "warning"),
+660:      card("Tracking status", m.paidTrackingReady ? "Ready" : "Needs connection", "Paid and analytics data available for budget decisions.", m.paidTrackingReady ? "success" : "warning")
+675:      card("Project settings", m.currentProject ? "Selected" : "No project", "The active project scope for configuration changes.", m.currentProject ? "success" : "warning"),
+677:      card("Team roles", String(m.teamRoles), "Roles and route permissions available to the operating system.", m.teamRoles ? "success" : "warning"),
+679:      card("Security status", titleize(m.securityStatus), "Backbone and configuration status for operational safety.", tone(m.securityStatus))
+683:  return asArray(cards[route] || cards.home).slice(0, 5);
+686:function statusCards(route, m) {
+689:      card("Ready", m.projectReadiness >= 80 ? "Ready" : "Not yet", "Setup can support downstream workflows once required inputs are complete.", tone(m.projectReadiness)),
+705:      card("Artifacts", String(m.aiArtifacts), "Generated outputs ready to open or route.", m.aiArtifacts ? "success" : "neutral"),
+714:      card("Ready", m.projectReadiness >= 80 && !m.missingAssets.length ? "Ready" : "Needs inputs", "Campaign quality depends on setup, assets, and connector readiness.", m.projectReadiness >= 80 && !m.missingAssets.length ? "success" : "warning"),
+744:      card("Saved findings", String(m.savedFindings), "Research routed into downstream work.", m.savedFindings ? "success" : "neutral"),
+749:      card("Ready", m.currentProject ? "Project selected" : "Select project", "Settings are scoped to the active project.", m.currentProject ? "success" : "warning"),
+755:  return asArray(cards[route] || [
+756:    card("Ready", m.systemScore >= 80 ? "Ready" : "Needs attention", "Current route readiness.", tone(m.systemScore)),
+762:function nextBestAction(route, m) {
+768:    "ai-command": "Run a structured task for the highest-risk blocker and route the artifact.",
+770:    "campaign-studio": "Build the next launch wave and route the package to Content Studio.",
+780:  return firstText([m.recommendations[0], map[route]], map.home);
+783:function ensureShell(page) {
+784:  const existing = page.querySelector(".std-page-shell");
+789:  shell.className = "std-page-shell";
+791:    <section class="std-page-header" data-ui-role="page-header">
+792:      <div class="std-page-header-copy">
+793:        <p class="page-subtitle std-page-eyebrow" id="stdPageEyebrow">Control Center</p>
+797:      <div class="toolbar std-header-actions" id="stdHeaderActions">
+803:    <section class="std-section-block" data-ui-role="page-power-summary">
+814:    <section class="std-section-block" data-ui-role="current-status">
+822:      <div class="dashboard-grid" id="stdStatusGrid" data-ui-role="status-cards"></div>
+825:    <section class="std-main-grid" data-ui-role="main-dashboard">
+826:      <section class="std-work-area" data-ui-role="main-work-area">
+827:        <section class="std-smart-strip" id="stdSmartStrip" data-ui-role="smart-strip" hidden>
+828:          <div class="std-smart-strip-copy">
+835:        <div id="stdMainContentSlot" class="std-main-content-slot"></div>
+838:      <aside class="std-main-right" data-ui-role="route-side-panels">
+839:        <section class="card std-action-panel" data-ui-role="action-panel">
+847:          <div id="stdActionsList" class="std-actions-list"></div>
+859:          <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
+871:          <div id="stdAiPrompts" class="std-ai-prompts"></div>
+874:        <details class="card std-advanced-details" data-ui-role="advanced-details">
+879:          <div id="stdAdvancedDetails" class="std-advanced-grid"></div>
+894:function renderMetricCards(container, items) {
+898:      <article class="metric-card std-power-card is-${esc(item.status)}">
+902:        <span class="badge badge-${esc(item.status)}">${esc(titleize(item.status))}</span>
+908:function renderStatus(container, items) {
+912:      <article class="status-card is-${esc(item.status)}">
+916:        <span class="badge badge-${esc(item.status)}">${esc(titleize(item.status))}</span>
+922:function quickActions(route) {
+924:    { label: "Open Home", route: "home" },
+925:    { label: "Open AI Workspace", route: "ai-command" },
+926:    { label: "Open Insights", route: "insights" }
+929:  const routeActions = {
+931:      { label: "Open Setup", route: "setup" },
+932:      { label: "Open Integrations", route: "integrations" },
+933:      { label: "Open Campaign Studio", route: "campaign-studio" }
+936:      { label: "Open Library", route: "library" },
+937:      { label: "Open Campaign Studio", route: "campaign-studio" },
+938:      { label: "Open Integrations", route: "integrations" }
+941:      { label: "Open Content Studio", route: "content-studio" },
+942:      { label: "Open Media Studio", route: "media-studio" },
+943:      { label: "Open Publishing", route: "publishing" }
+946:      { label: "Open Setup", route: "setup" },
+947:      { label: "Open Publishing", route: "publishing" },
+948:      { label: "Open Insights", route: "insights" }
+951:      { label: "Open Queue Center", route: "queue-center" },
+952:      { label: "Open Job Monitor", route: "job-monitor" },
+953:      { label: "Open Notifications", route: "notification-center" }
+956:      { label: "Open Governance", route: "governance" },
+957:      { label: "Open Home", route: "home" },
+958:      { label: "Open Integrations", route: "integrations" }
+962:  return routeActions[route] || common;
+965:function fillPrompt(prompt, context) {
+966:  const projectName = asString(context.state.context.currentProject).trim() || "this project";
+969:    .replace(/\bthis project\b/gi, projectName)
+973:function runAction(action, context) {
+984:  if (action.route) {
+985:    context.navigateTo(action.route);
+990:    const project = context.state.context.currentProject;
+991:    if (!project) {
+992:      context.showMessage?.("Select a project first.");
+995:    context.reloadProjectData?.(project).catch(() => {});
+1010:function bindHeaderAction(button, action, context) {
+1016:function renderActions(container, route, context) {
+1018:  const actions = ROUTE_ACTIONS[route] || ROUTE_ACTIONS.home;
+1021:      <button type="button" class="quick-action-btn std-action-btn" data-std-action="${index}">
+1028:  Array.from(container.querySelectorAll("[data-std-action]")).forEach((button) => {
+1030:      const action = actions[Number(button.getAttribute("data-std-action"))];
+1036:function renderAiPrompts(container, route, context) {
+1038:  const ai = ROUTE_AI[route] || ROUTE_AI.home;
+1042:      <button type="button" class="btn btn-ghost std-ai-btn" data-std-ai-prompt="${index}">
+1048:  Array.from(container.querySelectorAll("[data-std-ai-prompt]")).forEach((button) => {
+1050:      const prompt = ai.prompts[Number(button.getAttribute("data-std-ai-prompt"))] || "";
+1059:function advancedRows(route, m) {
+1060:  const flow = ROUTE_FLOW[route] || {};
+1065:  const routeRows = {
+1099:      { label: "Data used", value: "Scheduler queue, publishing jobs, execution results, worker status" },
+1115:      { label: "Data used", value: "Governance policy, role matrix, project configuration" },
+1120:  return [...base, ...asArray(routeRows[route])];
+1123:function renderAdvancedDetails(container, route, m) {
+1125:  container.innerHTML = advancedRows(route, m)
+1135:export function applyStandardPageLayout(context) {
+1136:  const route = asString(context.route);
+1138:  if (!REQUIRED_ROUTES.includes(route)) return;
+1140:  const page = document.querySelector(`#pageRoot .page[data-page="${route}"]`);
+1144:  const copy = ROUTE_COPY[route] || ROUTE_COPY.home;
+1151:  const statusTitle = shell.querySelector("#stdStatusTitle");
+1162:  if (powerTitle) powerTitle.textContent = `${copy.title} capabilities`;
+1163:  if (statusTitle) statusTitle.textContent = `${copy.title} status`;
+1183:    card("Route", route, "Current workspace is loaded.", "success"),
+1184:    card("Project", context?.state?.context?.currentProject || "-", "Active project context.", "neutral")
+1212:export function getRequiredStandardRoutes() {
+
+## CSS owners
+public/control-center/styles/08-components-foundation.css:3:.std-action-btn,
+public/control-center/styles/08-components-foundation.css:4:.std-ai-btn {
+public/control-center/styles/08-components-foundation.css:28:.std-action-btn:hover,
+public/control-center/styles/08-components-foundation.css:29:.std-ai-btn:hover {
+public/control-center/styles/08-components-foundation.css:35:.std-action-btn:disabled,
+public/control-center/styles/08-components-foundation.css:36:.std-ai-btn:disabled {
+public/control-center/styles/08-components-foundation.css:56:.std-ai-btn {
+public/control-center/styles/08-components-foundation.css:132:.status-card,
+public/control-center/styles/08-components-foundation.css:135:.std-kpi-card,
+public/control-center/styles/08-components-foundation.css:136:.std-status-card,
+public/control-center/styles/08-components-foundation.css:137:.std-side-card {
+public/control-center/styles/08-components-foundation.css:148:.status-card,
+public/control-center/styles/08-components-foundation.css:150:.std-kpi-card,
+public/control-center/styles/08-components-foundation.css:151:.std-status-card {
+public/control-center/styles/08-components-foundation.css:160:.std-kpi-value,
+public/control-center/styles/08-components-foundation.css:161:.std-status-value {
+public/control-center/styles/08-components-foundation.css:170:.std-side-head,
+public/control-center/styles/08-components-foundation.css:274:.std-kpi-grid,
+public/control-center/styles/08-components-foundation.css:275:.std-status-grid,
+public/control-center/styles/08-components-foundation.css:290:.std-kpi-grid,
+public/control-center/styles/08-components-foundation.css:291:.std-status-grid,
+public/control-center/styles/08-components-foundation.css:297:.std-page-shell {
+public/control-center/styles/08-components-foundation.css:303:.std-section-block,
+public/control-center/styles/08-components-foundation.css:304:.std-work-area,
+public/control-center/styles/08-components-foundation.css:305:.std-main-content-slot,
+public/control-center/styles/08-components-foundation.css:306:.std-advanced-grid,
+public/control-center/styles/08-components-foundation.css:311:.std-main-left,
+public/control-center/styles/08-components-foundation.css:312:.std-main-right {
+public/control-center/styles/08-components-foundation.css:318:.std-page-header,
+public/control-center/styles/08-components-foundation.css:327:.std-page-header {
+public/control-center/styles/08-components-foundation.css:333:.std-main-grid,
+public/control-center/styles/08-components-foundation.css:347:.std-actions-list,
+public/control-center/styles/08-components-foundation.css:348:.std-ai-prompts,
+public/control-center/styles/08-components-foundation.css:511:  .std-main-grid,
+public/control-center/styles/08-components-foundation.css:519:  .std-kpi-grid,
+public/control-center/styles/08-components-foundation.css:520:  .std-status-grid,
+public/control-center/styles/08-components-foundation.css:538:  .std-kpi-grid,
+public/control-center/styles/08-components-foundation.css:539:  .std-status-grid,
+public/control-center/styles/08-components-foundation.css:541:  .std-page-header,
+public/control-center/styles/08-components-foundation.css:542:  .std-main-grid,
+public/control-center/styles/08-components-foundation.css:549:  .std-action-btn,
+public/control-center/styles/08-components-foundation.css:550:  .std-ai-btn {
+public/control-center/styles/12-pages.css:10:.std-page-shell,
+public/control-center/ui/page-standard.js:784:  const existing = page.querySelector(".std-page-shell");
+public/control-center/ui/page-standard.js:789:  shell.className = "std-page-shell";
+public/control-center/ui/page-standard.js:791:    <section class="std-page-header" data-ui-role="page-header">
+public/control-center/ui/page-standard.js:792:      <div class="std-page-header-copy">
+public/control-center/ui/page-standard.js:793:        <p class="page-subtitle std-page-eyebrow" id="stdPageEyebrow">Control Center</p>
+public/control-center/ui/page-standard.js:797:      <div class="toolbar std-header-actions" id="stdHeaderActions">
+public/control-center/ui/page-standard.js:803:    <section class="std-section-block" data-ui-role="page-power-summary">
+public/control-center/ui/page-standard.js:809:        <span class="badge badge-success">Capabilities</span>
+public/control-center/ui/page-standard.js:814:    <section class="std-section-block" data-ui-role="current-status">
+public/control-center/ui/page-standard.js:822:      <div class="dashboard-grid" id="stdStatusGrid" data-ui-role="status-cards"></div>
+public/control-center/ui/page-standard.js:825:    <section class="std-main-grid" data-ui-role="main-dashboard">
+public/control-center/ui/page-standard.js:826:      <section class="std-work-area" data-ui-role="main-work-area">
+public/control-center/ui/page-standard.js:827:        <section class="std-smart-strip" id="stdSmartStrip" data-ui-role="smart-strip" hidden>
+public/control-center/ui/page-standard.js:828:          <div class="std-smart-strip-copy">
+public/control-center/ui/page-standard.js:835:        <div id="stdMainContentSlot" class="std-main-content-slot"></div>
+public/control-center/ui/page-standard.js:838:      <aside class="std-main-right" data-ui-role="route-side-panels">
+public/control-center/ui/page-standard.js:839:        <section class="card std-action-panel" data-ui-role="action-panel">
+public/control-center/ui/page-standard.js:847:          <div id="stdActionsList" class="std-actions-list"></div>
+public/control-center/ui/page-standard.js:859:          <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
+public/control-center/ui/page-standard.js:871:          <div id="stdAiPrompts" class="std-ai-prompts"></div>
+public/control-center/ui/page-standard.js:874:        <details class="card std-advanced-details" data-ui-role="advanced-details">
+public/control-center/ui/page-standard.js:879:          <div id="stdAdvancedDetails" class="std-advanced-grid"></div>
+public/control-center/ui/page-standard.js:898:      <article class="metric-card std-power-card is-${esc(item.status)}">
+public/control-center/ui/page-standard.js:912:      <article class="status-card is-${esc(item.status)}">
+public/control-center/ui/page-standard.js:1021:      <button type="button" class="quick-action-btn std-action-btn" data-std-action="${index}">
+public/control-center/ui/page-standard.js:1028:  Array.from(container.querySelectorAll("[data-std-action]")).forEach((button) => {
+public/control-center/ui/page-standard.js:1030:      const action = actions[Number(button.getAttribute("data-std-action"))];
+public/control-center/ui/page-standard.js:1042:      <button type="button" class="btn btn-ghost std-ai-btn" data-std-ai-prompt="${index}">
+public/control-center/ui/page-standard.js:1048:  Array.from(container.querySelectorAll("[data-std-ai-prompt]")).forEach((button) => {
+public/control-center/ui/page-standard.js:1050:      const prompt = ai.prompts[Number(button.getAttribute("data-std-ai-prompt"))] || "";
+public/control-center/ui/page-standard.js:1162:  if (powerTitle) powerTitle.textContent = `${copy.title} capabilities`;
+public/control-center/pages/home.js:421:    capabilities: [
+public/control-center/pages/home.js:662:    const capabilityCards = asArray(dashboard.capabilities).slice(0, 5);
