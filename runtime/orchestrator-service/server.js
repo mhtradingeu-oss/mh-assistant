@@ -9960,6 +9960,134 @@ app.get('/media/file/:project/:type/:filename', (req, res) => {
 
 
 
+
+function renameMediaManagerProject(oldProjectName, nextProjectName) {
+  const oldProject = normalizeProjectSlug(oldProjectName);
+  const nextProject = normalizeProjectSlug(nextProjectName);
+
+  if (!oldProject) {
+    throw new Error('Missing current project name');
+  }
+
+  if (!nextProject) {
+    throw new Error('Missing new project name');
+  }
+
+  if (oldProject === nextProject) {
+    throw new Error('Project already uses this name');
+  }
+
+  const registry = getProjectRegistryPaths();
+  const oldPaths = getProjectBasePaths(oldProject);
+  const nextPaths = getProjectBasePaths(nextProject);
+
+  if (!fs.existsSync(oldPaths.baseDir)) {
+    throw new Error('Project not found');
+  }
+
+  if (fs.existsSync(nextPaths.baseDir)) {
+    throw new Error('Target project already exists');
+  }
+
+  const projects = readJsonFile(registry.registryPath, []);
+  const existingTarget = Array.isArray(projects)
+    ? projects.find((item) => String(item.project_name || '').toLowerCase() === nextProject)
+    : null;
+
+  if (existingTarget) {
+    throw new Error('Target project already exists');
+  }
+
+  ensureDir(path.dirname(nextPaths.baseDir));
+  fs.renameSync(oldPaths.baseDir, nextPaths.baseDir);
+
+  const projectFile = nextPaths.projectFilePath;
+  const projectData = readJsonFile(projectFile, {});
+  const updatedAt = new Date().toISOString();
+
+  const updatedProject = {
+    ...projectData,
+    project_name: nextProject,
+    previous_project_name: projectData.previous_project_name || oldProject,
+    renamed_from: oldProject,
+    updated_at: updatedAt
+  };
+
+  writeJsonFile(projectFile, updatedProject);
+
+  const nextRegistry = Array.isArray(projects)
+    ? projects.map((item) => {
+        if (String(item.project_name || '').toLowerCase() !== oldProject) {
+          return item;
+        }
+
+        return {
+          ...item,
+          project_name: nextProject,
+          previous_project_name: item.previous_project_name || oldProject,
+          renamed_from: oldProject,
+          updated_at: updatedAt
+        };
+      })
+    : [];
+
+  writeJsonFile(registry.registryPath, nextRegistry);
+
+  return {
+    project: updatedProject,
+    previousProject: oldProject,
+    newProject: nextProject,
+    projects: listMediaManagerProjects()
+  };
+}
+
+function handleRenameMediaManagerProject(req, res) {
+  const currentProject = req.params.project;
+  const body = req.body || {};
+  const nextProjectName = String(
+    body.project_name ||
+    body.projectName ||
+    body.name ||
+    body.next_project_name ||
+    body.nextProjectName ||
+    ''
+  ).trim();
+
+  if (!currentProject) {
+    return res.status(400).json({
+      error: 'Missing current project name',
+      code: 'MISSING_PROJECT_NAME'
+    });
+  }
+
+  if (!nextProjectName) {
+    return res.status(400).json({
+      error: 'Missing new project name',
+      code: 'MISSING_NEW_PROJECT_NAME'
+    });
+  }
+
+  try {
+    const result = renameMediaManagerProject(currentProject, nextProjectName);
+
+    return res.json({
+      ok: true,
+      ...result
+    });
+  } catch (error) {
+    const message = error?.message || 'Failed to rename project';
+    const notFound = /not found/i.test(message);
+    const conflict = /already exists|already uses/i.test(message);
+
+    return res.status(notFound ? 404 : conflict ? 409 : 500).json({
+      error: 'Failed to rename project',
+      code: notFound ? 'PROJECT_NOT_FOUND' : conflict ? 'PROJECT_RENAME_CONFLICT' : 'PROJECT_RENAME_FAILED',
+      details: message
+    });
+  }
+}
+
+
 function applyBusinessTemplateToProject(projectName, projectType) {
   const safeProject = normalizeProjectSlug(projectName);
   const paths = getProjectBasePaths(safeProject);
@@ -10122,6 +10250,11 @@ function handleCreateMediaManagerProject(req, res) {
 
 
 
+
+
+app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+
+app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
 
 app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
 
