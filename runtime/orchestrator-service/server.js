@@ -9959,6 +9959,106 @@ app.get('/media/file/:project/:type/:filename', (req, res) => {
 });
 
 
+
+function applyBusinessTemplateToProject(projectName, projectType) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBasePaths(safeProject);
+
+  if (!fs.existsSync(paths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  const existing = readJsonFile(paths.projectFilePath, {});
+  const businessTemplate = getBusinessProjectTemplate(projectType || existing.project_type || existing.business_type);
+
+  const updated = {
+    ...existing,
+    project_name: existing.project_name || safeProject,
+    project_type: businessTemplate.id,
+    business_type: businessTemplate.id,
+    business_template: businessTemplate,
+    default_channels: businessTemplate.default_channels,
+    required_assets: businessTemplate.required_assets,
+    data_requirements: businessTemplate.data_requirements,
+    content_categories: businessTemplate.content_categories,
+    workspace_priorities: businessTemplate.workspace_priorities,
+    ai_team_defaults: businessTemplate.ai_team_defaults,
+    starter_checklist: businessTemplate.starter_checklist,
+    recommended_integrations: businessTemplate.recommended_integrations,
+    updated_at: new Date().toISOString()
+  };
+
+  writeJsonFile(paths.projectFilePath, updated);
+
+  const registry = getProjectRegistryPaths();
+  const projects = readJsonFile(registry.registryPath, []);
+  const nextProjects = Array.isArray(projects)
+    ? projects.map((item) => {
+        if (String(item.project_name || '').toLowerCase() !== safeProject) {
+          return item;
+        }
+
+        return {
+          ...item,
+          project_type: updated.project_type,
+          business_type: updated.business_type,
+          business_template: updated.business_template,
+          default_channels: updated.default_channels,
+          required_assets: updated.required_assets,
+          data_requirements: updated.data_requirements,
+          content_categories: updated.content_categories,
+          workspace_priorities: updated.workspace_priorities,
+          ai_team_defaults: updated.ai_team_defaults,
+          starter_checklist: updated.starter_checklist,
+          recommended_integrations: updated.recommended_integrations,
+          updated_at: updated.updated_at
+        };
+      })
+    : [];
+
+  writeJsonFile(registry.registryPath, nextProjects);
+
+  return updated;
+}
+
+function handleApplyBusinessTemplateToProject(req, res) {
+  const projectName = req.params.project;
+  const body = req.body || {};
+  const projectType = String(
+    body.project_type ||
+    body.projectType ||
+    body.business_type ||
+    body.businessType ||
+    ''
+  ).trim();
+
+  if (!projectName) {
+    return res.status(400).json({
+      error: 'Missing project name',
+      code: 'MISSING_PROJECT_NAME'
+    });
+  }
+
+  try {
+    const project = applyBusinessTemplateToProject(projectName, projectType);
+
+    return res.json({
+      ok: true,
+      project
+    });
+  } catch (error) {
+    const message = error?.message || 'Failed to apply project template';
+    const notFound = /not found/i.test(message);
+
+    return res.status(notFound ? 404 : 500).json({
+      error: 'Failed to apply project template',
+      code: notFound ? 'PROJECT_NOT_FOUND' : 'APPLY_TEMPLATE_FAILED',
+      details: message
+    });
+  }
+}
+
+
 function handleCreateMediaManagerProject(req, res) {
   const body = req.body || {};
 
@@ -10021,6 +10121,11 @@ function handleCreateMediaManagerProject(req, res) {
 }
 
 
+
+
+app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+
+app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
 
 app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
 
