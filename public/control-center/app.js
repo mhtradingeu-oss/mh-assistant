@@ -3146,6 +3146,8 @@ function bindProjectSwitcher() {
 ========================= */
 
 function bindResponsiveUi() {
+  if (window.__mhResponsiveUiBound) return;
+window.__mhResponsiveUiBound = true;
   const sidebar = document.querySelector(".sidebar");
   const toggleBtn = $("sidebarToggleBtn");
   const backdrop = $("sidebarBackdrop");
@@ -3401,6 +3403,8 @@ function closeGlobalCommandBarSafe() {
 }
 
 function bindCommandOutsideClose() {
+  if (window.__mhCommandOutsideBound) return;
+window.__mhCommandOutsideBound = true;
   const appRoot = $("app");
   const commandBar = $("globalCommandBar");
 
@@ -3473,6 +3477,8 @@ function bindCommandInputs() {
 ========================= */
 
 function initializeAiDock() {
+  if (window.__mhAiDockBound) return;
+window.__mhAiDockBound = true;
   const dock = $("aiDock");
   const toggle = $("aiDockToggle");
   const panel = $("aiDockPanel");
