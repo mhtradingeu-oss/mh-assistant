@@ -6592,6 +6592,155 @@ function ensureProjectBaseStructure(projectName) {
   return paths;
 }
 
+
+function normalizeBusinessTemplateType(value) {
+  const raw = String(value || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+
+  if (['artist', 'singer', 'musician', 'artist_singer'].includes(raw)) return 'artist_singer';
+  if (['salon', 'beauty', 'beauty_salon'].includes(raw)) return 'beauty_salon';
+  if (['realestate', 'real_estate', 'property', 'properties'].includes(raw)) return 'real_estate';
+  if (['shop', 'store', 'commerce', 'ecommerce', 'e_commerce'].includes(raw)) return 'ecommerce';
+  if (['service', 'services', 'service_business'].includes(raw)) return 'service_business';
+  if (['restaurant', 'cafe', 'food'].includes(raw)) return 'restaurant';
+  if (['agency', 'marketing_agency', 'creative_agency'].includes(raw)) return 'agency';
+  if (['local', 'local_business'].includes(raw)) return 'local_business';
+
+  return raw || 'service_business';
+}
+
+function getBusinessProjectTemplate(projectType) {
+  const type = normalizeBusinessTemplateType(projectType);
+
+  const common = {
+    default_channels: ['website', 'instagram', 'facebook'],
+    required_assets: ['logo', 'brand_profile', 'hero_images', 'legal_info'],
+    data_requirements: ['business_profile', 'target_audience', 'offers', 'contact_details'],
+    content_categories: ['brand_story', 'offers', 'education', 'social_proof'],
+    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+    starter_checklist: [
+      'complete_project_profile',
+      'upload_brand_assets',
+      'define_target_audience',
+      'connect_primary_channels',
+      'create_first_campaign'
+    ],
+    recommended_integrations: ['website', 'google', 'meta']
+  };
+
+  const templates = {
+    ecommerce: {
+      id: 'ecommerce',
+      label: 'eCommerce / Products',
+      default_channels: ['website', 'woocommerce', 'instagram', 'facebook', 'google', 'tiktok'],
+      required_assets: ['logo', 'product_photos', 'product_catalog', 'price_list', 'shipping_policy', 'legal_docs'],
+      data_requirements: ['products', 'inventory', 'offers', 'shipping', 'payment_methods', 'marketplaces'],
+      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+      starter_checklist: ['add_products', 'upload_product_media', 'define_shipping', 'connect_woocommerce', 'create_launch_campaign'],
+      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+    },
+
+    artist_singer: {
+      id: 'artist_singer',
+      label: 'Artist / Singer',
+      default_channels: ['instagram', 'tiktok', 'youtube', 'spotify', 'website'],
+      required_assets: ['artist_photos', 'logo_or_signature', 'press_kit', 'music_links', 'video_clips'],
+      data_requirements: ['artist_profile', 'songs', 'albums', 'events', 'booking_info', 'press_bio'],
+      content_categories: ['song_release', 'behind_the_scenes', 'live_events', 'fan_engagement', 'press_updates'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+      starter_checklist: ['complete_artist_profile', 'upload_press_photos', 'add_music_links', 'define_fan_audience', 'create_release_campaign'],
+      recommended_integrations: ['youtube', 'instagram', 'tiktok', 'spotify', 'website']
+    },
+
+    beauty_salon: {
+      id: 'beauty_salon',
+      label: 'Beauty Salon',
+      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+      required_assets: ['logo', 'salon_photos', 'service_menu', 'price_list', 'before_after_media'],
+      data_requirements: ['services', 'staff', 'booking_info', 'location', 'offers', 'reviews'],
+      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+      starter_checklist: ['add_services', 'upload_before_after_media', 'add_booking_details', 'connect_google_business', 'create_local_campaign'],
+      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'booking']
+    },
+
+    real_estate: {
+      id: 'real_estate',
+      label: 'Real Estate',
+      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+      required_assets: ['logo', 'property_photos', 'property_documents', 'location_media', 'agent_profile'],
+      data_requirements: ['properties', 'locations', 'lead_capture', 'viewings', 'buyer_profiles', 'seller_profiles'],
+      content_categories: ['property_listing', 'market_update', 'area_guide', 'buyer_tips', 'seller_tips'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+    },
+
+    service_business: {
+      id: 'service_business',
+      label: 'Service Business',
+      default_channels: ['website', 'google_business', 'instagram', 'facebook'],
+      required_assets: ['logo', 'service_list', 'case_studies', 'testimonials'],
+      data_requirements: ['services', 'pricing_model', 'service_area', 'booking_or_contact_flow'],
+      content_categories: ['services', 'case_studies', 'client_results', 'faq', 'offers'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+      starter_checklist: ['define_services', 'add_service_area', 'upload_testimonials', 'connect_contact_flow', 'create_offer_campaign'],
+      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+    },
+
+    restaurant: {
+      id: 'restaurant',
+      label: 'Restaurant / Cafe',
+      default_channels: ['instagram', 'tiktok', 'google_business', 'website', 'facebook'],
+      required_assets: ['logo', 'menu', 'food_photos', 'location_photos', 'offers'],
+      data_requirements: ['menu_items', 'opening_hours', 'location', 'reservation_or_ordering', 'delivery_options'],
+      content_categories: ['menu_highlights', 'daily_specials', 'behind_the_kitchen', 'reviews', 'events'],
+      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+      starter_checklist: ['add_menu', 'upload_food_photos', 'add_opening_hours', 'connect_google_business', 'create_local_offer'],
+      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'delivery']
+    },
+
+    agency: {
+      id: 'agency',
+      label: 'Agency',
+      default_channels: ['website', 'linkedin', 'instagram', 'facebook'],
+      required_assets: ['logo', 'case_studies', 'services_deck', 'client_testimonials'],
+      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+      content_categories: ['case_study', 'thought_leadership', 'services', 'client_results', 'lead_generation'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+    },
+
+    local_business: {
+      id: 'local_business',
+      label: 'Local Business',
+      default_channels: ['google_business', 'website', 'instagram', 'facebook'],
+      required_assets: ['logo', 'location_photos', 'service_or_product_list', 'reviews'],
+      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+      starter_checklist: ['add_location', 'add_opening_hours', 'upload_local_media', 'connect_google_business', 'create_local_post'],
+      recommended_integrations: ['google_business', 'website', 'meta']
+    }
+  };
+
+  return {
+    ...common,
+    ...(templates[type] || templates.service_business)
+  };
+}
+
+
 function createProject(projectName, market, language, projectType, websiteUrl) {
   const safeProject = normalizeProjectSlug(projectName);
 
@@ -6607,12 +6756,23 @@ function createProject(projectName, market, language, projectType, websiteUrl) {
   }
 
   const paths = ensureProjectBaseStructure(safeProject);
+  const businessTemplate = getBusinessProjectTemplate(projectType);
 
   const projectData = {
     project_name: safeProject,
     market: market || '',
     language: language || '',
-    project_type: projectType || '',
+    project_type: businessTemplate.id,
+    business_type: businessTemplate.id,
+    business_template: businessTemplate,
+    default_channels: businessTemplate.default_channels,
+    required_assets: businessTemplate.required_assets,
+    data_requirements: businessTemplate.data_requirements,
+    content_categories: businessTemplate.content_categories,
+    workspace_priorities: businessTemplate.workspace_priorities,
+    ai_team_defaults: businessTemplate.ai_team_defaults,
+    starter_checklist: businessTemplate.starter_checklist,
+    recommended_integrations: businessTemplate.recommended_integrations,
     website_url: websiteUrl || '',
     execution_mode: 'semi_auto',
     created_at: new Date().toISOString(),
