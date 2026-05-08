@@ -1,0 +1,34 @@
+/*
+  Control Center Layer System
+  Purpose: canonical z-index and interaction rules for global UI surfaces.
+*/
+
+:root {
+  --layer-base: 0;
+  --layer-sticky: 30;
+  --layer-sidebar: 100;
+  --layer-topbar: 200;
+  --layer-command: 400;
+  --layer-drawer: 500;
+  --layer-overlay: 600;
+  --layer-modal: 900;
+  --layer-ai: 1200;
+  --layer-toast: 1300;
+}
+
+/* Hidden global overlays must never block native controls. */
+.command-backdrop:not(.is-visible),
+.loading-overlay:not(.is-visible),
+.sidebar-backdrop:not(.is-visible),
+[aria-hidden="true"].command-backdrop,
+[aria-hidden="true"].loading-overlay,
+[aria-hidden="true"].sidebar-backdrop {
+  pointer-events: none !important;
+}
+
+/* Visible blocking layers are intentionally interactive. */
+.command-backdrop.is-visible,
+.loading-overlay.is-visible,
+.sidebar-backdrop.is-visible {
+  pointer-events: auto;
+}
