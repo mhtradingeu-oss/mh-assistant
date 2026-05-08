@@ -2241,12 +2241,7 @@ viewToggleButtons.forEach((button) => {
     };
 
     dropZone.onclick = (event) => {
-      if (event.target?.closest?.("#libraryChooseFilesBtn")) {
-        return;
-      }
-
       event.preventDefault();
-      event.stopPropagation();
       uploadInput.click();
     };
 
@@ -2563,7 +2558,7 @@ export const libraryRoute = {
           <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
             <div class="library-workspace-main">
               <div class="library-finder-topbar">
-                <div class="library-finder-sidebar-title">Folders</div>
+                <div class="library-finder-sidebar-title"></div>
                 <div class="library-folder-list">
                   ${LIBRARY_FOLDERS.map((folder) => {
       const count = folderCounts.find((item) => item.key === folder.key)?.count || 0;
