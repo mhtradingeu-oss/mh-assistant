@@ -9798,6 +9798,74 @@ app.get('/media/file/:project/:type/:filename', (req, res) => {
   return res.sendFile(filePath);
 });
 
+
+function handleCreateMediaManagerProject(req, res) {
+  const body = req.body || {};
+
+  const projectName = String(
+    body.project_name ||
+    body.projectName ||
+    body.name ||
+    ""
+  ).trim();
+
+  const market = String(body.market || body.country || "").trim();
+  const language = String(body.language || body.locale || "").trim();
+  const projectType = String(
+    body.project_type ||
+    body.projectType ||
+    body.business_type ||
+    body.businessType ||
+    ""
+  ).trim();
+
+  const websiteUrl = String(
+    body.website_url ||
+    body.websiteUrl ||
+    body.website ||
+    ""
+  ).trim();
+
+  if (!projectName) {
+    return res.status(400).json({
+      error: "Missing project name",
+      code: "MISSING_PROJECT_NAME"
+    });
+  }
+
+  try {
+    const project = createProject(
+      projectName,
+      market,
+      language,
+      projectType,
+      websiteUrl
+    );
+
+    return res.status(201).json({
+      ok: true,
+      project,
+      preferredProject: project.project_name,
+      projects: listMediaManagerProjects()
+    });
+  } catch (error) {
+    const message = error?.message || "Failed to create project";
+    const duplicate = /already exists/i.test(message);
+
+    return res.status(duplicate ? 409 : 500).json({
+      error: "Failed to create project",
+      code: duplicate ? "PROJECT_ALREADY_EXISTS" : "CREATE_PROJECT_FAILED",
+      details: message
+    });
+  }
+}
+
+
+
+app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+
+app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+
 app.get('/media-manager/projects', (req, res) => {
   return res.json(listMediaManagerProjects());
 });

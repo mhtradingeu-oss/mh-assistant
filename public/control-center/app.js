@@ -27,6 +27,7 @@ import {
   isDebugStartupMode,
   AccessKeyError,
   fetchProjects,
+  createMediaManagerProject,
   fetchAllCoreProjectData,
   fetchProjectInsights,
   fetchProjectLearning,
@@ -3573,6 +3574,52 @@ function createExecutiveNewLauncherModal() {
         >×</button>
       </div>
 
+      <form id="executiveNewProjectForm" class="executive-project-form" hidden>
+        <div class="executive-project-form-grid">
+          <label>
+            <span>Project name</span>
+            <input name="project_name" type="text" placeholder="Nadeem Nour, Beauty of Spirit, Real Estate Berlin..." required>
+          </label>
+
+          <label>
+            <span>Business type</span>
+            <select name="project_type" required>
+              <option value="">Choose type</option>
+              <option value="ecommerce">eCommerce / Products</option>
+              <option value="artist_singer">Artist / Singer</option>
+              <option value="beauty_salon">Beauty Salon</option>
+              <option value="real_estate">Real Estate</option>
+              <option value="service_business">Service Business</option>
+              <option value="restaurant">Restaurant / Cafe</option>
+              <option value="agency">Agency</option>
+              <option value="local_business">Local Business</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Market</span>
+            <input name="market" type="text" placeholder="Germany, UAE, Jordan...">
+          </label>
+
+          <label>
+            <span>Language</span>
+            <input name="language" type="text" placeholder="de, ar, en...">
+          </label>
+
+          <label class="executive-project-form-wide">
+            <span>Website URL</span>
+            <input name="website_url" type="url" placeholder="https://example.com">
+          </label>
+        </div>
+
+        <div class="executive-project-form-actions">
+          <button class="btn btn-primary" type="submit">Create Project</button>
+          <button class="btn btn-secondary" type="button" data-new-project-cancel="1">Cancel</button>
+          <span id="executiveNewProjectStatus" class="executive-project-form-status"></span>
+        </div>
+      </form>
+
+
       <div class="executive-new-grid">
         <button
           class="executive-new-option executive-new-option-primary"
@@ -3646,8 +3693,74 @@ function showExecutiveNewLauncher() {
 
     modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
 
+    const projectForm = modal.querySelector("#executiveNewProjectForm");
+    const projectStatus = modal.querySelector("#executiveNewProjectStatus");
+
+    const setProjectStatus = (message, tone = "info") => {
+      if (!projectStatus) return;
+      projectStatus.textContent = message || "";
+      projectStatus.dataset.tone = tone;
+    };
+
+    modal.querySelector("[data-new-project-cancel]")?.addEventListener("click", () => {
+      if (projectForm) projectForm.hidden = true;
+      setProjectStatus("");
+    });
+
+    projectForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(projectForm);
+      const payload = {
+        project_name: String(formData.get("project_name") || "").trim(),
+        project_type: String(formData.get("project_type") || "").trim(),
+        market: String(formData.get("market") || "").trim(),
+        language: String(formData.get("language") || "").trim(),
+        website_url: String(formData.get("website_url") || "").trim()
+      };
+
+      if (!payload.project_name) {
+        setProjectStatus("Project name is required.", "error");
+        return;
+      }
+
+      if (!payload.project_type) {
+        setProjectStatus("Choose a business type.", "error");
+        return;
+      }
+
+      const submitBtn = projectForm.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = true;
+      setProjectStatus("Creating isolated project workspace...", "info");
+
+      try {
+        const result = await createMediaManagerProject(payload);
+        const projectName = result?.preferredProject || result?.project?.project_name || payload.project_name;
+
+        hideExecutiveNewLauncher();
+        showMessage(`Project ${projectName} created.`);
+        await loadProjectData(projectName);
+        navigateTo("setup");
+      } catch (error) {
+        setProjectStatus(error?.message || "Failed to create project.", "error");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+
     Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
       button.addEventListener("click", () => {
+        const type = button.getAttribute("data-new-type") || "";
+
+        if (type === "project") {
+          if (projectForm) {
+            projectForm.hidden = false;
+            setProjectStatus("");
+            projectForm.querySelector("input, select, textarea")?.focus();
+          }
+          return;
+        }
+
         const route = button.getAttribute("data-new-route") || "ai-command";
         const prompt = button.getAttribute("data-new-prompt") || "";
         const input = $("quickCommandInput");

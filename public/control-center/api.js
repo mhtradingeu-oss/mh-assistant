@@ -939,6 +939,32 @@ function extractDashboardSection(payload, section) {
    PROJECTS
 ========================= */
 
+
+export async function createMediaManagerProject(payload = {}) {
+  const response = await fetch("/media-manager/projects", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...(typeof getRuntimeControlHeaders === "function" ? getRuntimeControlHeaders() : {})
+    },
+    body: JSON.stringify(payload)
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (_) {}
+
+  if (!response.ok) {
+    const message = data?.details || data?.error || `Failed to create project (${response.status})`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+
 export async function fetchProjects() {
   try {
     const payload = await getJson(
