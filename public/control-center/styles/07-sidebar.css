@@ -1,0 +1,76 @@
+/*
+  Control Center Sidebar
+  Purpose: stabilize navigation shell, scrolling, and active states.
+*/
+
+.sidebar {
+  z-index: var(--layer-sidebar);
+  min-width: 0;
+  overflow: hidden;
+
+  border-right:
+    1px solid var(--border-primary);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7, 16, 24, 0.96),
+      rgba(10, 18, 28, 0.98)
+    );
+}
+
+.sidebar-nav {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.nav-group {
+  min-width: 0;
+}
+
+.nav-group-title {
+  color: var(--text-muted);
+}
+
+.nav-item {
+  min-width: 0;
+  border-radius: var(--radius-md);
+
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.nav-item:hover {
+  transform: translateX(1px);
+}
+
+.nav-item.is-active {
+  color: var(--text-primary);
+  border-color: rgba(62, 230, 184, 0.32);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(62, 230, 184, 0.14),
+      rgba(124, 92, 255, 0.10)
+    );
+}
+
+.sidebar-backdrop {
+  z-index: calc(var(--layer-sidebar) - 1);
+}
+
+/* Mobile sidebar behavior is still controlled by existing JS classes. */
+@media (max-width: 1024px) {
+  .sidebar {
+    z-index: var(--layer-sidebar);
+  }
+
+  .sidebar-backdrop.is-visible {
+    pointer-events: auto;
+  }
+}
