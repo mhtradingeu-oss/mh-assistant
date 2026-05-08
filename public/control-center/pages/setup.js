@@ -1,4 +1,5 @@
 import { getMissingAssetLabels } from "../asset-library.js";
+import { applyProjectBusinessTemplate } from "../api.js";
 
 const REQUIRED_FIELDS = [
   { name: "project_name", label: "Project name" },
@@ -1061,6 +1062,82 @@ function bindSetupActions({
   activateStep(STEP_DEFINITIONS[0].id);
 }
 
+
+const BUSINESS_TEMPLATE_OPTIONS = [
+  { value: "ecommerce", label: "eCommerce / Products" },
+  { value: "artist_singer", label: "Artist / Singer" },
+  { value: "beauty_salon", label: "Beauty Salon" },
+  { value: "real_estate", label: "Real Estate" },
+  { value: "service_business", label: "Service Business" },
+  { value: "restaurant", label: "Restaurant / Cafe" },
+  { value: "agency", label: "Agency" },
+  { value: "local_business", label: "Local Business" }
+];
+
+function getBusinessTemplateLabel(value) {
+  const found = BUSINESS_TEMPLATE_OPTIONS.find((item) => item.value === value);
+  return found?.label || value || "Not selected";
+}
+
+function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
+  const currentType = (
+    overviewData.business_type ||
+    overviewData.project_type ||
+    values.project_type ||
+    ""
+  ).toString();
+
+  const currentLabel = overviewData.business_template?.label || getBusinessTemplateLabel(currentType);
+  const requiredAssets = Array.isArray(overviewData.required_assets) ? overviewData.required_assets : [];
+  const starterChecklist = Array.isArray(overviewData.starter_checklist) ? overviewData.starter_checklist : [];
+
+  return `
+    <section class="card setup-business-template-panel">
+      <div class="setup-template-head">
+        <div>
+          <div class="setup-kicker">Business Template</div>
+          <h3 class="setup-v2-title">Project operating model</h3>
+          <p class="setup-v2-subtitle">
+            Choose or update the project type so the system can apply the right assets, channels, checklist, AI team defaults, and workspace priorities.
+          </p>
+        </div>
+        <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
+      </div>
+
+      <div class="setup-template-body">
+        <label class="setup-template-selector">
+          <span>Template type</span>
+          <select id="setupBusinessTemplateSelect">
+            ${BUSINESS_TEMPLATE_OPTIONS.map((option) => `
+              <option value="${escapeHtml(option.value)}"${option.value === currentType ? " selected" : ""}>
+                ${escapeHtml(option.label)}
+              </option>
+            `).join("")}
+          </select>
+        </label>
+
+        <div class="setup-template-preview">
+          <strong>Current requirements</strong>
+          <span>${escapeHtml(requiredAssets.length ? requiredAssets.join(", ") : "No template assets applied yet.")}</span>
+        </div>
+
+        <div class="setup-template-preview">
+          <strong>Starter checklist</strong>
+          <span>${escapeHtml(starterChecklist.length ? starterChecklist.join(", ") : "No template checklist applied yet.")}</span>
+        </div>
+      </div>
+
+      <div class="setup-template-actions">
+        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+          Apply / Change Template
+        </button>
+        <span id="setupTemplateStatus" class="setup-template-status"></span>
+      </div>
+    </section>
+  `;
+}
+
+
 export const setupRoute = {
   id: "setup",
   meta: {
@@ -1390,6 +1467,8 @@ export const setupRoute = {
           </div>
         </section>
 
+        ${renderBusinessTemplatePanel({ values, overviewData, escapeHtml })}
+
         <section class="card setup-smart-ai-tools" hidden>
           <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">AI Positioning</button>
           <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">AI Audience</button>
@@ -1418,6 +1497,52 @@ export const setupRoute = {
       readinessStatus,
       criticalGaps
     });
+
+
+    const templateSelect = $("setupBusinessTemplateSelect");
+    const templateApplyBtn = $("setupApplyTemplateBtn");
+    const templateStatus = $("setupTemplateStatus");
+
+    if (templateApplyBtn && templateSelect) {
+      templateApplyBtn.onclick = async () => {
+        const selectedType = String(templateSelect.value || "").trim();
+
+        if (!selectedType) {
+          if (templateStatus) {
+            templateStatus.textContent = "Choose a template first.";
+            templateStatus.dataset.tone = "error";
+          }
+          return;
+        }
+
+        templateApplyBtn.disabled = true;
+
+        if (templateStatus) {
+          templateStatus.textContent = "Applying business template...";
+          templateStatus.dataset.tone = "info";
+        }
+
+        try {
+          await applyProjectBusinessTemplate(projectName, selectedType);
+
+          if (templateStatus) {
+            templateStatus.textContent = "Template applied. Reloading project...";
+            templateStatus.dataset.tone = "success";
+          }
+
+          showMessage?.("Business template applied.");
+          await reloadProjectData?.(projectName);
+        } catch (error) {
+          if (templateStatus) {
+            templateStatus.textContent = error?.message || "Failed to apply template.";
+            templateStatus.dataset.tone = "error";
+          }
+          showError?.(error?.message || "Failed to apply template.");
+        } finally {
+          templateApplyBtn.disabled = false;
+        }
+      };
+    }
 
     const saveBottomBtn = $("setupSaveBackendBtnBottom");
     const saveTopBtn = $("setupSaveBackendBtn");

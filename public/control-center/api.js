@@ -1287,6 +1287,37 @@ export async function fetchProjectOperations(projectName) {
   );
 }
 
+
+export async function applyProjectBusinessTemplate(projectName, projectType) {
+  const safeProjectName = toProjectName(projectName);
+  const encodedProjectName = encodeURIComponent(safeProjectName);
+
+  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...(typeof getRuntimeControlHeaders === "function" ? getRuntimeControlHeaders() : {})
+    },
+    body: JSON.stringify({
+      project_type: projectType
+    })
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (_) {}
+
+  if (!response.ok) {
+    const message = data?.details || data?.error || `Failed to apply project template (${response.status})`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+
 export async function saveProjectSetup(projectName, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");
