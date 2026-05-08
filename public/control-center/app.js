@@ -661,6 +661,7 @@ function showAccessKeyModal() {
     document.body.appendChild(modal);
     bindAccessKeyPanel(modal);
   }
+  document.body.classList.add("is-executive-new-open");
   modal.classList.add("is-visible");
   const input = document.getElementById("accessKeyInput");
   if (input) {
@@ -3558,48 +3559,68 @@ function createExecutiveNewLauncherModal() {
     <div class="access-key-card executive-new-card">
       <div class="executive-new-head">
         <div>
+          <span class="executive-new-kicker">Smart Launcher</span>
           <h2 class="access-key-title">What do you want to create?</h2>
           <p class="access-key-desc">
-            Start a guided AI workflow for content, campaigns, media, publishing, approvals, or operations.
+            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
           </p>
         </div>
-        <button id="executiveNewCloseBtn" class="btn btn-ghost" type="button">Close</button>
+        <button
+          id="executiveNewCloseBtn"
+          class="executive-modal-close"
+          type="button"
+          aria-label="Close"
+        >×</button>
       </div>
 
       <div class="executive-new-grid">
+        <button
+          class="executive-new-option executive-new-option-primary"
+          type="button"
+          data-new-route="setup"
+          data-new-type="project"
+          data-new-prompt="Create a new project from zero. Guide me through project name, business type, market, language, channels, brand tone, goals, and required setup."
+        >
+          <span class="executive-new-pill">Start</span>
+          <strong>New Project</strong>
+          <span>Create a project from scratch: brand, market, language, channels, and setup.</span>
+        </button>
+
         <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+          <span class="executive-new-pill">Plan</span>
           <strong>Campaign</strong>
           <span>Launch plan, audience, channels, budget, content map.</span>
         </button>
 
         <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+          <span class="executive-new-pill">Write</span>
           <strong>Blog / Content</strong>
           <span>Blog, captions, landing copy, SEO content.</span>
         </button>
 
         <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+          <span class="executive-new-pill">Create</span>
           <strong>Image / Video / Audio</strong>
           <span>Creative assets, AI visuals, videos, voice concepts.</span>
         </button>
 
         <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
-          <strong>Publish</strong>
+          <span class="executive-new-pill">Publish</span>
+          <strong>Publishing Task</strong>
           <span>Review, approve, schedule, publish.</span>
         </button>
 
         <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+          <span class="executive-new-pill">Review</span>
           <strong>Approval</strong>
           <span>Governance, claim review, release approval.</span>
         </button>
 
         <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+          <span class="executive-new-pill">AI</span>
           <strong>Custom Workflow</strong>
           <span>Multi-step AI workflow and execution routing.</span>
         </button>
-      </div>
-
-      <div class="access-key-status">
-        Tip: choose a workflow type. The system will open the right workspace and prefill AI Workspace with guided instructions.
       </div>
     </div>
   `;
@@ -3610,6 +3631,7 @@ function createExecutiveNewLauncherModal() {
 function hideExecutiveNewLauncher() {
   const modal = document.getElementById("executiveNewLauncherModal");
   if (modal) modal.classList.remove("is-visible");
+  document.body.classList.remove("is-executive-new-open");
 }
 
 function showExecutiveNewLauncher() {
@@ -3638,6 +3660,7 @@ function showExecutiveNewLauncher() {
     });
   }
 
+  document.body.classList.add("is-executive-new-open");
   modal.classList.add("is-visible");
 }
 
@@ -3645,6 +3668,18 @@ function showExecutiveNewLauncher() {
 /* =========================
    GLOBAL BUTTONS
 ========================= */
+
+
+function bindExecutiveNewLauncherKeyboard() {
+  if (window.__executiveNewKeyboardBound) return;
+  window.__executiveNewKeyboardBound = true;
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideExecutiveNewLauncher();
+    }
+  });
+}
 
 function bindGlobalButtons() {
   const refreshBtn = $("refreshAllBtn");
@@ -3709,6 +3744,7 @@ async function init() {
     bindRouteListener();
     bindProjectSwitcher();
     initializeAiDock();
+    bindExecutiveNewLauncherKeyboard();
     bindGlobalButtons();
     bindResponsiveUi();
     bindShellMeasurements();
