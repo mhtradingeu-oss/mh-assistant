@@ -1,0 +1,49 @@
+/*
+  Control Center Command Layer
+  Purpose: one canonical command-bar/backdrop behavior before legacy overrides.
+*/
+
+/* Default desktop command bar: hidden unless command mode is open. */
+.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-bar {
+  display: none;
+}
+
+.command-bar {
+  z-index: var(--layer-command);
+  min-width: 0;
+}
+
+/* Backdrop is non-blocking by default. */
+.command-backdrop {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: calc(var(--layer-command) - 1);
+}
+
+/* Open command state. */
+.app-shell.is-command-open .command-backdrop,
+.app-shell.is-mobile-command-open .command-backdrop,
+.command-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Mobile command opens only when explicitly requested. */
+@media (max-width: 768px) {
+  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+    display: none;
+  }
+
+  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+    display: grid;
+  }
+
+  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-backdrop {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
