@@ -827,9 +827,8 @@ function bindSetupActions({
     }, 0);
   };
 
-  form.addEventListener("click", keepSetupFieldFocused);
-  form.addEventListener("mouseup", keepSetupFieldFocused);
-  form.addEventListener("pointerup", keepSetupFieldFocused);
+  // Legacy focus forcing disabled after frontend shell rebuild.
+  // The old interaction model caused typing/click instability.
 
   const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
 
