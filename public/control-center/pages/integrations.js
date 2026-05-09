@@ -5,6 +5,7 @@ import {
   buildCriticalMissing,
   buildDomainModels,
   buildIntegrationActivityFeed,
+  buildIntegrationCardModel,
   buildIntegrationOverviewSummary,
   buildLaunchDiagnostics,
   buildLegacyFallbackRecord,
@@ -1032,59 +1033,6 @@ function getHealthSummary(statusLabel, record, integration) {
   return "This integration has not been configured yet.";
 }
 
-function buildIntegrationCardModel(integration, session, state) {
-  const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
-  const record = getServerRecord(state, integration);
-  const backendSupported = integration.backendSupported !== false && !UNSUPPORTED_INTEGRATION_IDS.has(integration.id);
-  const statusLabel = backendSupported
-    ? normalizeStatusLabel(record.status_label || record.status)
-    : "Unavailable";
-  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
-  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
-  const totalFields = integration.fields.length;
-  const accessModel = getIntegrationAccessModel(integration);
-  const dataScopes = asArray(record.data_scopes).length
-    ? asArray(record.data_scopes).map(titleCase)
-    : inferScopeKeys(integration).map(titleCase);
-  const suggestedValues = buildSuggestedValues(state, integration, { getSuggestedFieldValue });
-
-  return {
-    ...integration,
-    backendSupported,
-    record,
-    sourceValue: asString(record.primary_value || sourceValue),
-    statusLabel,
-    statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
-    statusTone:
-      statusLabel === "Connected" ? "success" :
-      statusLabel === "Unavailable" ? "danger" :
-      statusLabel === "Partial" ? "warning" :
-      statusLabel === "Token expired" ? "warning" :
-      statusLabel === "Error" ? "danger" :
-      "neutral",
-    dataScopes,
-    dataScopeSummary: dataScopes.join(", "),
-    readScopes: asArray(record.read_scopes).length ? asArray(record.read_scopes) : accessModel.read,
-    writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
-    credentialState: asObject(record.credential_state),
-    suggestedValues,
-    missingRequired: backendSupported ? missingRequired : [],
-    lastSync: asString(record.last_sync_at),
-    lastImport: asString(record.last_import_at),
-    lastTest: asString(record.last_test_at),
-    healthSummary: getHealthSummary(statusLabel, record, integration),
-    notes: !backendSupported
-      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
-      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
-      ? "Critical integration missing for full system capability."
-      : "Credentials are saved server-side and only masked status returns to the UI."),
-    localFillCount,
-    totalFields,
-    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
-    enablesSummary: asString(record.enables) || integration.enables
-  };
-}
-
 function getConnectorWorkspaceAction(card) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
@@ -1475,7 +1423,32 @@ export const integrationsRoute = {
     const state = getState();
     const projectName = state.context.currentProject || "";
     const session = ensureSession(projectName);
-    const domainModels = buildDomainModels(state, session, { domains: INTEGRATION_DOMAINS, buildIntegrationCardModel });
+    const domainModels = buildDomainModels(state, session, {
+      domains: INTEGRATION_DOMAINS,
+      buildIntegrationCardModel: (integration, localSession, localState) => buildIntegrationCardModel(
+        integration,
+        localSession,
+        localState,
+        {
+          getLegacySourceValue,
+          getLegacySources,
+          getServerRecord,
+          unsupportedIntegrationIds: UNSUPPORTED_INTEGRATION_IDS,
+          normalizeStatusLabel,
+          getLocalFillCount,
+          getRequiredMissing,
+          getIntegrationAccessModel,
+          asArray,
+          asObject,
+          asString,
+          titleCase,
+          inferScopeKeys,
+          buildSuggestedValues,
+          getSuggestedFieldValue,
+          getHealthSummary
+        }
+      )
+    });
     const sectionGroups = buildSectionGroups(domainModels);
     const allCards = domainModels.flatMap((domain) => domain.cards);
     if (!session.selectedIntegrationId || !allCards.find((card) => card.id === session.selectedIntegrationId)) {

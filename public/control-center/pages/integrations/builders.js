@@ -744,3 +744,74 @@ export function buildDomainModels(state = {}, session = {}, options = {}) {
     };
   });
 }
+
+export function buildIntegrationCardModel(integration = {}, session = {}, state = {}, options = {}) {
+  const getLegacySourceValue = typeof options.getLegacySourceValue === "function" ? options.getLegacySourceValue : () => "";
+  const getLegacySources = typeof options.getLegacySources === "function" ? options.getLegacySources : () => ({});
+  const getServerRecord = typeof options.getServerRecord === "function" ? options.getServerRecord : () => ({});
+  const unsupportedIntegrationIds = options.unsupportedIntegrationIds instanceof Set ? options.unsupportedIntegrationIds : new Set();
+  const normalizeStatusLabel = typeof options.normalizeStatusLabel === "function" ? options.normalizeStatusLabel : (value) => value || "Not Connected";
+  const getLocalFillCount = typeof options.getLocalFillCount === "function" ? options.getLocalFillCount : () => 0;
+  const getRequiredMissing = typeof options.getRequiredMissing === "function" ? options.getRequiredMissing : () => [];
+  const getIntegrationAccessModel = typeof options.getIntegrationAccessModel === "function" ? options.getIntegrationAccessModel : () => ({ read: [], write: [] });
+  const asArray = typeof options.asArray === "function" ? options.asArray : (value) => Array.isArray(value) ? value : [];
+  const asObject = typeof options.asObject === "function" ? options.asObject : (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const asString = typeof options.asString === "function" ? options.asString : (value) => value == null ? "" : String(value);
+  const titleCase = typeof options.titleCase === "function" ? options.titleCase : (value) => asString(value);
+  const inferScopeKeys = typeof options.inferScopeKeys === "function" ? options.inferScopeKeys : () => [];
+  const buildSuggestedValuesFn = typeof options.buildSuggestedValues === "function" ? options.buildSuggestedValues : buildSuggestedValues;
+  const getSuggestedFieldValue = typeof options.getSuggestedFieldValue === "function" ? options.getSuggestedFieldValue : () => "";
+  const getHealthSummary = typeof options.getHealthSummary === "function" ? options.getHealthSummary : () => "";
+
+  const sourceValue = getLegacySourceValue(integration, getLegacySources(state));
+  const record = getServerRecord(state, integration);
+  const backendSupported = integration.backendSupported !== false && !unsupportedIntegrationIds.has(integration.id);
+  const statusLabel = backendSupported
+    ? normalizeStatusLabel(record.status_label || record.status)
+    : "Unavailable";
+  const localFillCount = getLocalFillCount(session, integration, record, sourceValue, state);
+  const missingRequired = getRequiredMissing(session, integration, record, sourceValue, state);
+  const totalFields = Array.isArray(integration.fields) ? integration.fields.length : 0;
+  const accessModel = getIntegrationAccessModel(integration);
+  const recordDataScopes = asArray(record.data_scopes);
+  const dataScopes = recordDataScopes.length
+    ? recordDataScopes.map(titleCase)
+    : inferScopeKeys(integration).map(titleCase);
+  const suggestedValues = buildSuggestedValuesFn(state, integration, { getSuggestedFieldValue });
+
+  return {
+    ...integration,
+    backendSupported,
+    record,
+    sourceValue: asString(record.primary_value || sourceValue),
+    statusLabel,
+    statusKey: statusLabel.toLowerCase().replace(/\s+/g, "_"),
+    statusTone:
+      statusLabel === "Connected" ? "success" :
+      statusLabel === "Unavailable" ? "danger" :
+      statusLabel === "Partial" ? "warning" :
+      statusLabel === "Token expired" ? "warning" :
+      statusLabel === "Error" ? "danger" :
+      "neutral",
+    dataScopes,
+    dataScopeSummary: dataScopes.join(", "),
+    readScopes: asArray(record.read_scopes).length ? asArray(record.read_scopes) : accessModel.read,
+    writeScopes: asArray(record.write_scopes).length ? asArray(record.write_scopes) : accessModel.write,
+    credentialState: asObject(record.credential_state),
+    suggestedValues,
+    missingRequired: backendSupported ? missingRequired : [],
+    lastSync: asString(record.last_sync_at),
+    lastImport: asString(record.last_import_at),
+    lastTest: asString(record.last_test_at),
+    healthSummary: getHealthSummary(statusLabel, record, integration),
+    notes: !backendSupported
+      ? (asString(integration.unavailableReason) || "Backend provider support is not configured yet.")
+      : asString(record.notes) || (integration.critical && statusLabel !== "Connected"
+        ? "Critical integration missing for full system capability."
+        : "Credentials are saved server-side and only masked status returns to the UI."),
+    localFillCount,
+    totalFields,
+    permissionScopeSummary: asString(record.permission_scope) || integration.permissionScope,
+    enablesSummary: asString(record.enables) || integration.enables
+  };
+}
