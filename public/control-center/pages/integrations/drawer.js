@@ -131,3 +131,208 @@ export function renderIntegrationActionButtons(card = {}) {
     ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
   `;
 }
+
+function formatDrawerDate(value) {
+  if (!value) return "Never";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Never";
+  }
+
+  return date.toLocaleString();
+}
+
+function titleCaseLocal(value = "") {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export function renderIntegrationDetailsPanel(
+  card = {},
+  session = {},
+  options = {}
+) {
+  const isDrawer = options.mode === "drawer";
+
+  const getFieldValue =
+    typeof options.getFieldValue === "function"
+      ? options.getFieldValue
+      : () => "";
+
+  const requiredFields = card.fields.filter((field) => field.required);
+  const optionalFields = card.fields.filter((field) => !field.required);
+
+  const fields = requiredFields
+    .map((field) =>
+      renderIntegrationField(
+        card.id,
+        field,
+        getFieldValue(
+          session,
+          card,
+          field,
+          card.record,
+          card.sourceValue,
+          card.suggestedValues[field.key]
+        ),
+        {
+          invalid:
+            session.validationIntegrationId === card.id &&
+            session.validationFieldKey === field.key,
+          invalidMessage: session.validationMessage,
+          suggestion:
+            card.suggestedValues[field.key] &&
+            getFieldValue(
+              session,
+              card,
+              field,
+              card.record,
+              card.sourceValue,
+              card.suggestedValues[field.key]
+            ) === card.suggestedValues[field.key]
+        }
+      )
+    )
+    .join("");
+
+  const optionalFieldMarkup = optionalFields
+    .map((field) =>
+      renderIntegrationField(
+        card.id,
+        field,
+        getFieldValue(
+          session,
+          card,
+          field,
+          card.record,
+          card.sourceValue,
+          card.suggestedValues[field.key]
+        ),
+        {
+          suggestion:
+            card.suggestedValues[field.key] &&
+            getFieldValue(
+              session,
+              card,
+              field,
+              card.record,
+              card.sourceValue,
+              card.suggestedValues[field.key]
+            ) === card.suggestedValues[field.key]
+        }
+      )
+    )
+    .join("");
+
+  const credentialItems = Object.entries(card.credentialState || {})
+    .filter(([, value]) => value?.is_set)
+    .map(
+      ([key, value]) =>
+        `<span class="integration-scope-pill">${esc(
+          `${titleCaseLocal(key)}: ${value.masked}`
+        )}</span>`
+    )
+    .join("");
+
+  return `
+    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+      <div class="integration-hub-head">
+        <div class="integration-hub-title-wrap">
+          <div class="integration-hub-icon">${esc(card.icon)}</div>
+          <div>
+            <h4>${esc(card.label)}</h4>
+            <p>${esc(card.purpose)}</p>
+          </div>
+        </div>
+
+        <div class="integration-hub-head-actions">
+          <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+          ${isDrawer
+            ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>`
+            : ""}
+        </div>
+      </div>
+
+      <div class="integration-hub-intro">
+        <div class="integration-hub-why">
+          <strong>Status</strong>
+          <span>${esc(card.healthSummary)}</span>
+        </div>
+
+        <div class="integration-hub-why">
+          <strong>Connection value</strong>
+          <span>${esc(card.sourceValue || "Not set")}</span>
+        </div>
+      </div>
+
+      ${isDrawer ? renderDrawerProgress(card) : ""}
+
+      <div class="integration-hub-grid">
+        <div>
+          <div class="integration-mini-heading">Required fields</div>
+
+          <div class="integration-field-grid">
+            ${fields}
+          </div>
+
+          ${
+            session.validationIntegrationId === card.id &&
+            card.missingRequired.length
+              ? `<div class="integration-drawer-validation">${esc(
+                  `Missing required fields: ${card.missingRequired.join(", ")}`
+                )}</div>`
+              : ""
+          }
+
+          ${
+            optionalFieldMarkup
+              ? `
+                <details class="integration-optional-fields">
+                  <summary>Optional fields</summary>
+
+                  <div class="integration-field-grid integration-field-grid--optional">
+                    ${optionalFieldMarkup}
+                  </div>
+                </details>
+              `
+              : ""
+          }
+
+          ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
+
+          <div class="integration-side-note">
+            Sensitive credentials are stored server-side only.
+            Leave password fields blank to keep the current saved value.
+          </div>
+        </div>
+
+        <div class="integration-side-panel">
+          <div class="data-stack">
+            <div class="data-row"><span>Status</span><strong>${esc(card.statusLabel)}</strong></div>
+            <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
+            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+            <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
+            <div class="data-row"><span>Health</span><strong>${esc(card.healthSummary)}</strong></div>
+          </div>
+
+          <div class="integration-side-note">${esc(card.notes)}</div>
+
+          ${
+            card.missingRequired.length
+              ? `<div class="integration-side-note">${esc(
+                  `Missing required fields: ${card.missingRequired.join(", ")}`
+                )}</div>`
+              : ""
+          }
+        </div>
+      </div>
+
+      <div class="integration-action-row">
+        ${renderIntegrationActionButtons(card)}
+      </div>
+    </section>
+  `;
+}
