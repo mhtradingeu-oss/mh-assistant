@@ -1,0 +1,320 @@
+import {
+  brandCheckMedia,
+  createProjectApproval,
+  createProjectHandoff,
+  createProjectTask,
+  decideProjectApproval,
+  fetchProjectOperations,
+  generateMediaCampaignPack,
+  generateMediaImage,
+  generateMediaVideoBrief,
+  generateMediaVoiceScript,
+  improveMediaPrompt,
+  listProjectApprovals,
+  listProjectContentItems,
+  listProjectEvents,
+  listProjectHandoffs,
+  listProjectMediaJobs,
+  listProjectTasks,
+  saveProjectMediaJob
+} from "../api.js";
+import {
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+
+const mediaStudioSessions = new Map();
+const MEDIA_LOCAL_DRAFTS_KEY = "mh-media-studio-local-drafts-v1";
+const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+const MEDIA_MODES = ["image", "video", "voice", "campaign-pack"];
+const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];
+const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];
+const OUTPUT_PURPOSES = ["social post", "reel", "ad creative", "marketplace image", "email visual", "website banner"];
+const CHANNELS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];
+const MEDIA_ASSET_KEYS = ["logo", "brand_guideline", "product_photos", "product_videos", "packaging_images", "social_assets", "campaign_assets"];
+const MEDIA_ROLE_DEFAULTS = {
+  serviceDomain: "media",
+  designRole: "designer",
+  videoRole: "video_lead",
+  reviewRole: "compliance_reviewer",
+  handoffRole: "publisher"
+};
+const SPECIALISTS = [
+  {
+    id: "visual-director",
+    title: "Visual Director",
+    purpose: "Design premium still visuals that keep product truth and visual hierarchy clear.",
+    bestUse: "When creating hero images, product carousels, ad stills, and marketplace visuals.",
+    suggestedPrompt: "Act as Visual Director. Build a high-conversion image brief with composition, camera angle, lighting, text-safe area, and product-first framing."
+  },
+  {
+    id: "video-strategist",
+    title: "Video Strategist",
+    purpose: "Translate campaign goals into short-form video concepts with strong hooks and pacing.",
+    bestUse: "When producing reels, shorts, story cuts, and paid social video variants.",
+    suggestedPrompt: "Act as Video Strategist. Convert this brief into a 9:16 short video plan with hook, beat-by-beat storyboard, scene transitions, and CTA timing."
+  },
+  {
+    id: "voice-director",
+    title: "Voice Director",
+    purpose: "Shape narration tone, rhythm, and script clarity for voice-led content.",
+    bestUse: "When writing voiceovers for UGC-style videos, explainers, and promotional reels.",
+    suggestedPrompt: "Act as Voice Director. Create a voiceover script with opening hook, scene-aligned narration, cadence notes, and pronunciation guidance."
+  },
+  {
+    id: "brand-guardian",
+    title: "Brand Guardian",
+    purpose: "Protect brand consistency, legal-safe claims, and publishable creative outputs.",
+    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+    suggestedPrompt: "Act as Brand Guardian. Audit this draft for logo fit, claim risk, brand color compliance, German tone quality, and platform-safe layout."
+  },
+  {
+    id: "prompt-engineer",
+    title: "Prompt Engineer",
+    purpose: "Convert rough drafts into model-ready prompts with constraints and reusable structure.",
+    bestUse: "When a brief is unclear, too broad, or missing technical constraints for generation.",
+    suggestedPrompt: "Act as Prompt Engineer. Rewrite this into a structured generation prompt with objective, constraints, negatives, quality targets, and channel-specific formatting."
+  },
+  {
+    id: "publishing-assistant",
+    title: "Publishing Assistant",
+    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+    bestUse: "Right before sending approved media into Publishing operations.",
+    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+  }
+];
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function clean(value) {
+  return asString(value).trim();
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function toKey(value) {
+  return clean(value).toLowerCase();
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function firstText(...values) {
+  for (const value of values) {
+    const text = clean(value);
+    if (text) return text;
+  }
+  return "";
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not recorded";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function formatCount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  return String(Math.max(0, Math.round(parsed)));
+}
+
+function projectKey(projectName) {
+  return toKey(projectName) || "__default__";
+}
+
+function getProjectName(state) {
+  return firstText(state.context?.currentProject, state.data.overview?.overview?.project_name, "Workspace");
+}
+
+function getBackendProjectName(state) {
+  return firstText(state.context?.currentProject, state.data.overview?.overview?.project_name);
+}
+
+function getAssetData(state) {
+  return asObject(state.data.assets);
+}
+
+function normalizeStatus(value, fallback = "draft") {
+  const normalized = toKey(value);
+  if (!normalized) return fallback;
+  if (["requested", "request", "queued", "draft"].includes(normalized)) return "draft";
+  if (["prompt_ready", "prompt ready", "ready"].includes(normalized)) return "prompt_ready";
+  if (["generating", "running", "processing", "in_progress"].includes(normalized)) return "generating";
+  if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";
+  if (["approved", "complete", "completed"].includes(normalized)) return "approved";
+  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+  if (["sent_to_publishing", "sent to publishing", "sent"].includes(normalized)) return "sent_to_publishing";
+  if (["failed", "blocked", "error", "rejected"].includes(normalized)) return "failed";
+  return fallback;
+}
+
+function statusTone(status) {
+  if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";
+  if (status === "prompt_ready" || status === "generating" || status === "needs_review") return "warning";
+  if (status === "failed") return "danger";
+  return "neutral";
+}
+
+function statusClass(status) {
+  return asString(status).replace(/[\s_]+/g, "-");
+}
+
+function readDraftMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LOCAL_DRAFTS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeDraftMap(map) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage?.setItem(MEDIA_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+  } catch (_) {}
+}
+
+function readLibraryAssetMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeLibraryAssetMap(map) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));
+  } catch (_) {}
+}
+
+function loadLocalDrafts(projectName) {
+  return asArray(readDraftMap()[projectKey(projectName)]);
+}
+
+function loadLocalLibraryAssets(projectName) {
+  return asArray(readLibraryAssetMap()[projectKey(projectName)]);
+}
+
+function upsertLocalLibraryAsset(projectName, asset) {
+  const map = readLibraryAssetMap();
+  const key = projectKey(projectName);
+  const nextAsset = {
+    ...asObject(asset),
+    id: asString(asset.id || `media-library-${Date.now()}`),
+    source_signature: asString(asset.source_signature),
+    updated_at: nowIso()
+  };
+  const existing = asArray(map[key]).filter((item) => {
+    const sameId = asString(item.id) && asString(item.id) === nextAsset.id;
+    const sameSignature = nextAsset.source_signature && asString(item.source_signature) === nextAsset.source_signature;
+    return !(sameId || sameSignature);
+  });
+  map[key] = [nextAsset, ...existing].slice(0, 120);
+  writeLibraryAssetMap(map);
+  return nextAsset;
+}
+
+function saveLocalDraft(projectName, draft) {
+  const map = readDraftMap();
+  const key = projectKey(projectName);
+  const existing = asArray(map[key]).filter((item) => asString(item.id) !== asString(draft.id));
+  const next = {
+    ...asObject(draft),
+    id: asString(draft.id || `local-media-${Date.now()}`),
+    localOnly: true,
+    source: "Local draft",
+    updated_at: nowIso()
+  };
+  map[key] = [next, ...existing].slice(0, 30);
+  writeDraftMap(map);
+  return next;
+}
+
+function defaultForm(state, mode = "image") {
+  const context = asObject(state.context);
+  const overview = asObject(state.data.overview?.overview);
+  return {
+    mode,
+    project: firstText(context.currentProject, overview.project_name),
+    campaign: firstText(context.activeCampaign, overview.active_campaign),
+    product: firstText(overview.project_name, context.currentProject),
+    channel: "instagram",
+    format: mode === "video" ? "9:16 reel" : mode === "voice" ? "voiceover script" : "1:1 social image",
+    objective: firstText(overview.primary_goal, overview.goal, "Create publishing-ready media"),
+    brandStyle: firstText(overview.brand_voice, overview.tone, "Premium, clear, brand-safe"),
+    prompt: "",
+    referenceAsset: "",
+    outputPurpose: mode === "video" ? "reel" : "social post",
+    reviewNotes: "",
+    title: "",
+    status: "draft"
+  };
+}
+
+function nextVersionId(versions = []) {
+  return `v${asArray(versions).length + 1}`;
+}
+
+function createVersionEntry({
+  id,
+  mode = "image",
+  prompt = "",
+  outputPayload = null,
+  providerStatus = "prompt_ready",
+  readinessStatus = "draft",
+  notes = "",
+  provider = "",
+  model = "",
+  libraryAssetRef = null,
+  createdAt
+} = {}, existing = []) {
+  return {
+    id: asString(id || nextVersionId(existing)),
+    mode: asString(mode || "image"),
+    prompt: asString(prompt),
+    output_payload: outputPayload == null ? null : outputPayload,
+    provider_status: MEDIA_PREVIEW_STATES.includes(asString(providerStatus)) ? asString(providerStatus) : "prompt_ready",
+    readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),
+    notes: asString(notes),
+    provider: asString(provider),
+    model: asString(model),
+    library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),
+    timestamp: asString(createdAt || nowIso())
+  };
+}
+
+function normalizeVersionEntry(rawVersion, index = 0) {
+  const raw = asObject(rawVersion);
+  const outputPayload = raw.output_payload != null
+    ? raw.output_payload
+    : raw.output != null
+      ? raw.output
