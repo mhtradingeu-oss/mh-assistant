@@ -45,7 +45,7 @@ export function renderIntegrationMetric(label, value, tone = "neutral") {
   `;
 }
 
-export function renderIntegrationCard(record = {}) {
+export function renderIntegrationStatusCard(record = {}) {
   const item = normalizeIntegrationRecord(record);
 
   const healthTone =
@@ -105,7 +105,7 @@ export function renderIntegrationCards(records = []) {
 
   return `
     <section class="integration-os-grid">
-      ${items.map(renderIntegrationCard).join("")}
+      ${items.map(renderIntegrationStatusCard).join("")}
     </section>
   `;
 }
@@ -198,6 +198,99 @@ export function renderConnectorGroup(group = {}, session = {}) {
       </div>
       <div class="integration-control-group-list">
         ${cards.map((card) => renderConnectorRow(card, session)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function formatCardDate(value) {
+  if (!value) return "Never";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Never";
+  }
+
+  return date.toLocaleString();
+}
+
+function getSmartConnectLabel(card = {}) {
+  if (card.backendSupported === false) {
+    return "Unavailable";
+  }
+
+  if (card.statusLabel === "Connected") {
+    return "Manage Connection";
+  }
+
+  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+    return "Reconnect";
+  }
+
+  return `Connect ${card.label || "Integration"}`;
+}
+
+export function renderIntegrationCard(card = {}, session = {}) {
+  const isSelected = asString(session.selectedIntegrationId) === card.id;
+
+  const primaryAction =
+    card.backendSupported === false
+      ? "unavailable"
+      : card.statusLabel === "Connected"
+      ? "manage"
+      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+        ? "reconnect"
+        : "connect";
+
+  const primaryActionLabel = getSmartConnectLabel(card);
+
+  return `
+    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
+      <div class="integration-simple-head">
+        <div class="integration-hub-icon">${esc(card.icon)}</div>
+
+        <div class="integration-simple-copy">
+          <strong>${esc(card.label)}</strong>
+
+          <span class="integration-card-meta">
+            Health: ${esc(card.healthSummary)}
+          </span>
+
+          <span class="integration-card-meta">
+            Last sync: ${esc(formatCardDate(card.lastSync))}
+          </span>
+        </div>
+
+        <span class="card-badge ${esc(card.statusTone)}">
+          ${esc(
+            card.statusLabel === "Partial" ||
+            card.statusLabel === "Token expired" ||
+            card.statusLabel === "Error"
+              ? "Needs Attention"
+              : card.statusLabel
+          )}
+        </span>
+      </div>
+
+      <div class="integration-simple-actions">
+        <button
+          class="btn btn-primary"
+          type="button"
+          data-integration-primary="${esc(primaryAction)}"
+          data-integration-id="${esc(card.id)}"
+          ${card.backendSupported === false ? "disabled" : ""}
+        >
+          ${esc(primaryActionLabel)}
+        </button>
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          data-integration-select="${esc(card.id)}"
+        >
+          View Details
+        </button>
       </div>
     </section>
   `;

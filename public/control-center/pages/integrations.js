@@ -1693,40 +1693,7 @@ function renderIntegrationActionButtons(card, escapeHtml) {
   `;
 }
 
-function renderIntegrationCard(card, session, escapeHtml) {
-  const isSelected = asString(session.selectedIntegrationId) === card.id;
-  const primaryActionLabel = getSmartConnectLabel(card);
-  const primaryAction =
-    card.backendSupported === false
-      ? "unavailable"
-      : card.statusLabel === "Connected"
-      ? "manage"
-      : ["Partial", "Token expired", "Error"].includes(card.statusLabel)
-        ? "reconnect"
-        : "connect";
 
-  return `
-    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
-      <div class="integration-simple-head">
-        <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
-        <div class="integration-simple-copy">
-          <strong>${escapeHtml(card.label)}</strong>
-          <span class="integration-card-meta">Health: ${escapeHtml(card.healthSummary)}</span>
-          <span class="integration-card-meta">Last sync: ${escapeHtml(formatDateTime(card.lastSync))}</span>
-        </div>
-        <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(
-          card.statusLabel === "Partial" || card.statusLabel === "Token expired" || card.statusLabel === "Error"
-            ? "Needs Attention"
-            : card.statusLabel
-        )}</span>
-      </div>
-      <div class="integration-simple-actions">
-        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}" ${card.backendSupported === false ? "disabled" : ""}>${escapeHtml(primaryActionLabel)}</button>
-        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">View Details</button>
-      </div>
-    </section>
-  `;
-}
 
 function renderDrawerProgress(card, escapeHtml) {
   const stepOneComplete = card.missingRequired.length === 0;
