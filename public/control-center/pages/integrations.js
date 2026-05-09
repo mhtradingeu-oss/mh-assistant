@@ -1,4 +1,8 @@
 import {
+  summarizeSectionCards
+} from "./integrations/builders.js";
+
+import {
   renderDomainSection,
   renderIntegrationSection
 } from "./integrations/layout.js";
@@ -1684,14 +1688,6 @@ function focusDrawerField(session, card) {
       }
     }
   });
-}
-
-function summarizeSectionCards(cards) {
-  return {
-    connected: cards.filter((card) => card.statusLabel === "Connected").length,
-    notConnected: cards.filter((card) => card.statusLabel === "Not Connected").length,
-    needsAttention: cards.filter((card) => ["Partial", "Token expired", "Error"].includes(card.statusLabel)).length
-  };
 }
 
 function buildSectionGroups(domainModels) {
