@@ -3,6 +3,7 @@ import {
   renderIntegrationActivityFeed,
   renderIntegrationCoverageMap,
   renderIntegrationCriticalMissing,
+  renderIntegrationDiagnosticsList,
   renderIntegrationRecommendationsList
 } from "./integrations/render.js";
 
@@ -1691,22 +1692,7 @@ function renderConnectorGroup(group, session, escapeHtml) {
   `;
 }
 
-function renderDiagnosticsList(items, emptyText, escapeHtml) {
-  if (!items.length) {
-    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
-  }
 
-  return `
-    <div class="integration-diagnostic-list">
-      ${items.map((item) => `
-        <div class="integration-diagnostic-item">
-          <strong>${escapeHtml(item.title)}</strong>
-          <span>${escapeHtml(item.detail)}</span>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
 
 
 
@@ -2614,15 +2600,15 @@ export const integrationsRoute = {
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Blockers</h4>
-                ${renderDiagnosticsList(diagnostics.blockers, "No launch blockers are currently flagged.", escapeHtml)}
+                ${renderIntegrationDiagnosticsList(diagnostics.blockers, "No launch blockers are currently flagged.")}
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Warnings</h4>
-                ${renderDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.", escapeHtml)}
+                ${renderIntegrationDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.")}
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Fix Before Launch</h4>
-                ${renderDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.", escapeHtml)}
+                ${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.")}
               </div>
               <div class="integration-system-prompt-row">
                 ${recommendations.prompts.slice(0, 2).map((item) => `

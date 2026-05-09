@@ -184,3 +184,22 @@ export function renderIntegrationActivityFeed(items = [], formatDateTime = (valu
     </div>
   `;
 }
+
+export function renderIntegrationDiagnosticsList(items = [], emptyText = "No diagnostics available.") {
+  const list = asArray(items);
+
+  if (!list.length) {
+    return `<div class="empty-box">${esc(emptyText)}</div>`;
+  }
+
+  return `
+    <div class="integration-diagnostic-list">
+      ${list.map((item) => `
+        <div class="integration-diagnostic-item">
+          <strong>${esc(item.title)}</strong>
+          <span>${esc(item.detail)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
