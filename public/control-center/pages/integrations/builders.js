@@ -17,3 +17,61 @@ export function summarizeSectionCards(cards = []) {
     ).length
   };
 }
+
+export function buildCoverageMap(domainModels = []) {
+  const mapConfig = [
+    {
+      label: "Social Insights",
+      ids: ["facebook", "instagram", "tiktok", "youtube", "linkedin"]
+    },
+    {
+      label: "Paid Ads",
+      ids: ["meta-ads", "google-ads", "tiktok-ads", "meta-pixel", "tiktok-pixel"]
+    },
+    {
+      label: "Website Analytics",
+      ids: ["website", "ga4", "gtm", "custom-analytics"]
+    },
+    {
+      label: "SEO / Search Console",
+      ids: ["search-console"]
+    },
+    {
+      label: "Commerce / Orders",
+      ids: ["woocommerce", "shopify", "amazon", "ebay"]
+    },
+    {
+      label: "Email / CRM",
+      ids: ["smtp", "mailer", "mailchimp", "crm"]
+    },
+    {
+      label: "Automation",
+      ids: ["google-drive", "slack", "telegram", "notion", "zapier-make", "webhook"]
+    }
+  ];
+
+  const allCards = domainModels.flatMap((domain) =>
+    Array.isArray(domain.cards) ? domain.cards : []
+  );
+
+  return mapConfig.map((item) => {
+    const cards = allCards.filter((card) => item.ids.includes(card.id));
+    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+    const partial = cards.filter((card) =>
+      ["Partial", "Token expired", "Error"].includes(card.statusLabel)
+    ).length;
+
+    const status =
+      connected === cards.length && cards.length
+        ? "Covered"
+        : connected || partial
+          ? "Partial"
+          : "Missing";
+
+    return {
+      label: item.label,
+      status,
+      meta: `${connected}/${cards.length} connected`
+    };
+  });
+}
