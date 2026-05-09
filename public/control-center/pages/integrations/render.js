@@ -157,3 +157,30 @@ export function renderIntegrationCriticalMissing(items = []) {
     </div>
   `;
 }
+
+export function renderIntegrationActivityFeed(items = [], formatDateTime = (value) => value) {
+  const list = asArray(items);
+
+  if (!list.length) {
+    return `
+      <div class="empty-box">
+        No integration events yet. Run a connection test or sync to populate recent activity.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="integration-activity-list">
+      ${list.map((item) => `
+        <div class="integration-activity-item">
+          <div class="integration-activity-topline">
+            <strong>${esc(item.title)}</strong>
+            <span class="card-badge ${esc(item.tone)}">${esc(item.source === "real" ? "Live" : "Derived")}</span>
+          </div>
+          <span>${esc(item.detail || "No additional detail available.")}</span>
+          <small>${esc(formatDateTime(item.timestamp))}</small>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}

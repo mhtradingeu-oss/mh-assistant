@@ -1,5 +1,6 @@
 import {
   renderAISmartRecommendation as renderAISmartRecommendationModule,
+  renderIntegrationActivityFeed,
   renderIntegrationCoverageMap,
   renderIntegrationCriticalMissing,
   renderIntegrationRecommendationsList
@@ -1707,26 +1708,7 @@ function renderDiagnosticsList(items, emptyText, escapeHtml) {
   `;
 }
 
-function renderActivityFeed(items, escapeHtml) {
-  if (!items.length) {
-    return `<div class="empty-box">No integration events yet. Run a connection test or sync to populate recent activity.</div>`;
-  }
 
-  return `
-    <div class="integration-activity-list">
-      ${items.map((item) => `
-        <div class="integration-activity-item">
-          <div class="integration-activity-topline">
-            <strong>${escapeHtml(item.title)}</strong>
-            <span class="card-badge ${escapeHtml(item.tone)}">${escapeHtml(item.source === "real" ? "Live" : "Derived")}</span>
-          </div>
-          <span>${escapeHtml(item.detail || "No additional detail available.")}</span>
-          <small>${escapeHtml(formatDateTime(item.timestamp))}</small>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
 
 
 
@@ -2657,7 +2639,7 @@ export const integrationsRoute = {
                 </div>
                 <span class="card-badge ${escapeHtml(activityFeed.some((item) => item.source === "real") ? "success" : "neutral")}">${escapeHtml(activityFeed.some((item) => item.source === "real") ? "Live feed" : "Derived feed")}</span>
               </div>
-              ${renderActivityFeed(activityFeed, escapeHtml)}
+              ${renderIntegrationActivityFeed(activityFeed, formatDateTime)}
             </section>
           </aside>
         </section>
