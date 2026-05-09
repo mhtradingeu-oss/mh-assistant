@@ -1,0 +1,51 @@
+  if (aOrder !== bOrder) return aOrder - bOrder;
+  return (Date.parse(b.updated_at || b.created_at) || 0) - (Date.parse(a.updated_at || a.created_at) || 0);
+}
+
+async function loadMediaWorkspace(projectName, backendProjectName, state, session, rerender) {
+  if (!backendProjectName || session.loading || session.loaded) return;
+
+  session.loading = true;
+  session.error = "";
+  rerender();
+
+  try {
+    const [mediaJobs, contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+      listProjectMediaJobs(backendProjectName, { limit: 120 }),
+      listProjectContentItems(backendProjectName, { limit: 120 }),
+      listProjectTasks(backendProjectName, 120),
+      listProjectApprovals(backendProjectName, 120),
+      listProjectHandoffs(backendProjectName, { limit: 120 }),
+      listProjectEvents(backendProjectName, 120),
+      fetchProjectOperations(backendProjectName)
+    ]);
+
+    const backendItems = asArray(mediaJobs.items).map((item) => normalizeMediaItem(item, state));
+    const localItems = loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft"));
+    session.items = mergeQueueItems(backendItems, localItems);
+    session.contentItems = asArray(contentItems.items);
+    session.tasks = asArray(tasks.items);
+    session.approvals = asArray(approvals.items);
+    session.handoffs = asArray(handoffs.items);
+    session.events = asArray(events.items);
+    session.operations = operations || null;
+    session.loaded = true;
+    applyInboundHandoff(projectName, session);
+    if (!session.selectedId) session.selectedId = session.items[0]?.id || "";
+  } catch (error) {
+    session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";
+    session.items = mergeQueueItems([], loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft")));
+    session.loaded = true;
+    applyInboundHandoff(projectName, session);
+  } finally {
+    session.loading = false;
+    rerender();
+  }
+}
+
+function getSelectedItem(session) {
+  return session.items.find((item) => asString(item.id) === asString(session.selectedId)) || null;
+}
+
+function getLinkedRecords(items, ids) {
+  const set = new Set(asArray(ids).map((value) => asString(value)).filter(Boolean));
