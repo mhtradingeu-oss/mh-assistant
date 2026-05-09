@@ -2,6 +2,7 @@ import {
   buildConnectorWorkspaceGroups,
   buildCoverageMap,
   buildCriticalMissing,
+  buildIntegrationActivityFeed,
   buildIntegrationOverviewSummary,
   buildLaunchDiagnostics,
   buildRecommendations,
@@ -1292,99 +1293,6 @@ function getConnectorWorkspaceAction(card) {
 
   return { label: getSmartConnectLabel(card), action: "connect" };
 }
-
-function mapActivityTone(value) {
-  const text = asString(value).toLowerCase();
-  if (/(failed|error|disconnect|blocked|expired)/.test(text)) return "danger";
-  if (/(pending|partial|warning|setup)/.test(text)) return "warning";
-  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
-  return "neutral";
-}
-
-function buildIntegrationActivityFeed(controlCenter, cards) {
-  const activity = asObject(controlCenter.activity);
-  const realEvents = [
-    ...asArray(activity.events),
-    ...asArray(activity.items),
-    ...asArray(controlCenter.recent_syncs),
-    ...asArray(controlCenter.recent_events),
-    ...asArray(controlCenter.history)
-  ]
-    .map((item, index) => ({
-      id: asString(item.id || item.event_id || item.sync_id || `real-${index}`),
-      title: asString(item.title || item.summary || item.message || item.event || item.type || "Integration event"),
-      detail: asString(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
-      timestamp: asString(item.timestamp || item.occurred_at || item.created_at || item.updated_at || item.completed_at || item.executed_at),
-      tone: mapActivityTone(item.status || item.level || item.type || item.result),
-      source: "real"
-    }))
-    .filter((item) => item.title);
-
-  if (realEvents.length) {
-    return realEvents
-      .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""))
-      .slice(0, 8);
-  }
-
-  return cards
-    .flatMap((card) => {
-      const events = [];
-      if (card.lastSync) {
-        events.push({
-          id: `${card.id}-sync`,
-          title: `${card.label} sync checkpoint`,
-          detail: "Derived from the latest connector sync timestamp.",
-          timestamp: card.lastSync,
-          tone: "success",
-          source: "derived"
-        });
-      }
-      if (card.lastTest) {
-        events.push({
-          id: `${card.id}-test`,
-          title: `${card.label} connection test`,
-          detail: "Derived from the latest connector test timestamp.",
-          timestamp: card.lastTest,
-          tone: "success",
-          source: "derived"
-        });
-      }
-      if (card.lastImport) {
-        events.push({
-          id: `${card.id}-import`,
-          title: `${card.label} history import`,
-          detail: "Derived from the latest connector import timestamp.",
-          timestamp: card.lastImport,
-          tone: "success",
-          source: "derived"
-        });
-      }
-      if (["Error", "Token expired"].includes(card.statusLabel)) {
-        events.push({
-          id: `${card.id}-repair`,
-          title: `${card.label} needs repair`,
-          detail: asString(card.record.last_error) || card.healthSummary,
-          timestamp: asString(card.record.updated_at || card.lastTest || card.lastSync || card.lastImport),
-          tone: "danger",
-          source: "derived"
-        });
-      }
-      return events;
-    })
-    .filter((item) => item.timestamp)
-    .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""))
-    .slice(0, 8);
-}
-
-
-
-
-
-
-
-
-
-
 
 function focusDrawerField(session, card) {
   if (!session.drawerOpen || !card || typeof window === "undefined") return;
