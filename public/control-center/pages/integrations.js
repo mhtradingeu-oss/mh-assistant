@@ -2,6 +2,7 @@ import {
   renderDrawerProgress,
   renderIntegrationActionButtons,
   renderIntegrationDetailsPanel,
+  renderIntegrationDrawer,
   renderIntegrationField
 } from "./integrations/drawer.js";
 
@@ -1683,21 +1684,6 @@ function renderSelectedConnectorSummary(card, escapeHtml) {
   `;
 }
 
-function renderIntegrationDrawer(card, session, escapeHtml) {
-  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
-    return "";
-  }
-
-  return `
-    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
-      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
-      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
-        ${renderIntegrationDetailsPanel(card, session, { mode: "drawer", getFieldValue })}
-      </aside>
-    </div>
-  `;
-}
-
 function focusDrawerField(session, card) {
   if (!session.drawerOpen || !card || typeof window === "undefined") return;
 
@@ -2390,7 +2376,7 @@ export const integrationsRoute = {
           </div>
         </section>
 
-        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, escapeHtml) : ""}
+        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, { getFieldValue }) : ""}
       </div>
     `;
 

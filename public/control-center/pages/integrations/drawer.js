@@ -336,3 +336,35 @@ export function renderIntegrationDetailsPanel(
     </section>
   `;
 }
+
+export function renderIntegrationDrawer(card = null, session = {}, options = {}) {
+  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+    return "";
+  }
+
+  const getFieldValue =
+    typeof options.getFieldValue === "function"
+      ? options.getFieldValue
+      : () => "";
+
+  return `
+    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+      <button
+        class="integration-drawer-backdrop"
+        type="button"
+        aria-label="Close connector setup"
+        data-integration-drawer-close="backdrop"
+      ></button>
+
+      <aside
+        class="integration-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="${esc(card.label)} setup"
+        data-integration-drawer
+      >
+        ${renderIntegrationDetailsPanel(card, session, { mode: "drawer", getFieldValue })}
+      </aside>
+    </div>
+  `;
+}
