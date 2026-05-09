@@ -1,4 +1,9 @@
 import {
+  renderConnectorGroup,
+  renderIntegrationCard
+} from "./integrations/cards.js";
+
+import {
   renderAISmartRecommendation as renderAISmartRecommendationModule,
   renderIntegrationActivityFeed,
   renderIntegrationCoverageMap,
@@ -1636,61 +1641,7 @@ function buildIntegrationActivityFeed(controlCenter, cards) {
     .slice(0, 8);
 }
 
-function renderConnectorRow(card, session, escapeHtml) {
-  const statusKey = getConnectorWorkspaceStatus(card);
-  const statusLabel = getConnectorWorkspaceStatusLabel(statusKey);
-  const recommendedAction = getConnectorWorkspaceAction(card);
-  const isSelected = asString(session.selectedIntegrationId) === card.id;
 
-  return `
-    <article class="integration-control-row${isSelected ? " is-selected" : ""}">
-      <div class="integration-control-row-main">
-        <button class="integration-control-row-trigger" type="button" data-integration-select="${escapeHtml(card.id)}">
-          <span class="integration-control-row-icon">${escapeHtml(card.icon)}</span>
-          <span class="integration-control-row-copy">
-            <span class="integration-control-row-topline">
-              <strong>${escapeHtml(card.label)}</strong>
-              <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(statusLabel)}</span>
-            </span>
-            <span class="integration-control-row-meta">Why it matters: ${escapeHtml(card.whyItMatters)}</span>
-            <span class="integration-control-row-meta">Recommended action: ${escapeHtml(recommendedAction.label)}</span>
-          </span>
-        </button>
-      </div>
-      <div class="integration-control-row-actions">
-        ${recommendedAction.action === "select"
-          ? `<button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Open setup</button>`
-          : `<button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(recommendedAction.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(recommendedAction.label)}</button>`}
-        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Workspace</button>
-        ${card.backendSupported === false
-          ? ""
-          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test</button>`}
-        ${card.backendSupported === false
-          ? ""
-          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync</button>`}
-      </div>
-    </article>
-  `;
-}
-
-function renderConnectorGroup(group, session, escapeHtml) {
-  const countLabel = `${group.connectedCount} connected • ${group.setupCount} needs setup • ${group.failedCount} failed • ${group.missingCount} missing`;
-
-  return `
-    <section class="card integration-control-group">
-      <div class="card-head integration-control-group-head">
-        <div>
-          <h3>${escapeHtml(group.label)}</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">${escapeHtml(group.description)}</p>
-        </div>
-        <span class="card-badge ${group.failedCount || group.missingCount ? "warning" : group.setupCount ? "warning" : "success"}">${escapeHtml(countLabel)}</span>
-      </div>
-      <div class="integration-control-group-list">
-        ${group.cards.map((card) => renderConnectorRow(card, session, escapeHtml)).join("")}
-      </div>
-    </section>
-  `;
-}
 
 
 
@@ -2582,7 +2533,7 @@ export const integrationsRoute = {
 
             <section class="integration-system-group-stack">
               ${connectorGroups.length
-                ? connectorGroups.map((group) => renderConnectorGroup(group, session, escapeHtml)).join("")
+                ? connectorGroups.map((group) => renderConnectorGroup(group, session)).join("")
                 : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
             </section>
           </div>
