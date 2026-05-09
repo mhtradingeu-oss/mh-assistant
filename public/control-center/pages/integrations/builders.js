@@ -171,3 +171,82 @@ export function buildRecommendations(domainModels = [], coverageMap = []) {
 
   return { recommendations, prompts };
 }
+
+export const CONNECTOR_WORKSPACE_CATEGORIES = {
+  sales: {
+    label: "Sales",
+    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+    connectorIds: ["website", "woocommerce", "shopify", "amazon", "ebay"]
+  },
+  social: {
+    label: "Social",
+    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+    connectorIds: ["instagram", "facebook", "tiktok", "youtube", "linkedin"]
+  },
+  tracking: {
+    label: "Tracking",
+    description: "Measurement and attribution infrastructure required for launch visibility and optimization.",
+    connectorIds: ["ga4", "search-console", "meta-pixel", "tiktok-pixel", "gtm", "custom-analytics"]
+  },
+  communication: {
+    label: "Communication / CRM",
+    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
+    connectorIds: ["smtp", "mailer", "mailchimp", "crm", "telegram", "slack", "notion", "zapier-make", "google-drive", "webhook"]
+  },
+  growth: {
+    label: "Additional Growth",
+    description: "Paid media connectors that extend optimization once the core launch stack is stable.",
+    connectorIds: ["meta-ads", "google-ads", "tiktok-ads"]
+  }
+};
+
+export const REQUIRED_LAUNCH_CATEGORY_IDS = [
+  "sales",
+  "social",
+  "tracking",
+  "communication"
+];
+
+export function getConnectorWorkspaceCategory(card = {}) {
+  const entry = Object.entries(CONNECTOR_WORKSPACE_CATEGORIES).find(([, meta]) =>
+    Array.isArray(meta.connectorIds) && meta.connectorIds.includes(card.id)
+  );
+
+  return entry?.[0] || "growth";
+}
+
+export function getConnectorWorkspaceStatus(card = {}) {
+  if (card.statusLabel === "Connected") return "connected";
+  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
+  if (card.statusLabel === "Partial") return "needs_setup";
+  return "missing";
+}
+
+export function getConnectorWorkspaceStatusLabel(statusKey = "") {
+  if (statusKey === "needs_setup") return "Needs setup";
+
+  return String(statusKey)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export function matchesConnectorSearch(card = {}, searchQuery = "") {
+  const query = String(searchQuery).trim().toLowerCase();
+
+  if (!query) return true;
+
+  const haystack = [
+    card.label,
+    card.id,
+    card.domainTitle,
+    card.sourceKey,
+    card.purpose,
+    card.whyItMatters,
+    card.enablesSummary,
+    card.permissionScopeSummary
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}

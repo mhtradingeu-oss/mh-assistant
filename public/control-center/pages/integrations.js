@@ -2,6 +2,12 @@ import {
   buildCoverageMap,
   buildCriticalMissing,
   buildRecommendations,
+  CONNECTOR_WORKSPACE_CATEGORIES,
+  getConnectorWorkspaceCategory,
+  getConnectorWorkspaceStatus,
+  getConnectorWorkspaceStatusLabel,
+  matchesConnectorSearch,
+  REQUIRED_LAUNCH_CATEGORY_IDS,
   summarizeSectionCards
 } from "./integrations/builders.js";
 
@@ -1259,55 +1265,6 @@ function buildAISmartRecommendation(domainModels) {
 
 
 
-const CONNECTOR_WORKSPACE_CATEGORIES = {
-  sales: {
-    label: "Sales",
-    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
-    connectorIds: ["website", "woocommerce", "shopify", "amazon", "ebay"]
-  },
-  social: {
-    label: "Social",
-    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
-    connectorIds: ["instagram", "facebook", "tiktok", "youtube", "linkedin"]
-  },
-  tracking: {
-    label: "Tracking",
-    description: "Measurement and attribution infrastructure required for launch visibility and optimization.",
-    connectorIds: ["ga4", "search-console", "meta-pixel", "tiktok-pixel", "gtm", "custom-analytics"]
-  },
-  communication: {
-    label: "Communication / CRM",
-    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
-    connectorIds: ["smtp", "mailer", "mailchimp", "crm", "telegram", "slack", "notion", "zapier-make", "google-drive", "webhook"]
-  },
-  growth: {
-    label: "Additional Growth",
-    description: "Paid media connectors that extend optimization once the core launch stack is stable.",
-    connectorIds: ["meta-ads", "google-ads", "tiktok-ads"]
-  }
-};
-
-const REQUIRED_LAUNCH_CATEGORY_IDS = ["sales", "social", "tracking", "communication"];
-
-function getConnectorWorkspaceCategory(card) {
-  const entry = Object.entries(CONNECTOR_WORKSPACE_CATEGORIES).find(([, meta]) =>
-    meta.connectorIds.includes(card.id)
-  );
-  return entry?.[0] || "growth";
-}
-
-function getConnectorWorkspaceStatus(card) {
-  if (card.statusLabel === "Connected") return "connected";
-  if (["Error", "Token expired"].includes(card.statusLabel)) return "failed";
-  if (card.statusLabel === "Partial") return "needs_setup";
-  return "missing";
-}
-
-function getConnectorWorkspaceStatusLabel(statusKey) {
-  if (statusKey === "needs_setup") return "Needs setup";
-  return titleCase(statusKey);
-}
-
 function getConnectorWorkspaceAction(card) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
@@ -1331,26 +1288,6 @@ function getConnectorWorkspaceAction(card) {
   }
 
   return { label: getSmartConnectLabel(card), action: "connect" };
-}
-
-function matchesConnectorSearch(card, searchQuery) {
-  const query = asString(searchQuery).trim().toLowerCase();
-  if (!query) return true;
-
-  const haystack = [
-    card.label,
-    card.id,
-    card.domainTitle,
-    card.sourceKey,
-    card.purpose,
-    card.whyItMatters,
-    card.enablesSummary,
-    card.permissionScopeSummary
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  return haystack.includes(query);
 }
 
 function buildConnectorWorkspaceGroups(cards, session) {
