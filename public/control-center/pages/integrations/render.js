@@ -134,3 +134,26 @@ export function renderIntegrationRecommendationsList(items = []) {
     </div>
   `;
 }
+
+export function renderIntegrationCriticalMissing(items = []) {
+  const list = asArray(items);
+
+  if (!list.length) {
+    return `
+      <div class="empty-box">
+        No critical missing integrations are currently flagged.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="integration-critical-list">
+      ${list.map((item) => `
+        <div class="integration-critical-item">
+          <strong>${esc(item.title)}</strong>
+          <span>${esc(item.meta)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}

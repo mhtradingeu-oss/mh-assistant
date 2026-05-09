@@ -1,6 +1,7 @@
 import {
   renderAISmartRecommendation as renderAISmartRecommendationModule,
   renderIntegrationCoverageMap,
+  renderIntegrationCriticalMissing,
   renderIntegrationRecommendationsList
 } from "./integrations/render.js";
 
@@ -1729,22 +1730,7 @@ function renderActivityFeed(items, escapeHtml) {
 
 
 
-function renderCriticalMissing(items, escapeHtml) {
-  if (!items.length) {
-    return `<div class="empty-box">No critical missing integrations are currently flagged.</div>`;
-  }
 
-  return `
-    <div class="integration-critical-list">
-      ${items.map((item) => `
-        <div class="integration-critical-item">
-          <strong>${escapeHtml(item.title)}</strong>
-          <span>${escapeHtml(item.meta)}</span>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
 
 function renderField(integrationId, field, value, escapeHtml, options = {}) {
   const type = field.type || "text";
@@ -2687,7 +2673,7 @@ export const integrationsRoute = {
           <div class="integration-ai-grid">
             <div>
               <h4 class="integration-mini-heading">Critical missing integrations</h4>
-              ${renderCriticalMissing(criticalMissing, escapeHtml)}
+              ${renderIntegrationCriticalMissing(criticalMissing)}
             </div>
             <div>
               <h4 class="integration-mini-heading">Recommended next actions</h4>
