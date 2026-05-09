@@ -6,6 +6,7 @@ import {
   buildIntegrationActivityFeed,
   buildIntegrationOverviewSummary,
   buildLaunchDiagnostics,
+  buildLegacyFallbackRecord,
   buildRecommendations,
   buildSectionGroups,
   buildSuggestedValues,
@@ -945,49 +946,21 @@ function getIntegrationAccessModel(integration) {
   };
 }
 
-function buildLegacyFallbackRecord(integration, state) {
-  if (!shouldSyncLegacySource(integration)) {
-    return {};
-  }
-
-  const sources = getLegacySources(state);
-  const value = getLegacySourceValue(integration, sources);
-
-  if (!value) {
-    return {};
-  }
-
-  const accessModel = getIntegrationAccessModel(integration);
-
-  return {
-    integration_id: integration.id,
-    source_key: integration.sourceKey,
-    status: "connected",
-    status_label: "Connected",
-    primary_field: integration.primaryField,
-    primary_value: value,
-    config: {},
-    credential_state: {},
-    data_scopes: inferScopeKeys(integration),
-    read_scopes: accessModel.read,
-    write_scopes: accessModel.write,
-    permission_scope: integration.permissionScope,
-    enables: integration.enables,
-    health_summary: "Connected through the legacy source registry.",
-    notes: "This integration is currently inferred from the legacy project source mapping.",
-    last_sync_at: asString(asObject(sources[integration.sourceKey]).updated_at),
-    updated_at: asString(asObject(sources[integration.sourceKey]).updated_at),
-    legacy_source: true
-  };
-}
-
 function getServerRecord(state, integration) {
   const record = asObject(getControlCenterRecords(state)[integration.id]);
   if (record.integration_id) {
     return record;
   }
 
-  return buildLegacyFallbackRecord(integration, state);
+  return buildLegacyFallbackRecord(integration, state, {
+    shouldSyncLegacySource,
+    getLegacySources,
+    getLegacySourceValue,
+    getIntegrationAccessModel,
+    inferScopeKeys,
+    asString,
+    asObject
+  });
 }
 
 function getFieldValue(session, integration, field, record, sourceValue, suggestedValue = "") {

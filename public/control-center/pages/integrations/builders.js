@@ -634,3 +634,75 @@ export function buildSuggestedValues(state = {}, integration = {}, options = {})
     return accumulator;
   }, {});
 }
+
+export function buildLegacyFallbackRecord(integration = {}, state = {}, options = {}) {
+  const shouldSyncLegacySource =
+    typeof options.shouldSyncLegacySource === "function"
+      ? options.shouldSyncLegacySource
+      : () => false;
+
+  const getLegacySources =
+    typeof options.getLegacySources === "function"
+      ? options.getLegacySources
+      : () => ({});
+
+  const getLegacySourceValue =
+    typeof options.getLegacySourceValue === "function"
+      ? options.getLegacySourceValue
+      : () => "";
+
+  const getIntegrationAccessModel =
+    typeof options.getIntegrationAccessModel === "function"
+      ? options.getIntegrationAccessModel
+      : () => ({ read: [], write: [] });
+
+  const inferScopeKeys =
+    typeof options.inferScopeKeys === "function"
+      ? options.inferScopeKeys
+      : () => [];
+
+  const asString =
+    typeof options.asString === "function"
+      ? options.asString
+      : (value) => value == null ? "" : String(value);
+
+  const asObject =
+    typeof options.asObject === "function"
+      ? options.asObject
+      : (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+
+  if (!shouldSyncLegacySource(integration)) {
+    return {};
+  }
+
+  const sources = getLegacySources(state);
+  const value = getLegacySourceValue(integration, sources);
+
+  if (!value) {
+    return {};
+  }
+
+  const accessModel = getIntegrationAccessModel(integration);
+  const sourceRecord = asObject(sources[integration.sourceKey]);
+
+  return {
+    integration_id: integration.id,
+    source_key: integration.sourceKey,
+    status: "connected",
+    status_label: "Connected",
+    primary_field: integration.primaryField,
+    primary_value: value,
+    config: {},
+    credential_state: {},
+    data_scopes: inferScopeKeys(integration),
+    read_scopes: accessModel.read,
+    write_scopes: accessModel.write,
+    permission_scope: integration.permissionScope,
+    enables: integration.enables,
+    health_summary: "Connected through the legacy source registry.",
+    notes: "This integration is currently inferred from the legacy project source mapping.",
+    last_sync_at: asString(sourceRecord.updated_at),
+    updated_at: asString(sourceRecord.updated_at),
+    legacy_source: true
+  };
+}
