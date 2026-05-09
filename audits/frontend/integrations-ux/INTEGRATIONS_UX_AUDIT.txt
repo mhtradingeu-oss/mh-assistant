@@ -1,0 +1,474 @@
+===== INTEGRATIONS AUDIT =====
+
+## Status
+?? audits/frontend/integrations-ux/
+
+## Syntax
+
+## File size
+2824 public/control-center/pages/integrations.js
+
+## Render / bind / actions
+16:        purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",
+17:        whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",
+34:        purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",
+36:        enables: "Product sync, order sync, sales signals, and commerce intelligence.",
+54:        enables: "Product sync, order sync, customer sync, and sales reporting.",
+73:        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+88:        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+90:        enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",
+130:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+148:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+166:        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+184:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+312:    description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",
+343:        enables: "Campaign sends, audience sync, templates, and performance reporting.",
+358:        purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",
+360:        enables: "Audience sync, campaigns, lists, and newsletter reporting.",
+377:        purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
+378:        whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",
+379:        enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",
+403:        enables: "Spend sync, campaign import, creative performance, and paid optimization.",
+421:        enables: "Spend sync, campaign import, keyword performance, and paid optimization.",
+438:        whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",
+439:        enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",
+461:        purpose: "File sync and shared asset operations through Google Drive.",
+463:        enables: "Asset sync, doc sync, shared files, and automation inputs.",
+479:        whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",
+480:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+514:        enables: "Docs sync, planning sync, task context, and knowledge reuse.",
+529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+554:          { key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },
+664:  if (/^https?:\/\//i.test(text)) return text;
+743:  if (card.statusLabel === "Token expired") return "Reconnect Now";
+753:    return { action: "sync", label: "Sync Now" };
+756:    return { action: "reconnect", label: getSmartConnectLabel(card) };
+758:  return { action: "connect", label: getSmartConnectLabel(card) };
+855:    .filter((rule) => rule.pattern.test(sourceText))
+879:      write: ["catalog sync", "commerce updates"]
+893:      write: ["campaign sends", "audience sync"]
+927:    status: "connected",
+940:    last_sync_at: asString(asObject(sources[integration.sourceKey]).updated_at),
+990:  if (normalized === "connected") return "Connected";
+994:  if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";
+1009:    return `${integration.label} is connected and ready for provider-level sync actions.`;
+1012:    return "Some required connection details are still missing.";
+1015:    return "Reconnect the saved token before importing or syncing new data.";
+1018:    return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";
+1060:    lastSync: asString(record.last_sync_at),
+1062:    lastTest: asString(record.last_test_at),
+1089:    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+1096:      connectedCount,
+1139:    const connected = cards.filter((card) => card.statusLabel === "Connected").length;
+1141:    const status = connected === cards.length && cards.length
+1143:      : connected || partial
+1150:      meta: `${connected}/${cards.length} connected`
+1174:  // 1. Failed or expired critical connector
+1219:  // Healthy fallback — suggest next optional connector
+1288:function renderAISmartRecommendation(rec, escapeHtml) {
+1294:          <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(rec.nextOptional.id)}">
+1299:      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+1308:          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
+1332:        <div class="ai-smart-rec-connector">
+1333:          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
+1334:          <div class="ai-smart-rec-connector-info">
+1349:          <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">
+1363:  const reconnectNeeded = actionableCards.filter((card) => ["Token expired", "Error"].includes(card.statusLabel));
+1376:  if (reconnectNeeded.length) {
+1378:      title: `Repair ${reconnectNeeded[0].label}`,
+1379:      meta: `${reconnectNeeded[0].label} needs attention before sync and intelligence coverage can be trusted.`
+1386:      meta: `${partial.length} integration${partial.length === 1 ? "" : "s"} have staged values but are not fully connected yet.`
+1400:      meta: "Best next step: attach provider-specific OAuth validation and background sync jobs to the existing integration routes."
+1406:      label: "What should I connect next?",
+1407:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+1415:      prompt: "Explain what is missing from the current SEO and Search Console integration coverage and what should be connected or configured next."
+1433:    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+1434:    connectorIds: ["website", "woocommerce", "shopify", "amazon", "ebay"]
+1439:    connectorIds: ["instagram", "facebook", "tiktok", "youtube", "linkedin"]
+1444:    connectorIds: ["ga4", "search-console", "meta-pixel", "tiktok-pixel", "gtm", "custom-analytics"]
+1448:    description: "Email, CRM, and operational messaging connectors that keep lifecycle and team coordination intact.",
+1449:    connectorIds: ["smtp", "mailer", "mailchimp", "crm", "telegram", "slack", "notion", "zapier-make", "google-drive", "webhook"]
+1453:    description: "Paid media connectors that extend optimization once the core launch stack is stable.",
+1454:    connectorIds: ["meta-ads", "google-ads", "tiktok-ads"]
+1462:    meta.connectorIds.includes(card.id)
+1468:  if (card.statusLabel === "Connected") return "connected";
+1486:  if (statusKey === "connected") {
+1489:      action: card.lastSync ? "test" : "sync"
+1494:    return { label: getSmartConnectLabel(card), action: "reconnect" };
+1501:  return { label: getSmartConnectLabel(card), action: "connect" };
+1546:        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+1558:  const connectedIntegrations = cards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+1559:  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+1560:  const failedOrDisconnected = cards.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+1561:  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+1566:    launchReadinessImpact = `${blockerCount} critical connector${blockerCount === 1 ? "" : "s"} still block reliable launch execution.`;
+1568:    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+1569:  } else if (failedOrDisconnected) {
+1570:    launchReadinessImpact = `${failedOrDisconnected} non-critical connector${failedOrDisconnected === 1 ? " is" : "s are"} disconnected or failed and should be repaired after launch blockers.`;
+1575:    connectedIntegrations,
+1577:    failedOrDisconnected,
+1579:    nextRecommendedAction: recommendations.recommendations[0]?.title || "Review connector coverage"
+1606:          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+1618:  if (/(failed|error|disconnect|blocked|expired)/.test(text)) return "danger";
+1619:  if (/(pending|partial|warning|setup)/.test(text)) return "warning";
+1620:  if (/(connected|sync|tested|passed|healthy|ready|imported)/.test(text)) return "success";
+1629:    ...asArray(controlCenter.recent_syncs),
+1634:      id: asString(item.id || item.event_id || item.sync_id || `real-${index}`),
+1636:      detail: asString(item.detail || item.notes || item.status || item.result || item.connector || item.integration_id || ""),
+1654:          id: `${card.id}-sync`,
+1655:          title: `${card.label} sync checkpoint`,
+1656:          detail: "Derived from the latest connector sync timestamp.",
+1664:          id: `${card.id}-test`,
+1665:          title: `${card.label} connection test`,
+1666:          detail: "Derived from the latest connector test timestamp.",
+1676:          detail: "Derived from the latest connector import timestamp.",
+1699:function renderConnectorRow(card, session, escapeHtml) {
+1708:        <button class="integration-control-row-trigger" type="button" data-integration-select="${escapeHtml(card.id)}">
+1722:          ? `<button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Open setup</button>`
+1723:          : `<button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(recommendedAction.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(recommendedAction.label)}</button>`}
+1724:        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Workspace</button>
+1727:          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test</button>`}
+1730:          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync</button>`}
+1736:function renderConnectorGroup(group, session, escapeHtml) {
+1737:  const countLabel = `${group.connectedCount} connected • ${group.setupCount} needs setup • ${group.failedCount} failed • ${group.missingCount} missing`;
+1755:function renderDiagnosticsList(items, emptyText, escapeHtml) {
+1772:function renderActivityFeed(items, escapeHtml) {
+1774:    return `<div class="empty-box">No integration events yet. Run a connection test or sync to populate recent activity.</div>`;
+1793:function renderCoverageMap(items, escapeHtml) {
+1807:function renderCriticalMissing(items, escapeHtml) {
+1824:function renderField(integrationId, field, value, escapeHtml, options = {}) {
+1828:    <div class="integration-field-group${invalidClass}" data-integration-field-group="${escapeHtml(integrationId)}:${escapeHtml(field.key)}">
+1841:        data-integration-field="${escapeHtml(integrationId)}"
+1845:      <div class="setup-helper" data-integration-field-helper="${escapeHtml(integrationId)}:${escapeHtml(field.key)}"></div>
+1850:function renderIntegrationActionButtons(card, escapeHtml) {
+1859:    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${escapeHtml(primary.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primary.label)}</button>
+1860:    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
+1861:    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>` : ""}
+1862:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+1866:function renderIntegrationCard(card, session, escapeHtml) {
+1875:        ? "reconnect"
+1876:        : "connect";
+1885:          <span class="integration-card-meta">Last sync: ${escapeHtml(formatDateTime(card.lastSync))}</span>
+1894:        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}" ${card.backendSupported === false ? "disabled" : ""}>${escapeHtml(primaryActionLabel)}</button>
+1895:        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">View Details</button>
+1901:function renderDrawerProgress(card, escapeHtml) {
+1912:      label: "Step 2: Test connection",
+1914:      meta: stepTwoComplete ? "Connection test checkpoint recorded." : "Run a connection test before activation."
+1919:      meta: stepThreeComplete ? "Provider is active in the Control Center." : "Activate once fields and test are complete."
+1935:function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) {
+1980:          ${isDrawer ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>` : ""}
+2025:            <div class="data-row"><span>Last test</span><strong>${escapeHtml(formatDateTime(card.lastTest))}</strong></div>
+2026:            <div class="data-row"><span>Last sync</span><strong>${escapeHtml(formatDateTime(card.lastSync))}</strong></div>
+2046:function renderSelectedConnectorSummary(card, escapeHtml) {
+2052:          <h3>Selected connector</h3>
+2053:          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
+2065:        <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">${escapeHtml(smartLabel)}</button>
+2071:function renderIntegrationDrawer(card, session, escapeHtml) {
+2077:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+2078:      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
+2079:      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
+2096:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+2107:function renderDomainSection(domain, session, escapeHtml) {
+2118:        <span class="card-badge ${domain.connectedCount === domain.cards.length ? "success" : domain.connectedCount || domain.partialCount ? "warning" : "danger"}">${escapeHtml(`${domain.connectedCount} connected • ${domain.partialCount} partial • ${attentionCount} attention • ${blockedCount} missing`)}</span>
+2129:    connected: cards.filter((card) => card.statusLabel === "Connected").length,
+2142:      description: "Commerce and marketplace connections that support products, orders, revenue signals, and conversion-aware sales intelligence.",
+2179:function renderIntegrationSection(section, session, escapeHtml) {
+2180:  const { connected, notConnected, needsAttention } = section.summary;
+2181:  const tone = notConnected || needsAttention ? (connected ? "warning" : "danger") : "success";
+2183:  const connectedCards = section.cards.filter((card) => card.statusLabel === "Connected");
+2194:        <span class="card-badge ${tone}">${escapeHtml(`${connected} connected • ${notConnected} not connected • ${needsAttention} needs attention`)}</span>
+2199:          <span class="card-badge success">${escapeHtml(String(connected))}</span>
+2200:          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
+2203:          <strong>Not connected</strong>
+2205:          <div class="integration-coverage-meta">No complete connection record is available yet.</div>
+2216:          ${connectedCards.length ? connectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No connected integrations in this group yet.</div>`}
+2228:          ${notConnectedCards.length ? notConnectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">All integrations in this group already have a connection state.</div>`}
+2236:function bindIntegrationActions({
+2243:  connectProjectIntegration,
+2244:  reconnectProjectIntegration,
+2245:  testProjectIntegration,
+2246:  syncProjectIntegration,
+2248:  disconnectProjectIntegration,
+2253:  Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
+2254:    button.onclick = () => {
+2255:      const integrationId = button.getAttribute("data-integration-select") || "";
+2261:  Array.from(document.querySelectorAll("[data-integration-primary]")).forEach((button) => {
+2262:    button.onclick = async () => {
+2263:      const action = button.getAttribute("data-integration-primary") || "";
+2264:      const integrationId = button.getAttribute("data-integration-id") || "";
+2281:  Array.from(document.querySelectorAll("[data-integration-field]")).forEach((input) => {
+2283:      const integrationId = input.getAttribute("data-integration-field") || "";
+2293:  Array.from(document.querySelectorAll("[data-integration-field-helper]")).forEach((helper) => {
+2294:    const [integrationId, fieldKey] = asString(helper.getAttribute("data-integration-field-helper")).split(":");
+2316:      ? "Required for a complete connection."
+2320:  Array.from(document.querySelectorAll("[data-integration-category-filter]")).forEach((select) => {
+2327:  Array.from(document.querySelectorAll("[data-integration-status-filter]")).forEach((select) => {
+2334:  Array.from(document.querySelectorAll("[data-integration-search]")).forEach((input) => {
+2341:  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+2342:    button.onclick = () => {
+2401:      connection_method: integration.fields.some(isSecretField) ? "oauth_or_key" : "direct_config",
+2404:      sync_source_registry: shouldSyncLegacySource(integration)
+2408:  async function persistPrimary(integrationId, reconnect = false) {
+2428:      showError?.(`Enter ${primaryField.label.toLowerCase()} before connecting ${integration.label}.`);
+2433:      if (reconnect) {
+2434:        await reconnectProjectIntegration(projectName, integrationId, payload);
+2436:        await connectProjectIntegration(projectName, integrationId, payload);
+2440:      showMessage?.(reconnect ? `${integration.label} reconnected.` : `${integration.label} connected.`);
+2444:      showError?.(error.message || `Failed to connect ${integration.label}.`);
+2448:  async function disconnect(integrationId) {
+2457:      await disconnectProjectIntegration(projectName, integrationId, {
+2458:        notes: `${integration.label} disconnected from the Control Center.`
+2461:      showMessage?.(`${integration.label} disconnected.`);
+2465:      showError?.(error.message || `Failed to disconnect ${integration.label}.`);
+2469:  async function runServerAction(integrationId, type) {
+2478:      if (type === "test") {
+2479:        await testProjectIntegration(projectName, integrationId, {
+2480:          notes: `${integration.label} connection test passed from the Control Center.`
+2482:        showMessage?.(`${integration.label} test completed.`);
+2483:      } else if (type === "sync") {
+2484:        await syncProjectIntegration(projectName, integrationId, {
+2485:          notes: `${integration.label} sync triggered from the Control Center.`
+2487:        showMessage?.(`${integration.label} sync started.`);
+2502:  Array.from(document.querySelectorAll("[data-integration-action]")).forEach((button) => {
+2503:    button.onclick = async () => {
+2504:      const action = button.getAttribute("data-integration-action") || "";
+2505:      const integrationId = button.getAttribute("data-integration-id") || "";
+2507:      if (action === "connect") {
+2511:      if (action === "reconnect") {
+2515:      if (action === "disconnect") {
+2516:        await disconnect(integrationId);
+2524:  Array.from(document.querySelectorAll("[data-integration-prompt]")).forEach((button) => {
+2525:    button.onclick = () => {
+2526:      const prompt = button.getAttribute("data-integration-prompt-text") || "";
+2545:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+2554:    description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."
+2570:    connectProjectIntegration,
+2571:    reconnectProjectIntegration,
+2572:    testProjectIntegration,
+2573:    syncProjectIntegration,
+2575:    disconnectProjectIntegration
+2593:    const connectorGroups = buildConnectorWorkspaceGroups(allCards, session);
+2594:    const filteredCards = connectorGroups.flatMap((group) => group.cards);
+2600:    const connectedTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+2602:    const systemScore = Math.round(((connectedTotal + partialTotal * 0.5) / readinessBase) * 100);
+2605:      asString(controlCenter.summary?.last_global_sync) ||
+2614:    root.innerHTML = `
+2621:              <p class="home-section-copy" style="margin:6px 0 0;">Track launch-critical connectors, diagnose readiness impact, and operate integrations without leaving the standard page shell.</p>
+2633:              <strong>${escapeHtml(String(overview.connectedIntegrations))}</strong>
+2634:              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
+2639:              <span class="integration-system-metric-copy">Required launch connectors not yet fully connected.</span>
+2642:              <span class="data-label">Failed / Disconnected</span>
+2643:              <strong>${escapeHtml(String(overview.failedOrDisconnected))}</strong>
+2651:              <span>System score: ${escapeHtml(String(systemScore))}% • Last global sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</span>
+2656:              <span>${escapeHtml(recommendations.recommendations[0]?.meta || "Review the highest-impact connector gap before the next campaign launch.")}</span>
+2670:                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the connector setup workspace.</p>
+2677:                  <select data-integration-category-filter>
+2684:                  <select data-integration-status-filter>
+2686:                    <option value="connected" ${session.statusFilter === "connected" ? "selected" : ""}>Connected</option>
+2697:                    placeholder="Search connector, provider, or source"
+2698:                    data-integration-search
+2705:              ${connectorGroups.length
+2706:                ? connectorGroups.map((group) => renderConnectorGroup(group, session, escapeHtml)).join("")
+2707:                : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
+2712:            ${selectedCard ? renderSelectedConnectorSummary(selectedCard, escapeHtml) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
+2728:                ${renderDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.", escapeHtml)}
+2736:                  <button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>
+2745:                  <p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>
+2758:              <p class="home-section-copy" style="margin:6px 0 0;">Use category coverage, missing critical connectors, and next actions to close the remaining launch gaps.</p>
+2796:      connectProjectIntegration,
+2797:      reconnectProjectIntegration,
+2798:      testProjectIntegration,
+2799:      syncProjectIntegration,
+2801:      disconnectProjectIntegration,
+2813:        connectProjectIntegration,
+2814:        reconnectProjectIntegration,
+2815:        testProjectIntegration,
+2816:        syncProjectIntegration,
+2818:        disconnectProjectIntegration
+
+## CSS owners
+public/control-center/styles/08-components-foundation.css:350:.integration-list,
+public/control-center/styles/08-components-foundation.css:364:.integration-item,
+public/control-center/styles/14-page-standard.css:386:.integration-card,
+public/control-center/styles/14-page-standard.css:387:.integration-row,
+public/control-center/styles/14-page-standard.css:388:.integration-source-card,
+public/control-center/styles/14-page-standard.css:389:.integration-platform-card,
+public/control-center/styles/14-page-standard.css:390:[data-integration-id],
+public/control-center/styles/14-page-standard.css:391:[data-integration-source],
+public/control-center/styles/14-page-standard.css:392:[data-integration-platform] {
+public/control-center/styles/14-page-standard.css:410:.integration-card *,
+public/control-center/styles/14-page-standard.css:411:.integration-row *,
+public/control-center/styles/14-page-standard.css:412:.integration-source-card *,
+public/control-center/styles/14-page-standard.css:413:.integration-platform-card *,
+public/control-center/styles/14-page-standard.css:414:[data-integration-id] *,
+public/control-center/styles/14-page-standard.css:415:[data-integration-source] *,
+public/control-center/styles/14-page-standard.css:416:[data-integration-platform] * {
+public/control-center/pages/integrations.js:1294:          <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(rec.nextOptional.id)}">
+public/control-center/pages/integrations.js:1349:          <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">
+public/control-center/pages/integrations.js:1706:    <article class="integration-control-row${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations.js:1707:      <div class="integration-control-row-main">
+public/control-center/pages/integrations.js:1708:        <button class="integration-control-row-trigger" type="button" data-integration-select="${escapeHtml(card.id)}">
+public/control-center/pages/integrations.js:1709:          <span class="integration-control-row-icon">${escapeHtml(card.icon)}</span>
+public/control-center/pages/integrations.js:1710:          <span class="integration-control-row-copy">
+public/control-center/pages/integrations.js:1711:            <span class="integration-control-row-topline">
+public/control-center/pages/integrations.js:1715:            <span class="integration-control-row-meta">Why it matters: ${escapeHtml(card.whyItMatters)}</span>
+public/control-center/pages/integrations.js:1716:            <span class="integration-control-row-meta">Recommended action: ${escapeHtml(recommendedAction.label)}</span>
+public/control-center/pages/integrations.js:1720:      <div class="integration-control-row-actions">
+public/control-center/pages/integrations.js:1722:          ? `<button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Open setup</button>`
+public/control-center/pages/integrations.js:1723:          : `<button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(recommendedAction.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(recommendedAction.label)}</button>`}
+public/control-center/pages/integrations.js:1724:        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">Workspace</button>
+public/control-center/pages/integrations.js:1727:          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test</button>`}
+public/control-center/pages/integrations.js:1730:          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync</button>`}
+public/control-center/pages/integrations.js:1740:    <section class="card integration-control-group">
+public/control-center/pages/integrations.js:1741:      <div class="card-head integration-control-group-head">
+public/control-center/pages/integrations.js:1748:      <div class="integration-control-group-list">
+public/control-center/pages/integrations.js:1761:    <div class="integration-diagnostic-list">
+public/control-center/pages/integrations.js:1763:        <div class="integration-diagnostic-item">
+public/control-center/pages/integrations.js:1778:    <div class="integration-activity-list">
+public/control-center/pages/integrations.js:1780:        <div class="integration-activity-item">
+public/control-center/pages/integrations.js:1781:          <div class="integration-activity-topline">
+public/control-center/pages/integrations.js:1795:    <div class="integration-coverage-grid">
+public/control-center/pages/integrations.js:1797:        <div class="integration-coverage-item">
+public/control-center/pages/integrations.js:1800:          <div class="integration-coverage-meta">${escapeHtml(item.meta)}</div>
+public/control-center/pages/integrations.js:1813:    <div class="integration-critical-list">
+public/control-center/pages/integrations.js:1815:        <div class="integration-critical-item">
+public/control-center/pages/integrations.js:1828:    <div class="integration-field-group${invalidClass}" data-integration-field-group="${escapeHtml(integrationId)}:${escapeHtml(field.key)}">
+public/control-center/pages/integrations.js:1829:      <div class="integration-field-head">
+public/control-center/pages/integrations.js:1830:        <label class="setup-label" for="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
+public/control-center/pages/integrations.js:1831:        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
+public/control-center/pages/integrations.js:1834:        id="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}"
+public/control-center/pages/integrations.js:1841:        data-integration-field="${escapeHtml(integrationId)}"
+public/control-center/pages/integrations.js:1844:      ${options.invalid ? `<div class="integration-field-error">${escapeHtml(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
+public/control-center/pages/integrations.js:1845:      <div class="setup-helper" data-integration-field-helper="${escapeHtml(integrationId)}:${escapeHtml(field.key)}"></div>
+public/control-center/pages/integrations.js:1852:    return `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+public/control-center/pages/integrations.js:1859:    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${escapeHtml(primary.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primary.label)}</button>
+public/control-center/pages/integrations.js:1860:    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
+public/control-center/pages/integrations.js:1861:    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>` : ""}
+public/control-center/pages/integrations.js:1862:    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+public/control-center/pages/integrations.js:1879:    <section class="integration-simple-card${isSelected ? " is-selected" : ""}">
+public/control-center/pages/integrations.js:1880:      <div class="integration-simple-head">
+public/control-center/pages/integrations.js:1881:        <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
+public/control-center/pages/integrations.js:1882:        <div class="integration-simple-copy">
+public/control-center/pages/integrations.js:1884:          <span class="integration-card-meta">Health: ${escapeHtml(card.healthSummary)}</span>
+public/control-center/pages/integrations.js:1885:          <span class="integration-card-meta">Last sync: ${escapeHtml(formatDateTime(card.lastSync))}</span>
+public/control-center/pages/integrations.js:1893:      <div class="integration-simple-actions">
+public/control-center/pages/integrations.js:1894:        <button class="btn btn-primary" type="button" data-integration-primary="${escapeHtml(primaryAction)}" data-integration-id="${escapeHtml(card.id)}" ${card.backendSupported === false ? "disabled" : ""}>${escapeHtml(primaryActionLabel)}</button>
+public/control-center/pages/integrations.js:1895:        <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(card.id)}">View Details</button>
+public/control-center/pages/integrations.js:1924:    <div class="integration-drawer-progress">
+public/control-center/pages/integrations.js:1926:        <div class="integration-progress-step is-${escapeHtml(step.state)}">
+public/control-center/pages/integrations.js:1965:    .map(([key, value]) => `<span class="integration-scope-pill">${escapeHtml(`${titleCase(key)}: ${value.masked}`)}</span>`)
+public/control-center/pages/integrations.js:1969:    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+public/control-center/pages/integrations.js:1970:      <div class="integration-hub-head">
+public/control-center/pages/integrations.js:1971:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations.js:1972:          <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
+public/control-center/pages/integrations.js:1978:        <div class="integration-hub-head-actions">
+public/control-center/pages/integrations.js:1980:          ${isDrawer ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>` : ""}
+public/control-center/pages/integrations.js:1984:      <div class="integration-hub-intro">
+public/control-center/pages/integrations.js:1985:        <div class="integration-hub-why">
+public/control-center/pages/integrations.js:1989:        <div class="integration-hub-why">
+public/control-center/pages/integrations.js:1997:      <div class="integration-hub-grid">
+public/control-center/pages/integrations.js:1999:          <div class="integration-mini-heading">Required fields</div>
+public/control-center/pages/integrations.js:2000:          <div class="integration-field-grid">
+public/control-center/pages/integrations.js:2004:            ? `<div class="integration-drawer-validation">${escapeHtml(`Missing required fields: ${card.missingRequired.join(", ")}`)}</div>`
+public/control-center/pages/integrations.js:2008:              <details class="integration-optional-fields">
+public/control-center/pages/integrations.js:2010:                <div class="integration-field-grid integration-field-grid--optional">
+public/control-center/pages/integrations.js:2016:          ${credentialItems ? `<div class="integration-scope-row">${credentialItems}</div>` : ""}
+public/control-center/pages/integrations.js:2017:          <div class="integration-side-note">
+public/control-center/pages/integrations.js:2022:        <div class="integration-side-panel">
+public/control-center/pages/integrations.js:2030:          <div class="integration-side-note">${escapeHtml(card.notes)}</div>
+public/control-center/pages/integrations.js:2033:              ? `<div class="integration-side-note">${escapeHtml(`Missing required fields: ${card.missingRequired.join(", ")}`)}</div>`
+public/control-center/pages/integrations.js:2039:      <div class="integration-action-row">
+public/control-center/pages/integrations.js:2049:    <section class="card integration-selected-summary">
+public/control-center/pages/integrations.js:2057:      <div class="integration-selected-summary-body">
+public/control-center/pages/integrations.js:2058:        <div class="integration-hub-title-wrap">
+public/control-center/pages/integrations.js:2059:          <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
+public/control-center/pages/integrations.js:2065:        <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">${escapeHtml(smartLabel)}</button>
+public/control-center/pages/integrations.js:2077:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+public/control-center/pages/integrations.js:2078:      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
+public/control-center/pages/integrations.js:2079:      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
+public/control-center/pages/integrations.js:2096:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+public/control-center/pages/integrations.js:2112:    <section class="card integration-domain-card">
+public/control-center/pages/integrations.js:2120:      <div class="integration-domain-grid">
+public/control-center/pages/integrations.js:2188:    <section class="card integration-domain-card">
+public/control-center/pages/integrations.js:2196:      <div class="integration-coverage-grid integration-section-status-grid">
+public/control-center/pages/integrations.js:2197:        <div class="integration-coverage-item">
+public/control-center/pages/integrations.js:2200:          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
+public/control-center/pages/integrations.js:2202:        <div class="integration-coverage-item">
+public/control-center/pages/integrations.js:2205:          <div class="integration-coverage-meta">No complete connection record is available yet.</div>
+public/control-center/pages/integrations.js:2207:          <div class="integration-coverage-item">
+public/control-center/pages/integrations.js:2210:            <div class="integration-coverage-meta">Partial setup, token issues, or server-reported errors need review.</div>
+public/control-center/pages/integrations.js:2213:      <div class="integration-status-group">
+public/control-center/pages/integrations.js:2214:        <div class="integration-mini-heading">Connected</div>
+public/control-center/pages/integrations.js:2215:        <div class="integration-simple-grid">
+public/control-center/pages/integrations.js:2219:      <div class="integration-status-group">
+public/control-center/pages/integrations.js:2220:        <div class="integration-mini-heading">Needs Attention</div>
+public/control-center/pages/integrations.js:2221:        <div class="integration-simple-grid">
+public/control-center/pages/integrations.js:2225:      <div class="integration-status-group">
+public/control-center/pages/integrations.js:2226:        <div class="integration-mini-heading">Not Connected</div>
+public/control-center/pages/integrations.js:2227:        <div class="integration-simple-grid">
+public/control-center/pages/integrations.js:2253:  Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
+public/control-center/pages/integrations.js:2255:      const integrationId = button.getAttribute("data-integration-select") || "";
+public/control-center/pages/integrations.js:2261:  Array.from(document.querySelectorAll("[data-integration-primary]")).forEach((button) => {
+public/control-center/pages/integrations.js:2263:      const action = button.getAttribute("data-integration-primary") || "";
+public/control-center/pages/integrations.js:2264:      const integrationId = button.getAttribute("data-integration-id") || "";
+public/control-center/pages/integrations.js:2281:  Array.from(document.querySelectorAll("[data-integration-field]")).forEach((input) => {
+public/control-center/pages/integrations.js:2283:      const integrationId = input.getAttribute("data-integration-field") || "";
+public/control-center/pages/integrations.js:2293:  Array.from(document.querySelectorAll("[data-integration-field-helper]")).forEach((helper) => {
+public/control-center/pages/integrations.js:2294:    const [integrationId, fieldKey] = asString(helper.getAttribute("data-integration-field-helper")).split(":");
+public/control-center/pages/integrations.js:2320:  Array.from(document.querySelectorAll("[data-integration-category-filter]")).forEach((select) => {
+public/control-center/pages/integrations.js:2327:  Array.from(document.querySelectorAll("[data-integration-status-filter]")).forEach((select) => {
+public/control-center/pages/integrations.js:2334:  Array.from(document.querySelectorAll("[data-integration-search]")).forEach((input) => {
+public/control-center/pages/integrations.js:2341:  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+public/control-center/pages/integrations.js:2502:  Array.from(document.querySelectorAll("[data-integration-action]")).forEach((button) => {
+public/control-center/pages/integrations.js:2504:      const action = button.getAttribute("data-integration-action") || "";
+public/control-center/pages/integrations.js:2505:      const integrationId = button.getAttribute("data-integration-id") || "";
+public/control-center/pages/integrations.js:2524:  Array.from(document.querySelectorAll("[data-integration-prompt]")).forEach((button) => {
+public/control-center/pages/integrations.js:2526:      const prompt = button.getAttribute("data-integration-prompt-text") || "";
+public/control-center/pages/integrations.js:2615:      <div class="integrations-wrapper integration-system-panel">
+public/control-center/pages/integrations.js:2616:        <section class="card integration-system-overview">
+public/control-center/pages/integrations.js:2617:          <div class="card-head integration-system-overview-head">
+public/control-center/pages/integrations.js:2625:          <div class="integration-system-overview-grid">
+public/control-center/pages/integrations.js:2626:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:2629:              <span class="integration-system-metric-copy">All providers currently modeled in the control center.</span>
+public/control-center/pages/integrations.js:2631:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:2634:              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
+public/control-center/pages/integrations.js:2636:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:2639:              <span class="integration-system-metric-copy">Required launch connectors not yet fully connected.</span>
+public/control-center/pages/integrations.js:2641:            <div class="data-card integration-system-metric">
+public/control-center/pages/integrations.js:2644:              <span class="integration-system-metric-copy">Connectors with missing or failed state across the full stack.</span>
+public/control-center/pages/integrations.js:2647:          <div class="integration-system-summary-grid">
+public/control-center/pages/integrations.js:2648:            <div class="integration-system-summary-card">
+public/control-center/pages/integrations.js:2653:            <div class="integration-system-summary-card">
+public/control-center/pages/integrations.js:2663:        <section class="integration-system-workspace">
+public/control-center/pages/integrations.js:2664:          <div class="integration-system-workspace-main">
+public/control-center/pages/integrations.js:2665:            <section class="card integration-system-filters">
+public/control-center/pages/integrations.js:2666:              <div class="card-head integration-system-filters-head">
+public/control-center/pages/integrations.js:2674:              <div class="integration-filter-bar">
+public/control-center/pages/integrations.js:2675:                <label class="integration-filter-field">
+public/control-center/pages/integrations.js:2677:                  <select data-integration-category-filter>
+public/control-center/pages/integrations.js:2682:                <label class="integration-filter-field">
+public/control-center/pages/integrations.js:2684:                  <select data-integration-status-filter>
+public/control-center/pages/integrations.js:2692:                <label class="integration-filter-field integration-filter-search">
+public/control-center/pages/integrations.js:2698:                    data-integration-search
+public/control-center/pages/integrations.js:2704:            <section class="integration-system-group-stack">
+public/control-center/pages/integrations.js:2711:          <aside class="integration-system-workspace-side">
+public/control-center/pages/integrations.js:2714:            <section class="card integration-system-diagnostics">
+public/control-center/pages/integrations.js:2722:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:2723:                <h4 class="integration-mini-heading">Blockers</h4>
+public/control-center/pages/integrations.js:2726:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:2727:                <h4 class="integration-mini-heading">Warnings</h4>
+public/control-center/pages/integrations.js:2730:              <div class="integration-diagnostic-section">
+public/control-center/pages/integrations.js:2731:                <h4 class="integration-mini-heading">Fix Before Launch</h4>
+public/control-center/pages/integrations.js:2734:              <div class="integration-system-prompt-row">
+public/control-center/pages/integrations.js:2736:                  <button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>
+public/control-center/pages/integrations.js:2741:            <section class="card integration-system-activity">
+public/control-center/pages/integrations.js:2754:        <section class="card integration-system-readiness-map">
+public/control-center/pages/integrations.js:2762:          <div class="integration-ai-grid">
+public/control-center/pages/integrations.js:2764:              <h4 class="integration-mini-heading">Critical missing integrations</h4>
+public/control-center/pages/integrations.js:2768:              <h4 class="integration-mini-heading">Recommended next actions</h4>
+public/control-center/pages/integrations.js:2769:              <div class="integration-critical-list">
+public/control-center/pages/integrations.js:2771:                  <div class="integration-critical-item">
+public/control-center/pages/integrations.js:2779:          <div class="integration-system-coverage-block">
+public/control-center/pages/integrations.js:2780:            <h4 class="integration-mini-heading">Launch coverage</h4>
