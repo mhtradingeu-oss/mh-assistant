@@ -283,3 +283,46 @@ export function buildIntegrationOverviewSummary(cards = [], recommendations = {}
     nextRecommendedAction: recommendations.recommendations?.[0]?.title || "Review connector coverage"
   };
 }
+
+export function buildLaunchDiagnostics(cards = []) {
+  const list = Array.isArray(cards) ? cards : [];
+
+  const requiredCards = list.filter((card) =>
+    REQUIRED_LAUNCH_CATEGORY_IDS.includes(getConnectorWorkspaceCategory(card))
+  );
+
+  const blockers = requiredCards
+    .filter((card) =>
+      card.critical &&
+      ["missing", "failed"].includes(getConnectorWorkspaceStatus(card))
+    )
+    .map((card) => ({
+      title: card.label,
+      detail: card.whyItMatters
+    }))
+    .slice(0, 6);
+
+  const warnings = requiredCards
+    .filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup")
+    .map((card) => ({
+      title: card.label,
+      detail: card.missingRequired.length
+        ? `Finish required fields: ${card.missingRequired.join(", ")}`
+        : card.healthSummary
+    }))
+    .slice(0, 6);
+
+  const mustFix = blockers.length
+    ? blockers
+    : warnings.length
+      ? warnings
+      : requiredCards
+          .filter((card) => getConnectorWorkspaceStatus(card) !== "connected")
+          .map((card) => ({
+            title: card.label,
+            detail: card.healthSummary
+          }))
+          .slice(0, 4);
+
+  return { blockers, warnings, mustFix };
+}
