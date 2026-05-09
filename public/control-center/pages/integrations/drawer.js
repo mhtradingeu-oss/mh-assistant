@@ -87,3 +87,47 @@ export function renderDrawerProgress(card = {}) {
     </div>
   `;
 }
+
+function getDrawerPrimaryAction(card = {}) {
+  if (card.backendSupported === false) {
+    return { action: "unavailable", label: "Unavailable" };
+  }
+
+  if (card.statusLabel === "Connected") {
+    return { action: "manage", label: "Manage Connection" };
+  }
+
+  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+    return { action: "reconnect", label: "Reconnect" };
+  }
+
+  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+}
+
+function getQuickConnectLabel(card = {}) {
+  if (card.quickConnectLabel) {
+    return card.quickConnectLabel;
+  }
+
+  if (card.oauthSupported || card.authMode === "oauth") {
+    return "Quick Connect";
+  }
+
+  return "";
+}
+
+export function renderIntegrationActionButtons(card = {}) {
+  if (card.backendSupported === false) {
+    return `<div class="integration-side-note">${esc(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
+  }
+
+  const primary = getDrawerPrimaryAction(card);
+  const quickConnectLabel = getQuickConnectLabel(card);
+
+  return `
+    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
+    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test Connection</button>
+    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync Now</button>` : ""}
+    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+  `;
+}

@@ -1,5 +1,6 @@
 import {
   renderDrawerProgress,
+  renderIntegrationActionButtons,
   renderIntegrationField
 } from "./integrations/drawer.js";
 
@@ -1656,24 +1657,6 @@ function buildIntegrationActivityFeed(controlCenter, cards) {
 
 
 
-function renderIntegrationActionButtons(card, escapeHtml) {
-  if (card.backendSupported === false) {
-    return `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
-  }
-
-  const primary = getDrawerPrimaryAction(card);
-  const quickConnectLabel = getQuickConnectLabel(card);
-
-  return `
-    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${escapeHtml(primary.action)}" data-integration-id="${escapeHtml(card.id)}">${escapeHtml(primary.label)}</button>
-    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${escapeHtml(card.id)}">Test Connection</button>
-    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${escapeHtml(card.id)}">Sync Now</button>` : ""}
-    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
-  `;
-}
-
-
-
 function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) {
   const isDrawer = options.mode === "drawer";
   const requiredFields = card.fields.filter((field) => field.required);
@@ -1779,7 +1762,7 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) 
       </div>
 
       <div class="integration-action-row">
-        ${renderIntegrationActionButtons(card, escapeHtml)}
+        ${renderIntegrationActionButtons(card)}
       </div>
     </section>
   `;
