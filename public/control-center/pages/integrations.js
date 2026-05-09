@@ -6,6 +6,7 @@ import {
   buildIntegrationOverviewSummary,
   buildLaunchDiagnostics,
   buildRecommendations,
+  buildSectionGroups,
   CONNECTOR_WORKSPACE_CATEGORIES,
   getConnectorWorkspaceCategory,
   getConnectorWorkspaceStatus,
@@ -1312,50 +1313,6 @@ function focusDrawerField(session, card) {
         input.select();
       }
     }
-  });
-}
-
-function buildSectionGroups(domainModels) {
-  const byId = new Map(domainModels.map((domain) => [domain.id, domain]));
-
-  return [
-    {
-      id: "sales-channels",
-      title: "Sales Channels",
-      description: "Commerce and marketplace connections that support products, orders, revenue signals, and conversion-aware sales intelligence.",
-      domains: [byId.get("website-commerce")].filter(Boolean)
-    },
-    {
-      id: "social-channels",
-      title: "Social Channels",
-      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
-      domains: [byId.get("social")].filter(Boolean)
-    },
-    {
-      id: "marketing-tracking-tools",
-      title: "Marketing & Tracking Tools",
-      description: "Analytics, paid media, and attribution systems that improve measurement, optimization, and traffic visibility.",
-      domains: [byId.get("analytics"), byId.get("ads")].filter(Boolean)
-    },
-    {
-      id: "email-crm",
-      title: "Email & CRM",
-      description: "Lifecycle messaging, customer records, audience segmentation, and relationship data required for retention and lifecycle operations.",
-      domains: [byId.get("email-crm")].filter(Boolean)
-    },
-    {
-      id: "ai-automation-tools",
-      title: "AI / Automation Tools",
-      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
-      domains: [byId.get("automation")].filter(Boolean)
-    }
-  ].map((section) => {
-    const cards = section.domains.flatMap((domain) => domain.cards);
-    return {
-      ...section,
-      cards,
-      summary: summarizeSectionCards(cards)
-    };
   });
 }
 
