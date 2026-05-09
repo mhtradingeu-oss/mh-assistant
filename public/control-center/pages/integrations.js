@@ -1726,19 +1726,7 @@ function renderActivityFeed(items, escapeHtml) {
   `;
 }
 
-function renderCoverageMap(items, escapeHtml) {
-  return `
-    <div class="integration-coverage-grid">
-      ${items.map((item) => `
-        <div class="integration-coverage-item">
-          <strong>${escapeHtml(item.label)}</strong>
-          <span class="card-badge ${item.status === "Covered" ? "success" : item.status === "Partial" ? "warning" : "danger"}">${escapeHtml(item.status)}</span>
-          <div class="integration-coverage-meta">${escapeHtml(item.meta)}</div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
+
 
 function renderCriticalMissing(items, escapeHtml) {
   if (!items.length) {
@@ -2714,7 +2702,7 @@ export const integrationsRoute = {
           </div>
           <div class="integration-system-coverage-block">
             <h4 class="integration-mini-heading">Launch coverage</h4>
-            ${renderCoverageMap(coverageMap, escapeHtml)}
+            ${renderIntegrationCoverageMap(coverageMap)}
           </div>
         </section>
 
