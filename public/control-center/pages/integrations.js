@@ -1,5 +1,6 @@
 import {
-  renderDomainSection
+  renderDomainSection,
+  renderIntegrationSection
 } from "./integrations/layout.js";
 
 import {
@@ -1735,63 +1736,6 @@ function buildSectionGroups(domainModels) {
       summary: summarizeSectionCards(cards)
     };
   });
-}
-
-function renderIntegrationSection(section, session, escapeHtml) {
-  const { connected, notConnected, needsAttention } = section.summary;
-  const tone = notConnected || needsAttention ? (connected ? "warning" : "danger") : "success";
-  const selectedCard = section.cards.find((card) => card.id === asString(session.selectedIntegrationId)) || section.cards[0] || null;
-  const connectedCards = section.cards.filter((card) => card.statusLabel === "Connected");
-  const attentionCards = section.cards.filter((card) => ["Partial", "Token expired", "Error"].includes(card.statusLabel));
-  const notConnectedCards = section.cards.filter((card) => card.statusLabel === "Not Connected");
-
-  return `
-    <section class="card integration-domain-card">
-      <div class="card-head">
-        <div>
-          <h3>${escapeHtml(section.title)}</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">${escapeHtml(section.description)}</p>
-        </div>
-        <span class="card-badge ${tone}">${escapeHtml(`${connected} connected • ${notConnected} not connected • ${needsAttention} needs attention`)}</span>
-      </div>
-      <div class="integration-coverage-grid integration-section-status-grid">
-        <div class="integration-coverage-item">
-          <strong>Connected</strong>
-          <span class="card-badge success">${escapeHtml(String(connected))}</span>
-          <div class="integration-coverage-meta">Ready for test, sync, and provider-backed actions.</div>
-        </div>
-        <div class="integration-coverage-item">
-          <strong>Not connected</strong>
-          <span class="card-badge danger">${escapeHtml(String(notConnected))}</span>
-          <div class="integration-coverage-meta">No complete connection record is available yet.</div>
-        </div>
-          <div class="integration-coverage-item">
-            <strong>Needs attention / blocked</strong>
-            <span class="card-badge warning">${escapeHtml(String(needsAttention))}</span>
-            <div class="integration-coverage-meta">Partial setup, token issues, or server-reported errors need review.</div>
-          </div>
-        </div>
-      <div class="integration-status-group">
-        <div class="integration-mini-heading">Connected</div>
-        <div class="integration-simple-grid">
-          ${connectedCards.length ? connectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No connected integrations in this group yet.</div>`}
-        </div>
-      </div>
-      <div class="integration-status-group">
-        <div class="integration-mini-heading">Needs Attention</div>
-        <div class="integration-simple-grid">
-          ${attentionCards.length ? attentionCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">No integrations need attention in this group right now.</div>`}
-        </div>
-      </div>
-      <div class="integration-status-group">
-        <div class="integration-mini-heading">Not Connected</div>
-        <div class="integration-simple-grid">
-          ${notConnectedCards.length ? notConnectedCards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("") : `<div class="empty-box">All integrations in this group already have a connection state.</div>`}
-        </div>
-      </div>
-      ${selectedCard ? renderIntegrationDetailsPanel(selectedCard, session, { getFieldValue }) : ""}
-    </section>
-  `;
 }
 
 function bindIntegrationActions({
