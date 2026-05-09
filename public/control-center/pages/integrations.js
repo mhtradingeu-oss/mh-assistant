@@ -1290,76 +1290,7 @@ function buildAISmartRecommendation(domainModels) {
   };
 }
 
-function renderAISmartRecommendation(rec, escapeHtml) {
-  if (rec.healthy) {
-    const nextHtml = rec.nextOptional
-      ? `
-        <div class="ai-smart-rec-healthy-next">
-          <span class="ai-smart-rec-healthy-next-label">Suggested next:</span>
-          <button class="btn btn-secondary" type="button" data-integration-select="${escapeHtml(rec.nextOptional.id)}">
-            Open ${escapeHtml(rec.nextOptional.label)}
-          </button>
-        </div>
-      `
-      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
 
-    return `
-      <section class="card ai-smart-rec ai-smart-rec--healthy">
-        <div class="ai-smart-rec-header">
-          <div class="ai-smart-rec-kicker">
-            <span class="ai-smart-rec-badge success">AI Smart Connect</span>
-          </div>
-          <h3>Integration layer is healthy</h3>
-          <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
-        </div>
-        ${nextHtml}
-      </section>
-    `;
-  }
-
-  const { card, priorityLabel, priorityTone, reasonLabel, impactChips } = rec;
-
-  const chipsHtml = impactChips.length
-    ? `<div class="ai-smart-rec-chips">${impactChips.map((chip) => `<span class="ai-smart-rec-chip">${escapeHtml(chip)}</span>`).join("")}</div>`
-    : "";
-
-  return `
-    <section class="card ai-smart-rec">
-      <div class="ai-smart-rec-header">
-        <div class="ai-smart-rec-kicker">
-          <span class="ai-smart-rec-badge ${escapeHtml(priorityTone)}">AI Smart Connect</span>
-          <span class="card-badge ${escapeHtml(priorityTone)}">${escapeHtml(priorityLabel)}</span>
-        </div>
-        <h3>Connect <strong>${escapeHtml(card.label)}</strong> next</h3>
-        <p class="ai-smart-rec-sub">${escapeHtml(card.whyItMatters)}</p>
-      </div>
-      <div class="ai-smart-rec-body">
-        <div class="ai-smart-rec-connector">
-          <div class="ai-smart-rec-connector-icon">${escapeHtml(card.icon)}</div>
-          <div class="ai-smart-rec-connector-info">
-            <strong>${escapeHtml(card.label)}</strong>
-            <span>${escapeHtml(card.domainTitle)}</span>
-          </div>
-          <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
-        </div>
-        <div class="ai-smart-rec-why">
-          <div class="ai-smart-rec-why-top">
-            <span class="ai-smart-rec-why-label">Why this first?</span>
-            <span class="card-badge warning">${escapeHtml(reasonLabel)}</span>
-          </div>
-          <p>${escapeHtml(card.enables)}</p>
-        </div>
-        ${chipsHtml}
-        <div class="ai-smart-rec-actions">
-          <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">
-            Open Smart Connect
-          </button>
-          <span class="ai-smart-rec-cta-note">Opens the ${escapeHtml(card.label)} setup drawer and focuses the first required field.</span>
-        </div>
-      </div>
-    </section>
-  `;
-}
 
 function buildRecommendations(domainModels, coverageMap) {
   const cards = domainModels.flatMap((domain) => domain.cards);
