@@ -1,6 +1,7 @@
 import {
   renderAISmartRecommendation as renderAISmartRecommendationModule,
-  renderIntegrationCoverageMap
+  renderIntegrationCoverageMap,
+  renderIntegrationRecommendationsList
 } from "./integrations/render.js";
 
 const integrationSessions = new Map();
@@ -2690,14 +2691,7 @@ export const integrationsRoute = {
             </div>
             <div>
               <h4 class="integration-mini-heading">Recommended next actions</h4>
-              <div class="integration-critical-list">
-                ${recommendations.recommendations.map((item) => `
-                  <div class="integration-critical-item">
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <span>${escapeHtml(item.meta)}</span>
-                  </div>
-                `).join("")}
-              </div>
+              ${renderIntegrationRecommendationsList(recommendations.recommendations)}
             </div>
           </div>
           <div class="integration-system-coverage-block">

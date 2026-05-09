@@ -111,3 +111,26 @@ export function renderIntegrationCoverageMap(items = []) {
     </section>
   `;
 }
+
+export function renderIntegrationRecommendationsList(items = []) {
+  const list = asArray(items);
+
+  if (!list.length) {
+    return `
+      <div class="empty-box">
+        No recommended actions are currently available.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="integration-critical-list">
+      ${list.map((item) => `
+        <div class="integration-critical-item">
+          <strong>${esc(item.title)}</strong>
+          <span>${esc(item.meta)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
