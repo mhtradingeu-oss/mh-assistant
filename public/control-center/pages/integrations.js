@@ -1,3 +1,8 @@
+import {
+  renderAISmartRecommendation as renderAISmartRecommendationModule,
+  renderIntegrationCoverageMap
+} from "./integrations/render.js";
+
 const integrationSessions = new Map();
 let integrationDrawerEscapeHandler = null;
 const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);
@@ -2658,7 +2663,7 @@ export const integrationsRoute = {
           </div>
         </section>
 
-        ${renderAISmartRecommendation(aiRec, escapeHtml)}
+        ${renderAISmartRecommendationModule(aiRec)}
 
         <section class="integration-system-workspace">
           <div class="integration-system-workspace-main">
