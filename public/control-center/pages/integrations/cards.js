@@ -295,3 +295,29 @@ export function renderIntegrationCard(card = {}, session = {}) {
     </section>
   `;
 }
+
+export function renderSelectedConnectorSummary(card = {}) {
+  const smartLabel = getSmartConnectLabel(card);
+
+  return `
+    <section class="card integration-selected-summary">
+      <div class="card-head">
+        <div>
+          <h3>Selected connector</h3>
+          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
+        </div>
+        <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
+      </div>
+      <div class="integration-selected-summary-body">
+        <div class="integration-hub-title-wrap">
+          <div class="integration-hub-icon">${esc(card.icon)}</div>
+          <div>
+            <h4>${esc(card.label)}</h4>
+            <p>${esc(card.whyItMatters)}</p>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(smartLabel)}</button>
+      </div>
+    </section>
+  `;
+}

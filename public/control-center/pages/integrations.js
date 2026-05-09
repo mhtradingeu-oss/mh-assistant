@@ -8,7 +8,8 @@ import {
 
 import {
   renderConnectorGroup,
-  renderIntegrationCard
+  renderIntegrationCard,
+  renderSelectedConnectorSummary
 } from "./integrations/cards.js";
 
 import {
@@ -1659,31 +1660,6 @@ function buildIntegrationActivityFeed(controlCenter, cards) {
 
 
 
-function renderSelectedConnectorSummary(card, escapeHtml) {
-  const smartLabel = getSmartConnectLabel(card);
-  return `
-    <section class="card integration-selected-summary">
-      <div class="card-head">
-        <div>
-          <h3>Selected connector</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
-        </div>
-        <span class="card-badge ${escapeHtml(card.statusTone)}">${escapeHtml(card.statusLabel)}</span>
-      </div>
-      <div class="integration-selected-summary-body">
-        <div class="integration-hub-title-wrap">
-          <div class="integration-hub-icon">${escapeHtml(card.icon)}</div>
-          <div>
-            <h4>${escapeHtml(card.label)}</h4>
-            <p>${escapeHtml(card.whyItMatters)}</p>
-          </div>
-        </div>
-        <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(card.id)}">${escapeHtml(smartLabel)}</button>
-      </div>
-    </section>
-  `;
-}
-
 function focusDrawerField(session, card) {
   if (!session.drawerOpen || !card || typeof window === "undefined") return;
 
@@ -2310,7 +2286,7 @@ export const integrationsRoute = {
           </div>
 
           <aside class="integration-system-workspace-side">
-            ${selectedCard ? renderSelectedConnectorSummary(selectedCard, escapeHtml) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
+            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
 
             <section class="card integration-system-diagnostics">
               <div class="card-head">
