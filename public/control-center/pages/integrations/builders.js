@@ -250,3 +250,36 @@ export function matchesConnectorSearch(card = {}, searchQuery = "") {
 
   return haystack.includes(query);
 }
+
+export function buildIntegrationOverviewSummary(cards = [], recommendations = {}) {
+  const list = Array.isArray(cards) ? cards : [];
+  const requiredCards = list.filter((card) =>
+    REQUIRED_LAUNCH_CATEGORY_IDS.includes(getConnectorWorkspaceCategory(card))
+  );
+
+  const totalIntegrations = list.length;
+  const connectedIntegrations = list.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;
+  const missingRequired = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) !== "connected").length;
+  const failedOrDisconnected = list.filter((card) => ["failed", "missing"].includes(getConnectorWorkspaceStatus(card))).length;
+  const blockerCount = requiredCards.filter((card) => card.critical && getConnectorWorkspaceStatus(card) !== "connected").length;
+  const warningCount = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+
+  let launchReadinessImpact = "Launch-ready from an integrations perspective.";
+
+  if (blockerCount) {
+    launchReadinessImpact = `${blockerCount} critical connector${blockerCount === 1 ? "" : "s"} still block reliable launch execution.`;
+  } else if (warningCount) {
+    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+  } else if (failedOrDisconnected) {
+    launchReadinessImpact = `${failedOrDisconnected} non-critical connector${failedOrDisconnected === 1 ? " is" : "s are"} disconnected or failed and should be repaired after launch blockers.`;
+  }
+
+  return {
+    totalIntegrations,
+    connectedIntegrations,
+    missingRequired,
+    failedOrDisconnected,
+    launchReadinessImpact,
+    nextRecommendedAction: recommendations.recommendations?.[0]?.title || "Review connector coverage"
+  };
+}
