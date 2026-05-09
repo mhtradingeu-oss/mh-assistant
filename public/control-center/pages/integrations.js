@@ -8,6 +8,7 @@ import {
   buildLaunchDiagnostics,
   buildRecommendations,
   buildSectionGroups,
+  buildSuggestedValues,
   CONNECTOR_WORKSPACE_CATEGORIES,
   getConnectorWorkspaceCategory,
   getConnectorWorkspaceStatus,
@@ -805,16 +806,6 @@ function getDrawerPrimaryAction(card) {
   return { action: "connect", label: getSmartConnectLabel(card) };
 }
 
-function buildSuggestedValues(state, integration) {
-  return integration.fields.reduce((accumulator, field) => {
-    const suggested = getSuggestedFieldValue(state, integration, field);
-    if (suggested) {
-      accumulator[field.key] = suggested;
-    }
-    return accumulator;
-  }, {});
-}
-
 function ensureDraft(session, integrationId) {
   if (!session.drafts[integrationId]) {
     session.drafts[integrationId] = {};
@@ -1081,7 +1072,7 @@ function buildIntegrationCardModel(integration, session, state) {
   const dataScopes = asArray(record.data_scopes).length
     ? asArray(record.data_scopes).map(titleCase)
     : inferScopeKeys(integration).map(titleCase);
-  const suggestedValues = buildSuggestedValues(state, integration);
+  const suggestedValues = buildSuggestedValues(state, integration, { getSuggestedFieldValue });
 
   return {
     ...integration,

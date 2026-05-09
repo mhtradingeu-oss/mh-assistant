@@ -615,3 +615,22 @@ export function buildAISmartRecommendation(domainModels = []) {
     allCriticalConnected
   };
 }
+
+export function buildSuggestedValues(state = {}, integration = {}, options = {}) {
+  const getSuggestedFieldValue =
+    typeof options.getSuggestedFieldValue === "function"
+      ? options.getSuggestedFieldValue
+      : () => "";
+
+  const fields = Array.isArray(integration.fields) ? integration.fields : [];
+
+  return fields.reduce((accumulator, field) => {
+    const suggested = getSuggestedFieldValue(state, integration, field);
+
+    if (suggested) {
+      accumulator[field.key] = suggested;
+    }
+
+    return accumulator;
+  }, {});
+}
