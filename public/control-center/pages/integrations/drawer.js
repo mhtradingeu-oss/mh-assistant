@@ -45,3 +45,45 @@ export function renderIntegrationField(integrationId, field = {}, value = "", op
     </div>
   `;
 }
+
+export function renderDrawerProgress(card = {}) {
+  const missingRequired = Array.isArray(card.missingRequired) ? card.missingRequired : [];
+  const stepOneComplete = missingRequired.length === 0;
+  const stepTwoComplete = Boolean(card.lastTest) || card.statusLabel === "Connected";
+  const stepThreeComplete = card.statusLabel === "Connected";
+
+  const steps = [
+    {
+      label: "Step 1: Fill required fields",
+      state: stepOneComplete ? "complete" : "active",
+      meta: stepOneComplete
+        ? "Ready for validation."
+        : `${missingRequired.length} required field${missingRequired.length === 1 ? "" : "s"} remaining.`
+    },
+    {
+      label: "Step 2: Test connection",
+      state: stepTwoComplete ? "complete" : stepOneComplete ? "active" : "pending",
+      meta: stepTwoComplete
+        ? "Connection test checkpoint recorded."
+        : "Run a connection test before activation."
+    },
+    {
+      label: "Step 3: Activate",
+      state: stepThreeComplete ? "complete" : stepOneComplete ? "active" : "pending",
+      meta: stepThreeComplete
+        ? "Provider is active in the Control Center."
+        : "Activate once fields and test are complete."
+    }
+  ];
+
+  return `
+    <div class="integration-drawer-progress">
+      ${steps.map((step) => `
+        <div class="integration-progress-step is-${esc(step.state)}">
+          <strong>${esc(step.label)}</strong>
+          <span>${esc(step.meta)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}

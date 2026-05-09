@@ -1,4 +1,5 @@
 import {
+  renderDrawerProgress,
   renderIntegrationField
 } from "./integrations/drawer.js";
 
@@ -1673,40 +1674,6 @@ function renderIntegrationActionButtons(card, escapeHtml) {
 
 
 
-function renderDrawerProgress(card, escapeHtml) {
-  const stepOneComplete = card.missingRequired.length === 0;
-  const stepTwoComplete = Boolean(card.lastTest) || card.statusLabel === "Connected";
-  const stepThreeComplete = card.statusLabel === "Connected";
-  const steps = [
-    {
-      label: "Step 1: Fill required fields",
-      state: stepOneComplete ? "complete" : "active",
-      meta: stepOneComplete ? "Ready for validation." : `${card.missingRequired.length} required field${card.missingRequired.length === 1 ? "" : "s"} remaining.`
-    },
-    {
-      label: "Step 2: Test connection",
-      state: stepTwoComplete ? "complete" : stepOneComplete ? "active" : "pending",
-      meta: stepTwoComplete ? "Connection test checkpoint recorded." : "Run a connection test before activation."
-    },
-    {
-      label: "Step 3: Activate",
-      state: stepThreeComplete ? "complete" : stepOneComplete ? "active" : "pending",
-      meta: stepThreeComplete ? "Provider is active in the Control Center." : "Activate once fields and test are complete."
-    }
-  ];
-
-  return `
-    <div class="integration-drawer-progress">
-      ${steps.map((step) => `
-        <div class="integration-progress-step is-${escapeHtml(step.state)}">
-          <strong>${escapeHtml(step.label)}</strong>
-          <span>${escapeHtml(step.meta)}</span>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
 function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) {
   const isDrawer = options.mode === "drawer";
   const requiredFields = card.fields.filter((field) => field.required);
@@ -1767,7 +1734,7 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) 
         </div>
       </div>
 
-      ${isDrawer ? renderDrawerProgress(card, escapeHtml) : ""}
+      ${isDrawer ? renderDrawerProgress(card) : ""}
 
       <div class="integration-hub-grid">
         <div>
