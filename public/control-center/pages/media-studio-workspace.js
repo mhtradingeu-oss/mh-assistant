@@ -569,7 +569,7 @@ async function loadMediaWorkspace(projectName, backendProjectName, state, sessio
   rerender();
 
   try {
-    const [mediaJobs, contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+    const results = await Promise.allSettled([
       listProjectMediaJobs(backendProjectName, { limit: 120 }),
       listProjectContentItems(backendProjectName, { limit: 120 }),
       listProjectTasks(backendProjectName, 120),
@@ -578,6 +578,29 @@ async function loadMediaWorkspace(projectName, backendProjectName, state, sessio
       listProjectEvents(backendProjectName, 120),
       fetchProjectOperations(backendProjectName)
     ]);
+
+    const [
+      mediaJobsResult,
+      contentItemsResult,
+      tasksResult,
+      approvalsResult,
+      handoffsResult,
+      eventsResult,
+      operationsResult
+    ] = results;
+
+    const fulfilledValue = (result, fallback) =>
+      result?.status === "fulfilled" ? result.value : fallback;
+
+    const mediaJobs = fulfilledValue(mediaJobsResult, { items: [] });
+    const contentItems = fulfilledValue(contentItemsResult, { items: [] });
+    const tasks = fulfilledValue(tasksResult, { items: [] });
+    const approvals = fulfilledValue(approvalsResult, { items: [] });
+    const handoffs = fulfilledValue(handoffsResult, { items: [] });
+    const events = fulfilledValue(eventsResult, { items: [] });
+    const operations = fulfilledValue(operationsResult, null);
+
+    const failedLoads = results.filter((result) => result.status === "rejected").length;
 
     const backendItems = asArray(mediaJobs.items).map((item) => normalizeMediaItem(item, state));
     const localItems = loadLocalDrafts(projectName).map((item) => normalizeMediaItem(item, state, "Local draft"));
@@ -588,6 +611,9 @@ async function loadMediaWorkspace(projectName, backendProjectName, state, sessio
     session.handoffs = asArray(handoffs.items);
     session.events = asArray(events.items);
     session.operations = operations || null;
+    session.error = failedLoads
+      ? `${failedLoads} Media Studio data source${failedLoads === 1 ? "" : "s"} could not be loaded. Available data is still shown.`
+      : "";
     session.loaded = true;
     applyInboundHandoff(projectName, session);
     if (!session.selectedId) session.selectedId = session.items[0]?.id || "";
