@@ -3,6 +3,7 @@ import {
   buildConnectorWorkspaceGroups,
   buildCoverageMap,
   buildCriticalMissing,
+  buildDomainModels,
   buildIntegrationActivityFeed,
   buildIntegrationOverviewSummary,
   buildLaunchDiagnostics,
@@ -1084,33 +1085,6 @@ function buildIntegrationCardModel(integration, session, state) {
   };
 }
 
-function buildDomainModels(state, session) {
-  return INTEGRATION_DOMAINS.map((domain) => {
-    const cards = domain.integrations.map((integration) =>
-      buildIntegrationCardModel(
-        {
-          ...integration,
-          domainId: domain.id,
-          domainTitle: domain.title
-        },
-        session,
-        state
-      )
-    );
-    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
-    const partialCount = cards.filter((card) => card.statusLabel === "Partial").length;
-    const blockedCount = cards.filter((card) => ["Not Connected", "Error", "Token expired"].includes(card.statusLabel)).length;
-
-    return {
-      ...domain,
-      cards,
-      connectedCount,
-      partialCount,
-      blockedCount
-    };
-  });
-}
-
 function getConnectorWorkspaceAction(card) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
@@ -1501,7 +1475,7 @@ export const integrationsRoute = {
     const state = getState();
     const projectName = state.context.currentProject || "";
     const session = ensureSession(projectName);
-    const domainModels = buildDomainModels(state, session);
+    const domainModels = buildDomainModels(state, session, { domains: INTEGRATION_DOMAINS, buildIntegrationCardModel });
     const sectionGroups = buildSectionGroups(domainModels);
     const allCards = domainModels.flatMap((domain) => domain.cards);
     if (!session.selectedIntegrationId || !allCards.find((card) => card.id === session.selectedIntegrationId)) {

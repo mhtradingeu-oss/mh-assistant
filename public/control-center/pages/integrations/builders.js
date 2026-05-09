@@ -706,3 +706,41 @@ export function buildLegacyFallbackRecord(integration = {}, state = {}, options 
     legacy_source: true
   };
 }
+
+export function buildDomainModels(state = {}, session = {}, options = {}) {
+  const domains = Array.isArray(options.domains) ? options.domains : [];
+  const buildIntegrationCardModel =
+    typeof options.buildIntegrationCardModel === "function"
+      ? options.buildIntegrationCardModel
+      : (integration) => integration;
+
+  return domains.map((domain) => {
+    const integrations = Array.isArray(domain.integrations) ? domain.integrations : [];
+
+    const cards = integrations.map((integration) =>
+      buildIntegrationCardModel(
+        {
+          ...integration,
+          domainId: domain.id,
+          domainTitle: domain.title
+        },
+        session,
+        state
+      )
+    );
+
+    const connectedCount = cards.filter((card) => card.statusLabel === "Connected").length;
+    const partialCount = cards.filter((card) => card.statusLabel === "Partial").length;
+    const blockedCount = cards.filter((card) =>
+      ["Not Connected", "Error", "Token expired"].includes(card.statusLabel)
+    ).length;
+
+    return {
+      ...domain,
+      cards,
+      connectedCount,
+      partialCount,
+      blockedCount
+    };
+  });
+}
