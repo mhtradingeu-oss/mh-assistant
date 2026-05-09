@@ -1,4 +1,8 @@
 import {
+  renderIntegrationField
+} from "./integrations/drawer.js";
+
+import {
   renderConnectorGroup,
   renderIntegrationCard
 } from "./integrations/cards.js";
@@ -1651,32 +1655,6 @@ function buildIntegrationActivityFeed(controlCenter, cards) {
 
 
 
-function renderField(integrationId, field, value, escapeHtml, options = {}) {
-  const type = field.type || "text";
-  const invalidClass = options.invalid ? " is-invalid" : "";
-  return `
-    <div class="integration-field-group${invalidClass}" data-integration-field-group="${escapeHtml(integrationId)}:${escapeHtml(field.key)}">
-      <div class="integration-field-head">
-        <label class="setup-label" for="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
-        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
-      </div>
-      <input
-        id="integration-${escapeHtml(integrationId)}-${escapeHtml(field.key)}"
-        class="setup-input${invalidClass}"
-        type="${escapeHtml(type)}"
-        value="${escapeHtml(value)}"
-        placeholder="${escapeHtml(field.placeholder || "")}"
-        autocomplete="${type === "password" ? "new-password" : "off"}"
-        aria-invalid="${options.invalid ? "true" : "false"}"
-        data-integration-field="${escapeHtml(integrationId)}"
-        data-field-key="${escapeHtml(field.key)}"
-      />
-      ${options.invalid ? `<div class="integration-field-error">${escapeHtml(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
-      <div class="setup-helper" data-integration-field-helper="${escapeHtml(integrationId)}:${escapeHtml(field.key)}"></div>
-    </div>
-  `;
-}
-
 function renderIntegrationActionButtons(card, escapeHtml) {
   if (card.backendSupported === false) {
     return `<div class="integration-side-note">${escapeHtml(card.unavailableReason || "Backend provider support is not configured yet.")}</div>`;
@@ -1734,7 +1712,7 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) 
   const requiredFields = card.fields.filter((field) => field.required);
   const optionalFields = card.fields.filter((field) => !field.required);
   const fields = requiredFields
-    .map((field) => renderField(
+    .map((field) => renderIntegrationField(
       card.id,
       field,
       getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]),
@@ -1747,7 +1725,7 @@ function renderIntegrationDetailsPanel(card, session, escapeHtml, options = {}) 
     ))
     .join("");
   const optionalFieldMarkup = optionalFields
-    .map((field) => renderField(
+    .map((field) => renderIntegrationField(
       card.id,
       field,
       getFieldValue(session, card, field, card.record, card.sourceValue, card.suggestedValues[field.key]),
