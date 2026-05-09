@@ -326,3 +326,35 @@ export function buildLaunchDiagnostics(cards = []) {
 
   return { blockers, warnings, mustFix };
 }
+
+export function buildConnectorWorkspaceGroups(cards = [], session = {}) {
+  const list = Array.isArray(cards) ? cards : [];
+  const categoryFilter = String(session.categoryFilter || "").trim().toLowerCase() || "all";
+  const statusFilter = String(session.statusFilter || "").trim().toLowerCase() || "all";
+
+  return Object.entries(CONNECTOR_WORKSPACE_CATEGORIES)
+    .map(([id, meta]) => {
+      const groupCards = list
+        .filter((card) => getConnectorWorkspaceCategory(card) === id)
+        .filter((card) => categoryFilter === "all" || categoryFilter === id)
+        .filter((card) => statusFilter === "all" || getConnectorWorkspaceStatus(card) === statusFilter)
+        .filter((card) => matchesConnectorSearch(card, session.searchQuery))
+        .sort((left, right) => {
+          const leftPriority = left.critical ? 0 : 1;
+          const rightPriority = right.critical ? 0 : 1;
+          if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+          return String(left.label || "").localeCompare(String(right.label || ""));
+        });
+
+      return {
+        id,
+        ...meta,
+        cards: groupCards,
+        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
+        failedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "failed").length,
+        missingCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "missing").length,
+        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
+      };
+    })
+    .filter((group) => group.cards.length || categoryFilter === group.id);
+}

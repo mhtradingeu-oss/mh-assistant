@@ -1,4 +1,5 @@
 import {
+  buildConnectorWorkspaceGroups,
   buildCoverageMap,
   buildCriticalMissing,
   buildIntegrationOverviewSummary,
@@ -1290,37 +1291,6 @@ function getConnectorWorkspaceAction(card) {
   }
 
   return { label: getSmartConnectLabel(card), action: "connect" };
-}
-
-function buildConnectorWorkspaceGroups(cards, session) {
-  const categoryFilter = asString(session.categoryFilter).trim().toLowerCase() || "all";
-  const statusFilter = asString(session.statusFilter).trim().toLowerCase() || "all";
-
-  return Object.entries(CONNECTOR_WORKSPACE_CATEGORIES)
-    .map(([id, meta]) => {
-      const groupCards = cards
-        .filter((card) => getConnectorWorkspaceCategory(card) === id)
-        .filter((card) => categoryFilter === "all" || categoryFilter === id)
-        .filter((card) => statusFilter === "all" || getConnectorWorkspaceStatus(card) === statusFilter)
-        .filter((card) => matchesConnectorSearch(card, session.searchQuery))
-        .sort((left, right) => {
-          const leftPriority = left.critical ? 0 : 1;
-          const rightPriority = right.critical ? 0 : 1;
-          if (leftPriority !== rightPriority) return leftPriority - rightPriority;
-          return left.label.localeCompare(right.label);
-        });
-
-      return {
-        id,
-        ...meta,
-        cards: groupCards,
-        connectedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length,
-        failedCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "failed").length,
-        missingCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "missing").length,
-        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
-      };
-    })
-    .filter((group) => group.cards.length || categoryFilter === group.id);
 }
 
 function mapActivityTone(value) {
