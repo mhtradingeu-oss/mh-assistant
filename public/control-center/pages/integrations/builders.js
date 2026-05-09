@@ -501,3 +501,117 @@ export function buildSectionGroups(domainModels = []) {
     };
   });
 }
+
+export function buildAISmartRecommendation(domainModels = []) {
+  const allCards = domainModels.flatMap((domain) =>
+    Array.isArray(domain.cards) ? domain.cards : []
+  );
+
+  const actionableCards = allCards.filter((card) => card.backendSupported);
+  const criticalCards = actionableCards.filter((card) => card.critical);
+  const allCriticalConnected =
+    criticalCards.length > 0 &&
+    criticalCards.every((card) => card.statusLabel === "Connected");
+
+  let targetCard = null;
+
+  targetCard = actionableCards.find(
+    (card) => card.critical && ["Error", "Token expired"].includes(card.statusLabel)
+  ) || null;
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.id === "website" && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.id === "woocommerce" && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.id === "ga4" && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.id === "search-console" && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => ["instagram", "facebook"].includes(card.id) && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.id === "meta-pixel" && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => ["smtp", "mailer", "mailchimp"].includes(card.id) && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    targetCard = actionableCards.find((card) => card.critical && card.statusLabel !== "Connected") || null;
+  }
+
+  if (!targetCard) {
+    const nextOptional = actionableCards.find((card) => !card.critical && card.statusLabel !== "Connected") || null;
+    return { healthy: true, nextOptional, allCriticalConnected };
+  }
+
+  const priorityLabel = targetCard.critical ? "Critical" : "Recommended";
+  const priorityTone = targetCard.critical ? "danger" : "warning";
+
+  const blockerMap = {
+    launch_blocker: ["website", "woocommerce", "shopify", "smtp", "mailer"],
+    attribution_blocker: ["ga4", "gtm", "meta-pixel", "tiktok-pixel", "custom-analytics"],
+    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+    data_learning_blocker: ["search-console", "mailchimp", "meta-ads", "google-ads"]
+  };
+
+  let reasonType = "launch_blocker";
+
+  for (const [type, ids] of Object.entries(blockerMap)) {
+    if (ids.includes(targetCard.id)) {
+      reasonType = type;
+      break;
+    }
+  }
+
+  const reasonLabels = {
+    launch_blocker: "Launch blocker",
+    attribution_blocker: "Attribution blocker",
+    publishing_blocker: "Publishing blocker",
+    data_learning_blocker: "Data learning blocker"
+  };
+
+  const impactChips = [];
+
+  if (targetCard.critical) {
+    impactChips.push("Launch readiness");
+  }
+
+  if (["ga4", "search-console", "gtm", "meta-pixel", "custom-analytics", "website"].includes(targetCard.id)) {
+    impactChips.push("Analytics");
+  }
+
+  if (["instagram", "facebook", "tiktok", "youtube", "linkedin"].includes(targetCard.id)) {
+    impactChips.push("Publishing");
+  }
+
+  if (["woocommerce", "shopify", "amazon", "ebay"].includes(targetCard.id)) {
+    impactChips.push("Commerce");
+  }
+
+  if (["meta-ads", "google-ads", "tiktok-ads", "meta-pixel", "tiktok-pixel"].includes(targetCard.id)) {
+    impactChips.push("Ads optimization");
+  }
+
+  return {
+    healthy: false,
+    card: targetCard,
+    priorityLabel,
+    priorityTone,
+    reasonType,
+    reasonLabel: reasonLabels[reasonType] || "Launch blocker",
+    impactChips,
+    allCriticalConnected
+  };
+}
