@@ -1,4 +1,8 @@
 import {
+  renderDomainSection
+} from "./integrations/layout.js";
+
+import {
   renderDrawerProgress,
   renderIntegrationActionButtons,
   renderIntegrationDetailsPanel,
@@ -1679,26 +1683,6 @@ function focusDrawerField(session, card) {
       }
     }
   });
-}
-
-function renderDomainSection(domain, session, escapeHtml) {
-  const attentionCount = domain.cards.filter((card) => ["Error", "Token expired"].includes(card.statusLabel)).length;
-  const blockedCount = domain.cards.filter((card) => card.statusLabel === "Not Connected").length;
-
-  return `
-    <section class="card integration-domain-card">
-      <div class="card-head">
-        <div>
-          <h3>${escapeHtml(domain.title)}</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">${escapeHtml(domain.description)}</p>
-        </div>
-        <span class="card-badge ${domain.connectedCount === domain.cards.length ? "success" : domain.connectedCount || domain.partialCount ? "warning" : "danger"}">${escapeHtml(`${domain.connectedCount} connected • ${domain.partialCount} partial • ${attentionCount} attention • ${blockedCount} missing`)}</span>
-      </div>
-      <div class="integration-domain-grid">
-        ${domain.cards.map((card) => renderIntegrationCard(card, session, escapeHtml)).join("")}
-      </div>
-    </section>
-  `;
 }
 
 function summarizeSectionCards(cards) {
