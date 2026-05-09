@@ -1,5 +1,6 @@
 import {
   buildCoverageMap,
+  buildCriticalMissing,
   summarizeSectionCards
 } from "./integrations/builders.js";
 
@@ -1131,17 +1132,6 @@ function buildDomainModels(state, session) {
       blockedCount
     };
   });
-}
-
-function buildCriticalMissing(domainModels) {
-  return domainModels
-    .flatMap((domain) => domain.cards)
-    .filter((card) => card.backendSupported && card.critical && card.statusLabel !== "Connected")
-    .slice(0, 8)
-    .map((card) => ({
-      title: card.label,
-      meta: `${card.domainTitle} • ${card.statusLabel} • ${card.whyItMatters}`
-    }));
 }
 
 function buildAISmartRecommendation(domainModels) {

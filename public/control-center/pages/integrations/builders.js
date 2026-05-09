@@ -75,3 +75,18 @@ export function buildCoverageMap(domainModels = []) {
     };
   });
 }
+
+export function buildCriticalMissing(domainModels = []) {
+  return domainModels
+    .flatMap((domain) => Array.isArray(domain.cards) ? domain.cards : [])
+    .filter((card) =>
+      card.backendSupported &&
+      card.critical &&
+      card.statusLabel !== "Connected"
+    )
+    .slice(0, 8)
+    .map((card) => ({
+      title: card.label,
+      meta: `${card.domainTitle} • ${card.statusLabel} • ${card.whyItMatters}`
+    }));
+}
