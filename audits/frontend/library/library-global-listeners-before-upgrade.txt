@@ -1,0 +1,86 @@
+  Promise.resolve()
+    .then(nextJob)
+    .finally(() => {
+      libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);
+      runNextLibraryThumbLoad();
+    });
+}
+
+function enqueueLibraryThumbLoad(job) {
+  return new Promise((resolve, reject) => {
+    libraryThumbLoadQueue.push(async () => {
+      try {
+        resolve(await job());
+      } catch (error) {
+        reject(error);
+      }
+    });
+
+    runNextLibraryThumbLoad();
+  });
+}
+
+async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {
+  const previewUrl = getAssetPreviewUrl(asset);
+  const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");
+
+  if (!requiresProtectedMediaFetch(previewUrl)) {
+    return {
+      objectUrl: previewUrl,
+      contentType: "",
+      fileName,
+      fromProtectedFetch: false
+    };
+  }
+
+  const cacheKey = buildProtectedCacheKey(projectName, asset);
+  const cached = libraryProtectedUrlCache.get(cacheKey);
+  if (cached?.objectUrl && !options.force) {
+    return {
+      objectUrl: cached.objectUrl,
+      contentType: cached.contentType,
+      fileName,
+      fromProtectedFetch: true
+    };
+  }
+
+  if (options.force) {
+    revokeLibraryProtectedUrl(cacheKey);
+  }
+
+  const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);
+  if (inFlight && !options.force) {
+    return inFlight;
+  }
+
+  const loadPromise = (async () => {
+    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+    const objectUrl = URL.createObjectURL(blob);
+    libraryProtectedUrlCache.set(cacheKey, {
+      objectUrl,
+      contentType,
+      createdAt: Date.now()
+    });
+
+    return {
+      objectUrl,
+      contentType,
+      fileName,
+      fromProtectedFetch: true
+    };
+  })();
+
+  libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);
+
+  try {
+    return await loadPromise;
+  } finally {
+    if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {
+      libraryProtectedUrlPromiseCache.delete(cacheKey);
+    }
+  }
+}
+
+async function openLibraryAsset(projectName, asset) {
+  if (!asset) {
+    throw new Error("Select an asset before opening.");
