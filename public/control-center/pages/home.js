@@ -137,12 +137,14 @@ function buildAiTeamCards(state) {
 
   const roles = [
     { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
-    { id: "writer", name: "Writer", fallback: "Prepare high-conversion messaging for active channels." },
-    { id: "designer", name: "Designer", fallback: "Polish visual direction and creative consistency." },
-    { id: "video_lead", name: "Media Agent", fallback: "Queue the next media variants for launch assets." },
-    { id: "ads_operator", name: "Ads Specialist", fallback: "Optimize paid testing and budget decisions." },
-    { id: "analyst", name: "Analyst", fallback: "Read weak signals and recommend improvements." },
-    { id: "admin", name: "Operations", fallback: "Clear blockers and keep execution flow healthy." }
+    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
   ];
 
   return roles.map((role) => {
@@ -506,7 +508,7 @@ function buildExecutiveData(state) {
       executionMode: compact(state.context.executionMode || overviewData.execution_mode, "Not set"),
       nextScheduledAction: nextScheduled
         ? `${humanizeStatus(nextScheduled.status, "Scheduled")}: ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
-        : "No scheduled action yet"
+        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
     },
 
     blockers,
@@ -537,13 +539,13 @@ function buildExecutiveData(state) {
     recent: {
       execution: latestExecution
         ? `${humanizeStatus(latestExecution.execution_status, "Completed")} on ${humanizeStatus(latestExecution.channel, "Channel")}`
-        : "No execution recorded yet",
-      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "No recommendation generated yet",
-      feedback: asString(learningLessons[0]).trim() || "No feedback captured yet"
+        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
     },
 
     advanced: {
-      projectName: projectName || "Not selected",
+      projectName: projectName || "Project not selected yet",
       notifications: unreadNotifications.length,
       pendingTasks: pendingTasks.length,
       pendingApprovals: pendingApprovals.length,
