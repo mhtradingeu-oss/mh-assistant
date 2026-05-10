@@ -1913,11 +1913,21 @@ function bindLibraryWorkspace({
   folderButtons.forEach((button) => {
     button.onclick = () => {
       const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
-      session.folderKey = folderKey;
-      session.page = 1;
-      if (folderKey === "archived") {
-        session.selectedStatus = "archived";
-      }
+
+      dispatchLibraryCommand("set-filter", {
+        filter: "folder",
+        value: folderKey
+      }, {
+        "set-filter": ({ value }) => {
+          session.folderKey = value;
+          session.page = 1;
+
+          if (value === "archived") {
+            session.selectedStatus = "archived";
+          }
+        }
+      });
+
       rerender();
     };
   });
