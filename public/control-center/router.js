@@ -80,6 +80,25 @@ const routeRegistry = {
 
 let routeAccessResolver = null;
 
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
 function getPageRoot() {
   return document.getElementById("pageRoot");
 }
@@ -238,6 +257,7 @@ export function renderRouteTemplate(route) {
 
 export function navigateTo(route, emit = true) {
   renderRouteTemplate(route);
+  notifyRouteChange(route);
 
   // Sync browser URL — setting the same hash value does not re-fire hashchange
   const newHash = `#${route}`;
