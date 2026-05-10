@@ -1,0 +1,260 @@
+const path = require('path');
+const {
+  ensureDir,
+  ensureJsonFile,
+  readJsonFile,
+  readJsonFileDurable,
+  writeJsonFile
+} = require('../integrations/storage');
+const {
+  normalizeProjectSlug,
+  resolveProjectPath
+} = require('../security/project-isolation');
+
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'projects');
+const BACKBONE_VERSION = 'mh-ops-backbone-v2';
+
+// Canonical defaults for policy_rules — these are the authoritative safe values.
+// Any governance file that is missing policy_rules (or missing individual keys)
+// will be merged with these at read-time so enforcement never silently bypasses.
+const DEFAULT_POLICY_RULES = {
+  approval_before_publish: true,
+  high_risk_claim_review_required: true,
+  brand_safety_review_required: true,
+  allow_admin_override: true,
+  auto_escalate_critical_risk: true,
+  freeze_publishing: false
+};
+
+const MAX_ITEMS = {
+  campaigns: 150,
+  contentItems: 400,
+  mediaJobs: 400,
+  workflowRuns: 250,
+  aiCommands: 300,
+  aiArtifacts: 500,
+  aiRecommendations: 500,
+  aiMemory: 300,
+  approvals: 300,
+  tasks: 400,
+  notifications: 400,
+  queue: 400,
+  events: 1000,
+  handoffs: 250
+};
+
+const STATUS_MODELS = {
+  campaigns: {
+    statuses: ['draft', 'planned', 'active', 'paused', 'completed', 'archived'],
+    lifecycle: ['draft', 'review', 'ready', 'active', 'closed']
+  },
+  content_items: {
+    statuses: ['draft', 'in_review', 'approved', 'scheduled', 'published', 'archived'],
+    lifecycle: ['draft', 'review', 'approved', 'distribution', 'closed'],
+    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+    publish_statuses: ['draft', 'scheduled', 'published', 'failed']
+  },
+  media_jobs: {
+    statuses: ['requested', 'queued', 'processing', 'completed', 'failed', 'cancelled'],
+    lifecycle: ['requested', 'prepared', 'running', 'review', 'closed'],
+    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+  },
+  workflow_runs: {
+    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+    lifecycle: ['queued', 'running', 'completed', 'closed']
+  },
+  ai_commands: {
+    statuses: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+  },
+  ai_artifacts: {
+    statuses: ['draft', 'saved', 'routed', 'archived'],
+    types: ['ai_response', 'workflow_output', 'recommendation_bundle', 'memory_snapshot']
+  },
+  ai_recommendations: {
+    statuses: ['open', 'accepted', 'routed', 'completed', 'dismissed'],
+    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+  },
+  ai_memory: {
+    scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
+    statuses: ['active', 'archived']
+  },
+  approvals: {
+    statuses: ['pending', 'approved', 'rejected', 'changes_requested', 'escalated', 'overridden', 'cancelled'],
+    lifecycle: ['requested', 'reviewing', 'decided', 'escalated', 'closed']
+  },
+  tasks: {
+    statuses: ['open', 'queued', 'in_progress', 'blocked', 'completed', 'cancelled'],
+    lifecycle: ['open', 'active', 'blocked', 'done', 'closed'],
+    priorities: ['low', 'normal', 'high', 'critical']
+  },
+  notifications: {
+    statuses: ['unread', 'read', 'archived'],
+    severities: ['info', 'success', 'warning', 'critical']
+  },
+  handoffs: {
+    statuses: ['available', 'consumed', 'superseded', 'cancelled'],
+    lifecycle: ['created', 'available', 'consumed', 'closed']
+  },
+  events: {
+    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+  },
+  execution_bridges: {
+    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+  }
+};
+
+const TEAM_ROLE_DEFS = [
+  {
+    id: 'strategist',
+    label: 'Strategist',
+    routes: ['home', 'campaign-studio', 'workflows', 'research', 'insights'],
+    service_domains: ['campaign', 'research'],
+    actions: ['plan_campaign', 'route_work', 'approve_strategy', 'request_research']
+  },
+  {
+    id: 'writer',
+    label: 'Writer',
+    routes: ['content-studio', 'workflows', 'research'],
+    service_domains: ['content'],
+    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+  },
+  {
+    id: 'designer',
+    label: 'Designer',
+    routes: ['media-studio', 'library', 'workflows'],
+    service_domains: ['media'],
+    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+  },
+  {
+    id: 'video_lead',
+    label: 'Video Lead',
+    routes: ['media-studio', 'library', 'workflows'],
+    service_domains: ['media'],
+    actions: ['create_video', 'review_video', 'handoff_video']
+  },
+  {
+    id: 'publisher',
+    label: 'Publisher',
+    routes: ['publishing', 'library', 'workflows'],
+    service_domains: ['publishing'],
+    actions: ['schedule_publish', 'publish', 'return_for_changes']
+  },
+  {
+    id: 'ads_operator',
+    label: 'Ads Operator',
+    routes: ['ads-manager', 'campaign-studio', 'workflows', 'insights'],
+    service_domains: ['media', 'campaign'],
+    actions: ['launch_ads', 'update_budget', 'request_creative', 'analyze_paid']
+  },
+  {
+    id: 'analyst',
+    label: 'Analyst',
+    routes: ['insights', 'research', 'workflows', 'home'],
+    service_domains: ['research', 'governance'],
+    actions: ['analyze_performance', 'build_report', 'open_research_task']
+  },
+  {
+    id: 'compliance_reviewer',
+    label: 'Compliance Reviewer',
+    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+    service_domains: ['governance'],
+    actions: ['review_claims', 'review_brand_safety', 'approve_release', 'escalate_risk']
+  },
+  {
+    id: 'admin',
+    label: 'Admin',
+    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+    service_domains: ['governance'],
+    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+  }
+];
+
+const ROUTE_ROLE_ACCESS = {
+  home: ['strategist', 'analyst', 'admin'],
+  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+  'media-studio': ['designer', 'video_lead', 'compliance_reviewer', 'admin'],
+  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+  research: ['strategist', 'analyst', 'writer', 'admin'],
+  governance: ['compliance_reviewer', 'admin', 'analyst'],
+  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+  integrations: ['admin'],
+  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+  library: ['designer', 'video_lead', 'publisher', 'admin'],
+  settings: ['admin']
+};
+
+const SERVICE_DOMAIN_DEFS = {
+  campaign: {
+    label: 'Campaign',
+    owner_role: 'strategist',
+    review_role: 'admin',
+    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+    route_target: 'campaign-studio',
+    page_permissions: ['campaign-studio', 'workflows', 'insights']
+  },
+  content: {
+    label: 'Content',
+    owner_role: 'writer',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+    route_target: 'content-studio',
+    page_permissions: ['content-studio', 'workflows', 'publishing']
+  },
+  media: {
+    label: 'Media',
+    owner_role: 'designer',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+    route_target: 'media-studio',
+    page_permissions: ['media-studio', 'workflows', 'publishing']
+  },
+  publishing: {
+    label: 'Publishing',
+    owner_role: 'publisher',
+    review_role: 'compliance_reviewer',
+    handoff_to: ['analyst', 'strategist'],
+    route_target: 'publishing',
+    page_permissions: ['publishing', 'governance']
+  },
+  research: {
+    label: 'Research',
+    owner_role: 'analyst',
+    review_role: 'strategist',
+    handoff_to: ['strategist', 'writer', 'ads_operator'],
+    route_target: 'research',
+    page_permissions: ['research', 'workflows', 'insights']
+  },
+  governance: {
+    label: 'Governance',
+    owner_role: 'compliance_reviewer',
+    review_role: 'admin',
+    handoff_to: ['admin'],
+    route_target: 'governance',
+    page_permissions: ['governance', 'settings']
+  }
+};
+
+const APPROVAL_DOMAIN_MAP = {
+  campaign: 'campaign',
+  content_item: 'content',
+  media_job: 'media',
+  publishing_job: 'publishing',
+  workflow_run: 'research',
+  approval: 'governance',
+  task: 'governance'
+};
+
+const ESCALATION_CHAINS = {
+  low: ['compliance_reviewer'],
+  medium: ['compliance_reviewer', 'strategist'],
+  high: ['compliance_reviewer', 'admin'],
+  critical: ['compliance_reviewer', 'admin']
+};
+
+function normalizeProjectName(projectName) {
+  return normalizeProjectSlug(projectName);
+}
