@@ -1229,7 +1229,7 @@ function renderCommandComposer(session, aiContext, escapeHtml) {
 				<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">
 					<div class="ctrl-task-fields-label">Build a structured task</div>
 					<div class="ctrl-task-field">
-						<label>Task type</label>
+						<label for="ctrlTaskType">Task type</label>
 						<select id="ctrlTaskType" class="ctrl-task-select">
 							<option value="launch"${session.taskType === "launch" ? " selected" : ""}>🚀 Launch Campaign</option>
 							<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>
@@ -1238,14 +1238,14 @@ function renderCommandComposer(session, aiContext, escapeHtml) {
 						</select>
 					</div>
 					<div class="ctrl-task-field">
-						<label>Product / focus area</label>
+						<label for="ctrlProductSelect">Product / focus area</label>
 						<select id="ctrlProductSelect" class="ctrl-task-select">
 							<option value="">— whole project —</option>
 							${productOptions.map((opt) => `<option value="${escapeHtml(opt)}"${session.taskProduct === opt ? " selected" : ""}>${escapeHtml(opt)}</option>`).join("")}
 						</select>
 					</div>
 					<div class="ctrl-task-field">
-						<label>Channel</label>
+						<label for="ctrlChannelSelect">Channel</label>
 						<select id="ctrlChannelSelect" class="ctrl-task-select">
 							<option value="">— all channels —</option>
 							${channelOptions.map((ch) => `<option value="${escapeHtml(ch)}"${session.taskChannel === ch ? " selected" : ""}>${escapeHtml(ch)}</option>`).join("")}
