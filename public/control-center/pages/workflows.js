@@ -1850,7 +1850,29 @@ export const workflowsRoute = {
           </div>
 
           <div id="wfLightStatus" class="wfexec-meta">
-            Workflows is ready. Prepare workflow inputs, send them to AI Command, or continue from Campaign Studio and Task Center.
+            Workflows is ready. Prepare workflow inputs, send them to AI Workspace, or continue from Campaign Studio and Task Center.
+          </div>
+
+          <div class="wfexec-operating-strip" aria-label="Workflow execution context">
+            <div>
+              <span>Execution</span>
+              <strong>${escapeHtml(executionMode || "manual")}</strong>
+            </div>
+
+            <div>
+              <span>Workflow Runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Runtime</span>
+              <strong>Execution ready</strong>
+            </div>
           </div>
         </section>
 
