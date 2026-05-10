@@ -1559,8 +1559,15 @@ function bindLibraryWorkspace({
     sourceSelect.removeAttribute("disabled");
     sourceSelect.removeAttribute("readonly");
     sourceSelect.onchange = (event) => {
-      session.selectedSource = event.target.value || "all";
-      session.page = 1;
+      dispatchLibraryCommand("set-filter", {
+        filter: "source",
+        value: event.target.value || "all"
+      }, {
+        "set-filter": ({ value }) => {
+          session.selectedSource = value;
+          session.page = 1;
+        }
+      });
       bindLibraryWorkspace({
         $,
         projectName,
