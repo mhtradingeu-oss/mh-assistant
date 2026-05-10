@@ -1835,7 +1835,11 @@ function bindLibraryWorkspace({
       const nextId = row.getAttribute("data-library-row-select") || "";
       if (!nextId) return;
 
-      session.selectedAssetId = nextId;
+      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+        "select-asset": ({ assetId }) => {
+          session.selectedAssetId = assetId;
+        }
+      });
       bindLibraryWorkspace({
         $,
         projectName,
