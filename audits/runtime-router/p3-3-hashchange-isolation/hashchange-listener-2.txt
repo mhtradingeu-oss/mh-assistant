@@ -1,0 +1,41 @@
+      if (input && prompt) {
+        input.value = prompt;
+      }
+
+      openGlobalCommandBar?.();
+      showMessage("AI suggestion loaded.");
+      setOpen(false);
+    });
+  });
+
+  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const route = button.getAttribute("data-ai-route");
+      if (!route) return;
+      navigateTo(route);
+      setOpen(false);
+    });
+  });
+
+  const context = $("aiDockContext");
+
+  const syncContext = () => {
+    const route = window.location.hash.replace(/^#/, "") || "home";
+
+    if (context) {
+      context.textContent = `Current workspace: ${route}`;
+    }
+  };
+
+  syncContext();
+  window.addEventListener("hashchange", syncContext);
+}
+
+
+/* =========================
+   EXECUTIVE NEW LAUNCHER
+========================= */
+
+function createExecutiveNewLauncherModal() {
+  const modal = document.createElement("div");
+  modal.id = "executiveNewLauncherModal";
