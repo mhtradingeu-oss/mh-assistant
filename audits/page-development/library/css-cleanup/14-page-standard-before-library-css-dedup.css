@@ -1,0 +1,1322 @@
+/*
+  Standard Page Compact UX
+  Final clean shared page shell for all operational pages.
+*/
+
+.std-page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.std-context-ribbon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+
+  padding: 14px 16px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.82),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.std-context-main {
+  min-width: 0;
+}
+
+.std-context-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.std-context-eyebrow {
+  flex: 0 0 auto;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color:
+    rgba(45, 212, 191, 0.9);
+}
+
+.std-context-title {
+  margin: 0;
+
+  min-width: 0;
+
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+
+  color:
+    var(--text-primary);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-context-description {
+  margin:
+    4px 0 0;
+
+  max-width: 960px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 0.9rem;
+  line-height: 1.45;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-context-metrics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-wrap: wrap;
+
+  margin-top: 10px;
+}
+
+.std-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 28px;
+
+  padding:
+    0 10px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  border:
+    1px solid rgba(148, 163, 184, 0.14);
+
+  color:
+    rgba(226, 232, 240, 0.78);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.std-context-chip strong {
+  color:
+    var(--text-primary);
+}
+
+.std-context-chip.is-success {
+  border-color:
+    rgba(45, 212, 191, 0.24);
+
+  background:
+    rgba(45, 212, 191, 0.08);
+}
+
+.std-context-chip.is-warning {
+  border-color:
+    rgba(245, 158, 11, 0.28);
+
+  background:
+    rgba(245, 158, 11, 0.08);
+}
+
+.std-context-chip.is-danger {
+  border-color:
+    rgba(248, 113, 113, 0.28);
+
+  background:
+    rgba(248, 113, 113, 0.08);
+}
+
+.std-context-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.std-context-btn {
+  min-height: 36px;
+
+  padding:
+    0 13px;
+
+  border-radius:
+    999px;
+
+  white-space: nowrap;
+}
+
+.std-smart-strip-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 12px 14px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(45, 212, 191, 0.06);
+
+  border:
+    1px solid rgba(45, 212, 191, 0.14);
+}
+
+.std-smart-strip-copy {
+  min-width: 0;
+}
+
+.std-smart-strip-copy strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color:
+    var(--text-primary);
+
+  font-size: 0.98rem;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-smart-strip-copy p {
+  margin:
+    3px 0 0;
+
+  max-width: 920px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-main-content-slot {
+  min-width: 0;
+}
+
+/* Retire old standard-card surfaces if old DOM survives before hard refresh. */
+.std-page-header,
+.std-section-block[data-ui-role="page-power-summary"],
+.std-section-block[data-ui-role="current-status"],
+.std-main-right {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+
+  .std-context-ribbon {
+    grid-template-columns: 1fr;
+  }
+
+  .std-context-actions {
+    justify-content: flex-start;
+  }
+
+  .std-smart-strip-compact {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 760px) {
+
+  .std-context-ribbon {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .std-context-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .std-context-description {
+    white-space: normal;
+  }
+
+  .std-context-chip {
+    min-height: 26px;
+    font-size: 0.74rem;
+  }
+
+  .std-context-actions {
+    width: 100%;
+  }
+
+  .std-context-btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* =========================================
+   Interaction Safety
+========================================= */
+
+.workspace,
+#pageRoot,
+.page,
+.std-page-shell,
+.std-main-content-slot {
+  pointer-events: auto;
+}
+
+.command-backdrop[hidden],
+.command-backdrop[aria-hidden="true"],
+.sidebar-backdrop[hidden],
+.sidebar-backdrop[aria-hidden="true"],
+.loading-overlay[hidden],
+.loading-overlay[aria-hidden="true"],
+.ai-dock-panel[hidden],
+.ai-dock-panel[aria-hidden="true"] {
+  pointer-events: none !important;
+}
+
+/* =========================================
+   Form / Input Click Safety
+========================================= */
+
+input,
+select,
+textarea,
+button,
+.setup-input,
+.setup-textarea {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+}
+
+/* =========================================
+   Fix Home Prompt Button Overflow
+========================================= */
+
+.home-ai-prompt-grid .quick-action-btn,
+.home-decision-quick-actions .quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+
+  min-height: 92px;
+  height: auto;
+
+  white-space: normal;
+  text-align: left;
+  overflow: hidden;
+}
+
+.home-ai-prompt-grid .quick-action-btn span,
+.home-decision-quick-actions .quick-action-btn span {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   Generic Page Surface Recovery
+========================================= */
+
+.page article,
+.page .card,
+.page .panel,
+.page .data-card,
+.page .status-card,
+.page .action-card {
+  color: var(--text-primary);
+}
+
+.page .card,
+.page .panel,
+.page article[class*="card"],
+.page div[class*="card"] {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16);
+
+  border-radius: 18px;
+}
+
+/* =========================================
+   Integration Row Recovery
+========================================= */
+
+.integration-card,
+.integration-row,
+.integration-source-card,
+.integration-platform-card,
+[data-integration-id],
+[data-integration-source],
+[data-integration-platform] {
+  color: var(--text-primary) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(8, 16, 26, 0.92)
+    ) !important;
+
+  border:
+    1px solid rgba(148, 163, 184, 0.16) !important;
+
+  border-radius: 16px !important;
+
+  padding: 14px !important;
+}
+
+.integration-card *,
+.integration-row *,
+.integration-source-card *,
+.integration-platform-card *,
+[data-integration-id] *,
+[data-integration-source] *,
+[data-integration-platform] * {
+  color: inherit;
+}
+
+/* =========================================
+   AI Workspace Recovery
+========================================= */
+
+.ai-agent-card,
+.ai-role-card,
+.ai-command-card,
+.ai-specialist-card,
+[data-ai-agent],
+[data-ai-role] {
+  display: grid;
+  gap: 12px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.9),
+      rgba(8, 16, 26, 0.95)
+    );
+
+  border:
+    1px solid rgba(45, 212, 191, 0.14);
+}
+
+.ai-agent-card button,
+.ai-role-card button,
+.ai-command-card button,
+.ai-specialist-card button,
+[data-ai-agent] button,
+[data-ai-role] button {
+  width: fit-content;
+}
+
+/* =========================================
+   Better Wide / Dense Layouts
+========================================= */
+
+.std-main-content-slot > .card,
+.std-main-content-slot > section.card {
+  margin-bottom: 16px;
+}
+
+.home-two-column-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.7fr);
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .home-two-column-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   Library Workspace UX Polish
+========================================= */
+
+.library-workspace-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(340px, 420px);
+
+  gap: 18px;
+  align-items: start;
+}
+
+.library-workspace-main {
+  min-width: 0;
+}
+
+.library-workspace-side {
+  position: sticky;
+  top: 88px;
+}
+
+/* =========================================
+   Compact Finder Toolbar
+========================================= */
+
+.library-finder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 10px 12px;
+  margin-bottom: 12px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(15, 23, 42, 0.48);
+
+  border:
+    1px solid rgba(148, 163, 184, 0.12);
+}
+
+.library-finder-toolbar .btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+/* =========================================
+   Compact Filter Ribbon
+========================================= */
+
+.library-filter-bar {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr))
+    minmax(240px, 1.2fr);
+
+  gap: 12px;
+
+  padding: 14px;
+  margin-bottom: 14px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.72),
+      rgba(8, 16, 26, 0.84)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.12);
+}
+
+.library-filter-field {
+  min-width: 0;
+}
+
+.library-filter-field .setup-label {
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+/* =========================================
+   Upload Zone Modernization
+========================================= */
+
+.library-upload-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    320px;
+
+  gap: 18px;
+  align-items: stretch;
+}
+
+.library-drop-zone {
+  min-height: 180px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px;
+
+  text-align: center;
+
+  border-radius: 24px;
+
+  border:
+    1px dashed rgba(45, 212, 191, 0.34);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.76),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.library-drop-zone:hover,
+.library-drop-zone.is-drag-active {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(45, 212, 191, 0.68);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 32, 52, 0.92),
+      rgba(8, 16, 26, 0.98)
+    );
+}
+
+/* =========================================
+   Asset Grid Density
+========================================= */
+
+.library-grid-body {
+  gap: 14px;
+}
+
+.library-grid-item,
+.library-asset-card {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.library-grid-preview {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.library-grid-preview img,
+.library-grid-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* =========================================
+   Preview Panel
+========================================= */
+
+.library-preview-card {
+  overflow: hidden;
+}
+
+#libraryPreviewVisual {
+  min-height: 260px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background:
+    rgba(2, 6, 23, 0.72);
+
+  overflow: hidden;
+}
+
+.library-preview-image,
+.library-preview-video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+/* =========================================
+   Mobile
+========================================= */
+
+@media (max-width: 1280px) {
+  .library-filter-bar {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .library-upload-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .library-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .library-workspace-side {
+    position: relative;
+    top: auto;
+  }
+
+  .library-filter-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   Library Workspace UX Polish
+========================================= */
+
+.library-workspace-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(340px, 420px);
+
+  gap: 18px;
+  align-items: start;
+}
+
+.library-workspace-main {
+  min-width: 0;
+}
+
+.library-workspace-side {
+  position: sticky;
+  top: 88px;
+}
+
+/* =========================================
+   Compact Finder Toolbar
+========================================= */
+
+.library-finder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 10px 12px;
+  margin-bottom: 12px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(15, 23, 42, 0.48);
+
+  border:
+    1px solid rgba(148, 163, 184, 0.12);
+}
+
+.library-finder-toolbar .btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+/* =========================================
+   Compact Filter Ribbon
+========================================= */
+
+.library-filter-bar {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr))
+    minmax(240px, 1.2fr);
+
+  gap: 12px;
+
+  padding: 14px;
+  margin-bottom: 14px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.72),
+      rgba(8, 16, 26, 0.84)
+    );
+
+  border:
+    1px solid rgba(148, 163, 184, 0.12);
+}
+
+.library-filter-field {
+  min-width: 0;
+}
+
+.library-filter-field .setup-label {
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+/* =========================================
+   Upload Zone Modernization
+========================================= */
+
+.library-upload-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    320px;
+
+  gap: 18px;
+  align-items: stretch;
+}
+
+.library-drop-zone {
+  min-height: 180px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px;
+
+  text-align: center;
+
+  border-radius: 24px;
+
+  border:
+    1px dashed rgba(45, 212, 191, 0.34);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.76),
+      rgba(8, 16, 26, 0.92)
+    );
+
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.library-drop-zone:hover,
+.library-drop-zone.is-drag-active {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(45, 212, 191, 0.68);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 32, 52, 0.92),
+      rgba(8, 16, 26, 0.98)
+    );
+}
+
+/* =========================================
+   Asset Grid Density
+========================================= */
+
+.library-grid-body {
+  gap: 14px;
+}
+
+.library-grid-item,
+.library-asset-card {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.library-grid-preview {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.library-grid-preview img,
+.library-grid-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* =========================================
+   Preview Panel
+========================================= */
+
+.library-preview-card {
+  overflow: hidden;
+}
+
+#libraryPreviewVisual {
+  min-height: 260px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background:
+    rgba(2, 6, 23, 0.72);
+
+  overflow: hidden;
+}
+
+.library-preview-image,
+.library-preview-video {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+/* =========================================
+   Mobile
+========================================= */
+
+@media (max-width: 1280px) {
+  .library-filter-bar {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .library-upload-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .library-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .library-workspace-side {
+    position: relative;
+    top: auto;
+  }
+
+  .library-filter-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   Library Interaction + Density Fix
+========================================= */
+
+/* Native file input must stay functional but not visually duplicate Choose Files. */
+.library-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Ensure Library controls are clickable/editable. */
+.library-filter-bar,
+.library-filter-field,
+.library-filter-field *,
+.library-upload-grid,
+.library-upload-grid *,
+.library-drop-zone,
+.library-drop-zone *,
+.library-finder-toolbar,
+.library-finder-toolbar *,
+.library-folder-list,
+.library-folder-list *,
+.library-preview-actions,
+.library-preview-actions * {
+  pointer-events: auto !important;
+}
+
+/* Compact folder list instead of huge native-looking buttons. */
+.library-folder-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+
+  width: 100%;
+}
+
+.library-folder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 38px;
+  padding: 8px 10px;
+
+  border-radius: 12px;
+
+  color: var(--text-primary) !important;
+  background: rgba(15, 23, 42, 0.78) !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.library-folder-item small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.library-folder-item.is-active,
+.library-folder-item:hover {
+  border-color: rgba(45, 212, 191, 0.45) !important;
+  background: rgba(20, 184, 166, 0.16) !important;
+}
+
+/* Reduce oversized asset cards/previews. */
+.library-grid-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.library-grid-card,
+.library-grid-item,
+.library-asset-card {
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+.library-grid-preview {
+  aspect-ratio: 4 / 3 !important;
+  max-height: 180px !important;
+  min-height: 120px !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(2, 6, 23, 0.62);
+}
+
+.library-grid-preview img,
+.library-grid-preview video,
+.library-grid-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+}
+
+.library-grid-icon {
+  font-size: 1rem;
+  font-weight: 800;
+  opacity: 0.88;
+}
+
+/* Preview panel should not dominate the whole screen. */
+#libraryPreviewVisual {
+  min-height: 220px;
+  max-height: 440px;
+}
+
+.library-preview-image,
+.library-preview-video {
+  max-height: 390px;
+}
+
+/* Upload zone should be compact and not show duplicate browser input. */
+.library-drop-zone {
+  min-height: 150px;
+}
+
+.library-drop-zone .btn,
+#libraryChooseFilesBtn {
+  cursor: pointer;
+}
+
+/* Library upload buttons alignment. */
+.library-upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.library-upload-controls .setup-helper {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1280px) {
+  .library-folder-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .library-grid-body {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .library-folder-list,
+  .library-grid-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Library professional polish - 20260510 */
+[data-page="library"] .library-smart-shell {
+  display: grid;
+  gap: 22px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+[data-page="library"] .library-smart-shell > .card {
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+[data-page="library"] .library-overview-grid,
+[data-page="library"] .library-required-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+[data-page="library"] .library-upload-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+[data-page="library"] .library-drop-zone {
+  min-height: 178px;
+  border-radius: 20px;
+  border: 1px dashed rgba(99, 102, 241, 0.45);
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.12), transparent 34%),
+    rgba(248, 250, 252, 0.76);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+[data-page="library"] .library-drop-zone:hover,
+[data-page="library"] .library-drop-zone:focus {
+  border-color: rgba(79, 70, 229, 0.72);
+  box-shadow: 0 18px 42px rgba(79, 70, 229, 0.13);
+  transform: translateY(-1px);
+}
+
+[data-page="library"] .library-action-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+[data-page="library"] .library-action-toolbar .btn,
+[data-page="library"] .library-finder-toolbar .btn {
+  min-height: 38px;
+  border-radius: 999px;
+}
+
+[data-page="library"] .library-workspace-grid.library-finder-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: 18px;
+  align-items: start;
+}
+
+[data-page="library"] .library-workspace-main,
+[data-page="library"] .library-workspace-side {
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+}
+
+[data-page="library"] .library-workspace-side {
+  position: sticky;
+  top: 92px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+
+[data-page="library"] .library-finder-topbar,
+[data-page="library"] .library-finder-toolbar {
+  gap: 12px;
+  border-radius: 18px;
+}
+
+[data-page="library"] .library-inspector-title {
+  display: grid;
+  gap: 8px;
+}
+
+[data-page="library"] .library-inspector-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+[data-page="library"] .library-inspector-path {
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.045);
+  padding: 10px 12px;
+  word-break: break-word;
+}
+
+[data-page="library"] .library-inspector-more {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 10px 12px;
+  background: rgba(248, 250, 252, 0.7);
+}
+
+@media (max-width: 1180px) {
+  [data-page="library"] .library-upload-grid,
+  [data-page="library"] .library-workspace-grid.library-finder-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="library"] .library-workspace-side {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  [data-page="library"] .library-smart-shell {
+    gap: 16px;
+  }
+
+  [data-page="library"] .library-action-toolbar {
+    justify-content: stretch;
+  }
+
+  [data-page="library"] .library-action-toolbar .btn,
+  [data-page="library"] .library-finder-toolbar .btn {
+    width: 100%;
+  }
+
+  [data-page="library"] .library-overview-grid,
+  [data-page="library"] .library-required-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   LIBRARY UX POLISH
+   Safe visual improvements only
+========================================================= */
+
+.library-grid-card {
+  border: 1px solid rgba(255,255,255,0.08);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  cursor: pointer;
+}
+
+.library-grid-card:hover {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.03);
+  transform: translateY(-1px);
+}
+
+.library-grid-card.is-active {
+  border-color: #3b82f6;
+  background: rgba(59,130,246,0.10);
+  box-shadow:
+    0 0 0 1px rgba(59,130,246,0.25),
+    0 10px 30px rgba(59,130,246,0.15);
+}
+
+.library-grid-card.is-active .library-grid-title {
+  color: #93c5fd;
+}
+
+.library-folder-item.is-active {
+  background: rgba(59,130,246,0.14);
+  border-color: rgba(59,130,246,0.35);
+  color: #dbeafe;
+}
+
+#libraryDropZone {
+  border: 1px dashed rgba(255,255,255,0.16);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+#libraryDropZone:hover,
+#libraryDropZone.is-drag-active {
+  border-color: #3b82f6;
+  background: rgba(59,130,246,0.08);
+}
+
+#libraryChooseFilesBtn {
+  cursor: pointer;
+}
+
+#libraryUploadBtn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#libraryDropInfo {
+  opacity: 0.82;
+  font-size: 12px;
+}
+
