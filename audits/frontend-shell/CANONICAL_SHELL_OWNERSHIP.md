@@ -32,8 +32,6 @@ Must NOT own:
 - workflow logic
 - AI orchestration
 
----
-
 ## app.js
 
 Acts only as:
@@ -49,8 +47,6 @@ Must NOT become:
 - AI authority
 - rendering monolith
 
----
-
 ## runtime/
 
 Official owner of:
@@ -63,8 +59,6 @@ Official owner of:
 
 All future runtime systems must be isolated here.
 
----
-
 ## styles/
 
 Official owner of:
@@ -75,8 +69,6 @@ Official owner of:
 - responsive behavior
 - command layer
 - AI layer
-
----
 
 ## legacy/
 
