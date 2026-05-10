@@ -1590,8 +1590,15 @@ function bindLibraryWorkspace({
   if (sortSelect) {
     sortSelect.value = session.sortBy;
     sortSelect.onchange = (event) => {
-      session.sortBy = event.target.value || "updated_desc";
-      session.page = 1;
+      dispatchLibraryCommand("set-filter", {
+        filter: "sort",
+        value: event.target.value || "updated_desc"
+      }, {
+        "set-filter": ({ value }) => {
+          session.sortBy = value;
+          session.page = 1;
+        }
+      });
       bindLibraryWorkspace({
         $,
         projectName,
