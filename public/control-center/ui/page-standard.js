@@ -1,4 +1,4 @@
-import { getGlobalNextBestAction } from "../system-intelligence.js";
+import { getCachedNextBestAction, getGlobalNextBestAction } from "../system-intelligence.js";
 
 const REQUIRED_ROUTES = [
   "home",
@@ -299,8 +299,8 @@ function nextActionFor(route, metrics) {
   let recommendation = "";
 
   try {
-    const globalAction = getGlobalNextBestAction(metrics.state);
-    recommendation = asString(globalAction?.recommendation || globalAction?.title || globalAction?.summary || globalAction);
+    const cachedAction = getCachedNextBestAction(metrics.state);
+    recommendation = asString(cachedAction?.recommendation || cachedAction?.title || cachedAction?.summary || cachedAction);
   } catch {
     recommendation = "";
   }
@@ -323,6 +323,18 @@ function nextActionFor(route, metrics) {
   };
 
   return recommendation || fallback[route] || fallback.home;
+}
+
+function resolveFreshNextAction(context, fallbackAction = "") {
+  const state = getStateFromContext(context);
+
+  try {
+    const globalAction = getGlobalNextBestAction(state);
+    const next = asString(globalAction?.recommendation || globalAction?.title || globalAction?.summary || globalAction);
+    return next || fallbackAction;
+  } catch {
+    return fallbackAction;
+  }
 }
 
 function fillPrompt(prompt, context) {
@@ -530,12 +542,18 @@ export function applyStandardPageLayout(context) {
   const askAiBtn = shell.querySelector("#stdAskAiAction");
   if (askAiBtn) {
     askAiBtn.textContent = "Ask AI";
-    askAiBtn.onclick = () => queueAiPrompt(`Review ${copy.title}. Current recommended move: ${nextAction}`, context);
+    askAiBtn.onclick = () => {
+      const freshAction = resolveFreshNextAction(context, nextAction);
+      queueAiPrompt(`Review ${copy.title}. Current recommended move: ${freshAction}`, context);
+    };
   }
 
   const stripBtn = shell.querySelector("#stdSmartStripBtn");
   if (stripBtn) {
-    stripBtn.onclick = () => queueAiPrompt(nextAction, context);
+    stripBtn.onclick = () => {
+      const freshAction = resolveFreshNextAction(context, nextAction);
+      queueAiPrompt(freshAction, context);
+    };
   }
 
   page.dataset.stdLayoutInitialized = "true";

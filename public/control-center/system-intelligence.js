@@ -412,6 +412,66 @@ export function getGlobalNextBestAction(state) {
   return buildSystemIntelligence(state).nextBestAction;
 }
 
+export function getCachedNextBestAction(state) {
+  const data = asObject(asObject(state).data);
+  const readiness = asObject(asObject(data.readiness).dashboard || data.readiness);
+  const activity = asObject(data.activity);
+  const operations = asObject(data.operations);
+
+  const cachedCandidates = [
+    ...asArray(readiness.next_best_actions),
+    ...asArray(activity.insights?.recommendations),
+    ...asArray(activity.learning?.recommendations),
+    ...asArray(operations.ai_recommendations?.items)
+  ];
+
+  const first = cachedCandidates.find((item) => {
+    if (typeof item === "string") {
+      return hasValue(item);
+    }
+
+    const obj = asObject(item);
+    return hasValue(obj.recommendation) || hasValue(obj.title) || hasValue(obj.summary) || hasValue(obj.action);
+  });
+
+  if (!first) {
+    return {
+      title: "Maintain execution momentum",
+      recommendation: "Maintain execution momentum",
+      summary: "Use AI Workspace to review priorities and proceed with the next operating step.",
+      targetPage: "ai-command",
+      actionLabel: "Open AI Workspace"
+    };
+  }
+
+  if (typeof first === "string") {
+    const message = asString(first);
+    return {
+      title: message,
+      recommendation: message,
+      summary: message,
+      targetPage: "ai-command",
+      actionLabel: "Open AI Workspace"
+    };
+  }
+
+  const candidate = asObject(first);
+  const message =
+    asString(candidate.recommendation) ||
+    asString(candidate.title) ||
+    asString(candidate.summary) ||
+    asString(candidate.action);
+
+  return {
+    ...candidate,
+    title: asString(candidate.title) || message,
+    recommendation: message,
+    summary: asString(candidate.summary) || message,
+    targetPage: asString(candidate.targetPage || candidate.target_page) || "ai-command",
+    actionLabel: asString(candidate.actionLabel || candidate.action_label) || "Open AI Workspace"
+  };
+}
+
 export function getPageRecommendations(state, pageId) {
   const page = normalizeText(pageId || "");
   const intelligence = buildSystemIntelligence(state);
