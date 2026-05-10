@@ -65,6 +65,7 @@ import {
   CONTROL_ACCESS_KEY_STORAGE_KEY,
   CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
 } from "./constants.js";
+import { getCommandRuntimeSnapshot } from "./runtime/command-runtime.js";
 import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
 
 /* =========================
@@ -1030,6 +1031,7 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
     lastClick: readLastClickDiagnostic(),
     accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
     overlay: getOverlayState(),
     trace: runtimeTraceHistory.slice(-20)
   };
@@ -1063,6 +1065,10 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
       `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
       `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
       `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
       `lastClick: ${formatLastClickSummary(payload.lastClick)}`
     ].join("\n");
   }
@@ -1119,6 +1125,7 @@ function persistRuntimeTrace(options = {}) {
     lastClick: readLastClickDiagnostic(),
     accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
     appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
     overlay: getOverlayState(),
     trace: runtimeTraceHistory.slice(-20)
   };
@@ -3363,6 +3370,18 @@ function bindShellMeasurements() {
 /* =========================
    COMMANDS & SEARCH
 ========================= */
+
+function getCommandRuntimeState() {
+  const commandBar = $("globalCommandBar");
+  const commandBackdrop = $("commandBackdrop");
+  const aiDock = $("aiDock");
+
+  return getCommandRuntimeSnapshot({
+    commandBar,
+    commandBackdrop,
+    aiDock
+  });
+}
 
 function executeSearch() {
   const input = $("globalSearch");
