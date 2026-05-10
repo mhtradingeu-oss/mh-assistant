@@ -1523,8 +1523,15 @@ function bindLibraryWorkspace({
   if (statusSelect) {
     statusSelect.value = session.selectedStatus;
     statusSelect.onchange = (event) => {
-      session.selectedStatus = event.target.value || "all";
-      session.page = 1;
+      dispatchLibraryCommand("set-filter", {
+        filter: "status",
+        value: event.target.value || "all"
+      }, {
+        "set-filter": ({ value }) => {
+          session.selectedStatus = value;
+          session.page = 1;
+        }
+      });
       bindLibraryWorkspace({
         $,
         projectName,
