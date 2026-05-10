@@ -1,4 +1,10 @@
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot,
+  selectProjectPayload
+} from "../state.js";
 import {
 	getSharedHandoff,
 	setSharedAiDraft,
@@ -1650,15 +1656,17 @@ export const aiCommandRoute = {
   } = context;
 
   const state = getState();
-  const projectName = asString(state.context.currentProject || "");
+  const projectName = asString(selectCurrentProject(state) || "");
   const market = asString(state.context.currentMarket || "");
   const language = asString(state.context.currentLanguage || "");
   const campaign = asString(state.context.activeCampaign || "");
   const executionMode = asString(state.context.executionMode || "");
 
-  const overview = asObject(state.data.overview?.overview || state.data.overview);
-  const readiness = asObject(state.data.readiness?.dashboard || state.data.readiness);
-  const operations = asObject(state.data.operations);
+  const payload = asObject(selectProjectPayload(state));
+
+  const overview = asObject(payload.overview?.overview || payload.overview);
+  const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+  const operations = asObject(selectOperationsSnapshot(state));
 
   const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
   const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
