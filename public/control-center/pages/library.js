@@ -1,3 +1,4 @@
+import { normalizeLibraryAsset, normalizeLibraryAssets } from "./library/projection-adapter.js";
 import {
   AccessKeyError,
   archiveProjectAsset,
