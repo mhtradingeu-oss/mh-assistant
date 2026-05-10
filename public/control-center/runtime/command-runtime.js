@@ -20,7 +20,7 @@
    Runtime State
 ========================================= */
 
-const COMMAND_RUNTIME_VERSION = "phase-0-skeleton";
+const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
 
 /* =========================================
    Runtime Ownership Plan
@@ -40,6 +40,39 @@ const COMMAND_RUNTIME_VERSION = "phase-0-skeleton";
   - keyboard shortcuts
   - runtime transitions
 */
+
+/* =========================================
+   Runtime Snapshot Helpers
+========================================= */
+
+export function getCommandRuntimeSnapshot({
+  commandBar = null,
+  commandBackdrop = null,
+  aiDock = null
+} = {}) {
+  return {
+    version: COMMAND_RUNTIME_VERSION,
+
+    commandBar: {
+      exists: Boolean(commandBar),
+      hidden: Boolean(commandBar?.hidden),
+      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+      className: String(commandBar?.className || "")
+    },
+
+    commandBackdrop: {
+      exists: Boolean(commandBackdrop),
+      hidden: Boolean(commandBackdrop?.hidden),
+      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+      className: String(commandBackdrop?.className || "")
+    },
+
+    aiDock: {
+      exists: Boolean(aiDock),
+      className: String(aiDock?.className || "")
+    }
+  };
+}
 
 /* =========================================
    Future Canonical State Model
@@ -76,4 +109,3 @@ window.__MH_COMMAND_RUNTIME__ = {
   version: COMMAND_RUNTIME_VERSION,
   active: false,
 };
-
