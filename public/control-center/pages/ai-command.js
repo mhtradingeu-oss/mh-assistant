@@ -1,3 +1,4 @@
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 import {
 	getSharedHandoff,
 	setSharedAiDraft,
@@ -1067,6 +1068,33 @@ async function submitDurableCommand({
 //  RENDER: CONTROL ROOM HEADER
 // ============================================================
 
+
+function buildProjectedAgentCards(state) {
+  const projectedMembers = getProjectedTeamMembers(state);
+  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+
+  if (!projectedMembers.length) return AGENT_CARDS;
+
+  return projectedMembers.map((member) => {
+    const id = asString(member.role || member.id).toLowerCase();
+    const fallback =
+      AGENT_CARDS.find((agent) => agent.id === id) ||
+      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+      AGENT_CARDS[0] ||
+      {};
+
+    return {
+      ...fallback,
+      id,
+      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+      role: asString(member.role || fallback.role || id),
+      purpose: asString(member.purpose || member.description || fallback.purpose || "Support the current operating context."),
+      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+      active: id === activeRole
+    };
+  });
+}
+
 function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
 	const projectLabel = aiContext.projectName || "No project selected";
 	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
@@ -1132,6 +1160,7 @@ function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeH
 }
 
 // ============================================================
+
 //  RENDER: TEAM SELECTOR
 // ============================================================
 
@@ -1639,6 +1668,7 @@ export const aiCommandRoute = {
   const session = ensureSession(projectName || "__default__");
   hydrateSessionDraft(projectName || "__default__", session);
 
+  const projectedAgentCards = buildProjectedAgentCards(state);
   const currentMode = getModeMeta(session.modeId || "operations");
   const root = $("ctrlRoomRoot");
   if (!root) return;
@@ -1691,7 +1721,7 @@ export const aiCommandRoute = {
         </div>
 
         <div class="aicmd-agent-grid">
-          ${AGENT_CARDS.map((agent) => `
+          ${projectedAgentCards.map((agent) => `
             <article class="aicmd-agent-card${agent.id === session.modeId ? " is-active" : ""}">
               <h4>${escapeHtml(agent.name)}</h4>
               <div class="aicmd-agent-meta">
