@@ -1,0 +1,371 @@
+43:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+53:    aiModeId: "operations",
+77:    aiModeId: "operations",
+98:const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
+100:const workflowSessions = new Map();
+102:let workflowBridgeRegistered = false;
+103:let workflowAutoModeUnsubscribe = null;
+104:let workflowAutomationEnabled = false;
+105:const workflowAutomationState = {
+164:  return "draft";
+180:  const context = asObject(state.context);
+181:  const overview = asObject(state.data.overview?.overview);
+182:  const activity = asObject(state.data.activity);
+190:    project: firstNonEmpty(context.currentProject, overview.project_name),
+192:    product: firstNonEmpty(overview.project_name, context.currentProject),
+200:    status: "draft",
+211:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+212:    acc[workflow.id] = createEmptyRunState();
+218:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+219:    acc[workflow.id] = {
+227:function buildOperationsFingerprint(operations) {
+229:    asString(operations?.backbone?.last_updated),
+230:    String(operations?.workflows?.total_runs || 0),
+231:    String(operations?.tasks?.total || 0)
+258:function saveLocalDraft(projectName, workflowId, payload) {
+262:  projectDrafts[workflowId] = {
+263:    ...asObject(projectDrafts[workflowId]),
+269:  return projectDrafts[workflowId];
+275:  WORKFLOW_CATALOG.forEach((workflow) => {
+276:    const draft = asObject(local[workflow.id]);
+277:    if (!Object.keys(draft).length) return;
+278:    session.inputsByWorkflow[workflow.id] = {
+279:      ...session.inputsByWorkflow[workflow.id],
+280:      ...asObject(draft.inputs)
+282:    if (draft.lastSelected) {
+283:      session.selectedWorkflowId = workflow.id;
+285:    if (draft.updatedAt) {
+286:      session.draftStatus = `Draft restored ${formatDateTime(draft.updatedAt)}`;
+292:function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {
+293:  const saved = saveLocalDraft(projectName, workflowId, {
+294:    inputs: asObject(session.inputsByWorkflow[workflowId]),
+295:    workflowId,
+298:  session.draftStatus = hint || `Draft saved ${formatDateTime(saved.updatedAt)}`;
+301:function ensureSession(projectName, defaults, operations) {
+303:  if (!workflowSessions.has(key)) {
+304:    workflowSessions.set(key, {
+309:      draftStatus: "",
+311:      operationsFingerprint: "",
+325:    const session = workflowSessions.get(key);
+326:    session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {
+327:      acc[workflow.id] = {
+329:        ...asObject(session.inputsByWorkflow?.[workflow.id])
+335:    session.draftStatus = asString(session.draftStatus);
+336:    session.operationsFingerprint = asString(session.operationsFingerprint);
+350:  const session = workflowSessions.get(key);
+352:  hydrateSessionFromOperations(session, operations);
+356:function hydrateSessionFromOperations(session, operations) {
+357:  const fingerprint = buildOperationsFingerprint(operations);
+358:  if (!fingerprint || session.operationsFingerprint === fingerprint) return;
+361:  asArray(operations?.workflows?.items).forEach((item) => {
+362:    const sourceId = asString(item.workflow_id);
+386:  session.operationsFingerprint = fingerprint;
+390:  const dashboard = asObject(session.intelligence.dashboard || state.data);
+391:  const overviewBlock = asObject(dashboard.overview || state.data.overview);
+393:  const readinessRoot = asObject(dashboard.readiness || state.data.readiness);
+395:  const integrations = asObject(dashboard.integrations || state.data.integrations);
+396:  const assets = asObject(dashboard.assets || state.data.assets);
+397:  const activity = asObject(dashboard.activity || state.data.activity);
+423:    projectName: firstNonEmpty(state.context.currentProject, overview.project_name),
+424:    campaignName: firstNonEmpty(state.context.activeCampaign),
+444:    draft: 0,
+455:    else counts.draft += 1;
+472:function getBlockedRequirements(workflow, inputs, context) {
+474:  const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+479:  if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {
+483:  if (workflow.id === "generate-report" && context.missingIntegrations.length) {
+487:  if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {
+488:    blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");
+494:function buildWorkflowPrompt(workflow, inputs, context) {
+496:    `Workflow: ${workflow.title}`,
+497:    `Purpose: ${workflow.purpose}`,
+509:function buildFallbackOutput(workflow, inputs, context) {
+512:  const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
+515:    title: `${workflow.title} execution package`,
+516:    summary: `Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.`,
+519:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+520:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+523:    requiredInputs: workflow.requiredInputs.map(titleCase),
+526:        label: `Open ${titleCase(workflow.routeHint)}`,
+527:        route: workflow.routeHint,
+528:        reason: `Continue execution in ${titleCase(workflow.routeHint)}.`
+533:        reason: "Refine this workflow package with AI reasoning."
+554:      workflowId: mapped.id,
+558:      prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, `Build a ${mapped.title.toLowerCase()} execution plan from current system blockers and dependencies.`)
+564:      workflowId: "fix-integrations",
+568:      prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."
+574:      workflowId: "prepare-publishing-package",
+584:      workflowId: "launch-campaign",
+585:      title: "Define launch campaign workflow",
+588:      prompt: "Create a launch campaign workflow with owner sequence and execution gates."
+594:    workflowId: selected.id,
+596:    reason: "Current context is sufficient to run the selected execution workflow now.",
+612:        <article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>
+613:        <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
+614:        <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
+656:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+685:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+688:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+693:      <div id="workflowAutomationProgress" class="wfexec-meta">
+694:        ${esc(workflowAutomationState.progress || "")}
+697:      <div id="workflowAutomationResult" class="wfexec-meta">
+698:        ${esc(workflowAutomationState.result || "")}
+710:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+713:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+716:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+719:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+744:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+747:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+767:function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {
+775:            ${WORKFLOW_CATALOG.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}
+801:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Run Workflow</button>
+802:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Run</button>
+807:      <div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>
+817:        ${WORKFLOW_CATALOG.map((workflow) => {
+818:          const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+819:          const run = asObject(session.runsByWorkflow[workflow.id]);
+820:          const blocked = getBlockedRequirements(workflow, inputs, context);
+823:            <article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">
+825:                <h4>${escapeHtml(workflow.title)}</h4>
+828:              <p>${escapeHtml(workflow.purpose)}</p>
+829:              <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
+832:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Run</button>
+833:                <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
+834:                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+845:function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {
+851:        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+876:        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
+877:        <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
+878:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+879:        <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
+880:        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
+882:      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+894:  workflow,
+907:          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+911:          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+918:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+920:  const handoffId = asString(handoff?.id);
+921:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+923:  const payload = asObject(handoff?.payload);
+924:  const fromWorkflowId = asString(payload.workflow_id);
+925:  const modeId = asString(payload?.draft_context?.modeId);
+927:  const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;
+929:  session.selectedWorkflowId = workflowId;
+930:  session.inputsByWorkflow[workflowId] = {
+931:    ...session.inputsByWorkflow[workflowId],
+932:    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+933:    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+934:    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+935:    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+936:    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+940:    const run = session.runsByWorkflow[workflowId];
+944:    run.source = "handoff";
+949:  session.lastAppliedHandoffId = handoffId;
+950:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+951:    console.warn("Failed to consume workflow handoff:", error.message);
+953:  showMessage?.("Workflow context restored from shared handoff.");
+966:    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+980:  const state = getState();
+981:  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+999:          dashboard: getState().data,
+1003:            ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")
+1013:          error: error.message || "Failed to load workflow intelligence",
+1026:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+1029:      `Refine the ${workflow.title.toLowerCase()} execution package.`,
+1037:    `Build a ${workflow.title.toLowerCase()} execution package.`,
+1050:  workflow,
+1059:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+1062:    modeId: workflow.aiModeId,
+1064:    lastResponseTitle: asString(run.output?.title || workflow.title),
+1070:  const handoff = {
+1071:    source_page: "workflows",
+1075:      workflow_id: workflow.id,
+1076:      workflow_title: workflow.title,
+1077:      draft_context: aiDraft,
+1083:  setSharedHandoff(projectName, "ai-command", handoff);
+1086:    createProjectHandoff(projectName, handoff).catch((error) => {
+1087:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+1095:function validateWorkflowInputs(workflow, inputs) {
+1096:  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+1103:  if (workflowBridgeRegistered || typeof window === "undefined") return;
+1105:  window.addEventListener("mh:submit-workflow", async (event) => {
+1124:    const state = getState();
+1125:    const projectName = state.context.currentProject || "";
+1126:    const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+1127:    const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];
+1129:    session.selectedWorkflowId = workflow.id;
+1130:    session.inputsByWorkflow[workflow.id] = {
+1131:      ...session.inputsByWorkflow[workflow.id],
+1132:      project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),
+1133:      goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),
+1134:      campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),
+1135:      product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)
+1139:      session.draftStatus = "AI prompt imported into workflow builder";
+1144:    const run = session.runsByWorkflow[workflow.id];
+1158:      const contextModel = buildWorkflowContext(getState(), session);
+1160:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
+1161:        title: workflow.title,
+1164:        inputs: session.inputsByWorkflow[workflow.id],
+1165:        prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),
+1168:          source: "workflow-auto-run"
+1171:      const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);
+1181:      showMessage?.(`${workflow.title} created from AI context.`);
+1190:  workflowBridgeRegistered = true;
+1208:  if (workflowAutomationEnabled) {
+1210:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1211:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1216:  const state = getState();
+1217:  const projectName = state.context.currentProject || "";
+1218:  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+1219:  const workflow = getWorkflowDef(session.selectedWorkflowId);
+1220:  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+1221:  const run = session.runsByWorkflow[workflow.id];
+1223:  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+1248:  const workflowTypeSelect = $("wfexecWorkflowType");
+1249:  if (workflowTypeSelect) {
+1250:    workflowTypeSelect.onchange = () => {
+1251:      session.selectedWorkflowId = workflowTypeSelect.value || session.selectedWorkflowId;
+1262:      showMessage?.("Workflow draft saved.");
+1270:      const defaults = createDefaultInputs(getState());
+1274:      showMessage?.("Workflow draft cleared.");
+1282:      const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));
+1283:      if (!Object.keys(draft).length) {
+1284:        const safePrompt = `Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.`;
+1285:        setSharedHandoff(projectName, "workflows", {
+1286:          source_page: "workflows",
+1287:          destination_page: "workflows",
+1290:            draft_context: {
+1292:              modeId: workflow.aiModeId,
+1300:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+1301:        showMessage?.("No AI state found. Local workflow seed created safely.");
+1308:        project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),
+1309:        goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),
+1310:        campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),
+1311:        product: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].product, state.context.currentProject),
+1315:      showMessage?.("AI Command state loaded into workflow inputs.");
+1320:  async function runWorkflow(workflowId) {
+1321:    const activeWorkflow = getWorkflowDef(workflowId || session.selectedWorkflowId);
+1335:      setValidation("Select a project before running a workflow.");
+1356:      const freshContext = buildWorkflowContext(getState(), session);
+1367:          source: "workflow-manual-run"
+1384:      setSharedHandoff(projectName, "workflows", {
+1385:        source_page: "workflows",
+1386:        destination_page: "workflows",
+1388:          workflow_id: activeWorkflow.id,
+1405:        nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]
+1414:  const runBtn = $("workflowRunBtn");
+1416:  const runBtnMain = $("workflowRunBtnMain");
+1422:      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+1423:      runWorkflow(rec.workflowId);
+1430:      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+1431:      session.selectedWorkflowId = rec.workflowId;
+1432:      session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
+1433:      persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
+1434:      showMessage?.("Recommended workflow saved as draft.");
+1442:      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+1443:      const recWorkflow = getWorkflowDef(rec.workflowId);
+1447:        workflow: recWorkflow,
+1465:      const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;
+1466:      session.selectedWorkflowId = workflowId;
+1467:      persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);
+1468:      showMessage?.("Workflow draft saved.");
+1475:      const workflowId = button.getAttribute("data-wf-catalog-ai") || session.selectedWorkflowId;
+1476:      const wf = getWorkflowDef(workflowId);
+1477:      session.selectedWorkflowId = workflowId;
+1480:        workflow: wf,
+1481:        inputs: asObject(session.inputsByWorkflow[workflowId]),
+1482:        run: session.runsByWorkflow[workflowId],
+1492:  const pushAiBtn = $("workflowPushAiBtn");
+1497:        workflow,
+1509:  const pushAiSecondaryBtn = $("workflowPushAiBtnSecondary");
+1512:  const saveTaskBtn = $("workflowSaveTaskBtn");
+1516:        showError?.("Run the workflow before saving a task.");
+1521:          title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
+1523:          workflow_id: workflow.id,
+1524:          source_type: "workflow_run",
+1528:          service_domain: workflow.id === "generate-report" || workflow.id === "research-competitors" ? "research" : "campaign",
+1529:          route_target: "workflows",
+1534:        showMessage?.("Structured workflow task saved.");
+1536:        showError?.(error.message || "Failed to save workflow task.");
+1541:  const recommendBtn = $("workflowRecommendBtn");
+1544:      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+1546:        "Recommend the best workflow to run next.",
+1555:        modeId: "operations",
+1560:        source_page: "workflows",
+1564:          draft_context: {
+1566:            modeId: "operations",
+1577:  const customBtn = $("workflowBuildCustomBtn");
+1581:        "Build a custom workflow blueprint.",
+1591:        modeId: "operations",
+1593:        lastResponseTitle: "Custom workflow builder"
+1596:        source_page: "workflows",
+1600:          draft_context: {
+1602:            modeId: "operations",
+1604:            lastResponseTitle: "Custom workflow builder"
+1613:  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+1616:      const plan = buildAutomationPlan(getState());
+1618:        workflowAutomationState.result = "No safe automation steps available.";
+1625:      workflowAutomationState.lastPlan = plan;
+1626:      workflowAutomationState.cursor = 0;
+1627:      workflowAutomationState.result = "";
+1631:          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+1635:      workflowAutomationState.lastResults = asArray(result.results);
+1636:      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+1637:      showMessage?.(workflowAutomationState.result);
+1642:  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+1645:      const plan = buildAutomationPlan(getState());
+1647:        workflowAutomationState.result = "No safe automation steps available.";
+1655:      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+1660:          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+1664:      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+1665:      workflowAutomationState.lastPlan = plan;
+1666:      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+1667:      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+1670:      showMessage?.(workflowAutomationState.result);
+1675:  const autoStartBtn = $("workflowAutoStartBtn");
+1678:      const plan = buildAutomationPlan(getState());
+1679:      workflowAutomationEnabled = true;
+1681:      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1682:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1694:  const autoPauseBtn = $("workflowAutoPauseBtn");
+1702:  const autoResumeBtn = $("workflowAutoResumeBtn");
+1710:  const autoStopBtn = $("workflowAutoStopBtn");
+1718:  const autoApproveBtn = $("workflowAutoApproveBtn");
+1726:  const autoSkipBtn = $("workflowAutoSkipBtn");
+1735:export const workflowsRoute = {
+1736:  id: "workflows",
+1740:    description: "Run structured, repeatable workflows for common marketing and execution operations."
+1743:    <section class="page is-active" data-page="workflows">
+1744:      <div id="workflowsRoot"></div>
+1754:    const state = getState();
+1755:    const projectName = asString(state.context.currentProject || "");
+1756:    const campaignName = asString(state.context.activeCampaign || "");
+1757:    const executionMode = asString(state.context.executionMode || "");
+1759:    const overview = asObject(state.data.overview?.overview || state.data.overview);
+1760:    const readinessRoot = asObject(state.data.readiness?.dashboard || state.data.readiness);
+1761:    const operations = asObject(state.data.operations);
+1766:    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+1767:    const tasksTotal = Number(operations.tasks?.total || 0);
+1768:    const approvalsTotal = Number(operations.approvals?.total || 0);
+1770:    const root = $("workflowsRoot");
+1809:              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+1823:                ${WORKFLOW_CATALOG.map((workflow) => `
+1824:                  <option value="${escapeHtml(workflow.id)}">${escapeHtml(workflow.title)}</option>
+1853:            Workflows is ready. Prepare workflow inputs, send them to AI Workspace, or continue from Campaign Studio and Task Center.
+1864:              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+1887:              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+1909:        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+1910:        const workflow = getWorkflowDef(workflowId);
+1914:          `Workflow: ${workflow.title}`,
+1917:          `Goal: ${goal || "Prepare an execution-ready workflow plan."}`,
+1918:          `Purpose: ${workflow.purpose}`
+1937:        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+1938:        const workflow = getWorkflowDef(workflowId);
+1942:          `Build a workflow execution package.`,
+1943:          `Workflow: ${workflow.title}`,
+1946:          `Goal: ${goal || workflow.purpose}`
+1951:          modeId: workflow.aiModeId,
+1953:          lastResponseTitle: workflow.title,
+1957:              route: "workflows",
+1958:              reason: "Return to workflows after AI refinement."
