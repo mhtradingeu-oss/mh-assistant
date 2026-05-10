@@ -410,10 +410,17 @@ async function openLibraryAsset(projectName, asset) {
 }
 
 if (typeof window !== "undefined") {
+  function bindLibraryGlobalListeners() {
+  if (typeof window === "undefined" || window.__mhLibraryGlobalListenersBound) return;
+  window.__mhLibraryGlobalListenersBound = true;
+
   window.addEventListener("beforeunload", () => {
-    Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
-  });
+      Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+    });
+  }
 }
+
+bindLibraryGlobalListeners();
 
 function initializeLibraryGlobalListeners() {
   if (libraryGlobalListenersInitialized) return;
