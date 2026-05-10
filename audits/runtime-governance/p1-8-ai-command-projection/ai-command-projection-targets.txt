@@ -1,0 +1,72 @@
+11://  AI TEAM DEFINITIONS
+68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+73:// Map legacy mode IDs from older sessions to new team IDs
+172:		purpose: "Translate intent into executable workflows and handoffs.",
+361:			modeId: "operations",
+430:	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+443:		modeId: session.modeId,
+507:		executionMode: state.context.executionMode || overview.execution_mode || "",
+564:function scoreMode(text, modeId) {
+574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+576:	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+582:	const scores = MODE_DEFS.map((mode) => ({
+583:		modeId: mode.id,
+584:		score: scoreMode(message, mode.id) + (mode.id === selectedModeId ? 0.75 : 0)
+587:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+592:		resolvedModeId: top.modeId || selectedModeId || "operations",
+935:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+938:		modeId: modeId || "",
+947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+948:	const handoffId = asString(handoff?.id);
+949:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+951:	const payload = asObject(handoff?.payload);
+954:	if (draftContext.modeId) session.modeId = draftContext.modeId;
+960:			modeId: draftContext.modeId || session.modeId,
+967:	session.lastAppliedHandoffId = handoffId;
+968:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+969:		console.warn("Failed to consume AI handoff:", error.message);
+979:	modeId,
+990:	let resolvedModeId = modeId || session.modeId;
+996:			mode_id: modeId || session.modeId,
+1007:		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+1014:		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+1029:	session.modeId = resolvedModeId;
+1033:		role: "user",
+1034:		modeId: resolvedModeId,
+1042:		role: "assistant",
+1043:		modeId: resolvedModeId,
+1051:		modeId: resolvedModeId,
+1061:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+1135://  RENDER: TEAM SELECTOR
+1141:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+1145:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+1147:						data-ctrl-mode="${escapeHtml(agent.id)}"
+1152:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+1165:	const mode = getModeMeta(session.modeId);
+1178:					<span style="font-size:18px;">${mode.icon}</span>
+1179:					<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">${escapeHtml(mode.label)} — Command Composer</h3>
+1181:				<div class="ctrl-mode-toggle">
+1182:					<button class="ctrl-mode-btn${!isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="free">Free text</button>
+1183:					<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>
+1191:					placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"
+1223:					<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send to ${escapeHtml(mode.label)}</button>
+1368:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+1374:		const mode = getModeMeta(message.modeId);
+1375:		if (message.role === "user") {
+1387:				<div class="ctrl-msg-agent-icon" title="${escapeHtml(mode.label)}">${mode.icon}</div>
+1389:					<div class="ctrl-msg-ai-agent">${escapeHtml(mode.label)} · ${escapeHtml(formatTime(message.createdAt))}</div>
+1430:							const mode = getModeMeta(entry.modeId);
+1435:									<span class="ctrl-recent-agent">${mode.icon}</span>
+1438:										<div class="ctrl-recent-result">${escapeHtml(entry.responseTitle || mode.label + " · " + formatTime(entry.createdAt))}</div>
+1466:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+1529:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+1533:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+1584:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+1642:  const currentMode = getModeMeta(session.modeId || "operations");
+1681:            <span>Execution mode</span>
+1689:          <h3>Choose your AI specialist</h3>
+1695:            <article class="aicmd-agent-card${agent.id === session.modeId ? " is-active" : ""}">
+1758:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
+1776:            <strong>Operating mode</strong>
+1812:            <span>Selected specialist</span>
+1842:      session.modeId = agentId;
