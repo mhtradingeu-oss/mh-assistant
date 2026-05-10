@@ -113,7 +113,7 @@ export function renderHomeExecutiveIntro({
     <section class="card home-exec-hero">
       <div class="home-exec-hero-main">
         <div>
-          <p class="card-label">Project Operating Status</p>
+          <p class="card-label">Executive Command Center</p>
           <h2>${escapeHtml(dashboard.projectName || "Project Command Center")}</h2>
           <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
         </div>
