@@ -54,7 +54,7 @@ Each specialist shows:
 
 ### 4. Work Journey Pipeline
 Unified task journey:
-Idea → Plan → Create → Review → Approve → Publish → Promote → Measure → Learn
+Idea -> Plan -> Create -> Review -> Approve -> Publish -> Promote -> Measure -> Learn
 
 Each stage links to existing pages:
 - Plan: Campaign Studio / AI Command
