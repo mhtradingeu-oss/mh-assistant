@@ -1755,7 +1755,7 @@ export const aiCommandRoute = {
         </div>
 
         <div id="aicmdStatus" class="aicmd-draft-state">
-          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then run it from the global AI bar.")}
+          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
         </div>
       </section>
 
@@ -1872,7 +1872,7 @@ export const aiCommandRoute = {
       }
 
       if (status) {
-        status.textContent = "Command prepared in the global AI bar. Review it, then run it from the command controls.";
+        status.textContent = "Command prepared in AI Workspace. Review it, then run it from the command controls.";
       }
 
       showMessage?.(`${currentMode.label} command prepared.`);
