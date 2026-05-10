@@ -1,0 +1,481 @@
+				</div>
+
+				<div class="ctrl-composer-actions">
+					<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send to ${escapeHtml(mode.label)}</button>
+					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
+					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
+				</div>
+				<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only — send to execute</div>
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: SUGGESTED PROMPTS
+// ============================================================
+
+function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+	const projectLabel = aiContext.projectName || "this project";
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Suggested prompts</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send to run</span>
+			</div>
+			<div class="ctrl-composer-body">
+				<div class="ctrl-prompts-grid">
+					${QUICK_ACTIONS.map((action) => `
+						<button
+							class="ctrl-prompt-btn"
+							type="button"
+							data-ctrl-quick="${escapeHtml(action.action)}"
+							data-ctrl-quick-template="${escapeHtml(action.template.replace("{project}", projectLabel))}"
+						>
+							<span class="ctrl-prompt-icon">${action.icon}</span>
+							<span>
+								<span class="ctrl-prompt-label">${escapeHtml(action.label)}</span>
+								<span class="ctrl-prompt-sub">${escapeHtml(action.sub)}</span>
+							</span>
+						</button>
+					`).join("")}
+				</div>
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: AI RESPONSE (clean cards, no raw JSON)
+// ============================================================
+
+function renderCleanResponse(response, escapeHtml, ownerId) {
+	const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
+	const title = humanizeValue(response.title, "");
+	const summary = humanizeValue(response.summary, "");
+	const findings = normalizeDisplayList(response.findings, 5);
+	const recommendations = normalizeDisplayList(response.recommendations, 4);
+	const nextActions = normalizeDisplayList(response.nextActions || response.next_actions, 4);
+	const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+		const record = asObject(item);
+		return {
+			label: humanizeValue(record.label || record.title || record.route || item),
+			route: asString(record.route || record.destination || record.page),
+			reason: humanizeValue(record.reason || record.summary || item)
+		};
+	}).filter((item) => item.label || item.route);
+	const taskBlock = asObject(response.taskBlock);
+	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+
+	if (!hasContent && !hasError) {
+		return `<div class="ctrl-response-card"><p style="color:var(--color-text-2);font-size:13px;">No output returned.</p></div>`;
+	}
+
+	return `
+		<div class="ctrl-response-card">
+			${hasError ? `
+				<div class="ctrl-error-banner">
+					<span>⚠</span>
+					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+				</div>
+			` : ""}
+
+			${title ? `<div class="ctrl-response-summary">${escapeHtml(title)}</div>` : ""}
+			${summary ? `<div class="ctrl-response-body">${escapeHtml(summary)}</div>` : ""}
+
+			${findings.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Key findings</div>
+					<div class="ctrl-response-items">
+						${findings.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${recommendations.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Recommendations</div>
+					<div class="ctrl-response-items">
+						${recommendations.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${nextActions.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Next actions</div>
+					<div class="ctrl-response-items">
+						${nextActions.map((item) => `<div class="ctrl-response-item"><span>${escapeHtml(item)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${taskBlock.title ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Task block — ${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
+					<div class="ctrl-task-block-name">${escapeHtml(humanizeValue(taskBlock.title))}</div>
+					<div class="ctrl-response-items" style="margin-top:6px;">
+						${normalizeDisplayList(taskBlock.steps, 6).map((step) => `<div class="ctrl-response-item"><span>${escapeHtml(step)}</span></div>`).join("")}
+					</div>
+				</div>
+			` : ""}
+
+			${routeSuggestions.length ? `
+				<div class="ctrl-response-section">
+					<div class="ctrl-response-section-label">Open workspace</div>
+					<div class="ctrl-route-row">
+						${routeSuggestions.map((item, index) => `
+							<button class="ctrl-route-btn" type="button" data-ctrl-route="${index}" data-ctrl-route-owner="${escapeHtml(ownerId || "")}" title="${escapeHtml(item.reason)}">
+								${escapeHtml(item.label)} →
+							</button>
+						`).join("")}
+					</div>
+				</div>
+			` : ""}
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: MESSAGE STREAM
+// ============================================================
+
+function renderMessageStream(messages, escapeHtml) {
+	if (!messages.length) {
+		return `
+			<div class="ctrl-empty-stream">
+				<div class="ctrl-empty-icon">💬</div>
+				<div class="ctrl-empty-title">Start the conversation</div>
+				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+			</div>
+		`;
+	}
+
+	return messages.map((message) => {
+		const mode = getModeMeta(message.modeId);
+		if (message.role === "user") {
+			return `
+				<div class="ctrl-msg-user">
+					<div class="ctrl-msg-user-bubble">
+						<div class="ctrl-msg-user-text">${escapeHtml(message.content)}</div>
+						<div class="ctrl-msg-meta">${escapeHtml(formatTime(message.createdAt))}</div>
+					</div>
+				</div>
+			`;
+		}
+		return `
+			<div class="ctrl-msg-ai">
+				<div class="ctrl-msg-agent-icon" title="${escapeHtml(mode.label)}">${mode.icon}</div>
+				<div class="ctrl-msg-ai-body">
+					<div class="ctrl-msg-ai-agent">${escapeHtml(mode.label)} · ${escapeHtml(formatTime(message.createdAt))}</div>
+					${renderCleanResponse(asObject(message.response), escapeHtml, message.id)}
+				</div>
+			</div>
+		`;
+	}).join("");
+}
+
+// ============================================================
+//  RENDER: RESULTS PANEL
+// ============================================================
+
+function renderResultsPanel(session, escapeHtml) {
+	return `
+		<div class="ctrl-results-panel">
+			<div class="ctrl-results-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Conversation &amp; results</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${session.messages.length} message${session.messages.length !== 1 ? "s" : ""}</span>
+			</div>
+			<div id="ctrlChatStream" class="ctrl-chat-stream">
+				${renderMessageStream(session.messages, escapeHtml)}
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: RECENT COMMANDS
+// ============================================================
+
+function renderRecentCommands(session, escapeHtml) {
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Recent commands</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${session.history.length} logged · click to restore</span>
+			</div>
+			<div class="ctrl-composer-body">
+				${session.history.length ? `
+					<div class="ctrl-recents-list">
+						${session.history.slice(0, 8).map((entry, index) => {
+							const mode = getModeMeta(entry.modeId);
+							const statusClass = entry.failed ? "danger" : "success";
+							const statusLabel = entry.failed ? "Failed" : "Done";
+							return `
+								<button class="ctrl-recent-item" type="button" data-ctrl-history="${index}">
+									<span class="ctrl-recent-agent">${mode.icon}</span>
+									<div class="ctrl-recent-content">
+										<div class="ctrl-recent-command">${escapeHtml(entry.command)}</div>
+										<div class="ctrl-recent-result">${escapeHtml(entry.responseTitle || mode.label + " · " + formatTime(entry.createdAt))}</div>
+									</div>
+									<div class="ctrl-recent-meta">
+										<span class="ctrl-recent-time">${escapeHtml(formatTime(entry.createdAt))}</span>
+										<span class="card-badge ${statusClass}" style="font-size:10px;padding:2px 7px;">${statusLabel}</span>
+									</div>
+								</button>
+							`;
+						}).join("")}
+					</div>
+				` : `
+					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+				`}
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
+//  RENDER: AI MEMORY & ARTIFACTS
+// ============================================================
+
+function renderArtifactsPanel(aiContext, session, escapeHtml) {
+	const recommendations = aiContext.recommendations.slice(0, 4);
+	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+		.filter(([, val]) => val && val.label && val.label !== "No format pattern yet" && val.label !== "No platform pattern yet")
+		.slice(0, 3);
+	const artifacts = session.messages
+		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+		.slice(-4)
+		.map((msg) => ({
+			type: titleCase(asString(msg.response?.outputType || msg.response?.output_type)),
+			title: humanizeValue(msg.response?.title, "Artifact"),
+			body: humanizeValue(msg.response?.summary, ""),
+			time: formatTime(msg.createdAt)
+		}));
+
+	const hasContent = recommendations.length || patterns.length || artifacts.length;
+
+	return `
+		<div class="ctrl-composer-card">
+			<div class="ctrl-composer-head">
+				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">AI memory &amp; artifacts</h3>
+				<span style="font-size:11px;color:var(--color-text-2);">${recommendations.length} rec${recommendations.length !== 1 ? "s" : ""} · ${patterns.length} patterns</span>
+			</div>
+			<div class="ctrl-composer-body">
+				${!hasContent ? `
+					<div class="ctrl-empty-box">Recommendations and learned patterns will appear here as the AI works with your project data.</div>
+				` : `
+					<div class="ctrl-artifacts-grid">
+						${artifacts.map((art) => `
+							<div class="ctrl-artifact-card">
+								<div class="ctrl-artifact-type">Artifact · ${escapeHtml(art.type)} · ${escapeHtml(art.time)}</div>
+								<div class="ctrl-artifact-title">${escapeHtml(art.title)}</div>
+								${art.body ? `<div class="ctrl-artifact-body">${escapeHtml(art.body)}</div>` : ""}
+							</div>
+						`).join("")}
+
+						${recommendations.map((rec) => {
+							const r = asObject(rec);
+							const recTitle = humanizeValue(r.title || r.label || r.headline || rec);
+							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+							const recDomain = asString(r.domain || r.category || "");
+							return `
+								<div class="ctrl-artifact-card">
+									<div class="ctrl-artifact-type">Recommendation${recDomain ? " · " + titleCase(recDomain) : ""}</div>
+									<div class="ctrl-artifact-title">${escapeHtml(recTitle)}</div>
+									${recAction ? `<div class="ctrl-artifact-body">${escapeHtml(recAction)}</div>` : ""}
+								</div>
+							`;
+						}).join("")}
+
+						${patterns.map(([key, val]) => {
+							const patternLabel = humanizeValue(val.label);
+							const patternDetail = humanizeValue(val.detail || val.insight || val.reason || "");
+							return `
+								<div class="ctrl-artifact-card">
+									<div class="ctrl-artifact-type">Learned pattern · ${escapeHtml(titleCase(key))}</div>
+									<div class="ctrl-artifact-title">${escapeHtml(patternLabel)}</div>
+									${patternDetail ? `<div class="ctrl-artifact-body">${escapeHtml(patternDetail)}</div>` : ""}
+								</div>
+							`;
+						}).join("")}
+					</div>
+				`}
+			</div>
+		</div>
+	`;
+}
+
+function getLastUserMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+}
+
+function getLastAssistantMessage(session) {
+	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+}
+
+function buildCommandEnvelope(session, prompt) {
+	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
+	const targetValue = asString(session.targetValue).trim();
+	const targetLine = targetValue ? `${targetTypeLabel}: ${targetValue}` : targetTypeLabel;
+	return `${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}`;
+}
+
+function buildImpactChips(activeLabels) {
+	const activeSet = new Set(asArray(activeLabels));
+	return IMPACT_CHIP_LABELS.map((label) => ({
+		label,
+		active: activeSet.has(label)
+	}));
+}
+
+function buildSmartRecommendation(aiContext) {
+	if (aiContext.criticalGaps.length) {
+		return {
+			title: "Close critical readiness gaps before scale",
+			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+		};
+	}
+
+	if (aiContext.assetBlockers.length) {
+		return {
+			title: "Resolve asset blockers for execution flow",
+			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+			command: `Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.`,
+			chips: buildImpactChips(["Assets", "Content", "Campaign"])
+		};
+	}
+
+	if (aiContext.missingIntegrations.length || aiContext.connectorIssues.length) {
+		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+		return {
+			title: "Repair integration coverage for stronger AI output",
+			reason: `${impacted} integration signal${impacted === 1 ? "" : "s"} need attention before relying on full automation and optimization loops.`,
+			command: `Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.`,
+			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+		};
+	}
+
+	if (!aiContext.campaign || aiContext.campaign === "Not selected") {
+		return {
+			title: "Define the active campaign operating plan",
+			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+			command: `Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.`,
+			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+		};
+	}
+
+	return {
+		title: "Generate next content wave from current signals",
+		reason: "Core readiness is stable enough to move into output generation and optimization.",
+		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+		chips: buildImpactChips(["Content", "Campaign", "Automation"])
+	};
+}
+
+// ============================================================
+//  ROUTE EXPORT
+// ============================================================
+
+export const aiCommandRoute = {
+	id: "ai-command",
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Workspace",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+  const {
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  } = context;
+
+  const state = getState();
+  const projectName = asString(state.context.currentProject || "");
+  const market = asString(state.context.currentMarket || "");
+  const language = asString(state.context.currentLanguage || "");
+  const campaign = asString(state.context.activeCampaign || "");
+  const executionMode = asString(state.context.executionMode || "");
+
+  const overview = asObject(state.data.overview?.overview || state.data.overview);
+  const readiness = asObject(state.data.readiness?.dashboard || state.data.readiness);
+  const operations = asObject(state.data.operations);
+
+  const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
+  const aiArtifactsTotal = Number(operations.ai_artifacts?.total || 0);
+  const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
+
+  const session = ensureSession(projectName || "__default__");
+  hydrateSessionDraft(projectName || "__default__", session);
+
+  const currentMode = getModeMeta(session.modeId || "operations");
+  const root = $("ctrlRoomRoot");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="aicmd-shell">
+      <section class="aicmd-section aicmd-overview">
+        <div class="aicmd-section-head">
+          <h3>AI Workspace</h3>
+          <span class="card-badge success">Ready</span>
+        </div>
+
+        <div class="aicmd-overview-grid">
+          <div class="aicmd-stat">
+            <span>Current project</span>
+            <strong>${escapeHtml(projectName || "Not selected")}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Readiness</span>
+            <strong>${escapeHtml(readinessScore == null ? "--" : `${readinessScore}/100`)}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Market</span>
+            <strong>${escapeHtml(market || "Not set")}</strong>
+          </div>
+
+          <div class="aicmd-stat">
+            <span>Language</span>
+            <strong>${escapeHtml(language || "Not set")}</strong>
+          </div>
+
+          <div class="aicmd-stat aicmd-stat-wide">
+            <span>Active campaign</span>
+            <strong>${escapeHtml(campaign || "Not selected")}</strong>
+          </div>
+
+          <div class="aicmd-stat aicmd-stat-wide">
+            <span>Execution mode</span>
+            <strong>${escapeHtml(executionMode || "Not set")}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="aicmd-section">
+        <div class="aicmd-section-head">
+          <h3>Choose your AI specialist</h3>
+          <span class="card-badge neutral">${escapeHtml(currentMode.label)}</span>
+        </div>
+
+        <div class="aicmd-agent-grid">
+          ${AGENT_CARDS.map((agent) => `
+            <article class="aicmd-agent-card${agent.id === session.modeId ? " is-active" : ""}">
+              <h4>${escapeHtml(agent.name)}</h4>
+              <div class="aicmd-agent-meta">
+                <span>Purpose</span>
+                <p>${escapeHtml(agent.purpose)}</p>
+              </div>
