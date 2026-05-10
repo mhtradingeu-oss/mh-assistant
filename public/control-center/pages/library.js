@@ -1936,8 +1936,16 @@ function bindLibraryWorkspace({
 viewToggleButtons.forEach((button) => {
   button.onclick = () => {
     const mode = button.getAttribute("data-library-view-mode") || "grid";
-    session.viewMode = mode === "list" ? "list" : "grid";
-    session.page = 1;
+
+    dispatchLibraryCommand("set-view-mode", {
+      viewMode: mode === "list" ? "list" : "grid"
+    }, {
+      "set-view-mode": ({ viewMode }) => {
+        session.viewMode = viewMode;
+        session.page = 1;
+      }
+    });
+
     rerender();
   };
 });
