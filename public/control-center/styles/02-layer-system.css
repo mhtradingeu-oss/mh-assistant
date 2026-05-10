@@ -236,3 +236,22 @@ body.loading-locked {
     transform: rotate(360deg);
   }
 }
+
+/* Startup loading overlay hardening - 20260510 */
+#loadingOverlay {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(34, 211, 238, 0.10), transparent 28%),
+    rgba(2, 6, 23, 0.92) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#loadingOverlay:not(.hidden) {
+  opacity: 1;
+}
+
+#loadingOverlay .loading-card,
+#loadingOverlay .loading-panel,
+#loadingOverlay [class*="loading"] {
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.32);
+}
