@@ -1,0 +1,111 @@
+              <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
+            </div>
+
+            <div class="home-exec-hero-status">
+              ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+              <strong>${escapeHtml(formatPercent(dashboard.health.systemScore))}</strong>
+              <span class="data-label">System Health</span>
+            </div>
+          </div>
+
+          <div class="home-exec-hero-actions">
+            <button id="homePrimaryActionBtn" class="btn btn-primary" type="button">
+              ${escapeHtml(dashboard.primaryActionLabel)}
+            </button>
+            <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+              ${escapeHtml(dashboard.secondaryActionLabel)}
+            </button>
+            <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+              Ask Executive AI
+            </button>
+          </div>
+        </section>
+
+        <section class="home-kpi-grid">
+          ${capabilityCards.map((item) => `
+            <article class="card home-kpi-card">
+              <span class="data-label">${escapeHtml(item.title)}</span>
+              <strong>${escapeHtml(item.value)}</strong>
+              <p>${escapeHtml(item.detail)}</p>
+              ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+            </article>
+          `).join("")}
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Next Best Action</p>
+              <h3>What should I do next?</h3>
+            </div>
+            <span class="card-badge warning">Recommended</span>
+          </div>
+
+          <div class="home-decision-next">
+            <p class="home-decision-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
+            <p class="home-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+            <div class="home-inline-actions">
+              <button id="homeNextActionBtn" class="btn btn-primary" type="button">
+                ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+              </button>
+              <button id="homeAskNextActionBtn" class="btn btn-secondary" type="button">
+                Open AI Workspace
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+              <p class="card-label">Critical Gaps</p>
+              <h3>What is blocking progress?</h3>
+            </div>
+            ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
+          </div>
+
+          <div class="home-blocker-grid">
+            ${renderBlockerColumn("Integrations", dashboard.blockers.integrations, "warning", escapeHtml)}
+            ${renderBlockerColumn("Assets", dashboard.blockers.assets, "warning", escapeHtml)}
+            ${renderBlockerColumn("Failed Jobs", dashboard.blockers.failedJobs, "danger", escapeHtml)}
+            ${renderBlockerColumn("Readiness Gaps", dashboard.blockers.readinessGaps, "warning", escapeHtml)}
+          </div>
+        </section>
+
+        <section class="home-two-column-grid">
+          <article class="card home-decision-section">
+            <div class="home-decision-section-head">
+              <div>
+                <p class="card-label">Launch Snapshot</p>
+                <h3>Are we ready to publish?</h3>
+              </div>
+              ${renderBadge(
+                dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
+                dashboard.launchSnapshot.campaignReadiness,
+                escapeHtml
+              )}
+            </div>
+
+            <div class="home-status-grid">
+              <article>
+                <span class="data-label">Publish Ready</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+              </article>
+              <article>
+                <span class="data-label">Media Ready</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+              </article>
+              <article>
+                <span class="data-label">Email</span>
+                <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+              </article>
+              <article>
+                <span class="data-label">Scheduled Jobs</span>
+                <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+              </article>
+            </div>
+          </article>
+
+          <article class="card home-decision-section">
+            <div class="home-decision-section-head">
+              <div>
