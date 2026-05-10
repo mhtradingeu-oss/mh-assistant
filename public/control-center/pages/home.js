@@ -6,6 +6,10 @@ import {
   renderCompactList,
   renderHomeExecutiveIntro
 } from "./home/render-sections.js";
+import {
+  getProjectedActiveRole,
+  getProjectedTeamMembers
+} from "../runtime/authority/authority-projection.js";
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -135,7 +139,27 @@ function buildAiTeamCards(state) {
   const tasks = asArray(operations.tasks?.items);
   const approvals = asArray(operations.approvals?.items);
 
-  const roles = [
+  const projectedMembers = getProjectedTeamMembers(state);
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+        fallback: asString(
+          member.description ||
+          member.summary ||
+          "Ready to support this project."
+        )
+      }))
+    : [
     { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
     { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
     { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
@@ -159,7 +183,10 @@ function buildAiTeamCards(state) {
     return {
       ...role,
       tone,
-      status: humanizeStatus(statusRaw, "Idle"),
+      status:
+        role.id === projectedActiveRole
+          ? "Active role"
+          : humanizeStatus(statusRaw, "Idle"),
       summary: latest
         ? asString(latest.title || latest.summary || latest.action || role.fallback)
         : role.fallback
