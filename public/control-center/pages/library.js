@@ -1887,7 +1887,11 @@ function bindLibraryWorkspace({
       if (isLibraryInteractiveElement(event.target)) return;
       const nextId = card.getAttribute("data-library-grid-select") || "";
       if (!nextId) return;
-      session.selectedAssetId = nextId;
+      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+        "select-asset": ({ assetId }) => {
+          session.selectedAssetId = assetId;
+        }
+      });
       rerender();
     };
 
@@ -1896,7 +1900,11 @@ function bindLibraryWorkspace({
       event.preventDefault();
       const nextId = card.getAttribute("data-library-grid-select") || "";
       if (!nextId) return;
-      session.selectedAssetId = nextId;
+      dispatchLibraryCommand("select-asset", { assetId: nextId }, {
+        "select-asset": ({ assetId }) => {
+          session.selectedAssetId = assetId;
+        }
+      });
       rerender();
     };
   });
