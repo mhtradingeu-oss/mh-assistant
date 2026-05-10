@@ -1,0 +1,8 @@
+/*
+  Home Executive Runtime Render Sections
+
+  Pure render helpers only.
+  No DOM listeners.
+  No data fetching.
+  No state mutation.
+*/
