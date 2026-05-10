@@ -2274,8 +2274,15 @@ viewToggleButtons.forEach((button) => {
   if (searchInput) {
     searchInput.value = session.searchQuery;
     searchInput.oninput = (event) => {
-      session.searchQuery = event.target.value || "";
-      session.page = 1;
+      dispatchLibraryCommand("set-filter", {
+        filter: "search",
+        value: event.target.value || ""
+      }, {
+        "set-filter": ({ value }) => {
+          session.searchQuery = value;
+          session.page = 1;
+        }
+      });
 
       if (librarySearchRenderTimer) {
         window.clearTimeout(librarySearchRenderTimer);
