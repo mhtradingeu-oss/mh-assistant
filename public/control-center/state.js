@@ -332,3 +332,37 @@ export function resetContext() {
 
   notify();
 }
+
+
+// ============================================================
+// Runtime state selectors
+// Projection-only helpers. These functions must not mutate state.
+// ============================================================
+
+export function selectCurrentProject(state = getState()) {
+  return String(state?.context?.currentProject || "").trim();
+}
+
+export function selectActiveRoute(state = getState()) {
+  return String(state?.activeRoute || state?.context?.activeRoute || "").trim();
+}
+
+export function selectOperationsSnapshot(state = getState()) {
+  return state?.data?.operations || {};
+}
+
+export function selectProjectPayload(state = getState()) {
+  return state?.data || {};
+}
+
+export function selectSystemHealth(state = getState()) {
+  return state?.systemHealth || state?.data?.system_health || {};
+}
+
+export function selectActiveRoleProjection(state = getState()) {
+  return String(
+    state?.activeRole ||
+    state?.data?.operations?.team_service_model?.active_role ||
+    ""
+  ).trim();
+}
