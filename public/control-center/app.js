@@ -3697,12 +3697,19 @@ window.__mhAiDockBound = true;
     panel.style.pointerEvents = open ? "auto" : "none";
   };
 
+
   toggle.onclick = (event) => {
     event.preventDefault();
     event.stopPropagation();
+    
+    if (dock.classList.contains("is-runtime-blocked") || dock.getAttribute("aria-hidden") === "true") {
+      return;
+    }
+
     const open = dock.classList.contains("is-open");
     setOpen(!open);
   };
+
 
   closeBtn?.addEventListener("click", () => setOpen(false));
 
