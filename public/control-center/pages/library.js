@@ -1,5 +1,6 @@
 import { normalizeLibraryAsset, normalizeLibraryAssets } from "./library/projection-adapter.js";
 import { normalizeLibrarySession } from "./library/session-store.js";
+import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
 import {
   AccessKeyError,
   archiveProjectAsset,
@@ -12,7 +13,6 @@ import {
   uploadProjectAsset
 } from "../api.js";
 import {
-import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
   getAssetCatalog,
   getCanonicalAssetType,
   getCategoryReadinessList,
