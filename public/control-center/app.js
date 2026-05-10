@@ -842,6 +842,7 @@ function showLoading(
     overlay.style.pointerEvents = "auto";
     overlay.classList.add("is-visible");
     overlay.setAttribute("aria-hidden", "false");
+    syncAiDockInteractivity();
     document.body.classList.add("is-loading", "loading", "loading-locked");
     installLoadingWatchdog(reason, wasVisible);
     recordLoadingTransition("show", { token, reason });
@@ -878,6 +879,7 @@ function hideLoading(options = {}) {
   overlay.hidden = true;
   overlay.inert = true;
   overlay.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
   overlay.style.setProperty("display", "none", "important");
   overlay.style.opacity = "0";
   overlay.style.visibility = "hidden";
@@ -1442,6 +1444,7 @@ function forceHideLoadingOverlay(reason = "access-key-recovery") {
   overlay.classList.remove("is-visible");
   overlay.hidden = true;
   overlay.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
   overlay.style.setProperty("display", "none", "important");
   overlay.style.opacity = "0";
   overlay.style.visibility = "hidden";
@@ -1497,6 +1500,7 @@ function unlockStartupUi(reason = "manual-unlock") {
   if (overlay) {
     overlay.classList.remove("is-visible");
     overlay.setAttribute("aria-hidden", "true");
+    syncAiDockInteractivity();
     overlay.hidden = true;
     overlay.inert = true;
     overlay.style.setProperty("display", "none", "important");
@@ -3267,6 +3271,7 @@ window.__mhResponsiveUiBound = true;
       backdrop.classList.add("is-visible");
       backdrop.hidden = false;
       backdrop.setAttribute("aria-hidden", "false");
+      syncAiDockInteractivity();
     }
     document.body.classList.add("sidebar-open");
     document.body.style.overflow = "hidden";
@@ -3280,6 +3285,7 @@ window.__mhResponsiveUiBound = true;
       backdrop.classList.remove("is-visible");
       backdrop.hidden = true;
       backdrop.setAttribute("aria-hidden", "true");
+      syncAiDockInteractivity();
     }
     document.body.classList.remove("sidebar-open");
     document.body.style.overflow = "";
@@ -3378,6 +3384,43 @@ function bindShellMeasurements() {
 /* =========================
    COMMANDS & SEARCH
 ========================= */
+
+
+function syncAiDockInteractivity() {
+  const dock = $("aiDock");
+  const loadingOverlay = $("loadingOverlay");
+  const commandBackdrop = $("commandBackdrop");
+  const sidebarBackdrop = $("sidebarBackdrop");
+
+  if (!dock) return;
+
+  const loadingActive =
+    loadingOverlay &&
+    !loadingOverlay.hidden &&
+    loadingOverlay.getAttribute("aria-hidden") !== "true";
+
+  const commandActive =
+    commandBackdrop &&
+    !commandBackdrop.hidden &&
+    commandBackdrop.getAttribute("aria-hidden") !== "true";
+
+  const sidebarActive =
+    sidebarBackdrop &&
+    !sidebarBackdrop.hidden &&
+    sidebarBackdrop.getAttribute("aria-hidden") !== "true";
+
+  const blocked = loadingActive || commandActive || sidebarActive;
+
+  dock.classList.toggle("is-runtime-blocked", blocked);
+  dock.setAttribute("aria-hidden", blocked ? "true" : "false");
+
+  if (blocked) {
+    dock.style.pointerEvents = "none";
+  } else {
+    dock.style.pointerEvents = "";
+  }
+}
+
 
 function getCommandRuntimeState() {
   const commandBar = $("globalCommandBar");
@@ -3503,6 +3546,7 @@ function openGlobalCommandBar() {
     commandBackdrop.hidden = false;
   }
   commandBackdrop?.setAttribute("aria-hidden", "false");
+  syncAiDockInteractivity();
   toggleBtn?.setAttribute("aria-expanded", "true");
   if (toggleBtn) {
     toggleBtn.textContent = "Close";
@@ -3547,6 +3591,7 @@ function closeGlobalCommandBarSafe() {
     commandBackdrop.hidden = true;
   }
   commandBackdrop?.setAttribute("aria-hidden", "true");
+  syncAiDockInteractivity();
 
   if (toggleBtn) {
     toggleBtn.setAttribute("aria-expanded", "false");
