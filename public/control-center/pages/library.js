@@ -2260,11 +2260,17 @@ viewToggleButtons.forEach((button) => {
       event.stopPropagation();
 
       const action = button.getAttribute("data-library-grid-page");
-      if (action === "prev") {
-        session.page = Math.max(1, (Number(session.page) || 1) - 1);
-      } else if (action === "next") {
-        session.page = Math.min(totalPages, (Number(session.page) || 1) + 1);
-      }
+      const nextPage = action === "prev"
+        ? Math.max(1, (Number(session.page) || 1) - 1)
+        : action === "next"
+          ? Math.min(totalPages, (Number(session.page) || 1) + 1)
+          : Number(session.page) || 1;
+
+      dispatchLibraryCommand("set-page", { page: nextPage }, {
+        "set-page": ({ page }) => {
+          session.page = page;
+        }
+      });
 
       rerender();
     };
