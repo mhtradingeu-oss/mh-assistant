@@ -3,7 +3,8 @@ import {
   renderAiTeamCards,
   renderBadge,
   renderBlockerColumn,
-  renderCompactList
+  renderCompactList,
+  renderHomeExecutiveIntro
 } from "./home/render-sections.js";
 
 function asArray(value) {
@@ -592,67 +593,13 @@ export const homeRoute = {
 
     root.innerHTML = `
       <div class="home-command-center">
-        <section class="card home-exec-hero">
-          <div class="home-exec-hero-content">
-            <div>
-              <p class="card-label">Executive Command Center</p>
-              <h2>${escapeHtml(compact(dashboard.projectName, "Project not selected"))}</h2>
-              <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
-            </div>
-
-            <div class="home-exec-hero-status">
-              ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
-              <strong>${escapeHtml(formatPercent(dashboard.health.systemScore))}</strong>
-              <span class="data-label">System Health</span>
-            </div>
-          </div>
-
-          <div class="home-exec-hero-actions">
-            <button id="homePrimaryActionBtn" class="btn btn-primary" type="button">
-              ${escapeHtml(dashboard.primaryActionLabel)}
-            </button>
-            <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
-              ${escapeHtml(dashboard.secondaryActionLabel)}
-            </button>
-            <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
-              Ask Executive AI
-            </button>
-          </div>
-        </section>
-
-        <section class="home-kpi-grid">
-          ${capabilityCards.map((item) => `
-            <article class="card home-kpi-card">
-              <span class="data-label">${escapeHtml(item.title)}</span>
-              <strong>${escapeHtml(item.value)}</strong>
-              <p>${escapeHtml(item.detail)}</p>
-              ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
-            </article>
-          `).join("")}
-        </section>
-
-        <section class="card home-decision-section">
-          <div class="home-decision-section-head">
-            <div>
-              <p class="card-label">Next Best Action</p>
-              <h3>What should I do next?</h3>
-            </div>
-            <span class="card-badge warning">Recommended</span>
-          </div>
-
-          <div class="home-decision-next">
-            <p class="home-decision-next-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</p>
-            <p class="home-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
-            <div class="home-inline-actions">
-              <button id="homeNextActionBtn" class="btn btn-primary" type="button">
-                ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
-              </button>
-              <button id="homeAskNextActionBtn" class="btn btn-secondary" type="button">
-                Open AI Workspace
-              </button>
-            </div>
-          </div>
-        </section>
+        ${renderHomeExecutiveIntro({
+          dashboard,
+          capabilityCards,
+          escapeHtml,
+          formatPercent,
+          toneLabel
+        })}
 
         <section class="card home-decision-section">
           <div class="home-decision-section-head">
