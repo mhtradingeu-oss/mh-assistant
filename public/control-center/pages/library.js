@@ -12,6 +12,7 @@ import {
   uploadProjectAsset
 } from "../api.js";
 import {
+import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
   getAssetCatalog,
   getCanonicalAssetType,
   getCategoryReadinessList,
@@ -500,6 +501,11 @@ function ensureLibrarySession(projectName) {
     librarySessionStore.set(key, normalized);
   }
   return librarySessionStore.get(key);
+}
+
+function dispatchLibraryCommand(command, payload = {}, handlers = {}) {
+  const envelope = createLibraryCommand(command, payload);
+  return routeLibraryCommand(envelope, handlers);
 }
 
 function closeAllLibraryActionDropdowns() {
