@@ -1,0 +1,482 @@
+18:// Any governance file that is missing policy_rules (or missing individual keys)
+21:  approval_before_publish: true,
+38:  approvals: 300,
+43:  handoffs: 250
+54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+82:  approvals: {
+95:  handoffs: {
+100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+135:    actions: ['create_video', 'review_video', 'handoff_video']
+155:    service_domains: ['research', 'governance'],
+161:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+162:    service_domains: ['governance'],
+168:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+169:    service_domains: ['governance'],
+170:    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+181:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+185:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+193:    owner_role: 'strategist',
+194:    review_role: 'admin',
+195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+197:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+201:    owner_role: 'writer',
+202:    review_role: 'compliance_reviewer',
+203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+209:    owner_role: 'designer',
+210:    review_role: 'compliance_reviewer',
+211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+217:    owner_role: 'publisher',
+218:    review_role: 'compliance_reviewer',
+219:    handoff_to: ['analyst', 'strategist'],
+221:    page_permissions: ['publishing', 'governance']
+225:    owner_role: 'analyst',
+226:    review_role: 'strategist',
+227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+229:    page_permissions: ['research', 'workflows', 'insights']
+231:  governance: {
+233:    owner_role: 'compliance_reviewer',
+234:    review_role: 'admin',
+235:    handoff_to: ['admin'],
+236:    route_target: 'governance',
+237:    page_permissions: ['governance', 'settings']
+247:  approval: 'governance',
+248:  task: 'governance'
+330:function getRoleDef(roleId) {
+331:  const normalized = normalizeRoleKey(roleId);
+339:function buildDefaultTeamMember(roleDef, index) {
+341:    id: `${roleDef.id}-member-${index + 1}`,
+342:    name: roleDef.label,
+343:    role: roleDef.id,
+347:    page_permissions: asArray(roleDef.routes),
+348:    action_permissions: asArray(roleDef.actions),
+349:    service_domains: asArray(roleDef.service_domains)
+355:  const roleId = normalizeRoleKey(source.role, 'strategist');
+356:  const roleDef = getRoleDef(roleId) || TEAM_ROLE_DEFS[0];
+359:    id: asString(source.id) || `${roleDef.id}-member-${index + 1}`,
+360:    name: asString(source.name) || roleDef.label,
+361:    role: roleDef.id,
+365:    page_permissions: normalizeStringList(source.page_permissions).length
+366:      ? normalizeStringList(source.page_permissions)
+367:      : asArray(roleDef.routes),
+368:    action_permissions: normalizeStringList(source.action_permissions).length
+369:      ? normalizeStringList(source.action_permissions)
+370:      : asArray(roleDef.actions),
+373:      : asArray(roleDef.service_domains)
+386:        role: 'system_orchestrator',
+389:        page_permissions: ['workflows', 'governance'],
+390:        action_permissions: ['route_work', 'record_state'],
+391:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+393:      ...TEAM_ROLE_DEFS.map((roleDef, index) => buildDefaultTeamMember(roleDef, index))
+395:    active_role: 'strategist',
+396:    role_matrix: TEAM_ROLE_DEFS.map((roleDef) => ({
+397:      role: roleDef.id,
+398:      label: roleDef.label,
+399:      routes: asArray(roleDef.routes),
+400:      service_domains: asArray(roleDef.service_domains),
+401:      actions: asArray(roleDef.actions)
+403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+405:      roles: asArray(roles)
+411:        owner_role: domain.owner_role,
+412:        review_role: domain.review_role,
+413:        handoff_to: asArray(domain.handoff_to),
+415:        page_permissions: asArray(domain.page_permissions)
+435:    active_role: normalizeRoleKey(patch.active_role || current.active_role || defaults.active_role, defaults.active_role),
+437:    role_matrix: defaults.role_matrix,
+438:    route_permissions: defaults.route_permissions,
+480:    summary: 'Role routing, permissions, or assignment settings changed.',
+483:      active_role: next.active_role,
+491:function findTeamMemberByRole(team, roleId) {
+492:  const normalizedRole = normalizeRoleKey(roleId);
+493:  return asArray(team?.members).find((member) => normalizeRoleKey(member.role) === normalizedRole) || null;
+496:function roleLabel(roleId) {
+497:  return getRoleDef(roleId)?.label || asString(roleId);
+500:function roleDisplay(team, roleId) {
+501:  const member = findTeamMemberByRole(team, roleId);
+502:  return member?.name || roleLabel(roleId) || 'Unassigned';
+517:  if (routeTarget === 'governance') return 'governance';
+527:  let ownerRole = domain.owner_role || 'strategist';
+541:    owner_role: normalizeRoleKey(record.owner_role || ownerRole, ownerRole),
+542:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+544:      ? normalizeStringList(record.handoff_roles)
+545:      : asArray(domain.handoff_to),
+546:    owner_display: roleDisplay(team, record.owner_role || ownerRole),
+547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+794:    governancePath: path.join(opsDir, 'governance.json'),
+796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+822:      'approvals',
+825:      'handoffs',
+839:  ensureJsonFile(paths.approvalsPath, []);
+842:  ensureJsonFile(paths.handoffsPath, []);
+844:  ensureJsonFile(paths.governancePath, {
+845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+848:      semi_auto_requires_approval: true,
+853:      approval_before_publish: true,
+860:    approval_owners: {
+871:      approval_mode: 'Only high-risk',
+873:      approval_before_publish: true
+911:      'approvals',
+914:      'handoffs',
+969:  if (value.includes('approval')) return 'approval';
+973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+1084:    role: normalizeRoleKey(input.role || current.role),
+1182: * Normalizes a raw governance file object so that:
+1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+1218:    raw = readJsonFileDurable(paths.governancePath);
+1221:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+1244:    approval_owners: {
+1245:      ...asObject(current.approval_owners),
+1246:      ...asObject(sourcePatch.approval_owners)
+1258:  writeJsonFile(paths.governancePath, next);
+1262:    type: 'governance_policy_updated',
+1263:    entity_type: 'governance_policy',
+1284:    approval_id: asString(input.approval_id),
+1333:function buildPolicyFlags(record = {}, governance = {}) {
+1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+1348:      message: 'Publishing is frozen by governance policy.'
+1396:function buildBrandSafetyFlags(record = {}, governance = {}) {
+1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+1435:function buildPublishGuardrails(record = {}, governance = {}) {
+1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+1473:  const governance = getGovernancePolicy(projectName);
+1475:  const approvals = readCollection(paths.approvalsPath);
+1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+1483:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+1486:    ...approval,
+1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+1488:    policy_flags: buildPolicyFlags(approval, governance)
+1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+1500:      status: asString(item.status || item.approval_status) || 'open',
+1511:      status: asString(item.status || item.approval_state),
+1512:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+1520:      publish_guardrails: buildPublishGuardrails(item, governance)
+1525:    ...approvalQueue.flatMap((item) =>
+1528:        source: 'approval',
+1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+1586:    policy: governance,
+1589:        campaign: roleDisplay(team, 'strategist'),
+1590:        content: roleDisplay(team, 'writer'),
+1591:        media: roleDisplay(team, 'designer'),
+1592:        publishing: roleDisplay(team, 'publisher'),
+1593:        compliance: roleDisplay(team, 'compliance_reviewer'),
+1594:        admin: roleDisplay(team, 'admin')
+1596:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+1599:      approval_queue: approvalQueue,
+1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+1617:      pending_approvals: pendingApprovals.length
+1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+1630:    role: asString(item.owner_role || item.review_role || 'writer'),
+1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+1638:      approval_status: item.approval_status,
+1640:      owner_role: item.owner_role,
+1641:      review_role: item.review_role,
+1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+1665:      approval_state: job.approval_state,
+1666:      owner_role: job.owner_role,
+1667:      review_role: job.review_role,
+1701:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+1702:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+1703:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+1827:    approval_status: approvalStatus,
+1828:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+1829:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+1830:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+1857:        approval_status: approvalStatus,
+1877:      approval_status: approvalStatus,
+1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+1970:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+1971:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+1972:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+2093:    role: 'system_orchestrator',
+2432:  const ownerRole = normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role);
+2433:  const assigneeRole = normalizeRoleKey(input.assignee_role || current.assignee_role || ownerRole, ownerRole);
+2439:    owner: asString(input.owner || input.assignee || current.owner || current.assignee) || roleDisplay(team, ownerRole),
+2440:    owner_role: ownerRole,
+2441:    assignee: asString(input.assignee || current.assignee || input.owner) || roleDisplay(team, assigneeRole),
+2442:    assignee_role: assigneeRole,
+2443:    team_role: asString(input.team_role || current.team_role || assigneeRole),
+2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+2461:      owner_role: ownerRole,
+2462:      owner_label: roleDisplay(team, ownerRole),
+2463:      assignee_role: assigneeRole,
+2464:      assignee_label: roleDisplay(team, assigneeRole),
+2465:      review_role: routing.reviewer_role,
+2466:      review_label: roleDisplay(team, routing.reviewer_role)
+2479:        assignee_role: assigneeRole,
+2493:    role: assigneeRole,
+2501:      owner_role: ownerRole,
+2502:      assignee_role: assigneeRole,
+2557:  const items = readCollection(paths.approvalsPath);
+2558:  const governance = getGovernancePolicy(projectName);
+2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+2577:    input.reviewer_role ||
+2578:      current.reviewer_role ||
+2581:      routing.reviewer_role,
+2582:    routing.reviewer_role
+2587:  const approval = {
+2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+2593:    reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
+2594:    reviewer_role: reviewerRole,
+2596:    requested_for: asString(input.requested_for || current.requested_for || input.reviewer) || roleDisplay(team, reviewerRole),
+2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+2606:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+2610:      owner_role: routing.owner_role,
+2611:      owner_label: roleDisplay(team, routing.owner_role),
+2612:      reviewer_role: reviewerRole,
+2613:      reviewer_label: roleDisplay(team, reviewerRole)
+2616:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+2618:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+2631:      current.id ? 'approval_updated' : 'approval_requested',
+2637:        reviewer_role: reviewerRole
+2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+2646:    entity_type: 'approval',
+2647:    entity_id: approval.id,
+2648:    title: approval.title,
+2649:    summary: approval.summary || 'A new approval was requested.',
+2650:    actor: approval.requested_by,
+2652:      entity_type: approval.entity_type,
+2653:      entity_id: approval.entity_id,
+2654:      risk_level: approval.risk_level,
+2655:      approval_type: approval.approval_type
+2659:    category: 'approval',
+2660:    type: 'approval',
+2661:    title: `${approval.title} needs approval`,
+2662:    message: approval.summary || 'Review and decide on the requested operation.',
+2663:    body: approval.summary || 'Review and decide on the requested operation.',
+2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+2666:      entity_type: 'approval',
+2667:      entity_id: approval.id,
+2668:      route: inferRouteTarget('approval', approval)
+2670:    entity_type: 'approval',
+2671:    entity_id: approval.id
+2675:    queue_type: 'approval',
+2676:    entity_type: 'approval',
+2677:    entity_id: approval.id,
+2678:    title: approval.title,
+2679:    status: approval.status,
+2680:    assignee: approval.reviewer,
+2681:    role: reviewerRole,
+2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+2683:    route: 'governance',
+2685:      entity_type: approval.entity_type,
+2686:      entity_id: approval.entity_id,
+2687:      approval_type: approval.approval_type,
+2688:      requested_action: approval.requested_action,
+2689:      reviewer_role: reviewerRole,
+2690:      escalation_chain: approval.escalation_chain
+2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+2696:      approval.entity_type === 'media_job'
+2700:      approval.entity_type === 'media_job'
+2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+2709:        approval_id: approval.id,
+2710:        status: approval.status
+2714:    if (approval.entity_type === 'content_item') {
+2715:      nextRecord.approval_status = nextApprovalStatus;
+2717:      nextRecord.queue_status = 'pending_approval';
+2720:    if (approval.entity_type === 'media_job') {
+2721:      nextRecord.approval_state = nextApprovalState;
+2724:    if (approval.entity_type === 'content_item') {
+2726:    } else if (approval.entity_type === 'media_job') {
+2733:  return approval;
+2738:  return listItems(readCollection(paths.approvalsPath), options);
+2741:function decideApproval(projectName, approvalId, input = {}) {
+2743:  const items = readCollection(paths.approvalsPath);
+2745:  const targetId = asString(approvalId);
+2749:    throw new Error('Invalid approval decision');
+2765:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+2786:      `approval_${decision}`,
+2797:  writeJsonFile(paths.approvalsPath, items);
+2800:    type: `approval_${decision}`,
+2801:    entity_type: 'approval',
+2813:    category: 'approval',
+2814:    type: 'approval',
+2820:      entity_type: 'approval',
+2822:      route: inferRouteTarget('approval', next)
+2824:    entity_type: 'approval',
+2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+2845:        approval_id: next.id,
+2851:      nextRecord.approval_status =
+2865:      nextRecord.approval_state =
+2900:      owner: roleDisplay(team, escalationTargetRole),
+2901:      owner_role: escalationTargetRole,
+2902:      assignee: roleDisplay(team, escalationTargetRole),
+2903:      assignee_role: escalationTargetRole,
+2905:      service_domain: 'governance',
+2906:      route_target: 'governance',
+2907:      source_type: 'approval',
+2919:      approval_id: next.id,
+2933:  const items = readCollection(paths.handoffsPath);
+2957:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+2958:  const handoff = {
+2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+2961:    type: asString(input.type) || 'route_handoff',
+2970:    source_role: normalizeRoleKey(input.source_role || current.source_role || sourceRouting.owner_role, sourceRouting.owner_role),
+2971:    destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole),
+2972:    source_role_label: roleDisplay(team, input.source_role || current.source_role || sourceRouting.owner_role),
+2973:    destination_role_label: roleDisplay(team, input.destination_role || current.destination_role || destinationRole),
+2983:      current.id ? 'handoff_updated' : 'handoff_created',
+2989:        destination_role: normalizeRoleKey(input.destination_role || current.destination_role || destinationRole, destinationRole)
+2999:      asString(record.source_page) === handoff.source_page &&
+3000:      asString(record.id) !== handoff.id &&
+3011:      updated_at: handoff.updated_at,
+3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+3013:        replaced_by: handoff.id
+3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+3022:    type: 'route_handoff_created',
+3023:    entity_type: 'handoff',
+3024:    entity_id: handoff.id,
+3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+3026:    summary: 'Durable cross-page handoff recorded.',
+3027:    actor: handoff.created_by,
+3029:      source_page: handoff.source_page,
+3030:      destination_page: handoff.destination_page,
+3031:      route_key: handoff.route_key
+3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+3041:        owner_role: asString(record.owner_role || sourceRouting.owner_role),
+3042:        next_owner_role: handoff.destination_role,
+3043:        next_owner_label: handoff.destination_role_label,
+3044:        updated_at: handoff.updated_at,
+3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+3046:          handoff_id: handoff.id,
+3047:          destination_page: handoff.destination_page
+3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+3052:        nextRecord.destination = handoff.destination_page;
+3054:          handoff.destination_page === 'publishing'
+3058:          handoff.destination_page === 'publishing'
+3059:            ? 'ready_for_handoff'
+3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+3064:          handoff.destination_page === 'publishing'
+3065:            ? 'ready_for_handoff'
+3074:  return handoff;
+3082:  let items = readCollection(paths.handoffsPath);
+3099:function consumeHandoff(projectName, handoffId, input = {}) {
+3101:  const items = readCollection(paths.handoffsPath);
+3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+3122:  writeJsonFile(paths.handoffsPath, items);
+3126:    type: 'route_handoff_consumed',
+3127:    entity_type: 'handoff',
+3130:    summary: 'Durable cross-page handoff consumed.',
+3162:    assignee: roleDisplay(team, 'publisher'),
+3163:    role: 'publisher',
+3172:      owner_role: 'publisher',
+3173:      review_role: 'compliance_reviewer'
+3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+3269:    const roleId = normalizeRoleKey(
+3270:      item.owner_role ||
+3271:      item.assignee_role ||
+3272:      item.reviewer_role ||
+3273:      item.role
+3276:    if (!roleId) {
+3280:    if (!byRole[roleId]) {
+3281:      byRole[roleId] = {
+3282:        role: roleId,
+3283:        label: roleDisplay(team, roleId),
+3289:    byRole[roleId].total += 1;
+3291:      byRole[roleId].open += 1;
+3370:  if (normalizedType === 'approval') return 'governance';
+3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+3404:        owner_role: asString(task.owner_role || task.assignee_role),
+3406:        assignee_role: asString(task.assignee_role || task.owner_role),
+3436:      owners: mapFilterCounts(items, 'owner_role'),
+3455:      role: 'system_orchestrator',
+3479:      role: 'admin',
+3501:    role: asString(item.role),
+3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+3554:      roles: mapFilterCounts(items, 'role')
+3559:    approval_queue: queueGroups.approval,
+3676:  approvals = [],
+3679:  governanceSummary = {},
+3701:  const approvalPendingAlerts = asArray(approvals)
+3704:      id: `approval-pending-${item.id}`,
+3708:      source: 'approval_pending',
+3709:      entity_type: 'approval',
+3724:            : 'Publishing item is waiting for approval or release.',
+3757:    ...asArray(governanceSummary?.sections?.claim_review)
+3767:    ...asArray(governanceSummary?.sections?.policy_violations)
+3799:    ...approvalPendingAlerts,
+3816:    approval_pending_alerts: approvalPendingAlerts,
+3828:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+3839:  const approvals = readCollection(paths.approvalsPath);
+3842:  const handoffs = readCollection(paths.handoffsPath);
+3844:  const governanceSummary = buildGovernanceSummary(paths.project, {
+3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+3862:    ...approvals,
+3868:    owner_role: domain.owner_role,
+3869:    owner_label: roleDisplay(team, domain.owner_role),
+3870:    review_role: domain.review_role,
+3871:    review_label: roleDisplay(team, domain.review_role),
+3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+3873:      role: roleId,
+3874:      label: roleDisplay(team, roleId)
+3877:    page_permissions: asArray(domain.page_permissions)
+3884:    approvals,
+3887:    governanceSummary,
+3901:    governance,
+3907:      active_role: team.active_role,
+3908:      role_matrix: asArray(team.role_matrix),
+3909:      route_permissions: asArray(team.route_permissions),
+3915:      active_role: team.active_role,
+3916:      team_roles: asArray(team.members).map((member) => ({
+3919:        role: member.role,
+3921:        page_permissions: asArray(member.page_permissions),
+3922:        action_permissions: asArray(member.action_permissions),
+3930:      route_permissions: asArray(team.route_permissions),
+3931:      role_matrix: asArray(team.role_matrix),
+3935:      role_routes: domainRouting,
+3936:      queue_by_role: summarizeOwnershipVisibility(team, queueItems),
+3937:      handoffs_by_role: asArray(handoffs)
+3943:          source_role: item.source_role,
+3944:          source_role_label: item.source_role_label,
+3945:          destination_role: item.destination_role,
+3946:          destination_role_label: item.destination_role_label,
+3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+4001:    approvals: {
+4002:      total: approvals.length,
+4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+4005:      items: approvals.slice(0, approvalLimit)
+4017:    handoffs: {
+4018:      total: handoffs.length,
+4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+4020:      current: summarizeCurrentHandoffs(handoffs),
+4021:      by_role: asArray(handoffs)
+4025:          source_role: item.source_role,
+4026:          destination_role: item.destination_role,
+4027:          source_role_label: item.source_role_label,
+4028:          destination_role_label: item.destination_role_label,
+4033:      items: handoffs.slice(0, handoffLimit)
