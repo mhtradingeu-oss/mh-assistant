@@ -48,7 +48,9 @@ const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
 export function getCommandRuntimeSnapshot({
   commandBar = null,
   commandBackdrop = null,
-  aiDock = null
+  aiDock = null,
+  aiDockToggle = null,
+  aiDockPanel = null
 } = {}) {
   return {
     version: COMMAND_RUNTIME_VERSION,
@@ -69,7 +71,20 @@ export function getCommandRuntimeSnapshot({
 
     aiDock: {
       exists: Boolean(aiDock),
-      className: String(aiDock?.className || "")
+      open: Boolean(aiDock?.classList?.contains("is-open")),
+      dataOpen: String(aiDock?.getAttribute?.("data-open") || ""),
+      className: String(aiDock?.className || ""),
+      toggle: {
+        exists: Boolean(aiDockToggle),
+        ariaExpanded: String(aiDockToggle?.getAttribute?.("aria-expanded") || "")
+      },
+      panel: {
+        exists: Boolean(aiDockPanel),
+        hidden: Boolean(aiDockPanel?.hidden),
+        inert: Boolean(aiDockPanel?.inert),
+        ariaHidden: String(aiDockPanel?.getAttribute?.("aria-hidden") || ""),
+        pointerEvents: String(aiDockPanel?.style?.pointerEvents || "")
+      }
     }
   };
 }

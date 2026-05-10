@@ -13,30 +13,13 @@ import {
   buildSectionGroups,
   buildSuggestedValues,
   CONNECTOR_WORKSPACE_CATEGORIES,
-  getConnectorWorkspaceCategory,
-  getConnectorWorkspaceStatus,
-  getConnectorWorkspaceStatusLabel,
-  matchesConnectorSearch,
-  REQUIRED_LAUNCH_CATEGORY_IDS,
-  summarizeSectionCards
+  getConnectorWorkspaceStatus
 } from "./integrations/builders.js";
 
-import {
-  renderDomainSection,
-  renderIntegrationSection
-} from "./integrations/layout.js";
-
-import {
-  renderDrawerProgress,
-  renderIntegrationActionButtons,
-  renderIntegrationDetailsPanel,
-  renderIntegrationDrawer,
-  renderIntegrationField
-} from "./integrations/drawer.js";
+import { renderIntegrationDrawer } from "./integrations/drawer.js";
 
 import {
   renderConnectorGroup,
-  renderIntegrationCard,
   renderSelectedConnectorSummary
 } from "./integrations/cards.js";
 

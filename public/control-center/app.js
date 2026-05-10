@@ -1069,6 +1069,11 @@ function renderStartupRuntimeTrace(cachedPayload = null) {
       `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
       `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
       `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
       `lastClick: ${formatLastClickSummary(payload.lastClick)}`
     ].join("\n");
   }
@@ -3375,11 +3380,15 @@ function getCommandRuntimeState() {
   const commandBar = $("globalCommandBar");
   const commandBackdrop = $("commandBackdrop");
   const aiDock = $("aiDock");
+  const aiDockToggle = $("aiDockToggle");
+  const aiDockPanel = $("aiDockPanel");
 
   return getCommandRuntimeSnapshot({
     commandBar,
     commandBackdrop,
-    aiDock
+    aiDock,
+    aiDockToggle,
+    aiDockPanel
   });
 }
 
@@ -3544,7 +3553,8 @@ function bindCommandInputs() {
     searchBtn.setAttribute("data-action", "search");
   }
 
-  if (commandInput) {
+  if (commandInput && commandInput.dataset.mhCommandEnterBound !== "true") {
+    commandInput.dataset.mhCommandEnterBound = "true";
     commandInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -3553,7 +3563,8 @@ function bindCommandInputs() {
     });
   }
 
-  if (searchInput) {
+  if (searchInput && searchInput.dataset.mhSearchEnterBound !== "true") {
+    searchInput.dataset.mhSearchEnterBound = "true";
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
