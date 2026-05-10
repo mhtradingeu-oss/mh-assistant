@@ -3084,10 +3084,14 @@ function bindDelegatedClickRouting() {
       return;
     }
 
-    const routeAttr = String(candidate.getAttribute("data-route") || candidate.getAttribute("data-page") || "").trim();
-    if (routeAttr) {
+    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+    const pageAttr = String(candidate.getAttribute("data-page") || "").trim();
+    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+
+    if (routeAttrAllowed) {
       event.preventDefault();
-      navigateTo(routeAttr);
+      navigateTo(routeAttrAllowed);
       return;
     }
 

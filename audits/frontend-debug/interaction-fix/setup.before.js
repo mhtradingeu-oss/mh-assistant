@@ -609,8 +609,9 @@ function updateWizardDashboard({
       const input = form.querySelector(`[name="${first.name}"]`);
       if (input && typeof input.focus === "function") {
         input.focus();
-        // Disabled: automatic field scrolling caused form interaction jump.
-        // Keep focus stable without forcing scrollIntoView during editing.
+        if (typeof input.scrollIntoView === "function") {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     };
   }
@@ -748,7 +749,9 @@ function bindSetupActions({
       const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
       activateStep(stepId);
       const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
-      // Disabled: wizard panel auto-scroll caused workspace jump during interaction.
+      if (panel && typeof panel.scrollIntoView === "function") {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     };
   });
 
@@ -861,8 +864,9 @@ function bindSetupActions({
       if (input && typeof input.focus === "function") {
         input.focus();
 
-        // Disabled: automatic field scrolling caused form interaction jump.
-        // Keep focus stable without forcing scrollIntoView during editing.
+        if (typeof input.scrollIntoView === "function") {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     }, 0);
   };

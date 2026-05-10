@@ -1,0 +1,330 @@
+===== SETUP FIELD HANDLERS CONTEXT =====
+    prevBtn.onclick = () => {
+      const index = STEP_DEFINITIONS.findIndex((item) => item.id === activeStepId);
+      if (index > 0) activateStep(STEP_DEFINITIONS[index - 1].id);
+    };
+  }
+
+  const nextBtn = $("setupNextStepBtn");
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      const index = STEP_DEFINITIONS.findIndex((item) => item.id === activeStepId);
+      if (index < STEP_DEFINITIONS.length - 1) activateStep(STEP_DEFINITIONS[index + 1].id);
+    };
+  }
+
+  const refreshSummary = () => {
+    const values = readSetupFormValues(form);
+    updateWizardDashboard({
+      form,
+      values,
+      escapeHtml,
+      missingAssets,
+      missingConnectors,
+      criticalGaps,
+      readinessScore,
+      readinessStatus,
+      activeStepId,
+      activateStep
+    });
+    return values;
+  };
+
+  const saveLocal = (message) => {
+    const values = refreshSummary();
+    const saved = saveSetupDraft(projectName, values);
+    if (typeof showMessage === "function") {
+      showMessage(saved ? message : "Local draft storage is not available in this browser.");
+    }
+  };
+
+  let draftAutoSaveTimer = null;
+
+  const refreshAndPersistDraft = () => {
+    const values = refreshSummary();
+
+    patchState(
+      "data",
+      {
+        setupDraft: {
+          project: projectName || "",
+          values,
+          updatedAt: new Date().toISOString()
+        }
+      },
+      { silent: true }
+    );
+
+    if (draftAutoSaveTimer) {
+      clearTimeout(draftAutoSaveTimer);
+    }
+
+    draftAutoSaveTimer = setTimeout(() => {
+      saveSetupDraft(projectName, values);
+    }, 250);
+
+    return values;
+  };
+
+  form.oninput = refreshAndPersistDraft;
+  form.onchange = refreshAndPersistDraft;
+
+  const keepSetupFieldFocused = (event) => {
+    const field = event.target?.closest?.(".setup-input, .setup-textarea");
+    if (!field) return;
+
+    event.stopPropagation();
+
+    window.setTimeout(() => {
+      if (document.activeElement !== field && typeof field.focus === "function") {
+        field.focus();
+      }
+    }, 0);
+  };
+
+  // Legacy focus forcing disabled after frontend shell rebuild.
+  // The old interaction model caused typing/click instability.
+
+  const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
+
+  setupRoot.onclick = (event) => {
+    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+    if (!jumpBtn) return;
+
+    event.preventDefault();
+
+    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+
+    if (stepId) {
+      activateStep(stepId);
+    }
+
+    }
+
+    recordStartupStep("init.loadProjectData.start", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+    await loadProjectData(preferredProject || DEFAULT_PROJECT_SLUG);
+    recordStartupStep("init.loadProjectData.success", { detail: preferredProject || DEFAULT_PROJECT_SLUG });
+
+    markInitialized();
+    startupRuntimeState.initialized = true;
+    startupRuntimeState.initReadyAt = new Date().toISOString();
+    updateStartupUnlockVisibility(false);
+    window.__mhControlCenterStarted = true;
+    recordStartupStep("init.ready");
+
+    if (!getControlWriteKey()) {
+      showAccessKeyModal();
+    }
+  } catch (error) {
+    handleStartupFatalError("init", error);
+  }
+}
+
+
+
+subscribe(() => {
+  const state = getState();
+  const route = String(state.currentRoute || "home");
+  const project = String(state.context?.currentProject || "");
+  const activeElement = document.activeElement;
+  const isEditingFormField = Boolean(
+    activeElement &&
+    typeof activeElement.matches === "function" &&
+    activeElement.matches(
+      "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+    )
+  );
+
+  if (
+    route !== window.__mhLastGlobalUiRoute ||
+    project !== window.__mhLastGlobalUiProject ||
+    (!isEditingFormField && state.loading !== window.__mhLastGlobalUiLoading) ||
+    (!isEditingFormField && state.error !== window.__mhLastGlobalUiError)
+  ) {
+    renderGlobalUi();
+  }
+
+  window.__mhLastGlobalUiRoute = route;
+  window.__mhLastGlobalUiProject = project;
+  window.__mhLastGlobalUiLoading = state.loading;
+  window.__mhLastGlobalUiError = state.error;
+
+  if (isDebugStartupMode()) {
+    scheduleRuntimeTracePersist(false);
+  }
+});
+
+window.addEventListener("DOMContentLoaded", init);
+
+  state.error = "";
+  notify();
+}
+
+export function setProjects(projects) {
+  const next = Array.isArray(projects) ? projects : [];
+
+  if (state.data.projects === next) {
+    return;
+  }
+
+  state.data.projects = next;
+  notify();
+}
+
+export function setCurrentProject(projectName) {
+  const next = projectName || "";
+
+  if (state.context.currentProject === next) {
+    return;
+  }
+
+  state.context.currentProject = next;
+  notify();
+}
+
+export function setCurrentRoute(route) {
+  const next = route || "home";
+
+  if (state.currentRoute === next) {
+    return;
+  }
+
+  state.currentRoute = next;
+  notify();
+}
+
+export function setProjectContext({
+  project = "",
+  market = "",
+  language = "",
+  mode = "",
+  campaign = ""
+} = {}) {
+  const patch = {
+    currentProject: project,
+    currentMarket: market,
+    currentLanguage: language,
+    executionMode: mode,
+    activeCampaign: campaign
+  };
+
+  if (!hasShallowChanges(state.context, patch)) {
+    return;
+  }
+
+  state.context = {
+    ...state.context,
+    ...patch
+  };
+
+  notify();
+}
+
+export function patchState(section, patch, options = {}) {
+  if (!section || typeof patch !== "object" || patch == null) {
+    return;
+  }
+
+  const silent = Boolean(options?.silent);
+
+  if (section === "data") {
+    if (!hasShallowChanges(state.data, patch)) {
+      return;
+    }
+
+    state.data = {
+      ...state.data,
+      ...patch
+    };
+
+    if (!silent) {
+      notify();
+    }
+    return;
+  }
+
+  if (section === "context") {
+    if (!hasShallowChanges(state.context, patch)) {
+      return;
+
+  button.textContent = action.label;
+  button.hidden = false;
+  button.onclick = () => runAction(action, context);
+}
+
+function queueAiPrompt(prompt, context) {
+  const input = document.getElementById("quickCommandInput");
+  if (input) {
+    input.value = fillPrompt(prompt, context);
+    input.focus?.();
+  }
+
+  context.navigateTo?.("ai-command");
+  context.showMessage?.("AI prompt queued in AI Workspace.");
+}
+
+function isActiveFormInteractionWithinRoute(page) {
+  const activeElement = document.activeElement;
+  if (!activeElement || typeof activeElement.matches !== "function") {
+    return false;
+  }
+
+  if (!page.contains(activeElement)) {
+    return false;
+  }
+
+  return activeElement.matches(
+    "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+  );
+}
+
+export function applyStandardPageLayout(context) {
+  const route = asString(context.route);
+
+  if (!REQUIRED_ROUTES.includes(route)) return;
+
+  const page = document.querySelector(`#pageRoot .page[data-page="${route}"]`);
+  if (!page) return;
+
+  if (page.dataset.stdLayoutInitialized === "true" && page.dataset.stdLayoutRoute === route && isActiveFormInteractionWithinRoute(page)) {
+    return;
+  }
+
+  const shell = ensureShell(page);
+  const copy = ROUTE_COPY[route] || ROUTE_COPY.home;
+  const metrics = getMetrics(context);
+  const nextAction = nextActionFor(route, metrics);
+
+  const eyebrow = shell.querySelector("#stdPageEyebrow");
+  const title = shell.querySelector("#stdPageTitle");
+  const description = shell.querySelector("#stdPageDescription");
+  const smartTitle = shell.querySelector("#stdSmartStripTitle");
+  const smartReason = shell.querySelector("#stdSmartStripReason");
+
+  if (eyebrow) eyebrow.textContent = copy.eyebrow;
+  if (title) title.textContent = copy.title;
+  if (description) description.textContent = copy.description;
+  if (smartTitle) smartTitle.textContent = nextAction;
+  if (smartReason) {
+    smartReason.textContent = metrics.alertCount
+      ? "Resolve blockers first, then continue execution."
+      : "The system is ready for the next guided operating move.";
+  }
+
+  renderContextMetrics(shell.querySelector("#stdContextMetrics"), metrics);
+
+  bindButton(shell.querySelector("#stdPrimaryAction"), copy.primary, context);
+  bindButton(shell.querySelector("#stdSecondaryAction"), copy.secondary, context);
+
+  const askAiBtn = shell.querySelector("#stdAskAiAction");
+  if (askAiBtn) {
+    askAiBtn.textContent = "Ask AI";
+    askAiBtn.onclick = () => queueAiPrompt(`Review ${copy.title}. Current recommended move: ${nextAction}`, context);
+  }
+
+  const stripBtn = shell.querySelector("#stdSmartStripBtn");
+  if (stripBtn) {
+    stripBtn.onclick = () => queueAiPrompt(nextAction, context);
+  }
+
