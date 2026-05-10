@@ -471,7 +471,6 @@ function initializeLibraryGlobalListeners() {
 
 }
 
-initializeLibraryGlobalListeners();
 
 function ensureLibrarySession(projectName) {
   const key = projectName || "__default__";
@@ -2497,6 +2496,8 @@ export const libraryRoute = {
     const folderCounts = computeFolderCounts(renderAllAssets, session);
     const root = $("libraryRoot");
     if (!root) return;
+
+    initializeLibraryGlobalListeners();
 
     root.innerHTML = `
       <div class="library-smart-shell">
