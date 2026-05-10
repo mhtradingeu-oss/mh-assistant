@@ -11,6 +11,11 @@ import {
   getProjectedTeamMembers
 } from "../runtime/authority/authority-projection.js";
 
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot
+} from "../state.js";
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -134,7 +139,7 @@ function routeForAction(action) {
 }
 
 function buildAiTeamCards(state) {
-  const operations = asObject(state.data.operations);
+  const operations = asObject(selectOperationsSnapshot(state));
   const notifications = asArray(operations.notifications?.items);
   const tasks = asArray(operations.tasks?.items);
   const approvals = asArray(operations.approvals?.items);
@@ -200,7 +205,7 @@ function buildExecutiveData(state) {
   const integrations = asObject(state.data.integrations);
   const activity = asObject(state.data.activity);
   const assets = asObject(state.data.assets);
-  const operations = asObject(state.data.operations);
+  const operations = asObject(selectOperationsSnapshot(state));
 
   const overviewData = asObject(overview.overview);
   const readinessData = asObject(readiness.dashboard);
@@ -227,7 +232,7 @@ function buildExecutiveData(state) {
   const nextScheduled = sortedSchedule[0] || null;
 
   const projectName =
-    asString(state.context.currentProject) ||
+    asString(selectCurrentProject(state)) ||
     asString(overviewData.project_name);
 
   const readinessScore =
