@@ -1,4 +1,5 @@
 import { normalizeLibraryAsset, normalizeLibraryAssets } from "./library/projection-adapter.js";
+import { normalizeLibrarySession } from "./library/session-store.js";
 import {
   AccessKeyError,
   archiveProjectAsset,
@@ -476,7 +477,7 @@ function initializeLibraryGlobalListeners() {
 function ensureLibrarySession(projectName) {
   const key = projectName || "__default__";
   if (!librarySessionStore.has(key)) {
-    librarySessionStore.set(key, {
+    librarySessionStore.set(key, normalizeLibrarySession({
       selectedCategoryKey: "all",
       selectedAssetId: "",
       searchQuery: "",
@@ -490,7 +491,13 @@ function ensureLibrarySession(projectName) {
       uploadType: "logo",
       uploading: false,
       recentUploads: []
-    });
+    }));
+  }
+
+  const current = librarySessionStore.get(key);
+  const normalized = normalizeLibrarySession(current);
+  if (current !== normalized) {
+    librarySessionStore.set(key, normalized);
   }
   return librarySessionStore.get(key);
 }
