@@ -1,6 +1,11 @@
 // public/control-center/app.js
 
 import {
+  getProjectedActiveRole,
+  getProjectedRoutePermissions
+} from "./runtime/authority/authority-projection.js";
+
+import {
   initRouter,
   navigateTo,
   renderRouteTemplate,
@@ -175,8 +180,9 @@ function getActiveRole() {
       return stored.trim().toLowerCase();
     }
   } catch (_) {}
-  const operations = getState().data.operations;
-  const stateRole = operations?.team_service_model?.active_role;
+  const state = getState();
+  const operations = state.data.operations;
+  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
   if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
     return stateRole.trim().toLowerCase();
   }
@@ -248,9 +254,7 @@ function installProtectedWriteFetch() {
 
 function resolveRouteAccess(route) {
   const operations = getState().data.operations;
-  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
-    ? operations.team_service_model.route_permissions
-    : [];
+  const routePermissions = getProjectedRoutePermissions({ operations });
   const activeRole = getActiveRole();
 
   function buildBlockedReason(allowedRoles) {
