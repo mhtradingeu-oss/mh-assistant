@@ -1,0 +1,101 @@
+10:  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+13:  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+24:    <!-- Mobile sidebar backdrop -->
+25:    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+32:    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+37:      id="startupUnlockBar"
+38:      class="startup-unlock-bar"
+44:      <span id="startupUnlockText">Startup is taking longer than expected.</span>
+45:      <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+49:      id="startupTracePanel"
+50:      class="startup-trace-panel"
+55:      <div class="startup-trace-head">
+57:        <button id="startupTraceUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+59:      <div id="startupTraceMeta" class="startup-trace-meta">Startup trace is idle.</div>
+60:      <div id="startupTraceBody" class="startup-trace-body">No startup events recorded yet.</div>
+64:      id="fatalErrorPanel"
+65:      class="fatal-error-panel"
+71:      <h3 id="fatalErrorTitle">Control Center startup failed</h3>
+72:      <p id="fatalErrorText">The app could not finish loading.</p>
+73:      <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
+74:      <div id="fatalStartupSteps" class="fatal-startup-steps">No startup steps recorded yet.</div>
+75:      <div class="fatal-error-actions">
+76:        <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
+77:        <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
+81:    <!-- Global loading -->
+82:    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+83:      <div class="loading-card" role="status" aria-live="polite">
+84:        <div class="loading-spinner" aria-hidden="true"></div>
+85:        <h3 id="loadingTitle">Loading project</h3>
+86:        <p id="loadingText">Please wait while the system loads the workspace.</p>
+92:      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
+93:        <div class="sidebar-brand">
+99:        <div class="sidebar-project">
+100:          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+101:          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+106:        <nav class="sidebar-nav" aria-label="Primary navigation">
+113:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+139:        <div class="sidebar-actions">
+143:          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+152:        <header id="topbar" class="topbar" role="banner">
+154:            id="sidebarToggleBtn"
+155:            class="sidebar-toggle"
+157:            aria-label="Toggle sidebar"
+158:            aria-controls="sidebarNav"
+164:          <div class="topbar-left">
+171:          <div class="topbar-right">
+172:            <div class="workspace-chip" aria-label="Current workspace">
+173:              <span class="workspace-dot"></span>
+179:                id="commandToggleBtn"
+180:                class="btn btn-secondary command-toggle"
+182:                aria-label="Toggle command bar"
+210:        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
+212:        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+213:          <div class="command-bar-left">
+216:              class="command-input"
+224:          <div class="command-bar-center">
+227:              class="command-input"
+230:              aria-label="Quick command"
+235:          <div class="command-bar-right">
+237:            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+244:        <main id="workspace" class="workspace page-container" role="main" aria-live="polite">
+254:        var overlay = document.getElementById("loadingOverlay");
+255:        if (!overlay) return;
+257:        overlay.classList.remove("is-visible");
+258:        overlay.setAttribute("aria-hidden", "true");
+259:        overlay.style.display = "none";
+260:        overlay.style.pointerEvents = "none";
+266:        var panel = document.getElementById("fatalErrorPanel");
+267:        var text = document.getElementById("fatalErrorText");
+268:        var diagnostics = document.getElementById("fatalErrorDetails");
+291:      var retryBtn = document.getElementById("fatalRetryBtn");
+298:      var accessKeyBtn = document.getElementById("fatalAccessKeyBtn");
+337:          : String(reason || "Unhandled startup rejection");
+339:        showFatalStartupError("Control Center startup promise failed.", message);
+344:  <script type="module" src="./app.js?v=20260506-startup-hidden-fix-1"></script>
+345:  <script src="./runtime/command-runtime.js?v=20260508-command-runtime-skeleton-1"></script>
+347:    <div id="aiDock" class="ai-dock">
+350:        class="ai-dock-toggle"
+355:        <span class="ai-dock-status-dot"></span>
+356:        <span class="ai-dock-label">MH Assistant</span>
+357:        <span class="ai-dock-state">Ready</span>
+362:        class="ai-dock-panel"
+365:        <header class="ai-dock-header">
+373:            class="ai-dock-close"
+381:        <div class="ai-dock-body">
+382:          <div class="ai-dock-section">
+383:            <span class="ai-dock-section-label">Suggested next step</span>
+386:              class="ai-dock-suggestion"
+388:              data-ai-suggestion="Review the current workspace and suggest the next best action."
+390:              Review current workspace
+394:              class="ai-dock-suggestion"
+402:              class="ai-dock-suggestion"
+410:          <div class="ai-dock-section">
+411:            <span class="ai-dock-section-label">Quick actions</span>
+413:            <div class="ai-dock-actions">
+414:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+418:              <button class="ai-dock-chip" data-ai-route="content-studio">
+422:              <button class="ai-dock-chip" data-ai-route="media-studio">
+426:              <button class="ai-dock-chip" data-ai-route="publishing">

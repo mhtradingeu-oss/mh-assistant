@@ -1,0 +1,320 @@
+6:  renderRouteTemplate,
+91:  "ai-command": ACTIVE_ROUTE_ROLES,
+737:function renderSimpleList(items, emptyText = "No items available.") {
+749:    renderRouteTemplate(route);
+800:  text = "Please wait while the system loads the workspace.",
+817:  if (startupRuntimeState.manualUnlockActive && token === startupRuntimeState.manualUnlockToken) {
+822:  if (startupRuntimeState.manualUnlockActive && token !== startupRuntimeState.manualUnlockToken) {
+828:  const overlay = $("loadingOverlay");
+835:  if (overlay) {
+836:    overlay.hidden = false;
+837:    overlay.inert = false;
+838:    overlay.style.display = "flex";
+839:    overlay.style.opacity = "1";
+840:    overlay.style.visibility = "visible";
+841:    overlay.style.pointerEvents = "auto";
+842:    overlay.classList.add("is-visible");
+843:    overlay.setAttribute("aria-hidden", "false");
+873:  const overlay = $("loadingOverlay");
+874:  if (!overlay) return false;
+876:  overlay.classList.remove("is-visible");
+877:  overlay.hidden = true;
+878:  overlay.inert = true;
+879:  overlay.setAttribute("aria-hidden", "true");
+880:  overlay.style.setProperty("display", "none", "important");
+881:  overlay.style.opacity = "0";
+882:  overlay.style.visibility = "hidden";
+883:  overlay.style.pointerEvents = "none";
+888:  startupRuntimeState.hideLoadingCalled = true;
+889:  startupRuntimeState.hideLoadingReason = reason;
+890:  startupRuntimeState.hideLoadingAt = new Date().toISOString();
+897:  const overlay = $("loadingOverlay");
+898:  if (!overlay) return false;
+900:  const classVisible = overlay.classList.contains("is-visible");
+901:  const ariaVisible = overlay.getAttribute("aria-hidden") === "false";
+902:  const pointerBlocking = overlay.style.pointerEvents && overlay.style.pointerEvents !== "none";
+903:  const displayBlocking = overlay.style.display && overlay.style.display !== "none";
+914:const STARTUP_STEPS_STORAGE_KEY = "mh-control-center-startup-steps";
+917:const LAST_STARTUP_ERROR_STORAGE_KEY = "mh-control-center-last-startup-error";
+919:const STARTUP_UNLOCK_STORAGE_KEY = "mh-control-center-startup-unlock";
+931:const startupStepHistory = [];
+935:const startupDiagnostics = {
+948:const startupRuntimeState = {
+949:  startupStartedAtMs: 0,
+967:  initialized: false,
+975:  const overlay = $("loadingOverlay");
+977:  const overlayNodes = typeof document !== "undefined"
+982:    exists: Boolean(overlay),
+983:    count: overlayNodes.length,
+984:    className: String(overlay?.className || ""),
+985:    display: String(overlay?.style?.display || ""),
+986:    visibility: String(overlay?.style?.visibility || ""),
+987:    opacity: String(overlay?.style?.opacity || ""),
+988:    pointerEvents: String(overlay?.style?.pointerEvents || ""),
+989:    ariaHidden: String(overlay?.getAttribute?.("aria-hidden") || ""),
+1006:    stage: String(stage || "startup.trace"),
+1007:    token: String(details.token || startupRuntimeState.currentToken || ""),
+1016:function renderStartupRuntimeTrace(cachedPayload = null) {
+1020:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+1021:    currentToken: startupRuntimeState.currentToken || "",
+1022:    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+1023:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+1024:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+1025:    unlocked: Boolean(startupRuntimeState.unlocked),
+1026:    unlockReason: String(startupRuntimeState.unlockReason || ""),
+1027:    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+1029:    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+1031:    overlay: getOverlayState(),
+1034:  const panel = $("startupTracePanel");
+1035:  const meta = $("startupTraceMeta");
+1036:  const body = $("startupTraceBody");
+1037:  const unlockBar = $("startupUnlockBar");
+1038:  const unlockText = $("startupUnlockText");
+1040:  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+1058:      `overlay.className: ${payload.overlay.className || "-"}`,
+1059:      `overlay.display: ${payload.overlay.display || "-"}`,
+1060:      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+1061:      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+1062:      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+1063:      `overlay.count: ${payload.overlay.count || 0}`,
+1071:      : "No startup events recorded yet.";
+1081:    unlockText.textContent = startupRuntimeState.unlocked
+1094:    !startupRuntimeState.unlocked &&
+1095:    !startupRuntimeState.unlockVisible
+1104:    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+1105:    currentToken: startupRuntimeState.currentToken || "",
+1106:    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+1107:    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+1108:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+1109:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+1110:    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+1111:    unlocked: Boolean(startupRuntimeState.unlocked),
+1112:    unlockReason: String(startupRuntimeState.unlockReason || ""),
+1113:    unlockAt: String(startupRuntimeState.unlockAt || ""),
+1114:    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+1115:    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+1116:    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+1118:    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+1120:    overlay: getOverlayState(),
+1125:  renderStartupRuntimeTrace(payload);
+1208:      renderStartupRuntimeTrace();
+1217:  if (startupRuntimeState.unlockVisible === nextVisible) {
+1221:  startupRuntimeState.unlockVisible = nextVisible;
+1222:  recordRuntimeTrace(nextVisible ? "startup.unlock.available" : "startup.unlock.hidden", {
+1223:    detail: startupRuntimeState.currentProject || startupRuntimeState.currentToken || "startup"
+1249:function renderStartupStepDiagnostics() {
+1250:  const latest = startupStepHistory[startupStepHistory.length - 1] || null;
+1253:  const banner = $("startupStepBanner");
+1263:  const stepsBox = $("fatalStartupSteps");
+1265:    const lines = startupStepHistory.slice(-10).map((entry) => formatStepEntry(entry));
+1266:    stepsBox.textContent = lines.length ? lines.join("\n") : "No startup steps recorded yet.";
+1274:    startupStep: latest?.step || "",
+1275:    startupSteps: startupStepHistory.slice(-20),
+1285:    step: String(step || "startup.step"),
+1290:  boundedPush(startupStepHistory, entry, STARTUP_HISTORY_LIMIT);
+1291:  safeStorageSet(STARTUP_STEPS_STORAGE_KEY, JSON.stringify(startupStepHistory));
+1296:  renderStartupStepDiagnostics();
+1300:  const overlay = $("loadingOverlay");
+1307:    classVisible: Boolean(overlay && overlay.classList.contains("is-visible")),
+1308:    display: String(overlay?.style?.display || ""),
+1309:    pointerEvents: String(overlay?.style?.pointerEvents || "")
+1317:    endpoint: "overlay"
+1319:  renderStartupStepDiagnostics();
+1332:  const message = String(error?.message || error || "Unknown startup error").trim();
+1336:    source: String(source || "startup"),
+1343:    source: String(source || "startup"),
+1350:  startupDiagnostics.lastErrorSource = String(source || "startup");
+1351:  startupDiagnostics.lastErrorMessage = message;
+1352:  startupDiagnostics.requestAuth = {
+1359:  recordRuntimeTrace("startup.failure", {
+1360:    detail: `${String(source || "startup")}: ${message}`,
+1367:  const alreadyRecorded = startupDiagnostics.failedEndpoints.some((item) => item.endpoint === endpoint);
+1369:    startupDiagnostics.failedEndpoints.push({
+1378:function renderStartupDiagnosticsText(reason = "") {
+1383:  if (startupDiagnostics.lastErrorSource || startupDiagnostics.lastErrorMessage) {
+1385:      `Last error: ${startupDiagnostics.lastErrorSource || "startup"} - ` +
+1386:      `${startupDiagnostics.lastErrorMessage || "unknown"}`
+1389:  if (startupDiagnostics.failedEndpoints.length) {
+1390:    const endpointRow = startupDiagnostics.failedEndpoints
+1395:  if (startupStepHistory.length) {
+1396:    const recentSteps = startupStepHistory.slice(-6).map((entry) => formatStepEntry(entry)).join(" | ");
+1399:  const requestAuth = startupDiagnostics.requestAuth || {};
+1420:  const overlay = $("loadingOverlay");
+1421:  if (!overlay) {
+1429:  overlay.classList.remove("is-visible");
+1430:  overlay.hidden = true;
+1431:  overlay.setAttribute("aria-hidden", "true");
+1432:  overlay.style.setProperty("display", "none", "important");
+1433:  overlay.style.opacity = "0";
+1434:  overlay.style.visibility = "hidden";
+1435:  overlay.style.pointerEvents = "none";
+1441:    endpoint: "overlay"
+1453:    project: startupRuntimeState.currentProject || getState().context.currentProject || "",
+1454:    token: startupRuntimeState.currentToken || activeProjectLoadToken || ""
+1457:  startupRuntimeState.unlocked = true;
+1458:  startupRuntimeState.unlockReason = reason;
+1459:  startupRuntimeState.unlockAt = payload.at;
+1460:  startupRuntimeState.unlockVisible = true;
+1462:  recordRuntimeTrace("startup.unlock", {
+1473:  startupRuntimeState.manualUnlockActive = reason === "manual-unlock";
+1474:  startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+1483:  const overlay = $("loadingOverlay");
+1484:  if (overlay) {
+1485:    overlay.classList.remove("is-visible");
+1486:    overlay.setAttribute("aria-hidden", "true");
+1487:    overlay.hidden = true;
+1488:    overlay.inert = true;
+1489:    overlay.style.setProperty("display", "none", "important");
+1490:    overlay.style.visibility = "hidden";
+1491:    overlay.style.opacity = "0";
+1492:    overlay.style.pointerEvents = "none";
+1503:  renderStartupRuntimeTrace();
+1507:  ["startupUnlockBtn", "startupTraceUnlockBtn"].forEach((id) => {
+1543:  const panel = $("fatalErrorPanel");
+1546:  const actions = panel.querySelector(".fatal-error-actions");
+1547:  if (!actions || panel.querySelector("#fatalClearSavedKeyReloadBtn")) {
+1552:  button.id = "fatalClearSavedKeyReloadBtn";
+1581:  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+1586:  const retryBtn = $("fatalRetryBtn");
+1587:  const accessKeyBtn = $("fatalAccessKeyBtn");
+1588:  const clearSavedKeyReloadBtn = $("fatalClearSavedKeyReloadBtn");
+1617:  const panel = $("fatalErrorPanel");
+1623:  const text = $("fatalErrorText");
+1624:  const detailsBox = $("fatalErrorDetails");
+1641:  const err = error instanceof Error ? error : new Error(String(error || "Unknown startup failure"));
+1642:  recordStartupStep("startup.fatal", {
+1643:    detail: `${String(source || "startup")}: ${String(err.message || "unknown error")}`
+1648:  hideLoading({ reason: "startup-fatal", force: true });
+1652:    "Control Center could not complete startup.",
+1653:    renderStartupDiagnosticsText(String(source || "startup"))
+1676:    const startupAgeMs = startupRuntimeState.startupStartedAtMs
+1677:      ? Date.now() - startupRuntimeState.startupStartedAtMs
+1679:    const overlayVisibleMs = loadingWatchdogVisibleSinceMs
+1682:    const apiStageAgeMs = startupRuntimeState.lastApiStageAtMs
+1683:      ? Date.now() - startupRuntimeState.lastApiStageAtMs
+1686:      startupRuntimeState.lastApiStage === "response.text.start" ||
+1687:      startupRuntimeState.lastApiStage === "api.response.text.start" ||
+1688:      startupRuntimeState.lastApiStage === "api.response.text.timeout"
+1695:      !startupRuntimeState.responseTextWatchdogUnlocked
+1697:      startupRuntimeState.responseTextWatchdogUnlocked = true;
+1698:      startupRuntimeState.manualUnlockActive = true;
+1699:      startupRuntimeState.manualUnlockToken = activeProjectLoadToken;
+1700:      startupRuntimeState.projectPayloadSuccess = false;
+1701:      startupRuntimeState.payloadSuccessAt = "";
+1718:      void applyRequiredProjectFallback(startupRuntimeState.currentProject || DEFAULT_PROJECT_SLUG, activeProjectLoadToken);
+1721:    if (!startupRuntimeState.unlocked && startupAgeMs >= STARTUP_UNLOCK_TIMEOUT_MS) {
+1728:      overlayVisibleMs >= LOADING_WATCHDOG_TIMEOUT_MS
+1744:    startupRuntimeState.lastApiStage = String(detail.stage || "");
+1745:    startupRuntimeState.lastApiStageAtMs = Date.now();
+1746:    startupRuntimeState.lastApiMessage = String(detail.message || "");
+1747:    startupRuntimeState.lastApiEndpoint = String(detail.endpoint || "");
+1762:    const startupPhase = !getState().initialized || isLoadingVisible();
+1763:    if (!startupPhase) return;
+1771:    const startupPhase = !getState().initialized || isLoadingVisible();
+1772:    if (!startupPhase) return;
+1912:function renderTopContext() {
+1934:function renderProjectSwitcher() {
+1980:function renderPlaceholders() {
+2025:function renderCurrentPage() {
+2030:  if (typeof routeDef.render === "function") {
+2031:    routeDef.render({
+2037:      renderSimpleList,
+2099:function renderGlobalUi() {
+2100:  renderProjectSwitcher();
+2101:  renderTopContext();
+2106:    await Promise.resolve(renderCurrentPage());
+2108:  } catch (renderError) {
+2109:    console.error(logLabel, renderError);
+2110:    setError(renderError.message || "Failed to render project page");
+2111:    showError(renderError.message || "Failed to render project page");
+2184:        startupRuntimeState.lastApiStage === "response.text.start" ||
+2185:        startupRuntimeState.lastApiStage === "api.response.text.start" ||
+2186:        startupRuntimeState.lastApiStage === "api.response.text.timeout"
+2201:      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+2213:      const lastStage = String(startupRuntimeState.lastApiStage || "");
+2242:      error.endpoint = startupRuntimeState.lastApiEndpoint || "";
+2261:    startupRuntimeState.projectPayloadSuccess = true;
+2262:    startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+2485:  renderGlobalUi();
+2523:      recordStartupStep("loadProjectData.overlay-recovery.force-hide", {
+2602:    renderGlobalUi();
+2632:    renderProjectSwitcher();
+2640:    renderProjectSwitcher();
+2662:  startupRuntimeState.currentToken = loadToken;
+2663:  startupRuntimeState.currentProject = safeProjectName;
+2664:  startupRuntimeState.projectPayloadSuccess = false;
+2665:  startupRuntimeState.payloadSuccessAt = "";
+2666:  startupRuntimeState.hideLoadingCalled = false;
+2667:  startupRuntimeState.hideLoadingReason = "";
+2668:  startupRuntimeState.hideLoadingAt = "";
+2669:  startupRuntimeState.unlocked = false;
+2670:  startupRuntimeState.unlockReason = "";
+2671:  startupRuntimeState.unlockAt = "";
+2672:  startupRuntimeState.startupStartedAtMs = Date.now();
+2673:  startupRuntimeState.unlockVisible = false;
+2674:  startupRuntimeState.manualUnlockActive = false;
+2675:  startupRuntimeState.manualUnlockToken = "";
+2676:  startupRuntimeState.responseTextWatchdogUnlocked = false;
+2764:        startupDiagnostics.requestAuth = {
+2787:      startupRuntimeState.projectPayloadSuccess = true;
+2788:      startupRuntimeState.payloadSuccessAt = new Date().toISOString();
+2802:      recordStartupStep("loadProjectData.renderGlobalUi.start", {
+2807:        renderGlobalUi();
+2808:      } catch (renderGlobalError) {
+2809:        recordStartupFailure("load-project-render-global-ui", renderGlobalError);
+2811:        forceHideLoadingOverlay("render-global-ui-error");
+2812:        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+2813:        setError(renderMessage);
+2814:        showError(renderMessage);
+2815:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("renderGlobalUi"));
+2816:        recordStartupStep("loadProjectData.renderGlobalUi.error", {
+2818:          detail: String(renderMessage)
+2822:      recordStartupStep("loadProjectData.renderGlobalUi.done", {
+2832:        const rendered = await safeRenderCurrentPage();
+2833:        if (!rendered) {
+2834:          throw new Error("Failed to render current page.");
+2837:        recordStartupFailure("load-project-safe-render-current-page", pageRenderError);
+2839:        forceHideLoadingOverlay("safe-render-current-page-error");
+2840:        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+2841:        setError(renderMessage);
+2842:        showError(renderMessage);
+2843:        showFatalErrorPanel(renderMessage, renderStartupDiagnosticsText("safeRenderCurrentPage"));
+2846:          detail: String(renderMessage)
+2866:        startupRuntimeState.manualUnlockActive = true;
+2867:        startupRuntimeState.manualUnlockToken = loadToken;
+2868:        startupRuntimeState.responseTextWatchdogUnlocked = true;
+2869:        startupRuntimeState.projectPayloadSuccess = false;
+2870:        startupRuntimeState.payloadSuccessAt = "";
+2902:        renderGlobalUi();
+2930:        renderStartupDiagnosticsText("load-project-data")
+2932:      renderGlobalUi();
+2969:   * The required startup payload renders the page first; optional sections
+2970:   * can be restored later with route-level lazy loading to avoid startup
+2971:   * render pressure.
+2994:    "AI Command": "ai-command",
+3017:    "open-ai-command": "ai-command",
+3020:    "send-ai-command": "ai-command"
+3047:    if (actionName === "send-ai-command") {
+3051:        navigateTo("ai-command");
+3084:      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+3086:      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+3106:    const workspace = $("workspace");
+3107:    if (workspace) {
+3108:      workspace.scrollTop = 0;
+3109:      workspace.scrollLeft = 0;
+3112:    const sidebarNav = document.querySelector(".sidebar-nav");
+3113:    if (sidebarNav) {
+3114:      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+3124:    renderCurrentPage();
+3173:  const sidebar = document.querySelector(".sidebar");
+3174:  const toggleBtn = $("sidebarToggleBtn");
+3175:  const backdrop = $("sidebarBackdrop");
+3177:  const commandBar = $("globalCommandBar");
+3178:  const commandToggleBtn = $("commandToggleBtn");
+3179:  const commandBackdrop = $("commandBackdrop");
+3194:    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+3198:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+3201:      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+3202:      const desktopCommandOpen = appRoot.classList.contains("is-command-open");
+3203:      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+3204:      commandBar.hidden = !desktopCommandOpen;
