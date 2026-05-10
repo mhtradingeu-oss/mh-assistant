@@ -1,0 +1,110 @@
+public/control-center/app.js:84:const ACTIVE_ROUTE_ROLES = [
+public/control-center/app.js:95:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/app.js:97:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:103:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:104:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:105:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:106:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:107:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:108:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/app.js:112:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:179:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+public/control-center/app.js:272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/app.js:3882:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3885:          <span>Governance, claim review, release approval.</span>
+public/control-center/router.js:23:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:26:const ACTIVE_ROUTE_ROLES = [
+public/control-center/router.js:37:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/router.js:39:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:45:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:46:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:47:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:48:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:49:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:50:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/router.js:54:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:78:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:166:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/pages/ai-command.js:3:	getSharedHandoff,
+public/control-center/pages/ai-command.js:5:	setSharedHandoff
+public/control-center/pages/ai-command.js:15:const MODE_DEFS = [
+public/control-center/pages/ai-command.js:120:const AGENT_CARDS = [
+public/control-center/pages/ai-command.js:347:	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
+public/control-center/pages/ai-command.js:583:	const scores = MODE_DEFS.map((mode) => ({
+public/control-center/pages/ai-command.js:948:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:1076:  if (!projectedMembers.length) return AGENT_CARDS;
+public/control-center/pages/ai-command.js:1081:      AGENT_CARDS.find((agent) => agent.id === id) ||
+public/control-center/pages/ai-command.js:1082:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:1083:      AGENT_CARDS[0] ||
+public/control-center/pages/ai-command.js:1172:				${MODE_DEFS.map((agent) => `
+public/control-center/pages/ai-command.js:1871:      const card = AGENT_CARDS.find((item) => item.id === agentId);
+public/control-center/pages/workflows.js:3:  getSharedHandoff,
+public/control-center/pages/workflows.js:5:  setSharedHandoff
+public/control-center/pages/workflows.js:10:  createAutoModeController,
+public/control-center/pages/workflows.js:12:  startAutoMode,
+public/control-center/pages/workflows.js:16:  approveCurrentGate,
+public/control-center/pages/workflows.js:17:  skipCurrentStep,
+public/control-center/pages/workflows.js:18:  subscribeAutoMode,
+public/control-center/pages/workflows.js:650:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:1083:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1209:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1211:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1285:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1384:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1559:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1595:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1680:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1682:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1686:      await startAutoMode(plan, {
+public/control-center/pages/workflows.js:1721:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1729:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/publishing.js:1:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+public/control-center/pages/publishing.js:9:  createAutoModeController,
+public/control-center/pages/publishing.js:11:  startAutoMode,
+public/control-center/pages/publishing.js:13:  approveCurrentGate,
+public/control-center/pages/publishing.js:14:  skipCurrentStep,
+public/control-center/pages/publishing.js:15:  subscribeAutoMode
+public/control-center/pages/publishing.js:70:    createAutoModeController(getState, { getState, navigateTo });
+public/control-center/pages/publishing.js:78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/publishing.js:836:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:837:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:838:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:966:        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1629:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/publishing.js:1672:      const runResult = await startAutoMode(plan, {
+public/control-center/pages/publishing.js:1700:      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+public/control-center/pages/publishing.js:1708:      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+public/control-center/automation-engine.js:2:import { setSharedAiDraft, setSharedHandoff } from "./shared-context.js";
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:374:      setSharedHandoff(projectName, destination, localDraft);
+public/control-center/automation-engine.js:395:      setSharedHandoff(projectName, destination, draftPayload);
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:600:    approveCurrentGate,
+public/control-center/automation-engine.js:601:    skipCurrentStep,
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:74:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
