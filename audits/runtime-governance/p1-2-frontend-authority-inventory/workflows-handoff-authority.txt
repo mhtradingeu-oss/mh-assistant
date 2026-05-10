@@ -1,0 +1,221 @@
+  return `
+    <div class="wfexec-shell">
+      ${renderOverviewSection(metrics, context, escapeHtml)}
+      <div class="wfexec-grid">
+        <div class="wfexec-left">
+          ${renderRecommendationSection(recommendation, escapeHtml)}
+          ${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}
+          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+        </div>
+        <div class="wfexec-right">
+          ${renderCatalogSection(session, context, escapeHtml)}
+          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+  const handoff = getSharedHandoff(projectName, "workflows", operations);
+  const handoffId = asString(handoff?.id);
+  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+
+  const payload = asObject(handoff?.payload);
+  const fromWorkflowId = asString(payload.workflow_id);
+  const modeId = asString(payload?.draft_context?.modeId);
+  const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;
+  const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;
+
+  session.selectedWorkflowId = workflowId;
+  session.inputsByWorkflow[workflowId] = {
+    ...session.inputsByWorkflow[workflowId],
+    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+  };
+
+  if (payload.output) {
+    const run = session.runsByWorkflow[workflowId];
+    run.output = asObject(payload.output);
+    run.status = "completed";
+    run.lastRunAt = nowIso();
+    run.source = "handoff";
+    run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });
+    run.history = run.history.slice(0, 8);
+  }
+
+  session.lastAppliedHandoffId = handoffId;
+  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+    console.warn("Failed to consume workflow handoff:", error.message);
+  });
+  showMessage?.("Workflow context restored from shared handoff.");
+}
+
+async function ensureWorkflowIntelligenceLoaded({
+  projectName,
+  session,
+  getState,
+  reloadProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  rerender
+}) {
+  if (!projectName) {
+    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+    return;
+  }
+
+  const current = session.intelligence;
+  const freshEnough =
+    current.status === "ready" &&
+    current.project === projectName &&
+    current.loadedAt &&
+    (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+
+  if (freshEnough) return;
+  if (current.loadingPromise) return current.loadingPromise;
+
+  const state = getState();
+  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+
+  session.intelligence = {
+    ...current,
+    project: projectName,
+    status: "loading",
+    error: "",
+    loadingPromise: (async () => {
+      try {
+        if (needsDashboard) await reloadProjectData(projectName);
+        const [insightsResult, learningResult] = await Promise.allSettled([
+          fetchProjectInsights(projectName),
+          fetchProjectLearning(projectName)
+        ]);
+
+        session.intelligence = {
+          project: projectName,
+          status: "ready",
+          dashboard: getState().data,
+          insights: insightsResult.status === "fulfilled" ? insightsResult.value : null,
+          learning: learningResult.status === "fulfilled" ? learningResult.value : null,
+          error: insightsResult.status === "rejected" && learningResult.status === "rejected"
+            ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")
+            : "",
+          loadedAt: nowIso(),
+          loadingPromise: null
+        };
+      } catch (error) {
+        session.intelligence = {
+          ...session.intelligence,
+          project: projectName,
+          status: "error",
+          error: error.message || "Failed to load workflow intelligence",
+          loadingPromise: null
+        };
+      } finally {
+        rerender();
+      }
+    })()
+  };
+
+  rerender();
+  return session.intelligence.loadingPromise;
+}
+
+function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+  if (runOutput?.summary) {
+    return [
+      `Refine the ${workflow.title.toLowerCase()} execution package.`,
+      `Project: ${inputs.project || context.projectName || "not set"}`,
+      `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+      `Summary: ${runOutput.summary}`,
+      `Next actions: ${asArray(runOutput.nextActions).join("; ")}`
+    ].join("\n");
+  }
+  return [
+    `Build a ${workflow.title.toLowerCase()} execution package.`,
+    `Project: ${inputs.project || context.projectName || "not set"}`,
+    `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+    `Product: ${inputs.product || "not set"}`,
+    `Channel: ${inputs.channel || "not set"}`,
+    `Goal: ${inputs.goal || "not set"}`,
+    context.missingIntegrations.length ? `Missing integrations: ${context.missingIntegrations.join(", ")}` : "Missing integrations: none",
+    context.missingAssets.length ? `Missing assets: ${context.missingAssets.join(", ")}` : "Missing assets: none"
+  ].join("\n");
+}
+
+function pushWorkflowToAiCommand({
+  projectName,
+  workflow,
+  inputs,
+  run,
+  context,
+  navigateTo,
+  createProjectHandoff,
+  showMessage,
+  allowPersistent
+}) {
+  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+  const aiDraft = {
+    projectName,
+    modeId: workflow.aiModeId,
+    lastCommand: prompt,
+    lastResponseTitle: asString(run.output?.title || workflow.title),
+    routeSuggestions: asArray(run.output?.routeSuggestions)
+  };
+
+  setSharedAiDraft(projectName, aiDraft);
+
+  const handoff = {
+    source_page: "workflows",
+    destination_page: "ai-command",
+    payload: {
+      prompt,
+      workflow_id: workflow.id,
+      workflow_title: workflow.title,
+      draft_context: aiDraft,
+      output: asObject(run.output)
+    },
+    status: "available"
+  };
+
+  setSharedHandoff(projectName, "ai-command", handoff);
+
+  if (allowPersistent && typeof createProjectHandoff === "function") {
+    createProjectHandoff(projectName, handoff).catch((error) => {
+      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+    });
+  }
+
+  navigateTo("ai-command");
+  showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");
+}
+
+function validateWorkflowInputs(workflow, inputs) {
+  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+  if (!missing.length) return "";
+  return `Please complete: ${missing.map(titleCase).join(", ")}.`;
+}
+
+function registerWorkflowBridge(context) {
+  lastWorkflowRenderContext = context;
+  if (workflowBridgeRegistered || typeof window === "undefined") return;
+
+  window.addEventListener("mh:submit-workflow", async (event) => {
+    if (!lastWorkflowRenderContext) return;
+
+    const detail = asObject(event?.detail);
+    const message = asString(detail.message);
+    const meta = asObject(detail.meta);
+
+    const {
+      getState,
+      reloadProjectData,
+      fetchProjectInsights,
+      fetchProjectLearning,
+      runProjectWorkflow,
+      runProjectAiWorkflow,
+      render,
+      showMessage,

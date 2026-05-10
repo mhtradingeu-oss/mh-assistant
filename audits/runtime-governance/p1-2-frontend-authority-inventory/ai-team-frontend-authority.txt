@@ -1,0 +1,51 @@
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:106:export const AI_PAGE_SPECIALIST_MAP = {
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ai-team-model.js:128:export function getAiTeamRole(roleId) {
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:132:export function getAiRolesForPage(pageId) {
+public/control-center/ai-team-model.js:133:  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+public/control-center/ai-team-model.js:134:  return ids.map(getAiTeamRole).filter(Boolean);
+public/control-center/ai-team-model.js:137:export function getPrimaryAiRoleForPage(pageId) {
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/pages/ai-command.js:2:	getSharedHandoff,
+public/control-center/pages/ai-command.js:4:	setSharedHandoff
+public/control-center/pages/ai-command.js:45:		label: "Ads Specialist",
+public/control-center/pages/ai-command.js:68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:150:		name: "Ads Specialist",
+public/control-center/pages/ai-command.js:153:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:172:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:214:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:222:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:385:			lastAppliedHandoffId: ""
+public/control-center/pages/ai-command.js:574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:687:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:946:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:948:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:949:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:951:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:967:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:968:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:969:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:1033:		role: "user",
+public/control-center/pages/ai-command.js:1042:		role: "assistant",
+public/control-center/pages/ai-command.js:1141:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:1368:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:1375:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:1466:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:1529:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:1533:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:1584:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:1689:          <h3>Choose your AI specialist</h3>
+public/control-center/pages/ai-command.js:1758:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
+public/control-center/pages/ai-command.js:1763:            <span>Specialist</span>
+public/control-center/pages/ai-command.js:1812:            <span>Selected specialist</span>

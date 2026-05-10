@@ -1,0 +1,271 @@
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:106:export const AI_PAGE_SPECIALIST_MAP = {
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ai-team-model.js:128:export function getAiTeamRole(roleId) {
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:132:export function getAiRolesForPage(pageId) {
+public/control-center/ai-team-model.js:133:  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+public/control-center/ai-team-model.js:134:  return ids.map(getAiTeamRole).filter(Boolean);
+public/control-center/ai-team-model.js:137:export function getPrimaryAiRoleForPage(pageId) {
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/pages/ai-command.js:2:	getSharedHandoff,
+public/control-center/pages/ai-command.js:4:	setSharedHandoff
+public/control-center/pages/ai-command.js:45:		label: "Ads Specialist",
+public/control-center/pages/ai-command.js:68:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:150:		name: "Ads Specialist",
+public/control-center/pages/ai-command.js:153:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:172:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:214:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:222:				reason: "Requires approval gate before external publishing actions."
+public/control-center/pages/ai-command.js:385:			lastAppliedHandoffId: ""
+public/control-center/pages/ai-command.js:574:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:687:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+public/control-center/pages/ai-command.js:946:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:947:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:948:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:949:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:951:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:967:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:968:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:969:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:1033:		role: "user",
+public/control-center/pages/ai-command.js:1042:		role: "assistant",
+public/control-center/pages/ai-command.js:1141:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:1368:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:1375:		if (message.role === "user") {
+public/control-center/pages/ai-command.js:1466:		.filter((msg) => msg.role === "assistant" && asString(msg.response?.outputType || msg.response?.output_type))
+public/control-center/pages/ai-command.js:1529:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:1533:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:1584:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:1689:          <h3>Choose your AI specialist</h3>
+public/control-center/pages/ai-command.js:1758:          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
+public/control-center/pages/ai-command.js:1763:            <span>Specialist</span>
+public/control-center/pages/ai-command.js:1812:            <span>Selected specialist</span>
+public/control-center/pages/workflows.js:3:  getSharedHandoff,
+public/control-center/pages/workflows.js:5:  setSharedHandoff
+public/control-center/pages/workflows.js:10:  createAutoModeController,
+public/control-center/pages/workflows.js:12:  startAutoMode,
+public/control-center/pages/workflows.js:18:  subscribeAutoMode,
+public/control-center/pages/workflows.js:43:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:51:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:312:      lastAppliedHandoffId: "",
+public/control-center/pages/workflows.js:337:    session.lastAppliedHandoffId = asString(session.lastAppliedHandoffId);
+public/control-center/pages/workflows.js:519:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:520:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:578:      prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
+public/control-center/pages/workflows.js:650:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:656:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:706:        Hands-free safe execution with approval gates and inline logs.
+public/control-center/pages/workflows.js:735:        autoMode?.status === "waiting_approval"
+public/control-center/pages/workflows.js:738:              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+public/control-center/pages/workflows.js:918:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:919:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:920:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:921:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:923:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:944:    run.source = "handoff";
+public/control-center/pages/workflows.js:949:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:950:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:951:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:953:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1026:function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+public/control-center/pages/workflows.js:1055:  createProjectHandoff,
+public/control-center/pages/workflows.js:1059:  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+public/control-center/pages/workflows.js:1070:  const handoff = {
+public/control-center/pages/workflows.js:1083:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1085:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1086:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1087:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1205:  createProjectHandoff,
+public/control-center/pages/workflows.js:1209:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1211:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1285:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1300:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1384:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1452:        createProjectHandoff,
+public/control-center/pages/workflows.js:1485:        createProjectHandoff,
+public/control-center/pages/workflows.js:1502:        createProjectHandoff,
+public/control-center/pages/workflows.js:1526:          owner_role: "admin",
+public/control-center/pages/workflows.js:1527:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1559:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1595:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1629:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1658:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1680:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1682:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1686:      await startAutoMode(plan, {
+public/control-center/pages/workflows.js:1687:        mode: "auto_until_approval",
+public/control-center/pages/workflows.js:1688:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1705:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1721:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1722:      showMessage?.("Approval gate accepted.");
+public/control-center/pages/workflows.js:1729:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1768:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1868:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1869:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/pages/workflows.js:1896:              <span>Approvals</span>
+public/control-center/pages/workflows.js:1897:              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+public/control-center/app.js:49:  createProjectApproval,
+public/control-center/app.js:51:  createProjectHandoff,
+public/control-center/app.js:52:  consumeProjectHandoff,
+public/control-center/app.js:77:const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+public/control-center/app.js:78:const DEFAULT_ACTIVE_ROLE = "admin";
+public/control-center/app.js:79:const ACTIVE_ROUTE_ROLES = [
+public/control-center/app.js:90:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/app.js:92:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:98:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:99:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:100:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:101:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:102:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:103:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/app.js:107:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:171:function getActiveRole() {
+public/control-center/app.js:173:    const stored = window.localStorage?.getItem(CONTROL_ROLE_STORAGE_KEY);
+public/control-center/app.js:174:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+public/control-center/app.js:179:  const stateRole = operations?.team_service_model?.active_role;
+public/control-center/app.js:180:  if (stateRole && typeof stateRole === "string" && stateRole.trim()) {
+public/control-center/app.js:181:    return stateRole.trim().toLowerCase();
+public/control-center/app.js:183:  return DEFAULT_ACTIVE_ROLE;
+public/control-center/app.js:251:  const routePermissions = Array.isArray(operations?.team_service_model?.route_permissions)
+public/control-center/app.js:252:    ? operations.team_service_model.route_permissions
+public/control-center/app.js:254:  const activeRole = getActiveRole();
+public/control-center/app.js:256:  function buildBlockedReason(allowedRoles) {
+public/control-center/app.js:257:    const rolesStr = allowedRoles.join(", ");
+public/control-center/app.js:259:      `Route "${route}" requires one of: [${rolesStr}]. ` +
+public/control-center/app.js:260:      `Your current role is "${activeRole}". ` +
+public/control-center/app.js:261:      `Use the Role selector in the top bar to switch roles for internal testing.`
+public/control-center/app.js:265:  const explicitRule = routePermissions.find((item) => item?.route === route);
+public/control-center/app.js:268:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/app.js:269:    if (!Array.isArray(fallbackRoles)) {
+public/control-center/app.js:272:    const allowed = fallbackRoles.includes(activeRole);
+public/control-center/app.js:275:      reason: allowed ? "" : buildBlockedReason(fallbackRoles)
+public/control-center/app.js:279:  const allowedRoles = Array.isArray(explicitRule.roles)
+public/control-center/app.js:280:    ? explicitRule.roles.map((item) => String(item || "").trim().toLowerCase())
+public/control-center/app.js:282:  const allowed = allowedRoles.includes(activeRole);
+public/control-center/app.js:286:    reason: allowed ? "" : buildBlockedReason(allowedRoles)
+public/control-center/app.js:301:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:695:   ROLE SWITCHER
+public/control-center/app.js:698:function injectRoleSwitcher() {
+public/control-center/app.js:699:  // Role switching belongs in System/Settings, not the global header.
+public/control-center/app.js:722:function formatRoleLabel(role) {
+public/control-center/app.js:723:  const normalized = String(role || "").trim().toLowerCase();
+public/control-center/app.js:1945:  const roleBadge = $("mobileRoleBadge");
+public/control-center/app.js:1946:  if (roleBadge) {
+public/control-center/app.js:1947:    roleBadge.textContent = formatRoleLabel(getActiveRole());
+public/control-center/app.js:2077:      createProjectApproval,
+public/control-center/app.js:2079:      createProjectHandoff,
+public/control-center/app.js:2080:      consumeProjectHandoff,
+public/control-center/app.js:3773:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:3784:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3878:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3880:          <strong>Approval</strong>
+public/control-center/app.js:3881:          <span>Governance, claim review, release approval.</span>
+public/control-center/app.js:4093:      injectRoleSwitcher();
+public/control-center/router.js:23:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:25:const DEFAULT_ROLE = "admin";
+public/control-center/router.js:26:const ACTIVE_ROUTE_ROLES = [
+public/control-center/router.js:37:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/router.js:39:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:45:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:46:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:47:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:48:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:49:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:50:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/router.js:54:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:78:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:116:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:122:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:133:                To access this page, use the <strong>Role</strong> selector in the top bar and switch to a permitted role.
+public/control-center/router.js:166:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/router.js:167:  if (!Array.isArray(allowedRoles)) {
+public/control-center/router.js:171:  const allowed = allowedRoles.includes(DEFAULT_ROLE);
+public/control-center/router.js:176:      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+public/control-center/router.js:177:        `Default role is "${DEFAULT_ROLE}". Use the Role selector in the top bar to switch.`
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:22:function getLatestHandoffFromOperations(operations, destinationPage, sourcePage = "") {
+public/control-center/shared-context.js:23:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:24:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:61:  const handoff =
+public/control-center/shared-context.js:62:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:63:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:66:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:70:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:74:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/shared-context.js:77:  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+public/control-center/automation-engine.js:2:import { setSharedAiDraft, setSharedHandoff } from "./shared-context.js";
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:21:  { test: /approve\s*final\s*asset|final\s*approval/i, reason: "Final approvals require a human decision." },
+public/control-center/automation-engine.js:22:  { test: /spend\s*money|charge|billing|payment|purchase/i, reason: "Spending actions require explicit manual approval." },
+public/control-center/automation-engine.js:23:  { test: /send\s*external|send\s*email|send\s*message|dm\b|sms\b/i, reason: "External sending requires approval." },
+public/control-center/automation-engine.js:24:  { test: /paid\s*ads|launch\s*ads|ad\s*spend|budget/i, reason: "Paid promotion requires approval." },
+public/control-center/automation-engine.js:25:  { test: /credential|api\s*key|secret|token|auth/i, reason: "Credential and provider connection actions require approval." }
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:77:    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+public/control-center/automation-engine.js:82:    status: ["idle", "running", "paused", "waiting_approval", "completed", "failed"].includes(normalizeText(parsed.status))
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:99:    if (state.status === "running" || state.status === "waiting_approval") {
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:374:      setSharedHandoff(projectName, destination, localDraft);
+public/control-center/automation-engine.js:395:      setSharedHandoff(projectName, destination, draftPayload);
+public/control-center/automation-engine.js:396:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:397:        context.createProjectHandoff(projectName, draftPayload).catch(() => {});
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:416:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:437:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:461:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:464:      return { status: "success", reason: "Handoff created.", step };
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:542:      pushAutoLog(`Approval required at step ${index + 1}: ${stepActionText(step)}`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:609:  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:683:  pushAutoLog(`Approval granted for step ${Number(gate.index) + 1}: ${stepActionText(step)}`, "info", { stepIndex: Number(gate.index) });
+public/control-center/automation-engine.js:685:  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:711:  pushAutoLog(`Skipped step ${index + 1} after approval gate.`, "warning", { stepIndex: index });
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {
