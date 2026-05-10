@@ -1109,25 +1109,6 @@ function renderPreview(asset, escapeHtml) {
     `;
   }
 
-  if (isDocumentExtension(asset.extension)) {
-    const previewUrl = getAssetPreviewUrl(asset);
-    const label = toDocumentPreviewLabel(asset.extension);
-    const openButton = previewUrl
-      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
-      : `<button class="btn btn-primary" type="button" disabled>Open document</button>`;
-
-    return `
-      <div class="library-preview-fallback library-document-preview">
-        <div class="library-preview-extension">${escapeHtml((asset.extension || "doc").toUpperCase())}</div>
-        <strong>${escapeHtml(label)}</strong>
-        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
-        <div class="library-document-preview-actions">
-          ${openButton}
-          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
-        </div>
-      </div>
-    `;
-  }
 
   if (asset.text_preview) {
     return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
