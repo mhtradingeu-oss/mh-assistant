@@ -995,6 +995,20 @@ function computeFolderCounts(allAssets, session) {
   });
 }
 
+function isDocumentExtension(extension = "") {
+  return ["pdf", "doc", "docx", "txt", "md", "csv", "xls", "xlsx"].includes(asString(extension).toLowerCase());
+}
+
+function toDocumentPreviewLabel(extension = "") {
+  const value = asString(extension).toLowerCase();
+  if (value === "pdf") return "PDF Document";
+  if (value === "csv") return "CSV Spreadsheet";
+  if (value === "xls" || value === "xlsx") return "Excel Spreadsheet";
+  if (value === "doc" || value === "docx") return "Word Document";
+  if (value === "txt" || value === "md") return "Text Document";
+  return "Document";
+}
+
 function renderPreview(asset, escapeHtml) {
   if (!asset) {
     return `<div class="empty-box">Select an asset to preview.</div>`;
@@ -1071,6 +1085,26 @@ function renderPreview(asset, escapeHtml) {
     return `
       <div class="library-preview-frame">
         <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+      </div>
+    `;
+  }
+
+  if (isDocumentExtension(asset.extension)) {
+    const previewUrl = getAssetPreviewUrl(asset);
+    const label = toDocumentPreviewLabel(asset.extension);
+    const openButton = previewUrl
+      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
+      : `<button class="btn btn-primary" type="button" disabled>Open document</button>`;
+
+    return `
+      <div class="library-preview-fallback library-document-preview">
+        <div class="library-preview-extension">${escapeHtml((asset.extension || "doc").toUpperCase())}</div>
+        <strong>${escapeHtml(label)}</strong>
+        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+        <div class="library-document-preview-actions">
+          ${openButton}
+          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+        </div>
       </div>
     `;
   }
@@ -2531,6 +2565,21 @@ viewToggleButtons.forEach((button) => {
       if (input) input.value = buildAiPrompt(projectName, "missing", { missing: missingRequiredAssets });
       navigateTo("ai-command");
       showMessage?.("AI missing-assets prompt sent.");
+    };
+  }
+
+  const extractSelectedDocBtn = $("libraryAiExtractSelectedDocBtn");
+  if (extractSelectedDocBtn) {
+    extractSelectedDocBtn.onclick = () => {
+      if (!selectedAsset) {
+        showError?.("Select a document asset first.");
+        return;
+      }
+
+      const input = $("quickCommandInput");
+      if (input) input.value = buildAiPrompt(projectName, "extract", { docs: [selectedAsset.name] });
+      navigateTo("ai-command");
+      showMessage?.("Selected document extraction prompt sent.");
     };
   }
 
