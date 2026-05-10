@@ -1757,6 +1757,25 @@ export const aiCommandRoute = {
         <div id="aicmdStatus" class="aicmd-draft-state">
           ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
         </div>
+
+        <div class="aicmd-operating-strip" aria-label="AI workspace operating context">
+          <div>
+            <span>Specialist</span>
+            <strong>${escapeHtml(currentMode.label || "Strategist")}</strong>
+          </div>
+          <div>
+            <span>Commands</span>
+            <strong>${escapeHtml(String(aiCommandsTotal))}</strong>
+          </div>
+          <div>
+            <span>Recommendations</span>
+            <strong>${escapeHtml(String(recommendationsTotal))}</strong>
+          </div>
+          <div>
+            <span>Workspace</span>
+            <strong>Operating mode</strong>
+          </div>
+        </div>
       </section>
 
       <section class="aicmd-section">
