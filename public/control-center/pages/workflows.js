@@ -1,4 +1,10 @@
 import {
+  selectCurrentProject,
+  selectOperationsSnapshot,
+  selectProjectPayload
+} from "../state.js";
+
+import {
   getSharedAiDraft,
   getSharedHandoff,
   setSharedAiDraft,
@@ -1752,13 +1758,15 @@ export const workflowsRoute = {
     showMessage
   }) {
     const state = getState();
-    const projectName = asString(state.context.currentProject || "");
+    const projectName = asString(selectCurrentProject(state) || "");
     const campaignName = asString(state.context.activeCampaign || "");
     const executionMode = asString(state.context.executionMode || "");
 
-    const overview = asObject(state.data.overview?.overview || state.data.overview);
-    const readinessRoot = asObject(state.data.readiness?.dashboard || state.data.readiness);
-    const operations = asObject(state.data.operations);
+    const payload = asObject(selectProjectPayload(state));
+
+    const overview = asObject(payload.overview?.overview || payload.overview);
+    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+    const operations = asObject(selectOperationsSnapshot(state));
 
     const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
     const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
