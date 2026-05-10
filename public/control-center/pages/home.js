@@ -1,3 +1,11 @@
+import {
+  renderActivityItems,
+  renderAiTeamCards,
+  renderBadge,
+  renderBlockerColumn,
+  renderCompactList
+} from "./home/render-sections.js";
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -551,87 +559,6 @@ function dashboardLabelFromScore(score) {
   if (score >= 65) return "Stable with gaps";
   return "Recovery needed";
 }
-function renderBadge(tone, label, escapeHtml) {
-  return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
-}
-
-function renderCompactList(items, escapeHtml, emptyText = "Nothing to show yet.") {
-  const safeItems = asArray(items).slice(0, 5);
-
-  if (!safeItems.length) {
-    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
-  }
-
-  return `
-    <ul class="home-compact-list">
-      ${safeItems.map((item) => `
-        <li>${escapeHtml(asString(item))}</li>
-      `).join("")}
-    </ul>
-  `;
-}
-
-function renderBlockerColumn(title, items, tone, escapeHtml) {
-  const safeItems = asArray(items).slice(0, 5);
-
-  return `
-    <article class="home-blocker-card">
-      <div class="home-blocker-head">
-        <span class="data-label">${escapeHtml(title)}</span>
-        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
-      </div>
-      ${renderCompactList(safeItems, escapeHtml, "No blocker detected.")}
-    </article>
-  `;
-}
-
-function renderActivityItems(items, escapeHtml) {
-  const safeItems = asArray(items).slice(0, 6);
-
-  if (!safeItems.length) {
-    return `<p class="home-empty-note">No recent activity recorded yet.</p>`;
-  }
-
-  return `
-    <div class="home-activity-list">
-      ${safeItems.map((item) => `
-        <article class="home-activity-item">
-          <div>
-            <span class="data-label">${escapeHtml(item.kind || "Activity")}</span>
-            <strong>${escapeHtml(item.title || "Untitled activity")}</strong>
-            <p>${escapeHtml(item.detail || "")}</p>
-          </div>
-          <div class="home-activity-meta">
-            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
-          </div>
-        </article>
-      `).join("")}
-    </div>
-  `;
-}
-
-function renderAiTeamCards(cards, escapeHtml) {
-  const safeCards = asArray(cards).slice(0, 7);
-
-  if (!safeCards.length) {
-    return `<p class="home-empty-note">AI team status is not available yet.</p>`;
-  }
-
-  return `
-    <div class="home-ai-team-grid">
-      ${safeCards.map((agent) => `
-        <article class="home-ai-team-card">
-          <div class="home-ai-team-card-head">
-            <strong>${escapeHtml(agent.name)}</strong>
-            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
-          </div>
-          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
-        </article>
-      `).join("")}
-    </div>
-  `;
-}
-
 function setGlobalAiPrompt($, prompt) {
   const input = $("quickCommandInput");
   if (input) {
