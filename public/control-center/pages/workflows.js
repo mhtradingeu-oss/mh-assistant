@@ -101,6 +101,7 @@ const workflowSessions = new Map();
 let lastWorkflowRenderContext = null;
 let workflowBridgeRegistered = false;
 let workflowAutoModeUnsubscribe = null;
+let workflowAutomationEnabled = false;
 const workflowAutomationState = {
   progress: "",
   result: "",
@@ -1204,11 +1205,13 @@ function bindWorkflowExecutionLoop({
   createProjectHandoff,
   render
 }) {
-  createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
-  if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
-  workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
-    render();
-  });
+  if (workflowAutomationEnabled) {
+    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+      render();
+    });
+  }
 
   const state = getState();
   const projectName = state.context.currentProject || "";
@@ -1673,6 +1676,13 @@ function bindWorkflowExecutionLoop({
   if (autoStartBtn) {
     autoStartBtn.onclick = async () => {
       const plan = buildAutomationPlan(getState());
+      workflowAutomationEnabled = true;
+      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+        render();
+      });
+
       await startAutoMode(plan, {
         mode: "auto_until_approval",
         context: { getState, navigateTo, createProjectHandoff, projectName }

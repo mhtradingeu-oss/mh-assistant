@@ -37,6 +37,7 @@ const publishingAutomationState = {
 };
 let publishingAutoModeUnsubscribe = null;
 let publishingAutoModeControllerReady = false;
+let publishingAutomationEnabled = false;
 let publishingRenderCallback = null;
 let publishingRenderTimer = null;
 
@@ -60,6 +61,10 @@ function schedulePublishingRender(render) {
 
 function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
   publishingRenderCallback = render;
+
+  if (!publishingAutomationEnabled) {
+    return;
+  }
 
   if (!publishingAutoModeControllerReady) {
     createAutoModeController(getState, { getState, navigateTo });
@@ -1660,6 +1665,8 @@ function bindPublishingWorkspace({
 
       publishingAutomationState.result = "";
       publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+      publishingAutomationEnabled = true;
+      ensurePublishingAutoModeBinding(getState, navigateTo, render);
       rerender();
 
       const runResult = await startAutoMode(plan, {
