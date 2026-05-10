@@ -65,6 +65,7 @@ import {
   CONTROL_ACCESS_KEY_STORAGE_KEY,
   CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
 } from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
 
 /* =========================
    CONFIG
@@ -987,7 +988,8 @@ function getOverlayState() {
     opacity: String(overlay?.style?.opacity || ""),
     pointerEvents: String(overlay?.style?.pointerEvents || ""),
     ariaHidden: String(overlay?.getAttribute?.("aria-hidden") || ""),
-    bodyClasses: body ? body.className : ""
+    bodyClasses: body ? body.className : "",
+    runtimeSnapshot: getOverlaySnapshot(overlay)
   };
 }
 
