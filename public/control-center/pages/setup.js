@@ -1,5 +1,6 @@
 import { getMissingAssetLabels } from "../asset-library.js";
 import { applyProjectBusinessTemplate } from "../api.js";
+import { patchState } from "../state.js";
 
 const REQUIRED_FIELDS = [
   { name: "project_name", label: "Project name" },
@@ -799,6 +800,18 @@ function bindSetupActions({
 
   const refreshAndPersistDraft = () => {
     const values = refreshSummary();
+
+    patchState(
+      "data",
+      {
+        setupDraft: {
+          project: projectName || "",
+          values,
+          updatedAt: new Date().toISOString()
+        }
+      },
+      { silent: true }
+    );
 
     if (draftAutoSaveTimer) {
       clearTimeout(draftAutoSaveTimer);

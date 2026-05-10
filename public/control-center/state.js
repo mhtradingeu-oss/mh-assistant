@@ -232,10 +232,12 @@ export function setProjectContext({
   notify();
 }
 
-export function patchState(section, patch) {
+export function patchState(section, patch, options = {}) {
   if (!section || typeof patch !== "object" || patch == null) {
     return;
   }
+
+  const silent = Boolean(options?.silent);
 
   if (section === "data") {
     if (!hasShallowChanges(state.data, patch)) {
@@ -247,7 +249,9 @@ export function patchState(section, patch) {
       ...patch
     };
 
-    notify();
+    if (!silent) {
+      notify();
+    }
     return;
   }
 
@@ -261,7 +265,9 @@ export function patchState(section, patch) {
       ...patch
     };
 
-    notify();
+    if (!silent) {
+      notify();
+    }
     return;
   }
 
@@ -275,7 +281,9 @@ export function patchState(section, patch) {
       ...patch
     };
 
-    notify();
+    if (!silent) {
+      notify();
+    }
     return;
   }
 
@@ -284,7 +292,9 @@ export function patchState(section, patch) {
   }
 
   state[section] = patch;
-  notify();
+  if (!silent) {
+    notify();
+  }
 }
 
 export function resetProjectData() {

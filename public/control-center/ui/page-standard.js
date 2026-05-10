@@ -474,6 +474,21 @@ function queueAiPrompt(prompt, context) {
   context.showMessage?.("AI prompt queued in AI Workspace.");
 }
 
+function isActiveFormInteractionWithinRoute(page) {
+  const activeElement = document.activeElement;
+  if (!activeElement || typeof activeElement.matches !== "function") {
+    return false;
+  }
+
+  if (!page.contains(activeElement)) {
+    return false;
+  }
+
+  return activeElement.matches(
+    "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+  );
+}
+
 export function applyStandardPageLayout(context) {
   const route = asString(context.route);
 
@@ -481,6 +496,10 @@ export function applyStandardPageLayout(context) {
 
   const page = document.querySelector(`#pageRoot .page[data-page="${route}"]`);
   if (!page) return;
+
+  if (page.dataset.stdLayoutInitialized === "true" && page.dataset.stdLayoutRoute === route && isActiveFormInteractionWithinRoute(page)) {
+    return;
+  }
 
   const shell = ensureShell(page);
   const copy = ROUTE_COPY[route] || ROUTE_COPY.home;
@@ -518,6 +537,9 @@ export function applyStandardPageLayout(context) {
   if (stripBtn) {
     stripBtn.onclick = () => queueAiPrompt(nextAction, context);
   }
+
+  page.dataset.stdLayoutInitialized = "true";
+  page.dataset.stdLayoutRoute = route;
 }
 
 export function getRequiredStandardRoutes() {

@@ -4081,7 +4081,31 @@ async function init() {
 
 
 subscribe(() => {
-  renderGlobalUi();
+  const state = getState();
+  const route = String(state.currentRoute || "home");
+  const project = String(state.context?.currentProject || "");
+  const activeElement = document.activeElement;
+  const isEditingFormField = Boolean(
+    activeElement &&
+    typeof activeElement.matches === "function" &&
+    activeElement.matches(
+      "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+    )
+  );
+
+  if (
+    route !== window.__mhLastGlobalUiRoute ||
+    project !== window.__mhLastGlobalUiProject ||
+    (!isEditingFormField && state.loading !== window.__mhLastGlobalUiLoading) ||
+    (!isEditingFormField && state.error !== window.__mhLastGlobalUiError)
+  ) {
+    renderGlobalUi();
+  }
+
+  window.__mhLastGlobalUiRoute = route;
+  window.__mhLastGlobalUiProject = project;
+  window.__mhLastGlobalUiLoading = state.loading;
+  window.__mhLastGlobalUiError = state.error;
 
   if (isDebugStartupMode()) {
     scheduleRuntimeTracePersist(false);
