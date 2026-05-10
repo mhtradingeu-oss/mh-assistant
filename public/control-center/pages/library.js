@@ -1800,7 +1800,13 @@ function bindLibraryWorkspace({
     button.onclick = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      session.selectedAssetId = button.getAttribute("data-library-select") || "";
+      dispatchLibraryCommand("select-asset", {
+        assetId: button.getAttribute("data-library-select") || ""
+      }, {
+        "select-asset": ({ assetId }) => {
+          session.selectedAssetId = assetId;
+        }
+      });
       bindLibraryWorkspace({
         $,
         projectName,
