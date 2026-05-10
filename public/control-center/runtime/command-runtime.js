@@ -45,7 +45,7 @@ const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
    Runtime Snapshot Helpers
 ========================================= */
 
-export function getCommandRuntimeSnapshot({
+function getCommandRuntimeSnapshot({
   commandBar = null,
   commandBackdrop = null,
   aiDock = null,
@@ -123,4 +123,5 @@ export function getCommandRuntimeSnapshot({
 window.__MH_COMMAND_RUNTIME__ = {
   version: COMMAND_RUNTIME_VERSION,
   active: false,
+  getCommandRuntimeSnapshot
 };

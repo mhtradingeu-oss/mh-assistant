@@ -65,7 +65,6 @@ import {
   CONTROL_ACCESS_KEY_STORAGE_KEY,
   CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
 } from "./constants.js";
-import { getCommandRuntimeSnapshot } from "./runtime/command-runtime.js";
 import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
 
 /* =========================
@@ -3382,8 +3381,52 @@ function getCommandRuntimeState() {
   const aiDock = $("aiDock");
   const aiDockToggle = $("aiDockToggle");
   const aiDockPanel = $("aiDockPanel");
+  const fallbackCommandRuntimeSnapshot = ({
+    commandBar: fallbackCommandBar = null,
+    commandBackdrop: fallbackCommandBackdrop = null,
+    aiDock: fallbackAiDock = null,
+    aiDockToggle: fallbackAiDockToggle = null,
+    aiDockPanel: fallbackAiDockPanel = null
+  } = {}) => ({
+    version: "fallback-classic-runtime",
 
-  return getCommandRuntimeSnapshot({
+    commandBar: {
+      exists: Boolean(fallbackCommandBar),
+      hidden: Boolean(fallbackCommandBar?.hidden),
+      ariaHidden: String(fallbackCommandBar?.getAttribute?.("aria-hidden") || ""),
+      className: String(fallbackCommandBar?.className || "")
+    },
+
+    commandBackdrop: {
+      exists: Boolean(fallbackCommandBackdrop),
+      hidden: Boolean(fallbackCommandBackdrop?.hidden),
+      ariaHidden: String(fallbackCommandBackdrop?.getAttribute?.("aria-hidden") || ""),
+      className: String(fallbackCommandBackdrop?.className || "")
+    },
+
+    aiDock: {
+      exists: Boolean(fallbackAiDock),
+      open: Boolean(fallbackAiDock?.classList?.contains("is-open")),
+      dataOpen: String(fallbackAiDock?.getAttribute?.("data-open") || ""),
+      className: String(fallbackAiDock?.className || ""),
+      toggle: {
+        exists: Boolean(fallbackAiDockToggle),
+        ariaExpanded: String(fallbackAiDockToggle?.getAttribute?.("aria-expanded") || "")
+      },
+      panel: {
+        exists: Boolean(fallbackAiDockPanel),
+        hidden: Boolean(fallbackAiDockPanel?.hidden),
+        inert: Boolean(fallbackAiDockPanel?.inert),
+        ariaHidden: String(fallbackAiDockPanel?.getAttribute?.("aria-hidden") || ""),
+        pointerEvents: String(fallbackAiDockPanel?.style?.pointerEvents || "")
+      }
+    }
+  });
+
+  const runtimeSnapshot =
+    window.__MH_COMMAND_RUNTIME__?.getCommandRuntimeSnapshot || fallbackCommandRuntimeSnapshot;
+
+  return runtimeSnapshot({
     commandBar,
     commandBackdrop,
     aiDock,
