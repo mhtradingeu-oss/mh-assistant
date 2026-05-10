@@ -113,7 +113,7 @@ export function renderHomeExecutiveIntro({
     <section class="card home-exec-hero">
       <div class="home-exec-hero-main">
         <div>
-          <p class="card-label">Executive Command Center</p>
+          <p class="card-label">Project Operating Status</p>
           <h2>${escapeHtml(dashboard.projectName || "Project Command Center")}</h2>
           <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
         </div>
@@ -149,27 +149,6 @@ export function renderHomeExecutiveIntro({
       `).join("")}
     </section>
 
-    <section class="card home-decision-section">
-      <div class="home-decision-section-head">
-        <div>
-          <p class="card-label">Next Best Action</p>
-          <h3>What should I do next?</h3>
-        </div>
-        <span class="card-badge warning">Recommended</span>
-      </div>
 
-      <div class="home-decision-next">
-        <p class="home-decision-next-title">${escapeHtml(dashboard.nextBestAction?.recommendation)}</p>
-        <p class="home-decision-copy">${escapeHtml(dashboard.nextBestAction?.whyItMatters)}</p>
-        <div class="home-inline-actions">
-          <button id="homeNextActionBtn" class="btn btn-primary" type="button">
-            ${escapeHtml(dashboard.nextBestAction?.buttonLabel)}
-          </button>
-          <button id="homeAskNextActionBtn" class="btn btn-secondary" type="button">
-            Open AI Workspace
-          </button>
-        </div>
-      </div>
-    </section>
   `;
 }
