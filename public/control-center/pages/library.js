@@ -2349,8 +2349,13 @@ viewToggleButtons.forEach((button) => {
       }
     };
     uploadInput.onchange = () => {
-  updateUploadUiState();
-};
+      updateUploadUiState();
+
+      const files = Array.from(uploadInput.files || []);
+      if (files.length) {
+        showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+      }
+    };
 
     if (!dropZone.dataset.libraryDndBound) {
       ["dragenter", "dragover"].forEach((eventName) => {
