@@ -1,0 +1,453 @@
+public/control-center/runtime/RUNTIME_ROADMAP.md:7:- overlays
+public/control-center/runtime/RUNTIME_ROADMAP.md:23:## overlay-runtime.js
+public/control-center/runtime/RUNTIME_ROADMAP.md:24:- overlays
+public/control-center/runtime/RUNTIME_ROADMAP.md:25:- modal lifecycle
+public/control-center/runtime/command-runtime.js:7:  - command overlay
+public/control-center/runtime/command-runtime.js:37:  - overlay lifecycle
+public/control-center/runtime/command-runtime.js:101:  - command-overlay
+public/control-center/runtime/README.md:14:- overlay lifecycle is fragmented
+public/control-center/runtime/README.md:27:- command overlay
+public/control-center/runtime/README.md:48:- sidebar overlay state
+public/control-center/runtime/README.md:52:## overlay-runtime.js
+public/control-center/runtime/README.md:54:- overlay coordination
+public/control-center/runtime/README.md:57:- overlay accessibility
+public/control-center/runtime/overlay/overlay-runtime.js:2:  Overlay Runtime Helpers
+public/control-center/runtime/overlay/overlay-runtime.js:11:export function getOverlayElement(id, root = document) {
+public/control-center/runtime/overlay/overlay-runtime.js:16:export function markOverlayVisible(element) {
+public/control-center/runtime/overlay/overlay-runtime.js:21:  element.classList.add("is-visible");
+public/control-center/runtime/overlay/overlay-runtime.js:31:export function markOverlayHidden(element) {
+public/control-center/runtime/overlay/overlay-runtime.js:34:  element.classList.remove("is-visible");
+public/control-center/runtime/overlay/overlay-runtime.js:46:export function getOverlaySnapshot(element) {
+public/control-center/runtime/overlay/overlay-runtime.js:64:    isVisible: element.classList.contains("is-visible")
+public/control-center/runtime/overlay/overlay-runtime.js:68:export function forceHideOverlayById(id, root = document) {
+public/control-center/runtime/overlay/overlay-runtime.js:69:  return markOverlayHidden(getOverlayElement(id, root));
+public/control-center/runtime/overlay/overlay-runtime.js:72:export function forceShowOverlayById(id, root = document) {
+public/control-center/runtime/overlay/overlay-runtime.js:73:  return markOverlayVisible(getOverlayElement(id, root));
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:1:# Overlay Runtime Consolidation Plan
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:5:Centralize overlay lifecycle ownership for the MH-OS frontend.
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:8:- loading overlays
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:12:- startup trace overlays
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:13:- modal coordination
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:14:- overlay accessibility
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:23:- fragmented overlay ownership
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:28:- hidden overlays trapping clicks
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:29:- inconsistent overlay cleanup
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:33:# Current Overlay Sources
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:60:- extract overlay helpers
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:66:- remove duplicate overlay logic
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:67:- remove legacy overlay conflicts
+public/control-center/runtime/overlay/OVERLAY_RUNTIME_PLAN.md:74:- no overlay deletion yet
+public/control-center/runtime/runtime-boundaries.js:5:  overlays: "overlay-runtime",
+public/control-center/runtime/runtime-boundaries.js:13:  noGlobalOverlayDuplication: true,
+public/control-center/styles/08-components-foundation.css:409:.access-key-modal {
+public/control-center/styles/08-components-foundation.css:412:  z-index: var(--layer-modal);
+public/control-center/styles/08-components-foundation.css:420:.access-key-modal.is-visible {
+public/control-center/styles/12-pages.css:271:  z-index: var(--layer-drawer);
+public/control-center/styles/02-layer-system.css:7:  --layer-drawer: 500;
+public/control-center/styles/02-layer-system.css:8:  --layer-overlay: 600;
+public/control-center/styles/02-layer-system.css:9:  --layer-modal: 900;
+public/control-center/styles/02-layer-system.css:14:.loading-overlay {
+public/control-center/styles/02-layer-system.css:17:  z-index: var(--layer-overlay);
+public/control-center/styles/02-layer-system.css:29:.loading-overlay.is-visible,
+public/control-center/styles/02-layer-system.css:30:.loading-overlay[aria-hidden="false"] {
+public/control-center/styles/02-layer-system.css:37:.loading-overlay[aria-hidden="true"],
+public/control-center/styles/02-layer-system.css:38:.loading-overlay:not(.is-visible),
+public/control-center/styles/02-layer-system.css:39:.loading-overlay[hidden],
+public/control-center/styles/02-layer-system.css:40:body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay,
+public/control-center/styles/02-layer-system.css:41:body[data-loading-state="idle"] .loading-overlay {
+public/control-center/styles/02-layer-system.css:99:  z-index: var(--layer-modal);
+public/control-center/styles/02-layer-system.css:110:.fatal-error-panel.is-visible,
+public/control-center/styles/02-layer-system.css:184:.startup-trace-panel.is-visible,
+public/control-center/styles/02-layer-system.css:240:/* Startup loading overlay hardening - 20260510 */
+public/control-center/styles/02-layer-system.css:241:#loadingOverlay {
+public/control-center/styles/02-layer-system.css:249:#loadingOverlay:not(.hidden) {
+public/control-center/styles/02-layer-system.css:253:#loadingOverlay .loading-card,
+public/control-center/styles/02-layer-system.css:254:#loadingOverlay .loading-panel,
+public/control-center/styles/02-layer-system.css:255:#loadingOverlay [class*="loading"] {
+public/control-center/styles/14-page-standard.css:304:.loading-overlay[hidden],
+public/control-center/styles/14-page-standard.css:305:.loading-overlay[aria-hidden="true"],
+public/control-center/styles/07-sidebar.css:132:.sidebar-backdrop.is-visible {
+public/control-center/styles/07-sidebar.css:139:.sidebar-backdrop:not(.is-visible) {
+public/control-center/pages/integrations/render.js:88:          <span class="ai-smart-rec-cta-note">Opens the ${esc(card.label)} setup drawer and focuses the first required field.</span>
+public/control-center/pages/integrations/layout.js:50:} from "./drawer.js";
+public/control-center/pages/integrations/state.js:31:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations/state.js:32:      drawerOpen: false,
+public/control-center/pages/integrations/state.js:42:export function openIntegrationDrawer(session, integrationId) {
+public/control-center/pages/integrations/state.js:44:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/pages/integrations/state.js:45:  session.drawerOpen = Boolean(integrationId);
+public/control-center/pages/integrations/state.js:48:export function closeIntegrationDrawer(session) {
+public/control-center/pages/integrations/state.js:49:  session.drawerOpen = false;
+public/control-center/pages/integrations/state.js:50:  session.activeDrawerIntegrationId = "";
+public/control-center/pages/integrations/drawer.js:2:  Integrations OS Drawer
+public/control-center/pages/integrations/drawer.js:4:  Drawer render helpers only.
+public/control-center/pages/integrations/drawer.js:49:export function renderDrawerProgress(card = {}) {
+public/control-center/pages/integrations/drawer.js:80:    <div class="integration-drawer-progress">
+public/control-center/pages/integrations/drawer.js:91:function getDrawerPrimaryAction(card = {}) {
+public/control-center/pages/integrations/drawer.js:124:  const primary = getDrawerPrimaryAction(card);
+public/control-center/pages/integrations/drawer.js:135:function formatDrawerDate(value) {
+public/control-center/pages/integrations/drawer.js:158:  const isDrawer = options.mode === "drawer";
+public/control-center/pages/integrations/drawer.js:241:    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+public/control-center/pages/integrations/drawer.js:253:          ${isDrawer
+public/control-center/pages/integrations/drawer.js:254:            ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>`
+public/control-center/pages/integrations/drawer.js:271:      ${isDrawer ? renderDrawerProgress(card) : ""}
+public/control-center/pages/integrations/drawer.js:284:              ? `<div class="integration-drawer-validation">${esc(
+public/control-center/pages/integrations/drawer.js:315:            <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
+public/control-center/pages/integrations/drawer.js:316:            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+public/control-center/pages/integrations/drawer.js:317:            <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
+public/control-center/pages/integrations/drawer.js:340:export function renderIntegrationDrawer(card = null, session = {}, options = {}) {
+public/control-center/pages/integrations/drawer.js:341:  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+public/control-center/pages/integrations/drawer.js:351:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+public/control-center/pages/integrations/drawer.js:353:        class="integration-drawer-backdrop"
+public/control-center/pages/integrations/drawer.js:356:        data-integration-drawer-close="backdrop"
+public/control-center/pages/integrations/drawer.js:360:        class="integration-drawer"
+public/control-center/pages/integrations/drawer.js:362:        aria-modal="true"
+public/control-center/pages/integrations/drawer.js:364:        data-integration-drawer
+public/control-center/pages/integrations/drawer.js:366:        ${renderIntegrationDetailsPanel(card, session, { mode: "drawer", getFieldValue })}
+public/control-center/pages/integrations.js:19:import { renderIntegrationDrawer } from "./integrations/drawer.js";
+public/control-center/pages/integrations.js:36:let integrationDrawerEscapeHandler = null;
+public/control-center/pages/integrations.js:656:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations.js:657:      drawerOpen: false,
+public/control-center/pages/integrations.js:666:function openIntegrationDrawer(session, integrationId) {
+public/control-center/pages/integrations.js:668:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/pages/integrations.js:669:  session.drawerOpen = Boolean(integrationId);
+public/control-center/pages/integrations.js:672:function closeIntegrationDrawer(session) {
+public/control-center/pages/integrations.js:673:  session.drawerOpen = false;
+public/control-center/pages/integrations.js:674:  session.activeDrawerIntegrationId = "";
+public/control-center/pages/integrations.js:782:function getDrawerPrimaryAction(card) {
+public/control-center/pages/integrations.js:1044:function focusDrawerField(session, card) {
+public/control-center/pages/integrations.js:1045:  if (!session.drawerOpen || !card || typeof window === "undefined") return;
+public/control-center/pages/integrations.js:1054:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+public/control-center/pages/integrations.js:1085:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1094:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1170:  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+public/control-center/pages/integrations.js:1172:      closeIntegrationDrawer(session);
+public/control-center/pages/integrations.js:1255:      openIntegrationDrawer(session, integrationId);
+public/control-center/pages/integrations.js:1366:    if (integrationDrawerEscapeHandler) {
+public/control-center/pages/integrations.js:1367:      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/integrations.js:1369:    integrationDrawerEscapeHandler = (event) => {
+public/control-center/pages/integrations.js:1370:      if (event.key !== "Escape" || !session.drawerOpen) return;
+public/control-center/pages/integrations.js:1371:      closeIntegrationDrawer(session);
+public/control-center/pages/integrations.js:1374:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/integrations.js:1450:    const drawerCard = allCards.find((card) => card.id === session.activeDrawerIntegrationId) || selectedCard;
+public/control-center/pages/integrations.js:1632:        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, { getFieldValue }) : ""}
+public/control-center/pages/integrations.js:1669:    focusDrawerField(session, drawerCard);
+public/control-center/pages/library.js:407:  document.body.appendChild(anchor);
+public/control-center/pages/library.js:1152:    node.appendChild(image);
+public/control-center/pages/library.js:1206:      // Fall through to custom modal when prompt is blocked.
+public/control-center/pages/library.js:1211:    const overlay = document.createElement("div");
+public/control-center/pages/library.js:1212:    overlay.style.position = "fixed";
+public/control-center/pages/library.js:1213:    overlay.style.inset = "0";
+public/control-center/pages/library.js:1214:    overlay.style.background = "rgba(0,0,0,0.45)";
+public/control-center/pages/library.js:1215:    overlay.style.zIndex = "9999";
+public/control-center/pages/library.js:1216:    overlay.style.display = "grid";
+public/control-center/pages/library.js:1217:    overlay.style.placeItems = "center";
+public/control-center/pages/library.js:1219:    const modal = document.createElement("div");
+public/control-center/pages/library.js:1220:    modal.style.width = "min(480px, 92vw)";
+public/control-center/pages/library.js:1221:    modal.style.background = "#11141a";
+public/control-center/pages/library.js:1222:    modal.style.border = "1px solid rgba(255,255,255,0.12)";
+public/control-center/pages/library.js:1223:    modal.style.borderRadius = "12px";
+public/control-center/pages/library.js:1224:    modal.style.padding = "16px";
+public/control-center/pages/library.js:1225:    modal.style.color = "#f3f6fb";
+public/control-center/pages/library.js:1259:      overlay.remove();
+public/control-center/pages/library.js:1273:    overlay.onclick = (event) => {
+public/control-center/pages/library.js:1274:      if (event.target === overlay) {
+public/control-center/pages/library.js:1293:    actions.appendChild(cancelBtn);
+public/control-center/pages/library.js:1294:    actions.appendChild(submitBtn);
+public/control-center/pages/library.js:1295:    modal.appendChild(heading);
+public/control-center/pages/library.js:1296:    modal.appendChild(input);
+public/control-center/pages/library.js:1297:    modal.appendChild(actions);
+public/control-center/pages/library.js:1298:    overlay.appendChild(modal);
+public/control-center/pages/library.js:1299:    document.body.appendChild(overlay);
+public/control-center/pages/workflows.js:799:      <div id="wfexecValidation" class="wfexec-validation${validationMessage ? " is-visible" : ""}">${escapeHtml(validationMessage || "")}</div>
+public/control-center/pages/workflows.js:1231:    box.classList.toggle("is-visible", Boolean(session.validationMessage));
+public/control-center/index.html:10:  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+public/control-center/index.html:82:    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+public/control-center/index.html:253:      function hideLoadingOverlay() {
+public/control-center/index.html:254:        var overlay = document.getElementById("loadingOverlay");
+public/control-center/index.html:255:        if (!overlay) return;
+public/control-center/index.html:257:        overlay.classList.remove("is-visible");
+public/control-center/index.html:258:        overlay.setAttribute("aria-hidden", "true");
+public/control-center/index.html:259:        overlay.style.display = "none";
+public/control-center/index.html:260:        overlay.style.pointerEvents = "none";
+public/control-center/index.html:264:        hideLoadingOverlay();
+public/control-center/index.html:281:          panel.classList.add("is-visible");
+public/control-center/app.js:68:import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+public/control-center/app.js:297:function createAccessKeyModal() {
+public/control-center/app.js:298:  const modal = document.createElement("div");
+public/control-center/app.js:299:  modal.id = "accessKeyModal";
+public/control-center/app.js:300:  modal.className = "access-key-modal";
+public/control-center/app.js:301:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:302:  modal.setAttribute("aria-modal", "true");
+public/control-center/app.js:303:  modal.setAttribute("aria-label", "Control Center Access Key");
+public/control-center/app.js:304:  modal.innerHTML = `
+public/control-center/app.js:334:  return modal;
+public/control-center/app.js:515:function bindAccessKeyPanel(modal) {
+public/control-center/app.js:516:  const input = modal.querySelector("#accessKeyInput");
+public/control-center/app.js:517:  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+public/control-center/app.js:518:  const testBtn = modal.querySelector("#accessKeyTestBtn");
+public/control-center/app.js:519:  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
+public/control-center/app.js:520:  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+public/control-center/app.js:521:  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
+public/control-center/app.js:522:  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+public/control-center/app.js:554:        hideAccessKeyModal();
+public/control-center/app.js:647:    closeBtn.addEventListener("click", hideAccessKeyModal);
+public/control-center/app.js:650:  modal.addEventListener("click", (e) => {
+public/control-center/app.js:651:    if (e.target === modal) hideAccessKeyModal();
+public/control-center/app.js:654:  modal.addEventListener("keydown", (e) => {
+public/control-center/app.js:655:    if (e.key === "Escape") hideAccessKeyModal();
+public/control-center/app.js:659:function showAccessKeyModal() {
+public/control-center/app.js:660:  let modal = document.getElementById("accessKeyModal");
+public/control-center/app.js:661:  if (!modal) {
+public/control-center/app.js:662:    modal = createAccessKeyModal();
+public/control-center/app.js:663:    document.body.appendChild(modal);
+public/control-center/app.js:664:    bindAccessKeyPanel(modal);
+public/control-center/app.js:667:  modal.classList.add("is-visible");
+public/control-center/app.js:675:function hideAccessKeyModal() {
+public/control-center/app.js:676:  const modal = document.getElementById("accessKeyModal");
+public/control-center/app.js:677:  if (modal) modal.classList.remove("is-visible");
+public/control-center/app.js:829:  const overlay = $("loadingOverlay");
+public/control-center/app.js:836:  if (overlay) {
+public/control-center/app.js:837:    overlay.hidden = false;
+public/control-center/app.js:838:    overlay.inert = false;
+public/control-center/app.js:839:    overlay.style.display = "flex";
+public/control-center/app.js:840:    overlay.style.opacity = "1";
+public/control-center/app.js:841:    overlay.style.visibility = "visible";
+public/control-center/app.js:842:    overlay.style.pointerEvents = "auto";
+public/control-center/app.js:843:    overlay.classList.add("is-visible");
+public/control-center/app.js:844:    overlay.setAttribute("aria-hidden", "false");
+public/control-center/app.js:875:  const overlay = $("loadingOverlay");
+public/control-center/app.js:876:  if (!overlay) return false;
+public/control-center/app.js:878:  overlay.classList.remove("is-visible");
+public/control-center/app.js:879:  overlay.hidden = true;
+public/control-center/app.js:880:  overlay.inert = true;
+public/control-center/app.js:881:  overlay.setAttribute("aria-hidden", "true");
+public/control-center/app.js:883:  overlay.style.setProperty("display", "none", "important");
+public/control-center/app.js:884:  overlay.style.opacity = "0";
+public/control-center/app.js:885:  overlay.style.visibility = "hidden";
+public/control-center/app.js:886:  overlay.style.pointerEvents = "none";
+public/control-center/app.js:900:  const overlay = $("loadingOverlay");
+public/control-center/app.js:901:  if (!overlay) return false;
+public/control-center/app.js:903:  const classVisible = overlay.classList.contains("is-visible");
+public/control-center/app.js:904:  const ariaVisible = overlay.getAttribute("aria-hidden") === "false";
+public/control-center/app.js:905:  const pointerBlocking = overlay.style.pointerEvents && overlay.style.pointerEvents !== "none";
+public/control-center/app.js:906:  const displayBlocking = overlay.style.display && overlay.style.display !== "none";
+public/control-center/app.js:914:const OVERLAY_RECOVERY_DELAY_MS = 10000;
+public/control-center/app.js:977:function getOverlayState() {
+public/control-center/app.js:978:  const overlay = $("loadingOverlay");
+public/control-center/app.js:980:  const overlayNodes = typeof document !== "undefined"
+public/control-center/app.js:981:    ? Array.from(document.querySelectorAll("#loadingOverlay"))
+public/control-center/app.js:985:    exists: Boolean(overlay),
+public/control-center/app.js:986:    count: overlayNodes.length,
+public/control-center/app.js:987:    className: String(overlay?.className || ""),
+public/control-center/app.js:988:    display: String(overlay?.style?.display || ""),
+public/control-center/app.js:989:    visibility: String(overlay?.style?.visibility || ""),
+public/control-center/app.js:990:    opacity: String(overlay?.style?.opacity || ""),
+public/control-center/app.js:991:    pointerEvents: String(overlay?.style?.pointerEvents || ""),
+public/control-center/app.js:992:    ariaHidden: String(overlay?.getAttribute?.("aria-hidden") || ""),
+public/control-center/app.js:994:    runtimeSnapshot: getOverlaySnapshot(overlay)
+public/control-center/app.js:1036:    overlay: getOverlayState(),
+public/control-center/app.js:1050:    panel.classList.toggle("is-visible", showPanel);
+public/control-center/app.js:1063:      `overlay.className: ${payload.overlay.className || "-"}`,
+public/control-center/app.js:1064:      `overlay.display: ${payload.overlay.display || "-"}`,
+public/control-center/app.js:1065:      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+public/control-center/app.js:1066:      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+public/control-center/app.js:1067:      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+public/control-center/app.js:1068:      `overlay.count: ${payload.overlay.count || 0}`,
+public/control-center/app.js:1135:    overlay: getOverlayState(),
+public/control-center/app.js:1315:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1322:    classVisible: Boolean(overlay && overlay.classList.contains("is-visible")),
+public/control-center/app.js:1323:    display: String(overlay?.style?.display || ""),
+public/control-center/app.js:1324:    pointerEvents: String(overlay?.style?.pointerEvents || "")
+public/control-center/app.js:1332:    endpoint: "overlay"
+public/control-center/app.js:1428:function forceHideLoadingOverlay(reason = "access-key-recovery") {
+public/control-center/app.js:1429:  recordStartupStep("forceHideLoadingOverlay.start", {
+public/control-center/app.js:1435:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1436:  if (!overlay) {
+public/control-center/app.js:1437:    recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1444:  overlay.classList.remove("is-visible");
+public/control-center/app.js:1445:  overlay.hidden = true;
+public/control-center/app.js:1446:  overlay.setAttribute("aria-hidden", "true");
+public/control-center/app.js:1448:  overlay.style.setProperty("display", "none", "important");
+public/control-center/app.js:1449:  overlay.style.opacity = "0";
+public/control-center/app.js:1450:  overlay.style.visibility = "hidden";
+public/control-center/app.js:1451:  overlay.style.pointerEvents = "none";
+public/control-center/app.js:1457:    endpoint: "overlay"
+public/control-center/app.js:1459:  recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1492:    forceHideLoadingOverlay("manual-unlock");
+public/control-center/app.js:1494:    forceHideLoadingOverlay(reason);
+public/control-center/app.js:1499:  const overlay = $("loadingOverlay");
+public/control-center/app.js:1500:  if (overlay) {
+public/control-center/app.js:1501:    overlay.classList.remove("is-visible");
+public/control-center/app.js:1502:    overlay.setAttribute("aria-hidden", "true");
+public/control-center/app.js:1504:    overlay.hidden = true;
+public/control-center/app.js:1505:    overlay.inert = true;
+public/control-center/app.js:1506:    overlay.style.setProperty("display", "none", "important");
+public/control-center/app.js:1507:    overlay.style.visibility = "hidden";
+public/control-center/app.js:1508:    overlay.style.opacity = "0";
+public/control-center/app.js:1509:    overlay.style.pointerEvents = "none";
+public/control-center/app.js:1573:  actions.appendChild(button);
+public/control-center/app.js:1589:  forceHideLoadingOverlay("access-key-required-force");
+public/control-center/app.js:1599:  showAccessKeyModal();
+public/control-center/app.js:1617:      showAccessKeyModal();
+public/control-center/app.js:1651:  panel.classList.add("is-visible");
+public/control-center/app.js:1696:    const overlayVisibleMs = loadingWatchdogVisibleSinceMs
+public/control-center/app.js:1725:      forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:1745:      overlayVisibleMs >= LOADING_WATCHDOG_TIMEOUT_MS
+public/control-center/app.js:1964:  select.appendChild(defaultOption);
+public/control-center/app.js:1978:    select.appendChild(option);
+public/control-center/app.js:1985:    select.appendChild(option);
+public/control-center/app.js:2511:function scheduleOverlayRecoveryCheck(loadToken, projectName, loadStartedAtMs, didRequiredLoadSucceed) {
+public/control-center/app.js:2514:  const delayMs = Math.max(0, OVERLAY_RECOVERY_DELAY_MS - elapsedMs);
+public/control-center/app.js:2540:      recordStartupStep("loadProjectData.overlay-recovery.force-hide", {
+public/control-center/app.js:2723:    scheduleOverlayRecoveryCheck(loadToken, loadedProjectName, loadStartedAtMs, () => requiredPayloadSucceeded);
+public/control-center/app.js:2828:        forceHideLoadingOverlay("render-global-ui-error");
+public/control-center/app.js:2856:        forceHideLoadingOverlay("safe-render-current-page-error");
+public/control-center/app.js:2889:        forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:2914:        forceHideLoadingOverlay("parse-watchdog");
+public/control-center/app.js:2934:      forceHideLoadingOverlay(`load-project-error-${String(error?.phase || "unknown")}`);
+public/control-center/app.js:3228:        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+public/control-center/app.js:3243:      commandBackdrop.classList.toggle("is-visible", expanded);
+public/control-center/app.js:3271:      backdrop.classList.add("is-visible");
+public/control-center/app.js:3285:      backdrop.classList.remove("is-visible");
+public/control-center/app.js:3391:  const loadingOverlay = $("loadingOverlay");
+public/control-center/app.js:3398:    loadingOverlay &&
+public/control-center/app.js:3399:    !loadingOverlay.hidden &&
+public/control-center/app.js:3400:    loadingOverlay.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3544:  commandBackdrop?.classList.add("is-visible");
+public/control-center/app.js:3589:  commandBackdrop?.classList.remove("is-visible");
+public/control-center/app.js:3769:function createExecutiveNewLauncherModal() {
+public/control-center/app.js:3770:  const modal = document.createElement("div");
+public/control-center/app.js:3771:  modal.id = "executiveNewLauncherModal";
+public/control-center/app.js:3772:  modal.className = "access-key-modal executive-new-modal";
+public/control-center/app.js:3773:  modal.setAttribute("role", "dialog");
+public/control-center/app.js:3774:  modal.setAttribute("aria-modal", "true");
+public/control-center/app.js:3775:  modal.setAttribute("aria-label", "Create new workflow");
+public/control-center/app.js:3777:  modal.innerHTML = `
+public/control-center/app.js:3789:          class="executive-modal-close"
+public/control-center/app.js:3893:  return modal;
+public/control-center/app.js:3897:  const modal = document.getElementById("executiveNewLauncherModal");
+public/control-center/app.js:3898:  if (modal) modal.classList.remove("is-visible");
+public/control-center/app.js:3903:  let modal = document.getElementById("executiveNewLauncherModal");
+public/control-center/app.js:3904:  if (!modal) {
+public/control-center/app.js:3905:    modal = createExecutiveNewLauncherModal();
+public/control-center/app.js:3906:    document.body.appendChild(modal);
+public/control-center/app.js:3908:    modal.addEventListener("click", (event) => {
+public/control-center/app.js:3909:      if (event.target === modal) hideExecutiveNewLauncher();
+public/control-center/app.js:3912:    modal.querySelector("#executiveNewCloseBtn")?.addEventListener("click", hideExecutiveNewLauncher);
+public/control-center/app.js:3914:    const projectForm = modal.querySelector("#executiveNewProjectForm");
+public/control-center/app.js:3915:    const projectStatus = modal.querySelector("#executiveNewProjectStatus");
+public/control-center/app.js:3923:    modal.querySelector("[data-new-project-cancel]")?.addEventListener("click", () => {
+public/control-center/app.js:3969:    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+public/control-center/app.js:3995:  modal.classList.add("is-visible");
+public/control-center/app.js:4130:      showAccessKeyModal();
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:28:/* Prevent hidden overlays from trapping interactions */
+public/control-center/legacy/09-command-legacy-isolation.legacy.css:41:.command-backdrop.is-visible {
+public/control-center/legacy/styles.legacy-20260508.css:1595:.integration-drawer-progress {
+public/control-center/legacy/styles.legacy-20260508.css:1652:.integration-drawer-validation {
+public/control-center/legacy/styles.legacy-20260508.css:1679:.integration-drawer-layer {
+public/control-center/legacy/styles.legacy-20260508.css:1686:.integration-drawer-layer.is-open {
+public/control-center/legacy/styles.legacy-20260508.css:1690:.integration-drawer-backdrop {
+public/control-center/legacy/styles.legacy-20260508.css:1698:.integration-drawer {
+public/control-center/legacy/styles.legacy-20260508.css:1708:.integration-hub-card--drawer {
+public/control-center/legacy/styles.legacy-20260508.css:1713:.integration-hub-card--drawer .integration-action-row {
+public/control-center/legacy/styles.legacy-20260508.css:1969:.integration-drawer {
+public/control-center/legacy/styles.legacy-20260508.css:1980:.integration-hub-card--drawer {
+public/control-center/legacy/styles.legacy-20260508.css:3136:section[data-page="ai-command"] .aicmd-validation.is-visible {
+public/control-center/legacy/styles.legacy-20260508.css:3832:section[data-page="workflows"] .wfexec-validation.is-visible {
+public/control-center/legacy/styles.legacy-20260508.css:5747:.executive-new-modal {
+public/control-center/legacy/styles.legacy-20260508.css:5780:.executive-modal-close {
+public/control-center/legacy/styles.legacy-20260508.css:5798:.executive-modal-close:hover {
+public/control-center/legacy/styles.legacy-20260508.css:5848:.executive-new-modal {
+public/control-center/legacy/styles.legacy-20260508.css:5874:.executive-modal-close {
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:3:  Temporary scope: hidden overlay guards and known form-click recovery only.
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:7:  .loading-overlay[aria-hidden="true"],
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:8:  .loading-overlay:not(.is-visible),
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:9:  .loading-overlay[hidden],
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css:11:  .sidebar-backdrop:not(.is-visible),
+public/control-center/legacy/page-standard.legacy-20260508.js:886:  page.appendChild(shell);
+public/control-center/legacy/page-standard.legacy-20260508.js:889:  previousNodes.forEach((node) => slot?.appendChild(node));
+public/control-center/legacy/integrations.monolith-20260508.js:2:let integrationDrawerEscapeHandler = null;
+public/control-center/legacy/integrations.monolith-20260508.js:622:      activeDrawerIntegrationId: "",
+public/control-center/legacy/integrations.monolith-20260508.js:623:      drawerOpen: false,
+public/control-center/legacy/integrations.monolith-20260508.js:632:function openIntegrationDrawer(session, integrationId) {
+public/control-center/legacy/integrations.monolith-20260508.js:634:  session.activeDrawerIntegrationId = integrationId || "";
+public/control-center/legacy/integrations.monolith-20260508.js:635:  session.drawerOpen = Boolean(integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:638:function closeIntegrationDrawer(session) {
+public/control-center/legacy/integrations.monolith-20260508.js:639:  session.drawerOpen = false;
+public/control-center/legacy/integrations.monolith-20260508.js:640:  session.activeDrawerIntegrationId = "";
+public/control-center/legacy/integrations.monolith-20260508.js:748:function getDrawerPrimaryAction(card) {
+public/control-center/legacy/integrations.monolith-20260508.js:1352:          <span class="ai-smart-rec-cta-note">Opens the ${escapeHtml(card.label)} setup drawer and focuses the first required field.</span>
+public/control-center/legacy/integrations.monolith-20260508.js:1855:  const primary = getDrawerPrimaryAction(card);
+public/control-center/legacy/integrations.monolith-20260508.js:1901:function renderDrawerProgress(card, escapeHtml) {
+public/control-center/legacy/integrations.monolith-20260508.js:1924:    <div class="integration-drawer-progress">
+public/control-center/legacy/integrations.monolith-20260508.js:1936:  const isDrawer = options.mode === "drawer";
+public/control-center/legacy/integrations.monolith-20260508.js:1969:    <section class="card integration-hub-card${isDrawer ? " integration-hub-card--drawer" : ""}">
+public/control-center/legacy/integrations.monolith-20260508.js:1980:          ${isDrawer ? `<button class="btn btn-secondary integration-drawer-close-btn" type="button" data-integration-drawer-close="close">Close</button>` : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:1995:      ${isDrawer ? renderDrawerProgress(card, escapeHtml) : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:2004:            ? `<div class="integration-drawer-validation">${escapeHtml(`Missing required fields: ${card.missingRequired.join(", ")}`)}</div>`
+public/control-center/legacy/integrations.monolith-20260508.js:2071:function renderIntegrationDrawer(card, session, escapeHtml) {
+public/control-center/legacy/integrations.monolith-20260508.js:2072:  if (!card || !session.drawerOpen || session.activeDrawerIntegrationId !== card.id) {
+public/control-center/legacy/integrations.monolith-20260508.js:2077:    <div class="integration-drawer-layer is-open" data-integration-drawer-layer>
+public/control-center/legacy/integrations.monolith-20260508.js:2078:      <button class="integration-drawer-backdrop" type="button" aria-label="Close connector setup" data-integration-drawer-close="backdrop"></button>
+public/control-center/legacy/integrations.monolith-20260508.js:2079:      <aside class="integration-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(card.label)} setup" data-integration-drawer>
+public/control-center/legacy/integrations.monolith-20260508.js:2080:        ${renderIntegrationDetailsPanel(card, session, escapeHtml, { mode: "drawer" })}
+public/control-center/legacy/integrations.monolith-20260508.js:2086:function focusDrawerField(session, card) {
+public/control-center/legacy/integrations.monolith-20260508.js:2087:  if (!session.drawerOpen || !card || typeof window === "undefined") return;
+public/control-center/legacy/integrations.monolith-20260508.js:2096:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+public/control-center/legacy/integrations.monolith-20260508.js:2256:      openIntegrationDrawer(session, integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:2265:      openIntegrationDrawer(session, integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:2341:  Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2343:      closeIntegrationDrawer(session);
+public/control-center/legacy/integrations.monolith-20260508.js:2426:      openIntegrationDrawer(session, integrationId);
+public/control-center/legacy/integrations.monolith-20260508.js:2537:    if (integrationDrawerEscapeHandler) {
+public/control-center/legacy/integrations.monolith-20260508.js:2538:      document.removeEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/legacy/integrations.monolith-20260508.js:2540:    integrationDrawerEscapeHandler = (event) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2541:      if (event.key !== "Escape" || !session.drawerOpen) return;
+public/control-center/legacy/integrations.monolith-20260508.js:2542:      closeIntegrationDrawer(session);
+public/control-center/legacy/integrations.monolith-20260508.js:2545:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/legacy/integrations.monolith-20260508.js:2596:    const drawerCard = allCards.find((card) => card.id === session.activeDrawerIntegrationId) || selectedCard;
+public/control-center/legacy/integrations.monolith-20260508.js:2785:        ${drawerCard ? renderIntegrationDrawer(drawerCard, session, escapeHtml) : ""}
+public/control-center/legacy/integrations.monolith-20260508.js:2822:    focusDrawerField(session, drawerCard);
+public/control-center/legacy/styles.legacy-full.css:1867:.sidebar-backdrop.is-visible {
+public/control-center/legacy/styles.legacy-full.css:1909:.access-key-modal {
+public/control-center/legacy/styles.legacy-full.css:1919:.access-key-modal.is-visible {
+public/control-center/legacy/styles.legacy-full.css:2006:.fatal-error-panel.is-visible {
+public/control-center/legacy/styles.legacy-full.css:2072:.startup-trace-panel.is-visible {
+public/control-center/legacy/styles.legacy-full.css:2107:.loading-overlay {
+public/control-center/legacy/styles.legacy-full.css:2121:.loading-overlay.is-visible {
+public/control-center/legacy/styles.legacy-full.css:2128:.loading-overlay[aria-hidden="true"],
+public/control-center/legacy/styles.legacy-full.css:2129:.loading-overlay:not(.is-visible),
+public/control-center/legacy/styles.legacy-full.css:2130:.loading-overlay[hidden] {
+public/control-center/legacy/styles.legacy-full.css:2741:.integration-drawer-progress {
+public/control-center/legacy/styles.legacy-full.css:2798:.integration-drawer-validation {
+public/control-center/legacy/styles.legacy-full.css:2825:.integration-drawer-layer {
+public/control-center/legacy/styles.legacy-full.css:2832:.integration-drawer-layer.is-open {
+public/control-center/legacy/styles.legacy-full.css:2836:.integration-drawer-backdrop {
+public/control-center/legacy/styles.legacy-full.css:2844:.integration-drawer {
+public/control-center/legacy/styles.legacy-full.css:2854:.integration-hub-card--drawer {
+public/control-center/legacy/styles.legacy-full.css:2859:.integration-hub-card--drawer .integration-action-row {
+public/control-center/legacy/styles.legacy-full.css:3260:  .integration-drawer {
+public/control-center/legacy/styles.legacy-full.css:3271:  .integration-hub-card--drawer {
+public/control-center/legacy/styles.legacy-full.css:4611:section[data-page="ai-command"] .aicmd-validation.is-visible {
+public/control-center/legacy/styles.legacy-full.css:5322:section[data-page="workflows"] .wfexec-validation.is-visible {
+public/control-center/legacy/styles.legacy-full.css:5967:   Startup / Loading Overlay Safety
+public/control-center/legacy/styles.legacy-full.css:5968:   Keep overlays from trapping clicks after app startup.
+public/control-center/legacy/styles.legacy-full.css:5989:/* Hide stale loading overlays only when the app is not actively loading. */
+public/control-center/legacy/styles.legacy-full.css:5990:body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) #loadingOverlay,
+public/control-center/legacy/styles.legacy-full.css:5991:body:not(.is-loading):not(.loading):not(.loading-locked):not(.app-loading):not(.app-locked) .loading-overlay,
+public/control-center/legacy/styles.legacy-full.css:5993:body[data-loading-state="idle"] #loadingOverlay,
+public/control-center/legacy/styles.legacy-full.css:5994:body[data-loading-state="idle"] .loading-overlay,
+public/control-center/legacy/styles.legacy-full.css:5995:.loading-overlay[aria-hidden="true"],
+public/control-center/legacy/styles.legacy-full.css:5996:.loading-overlay:not(.is-visible),
+public/control-center/legacy/styles.legacy-full.css:5997:.loading-overlay[hidden] {
+public/control-center/legacy/styles.legacy-full.css:6010:/* End Startup / Loading Overlay Safety */
+public/control-center/legacy/styles.legacy-full.css:6194:/* Mobile command bar remains overlay only when explicitly opened */
+public/control-center/legacy/styles.legacy-full.css:8314:.executive-new-modal {
+public/control-center/legacy/styles.legacy-full.css:8347:.executive-modal-close {
+public/control-center/legacy/styles.legacy-full.css:8365:.executive-modal-close:hover {
+public/control-center/legacy/styles.legacy-full.css:8416:  .executive-new-modal {
+public/control-center/legacy/styles.legacy-full.css:8452:  .executive-modal-close {
+public/control-center/legacy/styles.legacy-full.css:8651:/* Safety patch: hidden command overlays must never block form fields or dropdowns. */
+public/control-center/legacy/styles.legacy-full.css:8660:.command-backdrop.is-visible {
+public/control-center/ui/page-standard.js:439:  page.appendChild(shell);
+public/control-center/ui/page-standard.js:442:  previousNodes.forEach((node) => slot?.appendChild(node));

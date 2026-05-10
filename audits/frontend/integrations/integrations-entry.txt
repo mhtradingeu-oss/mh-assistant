@@ -1,0 +1,260 @@
+import {
+  buildAISmartRecommendation,
+  buildConnectorWorkspaceGroups,
+  buildCoverageMap,
+  buildCriticalMissing,
+  buildDomainModels,
+  buildIntegrationActivityFeed,
+  buildIntegrationCardModel,
+  buildIntegrationOverviewSummary,
+  buildLaunchDiagnostics,
+  buildLegacyFallbackRecord,
+  buildRecommendations,
+  buildSectionGroups,
+  buildSuggestedValues,
+  CONNECTOR_WORKSPACE_CATEGORIES,
+  getConnectorWorkspaceStatus
+} from "./integrations/builders.js";
+
+import { renderIntegrationDrawer } from "./integrations/drawer.js";
+
+import {
+  renderConnectorGroup,
+  renderSelectedConnectorSummary
+} from "./integrations/cards.js";
+
+import {
+  renderAISmartRecommendation as renderAISmartRecommendationModule,
+  renderIntegrationActivityFeed,
+  renderIntegrationCoverageMap,
+  renderIntegrationCriticalMissing,
+  renderIntegrationDiagnosticsList,
+  renderIntegrationRecommendationsList
+} from "./integrations/render.js";
+
+const integrationSessions = new Map();
+let integrationDrawerEscapeHandler = null;
+const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);
+
+const INTEGRATION_DOMAINS = [
+  {
+    id: "website-commerce",
+    title: "Website & Commerce",
+    description: "Commercial infrastructure, storefronts, product data, orders, and conversion-aware commerce signals.",
+    integrations: [
+      {
+        id: "website",
+        sourceKey: "website",
+        label: "Website",
+        icon: "WE",
+        purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",
+        whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",
+        enables: "Landing-page analysis, content-to-site traffic mapping, attribution context, and conversion path learning.",
+        dataScope: ["Pages", "Traffic", "Landing pages", "Conversions"],
+        permissionScope: "Website endpoint or root domain access",
+        critical: true,
+        primaryField: "url",
+        fields: [
+          { key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },
+          { key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },
+          { key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }
+        ]
+      },
+      {
+        id: "woocommerce",
+        sourceKey: "ecommerce",
+        label: "WooCommerce",
+        icon: "WC",
+        purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",
+        whyItMatters: "Commerce data lets the system learn what content, campaigns, and pages actually influence sales.",
+        enables: "Product sync, order sync, sales signals, and commerce intelligence.",
+        dataScope: ["Products", "Orders", "Revenue", "Conversions"],
+        permissionScope: "Store URL + API consumer key/secret",
+        critical: true,
+        primaryField: "storeUrl",
+        fields: [
+          { key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },
+          { key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },
+          { key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }
+        ]
+      },
+      {
+        id: "shopify",
+        sourceKey: "shopify",
+        label: "Shopify",
+        icon: "SH",
+        purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",
+        whyItMatters: "Shopify unlocks product catalogs, order flow, and conversion insights for commerce-first projects.",
+        enables: "Product sync, order sync, customer sync, and sales reporting.",
+        dataScope: ["Products", "Orders", "Customers", "Sales"],
+        permissionScope: "Store domain + admin access token",
+        primaryField: "storeDomain",
+        fields: [
+          { key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },
+          { key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },
+          { key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }
+        ]
+      },
+      {
+        id: "amazon",
+        sourceKey: "amazon",
+        backendSupported: false,
+        unavailableReason: "Backend provider support is not configured yet.",
+        label: "Amazon",
+        icon: "AM",
+        purpose: "Marketplace performance, product-driven commerce signals, and listing intelligence.",
+        whyItMatters: "Amazon data gives MH Assistant direct product demand and marketplace sales feedback.",
+        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+        dataScope: ["Listings", "Orders", "Sales", "Marketplace performance"],
+        permissionScope: "Merchant ID + SP-API credentials",
+        primaryField: "merchantId",
+        fields: [
+          { key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },
+          { key: "sellerUrl", label: "Store URL", placeholder: "https://amazon.com/shops/brand" },
+          { key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }
+        ]
+      },
+      {
+        id: "ebay",
+        sourceKey: "ebay",
+        label: "eBay",
+        icon: "EB",
+        purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",
+        whyItMatters: "eBay extends commerce intelligence beyond the owned store and helps the system learn external demand patterns.",
+        enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",
+        dataScope: ["Listings", "Orders", "Sales", "Marketplace activity"],
+        permissionScope: "Seller account + OAuth access token",
+        primaryField: "sellerId",
+        fields: [
+          { key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },
+          { key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },
+          { key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "social",
+    title: "Social Platforms",
+    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+    integrations: [
+      {
+        id: "facebook",
+        sourceKey: "facebook",
+        label: "Facebook",
+        icon: "FB",
+        purpose: "Page insights, post performance, engagement, and linked business intelligence.",
+        whyItMatters: "Facebook insights help the system understand what posts drive reach, clicks, and downstream action.",
+        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+        dataScope: ["Post insights", "Engagement", "Comments", "Publishing", "Ads linkage"],
+        permissionScope: "Page ID + business access token",
+        critical: true,
+        primaryField: "pageUrl",
+        fields: [
+          { key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },
+          { key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },
+          { key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }
+        ]
+      },
+      {
+        id: "instagram",
+        sourceKey: "instagram",
+        label: "Instagram",
+        icon: "IG",
+        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+        whyItMatters: "Instagram is often the clearest signal for what content angles, hooks, and formats should be scaled next.",
+        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+        dataScope: ["Posts", "Reels", "Engagement", "Comments", "Publishing"],
+        permissionScope: "Business account ID + Graph API token",
+        critical: true,
+        primaryField: "profileUrl",
+        fields: [
+          { key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },
+          { key: "businessAccountId", label: "Business account ID", placeholder: "Instagram business account ID" },
+          { key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }
+        ]
+      },
+      {
+        id: "tiktok",
+        sourceKey: "tiktok",
+        label: "TikTok",
+        icon: "TT",
+        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+        whyItMatters: "TikTok data helps the system learn what hooks, timing, and short-form video patterns actually win.",
+        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+        dataScope: ["Video insights", "Engagement", "Comments", "Audience", "Publishing"],
+        permissionScope: "Business account ID + access token",
+        critical: true,
+        primaryField: "profileUrl",
+        fields: [
+          { key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },
+          { key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },
+          { key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }
+        ]
+      },
+      {
+        id: "youtube",
+        sourceKey: "youtube",
+        label: "YouTube",
+        icon: "YT",
+        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+        whyItMatters: "YouTube data gives stronger watch-based learning and topic-level content intelligence.",
+        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+        dataScope: ["Videos", "Views", "Watch time", "Engagement", "Publishing"],
+        permissionScope: "Channel ID + OAuth token",
+        critical: true,
+        primaryField: "channelUrl",
+        fields: [
+          { key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },
+          { key: "channelId", label: "Channel ID", placeholder: "YouTube channel ID" },
+          { key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }
+        ]
+      },
+      {
+        id: "linkedin",
+        sourceKey: "linkedin",
+        label: "LinkedIn",
+        icon: "LI",
+        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+        whyItMatters: "LinkedIn can expand B2B distribution, executive brand reach, and professional audience analytics.",
+        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+        dataScope: ["Posts", "Audience", "Engagement", "Publishing"],
+        permissionScope: "Company page ID + OAuth token",
+        primaryField: "companyUrl",
+        fields: [
+          { key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },
+          { key: "companyId", label: "Company ID", placeholder: "LinkedIn company ID" },
+          { key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "analytics",
+    title: "Analytics & Tracking",
+    description: "Traffic, conversions, landing pages, attribution, search visibility, and tracking infrastructure.",
+    integrations: [
+      {
+        id: "ga4",
+        sourceKey: "analytics",
+        label: "Google Analytics / GA4",
+        icon: "GA",
+        purpose: "Traffic, sessions, engaged sessions, events, conversions, and landing-page intelligence.",
+        whyItMatters: "GA4 is the foundation for understanding what content and channels actually drive sessions and conversions.",
+        enables: "Traffic intelligence, events, conversions, attribution, landing pages, and engagement analysis.",
+        dataScope: ["Traffic", "Sessions", "Events", "Conversions", "Landing pages"],
+        permissionScope: "Property ID + service account or OAuth token",
+        critical: true,
+        primaryField: "propertyId",
+        fields: [
+          { key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },
+          { key: "measurementId", label: "Measurement ID", placeholder: "G-XXXXXXXXXX" },
+          { key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }
+        ]
+      },
+      {
+        id: "gtm",
+        sourceKey: "google",
+        label: "Google Tag Manager",
+        icon: "TM",
+        purpose: "Tracking container management for tags, events, and analytics instrumentation.",
