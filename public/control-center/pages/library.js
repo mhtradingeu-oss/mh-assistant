@@ -643,7 +643,14 @@ function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType
         filename: fileName
       });
 
+    const projectionAsset = normalizeLibraryAsset({
+      ...merged,
+      status,
+      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth)
+    });
+
     return {
+      ...projectionAsset,
       ...merged,
       id,
       asset_id: id,
