@@ -5,6 +5,12 @@
 **Status:** Audit-only. No behavioral changes made.  
 **Compliance:** All 10 non-negotiables confirmed.
 
+## Step 2A Snapshot Artifacts Created
+
+- `MEDIA_STUDIO_CURRENT_STATE_SNAPSHOT.md`
+- `MEDIA_STUDIO_API_SCHEMA.md`
+- `MEDIA_STUDIO_ROLE_DEFAULTS_SOURCE.md`
+
 ---
 
 ## 1. Executive Summary
