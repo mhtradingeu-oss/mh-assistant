@@ -320,7 +320,7 @@ Needs review:
 | `/media/projects` | Read-key protected by adding `/^/media/projects/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | closed | resolved |
 | Integration provider summaries | `redactProviderSummaryObject()` applied to `provider_metadata`, `provider_account`, and `last_sync_summary` before client delivery (Fix 7). Stored records not mutated. | closed | resolved |
 | Upload filenames | `sanitizeUploadFilename()` added in Fix 6: `path.basename` applied first (eliminates traversal), followed by extension validation, stem normalization, max-length enforcement, and safe fallback to `upload`. Existing files not moved. Response shape unchanged. | closed | resolved |
-| Legacy default-project fallback | Some legacy routes can fall back to default project when explicit project is absent or invalid. | medium | needs_review |
+| Legacy default-project fallback | Audited in Fix 9 Prep; legacy fallback remains for compatibility in selected routes/helpers and now has a migration/deprecation plan. | medium | migration_planned |
 
 ## Fix 4 Applied
 
@@ -383,6 +383,14 @@ Needs review:
 - Existing script compatibility from Fix 8A is active (`scripts/verify-scheduler-automation.js` already sends `x-mh-control-key` and `Authorization: Bearer`).
 - No route handlers modified. No route response shapes changed beyond existing protected-key middleware responses.
 
+## Fix 9 Prep Applied (Legacy Default-Project Fallback Policy Audit)
+
+- Added `audits/backend/security/LEGACY_DEFAULT_PROJECT_FALLBACK_AUDIT.md` with route/helper-level fallback inventory and risk classification.
+- Confirmed no behavior change in this pass; this is documentation and policy classification only.
+- Confirmed no slug-validation or project-isolation bypass bug was found in audited fallback paths.
+- Recorded migration/deprecation plan for future tightening of fallback on mutating legacy surfaces.
+- Remaining fallback tightening should be handled by staged migration/deprecation work, not in this prep pass.
+
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, Fix 8, and Fix 8A were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, Fix 8, Fix 8A, Fix 8B, and Fix 9 Prep were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
