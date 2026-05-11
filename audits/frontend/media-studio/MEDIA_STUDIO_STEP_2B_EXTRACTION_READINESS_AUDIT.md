@@ -5,6 +5,10 @@ Branch: architecture/frontend-consolidation-v1
 Scope: Documentation-only extraction readiness audit
 Primary source file: public/control-center/pages/media-studio-workspace.js
 
+## Step 2C Pointer
+
+- Step 2C formatter extraction plan created: MEDIA_STUDIO_STEP_2C_FORMATTER_EXTRACTION_PLAN.md
+
 ## 1. Executive Summary
 
 This Step 2B audit classifies extraction readiness for Media Studio without changing runtime behavior. The current file remains a 3215-line monolith with tightly coupled state, rendering, and handler orchestration. A limited subset is safe to extract in a future pass: pure formatting/string/shape helpers only.
