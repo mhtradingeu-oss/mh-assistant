@@ -488,7 +488,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">Governance command center</div>
+                <div class="panel-kicker">Command surface</div>
                 <h3>Governance command center</h3>
                 <p>Governance operating surface for approvals, policy pressure, and decision routing.</p>
               </div>
@@ -498,7 +498,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">System signal bar</div>
+                <div class="panel-kicker">System signals</div>
                 <h3>Current system signals</h3>
               </div>
             </div>
@@ -516,7 +516,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">Governance command center</div>
+                <div class="panel-kicker">Command surface</div>
                 <h3>Governance command center for ${escapeHtml(projectName)}</h3>
                 <p>Preparing the governance operating surface.</p>
               </div>
@@ -526,7 +526,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">System signal bar</div>
+                <div class="panel-kicker">System signals</div>
                 <h3>Current system signals</h3>
               </div>
             </div>
@@ -544,7 +544,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">Governance command center</div>
+                <div class="panel-kicker">Command surface</div>
                 <h3>Governance command center for ${escapeHtml(projectName)}</h3>
                 <p>Governance surface is available but the latest data could not be loaded.</p>
               </div>
@@ -554,7 +554,7 @@ function renderPage(projectName, session, escapeHtml) {
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">System signal bar</div>
+                <div class="panel-kicker">System signals</div>
                 <h3>Current system signals</h3>
               </div>
             </div>
@@ -603,7 +603,7 @@ function renderPage(projectName, session, escapeHtml) {
         <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">Governance command center</div>
+              <div class="panel-kicker">Command surface</div>
               <h3>Governance command center for ${escapeHtml(projectName)}</h3>
               <p>Header and control surface for policy pressure, approval demand, and next governance decisions.</p>
             </div>
@@ -614,7 +614,7 @@ function renderPage(projectName, session, escapeHtml) {
         <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">System signal bar</div>
+              <div class="panel-kicker">System signals</div>
               <h3>Current system signals</h3>
               <p>Live governance metrics and latest recorded governance activity.</p>
             </div>
