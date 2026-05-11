@@ -285,6 +285,7 @@ function bindAdsManager({
 
 export const adsManagerRoute = {
   id: "ads-manager",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Ads Manager",
