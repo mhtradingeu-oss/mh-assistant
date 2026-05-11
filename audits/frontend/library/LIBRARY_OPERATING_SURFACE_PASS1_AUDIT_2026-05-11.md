@@ -111,3 +111,10 @@ Applied after Pass 1 review:
 Result:
 - Listener lifecycle risk reduced from medium to low.
 - Remaining Library work should focus on duplicated action surfaces and command-router wiring, not listener ownership.
+
+## Step 3 Pointer — Duplicated action surfaces audit
+
+- Step 3 audit completed:
+	- `audits/frontend/library/LIBRARY_STEP_3_DUPLICATED_ACTION_SURFACES_AUDIT.md`
+- Scope: duplicated Finder/Inspector/Action Panel/AI Panel actions, command-router usage gaps, dead/latent handlers, and phased consolidation plan.
+- Pass type: documentation only; no Library behavior changes.
