@@ -1377,6 +1377,7 @@ function bindIntegrationActions({
 
 export const integrationsRoute = {
   id: "integrations",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Start",
     title: "Integrations",
