@@ -129,6 +129,43 @@ function isMissingReadKeyErrorMessage(message) {
   return /missing\s+read\s+key/i.test(String(message || ""));
 }
 
+function isAccessKeyRelatedMessage(message) {
+  const normalized = String(message || "").toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return /missing\s+(?:protected\s+write\s+key|read\s+key|control\s+center\s+access\s+key)/i.test(normalized)
+    || /invalid\s+(?:protected\s+write\s+key|read\s+key|access\s+key)/i.test(normalized)
+    || /access\s+key/i.test(normalized)
+    || /write\s+key/i.test(normalized)
+    || /read\s+key/i.test(normalized);
+}
+
+export function isAccessKeyFailure(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof AccessKeyError) {
+    return true;
+  }
+
+  const status = Number(error?.status ?? error?.diagnostics?.status ?? error?.payload?.status ?? NaN);
+  const message = String(
+    error?.message
+      || error?.payload?.error
+      || error?.payload?.message
+      || ""
+  );
+
+  if ((status === 401 || status === 403) && isAccessKeyRelatedMessage(message)) {
+    return true;
+  }
+
+  return isAccessKeyRelatedMessage(message);
+}
+
 function isTopLevelErrorPayload(payload) {
   return Boolean(
     payload &&

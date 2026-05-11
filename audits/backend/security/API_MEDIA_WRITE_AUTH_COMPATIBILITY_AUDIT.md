@@ -99,3 +99,11 @@ Required before backend enforcement:
 Until those are complete:
 - Keep `/api/media/*` rate-limited (already applied).
 - Defer mandatory write-key enforcement on `/api/media/*`.
+
+## Frontend Fix 2A Applied
+
+- Media Studio now handles `/api/media/*` auth failures explicitly by detecting 401/403 and access-key failure messages via a shared frontend helper.
+- Improve prompt and brand-check preserve local fallback behavior, but now show clear user guidance when fallback was triggered by missing/invalid key auth.
+- Generation calls keep drafts safe and now emit auth-specific user messaging instead of a generic generation failure path for key failures.
+- Backend write-key enforcement for `/api/media/*` remains deferred in this phase.
+- Next step: manual UI validation, then backend write-key enforcement in the centralized write middleware.

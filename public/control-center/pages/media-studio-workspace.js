@@ -16,7 +16,8 @@ import {
   listProjectHandoffs,
   listProjectMediaJobs,
   listProjectTasks,
-  saveProjectMediaJob
+  saveProjectMediaJob,
+  isAccessKeyFailure
 } from "../api.js";
 import {
   getAssetNextAction,
@@ -40,6 +41,7 @@ const MEDIA_ROLE_DEFAULTS = {
   reviewRole: "compliance_reviewer",
   handoffRole: "publisher"
 };
+const MEDIA_ACCESS_KEY_GUIDANCE = "Missing or invalid Control Center access key. Save a valid access key before using provider-backed media generation.";
 const SPECIALISTS = [
   {
     id: "visual-director",
@@ -214,6 +216,11 @@ function writeLibraryAssetMap(map) {
   try {
     window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));
   } catch (_) {}
+}
+
+function mediaAccessKeyMessage(error) {
+  const detail = firstText(error?.payload?.message, error?.message);
+  return detail ? `${MEDIA_ACCESS_KEY_GUIDANCE} (${detail})` : MEDIA_ACCESS_KEY_GUIDANCE;
 }
 
 function loadLocalDrafts(projectName) {
@@ -2493,24 +2500,37 @@ function bindMediaStudio({
       session.draftMessage = "Generation completed and queued for review.";
       rerender();
     } catch (error) {
+      const isAuthError = isAccessKeyFailure(error);
+      const authMessage = mediaAccessKeyMessage(error);
       session.form.status = "prompt_ready";
       appendVersion(session, {
         mode: selectedMode,
         prompt: promptUsed,
         outputPayload: {
-          message: firstText(error?.payload?.message, error?.message, "Generation failed."),
-          error_code: firstText(error?.payload?.code, error?.code, "generation_error")
+          message: isAuthError
+            ? authMessage
+            : firstText(error?.payload?.message, error?.message, "Generation failed."),
+          error_code: isAuthError
+            ? "access_key_required"
+            : firstText(error?.payload?.code, error?.code, "generation_error")
         },
         providerStatus: "generation_error",
         readinessStatus: "failed",
-        notes: firstText(error?.payload?.message, error?.message, "Generation failed."),
+        notes: isAuthError
+          ? authMessage
+          : firstText(error?.payload?.message, error?.message, "Generation failed."),
         provider: "",
         model: ""
       });
       syncOutputsFromVersioning(session);
       saveDraftToSession(projectName, state, session, "prompt_ready");
+      if (isAuthError) {
+        showError?.(MEDIA_ACCESS_KEY_GUIDANCE);
+      }
       const payloadMessage = error?.payload?.message;
-      session.draftMessage = payloadMessage || error?.message || "Generation failed. Draft kept locally.";
+      session.draftMessage = isAuthError
+        ? `${authMessage} Draft kept locally.`
+        : payloadMessage || error?.message || "Generation failed. Draft kept locally.";
       rerender();
     }
   }
@@ -2610,7 +2630,14 @@ function bindMediaStudio({
           return;
         }
         applyPrompt(result.improved_prompt || improvePrompt(session.form.prompt), "Prompt improved.");
-      } catch (_) {
+      } catch (error) {
+        if (isAccessKeyFailure(error)) {
+          const authMessage = mediaAccessKeyMessage(error);
+          showError?.(MEDIA_ACCESS_KEY_GUIDANCE);
+          applyPrompt(improvePrompt(session.form.prompt), `${authMessage} Prompt improved locally.`);
+          return;
+        }
+
         applyPrompt(improvePrompt(session.form.prompt), "Prompt improved locally.");
       }
     };
@@ -2636,7 +2663,14 @@ function bindMediaStudio({
           ? "Prompt passed brand safety check."
           : "Prompt adjusted for brand safety.";
         applyPrompt(safePrompt, message);
-      } catch (_) {
+      } catch (error) {
+        if (isAccessKeyFailure(error)) {
+          const authMessage = mediaAccessKeyMessage(error);
+          showError?.(MEDIA_ACCESS_KEY_GUIDANCE);
+          applyPrompt(makeBrandSafe(session.form.prompt), `${authMessage} Prompt made brand-safe locally.`);
+          return;
+        }
+
         applyPrompt(makeBrandSafe(session.form.prompt), "Prompt made brand-safe locally.");
       }
     };
