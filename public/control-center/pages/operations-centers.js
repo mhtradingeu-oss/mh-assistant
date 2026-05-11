@@ -457,6 +457,8 @@ function renderTaskCenterLayout({
     ].join("\n")
     : "No task is selected.";
 
+  const showLoadingState = Boolean(session.isLoading);
+
   return `
     <section class="page is-active" data-page="task-center">
       <div class="ops-shell ops-workspace">
@@ -496,7 +498,7 @@ function renderTaskCenterLayout({
                 <h3>Execution backlog</h3>
                 <p>Filter by focus, owner, source, and priority to inspect task risk quickly.</p>
               </div>
-              <span class="card-badge neutral">${escapeHtml(String(items.length))} visible</span>
+              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -514,7 +516,6 @@ function renderTaskCenterLayout({
               <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
             </div>
 
-            ${session.isLoading ? `<div class="loading-state" aria-live="polite">Refreshing task center data...</div>` : ""}
             ${session.errorMessage ? `<div class="error-state" aria-live="assertive">${escapeHtml(session.errorMessage)}</div>` : ""}
 
             ${renderOpsTable(
@@ -765,19 +766,8 @@ function renderQueueCenterLayout({
   const showLoadingState = Boolean(session.isLoading);
   const showErrorState = Boolean(session.errorMessage);
   const showStateCard = (showLoadingState || showErrorState) && items.length > 0;
-  const stateRow = showLoadingState && !items.length
+  const stateRow = showErrorState && !items.length
     ? `
-      <tr class="ops-state-row">
-        <td colspan="7">
-          <div class="loading-state ops-queue-state" aria-live="polite">
-            <strong>Queue Center is loading</strong>
-            <span>Loading the queue surface while preserving the operating shell.</span>
-          </div>
-        </td>
-      </tr>
-    `
-    : showErrorState && !items.length
-      ? `
       <tr class="ops-state-row">
         <td colspan="7">
           <div class="error-state ops-queue-state" aria-live="assertive">
@@ -846,7 +836,7 @@ function renderQueueCenterLayout({
                 <h3>Queue operations</h3>
                 <p>Switch queue type focus and status filter to route each item to the owning page.</p>
               </div>
-              <span class="card-badge neutral">${escapeHtml(String(items.length))} visible</span>
+              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -863,9 +853,8 @@ function renderQueueCenterLayout({
               <select id="queueCenterStatus" class="sidebar-select">${renderFilterOptions(asObject(queueCenter.filters).statuses, session.status, escapeHtml, "All statuses")}</select>
             </div>
 
-            ${showStateCard ? `
-              ${showLoadingState ? `<div class="loading-state ops-queue-state" aria-live="polite"><strong>Queue Center is loading</strong><span>Refreshing queue data while keeping the operating shell stable.</span></div>` : ""}
-              ${showErrorState ? `<div class="error-state ops-queue-state" aria-live="assertive"><strong>Queue Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+            ${showErrorState && items.length > 0 ? `
+              <div class="error-state ops-queue-state" aria-live="assertive"><strong>Queue Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>
             ` : ""}
 
             ${renderOpsTable(
@@ -1077,19 +1066,8 @@ function renderJobMonitorLayout({
   const showLoadingState = Boolean(session.isLoading);
   const showErrorState = Boolean(session.errorMessage);
   const showStateCard = (showLoadingState || showErrorState) && items.length > 0;
-  const stateRow = showLoadingState && !items.length
+  const stateRow = showErrorState && !items.length
     ? `
-      <tr class="ops-state-row">
-        <td colspan="8">
-          <div class="loading-state ops-job-state" aria-live="polite">
-            <strong>Job Monitor is loading</strong>
-            <span>Loading execution state while preserving the operating shell.</span>
-          </div>
-        </td>
-      </tr>
-    `
-    : showErrorState && !items.length
-      ? `
       <tr class="ops-state-row">
         <td colspan="8">
           <div class="error-state ops-job-state" aria-live="assertive">
@@ -1158,7 +1136,7 @@ function renderJobMonitorLayout({
                 <h3>Execution inventory</h3>
                 <p>Filter by execution status and kind to inspect active and failed work quickly.</p>
               </div>
-              <span class="card-badge neutral">${escapeHtml(String(items.length))} visible</span>
+              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -1175,9 +1153,8 @@ function renderJobMonitorLayout({
               </select>
             </div>
 
-            ${showStateCard ? `
-              ${showLoadingState ? `<div class="loading-state ops-job-state" aria-live="polite"><strong>Job Monitor is loading</strong><span>Refreshing execution state while keeping the operating shell stable.</span></div>` : ""}
-              ${showErrorState ? `<div class="error-state ops-job-state" aria-live="assertive"><strong>Job Monitor error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+            ${showErrorState && items.length > 0 ? `
+              <div class="error-state ops-job-state" aria-live="assertive"><strong>Job Monitor error</strong><span>${escapeHtml(session.errorMessage)}</span></div>
             ` : ""}
 
             ${renderOpsTable(
@@ -1474,19 +1451,8 @@ function renderNotificationCenter(context, state, projectName) {
   const showLoadingState = Boolean(session.isLoading);
   const showErrorState = Boolean(session.errorMessage);
   const showStateCard = (showLoadingState || showErrorState) && listItems.length > 0;
-  const stateRow = showLoadingState && !listItems.length
+  const stateRow = showErrorState && !listItems.length
     ? `
-      <tr class="ops-state-row">
-        <td colspan="5">
-          <div class="loading-state ops-notification-state" aria-live="polite">
-            <strong>Notifications are loading</strong>
-            <span>Loading notification signals while preserving the operating shell.</span>
-          </div>
-        </td>
-      </tr>
-    `
-    : showErrorState && !listItems.length
-      ? `
       <tr class="ops-state-row">
         <td colspan="5">
           <div class="error-state ops-notification-state" aria-live="assertive">
@@ -1552,7 +1518,7 @@ function renderNotificationCenter(context, state, projectName) {
                 <h3>${escapeHtml(session.focus === "inbox" ? "Notification history" : "Operational alerts")}</h3>
                 <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
               </div>
-              <span class="card-badge neutral">${escapeHtml(String(listItems.length))} visible</span>
+              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -1570,9 +1536,8 @@ function renderNotificationCenter(context, state, projectName) {
               </select>
             </div>
 
-            ${showStateCard ? `
-              ${showLoadingState ? `<div class="loading-state ops-notification-state" aria-live="polite"><strong>Notifications are loading</strong><span>Refreshing notification signals while keeping the operating shell stable.</span></div>` : ""}
-              ${showErrorState ? `<div class="error-state ops-notification-state" aria-live="assertive"><strong>Notification Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+            ${showErrorState && listItems.length > 0 ? `
+              <div class="error-state ops-notification-state" aria-live="assertive"><strong>Notification Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>
             ` : ""}
 
             ${renderOpsTable(
