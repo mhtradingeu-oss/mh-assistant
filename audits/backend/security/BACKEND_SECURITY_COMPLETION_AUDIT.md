@@ -103,7 +103,7 @@ The frontend caller context in `public/control-center/api.js` sends write header
 | Canonical media-manager project reads | Matched by `/media-manager/project/` read pattern and slug validation. | protected |
 | Public media-manager project read aliases | Matched by `/public/media-manager/project/` read pattern and slug validation. | protected |
 | `/public/api/insights/:project`, `/public/api/learning/:project` | Matched by `/public/api/` read pattern and raw slug validation. | protected |
-| `/api/insights/:project`, `/api/learning/:project` | Not matched by `/public/api/`, but route inventory found frontend usage through `api.js`. These routes are project-scoped and slug-validated, but not covered by read-key middleware. | needs_review |
+| `/api/insights/:project`, `/api/learning/:project` | Read-key protected by the existing `^/(?:public/)?api/` sensitive read middleware pattern and project slug validation. | protected |
 | Legacy media file/tree/registry reads | Matched by `/media/(tree|registry|file)/` read pattern and raw slug validation. | protected |
 | `/generated-output/:project/:filename` | Matched by `/generated-output/` read pattern and raw slug validation. | protected |
 | `/today`, `/next`, product read helpers | Matched by read patterns. | protected |
@@ -146,7 +146,7 @@ Important distinction: `/public/media-manager/...` is not public in the auth sen
 | `/media/tree/:project`, `/media/registry/:project`, `/media/file/:project/:type/:filename` | Read key; project slug validation; media file query paths constrained to allowed roots. | medium | protected |
 | `/generated-output/:project/:filename` | Read key; project slug validation; basename filename check. | medium | protected |
 | `/today`, `/next`, product read helpers | Read key. | medium | protected |
-| `/api/insights/:project`, `/api/learning/:project` | Project slug validation; not matched by read-key pattern. | medium | needs_review |
+| `/api/insights/:project`, `/api/learning/:project` | Read-key protected by the existing `^/(?:public/)?api/` sensitive read pattern and project slug validation. | low | protected |
 | `/scheduler_queue`, `/get_performance_summary`, `/get_smart_suggestions` | Project context required; not matched by read-key pattern. | medium | needs_review |
 | `/media/projects` | No key apparent; returns project list. | medium | needs_review |
 
@@ -290,6 +290,13 @@ Needs review:
 
 - Legacy helpers using `normalizeOptionalProjectSlug` can silently drop an invalid optional project and fall back to default project in routes that allow fallback. This is existing behavior, not changed here, but should be considered during legacy consolidation.
 
+
+## Fix 3 Documentation Correction Applied
+
+- `/api/insights/:project` and `/api/learning/:project` were re-audited and confirmed already protected by the existing `^/(?:public/)?api/` sensitive read middleware pattern.
+- No backend behavior change was required.
+- `audits/backend/security/API_INSIGHTS_LEARNING_READ_AUTH_COMPATIBILITY_AUDIT.md` records the caller and middleware compatibility proof.
+
 ## Confirmed Guardrails
 
 - Timing-safe key comparison remains intact.
@@ -308,7 +315,7 @@ Needs review:
 | `/api/media/*` | Write-key protected via centralized middleware and rate-limited (Fix 1 + Fix 2B). | closed | resolved |
 | Scheduler and execution bridge | Project context required, but no read/write key middleware match. | high | needs_review |
 | Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` rely on project context, not key middleware. | medium | needs_review |
-| Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are frontend-used but not matched by read-key middleware. | medium | needs_review |
+| Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are covered by the existing `^/(?:public/)?api/` sensitive read middleware pattern. | closed | resolved |
 | `/media/projects` | Project list read is not key-protected. | medium | needs_review |
 | Integration provider summaries | Provider metadata/account/sync summaries are returned as plain objects. | medium | needs_review |
 | Upload filenames | Original filename is partially normalized but not fully basenamed/sanitized in the multer filename callback. | medium | needs_review |
