@@ -241,6 +241,12 @@ Needs review:
 - `/api/media/*` routes are AI/provider-backed but do not include `/ai` in the path, so they are not rate-limited by `shouldApplyAiRateLimit`.
 - Execution bridge routes that generate media/ad/email/publishing payloads are not rate-limited.
 
+## Fix 1 Applied (Backend Security)
+
+- `/api/media/*` routes are now covered by the in-memory provider/AI route rate limiter via the existing `applyRouteRateLimit` middleware path.
+- Authentication for `/api/media/*` remains intentionally deferred to a separate compatibility-aware phase.
+- No route response shapes were changed in this fix.
+
 ## Publishing And Product Guardrails
 
 Confirmed:

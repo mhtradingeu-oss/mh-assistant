@@ -334,7 +334,7 @@ function shouldApplyAiRateLimit(req) {
     return false;
   }
 
-  return /\/ai(?:\/|$)/i.test(requestPath);
+  return /\/ai(?:\/|$)/i.test(requestPath) || /^\/api\/media\//i.test(requestPath);
 }
 
 function applyRouteRateLimit(req, res, next) {
