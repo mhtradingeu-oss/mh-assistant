@@ -1889,6 +1889,7 @@ function bindFormEvents(context, session) {
 
 export const settingsRoute = {
   id: "settings",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "System",
     title: "Settings",
