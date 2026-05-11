@@ -3121,6 +3121,7 @@ async function sendPublishingHandoff({ projectName, backendProjectName, session,
 
 export const mediaStudioRoute = {
   id: "media-studio",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operations",
     title: "Media Studio",
