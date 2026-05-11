@@ -314,7 +314,7 @@ Needs review:
 | --- | --- | --- | --- |
 | `/api/media/*` | Write-key protected via centralized middleware and rate-limited (Fix 1 + Fix 2B). | closed | resolved |
 | Scheduler and execution bridge | Project context required, but no read/write key middleware match. | high | needs_review |
-| Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` rely on project context, not key middleware. | medium | needs_review |
+| Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` rely on project context, not key middleware. Active script caller (`verify-intelligence-loop.js`) sends no auth key; backend patch blocked pending script adjustment. See `INTELLIGENCE_LOOP_AUTH_COMPATIBILITY_AUDIT.md`. | medium | protect_with_script_adjustment |
 | Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are covered by the existing `^/(?:public/)?api/` sensitive read middleware pattern. | closed | resolved |
 | `/media/projects` | Read-key protected by adding `/^/media/projects/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | closed | resolved |
 | Integration provider summaries | Provider metadata/account/sync summaries are returned as plain objects. | medium | needs_review |
@@ -328,6 +328,13 @@ Needs review:
 - Response shape `{ projects: [...] }` is unchanged.
 - `audits/backend/security/MEDIA_PROJECTS_READ_AUTH_COMPATIBILITY_AUDIT.md` records the caller and middleware compatibility proof.
 
+## Fix 5 Status: Deferred — protect_with_script_adjustment
+
+- Intelligence loop routes (`/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions`) audited.
+- Active script caller `scripts/verify-intelligence-loop.js` calls all four routes with no auth key header.
+- Backend middleware patterns to add are fully specified in `audits/backend/security/INTELLIGENCE_LOOP_AUTH_COMPATIBILITY_AUDIT.md`.
+- Backend patch deferred until script is updated to send `x-mh-control-key` / `Authorization: Bearer` in its request helper.
+
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), and Fix 4 were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), and Fix 4 were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`. Fix 5 is deferred with documented patterns ready to apply.
