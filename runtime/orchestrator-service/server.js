@@ -7648,6 +7648,32 @@ function sanitizeIntegrationConfigForClient(record = {}) {
   return sanitized;
 }
 
+// Keys matching this pattern are redacted from provider summary objects before
+// being returned to clients. Values are replaced with "[redacted]".
+// Applied recursively; does not mutate stored records.
+const INTEGRATION_SUMMARY_REDACT_PATTERN =
+  /(secret|token|password|api[_-]?key|apiKey|authorization|credential|cookie|session|bearer|client_secret)/i;
+
+function redactProviderSummaryObject(obj, depth = 0) {
+  if (obj === null || typeof obj !== 'object' || depth > 5) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => redactProviderSummaryObject(item, depth + 1));
+  }
+
+  const out = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    if (INTEGRATION_SUMMARY_REDACT_PATTERN.test(String(key))) {
+      out[key] = '[redacted]';
+    } else {
+      out[key] = redactProviderSummaryObject(value, depth + 1);
+    }
+  });
+  return out;
+}
+
 function summarizeIntegrationRecord(record = {}) {
   const decryptedCredentials = getIntegrationCredentials(record);
   const normalizedRecord = {
@@ -7712,9 +7738,9 @@ function summarizeIntegrationRecord(record = {}) {
     health_state: healthState,
     legacy_source: Boolean(normalizedRecord.legacy_source),
     sync_source_registry: normalizedRecord.sync_source_registry,
-    provider_metadata: asPlainObject(normalizedRecord.provider_metadata),
-    last_sync_summary: asPlainObject(normalizedRecord.last_sync_summary),
-    provider_account: asPlainObject(normalizedRecord.provider_account),
+    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+    last_sync_summary: redactProviderSummaryObject(asPlainObject(normalizedRecord.last_sync_summary)),
+    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
     insights_ready: asPlainObject(normalizedRecord.insights_ready)
   };
 }

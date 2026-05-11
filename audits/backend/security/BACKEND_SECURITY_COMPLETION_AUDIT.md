@@ -317,7 +317,7 @@ Needs review:
 | Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` protected by read/write key middleware (Fix 5B). Script prepared in Fix 5A. | closed | resolved |
 | Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are covered by the existing `^/(?:public/)?api/` sensitive read middleware pattern. | closed | resolved |
 | `/media/projects` | Read-key protected by adding `/^/media/projects/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | closed | resolved |
-| Integration provider summaries | Provider metadata/account/sync summaries are returned as plain objects. | medium | needs_review |
+| Integration provider summaries | `redactProviderSummaryObject()` applied to `provider_metadata`, `provider_account`, and `last_sync_summary` before client delivery (Fix 7). Stored records not mutated. | closed | resolved |
 | Upload filenames | `sanitizeUploadFilename()` added in Fix 6: `path.basename` applied first (eliminates traversal), followed by extension validation, stem normalization, max-length enforcement, and safe fallback to `upload`. Existing files not moved. Response shape unchanged. | closed | resolved |
 | Legacy default-project fallback | Some legacy routes can fall back to default project when explicit project is absent or invalid. | medium | needs_review |
 
@@ -348,18 +348,15 @@ Needs review:
 - `POST /record_execution_feedback` and `POST /generate_optimization_recommendations` added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` — now require write key.
 - No route handlers modified. No response shapes changed beyond existing protected-key middleware error responses.
 
-## Fix 6 Applied (Upload Filename Hardening)
+## Fix 7 Applied (Integration Summary Redaction)
 
-- `sanitizeUploadFilename()` helper added to `runtime/orchestrator-service/server.js`.
-- Multer `filename` callback now calls `sanitizeUploadFilename(file.originalname)` instead of the bare `replace(/\s+/g, '_')` call.
-- Path traversal via `originalname` (e.g. `../../../etc/passwd`) is eliminated by `path.basename` as the first step.
-- Extension is validated: only `[a-zA-Z0-9]{1,8}` extensions are preserved; others are dropped.
-- Stem is normalized: whitespace → `_`, unsafe chars → `_`, repeated punctuation collapsed, leading/trailing punctuation stripped.
-- Max stem length: 128 characters. Empty names fall back to `upload`.
-- Timestamp prefix behavior unchanged. Destination directory behavior unchanged. Response shape unchanged.
-- Existing uploaded files are not moved or renamed.
-- `audits/backend/security/UPLOAD_FILENAME_HARDENING_AUDIT.md` records the full audit.
+- `INTEGRATION_SUMMARY_REDACT_PATTERN` regex added to `runtime/orchestrator-service/server.js` covering: `secret`, `token`, `password`, `api_key` / `apiKey` / `api-key`, `authorization`, `credential`, `cookie`, `session`, `bearer`, `client_secret`.
+- `redactProviderSummaryObject(obj, depth)` helper added — recursive, replaces values of sensitive-keyed fields with `"[redacted]"`, depth-capped at 5.
+- Applied in `summarizeIntegrationRecord` to `provider_metadata`, `provider_account`, and `last_sync_summary` before return.
+- Stored encrypted credential records not read or mutated by this helper.
+- `credential_state`, `config`, and `primary_value` remain protected by existing `summarizeCredentialState`, `sanitizeIntegrationConfigForClient`, and `maskPrimaryValueForClient` respectively.
+- `audits/backend/security/INTEGRATION_SUMMARY_REDACTION_AUDIT.md` records the full audit.
 
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, and Fix 6 were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, and Fix 7 were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
