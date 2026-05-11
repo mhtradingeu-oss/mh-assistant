@@ -1092,9 +1092,28 @@ function renderPreview(asset, escapeHtml) {
   if (isDocumentExtension(asset.extension)) {
     const previewUrl = getAssetPreviewUrl(asset);
     const label = toDocumentPreviewLabel(asset.extension);
+    const isPdf = asString(asset.extension).toLowerCase() === "pdf";
     const openButton = previewUrl
       ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
       : `<button class="btn btn-primary" type="button" disabled>Open document</button>`;
+
+    if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {
+      return `
+        <div class="library-pdf-preview">
+          <iframe src="${escapeHtml(previewUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+        </div>
+      `;
+    }
+
+    if (isPdf && previewUrl && requiresProtectedMediaFetch(previewUrl)) {
+      return `
+        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+          <div class="library-preview-extension">PDF</div>
+          <strong>${escapeHtml(label)}</strong>
+          <div class="library-preview-copy">Loading protected PDF preview...</div>
+        </div>
+      `;
+    }
 
     return `
       <div class="library-preview-fallback library-document-preview">
@@ -1160,6 +1179,15 @@ async function hydrateProtectedAssetPreview({
 
     if (asset.is_video) {
       previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+      return;
+    }
+
+    if (asString(asset.extension).toLowerCase() === "pdf") {
+      previewNode.outerHTML = `
+        <div class="library-pdf-preview">
+          <iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+        </div>
+      `;
     }
   } catch (error) {
     if (!previewNode.isConnected) {
@@ -2419,9 +2447,9 @@ viewToggleButtons.forEach((button) => {
     const chooseFilesBtn = $("libraryChooseFilesBtn");
     if (chooseFilesBtn) {
       chooseFilesBtn.onclick = (event) => {
-
+        event.preventDefault();
         event.stopPropagation();
-
+        uploadInput.click();
       };
     }
 
