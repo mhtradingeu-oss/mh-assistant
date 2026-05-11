@@ -1,0 +1,789 @@
+===== 08 LOADING EMPTY ERROR STATES =====
+public/control-center/pages/ads-manager.js:343:    root.innerHTML = `
+public/control-center/pages/ai-command.js:309:function isMissingIntelligenceError(error) {
+public/control-center/pages/ai-command.js:310:	const status = Number(error?.status);
+public/control-center/pages/ai-command.js:312:	const message = asString(error?.message).toLowerCase();
+public/control-center/pages/ai-command.js:388:				error: "",
+public/control-center/pages/ai-command.js:389:				loadedAt: "",
+public/control-center/pages/ai-command.js:390:				loadingPromise: null
+public/control-center/pages/ai-command.js:502:		.filter((record) => ["error", "token_expired", "partial"].includes(asString(record?.status)))
+public/control-center/pages/ai-command.js:506:			reason: record.health_summary || record.last_error
+public/control-center/pages/ai-command.js:643:		summary: summaryParts.join(" ") || "Project is loaded. Complete integrations to unlock stronger AI guidance.",
+public/control-center/pages/ai-command.js:887:		session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to load AI intelligence." };
+public/control-center/pages/ai-command.js:891:	const freshEnough = current.status === "ready" && current.project === projectName && current.loadedAt && (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+public/control-center/pages/ai-command.js:893:	if (current.loadingPromise) return current.loadingPromise;
+public/control-center/pages/ai-command.js:901:		status: "loading",
+public/control-center/pages/ai-command.js:902:		error: "",
+public/control-center/pages/ai-command.js:903:		loadingPromise: (async () => {
+public/control-center/pages/ai-command.js:922:					error: intelligenceErrors[0] || "",
+public/control-center/pages/ai-command.js:923:					loadedAt: nowIso(),
+public/control-center/pages/ai-command.js:924:					loadingPromise: null
+public/control-center/pages/ai-command.js:926:			} catch (error) {
+public/control-center/pages/ai-command.js:927:				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+public/control-center/pages/ai-command.js:929:				rerender();
+public/control-center/pages/ai-command.js:934:	rerender();
+public/control-center/pages/ai-command.js:935:	return session.intelligence.loadingPromise;
+public/control-center/pages/ai-command.js:975:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:976:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:1016:	} catch (error) {
+public/control-center/pages/ai-command.js:1017:		const payload = asObject(error?.payload);
+public/control-center/pages/ai-command.js:1020:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+public/control-center/pages/ai-command.js:1031:			error: failureReason
+public/control-center/pages/ai-command.js:1109:	const intelDotClass = { ready: "ready", loading: "loading", error: "error", idle: "idle" }[intelligenceStatus] || "idle";
+public/control-center/pages/ai-command.js:1110:	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+public/control-center/pages/ai-command.js:1163:			${session.intelligence.error ? `<div class="ctrl-intel-error">${escapeHtml(session.intelligence.error)}</div>` : ""}
+public/control-center/pages/ai-command.js:1307:	const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
+public/control-center/pages/ai-command.js:1331:				<div class="ctrl-error-banner">
+public/control-center/pages/ai-command.js:1333:					<span>${escapeHtml(asString(response.error) || asString(response.summary) || "AI provider error.")}</span>
+public/control-center/pages/ai-command.js:1400:			<div class="ctrl-empty-stream">
+public/control-center/pages/ai-command.js:1401:				<div class="ctrl-empty-icon">💬</div>
+public/control-center/pages/ai-command.js:1402:				<div class="ctrl-empty-title">Start the conversation</div>
+public/control-center/pages/ai-command.js:1403:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:1467:							const statusLabel = entry.failed ? "Failed" : "Done";
+public/control-center/pages/ai-command.js:1484:					<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>
+public/control-center/pages/ai-command.js:1520:					<div class="ctrl-empty-box">Recommendations and learned patterns will appear here as the AI works with your project data.</div>
+public/control-center/pages/ai-command.js:1684:  root.innerHTML = `
+public/control-center/pages/ai-command.js:1882:      persistSessionDraft(projectName || "__default__", session, "Agent prompt loaded");
+public/control-center/pages/ai-command.js:1892:      persistSessionDraft(projectName || "__default__", session, "Quick prompt loaded");
+public/control-center/pages/ai-command.js:1893:      if (status) status.textContent = "Quick prompt loaded. Review it before running.";
+public/control-center/pages/campaign-studio.js:177:function isMissingIntelligenceError(error) {
+public/control-center/pages/campaign-studio.js:178:  const status = Number(error?.status);
+public/control-center/pages/campaign-studio.js:180:  const message = asString(error?.message).toLowerCase();
+public/control-center/pages/campaign-studio.js:268:        error: ""
+public/control-center/pages/campaign-studio.js:281:      error: asString(session.intelligence?.error)
+public/control-center/pages/campaign-studio.js:492:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:493:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:516:    } catch (error) {
+public/control-center/pages/campaign-studio.js:517:      console.warn("Failed to persist campaign draft:", error.message);
+public/control-center/pages/campaign-studio.js:526:    <div class="campaign-studio-empty-state">
+public/control-center/pages/campaign-studio.js:874:  if (!seoOpportunities.length) seoBlockers.push("No search opportunity feed is loaded yet.");
+public/control-center/pages/campaign-studio.js:1069:    if (!["error", "token_expired", "partial"].includes(status)) return;
+public/control-center/pages/campaign-studio.js:1072:      body: firstNonEmpty(record.health_summary, record.last_error, record.status_label, "Connection health needs attention.")
+public/control-center/pages/campaign-studio.js:1146:    intelligenceError: asString(session.intelligence?.error || ""),
+public/control-center/pages/campaign-studio.js:1175:function renderBlockerGroup(title, items, escapeHtml, emptyBody) {
+public/control-center/pages/campaign-studio.js:1185:          : `<div class="setup-helper">${escapeHtml(emptyBody)}</div>`
+public/control-center/pages/campaign-studio.js:1200:  if (session.intelligence.status === "loading" || session.intelligence.status === "loaded") return;
+public/control-center/pages/campaign-studio.js:1203:  session.intelligence.status = "loading";
+public/control-center/pages/campaign-studio.js:1204:  session.intelligence.error = "";
+public/control-center/pages/campaign-studio.js:1219:      const errors = [
+public/control-center/pages/campaign-studio.js:1224:      session.intelligence.status = (insights || learning) ? "loaded" : "error";
+public/control-center/pages/campaign-studio.js:1227:      session.intelligence.error = errors.join(" • ");
+public/control-center/pages/campaign-studio.js:1229:      if (session.intelligence.status === "error" && session.intelligence.error) {
+public/control-center/pages/campaign-studio.js:1230:        showError?.(`Campaign intelligence could not be refreshed: ${session.intelligence.error}`);
+public/control-center/pages/campaign-studio.js:1235:    .catch((error) => {
+public/control-center/pages/campaign-studio.js:1236:      session.intelligence.status = "error";
+public/control-center/pages/campaign-studio.js:1237:      session.intelligence.error = error?.message || "Failed to load campaign intelligence";
+public/control-center/pages/campaign-studio.js:1238:      showError?.(session.intelligence.error);
+public/control-center/pages/campaign-studio.js:1294:      } catch (error) {
+public/control-center/pages/campaign-studio.js:1295:        showError?.(error.message || "Failed to save campaign plan.");
+public/control-center/pages/campaign-studio.js:1314:      } catch (error) {
+public/control-center/pages/campaign-studio.js:1315:        showError?.(error.message || "Failed to structure the campaign plan.");
+public/control-center/pages/campaign-studio.js:1359:      }).catch((error) => {
+public/control-center/pages/campaign-studio.js:1360:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1433:      session.intelligence.error = "";
+public/control-center/pages/campaign-studio.js:1531:    root.innerHTML = `
+public/control-center/pages/campaign-studio.js:1549:              <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
+public/control-center/pages/campaign-studio.js:1800:                  ? `<div class="empty-box">${escapeHtml(`Intelligence refresh warning: ${intelligenceError}`)}</div>`
+public/control-center/pages/content-studio-workspace.js:534:      loaded: false,
+public/control-center/pages/content-studio-workspace.js:535:      loading: false,
+public/control-center/pages/content-studio-workspace.js:536:      error: "",
+public/control-center/pages/content-studio-workspace.js:549:      loadedHandoffId: "",
+public/control-center/pages/content-studio-workspace.js:611:  const errors = {};
+public/control-center/pages/content-studio-workspace.js:613:  if (!clean(form.project)) errors.project = "Project is required.";
+public/control-center/pages/content-studio-workspace.js:614:  if (!clean(form.campaign)) errors.campaign = "Campaign is required.";
+public/control-center/pages/content-studio-workspace.js:615:  if (!clean(form.product)) errors.product = "Product is required.";
+public/control-center/pages/content-studio-workspace.js:616:  if (!clean(form.channel)) errors.channel = "Channel is required.";
+public/control-center/pages/content-studio-workspace.js:617:  if (!clean(form.language)) errors.language = "Language is required.";
+public/control-center/pages/content-studio-workspace.js:618:  if (!clean(form.tone)) errors.tone = "Tone is required.";
+public/control-center/pages/content-studio-workspace.js:619:  if (!clean(form.objective)) errors.objective = "Objective is required.";
+public/control-center/pages/content-studio-workspace.js:620:  if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";
+public/control-center/pages/content-studio-workspace.js:621:  session.validation = errors;
+public/control-center/pages/content-studio-workspace.js:622:  return !Object.keys(errors).length;
+public/control-center/pages/content-studio-workspace.js:627:  return message ? `<div class="content-inline-error">${escapeHtml(message)}</div>` : "";
+public/control-center/pages/content-studio-workspace.js:770:  if (!summary.id || summary.id === session.loadedHandoffId) return;
+public/control-center/pages/content-studio-workspace.js:771:  session.loadedHandoffId = summary.id;
+public/control-center/pages/content-studio-workspace.js:775:  if (!projectName || session.loading || session.loaded) return;
+public/control-center/pages/content-studio-workspace.js:776:  session.loading = true;
+public/control-center/pages/content-studio-workspace.js:777:  session.error = "";
+public/control-center/pages/content-studio-workspace.js:778:  rerender();
+public/control-center/pages/content-studio-workspace.js:798:    session.loaded = true;
+public/control-center/pages/content-studio-workspace.js:801:  } catch (error) {
+public/control-center/pages/content-studio-workspace.js:802:    session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";
+public/control-center/pages/content-studio-workspace.js:804:    session.loaded = true;
+public/control-center/pages/content-studio-workspace.js:807:    session.loading = false;
+public/control-center/pages/content-studio-workspace.js:808:    rerender();
+public/control-center/pages/content-studio-workspace.js:954:      .content-inline-error {
+public/control-center/pages/content-studio-workspace.js:1131:        <div class="empty-box">No drafts yet. Start from composer and save the first draft.</div>
+public/control-center/pages/content-studio-workspace.js:1452:        <div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>
+public/control-center/pages/content-studio-workspace.js:1614:    rerender();
+public/control-center/pages/content-studio-workspace.js:1621:    rerender();
+public/control-center/pages/content-studio-workspace.js:1820:      rerender();
+public/control-center/pages/content-studio-workspace.js:1830:      rerender();
+public/control-center/pages/content-studio-workspace.js:1839:        rerender();
+public/control-center/pages/content-studio-workspace.js:1867:      session.draftMessage = "Handoff loaded into composer.";
+public/control-center/pages/content-studio-workspace.js:1868:      rerender();
+public/control-center/pages/content-studio-workspace.js:1877:        rerender();
+public/control-center/pages/content-studio-workspace.js:1957:      rerender();
+public/control-center/pages/content-studio-workspace.js:1967:        rerender();
+public/control-center/pages/content-studio-workspace.js:1973:      rerender();
+public/control-center/pages/content-studio-workspace.js:1983:        rerender();
+public/control-center/pages/content-studio-workspace.js:1992:        rerender();
+public/control-center/pages/content-studio-workspace.js:2010:      rerender();
+public/control-center/pages/content-studio-workspace.js:2019:        rerender();
+public/control-center/pages/content-studio-workspace.js:2024:      rerender();
+public/control-center/pages/content-studio-workspace.js:2068:        rerender();
+public/control-center/pages/content-studio-workspace.js:2091:      rerender();
+public/control-center/pages/content-studio-workspace.js:2100:        rerender();
+public/control-center/pages/content-studio-workspace.js:2123:      rerender();
+public/control-center/pages/content-studio-workspace.js:2132:      rerender();
+public/control-center/pages/content-studio-workspace.js:2146:        rerender();
+public/control-center/pages/content-studio-workspace.js:2195:      rerender();
+public/control-center/pages/content-studio-workspace.js:2242:      rerender();
+public/control-center/pages/content-studio-workspace.js:2282:    if (!session.loaded && !session.loading && projectName) {
+public/control-center/pages/content-studio-workspace.js:2300:    root.innerHTML = `
+public/control-center/pages/content-studio-workspace.js:2305:        ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:2306:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/governance.js:52:      loaded: false,
+public/control-center/pages/governance.js:53:      loading: false,
+public/control-center/pages/governance.js:54:      error: "",
+public/control-center/pages/governance.js:109:  if (!projectName || session.loading) return;
+public/control-center/pages/governance.js:111:  session.loading = true;
+public/control-center/pages/governance.js:112:  session.error = "";
+public/control-center/pages/governance.js:113:  rerender();
+public/control-center/pages/governance.js:119:    session.loaded = true;
+public/control-center/pages/governance.js:120:  } catch (error) {
+public/control-center/pages/governance.js:121:    session.error = error.message || "Failed to load governance console.";
+public/control-center/pages/governance.js:123:    session.loading = false;
+public/control-center/pages/governance.js:124:    rerender();
+public/control-center/pages/governance.js:129:  session.loaded = false;
+public/control-center/pages/governance.js:131:  if (session.error) {
+public/control-center/pages/governance.js:132:    showError?.(session.error);
+public/control-center/pages/governance.js:179:function renderFlagList(flags, emptyText, escapeHtml) {
+public/control-center/pages/governance.js:181:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/governance.js:293:    return `<div class="empty-box">No audit history is available yet.</div>`;
+public/control-center/pages/governance.js:505:            <div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>
+public/control-center/pages/governance.js:512:  if (session.loading && !session.loaded) {
+public/control-center/pages/governance.js:533:            <div class="empty-box">Loading governance console...</div>
+public/control-center/pages/governance.js:540:  if (session.error && !session.summary) {
+public/control-center/pages/governance.js:549:                <p>Governance surface is available but the latest data could not be loaded.</p>
+public/control-center/pages/governance.js:561:            <div class="empty-box">${escapeHtml(session.error)}</div>
+public/control-center/pages/governance.js:610:            <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+public/control-center/pages/governance.js:638:              : `<div class="empty-box">No audit history is available yet.</div>`}
+public/control-center/pages/governance.js:742:                      : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+public/control-center/pages/governance.js:816:                : `<div class="empty-box">No governance item is selected.</div>`
+public/control-center/pages/governance.js:877:                      : `<div class="empty-box">No active overrides are currently open.</div>`}
+public/control-center/pages/governance.js:927:    root.innerHTML = renderPage(projectName, session, context.escapeHtml);
+public/control-center/pages/governance.js:948:      } catch (error) {
+public/control-center/pages/governance.js:949:        context.showError(error.message || "Failed to update approval.");
+public/control-center/pages/governance.js:957:      rerender();
+public/control-center/pages/governance.js:964:      rerender();
+public/control-center/pages/governance.js:987:      } catch (error) {
+public/control-center/pages/governance.js:988:        context.showError(error.message || "Failed to request approval.");
+public/control-center/pages/governance.js:1021:        } catch (error) {
+public/control-center/pages/governance.js:1022:          context.showError(error.message || "Failed to save governance policy.");
+public/control-center/pages/governance.js:1030:          context.showError("No durable Settings snapshot was found in the governance bridge for this project.");
+public/control-center/pages/governance.js:1041:        } catch (error) {
+public/control-center/pages/governance.js:1042:          context.showError(error.message || "Failed to sync Settings into Governance.");
+public/control-center/pages/governance.js:1085:      root.innerHTML = renderPage(projectName, session, context.escapeHtml);
+public/control-center/pages/governance.js:1089:    rerender();
+public/control-center/pages/governance.js:1095:    if (!session.loaded && !session.loading) {
+public/control-center/pages/home.js:52:    text.includes("error") ||
+public/control-center/pages/home.js:414:      `${humanizeStatus(item?.channel, "Channel")}: ${humanizeStatus(item?.execution_status, "Failed")}`
+public/control-center/pages/home.js:511:        label: "Failed",
+public/control-center/pages/home.js:628:    root.innerHTML = `
+public/control-center/pages/home.js:650:            ${renderBlockerColumn("Failed Jobs", dashboard.blockers.failedJobs, "danger", escapeHtml)}
+public/control-center/pages/insights.js:9:    emptyTitle: "No Facebook insight feed yet"
+public/control-center/pages/insights.js:16:    emptyTitle: "No Instagram insight feed yet"
+public/control-center/pages/insights.js:23:    emptyTitle: "No TikTok insight feed yet"
+public/control-center/pages/insights.js:30:    emptyTitle: "No YouTube insight feed yet"
+public/control-center/pages/insights.js:37:    emptyTitle: "No website analytics feed yet"
+public/control-center/pages/insights.js:44:    emptyTitle: "No Search Console feed yet"
+public/control-center/pages/insights.js:51:    emptyTitle: "No paid performance feed yet"
+public/control-center/pages/insights.js:61:      loading: false,
+public/control-center/pages/insights.js:62:      error: ""
+public/control-center/pages/insights.js:821:function renderRankedContent(items, emptyText, escapeHtml) {
+public/control-center/pages/insights.js:823:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/insights.js:862:function renderWeakContent(items, emptyText, escapeHtml) {
+public/control-center/pages/insights.js:864:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/insights.js:886:    <div class="insights-empty-state">
+public/control-center/pages/insights.js:1016:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1017:          console.warn("Failed to persist Insights handoff:", error.message);
+public/control-center/pages/insights.js:1065:    const refreshLabel = refreshState.loading
+public/control-center/pages/insights.js:1129:    root.innerHTML = `
+public/control-center/pages/insights.js:1135:              <button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>
+public/control-center/pages/insights.js:1139:          ${refreshState.error ? `<div class="empty-box">${escapeHtml(refreshState.error)}</div>` : ""}
+public/control-center/pages/insights.js:1256:                    : `<div class="empty-box">No major cross-platform risk signal is flagged right now.</div>`
+public/control-center/pages/insights.js:1264:                      ? renderKeyValueList(websiteIntel.weakPages.slice(0, 4), "page", escapeHtml) || `<div class="empty-box">No weak page list yet.</div>`
+public/control-center/pages/insights.js:1286:                        ) || `<div class="empty-box">No SEO or paid weakness list yet.</div>`
+public/control-center/pages/insights.js:1425:        setInsightsRefreshState(projectName, { loading: false, error: message });
+public/control-center/pages/insights.js:1443:        setInsightsRefreshState(projectName, { loading: false, error: message });
+public/control-center/pages/insights.js:1459:      setInsightsRefreshState(projectName, { loading: true, error: "" });
+public/control-center/pages/insights.js:1486:          setInsightsRefreshState(projectName, { loading: false, error: "" });
+public/control-center/pages/insights.js:1500:        .catch((error) => {
+public/control-center/pages/insights.js:1501:          const message = `Insights: ${error?.message || "Failed to refresh insights."}`;
+public/control-center/pages/insights.js:1502:          setInsightsRefreshState(projectName, { loading: false, error: message });
+public/control-center/pages/integrations.js:988:  if (normalized === "error") return "Error";
+public/control-center/pages/integrations.js:1014:    return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";
+public/control-center/pages/integrations.js:1272:    } catch (error) {
+public/control-center/pages/integrations.js:1273:      showError?.(error.message || `Failed to connect ${integration.label}.`);
+public/control-center/pages/integrations.js:1293:    } catch (error) {
+public/control-center/pages/integrations.js:1294:      showError?.(error.message || `Failed to disconnect ${integration.label}.`);
+public/control-center/pages/integrations.js:1326:    } catch (error) {
+public/control-center/pages/integrations.js:1327:      showError?.(error.message || `Failed to ${type} ${integration.label}.`);
+public/control-center/pages/integrations.js:1468:    root.innerHTML = `
+public/control-center/pages/integrations.js:1496:              <span class="data-label">Failed / Disconnected</span>
+public/control-center/pages/integrations.js:1542:                    <option value="failed" ${session.statusFilter === "failed" ? "selected" : ""}>Failed</option>
+public/control-center/pages/integrations.js:1561:                : `<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>`}
+public/control-center/pages/integrations.js:1566:            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
+public/control-center/pages/library.js:110:  { key: "uploaded_session", label: "Uploaded This Session" },
+public/control-center/pages/library.js:319:      } catch (error) {
+public/control-center/pages/library.js:320:        reject(error);
+public/control-center/pages/library.js:459:          }).catch((error) => {
+public/control-center/pages/library.js:460:            const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:462:              : `Could not open file: ${error.message || "Unknown error."}`;
+public/control-center/pages/library.js:507:      uploading: false,
+public/control-center/pages/library.js:565:  if (!normalized) return "uploaded";
+public/control-center/pages/library.js:571:  if (normalized === "uploaded") return "uploaded";
+public/control-center/pages/library.js:575:  return "uploaded";
+public/control-center/pages/library.js:588:  return "Uploaded";
+public/control-center/pages/library.js:647:      "uploaded"
+public/control-center/pages/library.js:694:      uploaded_at: merged.uploaded_at || merged.updated_at || merged.created_at || merged.registered_at || "",
+public/control-center/pages/library.js:747:    category_status: "Uploaded",
+public/control-center/pages/library.js:752:    uploaded_at: asset.updated_at || asset.created_at || null,
+public/control-center/pages/library.js:815:    const existingTs = new Date(existing.uploaded_at || 0).getTime() || 0;
+public/control-center/pages/library.js:816:    const candidateTs = new Date(asset.uploaded_at || 0).getTime() || 0;
+public/control-center/pages/library.js:827:  const recentlyUploadedByDate = assets.filter((asset) => {
+public/control-center/pages/library.js:828:    if (!asset.uploaded_at) return false;
+public/control-center/pages/library.js:829:    const ts = new Date(asset.uploaded_at).getTime();
+public/control-center/pages/library.js:834:  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+public/control-center/pages/library.js:847:    recentlyUploaded: recentlyUploadedByDate,
+public/control-center/pages/library.js:867:    } else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {
+public/control-center/pages/library.js:894:    } else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {
+public/control-center/pages/library.js:926:  const recentUploadedNames = new Set(
+public/control-center/pages/library.js:939:    if (selectedFolderKey === "uploaded_session") {
+public/control-center/pages/library.js:941:      return Boolean(filename && recentUploadedNames.has(filename));
+public/control-center/pages/library.js:982:    if (sortBy === "updated_asc") return toTimestamp(left.uploaded_at) - toTimestamp(right.uploaded_at);
+public/control-center/pages/library.js:984:    return toTimestamp(right.uploaded_at) - toTimestamp(left.uploaded_at);
+public/control-center/pages/library.js:1001:      if (folder.key === "uploaded_session") return inRecent;
+public/control-center/pages/library.js:1052:    return `<div class="empty-box">Select an asset to preview.</div>`;
+public/control-center/pages/library.js:1062:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1078:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1102:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1118:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1153:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+public/control-center/pages/library.js:1232:  } catch (error) {
+public/control-center/pages/library.js:1237:    const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:1239:      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+public/control-center/pages/library.js:1243:    if (!(error instanceof AccessKeyError)) {
+public/control-center/pages/library.js:1270:    image.onerror = () => {
+public/control-center/pages/library.js:1277:  } catch (error) {
+public/control-center/pages/library.js:1281:    if (error instanceof AccessKeyError) {
+public/control-center/pages/library.js:1285:    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+public/control-center/pages/library.js:1470:    rerender();
+public/control-center/pages/library.js:1518:    .filter((asset) => asset.uploaded_at)
+public/control-center/pages/library.js:1519:    .sort((left, right) => new Date(right.uploaded_at || 0).getTime() - new Date(left.uploaded_at || 0).getTime())
+public/control-center/pages/library.js:1744:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+public/control-center/pages/library.js:1760:      : `<div class="empty-box">No assets match this view. Adjust folder/filter/search.</div>`;
+public/control-center/pages/library.js:1844:            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+public/control-center/pages/library.js:1862:      : `<div class="empty-box">Select an asset to view details.</div>`;
+public/control-center/pages/library.js:1890:              <span>${escapeHtml(`${toStatusLabel(asset.status)} • ${formatDate(asset.uploaded_at)}`)}</span>
+public/control-center/pages/library.js:1895:      : `<div class="empty-box">No recent uploaded or updated assets yet.</div>`;
+public/control-center/pages/library.js:1906:              <span>${escapeHtml(`${item.asset_type} • ${item.status === "success" ? "Uploaded" : "Failed"}`)}</span>
+public/control-center/pages/library.js:1911:      : `<div class="empty-box">No uploads in this session yet.</div>`;
+public/control-center/pages/library.js:2057:      rerender();
+public/control-center/pages/library.js:2070:      rerender();
+public/control-center/pages/library.js:2093:      rerender();
+public/control-center/pages/library.js:2111:    rerender();
+public/control-center/pages/library.js:2169:      } catch (error) {
+public/control-center/pages/library.js:2170:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2172:          : `Could not open file: ${error.message || "Unknown error."}`;
+public/control-center/pages/library.js:2200:      } catch (error) {
+public/control-center/pages/library.js:2201:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2203:          : (error.message || "Failed to update source of truth.");
+public/control-center/pages/library.js:2239:      } catch (error) {
+public/control-center/pages/library.js:2240:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2242:          : (error.message || "Failed to update asset status.");
+public/control-center/pages/library.js:2276:      } catch (error) {
+public/control-center/pages/library.js:2277:        showError?.(error.message || "Failed to archive asset.");
+public/control-center/pages/library.js:2308:        showError?.("Asset name cannot be empty.");
+public/control-center/pages/library.js:2317:      } catch (error) {
+public/control-center/pages/library.js:2318:        showError?.(error.message || "Failed to rename asset.");
+public/control-center/pages/library.js:2353:      } catch (error) {
+public/control-center/pages/library.js:2354:        showError?.(error.message || "Failed to delete asset.");
+public/control-center/pages/library.js:2411:      rerender();
+public/control-center/pages/library.js:2434:        rerender();
+public/control-center/pages/library.js:2469:        uploadBtn.disabled = session.uploading || files.length === 0;
+public/control-center/pages/library.js:2470:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2563:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2564:    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2569:        showError?.("Select a project before uploading.");
+public/control-center/pages/library.js:2573:      if (session.uploading) return;
+public/control-center/pages/library.js:2584:      } catch (error) {
+public/control-center/pages/library.js:2585:        showError?.(error.message || "Invalid upload category.");
+public/control-center/pages/library.js:2589:      const uploaded = [];
+public/control-center/pages/library.js:2591:      let reloadedFromServer = false;
+public/control-center/pages/library.js:2593:      session.uploading = true;
+public/control-center/pages/library.js:2614:            uploaded.push({
+public/control-center/pages/library.js:2620:          } catch (error) {
+public/control-center/pages/library.js:2625:              error: error.message || "Upload failed",
+public/control-center/pages/library.js:2631:        session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);
+public/control-center/pages/library.js:2633:        if (uploaded.length && typeof reloadProjectData === "function") {
+public/control-center/pages/library.js:2635:          reloadedFromServer = true;
+public/control-center/pages/library.js:2642:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2643:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2645:        if (uploaded.length && !failed.length) {
+public/control-center/pages/library.js:2646:          showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.`);
+public/control-center/pages/library.js:2647:        } else if (uploaded.length && failed.length) {
+public/control-center/pages/library.js:2648:          showError?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, ${failed.length} failed.`);
+public/control-center/pages/library.js:2653:        session.uploading = false;
+public/control-center/pages/library.js:2654:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2655:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2656:        if (!reloadedFromServer) {
+public/control-center/pages/library.js:2657:          rerender();
+public/control-center/pages/library.js:2675:      } catch (error) {
+public/control-center/pages/library.js:2676:        showError?.(error.message || "Failed to refresh library scan.");
+public/control-center/pages/library.js:2786:    root.innerHTML = `
+public/control-center/pages/library.js:2883:                    <option value="uploaded">Uploaded</option>
+public/control-center/pages/media-studio-workspace.js:33:const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];
+public/control-center/pages/media-studio-workspace.js:172:  if (["failed", "blocked", "error", "rejected"].includes(normalized)) return "failed";
+public/control-center/pages/media-studio-workspace.js:221:function mediaAccessKeyMessage(error) {
+public/control-center/pages/media-studio-workspace.js:222:  const detail = firstText(error?.payload?.message, error?.message);
+public/control-center/pages/media-studio-workspace.js:464:      loaded: false,
+public/control-center/pages/media-studio-workspace.js:465:      loading: false,
+public/control-center/pages/media-studio-workspace.js:466:      error: "",
+public/control-center/pages/media-studio-workspace.js:482:      loadedHandoffId: "",
+public/control-center/pages/media-studio-workspace.js:572:  if (!backendProjectName || session.loading || session.loaded) return;
+public/control-center/pages/media-studio-workspace.js:574:  session.loading = true;
+public/control-center/pages/media-studio-workspace.js:575:  session.error = "";
+public/control-center/pages/media-studio-workspace.js:576:  rerender();
+public/control-center/pages/media-studio-workspace.js:621:    session.error = failedLoads
+public/control-center/pages/media-studio-workspace.js:622:      ? `${failedLoads} Media Studio data source${failedLoads === 1 ? "" : "s"} could not be loaded. Available data is still shown.`
+public/control-center/pages/media-studio-workspace.js:624:    session.loaded = true;
+public/control-center/pages/media-studio-workspace.js:627:  } catch (error) {
+public/control-center/pages/media-studio-workspace.js:628:    session.error = "Backend media data is unavailable. Media Studio is running in local draft mode.";
+public/control-center/pages/media-studio-workspace.js:630:    session.loaded = true;
+public/control-center/pages/media-studio-workspace.js:633:    session.loading = false;
+public/control-center/pages/media-studio-workspace.js:634:    rerender();
+public/control-center/pages/media-studio-workspace.js:680:  if (!summary.id || summary.id === session.loadedHandoffId) return;
+public/control-center/pages/media-studio-workspace.js:681:  session.loadedHandoffId = summary.id;
+public/control-center/pages/media-studio-workspace.js:738:  const errors = {};
+public/control-center/pages/media-studio-workspace.js:739:  if (!clean(form.project)) errors.project = "Project is required.";
+public/control-center/pages/media-studio-workspace.js:740:  if (!clean(form.campaign)) errors.campaign = "Campaign is required.";
+public/control-center/pages/media-studio-workspace.js:741:  if (!clean(form.product)) errors.product = "Product is required.";
+public/control-center/pages/media-studio-workspace.js:742:  if (!clean(form.channel)) errors.channel = "Channel is required.";
+public/control-center/pages/media-studio-workspace.js:743:  if (!clean(form.format)) errors.format = "Format is required.";
+public/control-center/pages/media-studio-workspace.js:744:  if (!clean(form.objective)) errors.objective = "Objective is required.";
+public/control-center/pages/media-studio-workspace.js:745:  if (!clean(form.brandStyle)) errors.brandStyle = "Brand style is required.";
+public/control-center/pages/media-studio-workspace.js:746:  if (!clean(form.prompt) && intent !== "generate-prompt") errors.prompt = "Prompt or brief is required.";
+public/control-center/pages/media-studio-workspace.js:747:  if (!clean(form.outputPurpose)) errors.outputPurpose = "Output purpose is required.";
+public/control-center/pages/media-studio-workspace.js:748:  session.validation = errors;
+public/control-center/pages/media-studio-workspace.js:749:  return !Object.keys(errors).length;
+public/control-center/pages/media-studio-workspace.js:754:  return message ? `<div class="media-inline-error">${escapeHtml(message)}</div>` : "";
+public/control-center/pages/media-studio-workspace.js:1001:    rerender();
+public/control-center/pages/media-studio-workspace.js:1010:    rerender();
+public/control-center/pages/media-studio-workspace.js:1428:      .media-inline-error {
+public/control-center/pages/media-studio-workspace.js:1578:        <div class="media-overview-item"><span>Failed / blocked jobs</span><strong>${escapeHtml(formatCount(metrics.failed))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1623:function renderField({ id, name, label, value, type = "text", options = [], multiline = false, rows = 4, helper = "", errorKey = name }, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1643:      ${fieldError(session, errorKey, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:1689:        ${renderField({ id: "mediaReviewNotesInput", name: "reviewNotes", label: "Review notes", value: form.reviewNotes, multiline: true, rows: 3, errorKey: "reviewNotes" }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:1737:        <div class="empty-box">Run or route a workflow into Media Studio to load a media brief here.</div>
+public/control-center/pages/media-studio-workspace.js:1743:  const loaded = summary.id && summary.id === session.loadedHandoffId;
+public/control-center/pages/media-studio-workspace.js:1752:        <span class="card-badge ${loaded ? "success" : "neutral"}">${escapeHtml(loaded ? "Loaded" : "Available")}</span>
+public/control-center/pages/media-studio-workspace.js:1778:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2415:    rerender();
+public/control-center/pages/media-studio-workspace.js:2428:      rerender();
+public/control-center/pages/media-studio-workspace.js:2438:    rerender();
+public/control-center/pages/media-studio-workspace.js:2460:        rerender();
+public/control-center/pages/media-studio-workspace.js:2501:      rerender();
+public/control-center/pages/media-studio-workspace.js:2502:    } catch (error) {
+public/control-center/pages/media-studio-workspace.js:2503:      const isAuthError = isAccessKeyFailure(error);
+public/control-center/pages/media-studio-workspace.js:2504:      const authMessage = mediaAccessKeyMessage(error);
+public/control-center/pages/media-studio-workspace.js:2512:            : firstText(error?.payload?.message, error?.message, "Generation failed."),
+public/control-center/pages/media-studio-workspace.js:2513:          error_code: isAuthError
+public/control-center/pages/media-studio-workspace.js:2515:            : firstText(error?.payload?.code, error?.code, "generation_error")
+public/control-center/pages/media-studio-workspace.js:2517:        providerStatus: "generation_error",
+public/control-center/pages/media-studio-workspace.js:2521:          : firstText(error?.payload?.message, error?.message, "Generation failed."),
+public/control-center/pages/media-studio-workspace.js:2530:      const payloadMessage = error?.payload?.message;
+public/control-center/pages/media-studio-workspace.js:2533:        : payloadMessage || error?.message || "Generation failed. Draft kept locally.";
+public/control-center/pages/media-studio-workspace.js:2534:      rerender();
+public/control-center/pages/media-studio-workspace.js:2543:        rerender();
+public/control-center/pages/media-studio-workspace.js:2552:      rerender();
+public/control-center/pages/media-studio-workspace.js:2563:      rerender();
+public/control-center/pages/media-studio-workspace.js:2573:      rerender();
+public/control-center/pages/media-studio-workspace.js:2582:        rerender();
+public/control-center/pages/media-studio-workspace.js:2586:      rerender();
+public/control-center/pages/media-studio-workspace.js:2604:        rerender();
+public/control-center/pages/media-studio-workspace.js:2613:      rerender();
+public/control-center/pages/media-studio-workspace.js:2623:        rerender();
+public/control-center/pages/media-studio-workspace.js:2633:      } catch (error) {
+public/control-center/pages/media-studio-workspace.js:2634:        if (isAccessKeyFailure(error)) {
+public/control-center/pages/media-studio-workspace.js:2635:          const authMessage = mediaAccessKeyMessage(error);
+public/control-center/pages/media-studio-workspace.js:2652:        rerender();
+public/control-center/pages/media-studio-workspace.js:2666:      } catch (error) {
+public/control-center/pages/media-studio-workspace.js:2667:        if (isAccessKeyFailure(error)) {
+public/control-center/pages/media-studio-workspace.js:2668:          const authMessage = mediaAccessKeyMessage(error);
+public/control-center/pages/media-studio-workspace.js:2712:      session.loadedHandoffId = summary.id;
+public/control-center/pages/media-studio-workspace.js:2716:      session.draftMessage = "Workflow media brief loaded into generator.";
+public/control-center/pages/media-studio-workspace.js:2717:      rerender();
+public/control-center/pages/media-studio-workspace.js:2731:        rerender();
+public/control-center/pages/media-studio-workspace.js:2765:      rerender();
+public/control-center/pages/media-studio-workspace.js:2800:      rerender();
+public/control-center/pages/media-studio-workspace.js:2836:      rerender();
+public/control-center/pages/media-studio-workspace.js:2868:      rerender();
+public/control-center/pages/media-studio-workspace.js:2904:      rerender();
+public/control-center/pages/media-studio-workspace.js:2969:      rerender();
+public/control-center/pages/media-studio-workspace.js:2983:        rerender();
+public/control-center/pages/media-studio-workspace.js:3045:      rerender();
+public/control-center/pages/media-studio-workspace.js:3089:      rerender();
+public/control-center/pages/media-studio-workspace.js:3108:    } catch (error) {
+public/control-center/pages/media-studio-workspace.js:3117:  } catch (error) {
+public/control-center/pages/media-studio-workspace.js:3118:    showError?.(error.message || "Failed to open Publishing.");
+public/control-center/pages/media-studio-workspace.js:3158:    if (!session.loaded && !session.loading) {
+public/control-center/pages/media-studio-workspace.js:3176:    root.innerHTML = `
+public/control-center/pages/media-studio-workspace.js:3181:        ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:3182:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/operations-centers.js:308:      label: "Failed Jobs",
+public/control-center/pages/operations-centers.js:407:function renderOpsTable(columns, rows, emptyText, escapeHtml) {
+public/control-center/pages/operations-centers.js:409:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/operations-centers.js:445:  const emptyText = hasFilters
+public/control-center/pages/operations-centers.js:517:            ${session.isLoading ? `<div class="loading-state" aria-live="polite">Refreshing task center data...</div>` : ""}
+public/control-center/pages/operations-centers.js:518:            ${session.errorMessage ? `<div class="error-state" aria-live="assertive">${escapeHtml(session.errorMessage)}</div>` : ""}
+public/control-center/pages/operations-centers.js:545:              emptyText,
+public/control-center/pages/operations-centers.js:576:              ` : `<div class="empty-box">No task is selected.</div>`}
+public/control-center/pages/operations-centers.js:644:    errorMessage: ""
+public/control-center/pages/operations-centers.js:663:  root.innerHTML = renderTaskCenterLayout({
+public/control-center/pages/operations-centers.js:677:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:678:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:679:      rerender();
+public/control-center/pages/operations-centers.js:682:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:688:        .catch((error) => {
+public/control-center/pages/operations-centers.js:689:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:690:          session.errorMessage = `Task Center: ${error?.message || "Failed to refresh."}`;
+public/control-center/pages/operations-centers.js:691:          rerender();
+public/control-center/pages/operations-centers.js:692:          context.showError?.(session.errorMessage);
+public/control-center/pages/operations-centers.js:695:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:713:    } catch (_error) {
+public/control-center/pages/operations-centers.js:714:      context.showError?.("Failed to copy task summary.");
+public/control-center/pages/operations-centers.js:719:    rerender();
+public/control-center/pages/operations-centers.js:723:    rerender();
+public/control-center/pages/operations-centers.js:727:    rerender();
+public/control-center/pages/operations-centers.js:732:      rerender();
+public/control-center/pages/operations-centers.js:756:  const emptyText = hasFilters
+public/control-center/pages/operations-centers.js:766:  const showErrorState = Boolean(session.errorMessage);
+public/control-center/pages/operations-centers.js:772:          <div class="loading-state ops-queue-state" aria-live="polite">
+public/control-center/pages/operations-centers.js:773:            <strong>Queue Center is loading</strong>
+public/control-center/pages/operations-centers.js:774:            <span>Loading the queue surface while preserving the operating shell.</span>
+public/control-center/pages/operations-centers.js:783:          <div class="error-state ops-queue-state" aria-live="assertive">
+public/control-center/pages/operations-centers.js:784:            <strong>Queue Center error</strong>
+public/control-center/pages/operations-centers.js:785:            <span>${escapeHtml(session.errorMessage)}</span>
+public/control-center/pages/operations-centers.js:867:              ${showLoadingState ? `<div class="loading-state ops-queue-state" aria-live="polite"><strong>Queue Center is loading</strong><span>Refreshing queue data while keeping the operating shell stable.</span></div>` : ""}
+public/control-center/pages/operations-centers.js:868:              ${showErrorState ? `<div class="error-state ops-queue-state" aria-live="assertive"><strong>Queue Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+public/control-center/pages/operations-centers.js:874:              stateRow ? "" : emptyText,
+public/control-center/pages/operations-centers.js:903:              ` : `<div class="empty-box">No queue item is selected.</div>`}
+public/control-center/pages/operations-centers.js:972:    errorMessage: ""
+public/control-center/pages/operations-centers.js:981:  if (!session.errorMessage && projectName && context.fetchProjectQueueCenter && !hasQueueSnapshot) {
+public/control-center/pages/operations-centers.js:982:    session.isLoading = true;
+public/control-center/pages/operations-centers.js:997:  root.innerHTML = renderQueueCenterLayout({
+public/control-center/pages/operations-centers.js:1011:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1012:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1013:      rerender();
+public/control-center/pages/operations-centers.js:1016:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1022:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1023:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1024:          session.errorMessage = `Queue Center: ${error?.message || "Failed to refresh."}`;
+public/control-center/pages/operations-centers.js:1025:          rerender();
+public/control-center/pages/operations-centers.js:1026:          context.showError?.(session.errorMessage);
+public/control-center/pages/operations-centers.js:1029:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1037:    rerender();
+public/control-center/pages/operations-centers.js:1041:    rerender();
+public/control-center/pages/operations-centers.js:1045:    rerender();
+public/control-center/pages/operations-centers.js:1050:      rerender();
+public/control-center/pages/operations-centers.js:1073:  const emptyText = hasFilters
+public/control-center/pages/operations-centers.js:1078:  const showErrorState = Boolean(session.errorMessage);
+public/control-center/pages/operations-centers.js:1084:          <div class="loading-state ops-job-state" aria-live="polite">
+public/control-center/pages/operations-centers.js:1085:            <strong>Job Monitor is loading</strong>
+public/control-center/pages/operations-centers.js:1086:            <span>Loading execution state while preserving the operating shell.</span>
+public/control-center/pages/operations-centers.js:1095:          <div class="error-state ops-job-state" aria-live="assertive">
+public/control-center/pages/operations-centers.js:1096:            <strong>Job Monitor error</strong>
+public/control-center/pages/operations-centers.js:1097:            <span>${escapeHtml(session.errorMessage)}</span>
+public/control-center/pages/operations-centers.js:1137:              <span class="std-context-chip is-danger"><span>Failed</span><strong>${escapeHtml(formatCount(jobMonitor.failed_count))}</strong></span>
+public/control-center/pages/operations-centers.js:1167:              { value: "failed", label: "Failed", count: formatCount(jobMonitor.failed_count) },
+public/control-center/pages/operations-centers.js:1179:              ${showLoadingState ? `<div class="loading-state ops-job-state" aria-live="polite"><strong>Job Monitor is loading</strong><span>Refreshing execution state while keeping the operating shell stable.</span></div>` : ""}
+public/control-center/pages/operations-centers.js:1180:              ${showErrorState ? `<div class="error-state ops-job-state" aria-live="assertive"><strong>Job Monitor error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+public/control-center/pages/operations-centers.js:1186:              stateRow ? "" : emptyText,
+public/control-center/pages/operations-centers.js:1215:              ` : `<div class="empty-box">No job is selected.</div>`}
+public/control-center/pages/operations-centers.js:1241:                `).join("") : `<div class="empty-box">Execution logs will appear here as jobs run.</div>`}
+public/control-center/pages/operations-centers.js:1289:    errorMessage: ""
+public/control-center/pages/operations-centers.js:1300:  if (!session.errorMessage && projectName && context.fetchProjectJobMonitor && !hasJobSnapshot) {
+public/control-center/pages/operations-centers.js:1301:    session.isLoading = true;
+public/control-center/pages/operations-centers.js:1315:  root.innerHTML = renderJobMonitorLayout({
+public/control-center/pages/operations-centers.js:1328:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1329:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1330:      rerender();
+public/control-center/pages/operations-centers.js:1333:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1339:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1340:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1341:          session.errorMessage = `Job Monitor: ${error?.message || "Failed to refresh."}`;
+public/control-center/pages/operations-centers.js:1342:          rerender();
+public/control-center/pages/operations-centers.js:1343:          context.showError?.(session.errorMessage);
+public/control-center/pages/operations-centers.js:1346:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1354:    rerender();
+public/control-center/pages/operations-centers.js:1358:    rerender();
+public/control-center/pages/operations-centers.js:1362:    rerender();
+public/control-center/pages/operations-centers.js:1367:      rerender();
+public/control-center/pages/operations-centers.js:1402:    errorMessage: ""
+public/control-center/pages/operations-centers.js:1416:  if (!session.errorMessage && projectName && context.fetchProjectNotificationCenter && !hasNotificationSnapshot) {
+public/control-center/pages/operations-centers.js:1417:    session.isLoading = true;
+public/control-center/pages/operations-centers.js:1471:  const emptyText = hasFilters
+public/control-center/pages/operations-centers.js:1475:  const showErrorState = Boolean(session.errorMessage);
+public/control-center/pages/operations-centers.js:1481:          <div class="loading-state ops-notification-state" aria-live="polite">
+public/control-center/pages/operations-centers.js:1482:            <strong>Notifications are loading</strong>
+public/control-center/pages/operations-centers.js:1483:            <span>Loading notification signals while preserving the operating shell.</span>
+public/control-center/pages/operations-centers.js:1492:          <div class="error-state ops-notification-state" aria-live="assertive">
+public/control-center/pages/operations-centers.js:1493:            <strong>Notification Center error</strong>
+public/control-center/pages/operations-centers.js:1494:            <span>${escapeHtml(session.errorMessage)}</span>
+public/control-center/pages/operations-centers.js:1517:  root.innerHTML = `
+public/control-center/pages/operations-centers.js:1574:              ${showLoadingState ? `<div class="loading-state ops-notification-state" aria-live="polite"><strong>Notifications are loading</strong><span>Refreshing notification signals while keeping the operating shell stable.</span></div>` : ""}
+public/control-center/pages/operations-centers.js:1575:              ${showErrorState ? `<div class="error-state ops-notification-state" aria-live="assertive"><strong>Notification Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+public/control-center/pages/operations-centers.js:1581:              stateRow ? "" : emptyText,
+public/control-center/pages/operations-centers.js:1608:              ` : `<div class="empty-box">No notification is selected.</div>`}
+public/control-center/pages/operations-centers.js:1675:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1676:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1677:      rerender();
+public/control-center/pages/operations-centers.js:1680:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1686:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1687:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1688:          session.errorMessage = `Notification Center: ${error?.message || "Failed to refresh."}`;
+public/control-center/pages/operations-centers.js:1689:          rerender();
+public/control-center/pages/operations-centers.js:1690:          context.showError?.(session.errorMessage);
+public/control-center/pages/operations-centers.js:1693:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1701:    rerender();
+public/control-center/pages/operations-centers.js:1705:    rerender();
+public/control-center/pages/operations-centers.js:1709:    rerender();
+public/control-center/pages/operations-centers.js:1713:    rerender();
+public/control-center/pages/operations-centers.js:1723:      } catch (error) {
+public/control-center/pages/operations-centers.js:1724:        context.showError?.(error.message || "Failed to update notification.");
+public/control-center/pages/operations-centers.js:1757:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1758:          context.showError?.(`Task Center: ${error?.message || "Failed to load live data."}`);
+public/control-center/pages/operations-centers.js:1789:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1790:          context.showError?.(`Queue Center: ${error?.message || "Failed to load live data."}`);
+public/control-center/pages/operations-centers.js:1820:        errorMessage: ""
+public/control-center/pages/operations-centers.js:1822:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1823:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1827:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1833:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1834:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1835:          session.errorMessage = `Job Monitor: ${error?.message || "Failed to load live data."}`;
+public/control-center/pages/operations-centers.js:1837:          context.showError?.(session.errorMessage);
+public/control-center/pages/operations-centers.js:1867:        errorMessage: ""
+public/control-center/pages/operations-centers.js:1869:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1870:      session.errorMessage = "";
+public/control-center/pages/operations-centers.js:1874:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1880:        .catch((error) => {
+public/control-center/pages/operations-centers.js:1881:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1882:          session.errorMessage = `Notification Center: ${error?.message || "Failed to load live data."}`;
+public/control-center/pages/operations-centers.js:1884:          context.showError?.(session.errorMessage);
+public/control-center/pages/publishing.js:192:  if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
+public/control-center/pages/publishing.js:287:      loadedHandoffId: "",
+public/control-center/pages/publishing.js:336:    notes: normalizeNotes(raw.notes, raw.connector_error),
+public/control-center/pages/publishing.js:545:  const errors = {};
+public/control-center/pages/publishing.js:548:  if (!clean(form.project)) errors.project = "Project is required.";
+public/control-center/pages/publishing.js:549:  if (!clean(form.campaign)) errors.campaign = "Campaign is required.";
+public/control-center/pages/publishing.js:550:  if (!clean(form.channel)) errors.channel = "Channel is required.";
+public/control-center/pages/publishing.js:551:  if (!clean(form.contentItem)) errors.contentItem = "Content item is required.";
+public/control-center/pages/publishing.js:553:    errors.publishDate = "Publish date is required for this action.";
+public/control-center/pages/publishing.js:556:    errors.approvalStatus = "Approval must be approved before publishing now.";
+public/control-center/pages/publishing.js:559:  session.validation = errors;
+public/control-center/pages/publishing.js:560:  return !Object.keys(errors).length;
+public/control-center/pages/publishing.js:565:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+public/control-center/pages/publishing.js:766:      .publishing-inline-error {
+public/control-center/pages/publishing.js:880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:917:        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+public/control-center/pages/publishing.js:1014:    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+public/control-center/pages/publishing.js:1152:        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+public/control-center/pages/publishing.js:1158:  const isLoaded = summary.id && summary.id === session.loadedHandoffId;
+public/control-center/pages/publishing.js:1165:          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+public/control-center/pages/publishing.js:1198:        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+public/control-center/pages/publishing.js:1242:        <div class="empty-box">Last publish result and failed publish blockers will appear here after execution data exists.</div>
+public/control-center/pages/publishing.js:1252:          <h3>${escapeHtml(latest ? latest.title : "Failed publish blockers")}</h3>
+public/control-center/pages/publishing.js:1254:        <span class="card-badge ${badgeTone(latest?.status || "failed")}">${escapeHtml(latest ? titleCase(latest.status) : "Failed")}</span>
+public/control-center/pages/publishing.js:1266:            <div class="simple-banner">${escapeHtml(item.title)}: ${escapeHtml(normalizeNotes(item.notes).join("; ") || "Failed publish needs review.")}</div>
+public/control-center/pages/publishing.js:1314:  } catch (error) {
+public/control-center/pages/publishing.js:1315:    showError?.(error.message || "Publishing action failed.");
+public/control-center/pages/publishing.js:1343:  function rerender() {
+public/control-center/pages/publishing.js:1387:      rerender();
+public/control-center/pages/publishing.js:1396:      rerender();
+public/control-center/pages/publishing.js:1406:        rerender();
+public/control-center/pages/publishing.js:1416:      rerender();
+public/control-center/pages/publishing.js:1432:        rerender();
+public/control-center/pages/publishing.js:1436:      rerender();
+public/control-center/pages/publishing.js:1445:        rerender();
+public/control-center/pages/publishing.js:1458:        rerender();
+public/control-center/pages/publishing.js:1480:      rerender();
+public/control-center/pages/publishing.js:1495:        rerender();
+public/control-center/pages/publishing.js:1501:        rerender();
+public/control-center/pages/publishing.js:1507:        rerender();
+public/control-center/pages/publishing.js:1516:        rerender();
+public/control-center/pages/publishing.js:1538:      rerender();
+public/control-center/pages/publishing.js:1548:        rerender();
+public/control-center/pages/publishing.js:1555:        rerender();
+public/control-center/pages/publishing.js:1563:      rerender();
+public/control-center/pages/publishing.js:1573:        rerender();
+public/control-center/pages/publishing.js:1579:        rerender();
+public/control-center/pages/publishing.js:1587:      rerender();
+public/control-center/pages/publishing.js:1604:      session.loadedHandoffId = summary.id;
+public/control-center/pages/publishing.js:1609:      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+public/control-center/pages/publishing.js:1610:      rerender();
+public/control-center/pages/publishing.js:1662:        rerender();
+public/control-center/pages/publishing.js:1670:      rerender();
+public/control-center/pages/publishing.js:1685:      rerender();
+public/control-center/pages/publishing.js:1771:    root.innerHTML = `
+public/control-center/pages/publishing.js:1791:                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark Failed</button>
+public/control-center/pages/research.js:555:    session.intelligence.loadedAt,
+public/control-center/pages/research.js:655:        loadedAt: "",
+public/control-center/pages/research.js:656:        error: "",
+public/control-center/pages/research.js:657:        loadingPromise: null
+public/control-center/pages/research.js:674:  if (session.intelligence.status === "loading" || session.intelligence.loadingPromise) return;
+public/control-center/pages/research.js:675:  if (session.intelligence.status === "loaded" && session.intelligence.loadedAt) return;
+public/control-center/pages/research.js:677:  session.intelligence.status = "loading";
+public/control-center/pages/research.js:679:  session.intelligence.loadingPromise = Promise.allSettled([
+public/control-center/pages/research.js:686:      const errorMessage = [
+public/control-center/pages/research.js:691:      session.intelligence.status = (insights || learning) ? "loaded" : "error";
+public/control-center/pages/research.js:694:      session.intelligence.loadedAt = new Date().toISOString();
+public/control-center/pages/research.js:695:      session.intelligence.error = errorMessage;
+public/control-center/pages/research.js:697:      if (errorMessage && !(insights || learning)) {
+public/control-center/pages/research.js:698:        showError?.(errorMessage);
+public/control-center/pages/research.js:701:    .catch((error) => {
+public/control-center/pages/research.js:702:      session.intelligence.status = "error";
+public/control-center/pages/research.js:703:      session.intelligence.error = error?.message || "Research intelligence failed to load.";
+public/control-center/pages/research.js:704:      showError?.(session.intelligence.error);
+public/control-center/pages/research.js:707:      session.intelligence.loadingPromise = null;
+public/control-center/pages/research.js:767:    <div class="research-empty-state">
+public/control-center/pages/research.js:785:function renderSignalList(items, escapeHtml, emptyText) {
+public/control-center/pages/research.js:787:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/research.js:871:      if (session.intelligence.loadingPromise) {
+public/control-center/pages/research.js:876:      session.intelligence.error = "";
+public/control-center/pages/research.js:934:        }).catch((error) => {
+public/control-center/pages/research.js:935:          console.warn("Failed to persist research AI handoff:", error.message);
+public/control-center/pages/research.js:940:      } catch (error) {
+public/control-center/pages/research.js:941:        showError?.(error?.message || "Failed to hand off the research prompt to AI Command.");
+public/control-center/pages/research.js:982:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:983:        console.warn("Failed to persist research route handoff:", error.message);
+public/control-center/pages/research.js:1209:    root.innerHTML = `
+public/control-center/pages/research.js:1212:          session.intelligence.error
+public/control-center/pages/research.js:1214:                <strong>Research data is partial.</strong> ${escapeHtml(compactText(session.intelligence.error, 28, "Some research feeds did not load, so the page is falling back to project context and any last successful intelligence."))}
+public/control-center/pages/research.js:1239:                value: session.intelligence.status === "loading" ? "Refreshing" : model.hasLiveIntelligence ? "Live + inferred" : "Context-only",
+public/control-center/pages/research.js:1340:                    : `<div class="empty-box">No intelligence coverage data is available yet.</div>`
+public/control-center/pages/research.js:1398:                ${model.longTailIdeas.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 12).map((item) => `<span class="research-chip">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No long-tail ideas saved yet.</div>`}
+public/control-center/pages/research.js:1400:                ${model.contentThemes.length ? `<div class="research-chip-groups"><div class="research-chip-row">${model.contentThemes.slice(0, 10).map((item) => `<span class="research-chip success">${escapeHtml(item)}</span>`).join("")}</div></div>` : `<div class="empty-box">No content themes clustered yet.</div>`}
+public/control-center/pages/research.js:1404:                ${model.missingClusters.length ? `<ul class="simple-list">${model.missingClusters.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No missing cluster list yet.</div>`}
+public/control-center/pages/research.js:1406:                ${model.optimizePages.length ? `<ul class="simple-list">${model.optimizePages.slice(0, 6).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<div class="empty-box">No page optimization list yet.</div>`}
+public/control-center/pages/research.js:1451:                    : `<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>`
+public/control-center/pages/research.js:1477:                    : `<div class="empty-box">Reusable blocks will appear as soon as stronger opportunities, risks, or keyword signals are available.</div>`
+public/control-center/pages/research.js:1557:                    : `<div class="empty-box" style="margin-top:16px;">Save a structured recommendation to keep the best next move accessible for later routing.</div>`
+public/control-center/pages/settings.js:518:        path: "sync.retryFailedBehavior",
+public/control-center/pages/settings.js:1032:      retryFailedBehavior: "Retry twice then alert",
+public/control-center/pages/settings.js:1076:    loaded: false,
+public/control-center/pages/settings.js:1077:    loading: false,
+public/control-center/pages/settings.js:1078:    error: "",
+public/control-center/pages/settings.js:1088:  if (!session.projectName || session.loading) return;
+public/control-center/pages/settings.js:1090:  session.loading = true;
+public/control-center/pages/settings.js:1091:  session.error = "";
+public/control-center/pages/settings.js:1092:  rerender();
+public/control-center/pages/settings.js:1114:    session.loaded = true;
+public/control-center/pages/settings.js:1115:  } catch (error) {
+public/control-center/pages/settings.js:1116:    session.error = error.message || "Failed to load durable settings.";
+public/control-center/pages/settings.js:1118:    session.loading = false;
+public/control-center/pages/settings.js:1119:    rerender();
+public/control-center/pages/settings.js:1511:        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+public/control-center/pages/settings.js:1643:          <strong>${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</strong>
+public/control-center/pages/settings.js:1727:  root.innerHTML = buildPageMarkup(session, context.escapeHtml);
+public/control-center/pages/settings.js:1786:        } catch (error) {
+public/control-center/pages/settings.js:1787:          context.showError(error.message || "Failed to save durable settings.");
+public/control-center/pages/settings.js:1906:      root.innerHTML = `
+public/control-center/pages/settings.js:1909:            <div class="empty-box">
+public/control-center/pages/settings.js:1922:    if (!session.loaded && !session.loading) {
+public/control-center/pages/setup.js:376:function renderIndicatorList(items, escapeHtml, emptyText) {
+public/control-center/pages/setup.js:378:    return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+public/control-center/pages/setup.js:585:      : `<div class="empty-box">No required field gaps detected.</div>`;
+public/control-center/pages/setup.js:908:      } catch (error) {
+public/control-center/pages/setup.js:909:        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
+public/control-center/pages/setup.js:1214:    root.innerHTML = `
+public/control-center/pages/setup.js:1405:                : `<div class="empty-box">All required setup fields are complete.</div>`
+public/control-center/pages/setup.js:1459:                <p>Failed connectors: ${escapeHtml(String(failedCount))}</p>
+public/control-center/pages/setup.js:1521:            templateStatus.dataset.tone = "error";
+public/control-center/pages/setup.js:1537:            templateStatus.textContent = "Template applied. Reloading project...";
+public/control-center/pages/setup.js:1543:        } catch (error) {
+public/control-center/pages/setup.js:1545:            templateStatus.textContent = error?.message || "Failed to apply template.";
+public/control-center/pages/setup.js:1546:            templateStatus.dataset.tone = "error";
+public/control-center/pages/setup.js:1548:          showError?.(error?.message || "Failed to apply template.");
+public/control-center/pages/workflows.js:168:  if (["failed", "error", "errored", "cancelled", "blocked"].includes(normalized)) return "failed";
+public/control-center/pages/workflows.js:325:        error: "",
+public/control-center/pages/workflows.js:326:        loadedAt: "",
+public/control-center/pages/workflows.js:327:        loadingPromise: null
+public/control-center/pages/workflows.js:350:      error: asString(session.intelligence?.error),
+public/control-center/pages/workflows.js:351:      loadedAt: asString(session.intelligence?.loadedAt),
+public/control-center/pages/workflows.js:352:      loadingPromise: session.intelligence?.loadingPromise || null
+public/control-center/pages/workflows.js:621:        <article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>
+public/control-center/pages/workflows.js:687:          : `<div class="wfexec-empty">No safe automation steps are available.</div>`
+public/control-center/pages/workflows.js:857:        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+public/control-center/pages/workflows.js:956:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:957:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:972:    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+public/control-center/pages/workflows.js:980:    current.loadedAt &&
+public/control-center/pages/workflows.js:981:    (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+public/control-center/pages/workflows.js:984:  if (current.loadingPromise) return current.loadingPromise;
+public/control-center/pages/workflows.js:992:    status: "loading",
+public/control-center/pages/workflows.js:993:    error: "",
+public/control-center/pages/workflows.js:994:    loadingPromise: (async () => {
+public/control-center/pages/workflows.js:1008:          error: insightsResult.status === "rejected" && learningResult.status === "rejected"
+public/control-center/pages/workflows.js:1009:            ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")
+public/control-center/pages/workflows.js:1011:          loadedAt: nowIso(),
+public/control-center/pages/workflows.js:1012:          loadingPromise: null
+public/control-center/pages/workflows.js:1014:      } catch (error) {
+public/control-center/pages/workflows.js:1018:          status: "error",
+public/control-center/pages/workflows.js:1019:          error: error.message || "Failed to load workflow intelligence",
+public/control-center/pages/workflows.js:1020:          loadingPromise: null
+public/control-center/pages/workflows.js:1023:        rerender();
+public/control-center/pages/workflows.js:1028:  rerender();
+public/control-center/pages/workflows.js:1029:  return session.intelligence.loadingPromise;
+public/control-center/pages/workflows.js:1092:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1093:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1188:    } catch (error) {
+public/control-center/pages/workflows.js:1190:      showError?.(error.message || "Workflow execution failed.");
+public/control-center/pages/workflows.js:1307:        showMessage?.("No AI state found. Local workflow seed created safely.");
+public/control-center/pages/workflows.js:1320:      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);
+public/control-center/pages/workflows.js:1321:      showMessage?.("AI Command state loaded into workflow inputs.");
+public/control-center/pages/workflows.js:1405:    } catch (error) {
+public/control-center/pages/workflows.js:1409:        summary: error.message || "Workflow execution failed.",
+public/control-center/pages/workflows.js:1414:      showError?.(error.message || "Workflow execution failed.");
+public/control-center/pages/workflows.js:1541:      } catch (error) {
+public/control-center/pages/workflows.js:1542:        showError?.(error.message || "Failed to save workflow task.");
+public/control-center/pages/workflows.js:1781:    root.innerHTML = `
+public/control-center/pages/home/render-sections.js:28:export function renderCompactList(items, escapeHtml, emptyText = "Nothing to show yet.") {
+public/control-center/pages/home/render-sections.js:32:    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
+public/control-center/pages/home/render-sections.js:62:    return `<p class="home-empty-note">No recent activity recorded yet.</p>`;
+public/control-center/pages/home/render-sections.js:87:    return `<p class="home-empty-note">AI team status is not available yet.</p>`;
+public/control-center/pages/integrations/builders.js:365:  if (/(failed|error|disconnect|blocked|expired)/.test(text)) return "danger";
+public/control-center/pages/integrations/builders.js:443:          detail: String(card.record?.last_error || card.healthSummary || ""),
+public/control-center/pages/integrations/cards.js:77:        ${renderIntegrationMetric("Errors", item.error_count, item.error_count ? "danger" : "success")}
+public/control-center/pages/integrations/cards.js:99:      <section class="integration-empty-state">
+public/control-center/pages/integrations/cards.js:100:        <strong>No integrations found</strong>
+public/control-center/pages/integrations/diagnostics.js:29:    error_count: asNumber(item.error_count, 0),
+public/control-center/pages/integrations/diagnostics.js:67:      "error"
+public/control-center/pages/integrations/diagnostics.js:157:    .filter((item) => item.error_count > 0);
+public/control-center/pages/integrations/drawer.js:43:      ${options.invalid ? `<div class="integration-field-error">${esc(options.invalidMessage || "Complete this field before continuing.")}</div>` : ""}
+public/control-center/pages/integrations/layout.js:130:            Partial setup, token issues, or server-reported errors need review.
+public/control-center/pages/integrations/layout.js:144:              : `<div class="empty-box">No connected integrations in this group yet.</div>`
+public/control-center/pages/integrations/layout.js:158:              : `<div class="empty-box">No integrations need attention in this group right now.</div>`
+public/control-center/pages/integrations/layout.js:172:              : `<div class="empty-box">All integrations in this group already have a connection state.</div>`
+public/control-center/pages/integrations/render.js:120:      <div class="empty-box">
+public/control-center/pages/integrations/render.js:143:      <div class="empty-box">
+public/control-center/pages/integrations/render.js:166:      <div class="empty-box">
+public/control-center/pages/integrations/render.js:188:export function renderIntegrationDiagnosticsList(items = [], emptyText = "No diagnostics available.") {
+public/control-center/pages/integrations/render.js:192:    return `<div class="empty-box">${esc(emptyText)}</div>`;
+public/control-center/pages/integrations/utils.js:81:    case "error":
+public/control-center/pages/library/listener-lifecycle.js:24:      } catch (error) {
+public/control-center/pages/library/listener-lifecycle.js:25:        console.warn("[Library] listener dispose failed", error);

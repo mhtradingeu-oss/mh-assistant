@@ -1,0 +1,97 @@
+===== 05 ROUTE RENDER FLOW =====
+  const cleanup = activeRouteCleanup;
+  activeRouteCleanup = null;
+  activeRouteCleanupRoute = "";
+
+  try {
+    cleanup();
+  } catch (error) {
+    console.warn("[Route] cleanup failed", error);
+  }
+}
+
+function renderCurrentPage() {
+  const { currentRoute } = getState();
+  disposeActiveRouteCleanup(currentRoute);
+  ensureRouteDom(currentRoute);
+  const routeDef = getRouteDefinition(currentRoute);
+
+  if (typeof routeDef.render === "function") {
+    const renderResult = routeDef.render({
+      getState,
+      $,
+      escapeHtml,
+      safeText,
+      setText,
+      renderSimpleList,
+      navigateTo,
+      showMessage,
+      showError,
+      clearFeedback,
+      reloadProjectData: loadProjectData,
+      fetchProjectInsights,
+      fetchProjectLearning,
+      fetchProjectOperations,
+      saveProjectSetup,
+      executeProjectAiCommand,
+      saveProjectConnectorSource,
+      removeProjectConnectorSource,
+      fetchProjectIntegrationControlCenter,
+      connectProjectIntegration,
+      reconnectProjectIntegration,
+      testProjectIntegration,
+      syncProjectIntegration,
+      importProjectIntegrationHistory,
+      disconnectProjectIntegration,
+      runProjectWorkflow,
+      runProjectAiWorkflow,
+      createProjectTask,
+      createProjectApproval,
+      saveProjectCampaign,
+      createProjectHandoff,
+      consumeProjectHandoff,
+      markProjectNotification,
+      savePublishingSchedule,
+      reschedulePublishingItem,
+      approvePublishingItem,
+      publishPublishingItem,
+      failPublishingItem,
+      fetchProjectTaskCenter,
+      fetchProjectQueueCenter,
+      fetchProjectJobMonitor,
+      fetchProjectNotificationCenter
+    });
+
+    if (typeof renderResult === "function") {
+      activeRouteCleanup = renderResult;
+      activeRouteCleanupRoute = currentRoute;
+    }
+
+    if (!routeDef.disableStandardLayout) {
+      applyStandardPageLayout({
+        route: currentRoute,
+        state: getState(),
+        navigateTo,
+        showMessage,
+        reloadProjectData: loadProjectData
+      });
+    }
+    return;
+  }
+
+
+
+  applyStandardPageLayout({
+    route: currentRoute,
+    state: getState(),
+    navigateTo,
+    showMessage,
+    reloadProjectData: loadProjectData
+  });
+}
+
+function renderGlobalUi() {
+  renderProjectSwitcher();
+  renderTopContext();
+}
+
