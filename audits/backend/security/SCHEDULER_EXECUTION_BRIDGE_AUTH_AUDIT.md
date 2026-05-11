@@ -187,3 +187,19 @@ When ready, update `scripts/verify-scheduler-automation.js`:
      ```
 
 **No new env vars. No new key type. Existing `MH_CONTROL_CENTER_WRITE_KEY` covers all routes.**
+
+---
+
+## 9. Script Fix 8A Applied
+
+Date: 2026-05-11
+
+`scripts/verify-scheduler-automation.js` updated:
+
+- `CONTROL_KEY` constant added — resolves from `MH_CONTROL_CENTER_WRITE_KEY || CONTROL_CENTER_WRITE_KEY || MH_CONTROL_KEY`.
+- Startup output: `Control key: [set]` when key is present; warning to stderr when absent explaining that keyed backends will reject with 401.
+- `req()` helper updated: attaches `x-mh-control-key` and `Authorization: Bearer <key>` when `CONTROL_KEY` is non-empty. Falls through without headers when key is absent (backward-compatible for bypass environments).
+- `ALLOW_MUTATING_TESTS=1` guard behavior unchanged.
+- Key is never printed.
+
+**Backend scheduler route enforcement remains deferred — Fix 8B adds backend patterns after this script update.**

@@ -369,6 +369,14 @@ Needs review:
 - Scheduler routes (`/schedule_execution_job`, `/scheduler_queue`, `/run_scheduler_worker_once`) deferred: `scripts/verify-scheduler-automation.js` is an active caller with no key support. Fix 8A (script update) must precede Fix 8B (backend patterns).
 - `audits/backend/security/SCHEDULER_EXECUTION_BRIDGE_AUTH_AUDIT.md` records the full audit.
 
+## Fix 8A Applied (Scheduler Verifier Key Header Preparation)
+
+- `scripts/verify-scheduler-automation.js` updated to resolve control key from environment (`MH_CONTROL_CENTER_WRITE_KEY || CONTROL_CENTER_WRITE_KEY || MH_CONTROL_KEY`).
+- `req()` helper attaches `x-mh-control-key` and `Authorization: Bearer` when key is present; continues without headers when absent (backward-compatible for bypass environments).
+- Startup prints `Control key: [set]` or warns to stderr when absent. Key value is never printed.
+- No backend middleware added in this pass. Scheduler routes remain unprotected pending Fix 8B.
+- Next step: Fix 8B — add `/^\/schedule_execution_job\/?$/i` and `/^\/run_scheduler_worker_once\/?$/i` to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` and `/^\/scheduler_queue\/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS`.
+
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, and Fix 8 were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, Fix 8, and Fix 8A were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.

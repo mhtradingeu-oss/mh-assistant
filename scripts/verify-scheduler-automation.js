@@ -27,14 +27,39 @@ const HOST = String(process.env.MH_HOST || 'http://127.0.0.1:3000').replace(/\/$
 const TEST_PROJECT = 'hairoticmen';
 const DATA_BASE = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..'), 'data');
 
+// Control key for keyed backends. Resolved from environment — never printed.
+// Supported env vars (checked in order): MH_CONTROL_CENTER_WRITE_KEY, CONTROL_CENTER_WRITE_KEY, MH_CONTROL_KEY.
+const CONTROL_KEY = (
+  String(process.env.MH_CONTROL_CENTER_WRITE_KEY || '').trim() ||
+  String(process.env.CONTROL_CENTER_WRITE_KEY || '').trim() ||
+  String(process.env.MH_CONTROL_KEY || '').trim()
+);
+
+if (!CONTROL_KEY) {
+  process.stderr.write(
+    'Warning: No control key found in environment (MH_CONTROL_CENTER_WRITE_KEY / CONTROL_CENTER_WRITE_KEY / MH_CONTROL_KEY).\n' +
+    '         Keyed backends will reject scheduler verification with 401.\n' +
+    '         Set MH_CONTROL_CENTER_WRITE_KEY=<key> to authenticate.\n'
+  );
+} else {
+  process.stdout.write('Control key: [set]\n');
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 async function req(method, url, body) {
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (CONTROL_KEY) {
+    headers['x-mh-control-key'] = CONTROL_KEY;
+    headers['Authorization'] = `Bearer ${CONTROL_KEY}`;
+  }
+
   const options = {
     method,
-    headers: { 'Content-Type': 'application/json' }
+    headers
   };
   if (body !== undefined) {
     options.body = JSON.stringify(body);
