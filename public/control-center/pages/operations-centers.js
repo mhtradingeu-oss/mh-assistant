@@ -184,6 +184,16 @@ function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel
         label: "Summarize execution risk",
         preview: "Highlight where task load or due-state suggests operational risk.",
         prompt: `Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.`
+      },
+      {
+        label: "Explain owner workload",
+        preview: "Explain workload concentration by owner and likely bottlenecks.",
+        prompt: `Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.`
+      },
+      {
+        label: "Identify overdue risk",
+        preview: "Identify highest-risk overdue items and likely downstream impact.",
+        prompt: `Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.`
       }
     ];
   }
@@ -562,6 +572,204 @@ function renderQueueGroup(title, items, escapeHtml) {
   `;
 }
 
+function renderTaskCenterLayout({
+  context,
+  projectName,
+  taskCenter,
+  session,
+  items,
+  selectedItem,
+  filters,
+  prompts
+}) {
+  const escapeHtml = context.escapeHtml;
+  const projectLabel = projectName || "No project selected";
+  const hasFilters = Boolean(
+    asString(session.search).trim() ||
+    session.focus !== "all" ||
+    session.priority !== "all" ||
+    session.owner !== "all" ||
+    session.source !== "all"
+  );
+  const emptyText = hasFilters
+    ? "No tasks match the current filters."
+    : "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";
+
+  const selectedSummary = selectedItem
+    ? [
+      selectedItem.title || "Task",
+      selectedItem.description || "No description.",
+      `Assignee: ${selectedItem.assignee || selectedItem.owner || "-"}`,
+      `Due: ${formatDateTime(selectedItem.due_at)}`,
+      `Priority: ${titleCase(selectedItem.priority || "normal")}`,
+      `Status: ${titleCase(selectedItem.status || "open")}`
+    ].join("\n")
+    : "No task is selected.";
+
+  return `
+    <section class="page is-active" data-page="task-center">
+      <div class="ops-shell ops-workspace">
+        <section class="std-context-ribbon">
+          <div class="std-context-main">
+            <div class="std-context-line">
+              <span class="std-context-eyebrow">TASK CENTER</span>
+              <h3 class="std-context-title">Task Center</h3>
+            </div>
+            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+            <div class="std-context-metrics" aria-label="Task Center metrics">
+              <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
+              <span class="std-context-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
+              <span class="std-context-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+              <span class="std-context-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>
+              <span class="std-context-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>
+            </div>
+          </div>
+          <div class="std-context-actions">
+            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+            <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
+          </div>
+        </section>
+
+        ${renderExecutiveRuntimeStrip(context)}
+
+        <div class="ops-layout-grid">
+          <article class="panel ops-main-column">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">Main View</div>
+                <h3>Execution backlog</h3>
+                <p>Filter by focus, owner, source, and priority to inspect task risk quickly.</p>
+              </div>
+              <span class="card-badge neutral">${escapeHtml(String(items.length))} visible</span>
+            </div>
+
+            ${renderOpsFocusTabs([
+              { value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },
+              { value: "open", label: "Open", count: formatCount(taskCenter.open_count) },
+              { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
+              { value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },
+              { value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }
+            ], session.focus, escapeHtml)}
+
+            <div class="ops-toolbar">
+              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+              <select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>
+              <select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>
+              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+            </div>
+
+            ${session.isLoading ? `<div class="loading-state" aria-live="polite">Refreshing task center data...</div>` : ""}
+            ${session.errorMessage ? `<div class="error-state" aria-live="assertive">${escapeHtml(session.errorMessage)}</div>` : ""}
+
+            ${renderOpsTable(
+              ["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],
+              items.map((item) => `
+                <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+                  <td>
+                    <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+                      <strong>${escapeHtml(item.title || "Task")}</strong>
+                      <span>${escapeHtml(item.description || item.service_domain || "-")}</span>
+                    </button>
+                  </td>
+                  <td>
+                    <strong>${escapeHtml(item.assignee || item.owner || "-")}</strong>
+                    <span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+                  </td>
+                  <td>
+                    <strong>${escapeHtml(formatDateTime(item.due_at))}</strong>
+                    <span class="card-badge ${badgeTone(item.due_state)}">${escapeHtml(titleCase(item.due_state || "unscheduled"))}</span>
+                  </td>
+                  <td><span class="card-badge ${badgeTone(item.priority)}">${escapeHtml(titleCase(item.priority || "normal"))}</span></td>
+                  <td>${escapeHtml(titleCase(item.source_page || "-"))}</td>
+                  <td>${escapeHtml(item.linked_entity?.label || item.linked_entity?.entity_type || "-")}</td>
+                  <td><span class="card-badge ${badgeTone(item.status)}">${escapeHtml(titleCase(item.status || "open"))}</span></td>
+                  <td>${renderRouteAction(item, escapeHtml)}</td>
+                </tr>
+              `),
+              emptyText,
+              escapeHtml
+            )}
+          </article>
+
+          <aside class="ops-right-rail">
+            <section class="panel ops-detail-card">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Selected Task</div>
+                  <h3>${escapeHtml(selectedItem?.title || "Select a task")}</h3>
+                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and execution context." : "Choose a task in the table to inspect details.")}</p>
+                </div>
+              </div>
+              ${selectedItem ? `
+                <div class="ops-detail-stack">
+                  <div class="ops-detail-summary">
+                    <strong>${escapeHtml(selectedItem.title || "Task")}</strong>
+                    <p>${escapeHtml(selectedItem.description || "No task description available.")}</p>
+                  </div>
+                  ${renderOpsDetailRows([
+                    { label: "Assignee", value: selectedItem.assignee || selectedItem.owner || "-" },
+                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+                    { label: "Due", value: formatDateTime(selectedItem.due_at) },
+                    { label: "Due state", value: titleCase(selectedItem.due_state || "unscheduled") },
+                    { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
+                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+                    { label: "Domain", value: titleCase(selectedItem.service_domain || "-") },
+                    { label: "Linked entity", value: selectedItem.linked_entity?.label || selectedItem.linked_entity?.entity_type || "-" }
+                  ], escapeHtml)}
+                </div>
+              ` : `<div class="empty-box">No task is selected.</div>`}
+            </section>
+
+            <section class="panel ops-action-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Action Panel</div>
+                  <h3>Task actions</h3>
+                  <p>Active actions are safe and non-destructive. Mutation actions remain deferred.</p>
+                </div>
+              </div>
+              <div class="ops-action-row">
+                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Linked Work") : ""}
+                <button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>
+              </div>
+              <div class="ops-deferred-list">
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (deferred: mutation safety pass)</button>
+              </div>
+            </section>
+
+            <section class="panel ops-ai-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">AI Panel</div>
+                  <h3>Operations AI Assistant</h3>
+                  <p>Prompt-only guidance. Navigation opens AI Command for explicit execution.</p>
+                </div>
+              </div>
+              <div class="ops-action-row">
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+              </div>
+              <div class="quick-actions">
+                ${prompts.map((item, index) => `
+                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+                    <span class="ops-prompt-title">${escapeHtml(item.label)}</span>
+                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </section>
+    <textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>
+  `;
+}
+
 function renderTaskCenter(context, state, projectName) {
   const root = context.$("pageRoot");
   if (!root) return;
@@ -575,7 +783,9 @@ function renderTaskCenter(context, state, projectName) {
     owner: "all",
     source: "all",
     search: "",
-    selectedKey: ""
+    selectedKey: "",
+    isLoading: false,
+    errorMessage: ""
   });
 
   let items = asArray(taskCenter.items).map((item, index) => ({
@@ -594,119 +804,58 @@ function renderTaskCenter(context, state, projectName) {
   session.selectedKey = selectedItem?._opsKey || "";
   const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
 
-  root.innerHTML = renderOperationsScaffold({
+  root.innerHTML = renderTaskCenterLayout({
     context,
-    pageKey: "task-center",
-    title: "Task Center",
-    overviewBadge: `${formatCount(taskCenter.total)} durable tasks`,
-    overviewCopy: "Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up.",
-    metrics: [
-      { label: "Total Tasks", value: formatCount(taskCenter.total), helper: "Durable operating backlog" },
-      { label: "Open", value: formatCount(taskCenter.open_count), helper: "Requires execution" },
-      { label: "Blocked", value: formatCount(taskCenter.blocked_count), helper: "Needs intervention" },
-      { label: "Overdue", value: formatCount(taskCenter.overdue_count), helper: "Past due date" }
-    ],
-    focusTabs: [
-      { value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },
-      { value: "open", label: "Open", count: formatCount(taskCenter.open_count) },
-      { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
-      { value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },
-      { value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }
-    ],
-    activeFocus: session.focus,
-    focusCopy: "Switch between the most urgent task states without changing route context.",
-    toolbar: `
-      <div class="ops-toolbar">
-        <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${context.escapeHtml(session.search)}">
-        <select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, context.escapeHtml, "All priorities")}</select>
-        <select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, context.escapeHtml, "All owners")}</select>
-        <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, context.escapeHtml, "All sources")}</select>
-      </div>
-    `,
-    listTitle: "Execution backlog",
-    listCopy: "Use the list to browse current task load, then inspect one selected task in detail.",
-    listBadge: `${items.length} filtered`,
-    listContent: renderOpsTable(
-      ["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],
-      items.map((item) => `
-        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
-          <td>
-            <button class="ops-select-link" type="button" data-ops-select="${context.escapeHtml(item._opsKey)}">
-              <strong>${context.escapeHtml(item.title || "Task")}</strong>
-              <span>${context.escapeHtml(item.description || item.service_domain || "-")}</span>
-            </button>
-          </td>
-          <td>
-            <strong>${context.escapeHtml(item.assignee || item.owner || "-")}</strong>
-            <span>${context.escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
-          </td>
-          <td>
-            <strong>${context.escapeHtml(formatDateTime(item.due_at))}</strong>
-            <span class="card-badge ${badgeTone(item.due_state)}">${context.escapeHtml(titleCase(item.due_state || "unscheduled"))}</span>
-          </td>
-          <td><span class="card-badge ${badgeTone(item.priority)}">${context.escapeHtml(titleCase(item.priority || "normal"))}</span></td>
-          <td>${context.escapeHtml(titleCase(item.source_page || "-"))}</td>
-          <td>${context.escapeHtml(item.linked_entity?.label || item.linked_entity?.entity_type || "-")}</td>
-          <td><span class="card-badge ${badgeTone(item.status)}">${context.escapeHtml(titleCase(item.status || "open"))}</span></td>
-          <td>${renderRouteAction(item, context.escapeHtml)}</td>
-        </tr>
-      `),
-      "No tasks match the current filters.",
-      context.escapeHtml
-    ),
-    detailsTitle: selectedItem?.title || "Select a task",
-    detailsCopy: selectedItem ? "Review owner, due-state, linked work, and current execution context." : "Choose a task from the list to inspect its details.",
-    detailsContent: selectedItem ? `
-      <div class="ops-detail-stack">
-        <div class="ops-detail-summary">
-          <strong>${context.escapeHtml(selectedItem.title || "Task")}</strong>
-          <p>${context.escapeHtml(selectedItem.description || "No task description available.")}</p>
-        </div>
-        ${renderOpsDetailRows([
-          { label: "Assignee", value: selectedItem.assignee || selectedItem.owner || "-" },
-          { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
-          { label: "Due", value: formatDateTime(selectedItem.due_at) },
-          { label: "Due state", value: titleCase(selectedItem.due_state || "unscheduled") },
-          { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
-          { label: "Source", value: titleCase(selectedItem.source_page || "-") },
-          { label: "Domain", value: titleCase(selectedItem.service_domain || "-") },
-          { label: "Linked entity", value: selectedItem.linked_entity?.label || selectedItem.linked_entity?.entity_type || "-" }
-        ], context.escapeHtml)}
-      </div>
-    ` : `<div class="empty-box">${context.escapeHtml("No task is selected.")}</div>`,
-    actionsTitle: "Task resolution",
-    actionsCopy: "Only use actions that already exist here: refresh the route or open the linked page for the selected task.",
-    actionsContent: `
-      <div class="ops-action-row">
-        <button class="btn btn-primary" type="button" id="taskCenterRefreshBtn">Refresh</button>
-        ${selectedItem ? renderRouteAction(selectedItem, context.escapeHtml, "Open Linked Work") : ""}
-      </div>
-      <div class="ops-mini-list">
-        ${asArray(filters.owners).length ? asArray(filters.owners).slice(0, 6).map((owner) => `
-          <div class="ops-mini-item">
-            <strong>${context.escapeHtml(titleCase(owner.value || "unassigned"))}</strong>
-            <span>${context.escapeHtml(`${owner.count} tasks`)}</span>
-          </div>
-        `).join("") : `<div class="empty-box">${context.escapeHtml("No owners have been assigned yet.")}</div>`}
-      </div>
-    `,
-    assistantCopy: "Use AI to prioritize task load, assess execution risk, or reason through the selected task before leaving the route.",
-    assistantPrompts: prompts
+    projectName,
+    taskCenter,
+    session,
+    items,
+    selectedItem,
+    filters,
+    prompts
   });
 
   const rerender = () => renderTaskCenter(context, context.getState(), projectName);
-  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", () => {
+  const refreshTaskCenter = () => {
     if (context.fetchProjectTaskCenter && projectName) {
+      session.isLoading = true;
+      session.errorMessage = "";
+      rerender();
       context.fetchProjectTaskCenter(projectName)
         .then((liveData) => {
+          session.isLoading = false;
           if (!liveData) return;
           const ops = asObject(context.getState().data.operations);
           ops.task_center = liveData;
           renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
         })
-        .catch((error) => context.showError?.(`Task Center: ${error?.message || "Failed to refresh."}`));
+        .catch((error) => {
+          session.isLoading = false;
+          session.errorMessage = `Task Center: ${error?.message || "Failed to refresh."}`;
+          rerender();
+          context.showError?.(session.errorMessage);
+        });
     } else {
+      session.errorMessage = "";
       context.reloadProjectData?.(projectName);
+    }
+  };
+  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);
+  root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);
+  root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {
+    const buffer = root.querySelector("#taskCenterSummaryBuffer");
+    const text = buffer?.value || "No task is selected.";
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        buffer?.focus();
+        buffer?.select();
+        document.execCommand("copy");
+      }
+      context.showMessage?.("Task summary copied.");
+    } catch (_error) {
+      context.showError?.("Failed to copy task summary.");
     }
   });
   bindOpsFocusButtons(root, (focus) => {
