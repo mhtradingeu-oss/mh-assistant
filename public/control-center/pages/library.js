@@ -2732,6 +2732,7 @@ viewToggleButtons.forEach((button) => {
 
 export const libraryRoute = {
   id: "library",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Start",
     title: "Library",
