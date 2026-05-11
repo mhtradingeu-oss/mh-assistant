@@ -1,4 +1,6 @@
-import { normalizeLibraryAsset, normalizeLibraryAssets } from "./library/projection-adapter.js";
+import { renderLibraryActionPanel } from "./library/action-panel.js";
+import { renderLibraryAiPanel } from "./library/ai-panel.js";
+import { normalizeLibraryAsset } from "./library/projection-adapter.js";
 import { normalizeLibrarySession } from "./library/session-store.js";
 import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
 import {
@@ -1489,6 +1491,16 @@ function bindLibraryWorkspace({
     assets: allAssets,
     requiredGroups
   });
+  const missingRequiredGroupCount = requiredGroups.filter((item) => item.status === "missing").length;
+  const readinessSummary = {
+    totalAssets: allAssets.length,
+    requiredCount: requiredGroups.length,
+    missingCount: missingRequiredGroupCount,
+    needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,
+    readinessScore: requiredGroups.length
+      ? Math.round(((requiredGroups.length - missingRequiredGroupCount) / requiredGroups.length) * 100)
+      : 100
+  };
 
   const recentActivity = [...allAssets]
     .filter((asset) => asset.uploaded_at)
@@ -1836,6 +1848,23 @@ function bindLibraryWorkspace({
         </div>
       `
       : `<div class="empty-box">Select an asset to view details.</div>`;
+  }
+
+  const actionPanelMount = $("libraryActionPanelMount");
+  if (actionPanelMount) {
+    actionPanelMount.innerHTML = renderLibraryActionPanel({
+      selectedAsset,
+      disabled: true
+    });
+  }
+
+  const aiPanelMount = $("libraryAiPanelMount");
+  if (aiPanelMount) {
+    aiPanelMount.innerHTML = renderLibraryAiPanel({
+      readiness: readinessSummary,
+      selectedAsset,
+      disabled: true
+    });
   }
 
   const activityBox = $("libraryRecentActivity");
@@ -2862,6 +2891,8 @@ export const libraryRoute = {
                 <div id="libraryPreviewVisual"></div>
                 <div id="libraryPreviewMeta" style="margin-top: 12px;"></div>
               </section>
+              <div id="libraryActionPanelMount" style="margin-top: 12px;"></div>
+              <div id="libraryAiPanelMount" style="margin-top: 12px;"></div>
             </aside>
           </div>
         </section>
