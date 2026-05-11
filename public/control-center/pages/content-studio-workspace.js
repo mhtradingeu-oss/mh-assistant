@@ -2246,6 +2246,7 @@ function bindPage({
 
 export const contentStudioRoute = {
   id: "content-studio",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operations",
     title: "Content Studio",
