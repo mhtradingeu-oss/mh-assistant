@@ -1148,6 +1148,7 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
 
 export const setupRoute = {
   id: "setup",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Start",
     title: "Smart Guided Setup",
