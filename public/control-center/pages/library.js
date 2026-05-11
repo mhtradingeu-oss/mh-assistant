@@ -2147,6 +2147,13 @@ viewToggleButtons.forEach((button) => {
   openButtons.forEach((button) => {
     button.onclick = async () => {
       const id = button.getAttribute("data-library-open") || "";
+      dispatchLibraryCommand("open-preview", { assetId: id }, {
+        "open-preview": ({ assetId }) => ({
+          shadow: true,
+          assetId
+        })
+      });
+
       const asset = allAssets.find((item) => item.id === id);
       if (!asset) {
         showError?.("Asset not found.");

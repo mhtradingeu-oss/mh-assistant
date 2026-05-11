@@ -142,3 +142,9 @@ Confirmed in this audit pass:
 - Dead toolbar delete handler for `libraryToolbarDeleteBtn` removed from `library.js` after confirming no rendered `id="libraryToolbarDeleteBtn"` exists.
 - Active Inspector delete behavior preserved via `[data-library-delete]` render and handler paths.
 - No behavior change from this removal, because no rendered toolbar delete button existed.
+
+## Step 3C applied
+
+- Open-preview now emits a command-router shadow/parity envelope from the `[data-library-open]` handler.
+- Open behavior remains unchanged: asset resolution and `openLibraryAsset(projectName, asset)` execution path are preserved.
+- No mutation commands were wired in this step.
