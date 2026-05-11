@@ -394,3 +394,9 @@ Needs review:
 ## No-Weakening Confirmation
 
 Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, Fix 8, Fix 8A, Fix 8B, and Fix 9 Prep were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+
+## Security Closeout Status
+
+- Final closeout artifact: `audits/backend/security/BACKEND_SECURITY_CLOSEOUT.md`.
+- Direct security gaps from this audit track are closed or moved to migration/deprecation planning (Fix 9 Prep).
+- No unresolved immediate security patch remains in this backend security track.
