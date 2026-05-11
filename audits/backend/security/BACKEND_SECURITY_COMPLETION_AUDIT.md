@@ -247,6 +247,13 @@ Needs review:
 - Authentication for `/api/media/*` remains intentionally deferred to a separate compatibility-aware phase.
 - No route response shapes were changed in this fix.
 
+## Fix 2B Applied (Backend Security)
+
+- `/api/media/*` now requires the existing protected write key via centralized `isProtectedControlWriteRequest` middleware matching.
+- `/api/media/*` remains covered by the in-memory provider/AI route rate limiter.
+- Frontend compatibility for missing/invalid key UX was prepared in Security Fix 2A before this backend enforcement change.
+- No route response shapes were changed beyond existing protected-write middleware responses.
+
 ## Publishing And Product Guardrails
 
 Confirmed:
@@ -298,7 +305,7 @@ Needs review:
 
 | Area | Gap | Risk | Status |
 | --- | --- | --- | --- |
-| `/api/media/*` | Not protected by backend write-key middleware and not rate-limited. | high | needs_review |
+| `/api/media/*` | Write-key protected via centralized middleware and rate-limited (Fix 1 + Fix 2B). | closed | resolved |
 | Scheduler and execution bridge | Project context required, but no read/write key middleware match. | high | needs_review |
 | Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` rely on project context, not key middleware. | medium | needs_review |
 | Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are frontend-used but not matched by read-key middleware. | medium | needs_review |
@@ -309,4 +316,4 @@ Needs review:
 
 ## No-Weakening Confirmation
 
-No code fixes were applied in this phase because the identified high-risk gaps require behavior changes that are not unquestionably compatibility-safe. This audit does not weaken security middleware, timing-safe comparisons, route protection, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1 and Fix 2B were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.

@@ -107,3 +107,9 @@ Until those are complete:
 - Generation calls keep drafts safe and now emit auth-specific user messaging instead of a generic generation failure path for key failures.
 - Backend write-key enforcement for `/api/media/*` remains deferred in this phase.
 - Next step: manual UI validation, then backend write-key enforcement in the centralized write middleware.
+
+## Backend Fix 2B Applied
+
+- Backend write-key enforcement is now enabled for `/api/media/*` through the existing centralized `isProtectedControlWriteRequest` middleware predicate.
+- This enforcement was applied after frontend auth UX preparation in Security Fix 2A.
+- `/api/media/*` rate limiting remains in place from Security Fix 1.

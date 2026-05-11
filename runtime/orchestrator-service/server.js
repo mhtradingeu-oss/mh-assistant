@@ -196,6 +196,7 @@ function isProtectedControlWriteRequest(req) {
 
   const requestPath = String(req.path || '').trim();
   return /^\/(?:public\/)?media-manager\//.test(requestPath)
+    || /^\/api\/media\//i.test(requestPath)
     || LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS.some((pattern) => pattern.test(requestPath));
 }
 
