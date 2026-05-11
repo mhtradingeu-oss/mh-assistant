@@ -23,6 +23,8 @@ Task Center is a read-only operational dashboard for browsing, filtering, and in
 
 **Recommended next:** Step 2 — write UX Contract before any layout patch.
 
+Update: Step 2 UX Contract created: `audits/frontend/operations-centers/TASK_CENTER_STEP_2_UX_CONTRACT.md`
+
 ---
 
 ## 2. Current Task Center Purpose
