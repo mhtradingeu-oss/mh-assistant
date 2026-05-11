@@ -1021,6 +1021,18 @@ function toDocumentPreviewLabel(extension = "") {
   return "Document";
 }
 
+function canAttemptDocumentPreview(asset = {}) {
+  return Boolean(
+    getAssetPreviewUrl(asset) ||
+    asset.file_path ||
+    asset.local_path ||
+    asset.path ||
+    asset.preview_url ||
+    asset.public_url ||
+    asset.url
+  );
+}
+
 function renderPreview(asset, escapeHtml) {
   if (!asset) {
     return `<div class="empty-box">Select an asset to preview.</div>`;
@@ -1119,7 +1131,7 @@ function renderPreview(asset, escapeHtml) {
       `;
     }
 
-    if (isPdf && previewUrl && requiresProtectedMediaFetch(previewUrl)) {
+    if (isPdf && canAttemptDocumentPreview(asset)) {
       return `
         <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
           <div class="library-preview-extension">PDF</div>
@@ -1167,7 +1179,7 @@ async function hydrateProtectedAssetPreview({
   escapeHtml,
   showError
 }) {
-  if (!previewNode || !asset || !requiresProtectedMediaFetch(getAssetPreviewUrl(asset))) {
+  if (!previewNode || !asset) {
     return;
   }
 
@@ -2416,7 +2428,7 @@ viewToggleButtons.forEach((button) => {
 
     dropZone.onclick = (event) => {
       event.preventDefault();
-      uploadInput.click();
+      openLibraryFilePicker();
     };
 
     dropZone.onkeydown = (event) => {
@@ -2458,12 +2470,33 @@ viewToggleButtons.forEach((button) => {
       dropZone.dataset.libraryDndBound = "1";
     }
 
+    const openLibraryFilePicker = () => {
+      const picker = document.createElement("input");
+      picker.type = "file";
+      picker.multiple = true;
+      picker.style.position = "fixed";
+      picker.style.left = "-9999px";
+      picker.style.top = "0";
+      document.body.appendChild(picker);
+
+      picker.onchange = () => {
+        const files = Array.from(picker.files || []);
+        if (files.length) {
+          syncDroppedFilesToInput(files);
+          showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+        }
+        picker.remove();
+      };
+
+      picker.click();
+    };
+
     const chooseFilesBtn = $("libraryChooseFilesBtn");
     if (chooseFilesBtn) {
       chooseFilesBtn.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        uploadInput.click();
+        openLibraryFilePicker();
       };
     }
 
