@@ -3,6 +3,8 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
   const status = escapePanelHtml(selectedAsset?.status || "n/a");
   const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+  const copyPathValue = escapePanelHtml(selectedAsset?.file_path || selectedAsset?.preview_url || "");
+  const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
 
   return `
@@ -19,6 +21,9 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
         <div class="data-row"><span>Status</span><strong>${status}</strong></div>
         <div class="data-row"><span>Source</span><strong>${sourceLabel}</strong></div>
         <p class="setup-helper">Actions are disabled until Library command routing is connected.</p>
+        <div class="library-preview-actions">
+          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
+        </div>
         <div class="library-preview-actions">
           <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
           <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="approved"${disabledAttr}>Approve</button>

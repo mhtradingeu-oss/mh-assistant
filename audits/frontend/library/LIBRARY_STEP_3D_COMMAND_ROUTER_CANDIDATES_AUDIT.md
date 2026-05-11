@@ -104,3 +104,7 @@ This Step 3D pass is audit-only.
 - Selected upload type behavior is unchanged; existing direct assignment to `session.uploadType` is preserved.
 - Upload execution behavior is unchanged.
 - No mutation commands were wired.
+
+## Pointer
+
+- Final refresh audit for Steps 3F through 5: `audits/frontend/library/LIBRARY_FINAL_OPERATING_SURFACE_REFRESH_AUDIT.md`.
