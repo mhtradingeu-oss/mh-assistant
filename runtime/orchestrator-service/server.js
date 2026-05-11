@@ -191,7 +191,9 @@ const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
   /^\/execute_publish_package\/?$/i,
   /^\/execute_email_package\/?$/i,
   /^\/generate_media_from_prompt\/?$/i,
-  /^\/build_ad_execution_package\/?$/i
+  /^\/build_ad_execution_package\/?$/i,
+  /^\/schedule_execution_job\/?$/i,
+  /^\/run_scheduler_worker_once\/?$/i
 ];
 
 function isProtectedControlWriteRequest(req) {
@@ -272,6 +274,7 @@ const SENSITIVE_READ_ROUTE_PATTERNS = [
   /^\/products\/?$/i,
   /^\/optimize-product\//i,
   /^\/prepare-product-update\//i,
+  /^\/scheduler_queue\/?$/i,
   /^\/get_performance_summary\/?$/i,
   /^\/get_smart_suggestions\/?$/i
 ];

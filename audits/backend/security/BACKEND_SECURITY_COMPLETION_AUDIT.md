@@ -107,8 +107,8 @@ The frontend caller context in `public/control-center/api.js` sends write header
 | Legacy media file/tree/registry reads | Matched by `/media/(tree|registry|file)/` read pattern and raw slug validation. | protected |
 | `/generated-output/:project/:filename` | Matched by `/generated-output/` read pattern and raw slug validation. | protected |
 | `/today`, `/next`, product read helpers | Matched by read patterns. | protected |
-| `/scheduler_queue`, `/get_performance_summary`, `/get_smart_suggestions` | Require project context but are not matched by read-key middleware. | needs_review |
-| `/media/projects` | Not matched by read-key middleware. Lists media-manager projects without project scope. | needs_review |
+| `/scheduler_queue`, `/get_performance_summary`, `/get_smart_suggestions` | Read-key protected by `SENSITIVE_READ_ROUTE_PATTERNS` (`Fix 5B` + `Fix 8B`) and project context validation. | protected |
+| `/media/projects` | Read-key protected by `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | protected |
 
 ## Public Route Classification
 
@@ -134,7 +134,7 @@ Important distinction: `/public/media-manager/...` is not public in the auth sen
 | `/media/upload` | Write key; body project slug validation; 50MB upload limit; project-scoped storage target. | medium | protected |
 | `/task`, `/ingest`, `/telegram-command` | Write key; Telegram route is rate-limited. | medium | protected |
 | `/execute_publish_package`, `/execute_email_package`, `/generate_media_from_prompt`, `/build_ad_execution_package` | Write-key protected (Fix 8) — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`. No active HTTP callers existed at time of protection. | high | resolved |
-| `/schedule_execution_job`, `/run_scheduler_worker_once`, `/record_execution_feedback`, `/generate_optimization_recommendations` | `/record_execution_feedback` and `/generate_optimization_recommendations` protected (Fix 5B). `/schedule_execution_job` and `/run_scheduler_worker_once` deferred — `verify-scheduler-automation.js` caller has no key support (Fix 8A/8B required). | high | protect_with_script_adjustment |
+| `/schedule_execution_job`, `/run_scheduler_worker_once`, `/record_execution_feedback`, `/generate_optimization_recommendations` | All four routes are protected by existing write-key middleware patterns (`Fix 5B` + `Fix 8B`), with script compatibility prepared in Fix 8A. | low | resolved |
 | `/api/media/*` | Frontend sends write headers, but backend middleware does not require them; may call providers or persist media job output. | high | needs_review |
 
 ## Sensitive Read Route Risk Table
@@ -147,7 +147,7 @@ Important distinction: `/public/media-manager/...` is not public in the auth sen
 | `/generated-output/:project/:filename` | Read key; project slug validation; basename filename check. | medium | protected |
 | `/today`, `/next`, product read helpers | Read key. | medium | protected |
 | `/api/insights/:project`, `/api/learning/:project` | Read-key protected by the existing `^/(?:public/)?api/` sensitive read pattern and project slug validation. | low | protected |
-| `/scheduler_queue`, `/get_performance_summary`, `/get_smart_suggestions` | Project context required; not matched by read-key pattern. | medium | needs_review |
+| `/scheduler_queue`, `/get_performance_summary`, `/get_smart_suggestions` | Read-key protected by `SENSITIVE_READ_ROUTE_PATTERNS` (`Fix 5B` + `Fix 8B`) and project context validation. | low | protected |
 | `/media/projects` | No key apparent; returns project list. | medium | needs_review |
 
 ## Scheduler And Execution Bridge Notes
@@ -160,10 +160,10 @@ Scheduler and execution bridge routes audit complete — see `audits/backend/sec
 - `/generate_media_from_prompt` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
 - `/build_ad_execution_package` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
 
-**Scheduler routes** — deferred (`protect_with_script_adjustment`):
-- `/schedule_execution_job` — active caller `scripts/verify-scheduler-automation.js` sends no key; protect after Fix 8A (script update)
-- `/scheduler_queue` — same dependency
-- `/run_scheduler_worker_once` — same dependency
+**Scheduler routes** — protected (Fix 8B):
+- `/schedule_execution_job` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
+- `/scheduler_queue` — added to `SENSITIVE_READ_ROUTE_PATTERNS`
+- `/run_scheduler_worker_once` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
 
 ## `/api/media/*` Notes
 
@@ -314,7 +314,7 @@ Needs review:
 | Area | Gap | Risk | Status |
 | --- | --- | --- | --- |
 | `/api/media/*` | Write-key protected via centralized middleware and rate-limited (Fix 1 + Fix 2B). | closed | resolved |
-| Scheduler and execution bridge | Project context required, but no read/write key middleware match. | high | needs_review |
+| Scheduler and execution bridge | Read/write key protected via centralized middleware patterns (`Fix 8` + `Fix 8B`). | closed | resolved |
 | Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` protected by read/write key middleware (Fix 5B). Script prepared in Fix 5A. | closed | resolved |
 | Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are covered by the existing `^/(?:public/)?api/` sensitive read middleware pattern. | closed | resolved |
 | `/media/projects` | Read-key protected by adding `/^/media/projects/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | closed | resolved |
@@ -366,7 +366,7 @@ Needs review:
   - `/^\/generate_media_from_prompt\/?$/i`
   - `/^\/build_ad_execution_package\/?$/i`
 - No active HTTP callers existed for these routes. The scheduler worker uses `executeJobBridge()` in-process — not via HTTP — and is unaffected.
-- Scheduler routes (`/schedule_execution_job`, `/scheduler_queue`, `/run_scheduler_worker_once`) deferred: `scripts/verify-scheduler-automation.js` is an active caller with no key support. Fix 8A (script update) must precede Fix 8B (backend patterns).
+- Scheduler routes (`/schedule_execution_job`, `/scheduler_queue`, `/run_scheduler_worker_once`) are now protected by existing centralized middleware patterns after Fix 8A script preparation and Fix 8B backend enforcement.
 - `audits/backend/security/SCHEDULER_EXECUTION_BRIDGE_AUTH_AUDIT.md` records the full audit.
 
 ## Fix 8A Applied (Scheduler Verifier Key Header Preparation)
@@ -374,8 +374,14 @@ Needs review:
 - `scripts/verify-scheduler-automation.js` updated to resolve control key from environment (`MH_CONTROL_CENTER_WRITE_KEY || CONTROL_CENTER_WRITE_KEY || MH_CONTROL_KEY`).
 - `req()` helper attaches `x-mh-control-key` and `Authorization: Bearer` when key is present; continues without headers when absent (backward-compatible for bypass environments).
 - Startup prints `Control key: [set]` or warns to stderr when absent. Key value is never printed.
-- No backend middleware added in this pass. Scheduler routes remain unprotected pending Fix 8B.
-- Next step: Fix 8B — add `/^\/schedule_execution_job\/?$/i` and `/^\/run_scheduler_worker_once\/?$/i` to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` and `/^\/scheduler_queue\/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS`.
+- Backend scheduler middleware enforcement applied in Fix 8B.
+
+## Fix 8B Applied (Scheduler Route Key Protection)
+
+- Added `/^\/schedule_execution_job\/?$/i` and `/^\/run_scheduler_worker_once\/?$/i` to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` in `runtime/orchestrator-service/server.js`.
+- Added `/^\/scheduler_queue\/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` in `runtime/orchestrator-service/server.js`.
+- Existing script compatibility from Fix 8A is active (`scripts/verify-scheduler-automation.js` already sends `x-mh-control-key` and `Authorization: Bearer`).
+- No route handlers modified. No route response shapes changed beyond existing protected-key middleware responses.
 
 ## No-Weakening Confirmation
 

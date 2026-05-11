@@ -132,8 +132,8 @@ All routes can use the existing `MH_CONTROL_CENTER_WRITE_KEY` mechanism. No sepa
 | Route group | Verdict | Action this pass |
 |---|---|---|
 | Execution bridge (4 POST routes) | `safe_to_protect_now` | **Applied** — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` |
-| Scheduler writes (`/schedule_execution_job`, `/run_scheduler_worker_once`) | `protect_with_script_adjustment` | **Deferred** — document and stop |
-| Scheduler read (`/scheduler_queue`) | `protect_with_script_adjustment` | **Deferred** — document and stop |
+| Scheduler writes (`/schedule_execution_job`, `/run_scheduler_worker_once`) | `protect_with_script_adjustment` | **Applied in Fix 8B** — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` after Fix 8A |
+| Scheduler read (`/scheduler_queue`) | `protect_with_script_adjustment` | **Applied in Fix 8B** — added to `SENSITIVE_READ_ROUTE_PATTERNS` after Fix 8A |
 
 ---
 
@@ -202,4 +202,19 @@ Date: 2026-05-11
 - `ALLOW_MUTATING_TESTS=1` guard behavior unchanged.
 - Key is never printed.
 
-**Backend scheduler route enforcement remains deferred — Fix 8B adds backend patterns after this script update.**
+**Backend scheduler route enforcement is now applied in Fix 8B using the existing centralized middleware patterns.**
+
+---
+
+## 10. Backend Fix 8B Applied
+
+Date: 2026-05-11
+
+- Scheduler write routes now require the existing protected write key by adding both routes to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`:
+  - `/^\/schedule_execution_job\/?$/i`
+  - `/^\/run_scheduler_worker_once\/?$/i`
+- Scheduler queue read route now requires the existing protected read key by adding this route to `SENSITIVE_READ_ROUTE_PATTERNS`:
+  - `/^\/scheduler_queue\/?$/i`
+- `scripts/verify-scheduler-automation.js` was prepared in Fix 8A and already sends control key headers from environment (`x-mh-control-key` and `Authorization: Bearer`).
+
+No route paths changed. No route handlers changed. No new auth mechanism introduced.
