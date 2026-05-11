@@ -1636,6 +1636,7 @@ function buildSmartRecommendation(aiContext) {
 
 export const aiCommandRoute = {
 	id: "ai-command",
+   disableStandardLayout: true,
 	meta: {
 		eyebrow: "AI & Build",
 		title: "AI Workspace",
