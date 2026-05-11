@@ -773,9 +773,20 @@ function showMessage(message) {
   }
 }
 
+function isFatalErrorPanelVisible() {
+  const panel = $("fatalErrorPanel");
+  return Boolean(panel && !panel.hidden && panel.classList.contains("is-visible"));
+}
+
 function showError(message) {
   const box = $("globalError");
   if (!box) return;
+
+  if (message && isFatalErrorPanelVisible()) {
+    box.textContent = "";
+    box.style.display = "none";
+    return;
+  }
 
   box.textContent = message || "";
   box.style.display = message ? "block" : "none";
