@@ -5,6 +5,10 @@ Branch: architecture/frontend-consolidation-v1
 Scope: Documentation only (no runtime behavior change)
 Primary file: public/control-center/pages/media-studio-workspace.js (3215 lines)
 
+## Step 2B Pointer
+
+- MEDIA_STUDIO_STEP_2B_EXTRACTION_READINESS_AUDIT.md
+
 ## No-Change Scope Confirmation
 
 - Backend unchanged.
