@@ -604,6 +604,7 @@ function setGlobalAiPrompt($, prompt) {
 
 export const homeRoute = {
   id: "home",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Executive",
     title: "Executive Command Center",
