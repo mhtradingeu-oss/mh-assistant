@@ -227,7 +227,7 @@ Confirmed:
 Needs review:
 
 - Upload filename sanitization only replaces whitespace in the original filename before prefixing with a timestamp. Destination directory is project-scoped, but filename hardening should be reviewed separately.
-- `/media/projects` is not read-key protected.
+- `/media/projects` is now read-key protected (Fix 4 applied).
 
 ## AI And Telegram Rate-Limit Notes
 
@@ -316,11 +316,18 @@ Needs review:
 | Scheduler and execution bridge | Project context required, but no read/write key middleware match. | high | needs_review |
 | Intelligence loop reads/writes | `/record_execution_feedback`, `/get_performance_summary`, `/generate_optimization_recommendations`, `/get_smart_suggestions` rely on project context, not key middleware. | medium | needs_review |
 | Canonical insights/learning | `/api/insights/:project` and `/api/learning/:project` are covered by the existing `^/(?:public/)?api/` sensitive read middleware pattern. | closed | resolved |
-| `/media/projects` | Project list read is not key-protected. | medium | needs_review |
+| `/media/projects` | Read-key protected by adding `/^/media/projects/?$/i` to `SENSITIVE_READ_ROUTE_PATTERNS` (Fix 4). | closed | resolved |
 | Integration provider summaries | Provider metadata/account/sync summaries are returned as plain objects. | medium | needs_review |
 | Upload filenames | Original filename is partially normalized but not fully basenamed/sanitized in the multer filename callback. | medium | needs_review |
 | Legacy default-project fallback | Some legacy routes can fall back to default project when explicit project is absent or invalid. | medium | needs_review |
 
+## Fix 4 Applied
+
+- `/media/projects` added to `SENSITIVE_READ_ROUTE_PATTERNS` in `runtime/orchestrator-service/server.js`.
+- No active Control Center or script callers exist; the only caller found is in an archived backup file and not served.
+- Response shape `{ projects: [...] }` is unchanged.
+- `audits/backend/security/MEDIA_PROJECTS_READ_AUTH_COMPATIBILITY_AUDIT.md` records the caller and middleware compatibility proof.
+
 ## No-Weakening Confirmation
 
-Security Fix 1 and Fix 2B were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), and Fix 4 were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.

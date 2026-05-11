@@ -258,6 +258,7 @@ const SENSITIVE_READ_ROUTE_PATTERNS = [
   /^\/(?:public\/)?media-manager\/project\//i,
   /^\/(?:public\/)?media-manager\/storage\//i,
   /^\/(?:public\/)?api\//i,
+  /^\/media\/projects\/?$/i,
   /^\/media\/(?:tree|registry|file)\//i,
   /^\/generated-output\//i,
   /^\/today\/?$/i,
