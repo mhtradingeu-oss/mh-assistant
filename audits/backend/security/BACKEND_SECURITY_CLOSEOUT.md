@@ -120,6 +120,14 @@ Migration/deprecation scope only (no immediate security patch blocker):
 
 Status: migration_planned.
 
+## 10A. Backend Phase 3 Pointer
+
+Backend Phase 3 (Project Isolation and Data Path Authority audit) has been completed in:
+
+- `audits/backend/data-paths/BACKEND_PROJECT_ISOLATION_AND_DATA_PATH_AUDIT.md`
+
+This is an audit-only output and does not change runtime behavior.
+
 ## 11. Do-Not-Break List For Future Work
 
 Future hardening must not:
