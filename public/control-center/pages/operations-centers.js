@@ -1731,6 +1731,7 @@ function renderNotificationCenter(context, state, projectName) {
 
 export const taskCenterRoute = {
   id: "task-center",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operate",
     title: "Task Center",
@@ -1765,6 +1766,7 @@ export const taskCenterRoute = {
 
 export const queueCenterRoute = {
   id: "queue-center",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operate",
     title: "Queue Center",
@@ -1797,6 +1799,7 @@ export const queueCenterRoute = {
 
 export const jobMonitorRoute = {
   id: "job-monitor",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operate",
     title: "Job Monitor",
@@ -1844,6 +1847,7 @@ export const jobMonitorRoute = {
 
 export const notificationCenterRoute = {
   id: "notification-center",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Operate",
     title: "Notification Center",

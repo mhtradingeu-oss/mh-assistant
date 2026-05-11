@@ -1067,6 +1067,7 @@ function bindGovernance(context, projectName, session) {
 
 export const governanceRoute = {
   id: "governance",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "System",
     title: "Governance",
