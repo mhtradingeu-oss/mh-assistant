@@ -995,6 +995,18 @@ function computeFolderCounts(allAssets, session) {
   });
 }
 
+function getPreviewExtensionForAsset(asset = {}) {
+  return getFileExtension(
+    asset.extension ||
+    asset.filename ||
+    asset.file_name ||
+    asset.file_path ||
+    asset.preview_url ||
+    asset.name ||
+    ""
+  );
+}
+
 function isDocumentExtension(extension = "") {
   return ["pdf", "doc", "docx", "txt", "md", "csv", "xls", "xlsx"].includes(asString(extension).toLowerCase());
 }
@@ -1089,10 +1101,12 @@ function renderPreview(asset, escapeHtml) {
     `;
   }
 
-  if (isDocumentExtension(asset.extension)) {
+  const previewExtension = getPreviewExtensionForAsset(asset);
+
+  if (isDocumentExtension(previewExtension)) {
     const previewUrl = getAssetPreviewUrl(asset);
-    const label = toDocumentPreviewLabel(asset.extension);
-    const isPdf = asString(asset.extension).toLowerCase() === "pdf";
+    const label = toDocumentPreviewLabel(previewExtension);
+    const isPdf = previewExtension === "pdf";
     const openButton = previewUrl
       ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
       : `<button class="btn btn-primary" type="button" disabled>Open document</button>`;
@@ -1117,7 +1131,7 @@ function renderPreview(asset, escapeHtml) {
 
     return `
       <div class="library-preview-fallback library-document-preview">
-        <div class="library-preview-extension">${escapeHtml((asset.extension || "doc").toUpperCase())}</div>
+        <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
         <strong>${escapeHtml(label)}</strong>
         <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
         <div class="library-document-preview-actions">
@@ -1182,7 +1196,7 @@ async function hydrateProtectedAssetPreview({
       return;
     }
 
-    if (asString(asset.extension).toLowerCase() === "pdf") {
+    if (getPreviewExtensionForAsset(asset) === "pdf") {
       previewNode.outerHTML = `
         <div class="library-pdf-preview">
           <iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
@@ -2715,7 +2729,7 @@ export const libraryRoute = {
               <strong>Upload Assets</strong>
               <span>Drop files here or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
-              <label id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" for="libraryUploadInput">Choose Files</label>
+              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
               <input id="libraryUploadInput" class="library-file-input" type="file" multiple>
             </div>
             <div class="library-upload-controls">
