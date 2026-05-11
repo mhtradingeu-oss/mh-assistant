@@ -44,6 +44,26 @@ export function mountLibraryListeners({ root, documentRef = document, windowRef 
     registry.add(documentRef, "click", handlers.onDocumentClick);
   }
 
+  const documentClickHandlers = Array.isArray(handlers.onDocumentClickHandlers)
+    ? handlers.onDocumentClickHandlers
+    : [];
+
+  documentClickHandlers
+    .filter((handler) => typeof handler === "function")
+    .forEach((handler) => {
+      registry.add(documentRef, "click", handler);
+    });
+
+  const beforeUnloadHandlers = Array.isArray(handlers.onBeforeUnloadHandlers)
+    ? handlers.onBeforeUnloadHandlers
+    : [];
+
+  beforeUnloadHandlers
+    .filter((handler) => typeof handler === "function")
+    .forEach((handler) => {
+      registry.add(windowRef, "beforeunload", handler);
+    });
+
   if (windowRef && typeof handlers.onBeforeUnload === "function") {
     registry.add(windowRef, "beforeunload", handlers.onBeforeUnload);
   }

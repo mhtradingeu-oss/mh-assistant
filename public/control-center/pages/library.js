@@ -3,6 +3,7 @@ import { renderLibraryAiPanel } from "./library/ai-panel.js";
 import { normalizeLibraryAsset } from "./library/projection-adapter.js";
 import { normalizeLibrarySession } from "./library/session-store.js";
 import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
+import { mountLibraryListeners } from "./library/listener-lifecycle.js";
 import {
   AccessKeyError,
   archiveProjectAsset,
@@ -28,7 +29,7 @@ const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 const libraryProtectedUrlCache = new Map();
 const LIBRARY_PAGE_SIZE = 10;
 const libraryProtectedUrlPromiseCache = new Map();
-let libraryGlobalListenersInitialized = false;
+let disposeLibraryGlobalListeners = null;
 const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
 const LIBRARY_THUMB_BATCH_LIMIT = 18;
 let libraryThumbLoadsInFlight = 0;
@@ -414,66 +415,77 @@ async function openLibraryAsset(projectName, asset) {
   anchor.remove();
 }
 
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeunload", () => {
-    Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+function mountLibraryGlobalListeners() {
+  if (disposeLibraryGlobalListeners) {
+    return;
+  }
+
+  disposeLibraryGlobalListeners = mountLibraryListeners({
+    handlers: {
+      onBeforeUnload: () => {
+        Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+      },
+      onDocumentClickHandlers: [
+        async (event) => {
+          const button = event.target.closest?.("[data-copy-asset-path]");
+          if (!button || !button.closest(".library-workspace")) return;
+
+          event.preventDefault();
+
+          const value = button.getAttribute("data-copy-asset-path") || "";
+          if (!value) return;
+
+          try {
+            await navigator.clipboard.writeText(value);
+            alert("Asset path copied.");
+          } catch {
+            window.prompt("Copy asset path:", value);
+          }
+        },
+        (event) => {
+          const link = event.target.closest?.("a.library-link-btn");
+          if (!link || !link.closest(".library-workspace")) return;
+
+          const fileUrl = link.getAttribute("href") || "";
+          if (!fileUrl.includes("/media/file/")) return;
+
+          event.preventDefault();
+
+          const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");
+          openLibraryAsset("", {
+            preview_url: fileUrl,
+            filename: assetName,
+            name: assetName
+          }).catch((error) => {
+            const message = error instanceof AccessKeyError
+              ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+              : `Could not open file: ${error.message || "Unknown error."}`;
+            alert(message);
+          });
+        },
+        (event) => {
+          const root = event.target?.closest?.(".library-workspace");
+          if (!root) return;
+
+          if (event.target?.closest?.(".library-action-menu")) {
+            return;
+          }
+
+          closeAllLibraryActionDropdowns();
+        }
+      ]
+    }
   });
 }
 
-function initializeLibraryGlobalListeners() {
-  if (libraryGlobalListenersInitialized) return;
-  libraryGlobalListenersInitialized = true;
+function unmountLibraryGlobalListeners() {
+  if (!disposeLibraryGlobalListeners) {
+    return;
+  }
 
-  document.addEventListener("click", async (event) => {
-    const button = event.target.closest?.("[data-copy-asset-path]");
-    if (!button || !button.closest(".library-workspace")) return;
-
-    event.preventDefault();
-
-    const value = button.getAttribute("data-copy-asset-path") || "";
-    if (!value) return;
-
-    try {
-      await navigator.clipboard.writeText(value);
-      alert("Asset path copied.");
-    } catch {
-      window.prompt("Copy asset path:", value);
-    }
-  });
-
-  document.addEventListener("click", (event) => {
-    const link = event.target.closest?.("a.library-link-btn");
-    if (!link || !link.closest(".library-workspace")) return;
-
-    const fileUrl = link.getAttribute("href") || "";
-    if (!fileUrl.includes("/media/file/")) return;
-
-    event.preventDefault();
-
-    const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");
-    openLibraryAsset("", {
-      preview_url: fileUrl,
-      filename: assetName,
-      name: assetName
-    }).catch((error) => {
-      const message = error instanceof AccessKeyError
-        ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
-        : `Could not open file: ${error.message || "Unknown error."}`;
-      alert(message);
-    });
-  });
-
-  document.addEventListener("click", (event) => {
-    const root = event.target?.closest?.(".library-workspace");
-    if (!root) return;
-
-    if (event.target?.closest?.(".library-action-menu")) {
-      return;
-    }
-
-    closeAllLibraryActionDropdowns();
-  });
-
+  const dispose = disposeLibraryGlobalListeners;
+  disposeLibraryGlobalListeners = null;
+  dispose();
 }
 
 
@@ -2754,7 +2766,7 @@ export const libraryRoute = {
     const root = $("libraryRoot");
     if (!root) return;
 
-    initializeLibraryGlobalListeners();
+    mountLibraryGlobalListeners();
 
     root.innerHTML = `
       <div class="library-smart-shell">
@@ -2883,16 +2895,22 @@ export const libraryRoute = {
             </div>
 
             <aside class="library-workspace-side">
-              <section class="card library-preview-card">
-                <div class="card-head">
-                  <h3>Asset Detail</h3>
-                  <span class="card-badge neutral">Preview + Actions</span>
-                </div>
-                <div id="libraryPreviewVisual"></div>
-                <div id="libraryPreviewMeta" style="margin-top: 12px;"></div>
-              </section>
-              <div id="libraryActionPanelMount" style="margin-top: 12px;"></div>
-              <div id="libraryAiPanelMount" style="margin-top: 12px;"></div>
+              <div class="library-operating-surface-head">
+                <p class="eyebrow">Operating Surface</p>
+                <h3>Header + Main View + Action + AI</h3>
+              </div>
+              <div class="library-side-stack">
+                <section class="card library-preview-card">
+                  <div class="card-head">
+                    <h3>Asset Detail</h3>
+                    <span class="card-badge neutral">Preview + Actions</span>
+                  </div>
+                  <div id="libraryPreviewVisual"></div>
+                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+                </section>
+                <div id="libraryActionPanelMount" class="library-panel-mount"></div>
+                <div id="libraryAiPanelMount" class="library-panel-mount"></div>
+              </div>
             </aside>
           </div>
         </section>
@@ -2913,5 +2931,9 @@ export const libraryRoute = {
       showError,
       escapeHtml
     });
+
+    return () => {
+      unmountLibraryGlobalListeners();
+    };
   }
 };

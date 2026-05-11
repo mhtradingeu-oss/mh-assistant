@@ -2054,13 +2054,38 @@ function renderPlaceholders() {
    PAGE RENDER ORCHESTRATION
 ========================= */
 
+let activeRouteCleanup = null;
+let activeRouteCleanupRoute = "";
+
+function disposeActiveRouteCleanup(nextRoute = "") {
+  if (!activeRouteCleanup) {
+    activeRouteCleanupRoute = nextRoute || "";
+    return;
+  }
+
+  if (activeRouteCleanupRoute && nextRoute && activeRouteCleanupRoute === nextRoute) {
+    return;
+  }
+
+  const cleanup = activeRouteCleanup;
+  activeRouteCleanup = null;
+  activeRouteCleanupRoute = "";
+
+  try {
+    cleanup();
+  } catch (error) {
+    console.warn("[Route] cleanup failed", error);
+  }
+}
+
 function renderCurrentPage() {
   const { currentRoute } = getState();
+  disposeActiveRouteCleanup(currentRoute);
   ensureRouteDom(currentRoute);
   const routeDef = getRouteDefinition(currentRoute);
 
   if (typeof routeDef.render === "function") {
-    routeDef.render({
+    const renderResult = routeDef.render({
       getState,
       $,
       escapeHtml,
@@ -2104,6 +2129,11 @@ function renderCurrentPage() {
       fetchProjectJobMonitor,
       fetchProjectNotificationCenter
     });
+
+    if (typeof renderResult === "function") {
+      activeRouteCleanup = renderResult;
+      activeRouteCleanupRoute = currentRoute;
+    }
 
     if (!routeDef.disableStandardLayout) {
       applyStandardPageLayout({
