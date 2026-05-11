@@ -1713,6 +1713,7 @@ function bindPublishingWorkspace({
 
 export const publishingRoute = {
   id: "publishing",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Publishing",
