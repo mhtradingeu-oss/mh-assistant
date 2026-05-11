@@ -1100,6 +1100,7 @@ function bindResearchActions({
 
 export const researchRoute = {
   id: "research",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Research",
