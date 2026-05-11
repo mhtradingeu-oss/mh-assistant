@@ -435,3 +435,6 @@ Confirmed for this audit task:
 - No API contract changes.
 
 This file records audit findings only and prepares Step 2 UX contract work.
+
+Update:
+- Step 2 UX Contract created: `audits/frontend/operations-centers/OPERATIONS_SHARED_SCAFFOLD_UX_CONTRACT.md`
