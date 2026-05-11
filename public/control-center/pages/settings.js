@@ -1504,12 +1504,13 @@ function renderSettingsOverview(summary, session, escapeHtml) {
     <section class="panel settings-overview">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings Overview</div>
+          <div class="panel-kicker">Settings command center</div>
           <h3>System configuration for ${escapeHtml(session.projectName || "this project")}</h3>
           <p class="settings-section-copy">Keep project setup, AI behavior, approvals, team access, and sync policy readable from one consistent workspace.</p>
         </div>
         <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
       </div>
+      <div class="panel-kicker">Configuration signals</div>
       <div class="settings-overview-grid">
         <div class="settings-overview-item">
           <span>Project mode</span>
@@ -1536,18 +1537,6 @@ function renderSettingsOverview(summary, session, escapeHtml) {
           <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
         </div>
       </div>
-      <div class="settings-actions">
-        <div class="settings-actions-copy">
-          <div class="panel-kicker">Control Actions</div>
-          <h3>Save or review this configuration</h3>
-          <p>${escapeHtml(session.dirty ? "Unsaved changes are present. Saving writes this configuration into the durable team and governance records used across the system." : "All changes captured. The shared durable governance and team records are in sync.")}</p>
-        </div>
-        <div class="settings-actions-buttons">
-          <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
-          <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
-          <button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>
-        </div>
-      </div>
       <div class="settings-risk-panel">
         <div class="settings-risk-head">
           <h4>Current configuration risks</h4>
@@ -1567,8 +1556,8 @@ function renderSettingsAssistant(session, escapeHtml) {
     <section class="panel settings-ai-assistant">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings AI Assistant</div>
-          <h3>Settings AI Assistant</h3>
+          <div class="panel-kicker">Settings AI assistant</div>
+          <h3>Settings AI assistant</h3>
           <p class="settings-section-copy">Use AI for configuration review and recommendations after you inspect the actual settings above.</p>
         </div>
       </div>
@@ -1622,7 +1611,7 @@ function renderSummary(summary, session, escapeHtml) {
     <aside class="settings-summary panel">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings Summary</div>
+          <div class="panel-kicker">Settings summary</div>
           <h3>System operating profile</h3>
           <p>Live view of how this project will behave with the current configuration.</p>
         </div>
@@ -1678,7 +1667,7 @@ function renderActions(session, escapeHtml) {
   return `
     <div class="settings-actions panel">
       <div class="settings-actions-copy">
-        <div class="panel-kicker">Control Actions</div>
+        <div class="panel-kicker">Settings actions</div>
         <h3>Save or review this configuration</h3>
         <p>${escapeHtml(dirtyText)}. Saving writes this configuration into the durable team and governance records used across the system.</p>
       </div>
@@ -1696,9 +1685,11 @@ function buildPageMarkup(session, escapeHtml) {
 
   return `
     <section class="page is-active" data-page="settings">
-      <div class="settings-shell settings-workspace">
+      <div class="settings-page-surface">
         ${renderSettingsOverview(summary, session, escapeHtml)}
         ${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}
+        ${renderSummary(summary, session, escapeHtml)}
+        ${renderActions(session, escapeHtml)}
         ${renderSettingsAssistant(session, escapeHtml)}
       </div>
     </section>
@@ -1709,6 +1700,10 @@ function refreshSummary(root, session, escapeHtml) {
   const overviewHost = root.querySelector(".settings-overview");
   if (overviewHost) {
     overviewHost.outerHTML = renderSettingsOverview(buildSummary(session), session, escapeHtml);
+  }
+  const summaryHost = root.querySelector(".settings-summary");
+  if (summaryHost) {
+    summaryHost.outerHTML = renderSummary(buildSummary(session), session, escapeHtml);
   }
   const aiHost = root.querySelector(".settings-ai-assistant");
   if (aiHost) {
@@ -1899,7 +1894,7 @@ export const settingsRoute = {
     title: "Settings",
     description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
   },
-  template: `<section class="page is-active" data-page="settings"><div class="settings-shell"></div></section>`,
+  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
   render(context) {
     const state = context.getState();
     const projectName = state?.context?.currentProject;
