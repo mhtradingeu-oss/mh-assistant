@@ -1467,7 +1467,7 @@ function renderGroupedSection(group, session, escapeHtml) {
     <article class="settings-section panel" id="settings-group-${group.id}">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">${escapeHtml(group.title)}</div>
+          <div class="panel-kicker">Configuration group</div>
           <h3>${escapeHtml(group.title)}</h3>
           <p class="settings-section-copy">${escapeHtml(group.description)}</p>
         </div>
@@ -1556,7 +1556,7 @@ function renderSettingsAssistant(session, escapeHtml) {
     <section class="panel settings-ai-assistant">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings AI assistant</div>
+          <div class="panel-kicker">AI review</div>
           <h3>Settings AI assistant</h3>
           <p class="settings-section-copy">Use AI for configuration review and recommendations after you inspect the actual settings above.</p>
         </div>
