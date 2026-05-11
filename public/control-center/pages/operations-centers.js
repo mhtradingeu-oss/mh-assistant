@@ -358,8 +358,8 @@ function buildExecutiveRuntimeSignals(context) {
 
 function renderExecutiveRuntimeStrip(context, options = {}) {
   const signals = buildExecutiveRuntimeSignals(context);
-  const kicker = asString(options.kicker) || "0. Executive Runtime";
-  const title = asString(options.title) || "Operations Command Signal";
+  const kicker = asString(options.kicker) || "System Runtime";
+  const title = asString(options.title) || "System Signal";
   const description = asString(options.description)
     || "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";
   const badge = asString(options.badge) || "Live context";
@@ -384,136 +384,6 @@ function renderExecutiveRuntimeStrip(context, options = {}) {
         `).join("")}
       </div>
     </section>
-  `;
-}
-
-
-function renderOperationsScaffold({
-  context,
-  pageKey,
-  title,
-  overviewBadge,
-  overviewCopy,
-  metrics,
-  focusTabs,
-  activeFocus,
-  focusCopy,
-  toolbar,
-  listTitle,
-  listCopy,
-  listBadge,
-  listContent,
-  detailsTitle,
-  detailsCopy,
-  detailsContent,
-  actionsTitle,
-  actionsCopy,
-  actionsContent,
-  assistantCopy,
-  assistantPrompts
-}) {
-  return `
-    <section class="page is-active" data-page="${context.escapeHtml(pageKey)}">
-      <div class="ops-shell ops-workspace">
-        ${renderExecutiveRuntimeStrip(context)}
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">1. Operations Overview</div>
-              <h3>${context.escapeHtml(title)}</h3>
-              <p>${context.escapeHtml(overviewCopy)}</p>
-            </div>
-            <span class="card-badge neutral">${context.escapeHtml(overviewBadge)}</span>
-          </div>
-          ${renderMetricCards(metrics, context.escapeHtml)}
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">2. Current Focus Tab</div>
-              <h3>${context.escapeHtml(title)} focus</h3>
-              <p>${context.escapeHtml(focusCopy)}</p>
-            </div>
-          </div>
-          ${renderOpsFocusTabs(focusTabs, activeFocus, context.escapeHtml)}
-        </section>
-
-        <div class="ops-workspace-grid">
-          <article class="panel panel-span-2">
-            <div class="panel-header">
-              <div>
-                <div class="panel-kicker">3. Item List / Table</div>
-                <h3>${context.escapeHtml(listTitle)}</h3>
-                <p>${context.escapeHtml(listCopy)}</p>
-              </div>
-              <span class="card-badge neutral">${context.escapeHtml(listBadge)}</span>
-            </div>
-            ${toolbar}
-            ${listContent}
-          </article>
-
-          <aside class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-kicker">4. Selected Item Details</div>
-                <h3>${context.escapeHtml(detailsTitle)}</h3>
-                <p>${context.escapeHtml(detailsCopy)}</p>
-              </div>
-            </div>
-            ${detailsContent}
-          </aside>
-        </div>
-
-        <div class="ops-resolution-grid">
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-kicker">5. Action / Resolution Area</div>
-                <h3>${context.escapeHtml(actionsTitle)}</h3>
-                <p>${context.escapeHtml(actionsCopy)}</p>
-              </div>
-            </div>
-            ${actionsContent}
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <div class="panel-kicker">6. Operations AI Assistant</div>
-                <h3>Operations AI Assistant</h3>
-                <p>${context.escapeHtml(assistantCopy)}</p>
-              </div>
-            </div>
-            <div class="ops-action-row">
-              <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
-            </div>
-            <div class="quick-actions">
-              ${assistantPrompts.map((item, index) => `
-                <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
-                  <span class="home-action-title">${context.escapeHtml(item.label)}</span>
-                  <span class="home-action-meta">${context.escapeHtml(item.preview)}</span>
-                </button>
-              `).join("")}
-            </div>
-          </section>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderMetricCards(metrics, escapeHtml) {
-  return `
-    <div class="ops-metric-grid">
-      ${metrics.map((metric) => `
-        <div class="ops-metric-card">
-          <span>${escapeHtml(metric.label)}</span>
-          <strong>${escapeHtml(asString(metric.value))}</strong>
-          <small>${escapeHtml(metric.helper || "")}</small>
-        </div>
-      `).join("")}
-    </div>
   `;
 }
 
@@ -550,30 +420,6 @@ function renderOpsTable(columns, rows, emptyText, escapeHtml) {
         </tbody>
       </table>
     </div>
-  `;
-}
-
-function renderQueueGroup(title, items, escapeHtml) {
-  return `
-    <article class="ops-lane">
-      <div class="ops-lane-head">
-        <h4>${escapeHtml(title)}</h4>
-        <span class="card-badge neutral">${escapeHtml(String(items.length))}</span>
-      </div>
-      ${items.length ? `
-        <div class="ops-list">
-          ${items.slice(0, 4).map((item) => `
-            <div class="ops-list-item">
-              <div>
-                <strong>${escapeHtml(item.title || "Queue item")}</strong>
-                <span>${escapeHtml(titleCase(item.status || "queued"))}</span>
-              </div>
-              ${renderRouteAction(item, escapeHtml)}
-            </div>
-          `).join("")}
-        </div>
-      ` : `<div class="empty-box">${escapeHtml(`No items in ${title.toLowerCase()}.`)}</div>`}
-    </article>
   `;
 }
 
@@ -1208,30 +1054,6 @@ function renderQueueCenter(context, state, projectName) {
   bindOpsAssistantButtons(root, context, prompts);
 }
 
-function renderJobColumn(title, items, escapeHtml) {
-  return `
-    <article class="ops-lane">
-      <div class="ops-lane-head">
-        <h4>${escapeHtml(title)}</h4>
-        <span class="card-badge neutral">${escapeHtml(String(items.length))}</span>
-      </div>
-      ${items.length ? `
-        <div class="ops-list">
-          ${items.slice(0, 6).map((item) => `
-            <div class="ops-list-item">
-              <div>
-                <strong>${escapeHtml(item.title || "Job")}</strong>
-                <span>${escapeHtml(`${titleCase(item.kind || "job")} • ${titleCase(item.status || "unknown")}`)}</span>
-              </div>
-              ${renderRouteAction(item, escapeHtml)}
-            </div>
-          `).join("")}
-        </div>
-      ` : `<div class="empty-box">${escapeHtml(`No ${title.toLowerCase()} jobs right now.`)}</div>`}
-    </article>
-  `;
-}
-
 function renderJobMonitorLayout({
   context,
   projectName,
@@ -1564,35 +1386,6 @@ function deriveProviderDisconnectAlerts(state, existingAlerts) {
       severity: "warning",
       route: { route: "integrations" }
     }));
-}
-
-function renderAlertList(title, items, context, allowMarkRead = false) {
-  return `
-    <article class="ops-lane">
-      <div class="ops-lane-head">
-        <h4>${context.escapeHtml(title)}</h4>
-        <span class="card-badge neutral">${context.escapeHtml(String(items.length))}</span>
-      </div>
-      ${items.length ? `
-        <div class="ops-alert-list">
-          ${items.slice(0, 6).map((item) => `
-            <div class="ops-alert-item">
-              <div class="ops-alert-head">
-                <span class="card-badge ${badgeTone(item.severity)}">${context.escapeHtml(titleCase(item.severity || "info"))}</span>
-                ${renderRouteAction(item, context.escapeHtml)}
-              </div>
-              <strong>${context.escapeHtml(item.title || "Alert")}</strong>
-              <p>${context.escapeHtml(item.message || "-")}</p>
-              <div class="ops-log-meta">
-                <span>${context.escapeHtml(formatDateTime(item.created_at))}</span>
-                ${allowMarkRead && item.notification_id ? `<button class="btn btn-secondary btn-sm" type="button" data-mark-read="${context.escapeHtml(item.notification_id)}">Mark Read</button>` : ""}
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      ` : `<div class="empty-box">${context.escapeHtml(`No ${title.toLowerCase()} right now.`)}</div>`}
-    </article>
-  `;
 }
 
 function renderNotificationCenter(context, state, projectName) {
