@@ -133,8 +133,8 @@ Important distinction: `/public/media-manager/...` is not public in the auth sen
 | Legacy product publish/replace/blog/rollback | Write key; project context; publishing guardrail where publish authority is exercised. | high | protected |
 | `/media/upload` | Write key; body project slug validation; 50MB upload limit; project-scoped storage target. | medium | protected |
 | `/task`, `/ingest`, `/telegram-command` | Write key; Telegram route is rate-limited. | medium | protected |
-| `/execute_publish_package`, `/execute_email_package`, `/generate_media_from_prompt`, `/build_ad_execution_package` | Require project context with fallback disabled; not matched by protected write middleware. | high | needs_review |
-| `/schedule_execution_job`, `/run_scheduler_worker_once`, `/record_execution_feedback`, `/generate_optimization_recommendations` | Require project context with fallback disabled; not matched by protected write middleware. | high | needs_review |
+| `/execute_publish_package`, `/execute_email_package`, `/generate_media_from_prompt`, `/build_ad_execution_package` | Write-key protected (Fix 8) — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`. No active HTTP callers existed at time of protection. | high | resolved |
+| `/schedule_execution_job`, `/run_scheduler_worker_once`, `/record_execution_feedback`, `/generate_optimization_recommendations` | `/record_execution_feedback` and `/generate_optimization_recommendations` protected (Fix 5B). `/schedule_execution_job` and `/run_scheduler_worker_once` deferred — `verify-scheduler-automation.js` caller has no key support (Fix 8A/8B required). | high | protect_with_script_adjustment |
 | `/api/media/*` | Frontend sends write headers, but backend middleware does not require them; may call providers or persist media job output. | high | needs_review |
 
 ## Sensitive Read Route Risk Table
@@ -152,17 +152,18 @@ Important distinction: `/public/media-manager/...` is not public in the auth sen
 
 ## Scheduler And Execution Bridge Notes
 
-Scheduler and execution bridge routes are active runtime surfaces:
+Scheduler and execution bridge routes audit complete — see `audits/backend/security/SCHEDULER_EXECUTION_BRIDGE_AUTH_AUDIT.md`.
 
-- `/execute_publish_package`
-- `/execute_email_package`
-- `/generate_media_from_prompt`
-- `/build_ad_execution_package`
-- `/schedule_execution_job`
-- `/scheduler_queue`
-- `/run_scheduler_worker_once`
+**Execution bridge routes** — protected (Fix 8):
+- `/execute_publish_package` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
+- `/execute_email_package` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
+- `/generate_media_from_prompt` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
+- `/build_ad_execution_package` — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`
 
-The bridge routes and scheduler mutations require explicit project context with fallback disabled. That prevents implicit default-project execution for those routes, but it is not equivalent to control-key auth. Phase 1 already identified them as bridge/scheduler surfaces; this audit marks key middleware coverage as `needs_review` rather than changing behavior because adding auth would affect scripts and external callers.
+**Scheduler routes** — deferred (`protect_with_script_adjustment`):
+- `/schedule_execution_job` — active caller `scripts/verify-scheduler-automation.js` sends no key; protect after Fix 8A (script update)
+- `/scheduler_queue` — same dependency
+- `/run_scheduler_worker_once` — same dependency
 
 ## `/api/media/*` Notes
 
@@ -357,6 +358,17 @@ Needs review:
 - `credential_state`, `config`, and `primary_value` remain protected by existing `summarizeCredentialState`, `sanitizeIntegrationConfigForClient`, and `maskPrimaryValueForClient` respectively.
 - `audits/backend/security/INTEGRATION_SUMMARY_REDACTION_AUDIT.md` records the full audit.
 
+## Fix 8 Applied (Execution Bridge Write Protection)
+
+- Four execution bridge POST routes added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS` in `runtime/orchestrator-service/server.js`:
+  - `/^\/execute_publish_package\/?$/i`
+  - `/^\/execute_email_package\/?$/i`
+  - `/^\/generate_media_from_prompt\/?$/i`
+  - `/^\/build_ad_execution_package\/?$/i`
+- No active HTTP callers existed for these routes. The scheduler worker uses `executeJobBridge()` in-process — not via HTTP — and is unaffected.
+- Scheduler routes (`/schedule_execution_job`, `/scheduler_queue`, `/run_scheduler_worker_once`) deferred: `scripts/verify-scheduler-automation.js` is an active caller with no key support. Fix 8A (script update) must precede Fix 8B (backend patterns).
+- `audits/backend/security/SCHEDULER_EXECUTION_BRIDGE_AUTH_AUDIT.md` records the full audit.
+
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, and Fix 7 were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, Fix 5A, Fix 5B, Fix 6, Fix 7, and Fix 8 were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`.

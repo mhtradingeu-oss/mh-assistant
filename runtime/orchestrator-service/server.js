@@ -187,7 +187,11 @@ const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
   /^\/publish-blog\/[^/]+\/?$/i,
   /^\/rollback-product\/[^/]+\/?$/i,
   /^\/record_execution_feedback\/?$/i,
-  /^\/generate_optimization_recommendations\/?$/i
+  /^\/generate_optimization_recommendations\/?$/i,
+  /^\/execute_publish_package\/?$/i,
+  /^\/execute_email_package\/?$/i,
+  /^\/generate_media_from_prompt\/?$/i,
+  /^\/build_ad_execution_package\/?$/i
 ];
 
 function isProtectedControlWriteRequest(req) {
