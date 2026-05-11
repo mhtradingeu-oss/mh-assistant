@@ -1604,8 +1604,25 @@ function renderNotificationCenter(context, state, projectName) {
     focus: "all",
     severity: "all",
     search: "",
-    selectedKey: ""
+    selectedKey: "",
+    isLoading: false,
+    errorMessage: ""
   });
+
+  const hasNotificationSnapshot =
+    asArray(notificationCenter.notification_items).length > 0 ||
+    asArray(notificationCenter.sync_failure_alerts).length > 0 ||
+    asArray(notificationCenter.approval_pending_alerts).length > 0 ||
+    asArray(notificationCenter.publish_alerts).length > 0 ||
+    asArray(notificationCenter.provider_disconnect_alerts).length > 0 ||
+    asArray(notificationCenter.claim_risk_alerts).length > 0 ||
+    asArray(notificationCenter.workflow_completion_alerts).length > 0 ||
+    Number(notificationCenter.unread_count || 0) > 0 ||
+    Number(notificationCenter.critical_count || 0) > 0;
+
+  if (!session.errorMessage && projectName && context.fetchProjectNotificationCenter && !hasNotificationSnapshot) {
+    session.isLoading = true;
+  }
 
   const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
   const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
@@ -1651,115 +1668,241 @@ function renderNotificationCenter(context, state, projectName) {
   session.selectedKey = selectedItem?._opsKey || "";
   const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
 
-  root.innerHTML = renderOperationsScaffold({
-    context,
-    pageKey: "notification-center",
-    title: "Notification Center",
-    overviewBadge: `${formatCount(baseAlerts.length)} active alerts`,
-    overviewCopy: "Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion.",
-    metrics: [
-      { label: "Active Alerts", value: formatCount(baseAlerts.length), helper: "Current operational signals" },
-      { label: "Unread Inbox", value: formatCount(notificationCenter.unread_count), helper: "Durable notifications" },
-      { label: "Critical", value: formatCount(notificationCenter.critical_count), helper: "Immediate action" },
-      { label: "Approvals", value: formatCount(approvalAlerts.length), helper: "Waiting for decisions" }
-    ],
-    focusTabs: [
-      { value: "all", label: "All Alerts", count: formatCount(baseAlerts.length) },
-      { value: "critical", label: "Critical", count: formatCount(notificationCenter.critical_count) },
-      { value: "approvals", label: "Approvals", count: formatCount(approvalAlerts.length) },
-      { value: "provider", label: "Provider", count: formatCount(providerAlerts.length) },
-      { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
-    ],
-    activeFocus: session.focus,
-    focusCopy: "Switch between active alert modes and inbox history while keeping the route intact.",
-    toolbar: `
-      <div class="ops-toolbar ops-toolbar-compact">
-        <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${context.escapeHtml(session.search)}">
-        <select id="notificationCenterSeverity" class="sidebar-select">
-          ${["all", "critical", "warning", "success", "info"].map((value) => `<option value="${context.escapeHtml(value)}"${value === session.severity ? " selected" : ""}>${context.escapeHtml(titleCase(value))}</option>`).join("")}
-        </select>
-      </div>
-    `,
-    listTitle: session.focus === "inbox" ? "Notification history" : "Operational alerts",
-    listCopy: session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.",
-    listBadge: `${listItems.length} filtered`,
-    listContent: renderOpsTable(
-      ["Severity", "Signal", "Source", "Created", "Route"],
-      listItems.map((item) => `
+  const escapeHtml = context.escapeHtml;
+  const projectLabel = projectName || "No project selected";
+  const hasFilters = Boolean(
+    asString(session.search).trim() ||
+    session.focus !== "all" ||
+    session.severity !== "all"
+  );
+  const emptyText = hasFilters
+    ? "No notifications match the current filters."
+    : "No notifications are available for this project yet. Use Refresh or adjust project context to load current signals.";
+  const showLoadingState = Boolean(session.isLoading);
+  const showErrorState = Boolean(session.errorMessage);
+  const showStateCard = (showLoadingState || showErrorState) && listItems.length > 0;
+  const stateRow = showLoadingState && !listItems.length
+    ? `
+      <tr class="ops-state-row">
+        <td colspan="5">
+          <div class="loading-state ops-notification-state" aria-live="polite">
+            <strong>Notifications are loading</strong>
+            <span>Loading notification signals while preserving the operating shell.</span>
+          </div>
+        </td>
+      </tr>
+    `
+    : showErrorState && !listItems.length
+      ? `
+      <tr class="ops-state-row">
+        <td colspan="5">
+          <div class="error-state ops-notification-state" aria-live="assertive">
+            <strong>Notification Center error</strong>
+            <span>${escapeHtml(session.errorMessage)}</span>
+          </div>
+        </td>
+      </tr>
+    `
+      : "";
+  const tableRows = stateRow
+    ? [stateRow]
+    : listItems.map((item) => `
         <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
-          <td><span class="card-badge ${badgeTone(item.severity)}">${context.escapeHtml(titleCase(item.severity || "info"))}</span></td>
+          <td><span class="card-badge ${badgeTone(item.severity)}">${escapeHtml(titleCase(item.severity || "info"))}</span></td>
           <td>
-            <button class="ops-select-link" type="button" data-ops-select="${context.escapeHtml(item._opsKey)}">
-              <strong>${context.escapeHtml(item.title || "Alert")}</strong>
-              <span>${context.escapeHtml(item.message || "-")}</span>
+            <button class="ops-select-link" type="button" data-ops-select="${escapeHtml(item._opsKey)}">
+              <strong>${escapeHtml(item.title || "Alert")}</strong>
+              <span>${escapeHtml(item.message || "-")}</span>
             </button>
           </td>
-          <td>${context.escapeHtml(titleCase(item.source || item.item_type || "system"))}</td>
-          <td>${context.escapeHtml(formatDateTime(item.created_at))}</td>
-          <td>${renderRouteAction(item, context.escapeHtml)}</td>
+          <td>${escapeHtml(titleCase(item.source || item.item_type || "system"))}</td>
+          <td>${escapeHtml(formatDateTime(item.created_at))}</td>
+          <td>${renderRouteAction(item, escapeHtml)}</td>
         </tr>
-      `),
-      "No notifications match the current filters.",
-      context.escapeHtml
-    ),
-    detailsTitle: selectedItem?.title || "Select a notification",
-    detailsCopy: selectedItem ? "Review source, severity, timing, and the owning page for the selected signal." : "Choose an alert or inbox item to inspect it.",
-    detailsContent: selectedItem ? `
-      <div class="ops-detail-stack">
-        <div class="ops-detail-summary">
-          <strong>${context.escapeHtml(selectedItem.title || "Notification")}</strong>
-          <p>${context.escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>
+      `);
+
+  root.innerHTML = `
+    <section class="page is-active" data-page="notification-center">
+      <div class="ops-shell ops-workspace">
+        <section class="std-context-ribbon">
+          <div class="std-context-main">
+            <div class="std-context-line">
+              <span class="std-context-eyebrow">NOTIFICATIONS</span>
+              <h3 class="std-context-title">Notification Center</h3>
+            </div>
+            <p class="std-context-description">Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+            <div class="std-context-metrics" aria-label="Notification Center metrics">
+              <span class="std-context-chip"><span>Active Alerts</span><strong>${escapeHtml(formatCount(baseAlerts.length))}</strong></span>
+              <span class="std-context-chip"><span>Unread Inbox</span><strong>${escapeHtml(formatCount(notificationCenter.unread_count))}</strong></span>
+              <span class="std-context-chip is-danger"><span>Critical</span><strong>${escapeHtml(formatCount(notificationCenter.critical_count))}</strong></span>
+              <span class="std-context-chip is-warning"><span>Approvals</span><strong>${escapeHtml(formatCount(approvalAlerts.length))}</strong></span>
+            </div>
+          </div>
+          <div class="std-context-actions">
+            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+            <button class="btn btn-secondary std-context-btn" type="button" id="notificationCenterRefreshBtnHeader">Refresh</button>
+          </div>
+        </section>
+
+        ${renderExecutiveRuntimeStrip(context, {
+          kicker: "System Runtime",
+          title: "System Signal",
+          description: "Supporting cross-center runtime and urgency signal context.",
+          badge: "Supporting context"
+        })}
+
+        <div class="ops-layout-grid">
+          <article class="panel ops-main-column">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">Main View</div>
+                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history" : "Operational alerts")}</h3>
+                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
+              </div>
+              <span class="card-badge neutral">${escapeHtml(String(listItems.length))} visible</span>
+            </div>
+
+            ${renderOpsFocusTabs([
+              { value: "all", label: "All Alerts", count: formatCount(baseAlerts.length) },
+              { value: "critical", label: "Critical", count: formatCount(notificationCenter.critical_count) },
+              { value: "approvals", label: "Approvals", count: formatCount(approvalAlerts.length) },
+              { value: "provider", label: "Provider", count: formatCount(providerAlerts.length) },
+              { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
+            ], session.focus, escapeHtml)}
+
+            <div class="ops-toolbar ops-toolbar-compact">
+              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+              <select id="notificationCenterSeverity" class="sidebar-select">
+                ${["all", "critical", "warning", "success", "info"].map((value) => `<option value="${escapeHtml(value)}"${value === session.severity ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+              </select>
+            </div>
+
+            ${showStateCard ? `
+              ${showLoadingState ? `<div class="loading-state ops-notification-state" aria-live="polite"><strong>Notifications are loading</strong><span>Refreshing notification signals while keeping the operating shell stable.</span></div>` : ""}
+              ${showErrorState ? `<div class="error-state ops-notification-state" aria-live="assertive"><strong>Notification Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>` : ""}
+            ` : ""}
+
+            ${renderOpsTable(
+              ["Severity", "Signal", "Source", "Created", "Route"],
+              tableRows,
+              stateRow ? "" : emptyText,
+              escapeHtml
+            )}
+          </article>
+
+          <aside class="ops-right-rail">
+            <section class="panel ops-detail-card">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Selected Notification</div>
+                  <h3>${escapeHtml(selectedItem?.title || "Select a notification")}</h3>
+                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+                </div>
+              </div>
+              ${selectedItem ? `
+                <div class="ops-detail-stack">
+                  <div class="ops-detail-summary">
+                    <strong>${escapeHtml(selectedItem.title || "Notification")}</strong>
+                    <p>${escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>
+                  </div>
+                  ${renderOpsDetailRows([
+                    { label: "Severity", value: titleCase(selectedItem.severity || "info") },
+                    { label: "Source", value: titleCase(selectedItem.source || selectedItem.item_type || "system") },
+                    { label: "Created", value: formatDateTime(selectedItem.created_at) },
+                    { label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }
+                  ], escapeHtml)}
+                </div>
+              ` : `<div class="empty-box">No notification is selected.</div>`}
+            </section>
+
+            <section class="panel ops-action-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Action Panel</div>
+                  <h3>Notification actions</h3>
+                  <p>Safe actions are active. Notification mutation controls remain deferred.</p>
+                </div>
+              </div>
+              <div class="ops-action-row">
+                <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh Notification Center</button>
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Source Page") : ""}
+                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}">Mark Read</button>` : ""}
+              </div>
+              <div class="ops-mini-list">
+                <div class="ops-mini-item">
+                  <strong>${escapeHtml("Approval pending")}</strong>
+                  <span>${escapeHtml(`${formatCount(approvalAlerts.length)} alerts`)}</span>
+                </div>
+                <div class="ops-mini-item">
+                  <strong>${escapeHtml("Provider health")}</strong>
+                  <span>${escapeHtml(`${formatCount(providerAlerts.length)} alerts`)}</span>
+                </div>
+                <div class="ops-mini-item">
+                  <strong>${escapeHtml("Claim risk")}</strong>
+                  <span>${escapeHtml(`${formatCount(claimAlerts.length)} alerts`)}</span>
+                </div>
+              </div>
+              <div class="ops-deferred-list">
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (deferred: mutation safety pass)</button>
+              </div>
+            </section>
+
+            <section class="panel ops-ai-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">AI Panel</div>
+                  <h3>Operations AI Assistant</h3>
+                  <p>Prompt-only guidance. Navigation opens AI Command for explicit execution.</p>
+                </div>
+              </div>
+              <div class="ops-action-row">
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+              </div>
+              <div class="quick-actions">
+                ${prompts.map((item, index) => `
+                  <button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">
+                    <span class="ops-prompt-title">${escapeHtml(item.label)}</span>
+                    <span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </section>
+          </aside>
         </div>
-        ${renderOpsDetailRows([
-          { label: "Severity", value: titleCase(selectedItem.severity || "info") },
-          { label: "Source", value: titleCase(selectedItem.source || selectedItem.item_type || "system") },
-          { label: "Created", value: formatDateTime(selectedItem.created_at) },
-          { label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }
-        ], context.escapeHtml)}
       </div>
-    ` : `<div class="empty-box">${context.escapeHtml("No notification is selected.")}</div>`,
-    actionsTitle: "Notification handling",
-    actionsCopy: "Use only the real actions available here: refresh, open the owning page, and mark inbox notifications as read when supported.",
-    actionsContent: `
-      <div class="ops-action-row">
-        <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh</button>
-        ${selectedItem ? renderRouteAction(selectedItem, context.escapeHtml, "Open Source Page") : ""}
-        ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${context.escapeHtml(selectedItem.notification_id)}">Mark Read</button>` : ""}
-      </div>
-      <div class="ops-mini-list">
-        <div class="ops-mini-item">
-          <strong>${context.escapeHtml("Approval pending")}</strong>
-          <span>${context.escapeHtml(`${formatCount(approvalAlerts.length)} alerts`)}</span>
-        </div>
-        <div class="ops-mini-item">
-          <strong>${context.escapeHtml("Provider health")}</strong>
-          <span>${context.escapeHtml(`${formatCount(providerAlerts.length)} alerts`)}</span>
-        </div>
-        <div class="ops-mini-item">
-          <strong>${context.escapeHtml("Claim risk")}</strong>
-          <span>${context.escapeHtml(`${formatCount(claimAlerts.length)} alerts`)}</span>
-        </div>
-      </div>
-    `,
-    assistantCopy: "Use AI to rank urgency, interpret the selected signal, or summarize what the current notification stream means operationally.",
-    assistantPrompts: prompts
-  });
+    </section>
+  `;
 
   const rerender = () => renderNotificationCenter(context, context.getState(), projectName);
-  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", () => {
+  const refreshNotificationCenter = () => {
     if (context.fetchProjectNotificationCenter && projectName) {
+      session.isLoading = true;
+      session.errorMessage = "";
+      rerender();
       context.fetchProjectNotificationCenter(projectName)
         .then((liveData) => {
+          session.isLoading = false;
           if (!liveData) return;
           const ops = asObject(context.getState().data.operations);
           ops.notification_center = liveData;
           renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
         })
-        .catch((error) => context.showError?.(`Notification Center: ${error?.message || "Failed to refresh."}`));
+        .catch((error) => {
+          session.isLoading = false;
+          session.errorMessage = `Notification Center: ${error?.message || "Failed to refresh."}`;
+          rerender();
+          context.showError?.(session.errorMessage);
+        });
     } else {
+      session.errorMessage = "";
       context.reloadProjectData?.(projectName);
     }
-  });
+  };
+  root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", refreshNotificationCenter);
+  root.querySelector("#notificationCenterRefreshBtnHeader")?.addEventListener("click", refreshNotificationCenter);
   bindOpsFocusButtons(root, (focus) => {
     session.focus = focus || "all";
     rerender();
@@ -1922,15 +2065,30 @@ export const notificationCenterRoute = {
 
     function doFetch() {
       if (!projectName || !context.fetchProjectNotificationCenter) return;
+      const session = ensureSession(notificationSessions, projectName, {
+        focus: "all",
+        severity: "all",
+        search: "",
+        selectedKey: "",
+        isLoading: false,
+        errorMessage: ""
+      });
+      session.isLoading = true;
+      session.errorMessage = "";
+      renderNotificationCenter(context, context.getState(), projectName);
       context.fetchProjectNotificationCenter(projectName)
         .then((liveData) => {
+          session.isLoading = false;
           if (!liveData) return;
           const ops = asObject(context.getState().data.operations);
           ops.notification_center = liveData;
           renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
         })
         .catch((error) => {
-          context.showError?.(`Notification Center: ${error?.message || "Failed to load live data."}`);
+          session.isLoading = false;
+          session.errorMessage = `Notification Center: ${error?.message || "Failed to load live data."}`;
+          renderNotificationCenter(context, context.getState(), projectName);
+          context.showError?.(session.errorMessage);
         });
     }
 
