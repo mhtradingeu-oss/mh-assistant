@@ -2133,11 +2133,6 @@ viewToggleButtons.forEach((button) => {
     toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
   }
 
-  const toolbarDelete = $("libraryToolbarDeleteBtn");
-  if (toolbarDelete) {
-    toolbarDelete.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-delete]", "Select an asset to delete.");
-  }
-
   const toolbarApprove = $("libraryToolbarApproveBtn");
   if (toolbarApprove) {
     toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");

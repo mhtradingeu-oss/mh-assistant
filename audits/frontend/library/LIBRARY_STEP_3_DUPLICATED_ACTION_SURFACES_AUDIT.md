@@ -136,3 +136,9 @@ Confirmed in this audit pass:
 - No Library behavior changes were introduced.
 - No new global listeners were added.
 - Route ids unchanged.
+
+## Step 3B applied
+
+- Dead toolbar delete handler for `libraryToolbarDeleteBtn` removed from `library.js` after confirming no rendered `id="libraryToolbarDeleteBtn"` exists.
+- Active Inspector delete behavior preserved via `[data-library-delete]` render and handler paths.
+- No behavior change from this removal, because no rendered toolbar delete button existed.
