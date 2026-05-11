@@ -185,7 +185,9 @@ const LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS = [
   /^\/replace-original-product\/[^/]+\/[^/]+\/?$/i,
   /^\/cleanup-clone\/[^/]+\/?$/i,
   /^\/publish-blog\/[^/]+\/?$/i,
-  /^\/rollback-product\/[^/]+\/?$/i
+  /^\/rollback-product\/[^/]+\/?$/i,
+  /^\/record_execution_feedback\/?$/i,
+  /^\/generate_optimization_recommendations\/?$/i
 ];
 
 function isProtectedControlWriteRequest(req) {
@@ -265,7 +267,9 @@ const SENSITIVE_READ_ROUTE_PATTERNS = [
   /^\/next\/?$/i,
   /^\/products\/?$/i,
   /^\/optimize-product\//i,
-  /^\/prepare-product-update\//i
+  /^\/prepare-product-update\//i,
+  /^\/get_performance_summary\/?$/i,
+  /^\/get_smart_suggestions\/?$/i
 ];
 
 function isProtectedControlReadRequest(req) {

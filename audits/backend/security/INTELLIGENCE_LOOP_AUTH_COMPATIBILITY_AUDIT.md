@@ -174,3 +174,28 @@ Date: 2026-05-11
 - No backend route or middleware code changed.
 
 Next step (Fix 5B): apply backend middleware patterns once this script update has been verified in the target environment.
+
+## Backend Fix 5B Applied
+
+Date: 2026-05-11
+
+`runtime/orchestrator-service/server.js` updated:
+
+**Read routes** — added to `SENSITIVE_READ_ROUTE_PATTERNS`:
+```js
+/^\/get_performance_summary\/?$/i,
+/^\/get_smart_suggestions\/?$/i,
+```
+
+**Write routes** — added to `LEGACY_PROTECTED_WRITE_ROUTE_PATTERNS`:
+```js
+/^\/record_execution_feedback\/?$/i,
+/^\/generate_optimization_recommendations\/?$/i,
+```
+
+Effects:
+- `GET /get_performance_summary` and `GET /get_smart_suggestions` now return 401 (missing read key) or 403 (invalid read key) when called without a valid `x-mh-control-key` / `Authorization: Bearer` header, unless `MH_CONTROL_CENTER_DISABLE_ACCESS_KEY=1` bypass is active.
+- `POST /record_execution_feedback` and `POST /generate_optimization_recommendations` now return 401 (missing write key) or 403 (invalid write key) under the same conditions.
+- No route handler code was modified.
+- No response shape was changed beyond the existing protected-key middleware error responses.
+- `scripts/verify-intelligence-loop.js` was prepared in Fix 5A to send `x-mh-control-key` and `Authorization: Bearer` from `MH_CONTROL_CENTER_WRITE_KEY` / `CONTROL_CENTER_WRITE_KEY` / `MH_CONTROL_KEY`; it remains backward-compatible in bypass environments.
