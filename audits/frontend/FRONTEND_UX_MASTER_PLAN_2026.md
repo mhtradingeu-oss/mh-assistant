@@ -560,3 +560,20 @@ Only after the CSS Foundation Audit is committed and approved does work move to 
 | Media Studio — Step 2B Extraction Readiness | Complete 2026-05-11 | `audits/frontend/media-studio/MEDIA_STUDIO_STEP_2B_EXTRACTION_READINESS_AUDIT.md` |
 | Media Studio — Step 2C Formatter Extraction Plan | Complete 2026-05-11 | `audits/frontend/media-studio/MEDIA_STUDIO_STEP_2C_FORMATTER_EXTRACTION_PLAN.md` |
 | Frontend UX Master Plan | This document | `audits/frontend/FRONTEND_UX_MASTER_PLAN_2026.md` |
+| P0 — CSS Foundation Audit | Complete 2026-05-11 | `audits/frontend/design-system/FRONTEND_CSS_FOUNDATION_AUDIT.md` |
+| P0 — UX Operating Surface Standard | Complete 2026-05-11 | `audits/frontend/design-system/UX_OPERATING_SURFACE_STANDARD.md` |
+| P0 — App Shell Layer Audit | Complete 2026-05-11 | `audits/frontend/design-system/APP_SHELL_LAYER_AUDIT.md` |
+
+---
+
+## Appendix C — Phase 0 CSS/Foundation Audit Artifacts
+
+Phase 0 audit artifacts committed 2026-05-11. These three documents constitute the canonical P0 foundation audit and are prerequisites for all P1 page work.
+
+| Document | Purpose |
+|---|---|
+| `audits/frontend/design-system/FRONTEND_CSS_FOUNDATION_AUDIT.md` | Full CSS file inventory, duplicate selectors, `!important` audit, token gap map, deprecated layer identification, risk classification per class/area |
+| `audits/frontend/design-system/UX_OPERATING_SURFACE_STANDARD.md` | Canonical four-zone layout standard (Header + Main View + Action Panel + AI Panel), page completion definition, action safety levels, empty/loading/error state standard, upgrade workflow |
+| `audits/frontend/design-system/APP_SHELL_LAYER_AUDIT.md` | Shell layer inventory (sidebar, topbar, workspace, command bar, AI dock, loading overlay, fatal recovery, startup diagnostics), z-index stack, interaction risk matrix |
+
+**P0 status:** Complete. P1 (Operations Centers) may now begin.
