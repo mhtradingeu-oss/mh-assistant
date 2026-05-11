@@ -1447,6 +1447,7 @@ function bindCampaignStudio({
 
 export const campaignStudioRoute = {
   id: "campaign-studio",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "AI & Build",
     title: "Campaign Studio",
