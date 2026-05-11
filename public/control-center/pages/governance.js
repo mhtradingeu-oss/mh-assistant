@@ -150,7 +150,7 @@ function renderReviewOwnership(summary, escapeHtml) {
 
   return `
     <article class="panel">
-      <div class="panel-header"><div><div class="panel-kicker">0. Review Model</div><h3>Ownership and escalation chain</h3></div></div>
+      <div class="panel-header"><div><div class="panel-kicker">Review model</div><h3>Ownership and escalation chain</h3></div></div>
       <div class="governance-card-list">
         ${Object.entries(ownership).map(([key, value]) => `
           <div class="governance-card">
@@ -484,8 +484,26 @@ function renderPage(projectName, session, escapeHtml) {
   if (!projectName) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="panel panel-span-2">
-          <div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>
+        <div class="governance-shell governance-workspace">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">Governance command center</div>
+                <h3>Governance command center</h3>
+                <p>Governance operating surface for approvals, policy pressure, and decision routing.</p>
+              </div>
+              <span class="card-badge neutral">Idle</span>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">System signal bar</div>
+                <h3>Current system signals</h3>
+              </div>
+            </div>
+            <div class="empty-box">Select a project to review approvals, policy violations, overrides, and audit history.</div>
+          </section>
         </div>
       </section>
     `;
@@ -494,8 +512,26 @@ function renderPage(projectName, session, escapeHtml) {
   if (session.loading && !session.loaded) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="panel panel-span-2">
-          <div class="empty-box">Loading governance console...</div>
+        <div class="governance-shell governance-workspace">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">Governance command center</div>
+                <h3>Governance command center for ${escapeHtml(projectName)}</h3>
+                <p>Preparing the governance operating surface.</p>
+              </div>
+              <span class="card-badge neutral">Loading</span>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">System signal bar</div>
+                <h3>Current system signals</h3>
+              </div>
+            </div>
+            <div class="empty-box">Loading governance console...</div>
+          </section>
         </div>
       </section>
     `;
@@ -504,8 +540,26 @@ function renderPage(projectName, session, escapeHtml) {
   if (session.error && !session.summary) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="panel panel-span-2">
-          <div class="empty-box">${escapeHtml(session.error)}</div>
+        <div class="governance-shell governance-workspace">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">Governance command center</div>
+                <h3>Governance command center for ${escapeHtml(projectName)}</h3>
+                <p>Governance surface is available but the latest data could not be loaded.</p>
+              </div>
+              <span class="card-badge warning">Error</span>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-kicker">System signal bar</div>
+                <h3>Current system signals</h3>
+              </div>
+            </div>
+            <div class="empty-box">${escapeHtml(session.error)}</div>
+          </section>
         </div>
       </section>
     `;
@@ -549,11 +603,21 @@ function renderPage(projectName, session, escapeHtml) {
         <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">1. Governance Overview</div>
-              <h3>Governance workspace for ${escapeHtml(projectName)}</h3>
-              <p>Review policy pressure, current approval demand, recent governance activity, and what needs a decision next.</p>
+              <div class="panel-kicker">Governance command center</div>
+              <h3>Governance command center for ${escapeHtml(projectName)}</h3>
+              <p>Header and control surface for policy pressure, approval demand, and next governance decisions.</p>
             </div>
             <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker">System signal bar</div>
+              <h3>Current system signals</h3>
+              <p>Live governance metrics and latest recorded governance activity.</p>
+            </div>
           </div>
           <div class="governance-overview-grid">
             ${renderMetric("Approval Queue", asArray(sections.approval_queue).length, "Awaiting decision", escapeHtml)}
@@ -575,115 +639,118 @@ function renderPage(projectName, session, escapeHtml) {
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">2. Policy / Rule Summary</div>
-              <h3>Policy visibility</h3>
-              <p>Keep the active rules, ownership, and settings bridge visible without duplicating separate governance cards.</p>
-            </div>
-          </div>
-          <div class="governance-policy-summary-grid">
-            <div class="governance-policy-block">
-              <h4>Active rules</h4>
-              <div class="governance-rule-list">
-                ${Object.entries(rules).map(([key, value]) => `
-                  <div class="governance-rule-item">
-                    <strong>${escapeHtml(titleCase(key))}</strong>
-                    <span>${escapeHtml(value ? "Enabled" : "Disabled")}</span>
-                  </div>
-                `).join("")}
-              </div>
-            </div>
-            <div class="governance-policy-block">
-              <h4>Approval owners</h4>
-              <div class="governance-rule-list">
-                ${Object.entries(owners).map(([key, value]) => `
-                  <div class="governance-rule-item">
-                    <strong>${escapeHtml(titleCase(key))}</strong>
-                    <span>${escapeHtml(asString(value) || "Unassigned")}</span>
-                  </div>
-                `).join("")}
-              </div>
-            </div>
-            <div class="governance-policy-block">
-              <h4>Editable policy controls</h4>
-              ${renderPolicyControls(summary, settingsDraft, escapeHtml)}
-            </div>
-            <div class="governance-policy-block">
-              <h4>Open policy signal</h4>
-              ${renderFlagList(asArray(sections.policy_violations), "No policy violations are currently open.", escapeHtml)}
-              <div class="simple-banner">
-                <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">3. Approval / Decision Queue</div>
-              <h3>Pending approvals and governance decisions</h3>
-              <p>Browse the combined governance queue, then inspect one selected item before taking action.</p>
-            </div>
-            <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
-          </div>
-          <div class="governance-focus-tabs">
-            ${[
-              ["all", "All", focusCounts.all],
-              ["approvals", "Approvals", focusCounts.approvals],
-              ["claims", "Claims", focusCounts.claims],
-              ["brand", "Brand", focusCounts.brand],
-              ["publish", "Publish", focusCounts.publish],
-              ["escalations", "Escalations", focusCounts.escalations]
-            ].map(([value, label, count]) => `
-              <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
-                <strong>${escapeHtml(label)}</strong>
-                <span>${escapeHtml(asString(count))}</span>
-              </button>
-            `).join("")}
-          </div>
-          <div class="ops-table-wrap">
-            <table class="ops-table">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Item</th>
-                  <th>Risk</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${visibleQueue.length
-                  ? visibleQueue.map((item) => `
-                    <tr class="${selectedItem?.selected_key === item.selected_key ? "is-selected" : ""}">
-                      <td><span class="card-badge neutral">${escapeHtml(titleCase(item.queue_kind || "item"))}</span></td>
-                      <td>
-                        <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
-                          <strong>${escapeHtml(item.queue_title)}</strong>
-                          <span>${escapeHtml(item.queue_summary)}</span>
-                        </button>
-                      </td>
-                      <td><span class="card-badge ${severityClass(item.queue_risk)}">${escapeHtml(titleCase(item.queue_risk || "medium"))}</span></td>
-                      <td>${escapeHtml(item.queue_owner || "-")}</td>
-                      <td><span class="card-badge ${severityClass(item.queue_status)}">${escapeHtml(titleCase(item.queue_status || "open"))}</span></td>
-                      <td>${escapeHtml(formatDateTime(item.queue_created))}</td>
-                    </tr>
-                  `).join("")
-                  : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
         <div class="governance-workspace-grid">
+          <div class="governance-action-stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Policy and rule summary</div>
+                  <h3>Policy visibility</h3>
+                  <p>Keep active rules, ownership, and settings bridge state visible from the main view.</p>
+                </div>
+              </div>
+              <div class="governance-policy-summary-grid">
+                <div class="governance-policy-block">
+                  <h4>Active rules</h4>
+                  <div class="governance-rule-list">
+                    ${Object.entries(rules).map(([key, value]) => `
+                      <div class="governance-rule-item">
+                        <strong>${escapeHtml(titleCase(key))}</strong>
+                        <span>${escapeHtml(value ? "Enabled" : "Disabled")}</span>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="governance-policy-block">
+                  <h4>Approval owners</h4>
+                  <div class="governance-rule-list">
+                    ${Object.entries(owners).map(([key, value]) => `
+                      <div class="governance-rule-item">
+                        <strong>${escapeHtml(titleCase(key))}</strong>
+                        <span>${escapeHtml(asString(value) || "Unassigned")}</span>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="governance-policy-block">
+                  <h4>Editable policy controls</h4>
+                  ${renderPolicyControls(summary, settingsDraft, escapeHtml)}
+                </div>
+                <div class="governance-policy-block">
+                  <h4>Open policy signal</h4>
+                  ${renderFlagList(asArray(sections.policy_violations), "No policy violations are currently open.", escapeHtml)}
+                  <div class="simple-banner">
+                    <strong>Settings bridge:</strong> ${escapeHtml(settingsBridge.source || "Not synced")} • approval mode ${escapeHtml(settingsBridge.approval_mode || "unknown")} • claim mode ${escapeHtml(settingsBridge.claim_safety_mode || "unknown")} • synced ${escapeHtml(settingsBridge.synced_at ? formatDateTime(settingsBridge.synced_at) : "not yet")}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-kicker">Decision queue</div>
+                  <h3>Pending approvals and governance decisions</h3>
+                  <p>Browse the combined governance queue, then inspect one selected item before taking action.</p>
+                </div>
+                <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
+              </div>
+              <div class="governance-focus-tabs">
+                ${[
+                  ["all", "All", focusCounts.all],
+                  ["approvals", "Approvals", focusCounts.approvals],
+                  ["claims", "Claims", focusCounts.claims],
+                  ["brand", "Brand", focusCounts.brand],
+                  ["publish", "Publish", focusCounts.publish],
+                  ["escalations", "Escalations", focusCounts.escalations]
+                ].map(([value, label, count]) => `
+                  <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+                    <strong>${escapeHtml(label)}</strong>
+                    <span>${escapeHtml(asString(count))}</span>
+                  </button>
+                `).join("")}
+              </div>
+              <div class="ops-table-wrap">
+                <table class="ops-table">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Item</th>
+                      <th>Risk</th>
+                      <th>Owner</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${visibleQueue.length
+                      ? visibleQueue.map((item) => `
+                        <tr class="${selectedItem?.selected_key === item.selected_key ? "is-selected" : ""}">
+                          <td><span class="card-badge neutral">${escapeHtml(titleCase(item.queue_kind || "item"))}</span></td>
+                          <td>
+                            <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+                              <strong>${escapeHtml(item.queue_title)}</strong>
+                              <span>${escapeHtml(item.queue_summary)}</span>
+                            </button>
+                          </td>
+                          <td><span class="card-badge ${severityClass(item.queue_risk)}">${escapeHtml(titleCase(item.queue_risk || "medium"))}</span></td>
+                          <td>${escapeHtml(item.queue_owner || "-")}</td>
+                          <td><span class="card-badge ${severityClass(item.queue_status)}">${escapeHtml(titleCase(item.queue_status || "open"))}</span></td>
+                          <td>${escapeHtml(formatDateTime(item.queue_created))}</td>
+                        </tr>
+                      `).join("")
+                      : `<tr><td colspan="6"><div class="empty-box">No governance items are visible in this focus state.</div></td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <div class="governance-action-stack">
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">4. Selected Decision Details</div>
+                <div class="panel-kicker">Selected decision</div>
                 <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
                 <p>${escapeHtml(selectedItem ? "Review the selected item, its flags, and linked approval history before deciding." : "Choose a governance item from the queue to inspect it.")}</p>
               </div>
@@ -750,10 +817,12 @@ function renderPage(projectName, session, escapeHtml) {
             }
           </section>
 
+          ${renderReviewOwnership(summary, escapeHtml)}
+
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-kicker">5. Governance Actions</div>
+                <div class="panel-kicker">Governance actions</div>
                 <h3>Review, decide, and maintain policy controls</h3>
                 <p>Only real governance actions are shown here. Approve and reject actions appear only for real approvals.</p>
               </div>
@@ -822,13 +891,14 @@ function renderPage(projectName, session, escapeHtml) {
               </div>
             </div>
           </section>
+          </div>
         </div>
 
         <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">6. Governance AI Assistant</div>
-              <h3>Governance AI Assistant</h3>
+              <div class="panel-kicker">Governance AI assistant</div>
+              <h3>Governance AI assistant</h3>
               <p>AI Workspace for governance help after you review the current state and selected decision item.</p>
             </div>
           </div>
