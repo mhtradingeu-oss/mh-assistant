@@ -663,6 +663,28 @@ function resolveMediaFilePathFromQuery(projectName, requestedPath, assetId) {
   };
 }
 
+function sanitizeUploadFilename(originalName) {
+  // 1. basename first — strips any path separators, preventing traversal.
+  const base = path.basename(String(originalName || '').trim()) || 'upload';
+
+  // 2. Split extension. Only preserve extensions that are safe (alphanumeric, 1-8 chars).
+  const lastDot = base.lastIndexOf('.');
+  let stem = lastDot > 0 ? base.slice(0, lastDot) : base;
+  const rawExt = lastDot > 0 ? base.slice(lastDot + 1) : '';
+  const ext = /^[a-zA-Z0-9]{1,8}$/.test(rawExt) ? rawExt : '';
+
+  // 3. Normalize stem: replace whitespace and unsafe chars with underscores.
+  stem = stem.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+  // 4. Collapse repeated underscores/dots, strip leading/trailing punctuation.
+  stem = stem.replace(/[._-]{2,}/g, '_').replace(/^[._-]+|[._-]+$/g, '');
+
+  // 5. Enforce max base length (128 chars) to prevent oversized names.
+  stem = stem.slice(0, 128) || 'upload';
+
+  return ext ? `${stem}.${ext}` : stem;
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -684,7 +706,7 @@ const upload = multer({
       }
     },
     filename: (req, file, cb) => {
-      const safeName = Date.now() + '_' + file.originalname.replace(/\s+/g, '_');
+      const safeName = Date.now() + '_' + sanitizeUploadFilename(file.originalname);
       cb(null, safeName);
     }
   }),
