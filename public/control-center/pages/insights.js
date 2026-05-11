@@ -1026,6 +1026,7 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
 
 export const insightsRoute = {
   id: "insights",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "Execute & Grow",
     title: "Insights",
