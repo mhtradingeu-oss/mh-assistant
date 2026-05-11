@@ -232,3 +232,46 @@ Recommended Step 4 refinement:
 - Convert it into a more compact System Signal Bar or collapsible system context strip.
 - Reduce or rename "0. Executive Runtime" / "Operations Command Signal" so it reads as supporting system status, not a second page header.
 - Preserve all behavior and signal links.
+
+---
+
+## Step 4 visual QA and system signal refinement (current)
+
+Date: 2026-05-11
+Scope: Task Center visual de-emphasis of Executive Runtime into supporting System Signal context.
+
+Applied in this refinement:
+- Task Center-only signal label override:
+  - Kicker: `System Runtime`
+  - Title: `System Signal`
+  - Badge: `Supporting context`
+- Preserved shared renderer defaults for non-Task Center pages to avoid cross-page label changes.
+- Further compacted signal strip under `[data-page="task-center"]` only.
+- Converted runtime signal presentation from card-heavy mini-panels to compact horizontal chips while keeping route links and all signals intact.
+
+Behavior and safety confirmation:
+- No backend changes.
+- No API function or response-shape changes.
+- No route ID changes.
+- No `fetchProjectTaskCenter` changes.
+- No mutation controls enabled.
+- No Task Center AI execution added.
+- No impact intended for Queue Center, Job Monitor, or Notifications.
+
+## Step 4A isolation correction applied before commit
+
+Date: 2026-05-11
+Scope: Restore shared Operations renderer label isolation before Step 4 commit.
+
+Correction applied:
+- Shared Operations scaffold runtime strip call was restored to shared defaults.
+- Task Center System Signal label refinement was isolated to the Task Center call site only.
+
+Shared labels restored:
+- `0. Executive Runtime`
+- `Operations Command Signal`
+- `Live context`
+
+Isolation confirmation:
+- Queue Center, Job Monitor, and Notifications keep shared labels and unchanged behavior.
+- Task Center keeps compact visual refinement and isolated supporting-context label treatment.

@@ -356,18 +356,23 @@ function buildExecutiveRuntimeSignals(context) {
   ];
 }
 
-function renderExecutiveRuntimeStrip(context) {
+function renderExecutiveRuntimeStrip(context, options = {}) {
   const signals = buildExecutiveRuntimeSignals(context);
+  const kicker = asString(options.kicker) || "0. Executive Runtime";
+  const title = asString(options.title) || "Operations Command Signal";
+  const description = asString(options.description)
+    || "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";
+  const badge = asString(options.badge) || "Live context";
 
   return `
     <section class="panel ops-executive-strip">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">0. Executive Runtime</div>
-          <h3>Operations Command Signal</h3>
-          <p>Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.</p>
+          <div class="panel-kicker">${context.escapeHtml(kicker)}</div>
+          <h3>${context.escapeHtml(title)}</h3>
+          <p>${context.escapeHtml(description)}</p>
         </div>
-        <span class="card-badge neutral">Live context</span>
+        <span class="card-badge neutral">${context.escapeHtml(badge)}</span>
       </div>
       <div class="ops-runtime-signal-grid">
         ${signals.map((signal) => `
@@ -630,7 +635,12 @@ function renderTaskCenterLayout({
           </div>
         </section>
 
-        ${renderExecutiveRuntimeStrip(context)}
+        ${renderExecutiveRuntimeStrip(context, {
+          kicker: "System Runtime",
+          title: "System Signal",
+          description: "Supporting cross-center health and risk signal.",
+          badge: "Supporting context"
+        })}
 
         <div class="ops-layout-grid">
           <article class="panel ops-main-column">
