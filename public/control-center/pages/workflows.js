@@ -1740,6 +1740,7 @@ function bindWorkflowExecutionLoop({
 
 export const workflowsRoute = {
   id: "workflows",
+  disableStandardLayout: true,
   meta: {
     eyebrow: "AI & Build",
     title: "Workflows",
