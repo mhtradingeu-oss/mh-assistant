@@ -155,3 +155,22 @@ Action for this pass:
   - Include key as `x-mh-control-key` header (and/or `Authorization: Bearer`) when set.
   - Proceed to backend patch after script update and verification.
 - Backend patterns to add are fully documented in the proposal above; apply in the next pass after script compatibility is confirmed.
+
+## Script Fix 5A Applied
+
+Date: 2026-05-11
+
+`scripts/verify-intelligence-loop.js` updated:
+
+- `CONTROL_KEY` constant added, resolved in priority order from environment:
+  1. `MH_CONTROL_CENTER_WRITE_KEY`
+  2. `CONTROL_CENTER_WRITE_KEY`
+  3. `MH_CONTROL_KEY`
+- `req()` helper now attaches `x-mh-control-key` and `Authorization: Bearer <key>` headers when key is present.
+- When no key is present, a non-secret warning is emitted to `stderr` explaining that keyed backends will reject requests and naming the expected env var.
+- Startup output now prints `Control key: [set]` or `[not set — set MH_CONTROL_CENTER_WRITE_KEY for keyed backends]`.
+- Key is never printed.
+- Script remains backward-compatible for local bypass environments (`MH_CONTROL_CENTER_DISABLE_ACCESS_KEY=1`) where no key is configured.
+- No backend route or middleware code changed.
+
+Next step (Fix 5B): apply backend middleware patterns once this script update has been verified in the target environment.

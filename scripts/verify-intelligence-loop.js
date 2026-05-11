@@ -27,6 +27,22 @@ const EXTERNAL_HOST = String(process.env.MH_HOST || '').trim();
 const TEST_PROJECT = String(process.env.MH_PROJECT || 'hairoticmen').trim().toLowerCase();
 const DATA_BASE = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..'), 'data', 'projects');
 
+// Control key for keyed backends. Resolved from environment — never printed.
+// Supported env vars (checked in order): MH_CONTROL_CENTER_WRITE_KEY, CONTROL_CENTER_WRITE_KEY, MH_CONTROL_KEY.
+const CONTROL_KEY = (
+  String(process.env.MH_CONTROL_CENTER_WRITE_KEY || '').trim() ||
+  String(process.env.CONTROL_CENTER_WRITE_KEY || '').trim() ||
+  String(process.env.MH_CONTROL_KEY || '').trim()
+);
+
+if (!CONTROL_KEY) {
+  process.stderr.write(
+    'Warning: No control key found in environment (MH_CONTROL_CENTER_WRITE_KEY / CONTROL_CENTER_WRITE_KEY / MH_CONTROL_KEY).\n' +
+    '         Backends that enforce read/write key auth will reject intelligence-loop verification with 401.\n' +
+    '         Set MH_CONTROL_CENTER_WRITE_KEY=<key> to authenticate, or enable bypass with MH_CONTROL_CENTER_DISABLE_ACCESS_KEY=1.\n'
+  );
+}
+
 let HOST = EXTERNAL_HOST ? EXTERNAL_HOST.replace(/\/$/, '') : '';
 let embeddedServer = null;
 
@@ -58,11 +74,18 @@ async function stopHost() {
 }
 
 async function req(method, url, body) {
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (CONTROL_KEY) {
+    headers['x-mh-control-key'] = CONTROL_KEY;
+    headers['Authorization'] = `Bearer ${CONTROL_KEY}`;
+  }
+
   const options = {
     method,
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers
   };
 
   if (body !== undefined) {
@@ -371,7 +394,7 @@ async function main() {
   await bootHost();
 
   process.stdout.write('\n=== Phase 5: Intelligence + Optimization Loop Verification ===\n');
-  process.stdout.write(`Host: ${HOST}\nProject: ${TEST_PROJECT}\n\n`);
+  process.stdout.write(`Host: ${HOST}\nProject: ${TEST_PROJECT}\nControl key: ${CONTROL_KEY ? '[set]' : '[not set — set MH_CONTROL_CENTER_WRITE_KEY for keyed backends]'}\n\n`);
 
   await checkRecordFeedback(results);
   await checkPerformanceSummary(results);

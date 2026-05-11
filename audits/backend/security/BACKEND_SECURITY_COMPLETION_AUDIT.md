@@ -335,6 +335,15 @@ Needs review:
 - Backend middleware patterns to add are fully specified in `audits/backend/security/INTELLIGENCE_LOOP_AUTH_COMPATIBILITY_AUDIT.md`.
 - Backend patch deferred until script is updated to send `x-mh-control-key` / `Authorization: Bearer` in its request helper.
 
+## Fix 5A Applied (Script Compatibility)
+
+- `scripts/verify-intelligence-loop.js` updated to send `x-mh-control-key` and `Authorization: Bearer` headers from environment.
+- Key resolved from `MH_CONTROL_CENTER_WRITE_KEY`, `CONTROL_CENTER_WRITE_KEY`, or `MH_CONTROL_KEY` (first non-empty value).
+- Warning emitted to stderr when no key is found; script remains backward-compatible with bypass environments.
+- Key is never printed.
+- No backend route or middleware code changed in this pass.
+- Fix 5B (backend middleware patterns) deferred to next pass after verification.
+
 ## No-Weakening Confirmation
 
-Security Fix 1, Fix 2B, Fix 3 (documentation correction), and Fix 4 were applied through existing centralized middleware paths without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`. Fix 5 is deferred with documented patterns ready to apply.
+Security Fix 1, Fix 2B, Fix 3 (documentation correction), Fix 4, and Fix 5A were applied without weakening timing-safe comparisons, publishing guardrails, protected key behavior, project isolation, slug validation, frontend behavior, or `data/projects`. Fix 5B (backend enforcement) is deferred with documented patterns ready to apply.
