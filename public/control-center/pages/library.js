@@ -2436,6 +2436,15 @@ viewToggleButtons.forEach((button) => {
   if (uploadTypeSelect) {
     uploadTypeSelect.value = session.uploadType;
     uploadTypeSelect.onchange = (event) => {
+      const uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
+
+      dispatchLibraryCommand("upload-type-change", { uploadType }, {
+        "upload-type-change": ({ uploadType: nextUploadType }) => ({
+          shadow: true,
+          uploadType: nextUploadType
+        })
+      });
+
       session.uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
     };
   }

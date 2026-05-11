@@ -97,3 +97,10 @@ This Step 3D pass is audit-only.
 - No runtime code changed.
 - No behavior changed.
 - No mutation commands were newly wired.
+
+## Step 3E applied
+
+- `upload-type-change` now emits a command-router shadow/parity envelope from `libraryUploadTypeSelect.onchange`.
+- Selected upload type behavior is unchanged; existing direct assignment to `session.uploadType` is preserved.
+- Upload execution behavior is unchanged.
+- No mutation commands were wired.

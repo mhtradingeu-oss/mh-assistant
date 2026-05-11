@@ -3,6 +3,7 @@ const LIBRARY_COMMANDS = Object.freeze({
   SET_FILTER: "set-filter",
   SET_VIEW_MODE: "set-view-mode",
   SET_PAGE: "set-page",
+  UPLOAD_TYPE_CHANGE: "upload-type-change",
   OPEN_UPLOAD: "open-upload",
   REFRESH_LIBRARY: "refresh-library",
   OPEN_PREVIEW: "open-preview",
