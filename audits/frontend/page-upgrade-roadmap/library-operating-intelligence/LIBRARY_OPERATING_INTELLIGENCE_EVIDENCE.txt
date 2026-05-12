@@ -1,0 +1,734 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/page-upgrade-roadmap/library-operating-intelligence/
+
+===== HEAD =====
+b01f0ec Add Library CSS canonical closeout
+c507795 Consolidate Library canonical CSS
+483c4b7 Add Library CSS canonical consolidation plan
+4c254b5 Add Library CSS canonical consolidation audit
+179044e Add frontend master upgrade protocol
+83ff5b1 Improve Library UX clarity and safe actions
+78dd12b Improve Library grid accessibility and path hints
+b50fa5c Add Library recovery review audit
+fb3dbb1 Record Control Center stable recovery point
+52938b1 Revert "Polish Library main view and operating surface styling"
+
+===== LIBRARY MODULES =====
+public/control-center/pages/library/action-panel.js
+public/control-center/pages/library/ai-panel.js
+public/control-center/pages/library/catalog-readiness.js
+public/control-center/pages/library/command-router.js
+public/control-center/pages/library/listener-lifecycle.js
+public/control-center/pages/library/projection-adapter.js
+public/control-center/pages/library/session-store.js
+
+===== LIBRARY INTELLIGENCE / READINESS MARKERS =====
+public/control-center/pages/library/projection-adapter.js:8:    sourceOfTruth: Boolean(asset.source_of_truth),
+public/control-center/pages/library/listener-lifecycle.js:25:        console.warn("[Library] listener dispose failed", error);
+public/control-center/pages/library/command-router.js:10:  SET_SOURCE_OF_TRUTH: "set-source-of-truth",
+public/control-center/pages/library/command-router.js:15:  SEND_TO_AI: "send-to-ai"
+public/control-center/pages/library/command-router.js:42:  return command === LIBRARY_COMMANDS.SEND_TO_AI;
+public/control-center/pages/library/catalog-readiness.js:6:        return { id: item, label: item, required: true };
+public/control-center/pages/library/catalog-readiness.js:12:        required: item?.required !== false,
+public/control-center/pages/library/catalog-readiness.js:19:export function summarizeLibraryReadiness({ assets = [], requiredCategories = [] } = {}) {
+public/control-center/pages/library/catalog-readiness.js:20:  const required = normalizeRequiredCategories(requiredCategories);
+public/control-center/pages/library/catalog-readiness.js:29:  const missing = required.filter((item) => !byCategory.has(item.id));
+public/control-center/pages/library/catalog-readiness.js:30:  const complete = required.length ? required.length - missing.length : 0;
+public/control-center/pages/library/catalog-readiness.js:31:  const readinessScore = required.length
+public/control-center/pages/library/catalog-readiness.js:32:    ? Math.round((complete / required.length) * 100)
+public/control-center/pages/library/catalog-readiness.js:37:    requiredCount: required.length,
+public/control-center/pages/library/catalog-readiness.js:39:    missingCount: missing.length,
+public/control-center/pages/library/catalog-readiness.js:40:    readinessScore,
+public/control-center/pages/library/catalog-readiness.js:41:    missing,
+public/control-center/pages/library/catalog-readiness.js:46:export function buildLibraryNextBestAction(readiness = {}) {
+public/control-center/pages/library/catalog-readiness.js:47:  if (readiness.missingCount > 0) {
+public/control-center/pages/library/catalog-readiness.js:49:      actionId: "upload-missing-required-assets",
+public/control-center/pages/library/catalog-readiness.js:51:      label: "Upload missing required assets",
+public/control-center/pages/library/catalog-readiness.js:52:      reason: `${readiness.missingCount} required asset categories are still missing.`,
+public/control-center/pages/library/catalog-readiness.js:53:      suggestedRouteOrAction: "library-upload"
+public/control-center/pages/library/catalog-readiness.js:61:    reason: "Required asset coverage is available. Review quality and source-of-truth status.",
+public/control-center/pages/library/catalog-readiness.js:62:    suggestedRouteOrAction: "library-review"
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:3:  const missingCountNumber = Number(readiness?.missingCount || 0);
+public/control-center/pages/library/ai-panel.js:4:  const readinessScoreValue = readiness?.readinessScore == null ? null : Number(readiness.readinessScore);
+public/control-center/pages/library/ai-panel.js:5:  const missingCount = escapePanelHtml(missingCountNumber);
+public/control-center/pages/library/ai-panel.js:7:  const readinessScore = escapePanelHtml(readinessScoreValue == null || Number.isNaN(readinessScoreValue) ? "n/a" : `${readinessScoreValue}%`);
+public/control-center/pages/library/ai-panel.js:8:  const nextBestAction = buildLibraryAiNextBestAction({ readiness, selectedAsset });
+public/control-center/pages/library/ai-panel.js:12:    <section class="card library-ai-panel" data-library-ai-panel>
+public/control-center/pages/library/ai-panel.js:15:          <p class="eyebrow">AI Panel</p>
+public/control-center/pages/library/ai-panel.js:16:          <h3>Library AI Assistant</h3>
+public/control-center/pages/library/ai-panel.js:22:        <strong>${escapePanelHtml(nextBestAction.title)}</strong>
+public/control-center/pages/library/ai-panel.js:23:        <span>${escapePanelHtml(nextBestAction.description)}</span>
+public/control-center/pages/library/ai-panel.js:29:          <strong>${readinessScore}</strong>
+public/control-center/pages/library/ai-panel.js:33:          <strong>${missingCount}</strong>
+public/control-center/pages/library/ai-panel.js:38:        <p class="setup-helper">Current AI context</p>
+public/control-center/pages/library/ai-panel.js:39:        <div class="library-ai-context-card">
+public/control-center/pages/library/ai-panel.js:46:        <p class="setup-helper">AI actions remain read-only in this pilot.</p>
+public/control-center/pages/library/ai-panel.js:48:          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI about this asset</button>
+public/control-center/pages/library/ai-panel.js:49:          <button class="btn btn-secondary" type="button" disabled aria-disabled="true">Review missing assets</button>
+public/control-center/pages/library/ai-panel.js:56:function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } = {}) {
+public/control-center/pages/library/ai-panel.js:57:  const missingCount = Number(readiness?.missingCount || 0);
+public/control-center/pages/library/ai-panel.js:59:  if (!selectedAsset && missingCount > 0) {
+public/control-center/pages/library/ai-panel.js:61:      title: "Close missing asset gaps",
+public/control-center/pages/library/ai-panel.js:62:      description: `${missingCount} required asset category${missingCount === 1 ? "" : "ies"} still need attention before the Library is fully ready.`
+public/control-center/pages/library/ai-panel.js:69:      description: "Choose an asset to let the system explain its status, authority, and next best review step."
+public/control-center/pages/library/ai-panel.js:73:  const isSource = Boolean(selectedAsset?.source_of_truth ?? selectedAsset?.sourceOfTruth ?? selectedAsset?.is_source_of_truth);
+public/control-center/pages/library/ai-panel.js:78:      title: "Confirm source-of-truth",
+public/control-center/pages/library/ai-panel.js:79:      description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns."
+public/control-center/pages/library/ai-panel.js:86:      description: "This asset needs review before it becomes a trusted production input."
+public/control-center/pages/library/ai-panel.js:92:    description: "This selected asset looks ready for downstream campaign, media, and publishing workflows."
+public/control-center/pages/library/action-panel.js:6:  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+public/control-center/pages/library/action-panel.js:53:          <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
+public/control-center/pages/library/action-panel.js:74:  return Boolean(asset?.source_of_truth ?? asset?.sourceOfTruth ?? asset?.is_source_of_truth);
+public/control-center/pages/library.js:2:import { renderLibraryAiPanel } from "./library/ai-panel.js";
+public/control-center/pages/library.js:45:  { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
+public/control-center/pages/library.js:53:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:60:    why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",
+public/control-center/pages/library.js:67:    why: "Product data anchors facts, variants, and claims for campaign and publishing.",
+public/control-center/pages/library.js:74:    why: "Approved product and packaging visuals are required for high-trust creative production.",
+public/control-center/pages/library.js:81:    why: "Video source assets are required for reels, demos, and cutdowns.",
+public/control-center/pages/library.js:95:    why: "Research and proof documents support claims, trust signals, and strategy decisions.",
+public/control-center/pages/library.js:111:  { key: "source_of_truth", label: "Source of Truth" },
+public/control-center/pages/library.js:203:  const tail = parts.slice(-3).join("/");
+public/control-center/pages/library.js:204:  return tail || shortPath(filePath);
+public/control-center/pages/library.js:318:        resolve(await job());
+public/control-center/pages/library.js:362:    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+public/control-center/pages/library.js:381:    return await loadPromise;
+public/control-center/pages/library.js:394:  const resolved = await getProtectedAssetObjectUrl(projectName, asset);
+public/control-center/pages/library.js:439:            await navigator.clipboard.writeText(value);
+public/control-center/pages/library.js:442:            window.prompt("Copy asset path:", value);
+public/control-center/pages/library.js:567:  if (normalized.includes("publishing_ready")) return "publishing_ready";
+public/control-center/pages/library.js:568:  if (normalized.includes("sent_to_publishing")) return "sent_to_publishing";
+public/control-center/pages/library.js:570:  if (normalized.includes("missing")) return "missing";
+public/control-center/pages/library.js:581:  if (value === "publishing_ready") return "Publishing Ready";
+public/control-center/pages/library.js:582:  if (value === "sent_to_publishing") return "Sent to Publishing";
+public/control-center/pages/library.js:585:  if (value === "missing") return "Missing";
+public/control-center/pages/library.js:593:  if (value === "publishing_ready" || value === "sent_to_publishing") return "success";
+public/control-center/pages/library.js:642:      merged.readiness_status ||
+public/control-center/pages/library.js:676:      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth)
+public/control-center/pages/library.js:692:      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth),
+public/control-center/pages/library.js:710:  if (mediaType === "campaign-pack") return "campaign_pack";
+public/control-center/pages/library.js:715:  if (asset.prompt && !asset.image_url && !asset.video_url && !asset.audio_url) return "prompt_asset";
+public/control-center/pages/library.js:716:  if (["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status))) return "publishing_ready_asset";
+public/control-center/pages/library.js:723:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:727:  const promptText = asString(asset.prompt || payload.prompt);
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:748:    status: normalizeReadinessStatus(asset.status || asset.readiness_status || "needs_review"),
+public/control-center/pages/library.js:750:    source_of_truth: false,
+public/control-center/pages/library.js:761:    text_preview: promptText || briefText,
+public/control-center/pages/library.js:767:    campaign: asString(asset.campaign || ""),
+public/control-center/pages/library.js:771:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:789:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:790:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/library.js:797:          handoff_id: item.id,
+public/control-center/pages/library.js:800:          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+public/control-center/pages/library.js:823:function buildAssetOverview({ assets, requiredGroups }) {
+public/control-center/pages/library.js:835:  const missingRequiredAssets = requiredGroups.filter((item) => item.status === "missing").length;
+public/control-center/pages/library.js:836:  const sourceOfTruthAssets = assets.filter((asset) => asset.source_of_truth).length;
+public/control-center/pages/library.js:838:  const nextAction = requiredGroups.find((item) => item.status === "missing") || requiredGroups.find((item) => item.status === "needs_review") || null;
+public/control-center/pages/library.js:844:    missingRequiredAssets,
+public/control-center/pages/library.js:849:      ? `${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}`
+public/control-center/pages/library.js:865:    if (!entries.length || statuses.every((value) => value === "missing")) {
+public/control-center/pages/library.js:867:    } else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {
+public/control-center/pages/library.js:891:    let status = "missing";
+public/control-center/pages/library.js:907:      action: status === "missing" ? "upload" : status === "needs_review" ? "review" : "classify"
+public/control-center/pages/library.js:937:    if (selectedFolderKey === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:967:      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+public/control-center/pages/library.js:968:      || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
+public/control-center/pages/library.js:999:      if (folder.key === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:1052:    return `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
+public/control-center/pages/library.js:1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1162:        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+public/control-center/pages/library.js:1165:          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+public/control-center/pages/library.js:1184:      <div class="library-preview-copy">Preview not available for this file type.</div>
+public/control-center/pages/library.js:1203:    const resolved = await getProtectedAssetObjectUrl(projectName, asset, {
+public/control-center/pages/library.js:1239:      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+public/control-center/pages/library.js:1261:    const resolved = await enqueueLibraryThumbLoad(() => getProtectedAssetObjectUrl(projectName, asset, {
+public/control-center/pages/library.js:1313:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+public/control-center/pages/library.js:1315:  if (mode === "missing") {
+public/control-center/pages/library.js:1316:    const missing = asArray(payload.missing).join(", ") || "none";
+public/control-center/pages/library.js:1317:    return `For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.`;
+public/control-center/pages/library.js:1320:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+public/control-center/pages/library.js:1323:function promptForTextInput(title, initialValue = "") {
+public/control-center/pages/library.js:1326:  if (typeof window !== "undefined" && typeof window.prompt === "function") {
+public/control-center/pages/library.js:1328:      return Promise.resolve(window.prompt(title, initial));
+public/control-center/pages/library.js:1330:      // Fall through to custom modal when prompt is blocked.
+public/control-center/pages/library.js:1437:  missingRequiredAssets,
+public/control-center/pages/library.js:1455:      missingRequiredAssets,
+public/control-center/pages/library.js:1466:      await reloadProjectData(projectName);
+public/control-center/pages/library.js:1485:  const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
+public/control-center/pages/library.js:1504:    requiredGroups
+public/control-center/pages/library.js:1506:  const missingRequiredGroupCount = requiredGroups.filter((item) => item.status === "missing").length;
+public/control-center/pages/library.js:1507:  const readinessSummary = {
+public/control-center/pages/library.js:1509:    requiredCount: requiredGroups.length,
+public/control-center/pages/library.js:1510:    missingCount: missingRequiredGroupCount,
+public/control-center/pages/library.js:1511:    needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,
+public/control-center/pages/library.js:1512:    readinessScore: requiredGroups.length
+public/control-center/pages/library.js:1513:      ? Math.round(((requiredGroups.length - missingRequiredGroupCount) / requiredGroups.length) * 100)
+public/control-center/pages/library.js:1535:    { value: "publishing-ready", label: "Publishing Ready" }
+public/control-center/pages/library.js:1556:        <span class="data-label">Missing required assets</span>
+public/control-center/pages/library.js:1557:        <strong>${escapeHtml(formatCount(overview.missingRequiredAssets))}</strong>
+public/control-center/pages/library.js:1560:        <span class="data-label">Source-of-truth coverage</span>
+public/control-center/pages/library.js:1570:  const requiredBox = $("libraryRequiredAssetsGrid");
+public/control-center/pages/library.js:1571:  if (requiredBox) {
+public/control-center/pages/library.js:1572:    requiredBox.innerHTML = requiredGroups.map((item) => {
+public/control-center/pages/library.js:1573:      const tone = item.status === "present" ? "success" : item.status === "missing" ? "danger" : "warning";
+public/control-center/pages/library.js:1575:      const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
+public/control-center/pages/library.js:1578:        <article class="library-required-card">
+public/control-center/pages/library.js:1579:          <div class="library-required-card-head">
+public/control-center/pages/library.js:1584:          <div class="library-required-card-foot">
+public/control-center/pages/library.js:1589:              data-library-required-action="${escapeHtml(item.action)}"
+public/control-center/pages/library.js:1590:              data-library-required-key="${escapeHtml(item.key)}"
+public/control-center/pages/library.js:1625:        missingRequiredAssets,
+public/control-center/pages/library.js:1656:        missingRequiredAssets,
+public/control-center/pages/library.js:1692:        missingRequiredAssets,
+public/control-center/pages/library.js:1723:        missingRequiredAssets,
+public/control-center/pages/library.js:1760:      : `<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>`;
+public/control-center/pages/library.js:1832:          <span class="card-badge ${selectedAsset.source_of_truth ? "success" : "neutral"}">${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</span>
+public/control-center/pages/library.js:1838:        <details class="library-inspector-more">
+public/control-center/pages/library.js:1839:          <summary>More details</summary>
+public/control-center/pages/library.js:1847:        </details>
+public/control-center/pages/library.js:1854:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+public/control-center/pages/library.js:1862:      : `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
+public/control-center/pages/library.js:1873:  const aiPanelMount = $("libraryAiPanelMount");
+public/control-center/pages/library.js:1874:  if (aiPanelMount) {
+public/control-center/pages/library.js:1875:    aiPanelMount.innerHTML = renderLibraryAiPanel({
+public/control-center/pages/library.js:1876:      readiness: readinessSummary,
+public/control-center/pages/library.js:1906:              <span>${escapeHtml(`${item.asset_type} • ${item.status === "success" ? "Uploaded" : "Failed"}`)}</span>
+public/control-center/pages/library.js:1914:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+public/control-center/pages/library.js:1915:  requiredActionButtons.forEach((button) => {
+public/control-center/pages/library.js:1917:      const action = button.getAttribute("data-library-required-action") || "review";
+public/control-center/pages/library.js:1939:          missingRequiredAssets,
+public/control-center/pages/library.js:1951:      navigateTo("ai-command");
+public/control-center/pages/library.js:1952:      showMessage?.("AI classification prompt sent.");
+public/control-center/pages/library.js:1976:        missingRequiredAssets,
+public/control-center/pages/library.js:2009:        missingRequiredAssets,
+public/control-center/pages/library.js:2036:        missingRequiredAssets,
+public/control-center/pages/library.js:2168:        await openLibraryAsset(projectName, asset);
+public/control-center/pages/library.js:2184:        showError?.("Select a project before updating source of truth.");
+public/control-center/pages/library.js:2196:        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+public/control-center/pages/library.js:2198:        await reloadOrRerender();
+public/control-center/pages/library.js:2199:        showMessage?.(`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.`);
+public/control-center/pages/library.js:2203:          : (error.message || "Failed to update source of truth.");
+public/control-center/pages/library.js:2235:        await updateProjectAssetStatus(activeProjectName, assetId, status, `Status changed to ${status} from Control Center Library.`);
+public/control-center/pages/library.js:2237:        await reloadOrRerender();
+public/control-center/pages/library.js:2242:          : (error.message || "Failed to update asset status.");
+public/control-center/pages/library.js:2272:        await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");
+public/control-center/pages/library.js:2274:        await reloadOrRerender();
+public/control-center/pages/library.js:2277:        showError?.(error.message || "Failed to archive asset.");
+public/control-center/pages/library.js:2301:      const nextName = await promptForTextInput("Rename asset", asset.name || "");
+public/control-center/pages/library.js:2313:        await renameProjectAsset(activeProjectName, assetId, normalized);
+public/control-center/pages/library.js:2315:        await reloadOrRerender();
+public/control-center/pages/library.js:2318:        showError?.(error.message || "Failed to rename asset.");
+public/control-center/pages/library.js:2347:        await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");
+public/control-center/pages/library.js:2351:        await reloadOrRerender();
+public/control-center/pages/library.js:2354:        showError?.(error.message || "Failed to delete asset.");
+public/control-center/pages/library.js:2369:      const open = dropdown.classList.contains("is-open");
+public/control-center/pages/library.js:2590:      const failed = [];
+public/control-center/pages/library.js:2602:        missingRequiredAssets,
+public/control-center/pages/library.js:2613:            const result = await uploadProjectAsset(activeProjectName, assetType, file);
+public/control-center/pages/library.js:2621:            failed.push({
+public/control-center/pages/library.js:2624:              status: "failed",
+public/control-center/pages/library.js:2625:              error: error.message || "Upload failed",
+public/control-center/pages/library.js:2631:        session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);
+public/control-center/pages/library.js:2634:          await reloadProjectData(activeProjectName);
+public/control-center/pages/library.js:2645:        if (uploaded.length && !failed.length) {
+public/control-center/pages/library.js:2647:        } else if (uploaded.length && failed.length) {
+public/control-center/pages/library.js:2648:          showError?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, ${failed.length} failed.`);
+public/control-center/pages/library.js:2650:          showError?.("Upload failed for all selected files.");
+public/control-center/pages/library.js:2672:        await refreshProjectLibrary(projectName);
+public/control-center/pages/library.js:2673:        await reloadProjectData?.(projectName);
+public/control-center/pages/library.js:2676:        showError?.(error.message || "Failed to refresh library scan.");
+public/control-center/pages/library.js:2688:      navigateTo("ai-command");
+public/control-center/pages/library.js:2689:      showMessage?.("AI classification prompt sent.");
+public/control-center/pages/library.js:2693:  const missingBtn = $("libraryAiMissingBtn");
+public/control-center/pages/library.js:2694:  if (missingBtn) {
+public/control-center/pages/library.js:2695:    missingBtn.onclick = () => {
+public/control-center/pages/library.js:2697:      if (input) input.value = buildAiPrompt(projectName, "missing", { missing: missingRequiredAssets });
+public/control-center/pages/library.js:2698:      navigateTo("ai-command");
+public/control-center/pages/library.js:2699:      showMessage?.("AI missing-assets prompt sent.");
+public/control-center/pages/library.js:2713:      navigateTo("ai-command");
+public/control-center/pages/library.js:2714:      showMessage?.("Selected document extraction prompt sent.");
+public/control-center/pages/library.js:2727:      navigateTo("ai-command");
+public/control-center/pages/library.js:2728:      showMessage?.("AI document extraction prompt sent.");
+public/control-center/pages/library.js:2769:    const missingRequiredAssets = getMissingAssetLabels(assetsData);
+public/control-center/pages/library.js:2803:            <span class="card-badge warning">Action required where missing</span>
+public/control-center/pages/library.js:2805:          <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
+public/control-center/pages/library.js:2832:              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+public/control-center/pages/library.js:2845:            <div class="library-workspace-main">
+public/control-center/pages/library.js:2866:                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+public/control-center/pages/library.js:2882:                    <option value="publishing_ready">Publishing ready</option>
+public/control-center/pages/library.js:2883:                    <option value="sent_to_publishing">Sent to publishing</option>
+public/control-center/pages/library.js:2916:                <h3>Header + Main View + Action + AI</h3>
+public/control-center/pages/library.js:2921:                    <h3>Asset Detail</h3>
+public/control-center/pages/library.js:2943:      missingRequiredAssets,
+
+===== LIBRARY DATA INPUTS / CONTEXT MARKERS =====
+public/control-center/pages/library/projection-adapter.js:8:    sourceOfTruth: Boolean(asset.source_of_truth),
+public/control-center/pages/library/projection-adapter.js:17:export function normalizeLibraryAssets(assets = []) {
+public/control-center/pages/library/projection-adapter.js:18:  if (!Array.isArray(assets)) return [];
+public/control-center/pages/library/projection-adapter.js:19:  return assets.map(normalizeLibraryAsset);
+public/control-center/pages/library/command-router.js:10:  SET_SOURCE_OF_TRUTH: "set-source-of-truth",
+public/control-center/pages/library/session-store.js:2:  selectedAssetId: "",
+public/control-center/pages/library/session-store.js:6:  sourceFilter: "all",
+public/control-center/pages/library/session-store.js:26:export function normalizeLibrarySession(session = {}) {
+public/control-center/pages/library/session-store.js:27:  return createLibrarySession(session);
+public/control-center/pages/library/session-store.js:30:export function updateLibrarySession(session = {}, patch = {}) {
+public/control-center/pages/library/session-store.js:32:    ...session,
+public/control-center/pages/library/session-store.js:35:      ...(session.expandedPanels || {}),
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:2:  const hasSelectedAsset = Boolean(selectedAsset);
+public/control-center/pages/library/ai-panel.js:3:  const missingCountNumber = Number(readiness?.missingCount || 0);
+public/control-center/pages/library/ai-panel.js:4:  const readinessScoreValue = readiness?.readinessScore == null ? null : Number(readiness.readinessScore);
+public/control-center/pages/library/ai-panel.js:6:  const selectedName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No selected asset");
+public/control-center/pages/library/ai-panel.js:7:  const readinessScore = escapePanelHtml(readinessScoreValue == null || Number.isNaN(readinessScoreValue) ? "n/a" : `${readinessScoreValue}%`);
+public/control-center/pages/library/ai-panel.js:8:  const nextBestAction = buildLibraryAiNextBestAction({ readiness, selectedAsset });
+public/control-center/pages/library/ai-panel.js:29:          <strong>${readinessScore}</strong>
+public/control-center/pages/library/ai-panel.js:49:          <button class="btn btn-secondary" type="button" disabled aria-disabled="true">Review missing assets</button>
+public/control-center/pages/library/ai-panel.js:56:function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } = {}) {
+public/control-center/pages/library/ai-panel.js:57:  const missingCount = Number(readiness?.missingCount || 0);
+public/control-center/pages/library/ai-panel.js:59:  if (!selectedAsset && missingCount > 0) {
+public/control-center/pages/library/ai-panel.js:62:      description: `${missingCount} required asset category${missingCount === 1 ? "" : "ies"} still need attention before the Library is fully ready.`
+public/control-center/pages/library/ai-panel.js:66:  if (!selectedAsset) {
+public/control-center/pages/library/ai-panel.js:73:  const isSource = Boolean(selectedAsset?.source_of_truth ?? selectedAsset?.sourceOfTruth ?? selectedAsset?.is_source_of_truth);
+public/control-center/pages/library/ai-panel.js:74:  const status = String(selectedAsset?.status || "").toLowerCase();
+public/control-center/pages/library/ai-panel.js:78:      title: "Confirm source-of-truth",
+public/control-center/pages/library/ai-panel.js:79:      description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns."
+public/control-center/pages/library/ai-panel.js:92:    description: "This selected asset looks ready for downstream campaign, media, and publishing workflows."
+public/control-center/pages/library/catalog-readiness.js:6:        return { id: item, label: item, required: true };
+public/control-center/pages/library/catalog-readiness.js:12:        required: item?.required !== false,
+public/control-center/pages/library/catalog-readiness.js:19:export function summarizeLibraryReadiness({ assets = [], requiredCategories = [] } = {}) {
+public/control-center/pages/library/catalog-readiness.js:20:  const required = normalizeRequiredCategories(requiredCategories);
+public/control-center/pages/library/catalog-readiness.js:21:  const assetList = Array.isArray(assets) ? assets : [];
+public/control-center/pages/library/catalog-readiness.js:29:  const missing = required.filter((item) => !byCategory.has(item.id));
+public/control-center/pages/library/catalog-readiness.js:30:  const complete = required.length ? required.length - missing.length : 0;
+public/control-center/pages/library/catalog-readiness.js:31:  const readinessScore = required.length
+public/control-center/pages/library/catalog-readiness.js:32:    ? Math.round((complete / required.length) * 100)
+public/control-center/pages/library/catalog-readiness.js:37:    requiredCount: required.length,
+public/control-center/pages/library/catalog-readiness.js:40:    readinessScore,
+public/control-center/pages/library/catalog-readiness.js:46:export function buildLibraryNextBestAction(readiness = {}) {
+public/control-center/pages/library/catalog-readiness.js:47:  if (readiness.missingCount > 0) {
+public/control-center/pages/library/catalog-readiness.js:49:      actionId: "upload-missing-required-assets",
+public/control-center/pages/library/catalog-readiness.js:51:      label: "Upload missing required assets",
+public/control-center/pages/library/catalog-readiness.js:52:      reason: `${readiness.missingCount} required asset categories are still missing.`,
+public/control-center/pages/library/catalog-readiness.js:58:    actionId: "review-library-assets",
+public/control-center/pages/library/catalog-readiness.js:60:    label: "Review and approve Library assets",
+public/control-center/pages/library/catalog-readiness.js:61:    reason: "Required asset coverage is available. Review quality and source-of-truth status.",
+public/control-center/pages/library/action-panel.js:1:export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/action-panel.js:2:  const hasSelectedAsset = Boolean(selectedAsset);
+public/control-center/pages/library/action-panel.js:3:  const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
+public/control-center/pages/library/action-panel.js:4:  const assetType = escapePanelHtml(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a");
+public/control-center/pages/library/action-panel.js:5:  const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
+public/control-center/pages/library/action-panel.js:6:  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+public/control-center/pages/library/action-panel.js:7:  const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
+public/control-center/pages/library/action-panel.js:41:          <strong>${escapePanelHtml(sourceLabel)}</strong>
+public/control-center/pages/library/action-panel.js:53:          <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
+public/control-center/pages/library/action-panel.js:74:  return Boolean(asset?.source_of_truth ?? asset?.sourceOfTruth ?? asset?.is_source_of_truth);
+public/control-center/pages/library.js:4:import { normalizeLibrarySession } from "./library/session-store.js";
+public/control-center/pages/library.js:28:const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+public/control-center/pages/library.js:45:  { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
+public/control-center/pages/library.js:53:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:74:    why: "Approved product and packaging visuals are required for high-trust creative production.",
+public/control-center/pages/library.js:81:    why: "Video source assets are required for reels, demos, and cutdowns.",
+public/control-center/pages/library.js:101:  { key: "all_assets", label: "All Assets" },
+public/control-center/pages/library.js:110:  { key: "uploaded_session", label: "Uploaded This Session" },
+public/control-center/pages/library.js:111:  { key: "source_of_truth", label: "Source of Truth" },
+public/control-center/pages/library.js:243:  const base = `/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}`;
+public/control-center/pages/library.js:261:  if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;
+public/control-center/pages/library.js:262:  return value.includes("/media/file/");
+public/control-center/pages/library.js:450:          if (!fileUrl.includes("/media/file/")) return;
+public/control-center/pages/library.js:497:      selectedAssetId: "",
+public/control-center/pages/library.js:503:      folderKey: "all_assets",
+public/control-center/pages/library.js:541:function getUploadAssetType(session, catalog, selectedValue) {
+public/control-center/pages/library.js:542:  const normalized = getSafeAssetType(selectedValue || session.uploadType);
+public/control-center/pages/library.js:543:  const valid = new Set(asArray(catalog).map((item) => item.asset_type));
+public/control-center/pages/library.js:599:function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {
+public/control-center/pages/library.js:600:  const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));
+public/control-center/pages/library.js:603:    legacyRegistry?.assets ||
+public/control-center/pages/library.js:608:  const assetItems = asArray(assetsData?.assets).length
+public/control-center/pages/library.js:609:    ? asArray(assetsData.assets)
+public/control-center/pages/library.js:628:    const canonicalType = getCanonicalAssetType(rawType, catalog);
+public/control-center/pages/library.js:633:    const catalogItem = catalogMap.get(canonicalType) || {};
+public/control-center/pages/library.js:642:      merged.readiness_status ||
+public/control-center/pages/library.js:676:      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth)
+public/control-center/pages/library.js:688:      type_label: catalogItem.display_label || catalogItem.label || titleCase(canonicalType || "asset"),
+public/control-center/pages/library.js:690:      source_label: asString(merged.source_label || merged.source || merged.scan_source || "Library"),
+public/control-center/pages/library.js:691:      source_key: asString(merged.source_key || merged.source || merged.scan_source || "library").toLowerCase(),
+public/control-center/pages/library.js:692:      source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth),
+public/control-center/pages/library.js:693:      used_in: asArray(merged.used_in || catalogItem.guidance?.used_in || ["Library"]),
+public/control-center/pages/library.js:709:  const mediaType = toKey(asset.media_type);
+public/control-center/pages/library.js:710:  if (mediaType === "campaign-pack") return "campaign_pack";
+public/control-center/pages/library.js:711:  if (mediaType === "video") return "generated_media";
+public/control-center/pages/library.js:712:  if (mediaType === "voice") return "voice_script";
+public/control-center/pages/library.js:717:  return "generated_media";
+public/control-center/pages/library.js:720:function normalizeManagedMediaAsset(rawAsset = {}, index = 0, sourceKind = "local") {
+public/control-center/pages/library.js:723:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:729:  const managedType = inferManagedAssetType({
+public/control-center/pages/library.js:739:    id: `managed-${id}`,
+public/control-center/pages/library.js:741:    kind: "managed_media",
+public/control-center/pages/library.js:742:    source_signature: asString(asset.source_signature),
+public/control-center/pages/library.js:743:    name: asString(asset.title || `${asString(asset.media_type || "media")} ${asString(asset.version_id || "version")}`),
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:745:    asset_type: managedType,
+public/control-center/pages/library.js:748:    status: normalizeReadinessStatus(asset.status || asset.readiness_status || "needs_review"),
+public/control-center/pages/library.js:750:    source_of_truth: false,
+public/control-center/pages/library.js:763:    media_payload: payload,
+public/control-center/pages/library.js:764:    media_type: asString(asset.media_type || payload.mode || "media"),
+public/control-center/pages/library.js:770:    source_kind: sourceKind,
+public/control-center/pages/library.js:771:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:789:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:790:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/library.js:797:          handoff_id: item.id,
+public/control-center/pages/library.js:800:          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+public/control-center/pages/library.js:809:    const key = asString(asset.source_signature || asset.asset_id || asset.id);
+public/control-center/pages/library.js:823:function buildAssetOverview({ assets, requiredGroups }) {
+public/control-center/pages/library.js:827:  const recentlyUploadedByDate = assets.filter((asset) => {
+public/control-center/pages/library.js:833:  const approvedAssets = assets.filter((asset) => asset.status === "approved").length;
+public/control-center/pages/library.js:834:  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+public/control-center/pages/library.js:835:  const missingRequiredAssets = requiredGroups.filter((item) => item.status === "missing").length;
+public/control-center/pages/library.js:836:  const sourceOfTruthAssets = assets.filter((asset) => asset.source_of_truth).length;
+public/control-center/pages/library.js:837:  const sourceCoverage = assets.length ? Math.round((sourceOfTruthAssets / assets.length) * 100) : 0;
+public/control-center/pages/library.js:838:  const nextAction = requiredGroups.find((item) => item.status === "missing") || requiredGroups.find((item) => item.status === "needs_review") || null;
+public/control-center/pages/library.js:841:    totalAssets: assets.length,
+public/control-center/pages/library.js:845:    sourceOfTruthAssets,
+public/control-center/pages/library.js:846:    sourceCoverage,
+public/control-center/pages/library.js:850:      : "Required assets are covered. Continue with classification and approvals."
+public/control-center/pages/library.js:912:function getFilteredAssets(allAssets, session, bucketMap) {
+public/control-center/pages/library.js:913:  const selectedFolderKey = session.folderKey || "all_assets";
+public/control-center/pages/library.js:914:  const selectedCategoryKey = session.selectedCategoryKey || "all";
+public/control-center/pages/library.js:916:  const selectedType = session.selectedType || "all";
+public/control-center/pages/library.js:917:  const selectedStatus = session.selectedStatus || "active";
+public/control-center/pages/library.js:921:  const selectedSource = session.selectedSource || "all";
+public/control-center/pages/library.js:922:  const sortBy = session.sortBy || "updated_desc";
+public/control-center/pages/library.js:924:  const searchValue = asString(session.searchQuery).trim();
+public/control-center/pages/library.js:927:    asArray(session.recentUploads)
+public/control-center/pages/library.js:936:    if (selectedFolderKey === "all_assets") return true;
+public/control-center/pages/library.js:937:    if (selectedFolderKey === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:939:    if (selectedFolderKey === "uploaded_session") {
+public/control-center/pages/library.js:966:      || (selectedSource === "media-studio" && asset.kind === "managed_media")
+public/control-center/pages/library.js:967:      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+public/control-center/pages/library.js:990:function computeFolderCounts(allAssets, session) {
+public/control-center/pages/library.js:996:      const inRecent = asArray(session.recentUploads).some((entry) => entry?.status === "success" && asString(entry.filename).trim() === filename);
+public/control-center/pages/library.js:998:      if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);
+public/control-center/pages/library.js:999:      if (folder.key === "source_of_truth") return Boolean(asset.source_of_truth);
+public/control-center/pages/library.js:1001:      if (folder.key === "uploaded_session") return inRecent;
+public/control-center/pages/library.js:1176:  const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);
+public/control-center/pages/library.js:1293:function getWorkspaceAssetItems(assetsData, registry) {
+public/control-center/pages/library.js:1295:    assetsData.assets,
+public/control-center/pages/library.js:1296:    assetsData.items,
+public/control-center/pages/library.js:1297:    assetsData.records,
+public/control-center/pages/library.js:1298:    registry.assets,
+public/control-center/pages/library.js:1313:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+public/control-center/pages/library.js:1317:    return `For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.`;
+public/control-center/pages/library.js:1432:  session,
+public/control-center/pages/library.js:1433:  assetsData,
+public/control-center/pages/library.js:1450:      session,
+public/control-center/pages/library.js:1451:      assetsData,
+public/control-center/pages/library.js:1473:  const catalog = getAssetCatalog(assetsData);
+public/control-center/pages/library.js:1475:  const managedAssets = getManagedMediaAssets(projectName, operations);
+public/control-center/pages/library.js:1476:  const workspaceAssetItems = getWorkspaceAssetItems(assetsData, registry);
+public/control-center/pages/library.js:1478:    ...assetsData,
+public/control-center/pages/library.js:1479:    assets: workspaceAssetItems
+public/control-center/pages/library.js:1482:    ...managedAssets,
+public/control-center/pages/library.js:1483:    ...normalizeAssets(projectName, workspaceAssetsData, registry, categoryByType, catalog)
+public/control-center/pages/library.js:1485:  const requiredGroups = buildRequiredAssetGroups(categoryReadiness);
+public/control-center/pages/library.js:1488:  const filteredAssets = getFilteredAssets(allAssets, session, bucketMap);
+public/control-center/pages/library.js:1490:  session.page = Math.min(Math.max(Number(session.page) || 1, 1), totalPages);
+public/control-center/pages/library.js:1491:  const pageStart = (session.page - 1) * LIBRARY_PAGE_SIZE;
+public/control-center/pages/library.js:1494:  const selectedAssetExists = filteredAssets.some((asset) => asset.id === session.selectedAssetId);
+public/control-center/pages/library.js:1495:  if (!selectedAssetExists) {
+public/control-center/pages/library.js:1496:    session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
+public/control-center/pages/library.js:1499:  const selectedAsset = filteredAssets.find((asset) => asset.id === session.selectedAssetId)
+public/control-center/pages/library.js:1500:    || allAssets.find((asset) => asset.id === session.selectedAssetId)
+public/control-center/pages/library.js:1503:    assets: allAssets,
+public/control-center/pages/library.js:1504:    requiredGroups
+public/control-center/pages/library.js:1506:  const missingRequiredGroupCount = requiredGroups.filter((item) => item.status === "missing").length;
+public/control-center/pages/library.js:1507:  const readinessSummary = {
+public/control-center/pages/library.js:1509:    requiredCount: requiredGroups.length,
+public/control-center/pages/library.js:1511:    needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,
+public/control-center/pages/library.js:1512:    readinessScore: requiredGroups.length
+public/control-center/pages/library.js:1513:      ? Math.round(((requiredGroups.length - missingRequiredGroupCount) / requiredGroups.length) * 100)
+public/control-center/pages/library.js:1522:  const managedTypeOptions = [...new Set(managedAssets.map((item) => item.asset_type).filter(Boolean))];
+public/control-center/pages/library.js:1525:    ...managedTypeOptions.map((type) => ({ value: type, label: titleCase(type) })),
+public/control-center/pages/library.js:1526:    ...catalog
+public/control-center/pages/library.js:1527:      .filter((item) => !managedTypeOptions.includes(item.asset_type))
+public/control-center/pages/library.js:1531:  const sourceOptions = [
+public/control-center/pages/library.js:1532:    { value: "all", label: "All sources" },
+public/control-center/pages/library.js:1533:    { value: "media-studio", label: "Media Studio" },
+public/control-center/pages/library.js:1534:    { value: "generated-media", label: "Generated Media" },
+public/control-center/pages/library.js:1538:  const folderCounts = computeFolderCounts(allAssets, session);
+public/control-center/pages/library.js:1544:        <span class="data-label">Total assets</span>
+public/control-center/pages/library.js:1548:        <span class="data-label">Approved assets</span>
+public/control-center/pages/library.js:1556:        <span class="data-label">Missing required assets</span>
+public/control-center/pages/library.js:1561:        <strong>${escapeHtml(`${formatCount(overview.sourceCoverage)}%`)}</strong>
+public/control-center/pages/library.js:1570:  const requiredBox = $("libraryRequiredAssetsGrid");
+public/control-center/pages/library.js:1571:  if (requiredBox) {
+public/control-center/pages/library.js:1572:    requiredBox.innerHTML = requiredGroups.map((item) => {
+public/control-center/pages/library.js:1578:        <article class="library-required-card">
+public/control-center/pages/library.js:1579:          <div class="library-required-card-head">
+public/control-center/pages/library.js:1584:          <div class="library-required-card-foot">
+public/control-center/pages/library.js:1589:              data-library-required-action="${escapeHtml(item.action)}"
+public/control-center/pages/library.js:1590:              data-library-required-key="${escapeHtml(item.key)}"
+public/control-center/pages/library.js:1602:      <option value="${escapeHtml(option.value)}"${session.selectedType === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+public/control-center/pages/library.js:1604:    typeSelect.value = session.selectedType || "all";
+public/control-center/pages/library.js:1613:          session.selectedType = value;
+public/control-center/pages/library.js:1614:          session.page = 1;
+public/control-center/pages/library.js:1620:        session,
+public/control-center/pages/library.js:1621:        assetsData,
+public/control-center/pages/library.js:1637:    statusSelect.value = session.selectedStatus;
+public/control-center/pages/library.js:1644:          session.selectedStatus = value;
+public/control-center/pages/library.js:1645:          session.page = 1;
+public/control-center/pages/library.js:1651:        session,
+public/control-center/pages/library.js:1652:        assetsData,
+public/control-center/pages/library.js:1666:  const sourceSelect = $("libraryFilterSourceSelect");
+public/control-center/pages/library.js:1667:  if (sourceSelect) {
+public/control-center/pages/library.js:1668:    sourceSelect.innerHTML = sourceOptions.map((option) => `
+public/control-center/pages/library.js:1669:      <option value="${escapeHtml(option.value)}"${session.selectedSource === option.value ? " selected" : ""}>${escapeHtml(option.label)}</option>
+public/control-center/pages/library.js:1671:    sourceSelect.value = session.selectedSource || "all";
+public/control-center/pages/library.js:1672:    sourceSelect.removeAttribute("disabled");
+public/control-center/pages/library.js:1673:    sourceSelect.removeAttribute("readonly");
+public/control-center/pages/library.js:1674:    sourceSelect.onchange = (event) => {
+public/control-center/pages/library.js:1676:        filter: "source",
+public/control-center/pages/library.js:1680:          session.selectedSource = value;
+public/control-center/pages/library.js:1681:          session.page = 1;
+public/control-center/pages/library.js:1687:        session,
+public/control-center/pages/library.js:1688:        assetsData,
+public/control-center/pages/library.js:1704:    sortSelect.value = session.sortBy;
+public/control-center/pages/library.js:1711:          session.sortBy = value;
+public/control-center/pages/library.js:1712:          session.page = 1;
+public/control-center/pages/library.js:1718:        session,
+public/control-center/pages/library.js:1719:        assetsData,
+public/control-center/pages/library.js:1748:          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
+public/control-center/pages/library.js:1760:      : `<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>`;
+public/control-center/pages/library.js:1771:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+public/control-center/pages/library.js:1772:        <span>Page ${escapeHtml(String(session.page))} / ${escapeHtml(String(totalPages))}</span>
+public/control-center/pages/library.js:1773:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+public/control-center/pages/library.js:1783:      if (leftId === session.selectedAssetId) return -1;
+public/control-center/pages/library.js:1784:      if (rightId === session.selectedAssetId) return 1;
+public/control-center/pages/library.js:1807:    previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+public/control-center/pages/library.js:1810:    if (protectedPreviewNode && selectedAsset) {
+public/control-center/pages/library.js:1814:        asset: selectedAsset,
+public/control-center/pages/library.js:1823:    previewMeta.innerHTML = selectedAsset
+public/control-center/pages/library.js:1826:          <strong>${escapeHtml(selectedAsset.name)}</strong>
+public/control-center/pages/library.js:1827:          <span>${escapeHtml(selectedAsset.filename || basename(selectedAsset.file_path || "") || "-")}</span>
+public/control-center/pages/library.js:1831:          <span class="card-badge ${escapeHtml(toStatusTone(selectedAsset.status))}">${escapeHtml(toStatusLabel(selectedAsset.status))}</span>
+public/control-center/pages/library.js:1832:          <span class="card-badge ${selectedAsset.source_of_truth ? "success" : "neutral"}">${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</span>
+public/control-center/pages/library.js:1833:          <span class="card-badge neutral">${escapeHtml(selectedAsset.asset_type)}</span>
+public/control-center/pages/library.js:1836:        <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
+public/control-center/pages/library.js:1841:            <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(shortAssetId(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-"))}</strong></div>
+public/control-center/pages/library.js:1842:            <div class="data-row"><span>Full Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
+public/control-center/pages/library.js:1843:            <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
+public/control-center/pages/library.js:1844:            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+public/control-center/pages/library.js:1845:            <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
+public/control-center/pages/library.js:1850:          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
+public/control-center/pages/library.js:1851:          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
+public/control-center/pages/library.js:1852:          ${selectedAsset.kind === "managed_media"
+public/control-center/pages/library.js:1853:      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed")}</button>`
+public/control-center/pages/library.js:1854:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+public/control-center/pages/library.js:1855:          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
+public/control-center/pages/library.js:1856:          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
+public/control-center/pages/library.js:1857:          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
+public/control-center/pages/library.js:1858:          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Soft-delete this asset after confirmation">Soft Delete</button>
+public/control-center/pages/library.js:1859:          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Archive this asset after confirmation">Archive</button>`}
+public/control-center/pages/library.js:1868:      selectedAsset,
+public/control-center/pages/library.js:1876:      readiness: readinessSummary,
+public/control-center/pages/library.js:1877:      selectedAsset,
+public/control-center/pages/library.js:1895:      : `<div class="empty-box">Recent uploads and updates will appear here after you add or refresh assets.</div>`;
+public/control-center/pages/library.js:1900:    uploadSummary.innerHTML = session.recentUploads.length
+public/control-center/pages/library.js:1903:          ${session.recentUploads.slice(0, 5).map((item) => `
+public/control-center/pages/library.js:1911:      : `<div class="empty-box">No uploads in this session yet. Choose files and upload them to start building the asset library.</div>`;
+public/control-center/pages/library.js:1914:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+public/control-center/pages/library.js:1915:  requiredActionButtons.forEach((button) => {
+public/control-center/pages/library.js:1917:      const action = button.getAttribute("data-library-required-action") || "review";
+public/control-center/pages/library.js:1921:        session.uploadType = uploadType;
+public/control-center/pages/library.js:1930:        session.selectedStatus = "needs_review";
+public/control-center/pages/library.js:1934:          session,
+public/control-center/pages/library.js:1935:          assetsData,
+public/control-center/pages/library.js:1965:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:1971:        session,
+public/control-center/pages/library.js:1972:        assetsData,
+public/control-center/pages/library.js:1998:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2004:        session,
+public/control-center/pages/library.js:2005:        assetsData,
+public/control-center/pages/library.js:2025:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2031:        session,
+public/control-center/pages/library.js:2032:        assetsData,
+public/control-center/pages/library.js:2054:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2067:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2077:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+public/control-center/pages/library.js:2084:          session.folderKey = value;
+public/control-center/pages/library.js:2085:          session.page = 1;
+public/control-center/pages/library.js:2088:            session.selectedStatus = "archived";
+public/control-center/pages/library.js:2106:        session.viewMode = viewMode;
+public/control-center/pages/library.js:2107:        session.page = 1;
+public/control-center/pages/library.js:2117:    finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+public/control-center/pages/library.js:2147:    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+public/control-center/pages/library.js:2178:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+public/control-center/pages/library.js:2179:  sourceOfTruthButtons.forEach((button) => {
+public/control-center/pages/library.js:2184:        showError?.("Select a project before updating source of truth.");
+public/control-center/pages/library.js:2188:      const assetId = button.getAttribute("data-library-source-truth") || "";
+public/control-center/pages/library.js:2196:        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+public/control-center/pages/library.js:2197:        session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2199:        showMessage?.(`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.`);
+public/control-center/pages/library.js:2203:          : (error.message || "Failed to update source of truth.");
+public/control-center/pages/library.js:2236:        if (asset?.id) session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2254:        showError?.("Select a project before archiving assets.");
+public/control-center/pages/library.js:2273:        if (asset?.id) session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2288:        showError?.("Select a project before renaming assets.");
+public/control-center/pages/library.js:2314:        session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2329:        showError?.("Select a project before deleting assets.");
+public/control-center/pages/library.js:2348:        if (asset?.id === session.selectedAssetId) {
+public/control-center/pages/library.js:2349:          session.selectedAssetId = "";
+public/control-center/pages/library.js:2383:      session.uploadType = uploadType;
+public/control-center/pages/library.js:2400:        ? Math.max(1, (Number(session.page) || 1) - 1)
+public/control-center/pages/library.js:2402:          ? Math.min(totalPages, (Number(session.page) || 1) + 1)
+public/control-center/pages/library.js:2403:          : Number(session.page) || 1;
+public/control-center/pages/library.js:2407:          session.page = page;
+public/control-center/pages/library.js:2417:    searchInput.value = session.searchQuery;
+public/control-center/pages/library.js:2424:          session.searchQuery = value;
+public/control-center/pages/library.js:2425:          session.page = 1;
+public/control-center/pages/library.js:2441:    uploadTypeSelect.value = session.uploadType;
+public/control-center/pages/library.js:2452:      session.uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
+public/control-center/pages/library.js:2469:        uploadBtn.disabled = session.uploading || files.length === 0;
+public/control-center/pages/library.js:2470:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2563:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2564:    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2573:      if (session.uploading) return;
+public/control-center/pages/library.js:2583:        assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);
+public/control-center/pages/library.js:2593:      session.uploading = true;
+public/control-center/pages/library.js:2597:        session,
+public/control-center/pages/library.js:2598:        assetsData,
+public/control-center/pages/library.js:2631:        session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);
+public/control-center/pages/library.js:2642:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2643:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2653:        session.uploading = false;
+public/control-center/pages/library.js:2654:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+public/control-center/pages/library.js:2655:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+public/control-center/pages/library.js:2699:      showMessage?.("AI missing-assets prompt sent.");
+public/control-center/pages/library.js:2706:      if (!selectedAsset) {
+public/control-center/pages/library.js:2712:      if (input) input.value = buildAiPrompt(projectName, "extract", { docs: [selectedAsset.name] });
+public/control-center/pages/library.js:2755:    const state = getState();
+public/control-center/pages/library.js:2756:    const projectName = state.context.currentProject || "";
+public/control-center/pages/library.js:2757:    const registry = asObject(state.data.registry);
+public/control-center/pages/library.js:2758:    const baseAssetsData = Array.isArray(state.data.assets) ? { assets: state.data.assets } : asObject(state.data.assets);
+public/control-center/pages/library.js:2759:    const registryAssets = asArray(registry.assets || registry.items || registry.records);
+public/control-center/pages/library.js:2760:    const assetsDataAssets = asArray(baseAssetsData.assets);
+public/control-center/pages/library.js:2761:    const assetsData = {
+public/control-center/pages/library.js:2763:      assets: assetsDataAssets.length ? assetsDataAssets : registryAssets
+public/control-center/pages/library.js:2765:    const operations = asObject(state.data.operations);
+public/control-center/pages/library.js:2766:    const session = ensureLibrarySession(projectName);
+public/control-center/pages/library.js:2767:    session.viewMode = "grid";
+public/control-center/pages/library.js:2768:    const categoryReadiness = getCategoryReadinessList(assetsData);
+public/control-center/pages/library.js:2769:    const missingRequiredAssets = getMissingAssetLabels(assetsData);
+public/control-center/pages/library.js:2770:    const renderCatalog = getAssetCatalog(assetsData);
+public/control-center/pages/library.js:2774:      ...assetsData,
+public/control-center/pages/library.js:2775:      assets: getWorkspaceAssetItems(assetsData, registry)
+public/control-center/pages/library.js:2781:    const folderCounts = computeFolderCounts(renderAllAssets, session);
+public/control-center/pages/library.js:2803:            <span class="card-badge warning">Action required where missing</span>
+public/control-center/pages/library.js:2805:          <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
+public/control-center/pages/library.js:2828:                ${getAssetCatalog(assetsData).map((item) => `
+public/control-center/pages/library.js:2829:                  <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
+public/control-center/pages/library.js:2832:              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+public/control-center/pages/library.js:2844:          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+public/control-center/pages/library.js:2851:      const active = (session.folderKey || "all_assets") === folder.key;
+public/control-center/pages/library.js:2891:                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
+public/control-center/pages/library.js:2895:                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+public/control-center/pages/library.js:2938:      session,
+public/control-center/pages/library.js:2939:      assetsData,
+
+===== LIBRARY ACTION / MUTATION MARKERS =====
+public/control-center/pages/library/command-router.js:14:  DELETE_ASSET: "delete-asset",
+public/control-center/pages/library.js:9:  archiveProjectAsset,
+public/control-center/pages/library.js:10:  deleteProjectAsset,
+public/control-center/pages/library.js:11:  fetchProtectedMediaBlob,
+public/control-center/pages/library.js:12:  refreshProjectLibrary,
+public/control-center/pages/library.js:13:  renameProjectAsset,
+public/control-center/pages/library.js:14:  setProjectAssetSourceOfTruth,
+public/control-center/pages/library.js:15:  updateProjectAssetStatus,
+public/control-center/pages/library.js:16:  uploadProjectAsset
+public/control-center/pages/library.js:292:  libraryProtectedUrlCache.delete(key);
+public/control-center/pages/library.js:362:    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+public/control-center/pages/library.js:384:      libraryProtectedUrlPromiseCache.delete(cacheKey);
+public/control-center/pages/library.js:461:              ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+public/control-center/pages/library.js:953:    const isDeleted = Boolean(asset.deleted || asset.is_deleted);
+public/control-center/pages/library.js:998:      if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);
+public/control-center/pages/library.js:1238:      ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+public/control-center/pages/library.js:1858:          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Soft-delete this asset after confirmation">Soft Delete</button>
+public/control-center/pages/library.js:2171:          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+public/control-center/pages/library.js:2196:        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+public/control-center/pages/library.js:2202:          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+public/control-center/pages/library.js:2229:      const confirmed = status === "approved" ? true : confirm(`Set this asset status to "${status}"?`);
+public/control-center/pages/library.js:2235:        await updateProjectAssetStatus(activeProjectName, assetId, status, `Status changed to ${status} from Control Center Library.`);
+public/control-center/pages/library.js:2241:          ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
+public/control-center/pages/library.js:2267:      if (!confirm(`Archive this asset?\n\nThis keeps the file registered but moves it out of active Library views.`)) {
+public/control-center/pages/library.js:2272:        await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");
+public/control-center/pages/library.js:2313:        await renameProjectAsset(activeProjectName, assetId, normalized);
+public/control-center/pages/library.js:2323:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+public/control-center/pages/library.js:2324:  deleteButtons.forEach((button) => {
+public/control-center/pages/library.js:2333:      const id = button.getAttribute("data-library-delete") || "";
+public/control-center/pages/library.js:2342:      if (!confirm(`Soft-delete this asset?\n\nThis is a registry-level soft delete. The asset will be removed from active Library views.`)) {
+public/control-center/pages/library.js:2347:        await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");
+public/control-center/pages/library.js:2352:        showMessage?.("Asset deleted (soft delete).");
+public/control-center/pages/library.js:2354:        showError?.(error.message || "Failed to delete asset.");
+public/control-center/pages/library.js:2613:            const result = await uploadProjectAsset(activeProjectName, assetType, file);
+public/control-center/pages/library.js:2672:        await refreshProjectLibrary(projectName);
+
+===== EXISTING PANEL MARKERS =====
+public/control-center/styles/14-page-standard.css:825:[data-page="library"] .library-panel-mount:empty {
+public/control-center/styles/14-page-standard.css:856:[data-page="library"] .library-action-panel,
+public/control-center/styles/14-page-standard.css:857:[data-page="library"] .library-ai-panel {
+public/control-center/pages/library/action-panel.js:1:export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/action-panel.js:16:    <section class="card library-action-panel" data-library-action-panel>
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:12:    <section class="card library-ai-panel" data-library-ai-panel>
+public/control-center/pages/library.js:1:import { renderLibraryActionPanel } from "./library/action-panel.js";
+public/control-center/pages/library.js:2:import { renderLibraryAiPanel } from "./library/ai-panel.js";
+public/control-center/pages/library.js:1867:    actionPanelMount.innerHTML = renderLibraryActionPanel({
+public/control-center/pages/library.js:1875:    aiPanelMount.innerHTML = renderLibraryAiPanel({
+public/control-center/pages/library.js:2927:                <div id="libraryActionPanelMount" class="library-panel-mount"></div>
+public/control-center/pages/library.js:2928:                <div id="libraryAiPanelMount" class="library-panel-mount"></div>
+
+===== ROUTE / LAYOUT MARKERS =====
+public/control-center/pages/library/listener-lifecycle.js:5:    if (!target || typeof target.addEventListener !== "function" || typeof handler !== "function") {
+public/control-center/pages/library/listener-lifecycle.js:9:    target.addEventListener(type, handler, options);
+public/control-center/pages/library.js:134:function bindLibraryControlEventShield(scope) {
+public/control-center/pages/library.js:1429:function bindLibraryWorkspace({
+public/control-center/pages/library.js:1447:    bindLibraryWorkspace({
+public/control-center/pages/library.js:1470:    rerender();
+public/control-center/pages/library.js:1617:      bindLibraryWorkspace({
+public/control-center/pages/library.js:1648:      bindLibraryWorkspace({
+public/control-center/pages/library.js:1684:      bindLibraryWorkspace({
+public/control-center/pages/library.js:1715:      bindLibraryWorkspace({
+public/control-center/pages/library.js:1748:          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
+public/control-center/pages/library.js:1931:        bindLibraryWorkspace({
+public/control-center/pages/library.js:1968:      bindLibraryWorkspace({
+public/control-center/pages/library.js:2001:      bindLibraryWorkspace({
+public/control-center/pages/library.js:2028:      bindLibraryWorkspace({
+public/control-center/pages/library.js:2057:      rerender();
+public/control-center/pages/library.js:2070:      rerender();
+public/control-center/pages/library.js:2093:      rerender();
+public/control-center/pages/library.js:2111:    rerender();
+public/control-center/pages/library.js:2198:        await reloadOrRerender();
+public/control-center/pages/library.js:2237:        await reloadOrRerender();
+public/control-center/pages/library.js:2274:        await reloadOrRerender();
+public/control-center/pages/library.js:2315:        await reloadOrRerender();
+public/control-center/pages/library.js:2351:        await reloadOrRerender();
+public/control-center/pages/library.js:2411:      rerender();
+public/control-center/pages/library.js:2434:        rerender();
+public/control-center/pages/library.js:2507:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:2514:        dropZone.addEventListener(eventName, (event) => {
+public/control-center/pages/library.js:2520:      dropZone.addEventListener("drop", (event) => {
+public/control-center/pages/library.js:2594:      bindLibraryWorkspace({
+public/control-center/pages/library.js:2657:          rerender();
+public/control-center/pages/library.js:2733:export const libraryRoute = {
+public/control-center/pages/library.js:2735:  disableStandardLayout: true,
+public/control-center/pages/library.js:2746:  render({
+public/control-center/pages/library.js:2818:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+public/control-center/pages/library.js:2935:    bindLibraryWorkspace({
+
+===== VALIDATION =====
+PASS: No legacy asset references found in active Control Center paths.
