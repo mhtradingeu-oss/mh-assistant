@@ -1,0 +1,1317 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/authority-boundary/publishing-shadow-compare-contract/
+
+===== LOG HEAD =====
+736b0e9 Add publishing runtime ownership audit
+a6cf556 Add route role fallback closeout report
+02dde34 Centralize route role fallback authority
+96ec03f Add route role fallback authority audit
+c04b263 Add frontend consolidation audit baseline
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+cdadb61 Fix Task Center grid stretch layout
+3b567ff Clean Settings duplicate heading labels
+69d354f Clean Governance duplicate heading labels
+
+===== PUBLISHING ACTION HANDLERS =====
+13:  approveCurrentGate,
+18:const publishingSessions = new Map();
+19:const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+20:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+21:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+23:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+34:const publishingAutomationState = {
+38:let publishingAutoModeUnsubscribe = null;
+39:let publishingAutoModeControllerReady = false;
+40:let publishingAutomationEnabled = false;
+41:let publishingRenderCallback = null;
+42:let publishingRenderTimer = null;
+44:function schedulePublishingRender(render) {
+46:    publishingRenderCallback = render;
+49:  if (publishingRenderTimer) {
+53:  publishingRenderTimer = window.setTimeout(() => {
+54:    publishingRenderTimer = null;
+56:    if (typeof publishingRenderCallback === "function") {
+57:      publishingRenderCallback();
+63:  publishingRenderCallback = render;
+65:  if (!publishingAutomationEnabled) {
+69:  if (!publishingAutoModeControllerReady) {
+71:    publishingAutoModeControllerReady = true;
+74:  if (publishingAutoModeUnsubscribe) {
+78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+86:    schedulePublishingRender();
+143:function formatDateTime(value, fallback = "Not scheduled") {
+156:  if (!date) return "Unscheduled";
+185:  if (["draft", "paused", "pause"].includes(normalized)) return "draft";
+186:  if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";
+190:  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+191:  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";
+192:  if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
+198:  if (status === "published") return "success";
+199:  if (status === "ready" || status === "scheduled") return "warning";
+200:  if (status === "failed") return "danger";
+239:    id: asString(draft.id || `local-publish-${Date.now()}`),
+269:    publishDate: toDateInput(tomorrow),
+270:    publishTime: "09:00",
+279:  if (!publishingSessions.has(key)) {
+280:    publishingSessions.set(key, {
+291:  return publishingSessions.get(key);
+309:  if (item.campaign) return `${item.campaign} ${titleCase(item.channel || "publish")}`;
+310:  if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || "publish")}`;
+317:  const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);
+318:  const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");
+328:    scheduledFor,
+332:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+358:  const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {
+371:  const knownIds = new Set(scheduledItems.map((item) => item.jobId));
+377:  const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));
+380:  return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);
+385:    failed: 0,
+388:    scheduled: 3,
+390:    published: 5
+395:  const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;
+396:  const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;
+429:    .filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))
+430:    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];
+431:  return next ? `${formatDateTime(next.scheduledFor)} - ${next.title}` : "No scheduled window";
+443:    publishDate: toDateInput(item.scheduledFor),
+444:    publishTime: toTimeInput(item.scheduledFor),
+473:  const date = clean(form.publishDate);
+475:  return `${date}T${clean(form.publishTime) || "09:00"}:00Z`;
+478:function buildSchedulePayload(session, status = "scheduled") {
+485:    scheduled_for: buildScheduleTime(session.form),
+502:    scheduledFor: buildScheduleTime(session.form),
+514:    "Prepare publishing draft from current project context."
+519:      id: `publishing-prepare-${Date.now()}`,
+520:      type: "prepare_publishing_draft",
+521:      targetPage: "publishing",
+522:      action: "Prepare publishing draft",
+525:        reason: "Prepare a safe publishing draft without executing publish.",
+526:        title: firstText(session.form.title, "Prepared publishing draft")
+531:      id: `publishing-gate-${Date.now()}`,
+532:      type: "publish_now",
+533:      targetPage: "publishing",
+552:  if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {
+553:    errors.publishDate = "Publish date is required for this action.";
+555:  if (intent === "publish" && form.approvalStatus !== "approved") {
+556:    errors.approvalStatus = "Approval must be approved before publishing now.";
+565:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+569:  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}">${escapeHtml(titleCase(status))}</span>`;
+575:      .publishing-execution-center {
+581:      .publishing-execution-grid {
+587:      .publishing-main-column,
+588:      .publishing-side-column {
+595:      .publishing-card {
+600:      .publishing-overview-grid {
+606:      .publishing-overview-item,
+607:      .publishing-impact-chip {
+615:      .publishing-overview-item span,
+616:      .publishing-impact-chip small {
+623:      .publishing-overview-item strong,
+624:      .publishing-impact-chip strong {
+630:      .publishing-overview-item.is-wide {
+634:      .publishing-impact-row,
+635:      .publishing-action-row,
+636:      .publishing-form-actions,
+637:      .publishing-filter-row {
+644:      .publishing-impact-row {
+648:      .publishing-action-row,
+649:      .publishing-form-actions {
+653:      .publishing-impact-chip {
+657:      .publishing-filter-chip {
+670:      .publishing-filter-chip.is-active {
+675:      .publishing-queue-list,
+676:      .publishing-calendar-list,
+677:      .publishing-blocker-list {
+684:      .publishing-queue-row {
+694:      .publishing-queue-row.is-active {
+698:      .publishing-queue-main,
+699:      .publishing-calendar-row {
+710:      .publishing-queue-title {
+716:      .publishing-queue-meta {
+725:      .publishing-queue-actions {
+731:      .publishing-queue-actions button {
+740:      .publishing-status-pill {
+753:      .publishing-status-pill.is-ready,
+754:      .publishing-status-pill.is-scheduled {
+758:      .publishing-status-pill.is-published {
+762:      .publishing-status-pill.is-failed {
+766:      .publishing-inline-error {
+773:      .publishing-calendar-row {
+783:      .publishing-calendar-row em {
+792:        .publishing-execution-grid {
+797:        .publishing-queue-row {
+802:        .publishing-queue-actions {
+816:function extractHandoffSummary(handoff) {
+817:  const payload = asObject(handoff?.payload);
+821:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+822:    sourcePage: asString(handoff?.source_page || "workflows"),
+836:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+837:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+838:    getSharedHandoff(projectName, "publishing", operations)
+846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+847:  const failed = queue.find((item) => item.status === "failed");
+854:  if (failed) {
+856:      action: "Retry failed publishing item",
+857:      why: `${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.`,
+858:      focusId: failed.id,
+865:      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+872:      why: `${needsApproval.title} needs approval before it can move into the publishable queue.`,
+877:  if (handoff) {
+880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+887:      action: "Complete and schedule a draft",
+894:    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+896:      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+905:    <section class="card publishing-card">
+913:      <div class="publishing-overview-grid">
+914:        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+915:        <div class="publishing-overview-item"><span>Ready to publish</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+916:        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+917:        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+918:        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+926:    ["Launch readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+927:    ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
+931:    ["Automation", counts.scheduled ? "Scheduled" : "Manual"]
+935:    <section class="card publishing-card" id="publishingRecommendation">
+940:          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+944:      <div class="publishing-impact-row">
+946:          <span class="publishing-impact-chip">
+952:      <div class="publishing-action-row">
+953:        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+954:        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+955:        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Workspace</button>
+956:        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
+957:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+963:      ${publishingAutomationState.progress ? `<div class="simple-banner" style="margin-top:12px;">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+964:      ${publishingAutomationState.result ? `<div class="simple-banner" style="margin-top:8px;">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+967:        <div class="publishing-action-row" style="margin-top:8px;">
+968:          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve and Continue</button>
+969:          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip Step</button>
+981:    <div class="publishing-filter-row">
+986:          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+999:      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+1000:        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+1001:          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+1002:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+1004:        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+1005:        <div class="publishing-queue-actions">
+1006:          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review</button>
+1007:          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule</button>
+1008:          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish now</button>
+1009:          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause</button>
+1010:          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry</button>
+1014:    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+1017:    <section class="card publishing-card" id="publishingQueuePanel">
+1026:      <div class="publishing-queue-list">${rows}</div>
+1033:    <section class="card publishing-card" id="publishingBuilderPanel">
+1037:          <h3>Draft, validate, schedule, and execute</h3>
+1041:      <form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>
+1045:              <label class="setup-label" for="publishingProjectInput">Project</label>
+1048:            <input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">
+1053:              <label class="setup-label" for="publishingCampaignInput">Campaign</label>
+1056:            <input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">
+1064:              <label class="setup-label" for="publishingChannelInput">Channel</label>
+1067:            <select id="publishingChannelInput" name="channel" class="setup-input">
+1077:              <label class="setup-label" for="publishingContentInput">Content item</label>
+1080:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+1088:              <label class="setup-label" for="publishingDateInput">Publish date</label>
+1091:            <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
+1092:            ${fieldError(session, "publishDate", escapeHtml)}
+1096:              <label class="setup-label" for="publishingTimeInput">Publish time</label>
+1099:            <input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">
+1103:              <label class="setup-label" for="publishingApprovalInput">Approval status</label>
+1106:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+1117:            <label class="setup-label" for="publishingTitleInput">Queue title</label>
+1120:          <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">
+1125:            <label class="setup-label" for="publishingNotesInput">Execution notes</label>
+1128:          <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>
+1131:      <div class="publishing-form-actions">
+1132:        <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
+1133:        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save Draft</button>
+1134:        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Schedule</button>
+1141:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+1142:  if (!handoff) {
+1144:      <section class="card publishing-card">
+1157:  const summary = extractHandoffSummary(handoff);
+1160:    <section class="card publishing-card" id="publishingHandoffPanel">
+1165:          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+1175:      <div class="publishing-action-row">
+1176:        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Output</button>
+1183:  const scheduled = queue
+1184:    .filter((item) => item.scheduledFor)
+1185:    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))
+1188:  if (!scheduled.length) {
+1190:      <section class="card publishing-card">
+1194:            <h3>No upcoming scheduled items</h3>
+1198:        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+1204:    <section class="card publishing-card">
+1208:          <h3>Upcoming scheduled items</h3>
+1210:        <span class="card-badge neutral">${escapeHtml(String(scheduled.length))} upcoming</span>
+1212:      <div class="publishing-calendar-list">
+1213:        ${scheduled.map((item) => `
+1214:          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+1215:            <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
+1216:            <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
+1228:    .filter((item) => item.executedAt || item.status === "failed")
+1230:  const failed = queue.filter((item) => item.status === "failed");
+1232:  if (!latest && !failed.length) {
+1234:      <section class="card publishing-card">
+1238:            <h3>No publish result yet</h3>
+1242:        <div class="empty-box">Last publish result and failed publish blockers will appear here after execution data exists.</div>
+1248:    <section class="card publishing-card">
+1252:          <h3>${escapeHtml(latest ? latest.title : "Failed publish blockers")}</h3>
+1254:        <span class="card-badge ${badgeTone(latest?.status || "failed")}">${escapeHtml(latest ? titleCase(latest.status) : "Failed")}</span>
+1263:      ${failed.length ? `
+1264:        <div class="publishing-blocker-list">
+1265:          ${failed.map((item) => `
+1266:            <div class="simple-banner">${escapeHtml(item.title)}: ${escapeHtml(normalizeNotes(item.notes).join("; ") || "Failed publish needs review.")}</div>
+1279:    <section class="card publishing-card">
+1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+1294:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+1296:    `Review this publishing execution plan for ${projectName || "the current project"}.`,
+1301:    `Publish window: ${session.form.publishDate ? `${session.form.publishDate} ${session.form.publishTime || "09:00"}` : "not scheduled"}`,
+1303:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+1315:    showError?.(error.message || "Publishing action failed.");
+1328:  reschedulePublishingItem,
+1329:  approvePublishingItem,
+1330:  publishPublishingItem,
+1331:  failPublishingItem,
+1334:  handoff
+1344:    schedulePublishingRender(render);
+1352:  function saveDraftLocally(message = "Publishing draft saved locally.") {
+1363:    const local = saveDraftLocally("Publishing draft saved locally.");
+1384:  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+1386:      session.filter = button.getAttribute("data-publishing-filter") || "all";
+1391:  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+1393:      const itemId = button.getAttribute("data-publishing-select") || "";
+1400:  const form = $("publishingBuilderForm");
+1411:  const newBtn = $("publishingNewItemBtn");
+1415:      showMessage?.("New publishing draft opened.");
+1420:  const openQueueBtn = $("publishingOpenQueueBtn");
+1423:      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+1427:  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+1428:  saveDraftButtons.forEach((button) => {
+1440:  const scheduleBtn = $("publishingScheduleBtn");
+1441:  if (scheduleBtn) {
+1442:    scheduleBtn.onclick = async () => {
+1444:      if (!validateBuilder(session, "schedule")) {
+1450:      const payload = buildSchedulePayload(session, "scheduled");
+1453:          ...buildLocalDraftPayload(session, "scheduled"),
+1456:        session.draftMessage = "Local publishing draft scheduled in this browser.";
+1463:        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+1471:        successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."
+1478:        saveDraftLocally("Backend schedule unavailable; draft kept locally.");
+1484:  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+1486:      const itemId = button.getAttribute("data-publishing-id") || "";
+1487:      const action = button.getAttribute("data-publishing-action") || "";
+1499:      if (action === "schedule") {
+1500:        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+1505:      const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";
+1512:        const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
+1514:        session.draftMessage = `Local draft ${action === "publish" ? "marked published" : action === "pause" ? "paused" : "updated"}.`;
+1520:      if (action === "publish") {
+1522:          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+1523:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
+1526:      if (action === "pause") {
+1528:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+1529:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft." }
+1532:      if (action === "retry") {
+1534:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+1535:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue." }
+1542:  const approveBtn = $("publishingApproveBtn");
+1543:  if (approveBtn) {
+1544:    approveBtn.onclick = async () => {
+1547:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+1551:      session.form.approvalStatus = "approved";
+1553:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+1554:        showMessage?.("Local publishing draft approved.");
+1560:        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1561:        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item approved and marked ready." }
+1567:  const failBtn = $("publishingFailBtn");
+1568:  if (failBtn) {
+1569:    failBtn.onclick = async () => {
+1572:        session.validation.contentItem = "Select a publishing item before marking it failed.";
+1577:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });
+1578:        showMessage?.("Local publishing draft marked failed.");
+1584:        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1585:        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
+1591:  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+1594:      const summary = extractHandoffSummary(handoff);
+1609:      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+1614:  const pushAiBtn = $("publishingPushAiBtn");
+1619:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+1630:        source_page: "publishing",
+1633:          entity_type: "publishing_job",
+1638:          publishing_item_id: current?.jobId || session.formSourceId || "",
+1639:          publishing_title: current?.title || session.form.title || "",
+1644:            scheduled_for: buildScheduleTime(session.form) || current?.scheduledFor || "",
+1655:  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+1660:        publishingAutomationState.progress = "";
+1661:        publishingAutomationState.result = "No safe publishing preparation steps available.";
+1666:      publishingAutomationState.result = "";
+1667:      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+1668:      publishingAutomationEnabled = true;
+1676:        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+1677:        schedulePublishingRender(render);
+1681:      publishingAutomationState.result = runResult.status === "success"
+1682:        ? "Auto Prepare Publishing completed."
+1683:        : "Auto Prepare Publishing stopped before completion.";
+1684:      showMessage?.(publishingAutomationState.result);
+1689:  const autoStopBtn = $("publishingAutoStopBtn");
+1697:  const autoApproveBtn = $("publishingAutoApproveBtn");
+1700:      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+1705:  const autoSkipBtn = $("publishingAutoSkipBtn");
+1714:export const publishingRoute = {
+1715:  id: "publishing",
+1720:    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+1723:    <section class="page is-active" data-page="publishing">
+1724:      <div id="publishingRoot"></div>
+1737:    reschedulePublishingItem,
+1738:    approvePublishingItem,
+1739:    publishPublishingItem,
+1740:    failPublishingItem
+1749:    const handoff = getPublishingHandoff(projectName, operations);
+1751:    const root = $("publishingRoot");
+1768:    const publishingAssets = filterAssetCategories(getAssetData(state), PUBLISHING_ASSET_KEYS);
+1769:    const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
+1770:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+1774:      <div class="publishing-execution-center">
+1778:        <div class="publishing-execution-grid">
+1779:          <div class="publishing-main-column">
+1782:            <section class="card publishing-card">
+1786:                  <h3>${escapeHtml(safeText(selectedItem?.title, "Selected publishing item"))}</h3>
+1790:              <div class="publishing-action-row">
+1791:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+1792:                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark Failed</button>
+1797:          <aside class="publishing-side-column">
+1798:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+1815:      reschedulePublishingItem,
+1816:      approvePublishingItem,
+1817:      publishPublishingItem,
+1818:      failPublishingItem,
+1819:      render: () => publishingRoute.render({
+1829:        reschedulePublishingItem,
+1830:        approvePublishingItem,
+1831:        publishPublishingItem,
+1832:        failPublishingItem
+1835:      handoff
+
+===== PUBLISHING RUNTIME RANGES 1288-1725 =====
+      <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
+    </section>
+  `;
+}
+
+function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+  return [
+    `Review this publishing execution plan for ${projectName || "the current project"}.`,
+    `Project: ${session.form.project || projectName || "not set"}`,
+    `Campaign: ${session.form.campaign || "not set"}`,
+    `Channel: ${session.form.channel || selectedItem?.channel || "not set"}`,
+    `Content item: ${session.form.contentItem || selectedItem?.contentItem || "not set"}`,
+    `Publish window: ${session.form.publishDate ? `${session.form.publishDate} ${session.form.publishTime || "09:00"}` : "not scheduled"}`,
+    `Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || "draft")}`,
+    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+    `Notes: ${session.form.notes || normalizeNotes(selectedItem?.notes).join("; ") || "none"}`
+  ].join("\n");
+}
+
+async function runAndRefresh(action, { projectName, reloadProjectData, showMessage, showError, successMessage }) {
+  try {
+    const response = await action();
+    await reloadProjectData?.(projectName);
+    showMessage?.(successMessage);
+    return response;
+  } catch (error) {
+    showError?.(error.message || "Publishing action failed.");
+    return null;
+  }
+}
+
+function bindPublishingWorkspace({
+  $,
+  getState,
+  navigateTo,
+  showMessage,
+  showError,
+  reloadProjectData,
+  savePublishingSchedule,
+  reschedulePublishingItem,
+  approvePublishingItem,
+  publishPublishingItem,
+  failPublishingItem,
+  render,
+  queue,
+  handoff
+}) {
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, state);
+
+  ensurePublishingAutoModeBinding(getState, navigateTo, render);
+
+  function rerender() {
+    schedulePublishingRender(render);
+  }
+
+
+  function selected() {
+    return getSelectedItem(queue, session.selectedId);
+  }
+
+  function saveDraftLocally(message = "Publishing draft saved locally.") {
+    const local = saveLocalDraft(projectName, buildLocalDraftPayload(session, "draft"));
+    session.selectedId = local.id;
+    session.formSourceId = local.id;
+    session.isCreatingNew = false;
+    session.draftMessage = message;
+    showMessage?.(message);
+    return local;
+  }
+
+  async function persistDraft() {
+    const local = saveDraftLocally("Publishing draft saved locally.");
+    if (typeof savePublishingSchedule === "function") {
+      const response = await runAndRefresh(
+        () => savePublishingSchedule(projectName, buildSchedulePayload(session, "draft")),
+        {
+          projectName,
+          reloadProjectData,
+          showMessage,
+          showError: () => {},
+          successMessage: "Publishing draft saved."
+        }
+      );
+
+      if (response?.job?.job_id) {
+        session.selectedId = response.job.job_id;
+        session.formSourceId = response.job.job_id;
+      }
+    }
+    return local;
+  }
+
+  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+    button.onclick = () => {
+      session.filter = button.getAttribute("data-publishing-filter") || "all";
+      rerender();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+    button.onclick = () => {
+      const itemId = button.getAttribute("data-publishing-select") || "";
+      session.selectedId = itemId;
+      syncFormFromItem(session, getSelectedItem(queue, itemId));
+      rerender();
+    };
+  });
+
+  const form = $("publishingBuilderForm");
+  if (form) {
+    form.oninput = () => {
+      syncSessionForm(session, form);
+      if (Object.keys(session.validation).length) {
+        session.validation = {};
+        rerender();
+      }
+    };
+  }
+
+  const newBtn = $("publishingNewItemBtn");
+  if (newBtn) {
+    newBtn.onclick = () => {
+      resetForm(session, state);
+      showMessage?.("New publishing draft opened.");
+      rerender();
+    };
+  }
+
+  const openQueueBtn = $("publishingOpenQueueBtn");
+  if (openQueueBtn) {
+    openQueueBtn.onclick = () => {
+      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  }
+
+  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+  saveDraftButtons.forEach((button) => {
+    button.onclick = async () => {
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "draft")) {
+        rerender();
+        return;
+      }
+      await persistDraft();
+      rerender();
+    };
+  });
+
+  const scheduleBtn = $("publishingScheduleBtn");
+  if (scheduleBtn) {
+    scheduleBtn.onclick = async () => {
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "schedule")) {
+        rerender();
+        return;
+      }
+
+      const current = selected();
+      const payload = buildSchedulePayload(session, "scheduled");
+      if (current?.localOnly) {
+        updateLocalDraft(projectName, current.id, {
+          ...buildLocalDraftPayload(session, "scheduled"),
+          id: current.id
+        });
+        session.draftMessage = "Local publishing draft scheduled in this browser.";
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      const action = current
+        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+        : () => savePublishingSchedule(projectName, payload);
+
+      const response = await runAndRefresh(action, {
+        projectName,
+        reloadProjectData,
+        showMessage,
+        showError,
+        successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."
+      });
+
+      if (response?.job?.job_id) {
+        session.selectedId = response.job.job_id;
+        session.formSourceId = response.job.job_id;
+      } else if (!current) {
+        saveDraftLocally("Backend schedule unavailable; draft kept locally.");
+      }
+      rerender();
+    };
+  }
+
+  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+    button.onclick = async () => {
+      const itemId = button.getAttribute("data-publishing-id") || "";
+      const action = button.getAttribute("data-publishing-action") || "";
+      const item = getSelectedItem(queue, itemId);
+      if (!item) return;
+
+      session.selectedId = item.id;
+      syncFormFromItem(session, item);
+
+      if (action === "review") {
+        rerender();
+        return;
+      }
+
+      if (action === "schedule") {
+        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        rerender();
+        return;
+      }
+
+      const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";
+      if (!validateBuilder(session, intent)) {
+        rerender();
+        return;
+      }
+
+      if (item.localOnly) {
+        const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
+        updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });
+        session.draftMessage = `Local draft ${action === "publish" ? "marked published" : action === "pause" ? "paused" : "updated"}.`;
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      if (action === "publish") {
+        await runAndRefresh(
+          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
+        );
+      }
+      if (action === "pause") {
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft." }
+        );
+      }
+      if (action === "retry") {
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue." }
+        );
+      }
+      rerender();
+    };
+  });
+
+  const approveBtn = $("publishingApproveBtn");
+  if (approveBtn) {
+    approveBtn.onclick = async () => {
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select or save a publishing draft before approval.";
+        rerender();
+        return;
+      }
+      session.form.approvalStatus = "approved";
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+        showMessage?.("Local publishing draft approved.");
+        rerender();
+        return;
+      }
+      
+      await runAndRefresh(
+        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item approved and marked ready." }
+      );
+      rerender();
+    };
+  }
+
+  const failBtn = $("publishingFailBtn");
+  if (failBtn) {
+    failBtn.onclick = async () => {
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select a publishing item before marking it failed.";
+        rerender();
+        return;
+      }
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });
+        showMessage?.("Local publishing draft marked failed.");
+        rerender();
+        return;
+      }
+
+      await runAndRefresh(
+        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
+      );
+      rerender();
+    };
+  }
+
+  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+  if (loadHandoffBtn) {
+    loadHandoffBtn.onclick = () => {
+      const summary = extractHandoffSummary(handoff);
+      session.form = {
+        ...session.form,
+        project: firstText(summary.project, session.form.project, projectName),
+        campaign: firstText(summary.campaign, session.form.campaign),
+        channel: toKey(firstText(summary.channel, session.form.channel)),
+        contentItem: firstText(summary.contentItem, summary.summary, session.form.contentItem),
+        title: firstText(summary.title, session.form.title),
+        notes: firstText(summary.summary, session.form.notes)
+      };
+      session.loadedHandoffId = summary.id;
+      session.isCreatingNew = true;
+      session.selectedId = "";
+      session.formSourceId = "";
+      session.validation = {};
+      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+      rerender();
+    };
+  }
+
+  const pushAiBtn = $("publishingPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      syncSessionForm(session, form);
+      const current = selected();
+      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+      const aiDraft = {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: current?.title || session.form.title || "Publishing Execution Review",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "publishing",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "publishing_job",
+          entity_id: current?.jobId || session.formSourceId || ""
+        },
+        payload: {
+          prompt,
+          publishing_item_id: current?.jobId || session.formSourceId || "",
+          publishing_title: current?.title || session.form.title || "",
+          draft_context: aiDraft,
+          selection: {
+            status: current?.status || "draft",
+            channel: session.form.channel || current?.channel || "",
+            scheduled_for: buildScheduleTime(session.form) || current?.scheduledFor || "",
+            notes: session.form.notes
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+      showMessage?.("Publishing context sent to AI Command.");
+    };
+  }
+
+  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+  if (autoPrepareBtn) {
+    autoPrepareBtn.onclick = async () => {
+      const plan = buildPublishingAutoModePlan(session);
+      if (!plan.length) {
+        publishingAutomationState.progress = "";
+        publishingAutomationState.result = "No safe publishing preparation steps available.";
+        rerender();
+        return;
+      }
+
+      publishingAutomationState.result = "";
+      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+      publishingAutomationEnabled = true;
+      ensurePublishingAutoModeBinding(getState, navigateTo, render);
+      rerender();
+
+      const runResult = await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, projectName },
+        onProgress: ({ index, total, step, result }) => {
+        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        schedulePublishingRender(render);
+        }
+      });
+
+      publishingAutomationState.result = runResult.status === "success"
+        ? "Auto Prepare Publishing completed."
+        : "Auto Prepare Publishing stopped before completion.";
+      showMessage?.(publishingAutomationState.result);
+      rerender();
+    };
+  }
+
+  const autoStopBtn = $("publishingAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("publishingAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("publishingAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Gated step skipped.");
+    };
+  }
+}
+
+export const publishingRoute = {
+  id: "publishing",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Publishing",
+    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+  },
+  template: `
+    <section class="page is-active" data-page="publishing">
+      <div id="publishingRoot"></div>
+    </section>
+
+===== PUBLISHING PURE HELPERS / BUILDERS =====
+182:function normalizeStatus(value, fallback = "draft") {
+183:  const normalized = toKey(value);
+233:function saveLocalDraft(projectName, draft) {
+249:function updateLocalDraft(projectName, itemId, patch) {
+258:function buildDefaultForm(state) {
+294:function normalizeNotes(...values) {
+305:function buildItemTitle(item, state) {
+314:function normalizeQueueItem(rawItem, state, source) {
+346:function buildQueue(state, projectName) {
+400:function buildChannels(state, queue) {
+472:function buildScheduleTime(form) {
+478:function buildSchedulePayload(session, status = "scheduled") {
+494:function buildLocalDraftPayload(session, status = "draft") {
+510:function buildPublishingAutoModePlan(session) {
+544:function validateBuilder(session, intent) {
+834:function getPublishingHandoff(projectName, operations) {
+846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+
+===== PUBLISHING API FUNCTIONS =====
+1788:export async function savePublishingSchedule(projectName, payload = {}) {
+1801:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1818:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1835:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1852:export async function failPublishingItem(projectName, jobId, payload = {}) {
+
+===== AUTOMATION ENGINE PUBLISHING TYPES =====
+6:const AUTO_SAFE_TYPES = new Set([
+13:  "prepare_publishing_draft"
+16:const AUTO_BLOCK_PATTERNS = [
+207:  if (!AUTO_SAFE_TYPES.has(type)) return false;
+209:  for (const rule of AUTO_BLOCK_PATTERNS) {
+221:  for (const rule of AUTO_BLOCK_PATTERNS) {
+231:  if (type === "prepare_publishing_draft") {
+422:    if (normalizeText(step.type) === "prepare_publishing_draft") {
+432:          intent: "prepare_publishing_draft",
+596:    startAutoMode,
+599:    stopAutoMode,
+600:    approveCurrentGate,
+601:    skipCurrentStep,
+607:export async function startAutoMode(plan, options = {}) {
+664:export function stopAutoMode() {
+675:export async function approveCurrentGate(options = {}) {
+708:export async function skipCurrentStep(options = {}) {
+
+===== SHARED CONTEXT HANDOFF / AI DRAFT =====
+2:const aiDraftCache = new Map();
+3:const handoffCache = new Map();
+52:export function setSharedAiDraft(projectName, draft) {
+54:  aiDraftCache.set(buildKey(projectName), draft);
+57:export function getSharedAiDraft(projectName, operations) {
+58:  const cached = aiDraftCache.get(buildKey(projectName));
+69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+74:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+
+===== SERVER PUBLISHING MUTATION ROUTES =====
+3895:  assertPublishingMutationAllowed(projectName, 'schedule', {
+4274:    requestedFile: 'publishing/scheduler/*.json'
+4301:  assertPublishingMutationAllowed(projectName, 'reschedule', {
+11818:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+11820:    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+11851:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+11853:    assertPublishingMutationAllowed(req.params.project, 'schedule', {
+11884:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+11886:    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+11913:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+11915:    assertPublishingMutationAllowed(req.params.project, 'reschedule', {
+11942:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+11944:    assertPublishingMutationAllowed(req.params.project, 'ready', {
+11964:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+11966:    assertPublishingMutationAllowed(req.params.project, 'ready', {
+11986:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+11988:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+12018:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+12020:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+12050:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+12052:    assertPublishingMutationAllowed(req.params.project, 'fail', {
+12082:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+12084:    assertPublishingMutationAllowed(req.params.project, 'fail', {
+13288:    requestedFile: `publishing/scheduler/${jobId}.json`
+13306:    assertPublishingMutationAllowed(projectName, 'publish', {
+13614:function assertPublishingMutationAllowed(projectName, action, options = {}) {
+20157:    assertPublishingMutationAllowed(projectName, 'publish', {
+20200:    assertPublishingMutationAllowed(projectName, 'publish', {
+20336:    assertPublishingMutationAllowed(projectName, 'publish', {
+20442:    assertPublishingMutationAllowed(projectName, 'publish', {
+
+===== BACKBONE DURABLE OPS =====
+2555:function createApproval(projectName, input = {}) {
+2741:function decideApproval(projectName, approvalId, input = {}) {
+2931:function createHandoff(projectName, input = {}) {
+3099:function consumeHandoff(projectName, handoffId, input = {}) {
+3142:function syncPublishingJob(projectName, job = {}, executionResult = null) {
+4077:  createApproval,
+4079:  decideApproval,
+4084:  createHandoff,
+4086:  consumeHandoff,
+4088:  syncPublishingJob
+
+===== PRIOR PUBLISHING AUDITS =====
+# Publishing Runtime Ownership Audit
+
+## Scope
+- Branch: architecture/frontend-consolidation-v1
+- Baseline: a6cf556, 02dde34, 96ec03f
+- Mode: audit only (no production code changes)
+- Primary page audited: public/control-center/pages/publishing.js
+
+## Doctrine alignment check
+- Backend authority doctrine is explicitly documented in public/control-center/runtime/authority/authority-projection.js:7-8.
+- Frontend route fallback is centralized in public/control-center/runtime/authority/route-role-fallback.js.
+- Publishing page is a runtime executor surface with approval/publish/fail/schedule controls and Auto Mode controls.
+
+## 1) What Publishing owns today
+
+### Display-only state
+- Queue rendering, status pills, overview cards, recommendation chips, and filter chips are presentation-only: public/control-center/pages/publishing.js:893-1278, 1768-1806.
+- Recommendation text and counts are derived projections over existing state: public/control-center/pages/publishing.js:852-892.
+
+### Local session state
+- Per-project in-memory UI session map: publishingSessions, selected item, filter, validation, form source id: public/control-center/pages/publishing.js:17, 274-290.
+- Auto Mode UI-only progress/result banners: publishingAutomationState: public/control-center/pages/publishing.js:34-37.
+
+### Draft/convenience state
+- Local draft persistence in browser localStorage under mh-publishing-local-drafts-v1: public/control-center/pages/publishing.js:18, 208-247.
+- Local fallback update path for schedule/approve/fail/publish status when item is localOnly: public/control-center/pages/publishing.js:1450-1458, 1509-1515, 1552-1557, 1576-1580.
+
+### Backend-projected authority
+- Route and active-role projection in app authority resolver: public/control-center/app.js:227-254.
+- Governance/approvals/handoffs projection doctrine helpers: public/control-center/runtime/authority/authority-projection.js:41-84.
+- Publishing queue itself is hydrated from backend-fed activity datasets in state: public/control-center/pages/publishing.js:340-385.
+
+### Write actions (runtime mutations)
+- savePublishingSchedule -> POST /publishing/schedule: public/control-center/api.js:1788-1798.
+- reschedulePublishingItem -> POST /publishing/:jobId/reschedule: public/control-center/api.js:1801-1815.
+- approvePublishingItem -> POST /publishing/:jobId/ready: public/control-center/api.js:1818-1832.
+- publishPublishingItem -> POST /publishing/:jobId/publish: public/control-center/api.js:1835-1849.
+- failPublishingItem -> POST /publishing/:jobId/fail: public/control-center/api.js:1852-1866.
+- createProjectHandoff/consumeProjectHandoff durable endpoints exist: public/control-center/api.js:2162-2188.
+
+### Approval-gated actions
+- Frontend builder validation requires approvalStatus=approved for publish intent: public/control-center/pages/publishing.js:555-557.
+- Backend hard-gates ready/publish via governance policy and approval record checks: runtime/orchestrator-service/server.js:13614-13704.
+
+### Auto Mode actions
+- Auto controls are bound to explicit buttons only (prepare/stop/approve gate/skip): public/control-center/pages/publishing.js:1655-1709.
+- Plan contains safe prepare step plus intentional gated publish step type publish_now: public/control-center/pages/publishing.js:520-542.
+- Engine safe-type whitelist excludes publish_now and blocks risky patterns: public/control-center/automation-engine.js:6-22, 203-214.
+
+### Handoff actions
+- Publishing consumes handoff data from shared context + operations fallback: public/control-center/pages/publishing.js:834-839.
+- Load Handoff writes local draft/session fields only: public/control-center/pages/publishing.js:1591-1610.
+- Push to AI writes shared ai-command handoff context (frontend cache): public/control-center/pages/publishing.js:1616-1649.
+
+### Dangerous/destructive actions
+- Publish now and fail are high-impact state transitions (durable backend mutations): public/control-center/pages/publishing.js:1520-1524, 1582-1586; runtime/orchestrator-service/server.js:11988-12049, 12052-12113.
+- Local-only path can mark local draft as published/failed without backend record (UX-level only, but authority-adjacent for operator interpretation): public/control-center/pages/publishing.js:1509-1515, 1576-1580.
+
+## 2) Where runtime actions are defined
+
+- publish: UI data-publishing-action="publish" and publish button handling at public/control-center/pages/publishing.js:1008, 1484-1524.
+- approve: manual approve button at public/control-center/pages/publishing.js:1542-1563.
+- fail: manual fail button at public/control-center/pages/publishing.js:1567-1587.
+- schedule: builder schedule button and queue schedule action at public/control-center/pages/publishing.js:1440-1477, 1498-1503.
+- reschedule: reschedulePublishingItem calls in publish/pause/retry flows at public/control-center/pages/publishing.js:1463, 1528, 1534.
+- execute: publishPublishingItem path + backend execution result record at runtime/orchestrator-service/server.js:11988-12049.
+- auto prepare: public/control-center/pages/publishing.js:1655-1686.
+- auto stop: public/control-center/pages/publishing.js:1689-1694.
+- auto approve: public/control-center/pages/publishing.js:1697-1702.
+- auto skip: public/control-center/pages/publishing.js:1705-1710.
+- handoff load: public/control-center/pages/publishing.js:1591-1610.
+- AI push: public/control-center/pages/publishing.js:1616-1652.
+- buttons with onclick: concentrated in bindPublishingWorkspace: public/control-center/pages/publishing.js:1383-1710.
+- context/API calls: runAndRefresh wrappers + direct shared-context writes: public/control-center/pages/publishing.js:1308-1317, 1364-1374, 1463-1472, 1522-1535, 1560-1561, 1584-1585, 1628-1629.
+
+## 3) Auto Mode lifecycle
+
+- createAutoModeController imported in publishing and used in ensurePublishingAutoModeBinding: public/control-center/pages/publishing.js:9, 62-72.
+- subscribeAutoMode used in ensurePublishingAutoModeBinding once per process unless already subscribed: public/control-center/pages/publishing.js:74-88.
+- startAutoMode called from explicit Auto Prepare button click only: public/control-center/pages/publishing.js:1657-1679.
+- Auto Mode does not start from render/mount. Render path only ensures controller/subscription when publishingAutomationEnabled=true: public/control-center/pages/publishing.js:62-67, 1668-1669.
+- Controller binding happens in render cycle via ensurePublishingAutoModeBinding call inside bindPublishingWorkspace: public/control-center/pages/publishing.js:1341.
+- Guard flags exist:
+  - publishingAutomationEnabled gate: line 65.
+  - publishingAutoModeControllerReady one-time controller creation: lines 69-72.
+  - publishingAutoModeUnsubscribe existence gate: lines 74-76.
+- Unsubscribe cleanup is not executed on route unmount in this file; unsubscribe function is stored but never called in publishing.js.
+- State leak risk:
+  - module-level flags and callback references persist across route revisits: public/control-center/pages/publishing.js:38-42.
+  - schedulePublishingRender keeps callback/timeouts across route renders: lines 44-60.
+  - risk is moderate: duplicate subscriptions are guarded, but stale callback/subscription lifecycle is not explicitly torn down.
+
+## 4) Backend authority alignment
+
+### Actions that call backend through API/context
+- schedule draft or new schedule: savePublishingSchedule: public/control-center/pages/publishing.js:1366, 1464.
+- reschedule/pause/retry: reschedulePublishingItem: public/control-center/pages/publishing.js:1463, 1528, 1534.
+- approve ready: approvePublishingItem: public/control-center/pages/publishing.js:1560.
+- publish: publishPublishingItem: public/control-center/pages/publishing.js:1522.
+- fail: failPublishingItem: public/control-center/pages/publishing.js:1584.
+
+### Frontend-only actions
+- Local draft save/update/approve/fail/publish markers for localOnly items: public/control-center/pages/publishing.js:1450-1458, 1509-1515, 1552-1557, 1576-1580.
+- Filter/select/review/scroll behaviors: public/control-center/pages/publishing.js:1383-1400, 1492-1503.
+- Push to AI shared cache/handoff: public/control-center/pages/publishing.js:1628-1649; shared cache implementation in public/control-center/shared-context.js:52-77.
+
+### Durable operation records
+- Backend publishing mutations write/update scheduled jobs and execution outcomes: runtime/orchestrator-service/server.js:11818-12113.
+- syncPublishingJob persists queue/event/notification durable operations: runtime/orchestrator-service/lib/ops/backbone.js:3142 onward.
+- Durable handoffs: create/consume handoff in backbone: runtime/orchestrator-service/lib/ops/backbone.js:2931-3128.
+
+### Should require backend/governance authority
+- ready/publish and freeze-sensitive schedule/reschedule are governed by assertPublishingMutationAllowed: runtime/orchestrator-service/server.js:13614-13704.
+
+### Reliant on local session only
+- Form draft edits, selected item, validation map, draft message, filter state: public/control-center/pages/publishing.js:274-290.
+
+### Should remain local UX
+- Filter chips, queue row highlighting, scroll navigation, inline validation text, recommendation display.
+
+## 5) Approval/governance boundary
+
+- Approval state read in frontend:
+  - Local form approvalStatus and validateBuilder check: public/control-center/pages/publishing.js:555-557.
+  - Queue item approval projection normalization: public/control-center/pages/publishing.js:327-333.
+- Publish/fail/approve state changed in frontend via backend mutation APIs or local-only branch:
+  - approve: 1542-1563
+  - publish: 1520-1524
+  - fail: 1567-1587
+- Frontend does not finalize governance authority; it requests mutation and backend enforces policy:
+  - assertPublishingMutationAllowed governance gate: runtime/orchestrator-service/server.js:13614-13704.
+- Backend stores approvals/handoffs durably:
+  - createApproval/decideApproval: runtime/orchestrator-service/lib/ops/backbone.js:2555-2918.
+  - createHandoff/consumeHandoff: runtime/orchestrator-service/lib/ops/backbone.js:2931-3128.
+- Potential bypass check:
+  - Frontend localOnly branch can mark local drafts approved/published/failed without backend mutation (not durable, UX-visible only). This does not bypass backend authority for durable operations but can create misleading local status.
+
+## 6) Handoff boundary
+
+- Handoffs loaded:
+  - getPublishingHandoff uses getSharedHandoff with operations fallback: public/control-center/pages/publishing.js:834-839.
+- Handoffs consumed in publishing:
+  - load handoff button transfers summary into local draft/session: public/control-center/pages/publishing.js:1591-1610.
+- Publishing receives data from shared-context:
+  - imports and calls getSharedHandoff/setSharedHandoff/setSharedAiDraft: public/control-center/pages/publishing.js:1, 836-838, 1628-1629.
+- Shared-context durability level:
+  - shared context caches are in-memory maps only: public/control-center/shared-context.js:2-3, 52-77.
+  - durable handoffs require backend create/consume endpoints (not invoked in publishing page handlers directly).
+- What can become orphaned:
+  - cached shared handoff/AI draft may be superseded by operations data or lost on reload.
+  - local draft loaded from handoff may diverge from backend if never persisted.
+
+## 7) Loading/session lifecycle
+
+- No dedicated session.loading/isLoading flag in publishing session model (session tracks form/filter/validation only): public/control-center/pages/publishing.js:274-290.
+- Render does not trigger fetch itself; mutations call runAndRefresh which invokes reloadProjectData after action success: public/control-center/pages/publishing.js:1308-1313.
+- Fetch lifecycle settlement:
+  - success -> showMessage
+  - failure -> showError with message
+  - both settle and return (no uncaught throw from runAndRefresh): public/control-center/pages/publishing.js:1308-1317.
+- Error visibility exists through showError wiring in runAndRefresh and button handlers.
+- Repeated render rebind risk:
+  - root.innerHTML rewrite then bindPublishingWorkspace reassigns handlers every render, but old nodes are replaced, reducing duplicate-listener accumulation on DOM nodes.
+  - module-level Auto Mode subscription is not cleaned up explicitly, so lifecycle risk remains for long-lived callbacks.
+
+## 8) Authority risk classification summary
+
+- Safe projection:
+  - queue/status rendering from backend activity, recommendation summaries, route-role projection read paths.
+- Safe local UX:
+  - filters, local form typing, scroll/open queue, review selection.
+- Authority-adjacent:
+  - local draft status changes (localOnly approve/publish/fail), push-to-AI handoff payload shaping.
+- Duplicate authority risk:
+  - localOnly path can show terminal statuses without durable backend record.
+- High-risk execution:
+  - publish/fail endpoints and ready transition.
+- Needs backend confirmation:
+  - schedule/reschedule/ready/publish/fail.
+- Needs explicit user action:
+  - startAutoMode, publish/fail/approve buttons, load handoff button.
+- Should not be changed yet:
+  - core publish/approve/fail semantics and governance guard coupling, until shadow-compare lifecycle audit is complete.
+
+## 9) Recommended next step
+
+Recommended: F. Create shadow-compare plan before extraction.
+
+Why this is safest now:
+- Publishing has mixed local-only and durable paths.
+- Auto Mode has module-level lifecycle state and render-time bindings.
+- Governance enforcement is backend-only and must remain untouched while extracting.
+- A shadow-compare phase allows evidence-based parity checks on action outcomes before any structural refactor.
+
+## 10) Implementation-later anchor (high-level)
+
+- First safe change (future): add a publishing action lifecycle registry document + non-invasive instrumentation contract (no behavior change).
+- Candidate files later: public/control-center/pages/publishing.js, public/control-center/automation-engine.js, and an audit registry markdown under audits/frontend/authority-boundary.
+- Validate with static checks and targeted route behavior verification before any extraction.
+
+## Risk summary
+- Primary risk: authority-adjacent local status transitions can appear equivalent to backend durable transitions.
+- Secondary risk: Auto Mode binding lifecycle lacks explicit unsubscribe cleanup in page teardown.
+- Governance boundary is currently strong at backend mutation guard level, which should remain primary and unchanged.
+# Publishing Action Matrix
+
+| action/control | location/line | trigger | frontend/local state? | backend/API call? | durable? | approval required? | risk level | classification | recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| Filter queue chip | public/control-center/pages/publishing.js:1383-1388 | click data-publishing-filter | yes | no | no | no | low | Safe local UX | Keep local |
+| Select queue row | public/control-center/pages/publishing.js:1391-1397 | click data-publishing-select | yes | no | no | no | low | Safe local UX | Keep local |
+| Save Draft (local+optional backend draft save) | public/control-center/pages/publishing.js:1355-1378, 1427-1438 | click Save Draft buttons | yes | yes (savePublishingSchedule) | yes when API succeeds | no | medium | Authority-adjacent | Keep dual path but document local-only fallback clearly |
+| Schedule item | public/control-center/pages/publishing.js:1440-1477 | click Schedule | yes | yes (savePublishingSchedule or reschedulePublishingItem) | yes for backend items | policy-dependent on backend | high | Needs backend confirmation | Keep backend as source of truth |
+| Queue action: Review | public/control-center/pages/publishing.js:1492-1496 | click queue review action | yes | no | no | no | low | Safe local UX | Keep local |
+| Queue action: Schedule jump | public/control-center/pages/publishing.js:1498-1503 | click queue schedule action | yes | no | no | no | low | Safe local UX | Keep local |
+| Queue action: Publish (backend item) | public/control-center/pages/publishing.js:1520-1524 | click queue publish action | minor local | yes (publishPublishingItem) | yes | yes (backend governance gate) | critical | High-risk execution | Preserve backend gate, avoid frontend authority logic |
+| Queue action: Publish (localOnly item) | public/control-center/pages/publishing.js:1509-1515 | click queue publish action on local draft | yes | no | no | no | high | Duplicate authority risk | Mark as local simulation only in UI copy before refactor |
+| Queue action: Pause | public/control-center/pages/publishing.js:1526-1530 | click queue pause action | minor local | yes (reschedulePublishingItem status=draft) | yes | policy-dependent | medium | Needs backend confirmation | Keep backend mutation path |
+| Queue action: Retry | public/control-center/pages/publishing.js:1532-1536 | click queue retry action | minor local | yes (reschedulePublishingItem status=scheduled) | yes | policy-dependent | high | Authority-adjacent | Keep backend mutation path |
+| Approve selected item (backend) | public/control-center/pages/publishing.js:1542-1563 | click Approve | yes | yes (approvePublishingItem) | yes | yes | high | Needs backend confirmation | Keep backend governance as authority |
+| Approve selected item (localOnly) | public/control-center/pages/publishing.js:1552-1557 | click Approve on local draft | yes | no | no | no | medium | Authority-adjacent | Keep as draft convenience only |
+| Fail selected item (backend) | public/control-center/pages/publishing.js:1567-1587 | click Mark Failed | yes | yes (failPublishingItem) | yes | policy-dependent | high | High-risk execution | Keep backend as recorder of failure |
+| Fail selected item (localOnly) | public/control-center/pages/publishing.js:1576-1580 | click Mark Failed on local draft | yes | no | no | no | medium | Authority-adjacent | Keep local-only and visually distinguish |
+| Load Workflow Handoff | public/control-center/pages/publishing.js:1591-1610 | click Load Handoff | yes | no | no | no | medium | Safe local UX | Keep local hydration path |
+| Send to AI Workspace | public/control-center/pages/publishing.js:1616-1652 | click Send to AI Workspace | yes (shared context map) | no direct API | no | no | medium | Authority-adjacent | Keep local, consider optional durable handoff later |
+| Auto Prepare Publishing | public/control-center/pages/publishing.js:1655-1686 | click Auto Prepare Publishing | yes | via automation engine shared handoff; no direct publish API | mixed | gate at engine level | high | Needs explicit user action | Keep explicit click start only |
+| Auto Stop | public/control-center/pages/publishing.js:1689-1694 | click Stop Auto Mode | yes | no | no | no | low | Safe local UX | Keep local |
+| Auto Approve Gate | public/control-center/pages/publishing.js:1697-1702 | click Approve and Continue | yes | no direct publishing mutation | no | yes (human click) | medium | Needs explicit user action | Keep explicit click and gate semantics |
+| Auto Skip Gate | public/control-center/pages/publishing.js:1705-1710 | click Skip Step | yes | no direct publishing mutation | no | yes (human click) | medium | Needs explicit user action | Keep explicit click and audit logs |
+| Auto Mode subscription binding | public/control-center/pages/publishing.js:62-88 | render-time binding when enabled | module-level local | no | no | no | medium | Authority-adjacent lifecycle | Add teardown/registry later (no behavior change first) |
+| Backend publishing schedule endpoint | runtime/orchestrator-service/server.js:11818-11849 | API POST /publishing/schedule | no | yes | yes | freeze rule can block | high | Backend authority | Keep as authoritative mutation entrypoint |
+| Backend publishing reschedule endpoint | runtime/orchestrator-service/server.js:11884-11939 | API POST /publishing/:jobId/reschedule | no | yes | yes | freeze rule can block | high | Backend authority | Keep as authoritative mutation entrypoint |
+| Backend publishing ready endpoint | runtime/orchestrator-service/server.js:11942-11981 | API POST /publishing/:jobId/ready | no | yes | yes | approval_before_publish enforced | critical | Backend authority | Keep strict governance gate |
+| Backend publishing publish endpoint | runtime/orchestrator-service/server.js:11988-12049 | API POST /publishing/:jobId/publish | no | yes | yes + execution result | approval_before_publish enforced | critical | Backend authority | Keep strict governance gate |
+| Backend publishing fail endpoint | runtime/orchestrator-service/server.js:12052-12113 | API POST /publishing/:jobId/fail | no | yes | yes + execution result | freeze/policy path | high | Backend authority | Keep backend recording path |
+| Governance block function | runtime/orchestrator-service/server.js:13614-13704 | called before publish mutations | no | yes | yes | yes | critical | Backend authority | Must remain backend-owned |
+| Durable approvals creation/decision | runtime/orchestrator-service/lib/ops/backbone.js:2555-2918 | backend workflow/governance APIs | no | yes | yes | n/a | high | Backend authority | Keep approval truth in backend only |
+| Durable handoff create/consume | runtime/orchestrator-service/lib/ops/backbone.js:2931-3128 | backend handoff APIs | no | yes | yes | no | medium | Backend authority | Keep durable handoffs backend-owned |
+
+## Matrix notes
+- Frontend local draft statuses are useful UX but are not durable governance truth.
+- Durable publish readiness/publish mutations are guarded by backend policy_rules (approval_before_publish, freeze_publishing).
+- Auto Mode in publishing starts only on explicit user click and is constrained by automation-engine safety/gate rules.
+# Publishing Runtime Implementation Plan (Future, If Implementation Is Approved)
+
+## Recommended next step
+- Selected option: F. Create shadow-compare plan before extraction.
+
+### Why this is safest
+- Publishing mixes local-only convenience paths and backend-durable authority paths.
+- Auto Mode lifecycle uses module-level binding state and render-time attachment.
+- Governance enforcement is currently backend-only and must remain the primary authority boundary.
+- Shadow-compare allows parity checks before any structural movement of handlers/functions.
+
+## Step-by-step future implementation (not executed in this phase)
+
+1. Freeze behavior contract (no code movement)
+- Capture a behavior contract for each publishing action (draft, schedule, reschedule, approve, publish, fail, handoff load, AI push, auto prepare/stop/approve/skip).
+- Define expected preconditions, backend call expectation, and resulting durable artifacts.
+
+2. Add lifecycle registry comments/doc only
+- Add a publishing lifecycle registry document that maps each click/control to:
+  - local state mutations
+  - backend mutation calls
+  - shared-context writes
+  - expected durable outputs
+- No functional edits yet.
+
+3. Introduce non-invasive shadow instrumentation
+- Add temporary trace wrapper (feature-flagged) around publishing handlers to log:
+  - action key
+  - item localOnly vs durable id
+  - backend call attempted/succeeded/failed
+  - resulting queue status shown in UI
+- Persist traces in a dedicated audit log artifact path.
+
+4. Run side-by-side parity checks
+- Compare old handler outputs vs extracted candidate helper outputs for identical input snapshots.
+- Block any extraction if parity fails on status transitions or API payloads.
+
+5. First safe code extraction (after parity pass)
+- Extract only pure payload helpers first:
+  - buildSchedulePayload
+  - buildLocalDraftPayload
+  - buildPublishingAiPrompt
+- Keep event binding in place until all parity checks pass.
+
+6. Controlled action dispatcher extraction
+- Extract a thin action dispatcher that routes action keys to existing current implementations.
+- Keep rollback switch to old direct handlers.
+
+7. Decide backend movement scope
+- For any authority-adjacent local path that can be misunderstood as durable truth (especially localOnly publish/fail/approve markings), decide whether to:
+  - keep as explicit local simulation, or
+  - require backend confirmation before terminal status display.
+
+## Exact first safe change
+- Create a publishing lifecycle registry artifact (audit doc) with an immutable action contract table and parity assertions.
+- No production behavior changes.
+
+## Files to touch (future)
+- public/control-center/pages/publishing.js (only when implementation phase is approved)
+- public/control-center/automation-engine.js (only if lifecycle teardown is introduced)
+- audits/frontend/authority-boundary/publishing-runtime-ownership-audit/ (registry + parity reports)
+
+## Validation commands (future implementation phase)
+```bash
+cd /opt/mh-assistant
+node --check public/control-center/pages/publishing.js
+node --check public/control-center/automation-engine.js
+node --check public/control-center/app.js
+node --check public/control-center/api.js
+node --check public/control-center/shared-context.js
+
+rg -n "createAutoModeController|subscribeAutoMode|startAutoMode|stopAutoMode|approveCurrentGate|skipCurrentStep" \
+  public/control-center/pages/publishing.js public/control-center/automation-engine.js
+
+rg -n "savePublishingSchedule|reschedulePublishingItem|approvePublishingItem|publishPublishingItem|failPublishingItem" \
+  public/control-center/pages/publishing.js public/control-center/api.js
+
+rg -n "assertPublishingMutationAllowed|approval_before_publish|freeze_publishing" \
+  runtime/orchestrator-service/server.js runtime/orchestrator-service/lib/ops/backbone.js
+```
+
+## Browser QA checklist (future implementation phase)
+
+1. Routing and mount
+- Open publishing route and verify page renders once without duplicate action toasts.
+
+2. Local-only flow
+- Create local draft, approve local draft, mark local draft failed, mark local draft published.
+- Confirm UI clearly indicates local-only nature and no backend durable IDs created.
+
+3. Durable schedule flow
+- Save schedule for backend item.
+- Reschedule existing item.
+- Verify queue status and timing update after reloadProjectData.
+
+4. Governance-enforced ready/publish
+- Attempt ready/publish without backend approval and verify governance block response.
+- Approve via governance path, then ready/publish succeeds.
+
+5. Failure flow
+- Mark backend item failed and verify durable result record appears after refresh.
+
+6. Handoff + AI push
+- Load workflow handoff, verify fields hydrate correctly.
+- Send to AI workspace and verify destination route receives expected draft context.
+
+7. Auto Mode
+- Start Auto Prepare only by explicit click.
+- Confirm waiting_approval gate appears at publish step.
+- Verify Approve and Continue / Skip Step buttons work as expected.
+- Confirm no automatic publish occurs from initial render.
+
+8. Regression checks
+- Re-enter publishing route multiple times and verify no duplicate subscriptions/toasts.
+
+## Rollback plan (future implementation phase)
+
+1. Keep extraction behind a runtime flag for one release cycle.
+2. If parity mismatch or lifecycle regression appears:
+- disable extraction flag
+- restore direct handler path
+- preserve gathered trace logs for diagnosis
+3. Re-run validation commands and browser QA checklist before re-enabling.
+
+## Explicit non-goals
+- No backend authority redesign in this phase.
+- No policy_rules changes.
+- No UI redesign.
+- No route-role model changes.
+- No modifications to data/projects files.
+- No conversion of local draft UX into mandatory backend persistence during first extraction pass.
