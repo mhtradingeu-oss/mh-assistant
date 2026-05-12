@@ -14,6 +14,11 @@ import {
   skipCurrentStep,
   subscribeAutoMode
 } from "../automation-engine.js";
+import {
+  buildSchedulePayload,
+  buildLocalDraftPayload,
+  buildPublishingAiPrompt
+} from "./publishing/publishing-payloads.js";
 
 const publishingSessions = new Map();
 const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
@@ -473,38 +478,6 @@ function buildScheduleTime(form) {
   const date = clean(form.publishDate);
   if (!date) return "";
   return `${date}T${clean(form.publishTime) || "09:00"}:00Z`;
-}
-
-function buildSchedulePayload(session, status = "scheduled") {
-  return {
-    title: firstText(session.form.title, session.form.contentItem, "Publishing item"),
-    wave_name: session.form.campaign,
-    campaign: session.form.campaign,
-    channel: session.form.channel,
-    content_item: session.form.contentItem,
-    scheduled_for: buildScheduleTime(session.form),
-    status,
-    approval_status: session.form.approvalStatus,
-    mode: "semi_auto",
-    offer: "",
-    notes: session.form.notes
-  };
-}
-
-function buildLocalDraftPayload(session, status = "draft") {
-  return {
-    id: session.formSourceId || session.selectedId || "",
-    title: firstText(session.form.title, session.form.contentItem, "Publishing draft"),
-    project: session.form.project,
-    campaign: session.form.campaign,
-    channel: session.form.channel,
-    contentItem: session.form.contentItem,
-    scheduledFor: buildScheduleTime(session.form),
-    approvalStatus: session.form.approvalStatus,
-    status,
-    notes: session.form.notes,
-    updatedAt: nowIso()
-  };
 }
 
 function buildPublishingAutoModePlan(session) {
@@ -1288,21 +1261,6 @@ function renderAssetGate(state, escapeHtml) {
       <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
     </section>
   `;
-}
-
-function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
-  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
-  return [
-    `Review this publishing execution plan for ${projectName || "the current project"}.`,
-    `Project: ${session.form.project || projectName || "not set"}`,
-    `Campaign: ${session.form.campaign || "not set"}`,
-    `Channel: ${session.form.channel || selectedItem?.channel || "not set"}`,
-    `Content item: ${session.form.contentItem || selectedItem?.contentItem || "not set"}`,
-    `Publish window: ${session.form.publishDate ? `${session.form.publishDate} ${session.form.publishTime || "09:00"}` : "not scheduled"}`,
-    `Approval: ${titleCase(session.form.approvalStatus || selectedItem?.approvalStatus || "draft")}`,
-    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
-    `Notes: ${session.form.notes || normalizeNotes(selectedItem?.notes).join("; ") || "none"}`
-  ].join("\n");
 }
 
 async function runAndRefresh(action, { projectName, reloadProjectData, showMessage, showError, successMessage }) {
