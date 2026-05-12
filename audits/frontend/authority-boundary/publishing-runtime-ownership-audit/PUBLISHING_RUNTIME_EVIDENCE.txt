@@ -1,0 +1,2626 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/authority-boundary/publishing-runtime-ownership-audit/
+
+===== LOG HEAD =====
+a6cf556 Add route role fallback closeout report
+02dde34 Centralize route role fallback authority
+96ec03f Add route role fallback authority audit
+c04b263 Add frontend consolidation audit baseline
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+cdadb61 Fix Task Center grid stretch layout
+3b567ff Clean Settings duplicate heading labels
+69d354f Clean Governance duplicate heading labels
+e061a22 Clean Operations in-page loading states
+
+===== PUBLISHING ROUTE HEADER =====
+1343:  function rerender() {
+1387:      rerender();
+1396:      rerender();
+1406:        rerender();
+1416:      rerender();
+1432:        rerender();
+1436:      rerender();
+1445:        rerender();
+1458:        rerender();
+1480:      rerender();
+1495:        rerender();
+1501:        rerender();
+1507:        rerender();
+1516:        rerender();
+1538:      rerender();
+1548:        rerender();
+1555:        rerender();
+1563:      rerender();
+1573:        rerender();
+1579:        rerender();
+1587:      rerender();
+1610:      rerender();
+1662:        rerender();
+1670:      rerender();
+1685:      rerender();
+1714:export const publishingRoute = {
+1716:  disableStandardLayout: true,
+1722:  template: `
+1727:  render({
+1819:      render: () => publishingRoute.render({
+
+===== PUBLISHING IMPORTS =====
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import {
+  filterAssetCategories,
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+import { getReadinessBlockers } from "../system-intelligence.js";
+import {
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode
+} from "../automation-engine.js";
+
+const publishingSessions = new Map();
+const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];
+const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+const PUBLISHING_ASSET_KEYS = [
+  "legal_doc",
+  "pricing_doc",
+  "product_csv",
+  "product_photos",
+  "product_videos",
+  "campaign_assets",
+  "social_assets",
+  "logo"
+];
+const publishingAutomationState = {
+  progress: "",
+  result: ""
+};
+let publishingAutoModeUnsubscribe = null;
+let publishingAutoModeControllerReady = false;
+let publishingAutomationEnabled = false;
+let publishingRenderCallback = null;
+let publishingRenderTimer = null;
+
+function schedulePublishingRender(render) {
+  if (typeof render === "function") {
+    publishingRenderCallback = render;
+  }
+
+  if (publishingRenderTimer) {
+    return;
+  }
+
+  publishingRenderTimer = window.setTimeout(() => {
+    publishingRenderTimer = null;
+
+    if (typeof publishingRenderCallback === "function") {
+      publishingRenderCallback();
+    }
+  }, 120);
+}
+
+function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+  publishingRenderCallback = render;
+
+  if (!publishingAutomationEnabled) {
+    return;
+  }
+
+  if (!publishingAutoModeControllerReady) {
+    createAutoModeController(getState, { getState, navigateTo });
+    publishingAutoModeControllerReady = true;
+  }
+
+  if (publishingAutoModeUnsubscribe) {
+    return;
+  }
+
+  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+    const autoState = getAutoModeState();
+    const status = asString(autoState.status || "idle");
+
+    if (status === "idle") {
+      return;
+    }
+
+    schedulePublishingRender();
+  });
+}
+
+
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function clean(value) {
+  return asString(value).trim();
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function toKey(value) {
+  return clean(value).toLowerCase();
+}
+
+function toDate(value) {
+  const parsed = new Date(value);
+
+===== AUTO MODE MARKERS =====
+public/control-center/pages/publishing.js:9:  createAutoModeController,
+public/control-center/pages/publishing.js:11:  startAutoMode,
+public/control-center/pages/publishing.js:15:  subscribeAutoMode
+public/control-center/pages/publishing.js:16:} from "../automation-engine.js";
+public/control-center/pages/publishing.js:70:    createAutoModeController(getState, { getState, navigateTo });
+public/control-center/pages/publishing.js:78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/publishing.js:79:    const autoState = getAutoModeState();
+public/control-center/pages/publishing.js:80:    const status = asString(autoState.status || "idle");
+public/control-center/pages/publishing.js:488:    mode: "semi_auto",
+public/control-center/pages/publishing.js:602:        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+public/control-center/pages/publishing.js:775:        grid-template-columns: minmax(0, 1fr) auto;
+public/control-center/pages/publishing.js:798:          grid-template-columns: minmax(0, 1fr) auto;
+public/control-center/pages/publishing.js:957:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+public/control-center/pages/publishing.js:959:      <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+public/control-center/pages/publishing.js:1655:  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+public/control-center/pages/publishing.js:1656:  if (autoPrepareBtn) {
+public/control-center/pages/publishing.js:1657:    autoPrepareBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1672:      const runResult = await startAutoMode(plan, {
+public/control-center/pages/publishing.js:1673:        mode: "auto_until_approval",
+public/control-center/pages/publishing.js:1689:  const autoStopBtn = $("publishingAutoStopBtn");
+public/control-center/pages/publishing.js:1690:  if (autoStopBtn) {
+public/control-center/pages/publishing.js:1691:    autoStopBtn.onclick = () => {
+public/control-center/pages/publishing.js:1693:      showMessage?.("Auto Mode stopped.");
+public/control-center/pages/publishing.js:1697:  const autoApproveBtn = $("publishingAutoApproveBtn");
+public/control-center/pages/publishing.js:1698:  if (autoApproveBtn) {
+public/control-center/pages/publishing.js:1699:    autoApproveBtn.onclick = async () => {
+public/control-center/pages/publishing.js:1705:  const autoSkipBtn = $("publishingAutoSkipBtn");
+public/control-center/pages/publishing.js:1706:  if (autoSkipBtn) {
+public/control-center/pages/publishing.js:1707:    autoSkipBtn.onclick = async () => {
+public/control-center/automation-engine.js:4:const AUTO_MODE_STORAGE_KEY = "mh-auto-mode-state-v1";
+public/control-center/automation-engine.js:18:  { test: /\bdelete\b|\bremove\b|\bdestroy\b|\berase\b/i, reason: "Destructive actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:19:  { test: /\boverwrite\b|\breplace\b|\btruncate\b/i, reason: "Overwrite actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:20:  { test: /disconnect|revoke|unlink/i, reason: "Connection removal is blocked in Auto Mode." },
+public/control-center/automation-engine.js:28:const autoModeListeners = new Set();
+public/control-center/automation-engine.js:30:const autoModeRuntime = {
+public/control-center/automation-engine.js:77:    mode: ["off", "guided", "auto_until_approval"].includes(normalizeText(parsed.mode))
+public/control-center/automation-engine.js:108:          message: "Auto Mode did not continue after reload. Resume manually if needed."
+public/control-center/automation-engine.js:125:let autoModeState = readPersistedAutoModeState();
+public/control-center/automation-engine.js:128:  autoModeState.logs = [
+public/control-center/automation-engine.js:129:    ...asArray(autoModeState.logs),
+public/control-center/automation-engine.js:140:  persistAutoModeState(autoModeState);
+public/control-center/automation-engine.js:141:  const snapshot = clone(autoModeState);
+public/control-center/automation-engine.js:142:  autoModeListeners.forEach((listener) => {
+public/control-center/automation-engine.js:151:    ...asObject(autoModeRuntime.context),
+public/control-center/automation-engine.js:226:        whatWillHappen: `${action} is not executed automatically. A human must approve the next move.`
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:291:        source: "automation-flow"
+public/control-center/automation-engine.js:365:        source_page: "automation-engine",
+public/control-center/automation-engine.js:371:          automation_step: asObject(step)
+public/control-center/automation-engine.js:381:        source_page: "automation-engine",
+public/control-center/automation-engine.js:392:          automation_step: asObject(step)
+public/control-center/automation-engine.js:405:        source_page: "automation-engine",
+public/control-center/automation-engine.js:412:          automation_step: asObject(step)
+public/control-center/automation-engine.js:425:        source_page: "automation-engine",
+public/control-center/automation-engine.js:433:          automation_step: asObject(step)
+public/control-center/automation-engine.js:446:        source_page: asString(step?.payload?.source_page || "automation-engine"),
+public/control-center/automation-engine.js:456:          automation_step: asObject(step)
+public/control-center/automation-engine.js:473:export async function runAutomationPlan(plan, options = {}) {
+public/control-center/automation-engine.js:522:  const steps = asArray(autoModeState.currentPlan);
+public/control-center/automation-engine.js:524:  const activeToken = autoModeRuntime.runToken;
+public/control-center/automation-engine.js:526:  while (autoModeState.currentStepIndex < steps.length) {
+public/control-center/automation-engine.js:527:    if (activeToken !== autoModeRuntime.runToken) return getAutoModeState();
+public/control-center/automation-engine.js:528:    if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:530:    const index = autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:535:      autoModeState.status = "waiting_approval";
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:549:      autoModeState.currentStepIndex = index + 1;
+public/control-center/automation-engine.js:555:    autoModeState.currentStepIndex = index + 1;
+public/control-center/automation-engine.js:563:      autoModeState.status = "failed";
+public/control-center/automation-engine.js:564:      autoModeState.enabled = false;
+public/control-center/automation-engine.js:565:      autoModeState.mode = "off";
+public/control-center/automation-engine.js:570:    if (autoModeState.mode === "guided" && autoModeState.currentStepIndex < steps.length) {
+public/control-center/automation-engine.js:571:      autoModeState.status = "paused";
+public/control-center/automation-engine.js:580:  autoModeState.status = "completed";
+public/control-center/automation-engine.js:581:  autoModeState.enabled = false;
+public/control-center/automation-engine.js:582:  autoModeState.mode = "off";
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:584:  pushAutoLog("Auto Mode completed all safe steps.", "success");
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:590:  autoModeRuntime.context = {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:609:  const mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:613:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:614:  autoModeState.enabled = true;
+public/control-center/automation-engine.js:615:  autoModeState.mode = mode;
+public/control-center/automation-engine.js:616:  autoModeState.currentPlan = steps;
+public/control-center/automation-engine.js:617:  autoModeState.currentStepIndex = 0;
+public/control-center/automation-engine.js:618:  autoModeState.status = "running";
+public/control-center/automation-engine.js:619:  autoModeState.lastRunAt = nowIso();
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:621:  pushAutoLog(`Auto Mode started in ${mode} mode with ${steps.length} step(s).`, "info");
+public/control-center/automation-engine.js:625:    autoModeState.status = "failed";
+public/control-center/automation-engine.js:626:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:627:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:628:    pushAutoLog("Auto Mode failed: no plan steps provided.", "error");
+public/control-center/automation-engine.js:637:  if (autoModeState.status !== "running") return getAutoModeState();
+public/control-center/automation-engine.js:638:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:639:  autoModeState.status = "paused";
+public/control-center/automation-engine.js:640:  pushAutoLog("Auto Mode paused.", "info");
+public/control-center/automation-engine.js:646:  if (!["paused", "idle", "failed"].includes(autoModeState.status)) return getAutoModeState();
+public/control-center/automation-engine.js:647:  if (!asArray(autoModeState.currentPlan).length) return getAutoModeState();
+public/control-center/automation-engine.js:648:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) return getAutoModeState();
+public/control-center/automation-engine.js:650:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:651:  autoModeState.enabled = true;
+public/control-center/automation-engine.js:652:  if (autoModeState.mode === "off") {
+public/control-center/automation-engine.js:653:    autoModeState.mode = ["guided", "auto_until_approval"].includes(normalizeText(options.mode))
+public/control-center/automation-engine.js:657:  autoModeState.status = "running";
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:659:  pushAutoLog("Auto Mode resumed.", "info");
+public/control-center/automation-engine.js:665:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:666:  autoModeState.enabled = false;
+public/control-center/automation-engine.js:667:  autoModeState.mode = "off";
+public/control-center/automation-engine.js:668:  autoModeState.status = "idle";
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:670:  pushAutoLog("Auto Mode stopped.", "info");
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:685:  // Approval means proceed manually for guarded actions; never auto-publish or execute destructive actions.
+public/control-center/automation-engine.js:690:  autoModeState.currentStepIndex = Math.max(0, Number(gate.index) + 1);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:693:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+public/control-center/automation-engine.js:694:    autoModeState.status = "completed";
+public/control-center/automation-engine.js:695:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:696:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:702:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:703:  autoModeState.status = "running";
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:712:  autoModeState.currentStepIndex = Math.max(0, index + 1);
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:715:  if (autoModeState.currentStepIndex >= autoModeState.currentPlan.length) {
+public/control-center/automation-engine.js:716:    autoModeState.status = "completed";
+public/control-center/automation-engine.js:717:    autoModeState.enabled = false;
+public/control-center/automation-engine.js:718:    autoModeState.mode = "off";
+public/control-center/automation-engine.js:719:    pushAutoLog("Auto Mode completed after skipping gated step.", "success");
+public/control-center/automation-engine.js:724:  autoModeRuntime.runToken += 1;
+public/control-center/automation-engine.js:725:  autoModeState.status = "running";
+public/control-center/automation-engine.js:731:  return clone(autoModeState);
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {
+public/control-center/automation-engine.js:736:  autoModeListeners.add(listener);
+public/control-center/automation-engine.js:738:    autoModeListeners.delete(listener);
+
+===== PUBLISHING BUTTON HANDLERS =====
+13:  approveCurrentGate,
+16:} from "../automation-engine.js";
+18:const publishingSessions = new Map();
+19:const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+20:const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+21:const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+23:const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+34:const publishingAutomationState = {
+38:let publishingAutoModeUnsubscribe = null;
+39:let publishingAutoModeControllerReady = false;
+40:let publishingAutomationEnabled = false;
+41:let publishingRenderCallback = null;
+42:let publishingRenderTimer = null;
+44:function schedulePublishingRender(render) {
+46:    publishingRenderCallback = render;
+49:  if (publishingRenderTimer) {
+53:  publishingRenderTimer = window.setTimeout(() => {
+54:    publishingRenderTimer = null;
+56:    if (typeof publishingRenderCallback === "function") {
+57:      publishingRenderCallback();
+63:  publishingRenderCallback = render;
+65:  if (!publishingAutomationEnabled) {
+69:  if (!publishingAutoModeControllerReady) {
+71:    publishingAutoModeControllerReady = true;
+74:  if (publishingAutoModeUnsubscribe) {
+78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+79:    const autoState = getAutoModeState();
+80:    const status = asString(autoState.status || "idle");
+86:    schedulePublishingRender();
+143:function formatDateTime(value, fallback = "Not scheduled") {
+156:  if (!date) return "Unscheduled";
+186:  if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";
+190:  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+191:  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";
+192:  if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
+198:  if (status === "published") return "success";
+199:  if (status === "ready" || status === "scheduled") return "warning";
+200:  if (status === "failed") return "danger";
+239:    id: asString(draft.id || `local-publish-${Date.now()}`),
+269:    publishDate: toDateInput(tomorrow),
+270:    publishTime: "09:00",
+279:  if (!publishingSessions.has(key)) {
+280:    publishingSessions.set(key, {
+291:  return publishingSessions.get(key);
+309:  if (item.campaign) return `${item.campaign} ${titleCase(item.channel || "publish")}`;
+310:  if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || "publish")}`;
+317:  const scheduledFor = firstText(raw.scheduled_for, raw.scheduledFor);
+318:  const status = normalizeStatus(raw.execution_status || raw.status, scheduledFor ? "scheduled" : "draft");
+328:    scheduledFor,
+332:    approvalStatus: status === "ready" ? "approved" : status === "needs approval" ? "needs approval" : "draft",
+358:  const scheduledItems = asArray(activity.scheduled_jobs).map((job) => {
+371:  const knownIds = new Set(scheduledItems.map((item) => item.jobId));
+377:  const backendIds = new Set([...scheduledItems, ...orphanResults].map((item) => item.id));
+380:  return [...visibleLocalDrafts, ...scheduledItems, ...orphanResults].sort(compareQueueItems);
+385:    failed: 0,
+388:    scheduled: 3,
+390:    published: 5
+395:  const aTime = toDate(a.scheduledFor || a.updatedAt || a.createdAt)?.getTime() || 0;
+396:  const bTime = toDate(b.scheduledFor || b.updatedAt || b.createdAt)?.getTime() || 0;
+429:    .filter((item) => item.scheduledFor && ["scheduled", "ready"].includes(item.status))
+430:    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))[0];
+431:  return next ? `${formatDateTime(next.scheduledFor)} - ${next.title}` : "No scheduled window";
+443:    publishDate: toDateInput(item.scheduledFor),
+444:    publishTime: toTimeInput(item.scheduledFor),
+473:  const date = clean(form.publishDate);
+475:  return `${date}T${clean(form.publishTime) || "09:00"}:00Z`;
+478:function buildSchedulePayload(session, status = "scheduled") {
+485:    scheduled_for: buildScheduleTime(session.form),
+488:    mode: "semi_auto",
+502:    scheduledFor: buildScheduleTime(session.form),
+514:    "Prepare publishing draft from current project context."
+519:      id: `publishing-prepare-${Date.now()}`,
+520:      type: "prepare_publishing_draft",
+521:      targetPage: "publishing",
+522:      action: "Prepare publishing draft",
+525:        reason: "Prepare a safe publishing draft without executing publish.",
+526:        title: firstText(session.form.title, "Prepared publishing draft")
+531:      id: `publishing-gate-${Date.now()}`,
+532:      type: "publish_now",
+533:      targetPage: "publishing",
+552:  if (["schedule", "publish", "retry"].includes(intent) && !clean(form.publishDate)) {
+553:    errors.publishDate = "Publish date is required for this action.";
+555:  if (intent === "publish" && form.approvalStatus !== "approved") {
+556:    errors.approvalStatus = "Approval must be approved before publishing now.";
+565:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+569:  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}">${escapeHtml(titleCase(status))}</span>`;
+575:      .publishing-execution-center {
+581:      .publishing-execution-grid {
+587:      .publishing-main-column,
+588:      .publishing-side-column {
+595:      .publishing-card {
+600:      .publishing-overview-grid {
+602:        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+606:      .publishing-overview-item,
+607:      .publishing-impact-chip {
+615:      .publishing-overview-item span,
+616:      .publishing-impact-chip small {
+623:      .publishing-overview-item strong,
+624:      .publishing-impact-chip strong {
+630:      .publishing-overview-item.is-wide {
+634:      .publishing-impact-row,
+635:      .publishing-action-row,
+636:      .publishing-form-actions,
+637:      .publishing-filter-row {
+644:      .publishing-impact-row {
+648:      .publishing-action-row,
+649:      .publishing-form-actions {
+653:      .publishing-impact-chip {
+657:      .publishing-filter-chip {
+670:      .publishing-filter-chip.is-active {
+675:      .publishing-queue-list,
+676:      .publishing-calendar-list,
+677:      .publishing-blocker-list {
+684:      .publishing-queue-row {
+694:      .publishing-queue-row.is-active {
+698:      .publishing-queue-main,
+699:      .publishing-calendar-row {
+710:      .publishing-queue-title {
+716:      .publishing-queue-meta {
+725:      .publishing-queue-actions {
+731:      .publishing-queue-actions button {
+740:      .publishing-status-pill {
+753:      .publishing-status-pill.is-ready,
+754:      .publishing-status-pill.is-scheduled {
+758:      .publishing-status-pill.is-published {
+762:      .publishing-status-pill.is-failed {
+766:      .publishing-inline-error {
+773:      .publishing-calendar-row {
+775:        grid-template-columns: minmax(0, 1fr) auto;
+783:      .publishing-calendar-row em {
+792:        .publishing-execution-grid {
+797:        .publishing-queue-row {
+798:          grid-template-columns: minmax(0, 1fr) auto;
+802:        .publishing-queue-actions {
+816:function extractHandoffSummary(handoff) {
+817:  const payload = asObject(handoff?.payload);
+821:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+822:    sourcePage: asString(handoff?.source_page || "workflows"),
+836:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+837:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+838:    getSharedHandoff(projectName, "publishing", operations)
+846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+847:  const failed = queue.find((item) => item.status === "failed");
+854:  if (failed) {
+856:      action: "Retry failed publishing item",
+857:      why: `${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.`,
+858:      focusId: failed.id,
+865:      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+872:      why: `${needsApproval.title} needs approval before it can move into the publishable queue.`,
+877:  if (handoff) {
+880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+887:      action: "Complete and schedule a draft",
+894:    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+896:      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+905:    <section class="card publishing-card">
+913:      <div class="publishing-overview-grid">
+914:        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+915:        <div class="publishing-overview-item"><span>Ready to publish</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+916:        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+917:        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+918:        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+926:    ["Launch readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+927:    ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
+931:    ["Automation", counts.scheduled ? "Scheduled" : "Manual"]
+935:    <section class="card publishing-card" id="publishingRecommendation">
+940:          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+944:      <div class="publishing-impact-row">
+946:          <span class="publishing-impact-chip">
+952:      <div class="publishing-action-row">
+953:        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+954:        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+955:        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Workspace</button>
+956:        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
+957:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+963:      ${publishingAutomationState.progress ? `<div class="simple-banner" style="margin-top:12px;">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+964:      ${publishingAutomationState.result ? `<div class="simple-banner" style="margin-top:8px;">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+967:        <div class="publishing-action-row" style="margin-top:8px;">
+968:          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve and Continue</button>
+969:          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip Step</button>
+981:    <div class="publishing-filter-row">
+986:          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+989:          </button>
+999:      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+1000:        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+1001:          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+1002:          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+1003:        </button>
+1004:        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+1005:        <div class="publishing-queue-actions">
+1006:          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review</button>
+1007:          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule</button>
+1008:          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish now</button>
+1009:          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause</button>
+1010:          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry</button>
+1014:    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+1017:    <section class="card publishing-card" id="publishingQueuePanel">
+1026:      <div class="publishing-queue-list">${rows}</div>
+1033:    <section class="card publishing-card" id="publishingBuilderPanel">
+1037:          <h3>Draft, validate, schedule, and execute</h3>
+1041:      <form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>
+1045:              <label class="setup-label" for="publishingProjectInput">Project</label>
+1048:            <input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">
+1053:              <label class="setup-label" for="publishingCampaignInput">Campaign</label>
+1056:            <input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">
+1064:              <label class="setup-label" for="publishingChannelInput">Channel</label>
+1067:            <select id="publishingChannelInput" name="channel" class="setup-input">
+1077:              <label class="setup-label" for="publishingContentInput">Content item</label>
+1080:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+1088:              <label class="setup-label" for="publishingDateInput">Publish date</label>
+1091:            <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
+1092:            ${fieldError(session, "publishDate", escapeHtml)}
+1096:              <label class="setup-label" for="publishingTimeInput">Publish time</label>
+1099:            <input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">
+1103:              <label class="setup-label" for="publishingApprovalInput">Approval status</label>
+1106:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+1117:            <label class="setup-label" for="publishingTitleInput">Queue title</label>
+1120:          <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">
+1125:            <label class="setup-label" for="publishingNotesInput">Execution notes</label>
+1128:          <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>
+1131:      <div class="publishing-form-actions">
+1132:        <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
+1133:        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save Draft</button>
+1134:        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Schedule</button>
+1141:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+1142:  if (!handoff) {
+1144:      <section class="card publishing-card">
+1157:  const summary = extractHandoffSummary(handoff);
+1160:    <section class="card publishing-card" id="publishingHandoffPanel">
+1165:          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+1175:      <div class="publishing-action-row">
+1176:        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Output</button>
+1183:  const scheduled = queue
+1184:    .filter((item) => item.scheduledFor)
+1185:    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))
+1188:  if (!scheduled.length) {
+1190:      <section class="card publishing-card">
+1194:            <h3>No upcoming scheduled items</h3>
+1198:        <div class="empty-box">Scheduled publishing items will appear here once timing exists in the queue.</div>
+1204:    <section class="card publishing-card">
+1208:          <h3>Upcoming scheduled items</h3>
+1210:        <span class="card-badge neutral">${escapeHtml(String(scheduled.length))} upcoming</span>
+1212:      <div class="publishing-calendar-list">
+1213:        ${scheduled.map((item) => `
+1214:          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+1215:            <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
+1216:            <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
+1219:          </button>
+1228:    .filter((item) => item.executedAt || item.status === "failed")
+1230:  const failed = queue.filter((item) => item.status === "failed");
+1232:  if (!latest && !failed.length) {
+1234:      <section class="card publishing-card">
+1238:            <h3>No publish result yet</h3>
+1242:        <div class="empty-box">Last publish result and failed publish blockers will appear here after execution data exists.</div>
+1248:    <section class="card publishing-card">
+1252:          <h3>${escapeHtml(latest ? latest.title : "Failed publish blockers")}</h3>
+1254:        <span class="card-badge ${badgeTone(latest?.status || "failed")}">${escapeHtml(latest ? titleCase(latest.status) : "Failed")}</span>
+1263:      ${failed.length ? `
+1264:        <div class="publishing-blocker-list">
+1265:          ${failed.map((item) => `
+1266:            <div class="simple-banner">${escapeHtml(item.title)}: ${escapeHtml(normalizeNotes(item.notes).join("; ") || "Failed publish needs review.")}</div>
+1279:    <section class="card publishing-card">
+1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+1294:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+1296:    `Review this publishing execution plan for ${projectName || "the current project"}.`,
+1301:    `Publish window: ${session.form.publishDate ? `${session.form.publishDate} ${session.form.publishTime || "09:00"}` : "not scheduled"}`,
+1303:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+1315:    showError?.(error.message || "Publishing action failed.");
+1328:  reschedulePublishingItem,
+1329:  approvePublishingItem,
+1330:  publishPublishingItem,
+1331:  failPublishingItem,
+1334:  handoff
+1344:    schedulePublishingRender(render);
+1384:  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+1385:    button.onclick = () => {
+1386:      session.filter = button.getAttribute("data-publishing-filter") || "all";
+1391:  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+1392:    button.onclick = () => {
+1393:      const itemId = button.getAttribute("data-publishing-select") || "";
+1400:  const form = $("publishingBuilderForm");
+1411:  const newBtn = $("publishingNewItemBtn");
+1413:    newBtn.onclick = () => {
+1415:      showMessage?.("New publishing draft opened.");
+1420:  const openQueueBtn = $("publishingOpenQueueBtn");
+1422:    openQueueBtn.onclick = () => {
+1423:      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+1427:  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+1428:  saveDraftButtons.forEach((button) => {
+1429:    button.onclick = async () => {
+1440:  const scheduleBtn = $("publishingScheduleBtn");
+1441:  if (scheduleBtn) {
+1442:    scheduleBtn.onclick = async () => {
+1444:      if (!validateBuilder(session, "schedule")) {
+1450:      const payload = buildSchedulePayload(session, "scheduled");
+1453:          ...buildLocalDraftPayload(session, "scheduled"),
+1456:        session.draftMessage = "Local publishing draft scheduled in this browser.";
+1463:        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+1471:        successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."
+1478:        saveDraftLocally("Backend schedule unavailable; draft kept locally.");
+1484:  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+1485:    button.onclick = async () => {
+1486:      const itemId = button.getAttribute("data-publishing-id") || "";
+1487:      const action = button.getAttribute("data-publishing-action") || "";
+1499:      if (action === "schedule") {
+1500:        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+1505:      const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";
+1512:        const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
+1514:        session.draftMessage = `Local draft ${action === "publish" ? "marked published" : action === "pause" ? "paused" : "updated"}.`;
+1520:      if (action === "publish") {
+1522:          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+1523:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
+1528:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+1534:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+1535:          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue." }
+1542:  const approveBtn = $("publishingApproveBtn");
+1543:  if (approveBtn) {
+1544:    approveBtn.onclick = async () => {
+1547:        session.validation.contentItem = "Select or save a publishing draft before approval.";
+1551:      session.form.approvalStatus = "approved";
+1553:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+1554:        showMessage?.("Local publishing draft approved.");
+1560:        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1561:        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item approved and marked ready." }
+1567:  const failBtn = $("publishingFailBtn");
+1568:  if (failBtn) {
+1569:    failBtn.onclick = async () => {
+1572:        session.validation.contentItem = "Select a publishing item before marking it failed.";
+1577:        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });
+1578:        showMessage?.("Local publishing draft marked failed.");
+1584:        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1585:        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
+1591:  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+1593:    loadHandoffBtn.onclick = () => {
+1594:      const summary = extractHandoffSummary(handoff);
+1609:      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+1614:  const pushAiBtn = $("publishingPushAiBtn");
+1616:    pushAiBtn.onclick = () => {
+1619:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+1630:        source_page: "publishing",
+1633:          entity_type: "publishing_job",
+1638:          publishing_item_id: current?.jobId || session.formSourceId || "",
+1639:          publishing_title: current?.title || session.form.title || "",
+1644:            scheduled_for: buildScheduleTime(session.form) || current?.scheduledFor || "",
+1651:      showMessage?.("Publishing context sent to AI Command.");
+1655:  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+1656:  if (autoPrepareBtn) {
+1657:    autoPrepareBtn.onclick = async () => {
+1660:        publishingAutomationState.progress = "";
+1661:        publishingAutomationState.result = "No safe publishing preparation steps available.";
+1666:      publishingAutomationState.result = "";
+1667:      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+1668:      publishingAutomationEnabled = true;
+1673:        mode: "auto_until_approval",
+1676:        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+1677:        schedulePublishingRender(render);
+1681:      publishingAutomationState.result = runResult.status === "success"
+1684:      showMessage?.(publishingAutomationState.result);
+1689:  const autoStopBtn = $("publishingAutoStopBtn");
+1690:  if (autoStopBtn) {
+1691:    autoStopBtn.onclick = () => {
+1697:  const autoApproveBtn = $("publishingAutoApproveBtn");
+1698:  if (autoApproveBtn) {
+1699:    autoApproveBtn.onclick = async () => {
+1700:      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+1705:  const autoSkipBtn = $("publishingAutoSkipBtn");
+1706:  if (autoSkipBtn) {
+1707:    autoSkipBtn.onclick = async () => {
+1714:export const publishingRoute = {
+1715:  id: "publishing",
+1720:    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+1723:    <section class="page is-active" data-page="publishing">
+1724:      <div id="publishingRoot"></div>
+1737:    reschedulePublishingItem,
+1738:    approvePublishingItem,
+1739:    publishPublishingItem,
+1740:    failPublishingItem
+1749:    const handoff = getPublishingHandoff(projectName, operations);
+1751:    const root = $("publishingRoot");
+1768:    const publishingAssets = filterAssetCategories(getAssetData(state), PUBLISHING_ASSET_KEYS);
+1769:    const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
+1770:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+1774:      <div class="publishing-execution-center">
+1778:        <div class="publishing-execution-grid">
+1779:          <div class="publishing-main-column">
+1782:            <section class="card publishing-card">
+1786:                  <h3>${escapeHtml(safeText(selectedItem?.title, "Selected publishing item"))}</h3>
+1790:              <div class="publishing-action-row">
+1791:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+1792:                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark Failed</button>
+1797:          <aside class="publishing-side-column">
+1798:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+1815:      reschedulePublishingItem,
+1816:      approvePublishingItem,
+1817:      publishPublishingItem,
+1818:      failPublishingItem,
+1819:      render: () => publishingRoute.render({
+1829:        reschedulePublishingItem,
+1830:        approvePublishingItem,
+1831:        publishPublishingItem,
+1832:        failPublishingItem
+1835:      handoff
+
+===== PUBLISHING API / CONTEXT CALLS =====
+1:import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+265:    project: firstText(context.currentProject, overview.project_name),
+266:    campaign: firstText(context.activeCampaign, overview.active_campaign),
+310:  if (context.activeCampaign) return `${context.activeCampaign} ${titleCase(item.channel || "publish")}`;
+514:    "Prepare publishing draft from current project context."
+816:function extractHandoffSummary(handoff) {
+817:  const payload = asObject(handoff?.payload);
+821:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+822:    sourcePage: asString(handoff?.source_page || "workflows"),
+846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+877:  if (handoff) {
+880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+1141:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+1142:  if (!handoff) {
+1157:  const summary = extractHandoffSummary(handoff);
+1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+1294:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+1303:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+1328:  reschedulePublishingItem,
+1329:  approvePublishingItem,
+1330:  publishPublishingItem,
+1331:  failPublishingItem,
+1334:  handoff
+1338:  const projectName = state.context.currentProject || "";
+1463:        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+1522:          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+1528:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+1534:          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+1560:        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1584:        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+1594:      const summary = extractHandoffSummary(handoff);
+1619:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+1737:    reschedulePublishingItem,
+1738:    approvePublishingItem,
+1739:    publishPublishingItem,
+1740:    failPublishingItem
+1743:    const projectName = state.context.currentProject || "";
+1749:    const handoff = getPublishingHandoff(projectName, operations);
+1770:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+1798:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+1815:      reschedulePublishingItem,
+1816:      approvePublishingItem,
+1817:      publishPublishingItem,
+1818:      failPublishingItem,
+1829:        reschedulePublishingItem,
+1830:        approvePublishingItem,
+1831:        publishPublishingItem,
+1832:        failPublishingItem
+1835:      handoff
+
+===== PUBLISHING SESSION / LOADING / STATE =====
+192:  if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
+336:    notes: normalizeNotes(raw.notes, raw.connector_error),
+545:  const errors = {};
+548:  if (!clean(form.project)) errors.project = "Project is required.";
+549:  if (!clean(form.campaign)) errors.campaign = "Campaign is required.";
+550:  if (!clean(form.channel)) errors.channel = "Channel is required.";
+551:  if (!clean(form.contentItem)) errors.contentItem = "Content item is required.";
+553:    errors.publishDate = "Publish date is required for this action.";
+556:    errors.approvalStatus = "Approval must be approved before publishing now.";
+559:  session.validation = errors;
+560:  return !Object.keys(errors).length;
+565:  return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
+766:      .publishing-inline-error {
+1165:          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+1314:  } catch (error) {
+1315:    showError?.(error.message || "Publishing action failed.");
+
+===== PUBLISHING IMPORTANT RANGES 1-220 =====
+import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
+import {
+  filterAssetCategories,
+  getAssetNextAction,
+  renderAssetDependencyRows
+} from "../asset-library.js";
+import { getReadinessBlockers } from "../system-intelligence.js";
+import {
+  createAutoModeController,
+  getAutoModeState,
+  startAutoMode,
+  stopAutoMode,
+  approveCurrentGate,
+  skipCurrentStep,
+  subscribeAutoMode
+} from "../automation-engine.js";
+
+const publishingSessions = new Map();
+const PUBLISHING_LOCAL_DRAFTS_KEY = "mh-publishing-local-drafts-v1";
+const STATUS_FILTERS = ["all", "draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const DISPLAY_STATUSES = ["draft", "ready", "needs approval", "scheduled", "published", "failed"];
+const CHANNEL_DEFAULTS = ["instagram", "facebook", "tiktok", "youtube", "email", "amazon", "ebay", "website"];
+const APPROVAL_STATUSES = ["draft", "needs approval", "approved"];
+const PUBLISHING_ASSET_KEYS = [
+  "legal_doc",
+  "pricing_doc",
+  "product_csv",
+  "product_photos",
+  "product_videos",
+  "campaign_assets",
+  "social_assets",
+  "logo"
+];
+const publishingAutomationState = {
+  progress: "",
+  result: ""
+};
+let publishingAutoModeUnsubscribe = null;
+let publishingAutoModeControllerReady = false;
+let publishingAutomationEnabled = false;
+let publishingRenderCallback = null;
+let publishingRenderTimer = null;
+
+function schedulePublishingRender(render) {
+  if (typeof render === "function") {
+    publishingRenderCallback = render;
+  }
+
+  if (publishingRenderTimer) {
+    return;
+  }
+
+  publishingRenderTimer = window.setTimeout(() => {
+    publishingRenderTimer = null;
+
+    if (typeof publishingRenderCallback === "function") {
+      publishingRenderCallback();
+    }
+  }, 120);
+}
+
+function ensurePublishingAutoModeBinding(getState, navigateTo, render) {
+  publishingRenderCallback = render;
+
+  if (!publishingAutomationEnabled) {
+    return;
+  }
+
+  if (!publishingAutoModeControllerReady) {
+    createAutoModeController(getState, { getState, navigateTo });
+    publishingAutoModeControllerReady = true;
+  }
+
+  if (publishingAutoModeUnsubscribe) {
+    return;
+  }
+
+  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+    const autoState = getAutoModeState();
+    const status = asString(autoState.status || "idle");
+
+    if (status === "idle") {
+      return;
+    }
+
+    schedulePublishingRender();
+  });
+}
+
+
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function clean(value) {
+  return asString(value).trim();
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function toKey(value) {
+  return clean(value).toLowerCase();
+}
+
+function toDate(value) {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function toDateInput(value) {
+  const date = toDate(value);
+  return date ? date.toISOString().slice(0, 10) : "";
+}
+
+function toTimeInput(value) {
+  const date = toDate(value);
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
+
+function formatDateTime(value, fallback = "Not scheduled") {
+  const date = toDate(value);
+  if (!date) return fallback;
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function formatDate(value) {
+  const date = toDate(value);
+  if (!date) return "Unscheduled";
+
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+function formatTime(value) {
+  const date = toDate(value);
+  if (!date) return "Time TBD";
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function firstText(...values) {
+  for (const value of values) {
+    const text = clean(value);
+    if (text) return text;
+  }
+  return "";
+}
+
+function normalizeStatus(value, fallback = "draft") {
+  const normalized = toKey(value);
+  if (!normalized) return fallback;
+  if (["draft", "paused", "pause"].includes(normalized)) return "draft";
+  if (["ready", "approved", "ready_for_manual_publish", "ready_for_manual_send"].includes(normalized)) return "ready";
+  if (["needs approval", "needs_approval", "approval", "pending_approval", "review", "in_review"].includes(normalized)) {
+    return "needs approval";
+  }
+  if (["scheduled", "queued", "queue", "pending", "pending_publish"].includes(normalized)) return "scheduled";
+  if (["published", "completed", "complete", "success", "done", "sent", "live"].includes(normalized)) return "published";
+  if (["failed", "error", "blocked", "rejected"].includes(normalized)) return "failed";
+  
+  return fallback;
+}
+
+function badgeTone(status) {
+  if (status === "published") return "success";
+  if (status === "ready" || status === "scheduled") return "warning";
+  if (status === "failed") return "danger";
+  return "neutral";
+}
+
+function statusClass(status) {
+  return asString(status).replace(/\s+/g, "-");
+}
+
+function readDraftMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(PUBLISHING_LOCAL_DRAFTS_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeDraftMap(map) {
+  if (typeof window === "undefined") return;
+  try {
+
+===== PUBLISHING IMPORTANT RANGES 820-1040 =====
+  return {
+    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+    sourcePage: asString(handoff?.source_page || "workflows"),
+    workflowId: asString(payload.workflow_id),
+    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
+    project: firstText(draftContext.projectName, payload.project_name, output.project),
+    campaign: firstText(payload.campaign_name, output.campaign, output.campaignName),
+    channel: firstText(output.channel, payload.channel),
+    contentItem: firstText(output.content_item, output.contentItem, output.summary, payload.prompt),
+    summary: firstText(output.summary, output.description, payload.prompt, draftContext.lastCommand),
+    output
+  };
+}
+
+function getPublishingHandoff(projectName, operations) {
+  return (
+    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+    getSharedHandoff(projectName, "publishing", operations)
+  );
+}
+
+function getAssetData(state) {
+  return asObject(state.data.assets);
+}
+
+function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+  const failed = queue.find((item) => item.status === "failed");
+  const ready = queue.find((item) => item.status === "ready");
+  const needsApproval = queue.find((item) => item.status === "needs approval");
+  const draft = queue.find((item) => item.status === "draft");
+  const connectedCount = Object.values(checks).filter(Boolean).length;
+  const externalBlockers = asArray(globalBlockers).slice(0, 3);
+
+  if (failed) {
+    return {
+      action: "Retry failed publishing item",
+      why: `${failed.title} is blocked or failed. Clear the blocker before adding more scheduled work.`,
+      focusId: failed.id,
+      externalBlockers
+    };
+  }
+  if (ready && !assetBlockers.length) {
+    return {
+      action: "Publish the ready item",
+      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+      focusId: ready.id
+    };
+  }
+  if (needsApproval) {
+    return {
+      action: "Review approval queue",
+      why: `${needsApproval.title} needs approval before it can move into the publishable queue.`,
+      focusId: needsApproval.id,
+      externalBlockers
+    };
+  }
+  if (handoff) {
+    return {
+      action: "Load workflow output into a draft",
+      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+      focusId: "",
+      externalBlockers
+    };
+  }
+  if (draft) {
+    return {
+      action: "Complete and schedule a draft",
+      why: `${draft.title} is not yet executable. Add channel, content, approval, and timing details.`,
+      focusId: draft.id,
+      externalBlockers
+    };
+  }
+  return {
+    action: connectedCount ? "Create a publishing draft" : "Connect a publishing channel",
+    why: connectedCount
+      ? "No queue item is ready. Start with a draft and save it locally until it can be scheduled."
+      : "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",
+    focusId: "",
+    externalBlockers
+  };
+}
+
+function renderOverview(counts, queue, escapeHtml) {
+  return `
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publishing Overview</div>
+          <h3>Execution Destination</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(queue.length))} items</span>
+      </div>
+      <div class="publishing-overview-grid">
+        <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
+        <div class="publishing-overview-item"><span>Ready to publish</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+        <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
+        <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
+        <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
+      </div>
+    </section>
+  `;
+}
+
+function renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml) {
+  const chips = [
+    ["Launch readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+    ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
+    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+    ["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],
+    ["Approval", counts["needs approval"] ? "Pending" : counts.ready ? "Approved" : "Draft"],
+    ["Automation", counts.scheduled ? "Scheduled" : "Manual"]
+  ];
+
+  return `
+    <section class="card publishing-card" id="publishingRecommendation">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Smart Recommendation</div>
+          <h3>${escapeHtml(recommendation.action)}</h3>
+          <p class="publishing-section-copy">${escapeHtml(recommendation.why)}</p>
+        </div>
+        <span class="card-badge ${assetBlockers.length ? "danger" : "neutral"}">${escapeHtml(assetBlockers.length ? `${assetBlockers.length} blockers` : "Clear")}</span>
+      </div>
+      <div class="publishing-impact-row">
+        ${chips.map(([label, value]) => `
+          <span class="publishing-impact-chip">
+            <strong>${escapeHtml(label)}</strong>
+            <small>${escapeHtml(value)}</small>
+          </span>
+        `).join("")}
+      </div>
+      <div class="publishing-action-row">
+        <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
+        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Workspace</button>
+        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
+        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+      </div>
+      <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+      ${asArray(recommendation.externalBlockers).length ? `
+        <div class="simple-banner" style="margin-top:12px;">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
+      ` : ""}
+      ${publishingAutomationState.progress ? `<div class="simple-banner" style="margin-top:12px;">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+      ${publishingAutomationState.result ? `<div class="simple-banner" style="margin-top:8px;">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+      ${getAutoModeState().status === "waiting_approval" ? `
+        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+        <div class="publishing-action-row" style="margin-top:8px;">
+          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve and Continue</button>
+          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip Step</button>
+        </div>
+      ` : ""}
+    </section>
+  `;
+}
+
+function renderFilterRow(filter, queue, escapeHtml) {
+  const counts = getStatusCounts(queue);
+
+
+  return `
+    <div class="publishing-filter-row">
+      ${STATUS_FILTERS.map((status) => {
+        const active = filter === status;
+        const count = status === "all" ? queue.length : counts[status];
+        return `
+          <button class="publishing-filter-chip${active ? " is-active" : ""}" type="button" data-publishing-filter="${escapeHtml(status)}">
+            <span>${escapeHtml(status === "all" ? "All" : titleCase(status))}</span>
+            <strong>${escapeHtml(String(count || 0))}</strong>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
+  const rows = visibleQueue.length
+    ? visibleQueue.map((item) => `
+      <article class="publishing-queue-row${item.id === selectedId ? " is-active" : ""}" data-publishing-row="${escapeHtml(item.id)}">
+        <button class="publishing-queue-main" type="button" data-publishing-select="${escapeHtml(item.id)}">
+          <span class="publishing-queue-title">${escapeHtml(item.title)}</span>
+          <span class="publishing-queue-meta">${escapeHtml(titleCase(item.channel || "unassigned"))} • ${escapeHtml(item.scheduledFor ? formatDateTime(item.scheduledFor) : "Unscheduled")} • ${escapeHtml(item.source)}</span>
+        </button>
+        <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
+        <div class="publishing-queue-actions">
+          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review</button>
+          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule</button>
+          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish now</button>
+          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause</button>
+          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry</button>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty-box">No publish queue items match this filter. Create or load a draft to start the execution queue.</div>`;
+
+  return `
+    <section class="card publishing-card" id="publishingQueuePanel">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publish Queue</div>
+          <h3>Queue items and execution actions</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(visibleQueue.length))} visible</span>
+      </div>
+      ${renderFilterRow(filter, queue, escapeHtml)}
+      <div class="publishing-queue-list">${rows}</div>
+    </section>
+  `;
+}
+
+function renderBuilder(session, channels, checks, escapeHtml) {
+  return `
+    <section class="card publishing-card" id="publishingBuilderPanel">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Publishing Builder</div>
+          <h3>Draft, validate, schedule, and execute</h3>
+        </div>
+        <span class="card-badge neutral">Inline validation</span>
+      </div>
+
+===== PUBLISHING IMPORTANT RANGES 1360-1735 =====
+  }
+
+  async function persistDraft() {
+    const local = saveDraftLocally("Publishing draft saved locally.");
+    if (typeof savePublishingSchedule === "function") {
+      const response = await runAndRefresh(
+        () => savePublishingSchedule(projectName, buildSchedulePayload(session, "draft")),
+        {
+          projectName,
+          reloadProjectData,
+          showMessage,
+          showError: () => {},
+          successMessage: "Publishing draft saved."
+        }
+      );
+
+      if (response?.job?.job_id) {
+        session.selectedId = response.job.job_id;
+        session.formSourceId = response.job.job_id;
+      }
+    }
+    return local;
+  }
+
+  Array.from(document.querySelectorAll("[data-publishing-filter]")).forEach((button) => {
+    button.onclick = () => {
+      session.filter = button.getAttribute("data-publishing-filter") || "all";
+      rerender();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-publishing-select]")).forEach((button) => {
+    button.onclick = () => {
+      const itemId = button.getAttribute("data-publishing-select") || "";
+      session.selectedId = itemId;
+      syncFormFromItem(session, getSelectedItem(queue, itemId));
+      rerender();
+    };
+  });
+
+  const form = $("publishingBuilderForm");
+  if (form) {
+    form.oninput = () => {
+      syncSessionForm(session, form);
+      if (Object.keys(session.validation).length) {
+        session.validation = {};
+        rerender();
+      }
+    };
+  }
+
+  const newBtn = $("publishingNewItemBtn");
+  if (newBtn) {
+    newBtn.onclick = () => {
+      resetForm(session, state);
+      showMessage?.("New publishing draft opened.");
+      rerender();
+    };
+  }
+
+  const openQueueBtn = $("publishingOpenQueueBtn");
+  if (openQueueBtn) {
+    openQueueBtn.onclick = () => {
+      document.getElementById("publishingQueuePanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  }
+
+  const saveDraftButtons = [$("publishingSaveDraftBtn"), $("publishingBuilderSaveBtn")].filter(Boolean);
+  saveDraftButtons.forEach((button) => {
+    button.onclick = async () => {
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "draft")) {
+        rerender();
+        return;
+      }
+      await persistDraft();
+      rerender();
+    };
+  });
+
+  const scheduleBtn = $("publishingScheduleBtn");
+  if (scheduleBtn) {
+    scheduleBtn.onclick = async () => {
+      syncSessionForm(session, form);
+      if (!validateBuilder(session, "schedule")) {
+        rerender();
+        return;
+      }
+
+      const current = selected();
+      const payload = buildSchedulePayload(session, "scheduled");
+      if (current?.localOnly) {
+        updateLocalDraft(projectName, current.id, {
+          ...buildLocalDraftPayload(session, "scheduled"),
+          id: current.id
+        });
+        session.draftMessage = "Local publishing draft scheduled in this browser.";
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      const action = current
+        ? () => reschedulePublishingItem(projectName, current.jobId, payload)
+        : () => savePublishingSchedule(projectName, payload);
+
+      const response = await runAndRefresh(action, {
+        projectName,
+        reloadProjectData,
+        showMessage,
+        showError,
+        successMessage: current ? "Publishing item scheduled." : "Publishing schedule saved."
+      });
+
+      if (response?.job?.job_id) {
+        session.selectedId = response.job.job_id;
+        session.formSourceId = response.job.job_id;
+      } else if (!current) {
+        saveDraftLocally("Backend schedule unavailable; draft kept locally.");
+      }
+      rerender();
+    };
+  }
+
+  Array.from(document.querySelectorAll("[data-publishing-action]")).forEach((button) => {
+    button.onclick = async () => {
+      const itemId = button.getAttribute("data-publishing-id") || "";
+      const action = button.getAttribute("data-publishing-action") || "";
+      const item = getSelectedItem(queue, itemId);
+      if (!item) return;
+
+      session.selectedId = item.id;
+      syncFormFromItem(session, item);
+
+      if (action === "review") {
+        rerender();
+        return;
+      }
+
+      if (action === "schedule") {
+        document.getElementById("publishingBuilderPanel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        rerender();
+        return;
+      }
+
+      const intent = action === "publish" ? "publish" : action === "retry" ? "retry" : "draft";
+      if (!validateBuilder(session, intent)) {
+        rerender();
+        return;
+      }
+
+      if (item.localOnly) {
+        const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
+        updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });
+        session.draftMessage = `Local draft ${action === "publish" ? "marked published" : action === "pause" ? "paused" : "updated"}.`;
+        showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      if (action === "publish") {
+        await runAndRefresh(
+          () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
+        );
+      }
+      if (action === "pause") {
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft." }
+        );
+      }
+      if (action === "retry") {
+        await runAndRefresh(
+          () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue." }
+        );
+      }
+      rerender();
+    };
+  });
+
+  const approveBtn = $("publishingApproveBtn");
+  if (approveBtn) {
+    approveBtn.onclick = async () => {
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select or save a publishing draft before approval.";
+        rerender();
+        return;
+      }
+      session.form.approvalStatus = "approved";
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
+        showMessage?.("Local publishing draft approved.");
+        rerender();
+        return;
+      }
+      
+      await runAndRefresh(
+        () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item approved and marked ready." }
+      );
+      rerender();
+    };
+  }
+
+  const failBtn = $("publishingFailBtn");
+  if (failBtn) {
+    failBtn.onclick = async () => {
+      const current = selected();
+      if (!current) {
+        session.validation.contentItem = "Select a publishing item before marking it failed.";
+        rerender();
+        return;
+      }
+      if (current.localOnly) {
+        updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "failed"), id: current.id });
+        showMessage?.("Local publishing draft marked failed.");
+        rerender();
+        return;
+      }
+
+      await runAndRefresh(
+        () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
+      );
+      rerender();
+    };
+  }
+
+  const loadHandoffBtn = $("publishingLoadHandoffBtn");
+  if (loadHandoffBtn) {
+    loadHandoffBtn.onclick = () => {
+      const summary = extractHandoffSummary(handoff);
+      session.form = {
+        ...session.form,
+        project: firstText(summary.project, session.form.project, projectName),
+        campaign: firstText(summary.campaign, session.form.campaign),
+        channel: toKey(firstText(summary.channel, session.form.channel)),
+        contentItem: firstText(summary.contentItem, summary.summary, session.form.contentItem),
+        title: firstText(summary.title, session.form.title),
+        notes: firstText(summary.summary, session.form.notes)
+      };
+      session.loadedHandoffId = summary.id;
+      session.isCreatingNew = true;
+      session.selectedId = "";
+      session.formSourceId = "";
+      session.validation = {};
+      saveDraftLocally("Workflow output loaded into a local publishing draft.");
+      rerender();
+    };
+  }
+
+  const pushAiBtn = $("publishingPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      syncSessionForm(session, form);
+      const current = selected();
+      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+      const aiDraft = {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: current?.title || session.form.title || "Publishing Execution Review",
+        routeSuggestions: []
+      };
+
+      setSharedAiDraft(projectName, aiDraft);
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "publishing",
+        destination_page: "ai-command",
+        linked_entity: {
+          entity_type: "publishing_job",
+          entity_id: current?.jobId || session.formSourceId || ""
+        },
+        payload: {
+          prompt,
+          publishing_item_id: current?.jobId || session.formSourceId || "",
+          publishing_title: current?.title || session.form.title || "",
+          draft_context: aiDraft,
+          selection: {
+            status: current?.status || "draft",
+            channel: session.form.channel || current?.channel || "",
+            scheduled_for: buildScheduleTime(session.form) || current?.scheduledFor || "",
+            notes: session.form.notes
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+      showMessage?.("Publishing context sent to AI Command.");
+    };
+  }
+
+  const autoPrepareBtn = $("publishingAutoPrepareBtn");
+  if (autoPrepareBtn) {
+    autoPrepareBtn.onclick = async () => {
+      const plan = buildPublishingAutoModePlan(session);
+      if (!plan.length) {
+        publishingAutomationState.progress = "";
+        publishingAutomationState.result = "No safe publishing preparation steps available.";
+        rerender();
+        return;
+      }
+
+      publishingAutomationState.result = "";
+      publishingAutomationState.progress = `Step 0 / ${plan.length}`;
+      publishingAutomationEnabled = true;
+      ensurePublishingAutoModeBinding(getState, navigateTo, render);
+      rerender();
+
+      const runResult = await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, projectName },
+        onProgress: ({ index, total, step, result }) => {
+        publishingAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${result.status})`;
+        schedulePublishingRender(render);
+        }
+      });
+
+      publishingAutomationState.result = runResult.status === "success"
+        ? "Auto Prepare Publishing completed."
+        : "Auto Prepare Publishing stopped before completion.";
+      showMessage?.(publishingAutomationState.result);
+      rerender();
+    };
+  }
+
+  const autoStopBtn = $("publishingAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("publishingAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("publishingAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Gated step skipped.");
+    };
+  }
+}
+
+export const publishingRoute = {
+  id: "publishing",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Publishing",
+    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+  },
+  template: `
+    <section class="page is-active" data-page="publishing">
+      <div id="publishingRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    reloadProjectData,
+
+===== API PUBLISHING FUNCTIONS =====
+1788:export async function savePublishingSchedule(projectName, payload = {}) {
+1794:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/schedule`,
+1797:    "Failed to save publishing schedule"
+1801:export async function reschedulePublishingItem(projectName, jobId, payload = {}) {
+1811:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/reschedule`,
+1814:    "Failed to reschedule publishing item"
+1818:export async function approvePublishingItem(projectName, jobId, payload = {}) {
+1828:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/ready`,
+1831:    "Failed to approve publishing item"
+1835:export async function publishPublishingItem(projectName, jobId, payload = {}) {
+1845:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/publish`,
+1852:export async function failPublishingItem(projectName, jobId, payload = {}) {
+1862:    `/media-manager/project/${encodeURIComponent(projectName)}/publishing/${encodeURIComponent(jobId)}/fail`,
+1865:    "Failed to mark publishing item as failed"
+
+===== SERVER PUBLISHING ROUTES =====
+184:  /^\/publish-clone\/[^/]+\/?$/i,
+187:  /^\/publish-blog\/[^/]+\/?$/i,
+191:  /^\/execute_publish_package\/?$/i,
+745:  'manual_publish_ready',
+1026:  publishing: {
+1028:    canonical: 'publishing'
+1060:    canonical: 'publishing/results'
+1527:  'publishing',
+2708:    published_count: 0,
+2717:    if (product.status === 'publish') summary.published_count += 1;
+2914:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+2934:    status: compliance.publish_status,
+3026:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+3045:    status: compliance.publish_status,
+3171:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+3199:    status: compliance.publish_status,
+3605:    if (status !== 'publish' || !slug || !name || !stableKey) {
+3661:      published_count: launchReadyProducts.length,
+3811:    domain: 'publishing',
+3816:    domain: 'publishing',
+3819:    requestedIdentifier: 'publishing-root',
+3820:    requestedFile: 'publishing'
+3881:    domain: 'publishing',
+3882:    artifactType: 'publishing_connector_payload',
+3917:    domain: 'publishing',
+3918:    artifactType: 'publishing_scheduler_job',
+3935:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+3939:      'ready_for_manual_publish',
+3941:      'ready_for_manual_handoff',
+3943:      'manual_publish',
+3950:  if (['published', 'completed', 'complete', 'success', 'done', 'sent', 'live'].includes(normalized)) {
+3951:    return 'published';
+3995:  if (safeChannel) return `${safeChannel} publish`;
+4139:    domain: 'publishing',
+4140:    artifactType: 'publishing_scheduler_job',
+4269:    domain: 'publishing',
+4274:    requestedFile: 'publishing/scheduler/*.json'
+4395:    recommendations.push('rewrite copy in natural German for German-market publishing');
+5977:    text.includes('publish') ||
+5983:    return 'approval_required';
+6052:    approval_required: mode === 'approval_required',
+6059:        mode === 'approval_required'
+6060:          ? 'Prepare execution summary and request approval.'
+6115:    publishingDir: path.join(baseDir, 'publishing'),
+6416:    paths.publishingDir,
+6532:      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+6616:    paths.publishingDir,
+6654:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6655:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6674:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+6675:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+6687:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+6688:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+6700:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+6701:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6714:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+6726:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+6727:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+6739:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+6740:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+6765:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+6766:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+6822:      publishing: paths.publishingDir,
+7119:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+7132:    publishing_readiness: publishingReadiness,
+7143:    has_publishing_dir: fs.existsSync(paths.publishingDir),
+7179:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+7255:    approval_note: normalizeSetupTextValue(asset.approval_note),
+8156:        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+8233:      description: 'Approved product photography for content, media, ads, and publishing.',
+8379:    record.approval_status ||
+9302:app.post('/execute_publish_package', (req, res) => {
+9307:    const publishPackage = resolvePublishPackageForExecution(projectName, req.body || {});
+9308:    const payload = buildSocialExecutionPayload(publishPackage);
+9309:    const executionState = 'manual_publish_ready';
+9313:      campaign_name: String(publishPackage.campaign_name || req.body?.campaign_name || '').trim(),
+9322:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+9342:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+9355:      message: error.message || 'Failed to execute publish package'
+9424:      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
+9427:      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
+9753:        'Use the cloned draft product for safe content updates before publishing.'
+9868:        'Review the updated draft clone in WooCommerce before any publish action.'
+10546:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+11364:      error: error.message || 'Failed to list approvals'
+11371:    const approval = createApproval(req.params.project, req.body || {});
+11373:      approval,
+11378:      error: error.message || 'Failed to create approval'
+11385:    const approval = decideApproval(req.params.project, req.params.approvalId, {
+11394:      approval,
+11399:      error: error.message || 'Failed to update approval'
+11404:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+11405:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+11406:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+11407:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+11408:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+11409:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+11516:      error: error.message || 'Failed to list handoffs'
+11523:    const handoff = createHandoff(req.params.project, req.body || {});
+11525:      handoff,
+11530:      error: error.message || 'Failed to create handoff'
+11537:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+11539:      handoff,
+11544:      error: error.message || 'Failed to consume handoff'
+11549:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+11550:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+11551:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+11552:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+11553:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+11554:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+11818:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+11841:    logCriticalFailure('publishing_schedule', req, error, {
+11845:      error: error.message || 'Failed to save publishing schedule',
+11851:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+11874:    logCriticalFailure('publishing_schedule', req, error, {
+11878:      error: error.message || 'Failed to save publishing schedule',
+11884:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+11907:      error: error.message || 'Failed to reschedule publishing item',
+11913:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+11936:      error: error.message || 'Failed to reschedule publishing item',
+11942:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+11958:      error: error.message || 'Failed to approve publishing item',
+11964:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+11980:      error: error.message || 'Failed to approve publishing item',
+11986:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+11988:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+11990:      status: 'published'
+11993:      status: 'published',
+11997:      execution_status: 'published',
+11998:      action_type: 'manual_publish_complete',
+12007:    logCriticalFailure('publishing_publish', req, error, {
+12012:      error: error.message || 'Failed to publish item',
+12018:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+12020:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+12022:      status: 'published'
+12025:      status: 'published',
+12029:      execution_status: 'published',
+12030:      action_type: 'manual_publish_complete',
+12039:    logCriticalFailure('publishing_publish', req, error, {
+12044:      error: error.message || 'Failed to publish item',
+12050:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+12062:      action_type: 'manual_publish_failed',
+12071:    logCriticalFailure('publishing_fail', req, error, {
+12076:      error: error.message || 'Failed to mark publishing item as failed',
+12082:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+12094:      action_type: 'manual_publish_failed',
+12103:    logCriticalFailure('publishing_fail', req, error, {
+12108:      error: error.message || 'Failed to mark publishing item as failed',
+12709:  const publishDir = path.join(baseDir, 'publish-packages');
+12712:  const legacyPublishDir = path.join(legacyBaseDir, 'publish-packages');
+12717:  ensureDir(publishDir);
+12727:    publishDir,
+12775:  const packageId = `publish_${Date.now()}`;
+12787:    ready_for_publish: payload.assets.length > 0,
+12795:    artifactType: 'campaign_publish_package',
+12856:  const publishDir = resolveExecutionReadCandidate({
+12859:    relativePath: 'publish-packages',
+12863:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+12877:  const publishFiles = fs.existsSync(publishDir)
+12878:    ? fs.readdirSync(publishDir).filter(x => x.startsWith(safeName))
+12885:    publish_packages_count: publishFiles.length,
+12887:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+12965:  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+12966:    ? input.publish_package
+12975:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+12984:function buildSocialExecutionPayload(publishPackage) {
+12985:  const assets = assertExecutionPackageAssets(publishPackage, 'publish package');
+12986:  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+12992:    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+13284:    domain: 'publishing',
+13288:    requestedFile: `publishing/scheduler/${jobId}.json`
+13306:    assertPublishingMutationAllowed(projectName, 'publish', {
+13308:      status: 'published'
+13327:    external_publish: normalizedMode !== 'semi_auto',
+13337:      result.execution_status = 'ready_for_manual_publish';
+13338:      result.action_type = 'manual_publish';
+13339:      result.notes.push('Social payload is ready for operator-controlled publishing.');
+13341:      result.execution_status = 'ready_for_manual_handoff';
+13342:      result.action_type = 'manual_marketplace_handoff';
+13343:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+13355:      result.execution_status = 'auto_publish_pending';
+13356:      result.action_type = 'auto_publish';
+13357:      result.notes.push('Full-auto mode enabled. Social publish adapter should consume this.');
+13373:    artifactType: 'publishing_execution_result',
+13443:    const error = new Error('Manual publish recording is allowed only in semi_auto mode.');
+13467:  const manualPublishDir = path.join(projectPaths.executionDir, 'manual-publish');
+13476:    published_at: nowIso,
+13479:    external_publish: false,
+13480:    manual_publish: true,
+13506:      manual_publish_recorded: true,
+13507:      manual_publish_url: safePostUrl,
+13508:      manual_publish_operator: safeOperator,
+13509:      manual_publish_recorded_at: nowIso,
+13510:      final_status: 'manually_published',
+13511:      manual_publish: true,
+13512:      external_publish: false,
+13527:      artifactType: 'publishing_execution_result',
+13536:    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+13544:    manual_publish_recorded: true,
+13545:    external_publish: false,
+13546:    manual_publish: true,
+13582:    artifactType: 'publishing_execution_result',
+13604:      String(item?.entity_type || '').trim() === 'publishing_job'
+13625:  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+13626:    || ['ready', 'published'].includes(requestedStatus);
+13627:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+13628:    || ['ready', 'published'].includes(requestedStatus);
+13631:  //   freeze_publishing  → default false (permissive — freeze is opt-in)
+13632:  //   approval_before_publish → default true (restrictive — approval is required by default)
+13633:  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+13634:    ? policyRules.freeze_publishing
+13635:    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+13636:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+13637:    ? policyRules.approval_before_publish
+13638:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+13642:      route: '/governance/publishing',
+13652:    logGovernanceBlock('freeze_publishing');
+13654:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+13657:        rule: 'freeze_publishing'
+13662:  if (approvalSensitiveAction && approvalBeforePublish) {
+13664:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+13666:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+13669:          rule: 'approval_before_publish'
+13674:    const approval = getLatestPublishingApproval(projectName, jobId);
+13675:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+13677:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+13678:      logGovernanceBlock('approval_before_publish', {
+13680:        approval_status: approvalStatus || 'missing'
+13683:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+13686:          rule: 'approval_before_publish',
+13688:          approval_status: approvalStatus || 'missing'
+14914:      item.status = 'ready_for_publish';
+14921:        note: 'Post draft is now ready_for_publish. Social publishing connector is the next layer.'
+14940:      item.status = 'ready_for_publish';
+14947:        note: 'Blog draft is now ready_for_publish. Website/blog publishing connector is the next layer.'
+14974:if (command === '/publish_blog') {
+14981:    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
+15238:  if (!blogItem || !blogItem.published_post_id) {
+15239:    return res.json({ error: 'Blog not published or not found' });
+15274:      `${process.env.WP_BASE_URL}/posts/${blogItem.published_post_id}`,
+15291:    asset.attached_post_id = blogItem.published_post_id;
+15314:        post_id: blogItem.published_post_id,
+15331:    if (command === '/enhance_published_blog') {
+15343:      if (!blogItem || !blogItem.published_post_id) {
+15353:        const postId = blogItem.published_post_id;
+15464:    if (command === '/review_published_blog') {
+15486:          published_post_id: blogItem.published_post_id || null,
+16076:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+16816:          'publish landing/product/blog asset',
+16925:          'publish one authority blog',
+16927:          'publish three social assets',
+17280:    if (command === '/campaign_publish_blog') {
+17307:          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
+17310:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+17311:        campaignExec.controlled_publish.blog = {
+17312:          status: 'published',
+17315:          published_at: new Date().toISOString()
+17326:          result: campaignExec.controlled_publish.blog
+17330:          error: 'Campaign blog publish failed',
+17371:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+17372:        campaignExec.controlled_publish.email = {
+17388:          result: campaignExec.controlled_publish.email
+17398:    if (command === '/campaign_review_publish_state') {
+17423:          controlled_publish: campaignExec.controlled_publish || {},
+17425:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+17426:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+19313:if (command === '/build_campaign_publish_package') {
+19330:      error: 'Failed to build campaign publish package',
+19479:if (command === '/record_manual_publish') {
+19490:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+19499:      error: 'Failed to record manual publish',
+20154:app.post('/publish-clone/:cloneId', async (req, res) => {
+20157:    assertPublishingMutationAllowed(projectName, 'publish', {
+20158:      status: 'published'
+20165:        status: 'publish'
+20175:    const publishedProduct = response.data;
+20178:      mode: 'publish_clone',
+20179:      product_id: publishedProduct.id,
+20180:      name: publishedProduct.name,
+20181:      status: publishedProduct.status,
+20182:      permalink: publishedProduct.permalink,
+20185:        'This action published a draft product. Original product was not modified.'
+20188:    logCriticalFailure('publish_clone', req, error, {
+20192:      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
+20200:    assertPublishingMutationAllowed(projectName, 'publish', {
+20201:      status: 'published'
+20241:      status: 'publish'
+20333:app.post('/publish-blog/:draftId', async (req, res) => {
+20336:    assertPublishingMutationAllowed(projectName, 'publish', {
+20337:      status: 'published'
+20385:        status: 'publish'
+20395:        message: `WordPress publish failed with status ${response.status}`
+20399:    item.status = 'published';
+20400:    item.published_post_id = data.id || null;
+20403:    item.date_published = data.date || '';
+20425:      note: 'Blog published successfully'
+20428:    logCriticalFailure('publish_blog', req, err, {
+20434:      message: 'Failed to publish blog draft'
+20442:    assertPublishingMutationAllowed(projectName, 'publish', {
+20443:      status: 'published'
+20471:      status: backupData.status || 'publish'
+20510:const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+20570:  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+20571:    ? payload.publish_package
+20573:  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+20579:      || publishPackage.campaign_id
+
+===== BACKBONE APPROVAL/HANDOFF/PUBLISHING MARKERS =====
+17:// Canonical defaults for policy_rules — these are the authoritative safe values.
+18:// Any governance file that is missing policy_rules (or missing individual keys)
+21:  approval_before_publish: true,
+26:  freeze_publishing: false
+38:  approvals: 300,
+43:  handoffs: 250
+52:    statuses: ['draft', 'in_review', 'approved', 'scheduled', 'published', 'archived'],
+54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+55:    publish_statuses: ['draft', 'scheduled', 'published', 'failed']
+60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+82:  approvals: {
+95:  handoffs: {
+100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+103:    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+104:    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+135:    actions: ['create_video', 'review_video', 'handoff_video']
+138:    id: 'publisher',
+140:    routes: ['publishing', 'library', 'workflows'],
+141:    service_domains: ['publishing'],
+142:    actions: ['schedule_publish', 'publish', 'return_for_changes']
+161:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+179:  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+186:  library: ['designer', 'video_lead', 'publisher', 'admin'],
+195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+215:  publishing: {
+217:    owner_role: 'publisher',
+219:    handoff_to: ['analyst', 'strategist'],
+220:    route_target: 'publishing',
+221:    page_permissions: ['publishing', 'governance']
+227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+235:    handoff_to: ['admin'],
+245:  publishing_job: 'publishing',
+247:  approval: 'governance',
+391:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+413:        handoff_to: asArray(domain.handoff_to),
+515:  if (routeTarget === 'publishing') return 'publishing';
+543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+544:      ? normalizeStringList(record.handoff_roles)
+545:      : asArray(domain.handoff_to),
+790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+822:      'approvals',
+825:      'handoffs',
+839:  ensureJsonFile(paths.approvalsPath, []);
+842:  ensureJsonFile(paths.handoffsPath, []);
+845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+848:      semi_auto_requires_approval: true,
+852:    policy_rules: {
+853:      approval_before_publish: true,
+858:      freeze_publishing: false
+860:    approval_owners: {
+864:      publishing: 'Publisher',
+871:      approval_mode: 'Only high-risk',
+873:      approval_before_publish: true
+911:      'approvals',
+914:      'handoffs',
+969:  if (value.includes('approval')) return 'approval';
+971:  if (value.includes('publish')) return 'publish';
+973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+1183: *  - policy_rules is always an object (never null/undefined/non-object)
+1184: *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+1192:  const rawRules = doc.policy_rules;
+1193:  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+1204:    freeze_publishing: asBoolean(safeRules.freeze_publishing, DEFAULT_POLICY_RULES.freeze_publishing),
+1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+1210:    policy_rules: mergedRules
+1240:    policy_rules: {
+1241:      ...asObject(current.policy_rules),
+1242:      ...asObject(sourcePatch.policy_rules)
+1244:    approval_owners: {
+1245:      ...asObject(current.approval_owners),
+1246:      ...asObject(sourcePatch.approval_owners)
+1269:      policy_rules: next.policy_rules,
+1284:    approval_id: asString(input.approval_id),
+1323:  if (normalizedType === 'publishing_job') {
+1325:      asString(item.entity_type) === 'publishing_job' &&
+1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+1346:      code: 'publishing_frozen',
+1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+1444:  if (!asString(record.scheduled_for) && status !== 'published') {
+1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+1475:  const approvals = readCollection(paths.approvalsPath);
+1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+1486:    ...approval,
+1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+1488:    policy_flags: buildPolicyFlags(approval, governance)
+1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+1500:      status: asString(item.status || item.approval_status) || 'open',
+1511:      status: asString(item.status || item.approval_state),
+1516:  const publishGuardrails = queueItems
+1517:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+1520:      publish_guardrails: buildPublishGuardrails(item, governance)
+1522:    .filter((item) => item.publish_guardrails.length || ['scheduled', 'ready', 'failed'].includes(asString(item.status)));
+1525:    ...approvalQueue.flatMap((item) =>
+1528:        source: 'approval',
+1558:    ...publishGuardrails.flatMap((item) =>
+1559:      item.publish_guardrails.map((flag) => ({
+1561:        source: 'publish_guardrails',
+1562:        entity_type: 'publishing_job',
+1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+1592:        publishing: roleDisplay(team, 'publisher'),
+1599:      approval_queue: approvalQueue,
+1603:      publish_guardrails: publishGuardrails,
+1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+1616:      publishing_jobs: queueItems.filter((item) => asString(item.entity_type) === 'publishing_job').length,
+1617:      pending_approvals: pendingApprovals.length
+1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+1637:      publish_status: item.publish_status,
+1638:      approval_status: item.approval_status,
+1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+1664:      publishing_job_id: job.publishing_job_id,
+1665:      approval_state: job.approval_state,
+1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1771:  const status = asString(input.status || current.status || input.publish_status) || 'draft';
+1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+1774:  const publishStatus = asString(input.publish_status || current.publish_status) || 'draft';
+1827:    approval_status: approvalStatus,
+1833:    destination_type: asString(input.destination_type || current.destination_type || 'publishing'),
+1835:    publishing_destination: asString(input.publishing_destination || current.publishing_destination || input.destination),
+1836:    publish_status: publishStatus,
+1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+1857:        approval_status: approvalStatus,
+1858:        publish_status: publishStatus,
+1877:      approval_status: approvalStatus,
+1878:      publish_status: publishStatus,
+1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+1969:    publishing_job_id: asString(input.publishing_job_id || current.publishing_job_id),
+1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+2557:  const items = readCollection(paths.approvalsPath);
+2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+2587:  const approval = {
+2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+2619:    publish_guardrails: asArray(input.publish_guardrails || current.publish_guardrails || []),
+2631:      current.id ? 'approval_updated' : 'approval_requested',
+2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+2646:    entity_type: 'approval',
+2647:    entity_id: approval.id,
+2648:    title: approval.title,
+2649:    summary: approval.summary || 'A new approval was requested.',
+2650:    actor: approval.requested_by,
+2652:      entity_type: approval.entity_type,
+2653:      entity_id: approval.entity_id,
+2654:      risk_level: approval.risk_level,
+2655:      approval_type: approval.approval_type
+2659:    category: 'approval',
+2660:    type: 'approval',
+2661:    title: `${approval.title} needs approval`,
+2662:    message: approval.summary || 'Review and decide on the requested operation.',
+2663:    body: approval.summary || 'Review and decide on the requested operation.',
+2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+2666:      entity_type: 'approval',
+2667:      entity_id: approval.id,
+2668:      route: inferRouteTarget('approval', approval)
+2670:    entity_type: 'approval',
+2671:    entity_id: approval.id
+2675:    queue_type: 'approval',
+2676:    entity_type: 'approval',
+2677:    entity_id: approval.id,
+2678:    title: approval.title,
+2679:    status: approval.status,
+2680:    assignee: approval.reviewer,
+2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+2685:      entity_type: approval.entity_type,
+2686:      entity_id: approval.entity_id,
+2687:      approval_type: approval.approval_type,
+2688:      requested_action: approval.requested_action,
+2690:      escalation_chain: approval.escalation_chain
+2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+2696:      approval.entity_type === 'media_job'
+2700:      approval.entity_type === 'media_job'
+2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+2709:        approval_id: approval.id,
+2710:        status: approval.status
+2714:    if (approval.entity_type === 'content_item') {
+2715:      nextRecord.approval_status = nextApprovalStatus;
+2717:      nextRecord.queue_status = 'pending_approval';
+2720:    if (approval.entity_type === 'media_job') {
+2721:      nextRecord.approval_state = nextApprovalState;
+2724:    if (approval.entity_type === 'content_item') {
+2726:    } else if (approval.entity_type === 'media_job') {
+2733:  return approval;
+2738:  return listItems(readCollection(paths.approvalsPath), options);
+2741:function decideApproval(projectName, approvalId, input = {}) {
+2743:  const items = readCollection(paths.approvalsPath);
+2745:  const targetId = asString(approvalId);
+2749:    throw new Error('Invalid approval decision');
+2786:      `approval_${decision}`,
+2797:  writeJsonFile(paths.approvalsPath, items);
+2800:    type: `approval_${decision}`,
+2801:    entity_type: 'approval',
+2813:    category: 'approval',
+2814:    type: 'approval',
+2820:      entity_type: 'approval',
+2822:      route: inferRouteTarget('approval', next)
+2824:    entity_type: 'approval',
+2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+2845:        approval_id: next.id,
+2851:      nextRecord.approval_status =
+2865:      nextRecord.approval_state =
+2884:  if (next.entity_type === 'publishing_job') {
+2885:    updateQueueEntity(paths.project, 'publishing_job', next.entity_id, {
+2907:      source_type: 'approval',
+2919:      approval_id: next.id,
+2933:  const items = readCollection(paths.handoffsPath);
+2958:  const handoff = {
+2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+2961:    type: asString(input.type) || 'route_handoff',
+2983:      current.id ? 'handoff_updated' : 'handoff_created',
+2999:      asString(record.source_page) === handoff.source_page &&
+3000:      asString(record.id) !== handoff.id &&
+3011:      updated_at: handoff.updated_at,
+3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+3013:        replaced_by: handoff.id
+3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+3022:    type: 'route_handoff_created',
+3023:    entity_type: 'handoff',
+3024:    entity_id: handoff.id,
+3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+3026:    summary: 'Durable cross-page handoff recorded.',
+3027:    actor: handoff.created_by,
+3029:      source_page: handoff.source_page,
+3030:      destination_page: handoff.destination_page,
+3031:      route_key: handoff.route_key
+3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+3042:        next_owner_role: handoff.destination_role,
+3043:        next_owner_label: handoff.destination_role_label,
+3044:        updated_at: handoff.updated_at,
+3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+3046:          handoff_id: handoff.id,
+3047:          destination_page: handoff.destination_page
+3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+3052:        nextRecord.destination = handoff.destination_page;
+3053:        nextRecord.publish_status =
+3054:          handoff.destination_page === 'publishing'
+3056:            : nextRecord.publish_status;
+3058:          handoff.destination_page === 'publishing'
+3059:            ? 'ready_for_handoff'
+3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+3064:          handoff.destination_page === 'publishing'
+3065:            ? 'ready_for_handoff'
+3074:  return handoff;
+3082:  let items = readCollection(paths.handoffsPath);
+3099:function consumeHandoff(projectName, handoffId, input = {}) {
+3101:  const items = readCollection(paths.handoffsPath);
+3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+3122:  writeJsonFile(paths.handoffsPath, items);
+3126:    type: 'route_handoff_consumed',
+3127:    entity_type: 'handoff',
+3130:    summary: 'Durable cross-page handoff consumed.',
+3155:    queue_type: 'publishing',
+3156:    entity_type: 'publishing_job',
+3162:    assignee: roleDisplay(team, 'publisher'),
+3163:    role: 'publisher',
+3164:    route: 'publishing',
+3171:      service_domain: 'publishing',
+3172:      owner_role: 'publisher',
+3177:  if (status === 'ready' || status === 'ready_for_manual_publish' || status === 'ready_for_manual_send') {
+3179:      category: 'publishing',
+3180:      type: 'publishing',
+3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+3186:        entity_type: 'publishing_job',
+3188:        route: 'publishing'
+3190:      entity_type: 'publishing_job',
+3195:  if (status === 'published') {
+3197:      category: 'publishing',
+3198:      type: 'publishing',
+3199:      title: `${queueItem.title} published`,
+3204:        entity_type: 'publishing_job',
+3206:        route: 'publishing'
+3208:      entity_type: 'publishing_job',
+3215:      category: 'publishing',
+3216:      type: 'publishing',
+3222:        entity_type: 'publishing_job',
+3224:        route: 'publishing'
+3226:      entity_type: 'publishing_job',
+3232:    category: 'publish',
+3233:    type: 'publishing_job_synced',
+3234:    entity_type: 'publishing_job',
+3290:    if (!['completed', 'published', 'closed', 'archived', 'cancelled'].includes(asString(item.status))) {
+3321:  if (['completed', 'published', 'read', 'archived', 'cancelled', 'closed'].includes(normalized)) return 4;
+3370:  if (normalizedType === 'approval') return 'governance';
+3374:  if (normalizedType === 'publishing_job') return 'publishing';
+3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+3523:    publishing: normalizedQueue.filter((item) => item.queue_type === 'publishing'),
+3544:    active_count: items.filter((item) => !['completed', 'published', 'read', 'archived', 'closed', 'cancelled'].includes(item.status)).length,
+3548:      active: asArray(groupedItems).filter((item) => !['completed', 'published', 'closed', 'cancelled'].includes(asString(item.status))).length
+3559:    approval_queue: queueGroups.approval,
+3560:    publishing_queue: queueGroups.publishing,
+3595:  const publishingJobs = asArray(queueItems)
+3596:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+3599:      kind: 'publishing',
+3600:      entity_type: 'publishing_job',
+3604:      route: inferRouteTarget('publishing_job', item),
+3612:  return [...workflowJobs, ...mediaJobItems, ...publishingJobs]
+3623:  const completedJobs = items.filter((item) => ['completed', 'published'].includes(asString(item.status)));
+3627:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+3676:  approvals = [],
+3701:  const approvalPendingAlerts = asArray(approvals)
+3704:      id: `approval-pending-${item.id}`,
+3708:      source: 'approval_pending',
+3709:      entity_type: 'approval',
+3714:  const publishAlerts = asArray(queueItems)
+3715:    .filter((item) => asString(item.entity_type) === 'publishing_job' && ['ready', 'published', 'failed'].includes(asString(item.status)))
+3717:      id: `publishing-${item.entity_id}-${item.status}`,
+3722:          : asString(item.status) === 'published'
+3724:            : 'Publishing item is waiting for approval or release.',
+3728:          : asString(item.status) === 'published'
+3731:      source: 'publish',
+3732:      entity_type: 'publishing_job',
+3799:    ...approvalPendingAlerts,
+3800:    ...publishAlerts,
+3816:    approval_pending_alerts: approvalPendingAlerts,
+3817:    publish_alerts: publishAlerts,
+3839:  const approvals = readCollection(paths.approvalsPath);
+3842:  const handoffs = readCollection(paths.handoffsPath);
+3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+3862:    ...approvals,
+3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+3884:    approvals,
+3937:      handoffs_by_role: asArray(handoffs)
+3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+4001:    approvals: {
+4002:      total: approvals.length,
+4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+4005:      items: approvals.slice(0, approvalLimit)
+4009:      active_count: queueItems.filter((item) => !['published', 'completed', 'closed'].includes(asString(item.status))).length,
+4017:    handoffs: {
+4018:      total: handoffs.length,
+4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+4020:      current: summarizeCurrentHandoffs(handoffs),
+4021:      by_role: asArray(handoffs)
+4033:      items: handoffs.slice(0, handoffLimit)
+
+===== SHARED CONTEXT HANDOFFS =====
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:23:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:24:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:52:export function setSharedAiDraft(projectName, draft) {
+public/control-center/shared-context.js:53:  if (!projectName || !draft) return;
+public/control-center/shared-context.js:54:  aiDraftCache.set(buildKey(projectName), draft);
+public/control-center/shared-context.js:61:  const handoff =
+public/control-center/shared-context.js:66:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:70:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/app.js:60:  createProjectHandoff,
+public/control-center/app.js:61:  consumeProjectHandoff,
+public/control-center/app.js:1990:    ["publishingCalendar", "No data is available yet."],
+public/control-center/app.js:1991:    ["publishingQueue", "Open the related setup page to complete this section."],
+public/control-center/app.js:1992:    ["publishingChannels", "Open the related setup page to complete this section."],
+public/control-center/app.js:2078:      createProjectHandoff,
+public/control-center/app.js:2079:      consumeProjectHandoff,
+public/control-center/app.js:3017:    Publishing: "publishing"
+public/control-center/app.js:3040:    "open-publishing": "publishing",
+public/control-center/app.js:3113:      (candidate.closest("#scheduleBtn") ? "open-publishing" : "");
+public/control-center/app.js:3788:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3876:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:4053:    scheduleBtn.setAttribute("data-action", "open-publishing");
+
+===== EXISTING AUDITS =====
+# Frontend Runtime Authority Audit
+
+## Core doctrine check
+Documented projection doctrine exists in runtime/authority/authority-projection.js:
+- Backend owns authority.
+- Frontend projects authority.
+- Helper explicitly states it must not enforce or generate authority.
+
+## Auto Mode and heavy intelligence markers
+Auto Mode implementation surface:
+- automation-engine.js exports createAutoModeController, startAutoMode, runAutomationPlan, subscribeAutoMode.
+- workflows.js imports and uses createAutoModeController/startAutoMode/runAutomationPlan/subscribeAutoMode.
+- publishing.js imports and uses createAutoModeController/startAutoMode/subscribeAutoMode.
+
+Heavy intelligence surface:
+- system-intelligence.js exports buildSystemIntelligence and recommendation/blocker/handoff derivations.
+- workflows.js, publishing.js, and ui/page-standard.js consume intelligence outputs.
+
+## Initialization posture (implicit vs explicit)
+- Auto Mode starts through explicit user actions in workflows/publishing handlers (button/confirmation flows), not from app bootstrap.
+- No evidence of startAutoMode invocation during app init sequence.
+- runAutomationPlan is called from explicit workflow actions.
+
+## Frontend authority duplication signals
+### Duplicated route access fallback maps
+- router.js defines ACTIVE_ROUTE_ROLES and DEFAULT_ROUTE_ROLE_ACCESS.
+- app.js defines the same fallback structures again.
+Risk: dual fallback authority map can drift.
+
+### Authority-like rule creation in page flows
+Authority-like fields appear in payload assembly (examples):
+- owner_role/assignee_role in workflows/media/campaign flows
+- policy_rules construction in settings/governance flows
+- execution_mode mapping in settings/app context
+- handoff creation across multiple pages
+
+These are mostly projection/payload shaping, but still authority-adjacent in frontend.
+
+## Classification by doctrine
+- safe transient UX state:
+  - local render/session flags, selected filters, drawer open state, temporary form drafts
+- compatibility fallback:
+  - default route role maps in router/app
+  - legacy shell and legacy css/js files
+- duplicate authority risk:
+  - duplicated role-route fallback maps in both router.js and app.js
+  - local owner/assignee role stamping in page payload builders
+- should move to backend later:
+  - policy_rules shaping and normalization now performed in settings/governance page logic
+  - approval/role gate semantics encoded in frontend prompt and form templates
+- must remain frontend-only:
+  - shell rendering decisions, local navigation, UI-level command overlays, temporary handoff UX buffering
+
+## Lifecycle and listener risks
+Global listeners/timers are concentrated in app.js and selected pages.
+Key observations:
+- app.js registers many document/window listeners; init is bound once on DOMContentLoaded.
+- workflows bridge listener uses one-time guard (workflowBridgeRegistered) and auto-mode unsubscribe replacement logic.
+- integrations page removes prior Escape listener before re-registering.
+- multiple timers/watchdogs exist in app.js and api.js (timeouts/intervals) and should be governed by lifecycle registry over time.
+
+Risk callout:
+- High listener density in app.js increases cross-page side-effect risk if future re-init paths are introduced.
+
+## Must-fix-before-redesign list (audit decision, not implementation)
+1. Consolidate route fallback authority map into single canonical location.
+2. Define lifecycle ownership registry for global listeners/timers.
+3. Document Auto Mode gate contract (explicit trigger, approval-required behavior, safe-step constraints).
+4. Formalize authority boundary for role/policy payload shaping in settings/governance/workflows.
+
+# Frontend API Connectivity Audit
+
+## Frontend API client authority
+Primary API client:
+- public/control-center/api.js
+
+Pattern summary:
+- Most project operations target /media-manager/project/:project/*
+- Insights/learning and media generation use /api/* endpoints
+- Read/write headers include control key handling and diagnostics
+- Request timeout + parse timeout guards are implemented
+
+## Backend endpoint alignment check
+Cross-check against runtime/orchestrator-service/server.js route markers shows frontend endpoint families are present:
+- /media-manager/projects
+- /media-manager/project/:project/startup
+- /media-manager/project/:project/operations
+- /media-manager/project/:project/task-center|queue-center|job-monitor|notification-center
+- /media-manager/project/:project/governance*
+- /media-manager/project/:project/team
+- /media-manager/project/:project/workflows and /ai/workflows
+- /media-manager/project/:project/handoffs
+- /media-manager/project/:project/publishing/*
+- /api/insights/:project
+- /api/learning/:project
+- /api/media/*
+
+## Pages and backend connectivity
+Direct API imports by page modules:
+- setup.js
+- settings.js
+- library.js
+- media-studio-workspace.js
+- governance.js
+- content-studio-workspace.js
+
+Context-injected API usage (from app render context) used by additional pages:
+- workflows.js
+- publishing.js
+- research.js
+- insights.js
+- operations-centers.js
+- campaign-studio.js
+- ai-command.js
+
+Lower-direct-connect pages:
+- home.js (mainly consumes already-loaded state)
+- ads-manager.js (largely local planner/state projection)
+
+## Local fallback/mock behavior
+Fallback and compatibility behavior present:
+- fetchProjects returns fallback empty list on failure.
+- fetchAllCoreProjectData supports optional section fallbacks and deferred optional loading.
+- Media Studio and handoff flows support local handoff persistence when backend save is unavailable.
+
+## Loading/error settlement
+Evidence of settlement controls:
+- Request timeout and parse-time watchdogs in api.js.
+- App-level startup and global loading watchdog in app.js.
+- Per-page isLoading and error messaging patterns in operations/publishing/workflows/research.
+
+## Write and destructive operation posture
+Write operations are user-triggered through UI actions in page handlers (save, connect, run, approve, publish, mark notification, etc.).
+Destructive-sensitive operations include:
+- deleteProjectAsset
+- disconnectProjectIntegration
+- publishing fail/publish transitions
+- governance/team policy updates
+
+Control key middleware integration exists in frontend headers and backend route set includes write aliases under /public/media-manager/* for compatibility.
+
+## Prefix consistency findings
+- Mixed endpoint families are intentional but increase boundary complexity:
+  - /media-manager/* for operational/project data
+  - /api/* for insights/learning/media-generation services
+- Public aliases exist backend-side; frontend mostly calls non-/public paths.
+
+## Risk and boundary notes
+- API ownership is mostly centralized in api.js (good).
+- Page-level direct calls plus context calls are mixed; this can blur ownership unless a strict API boundary map is maintained.
+- Active project name flow is generally consistent (state.context.currentProject), with defensive checks in API functions.
+
+# Frontend Page Risk Matrix
+
+| Page | File | Lines | Route | Ownership | Shell | Backend connected? | Runtime risk | Authority risk | CSS risk | UX maturity | Overall risk | Next action | Priority |
+|---|---|---:|---|---|---|---|---|---|---|---|---|---|---|
+| Home | public/control-center/pages/home.js | 905 | home | single-route owner | custom root mount | indirect | low | low | medium | medium | medium | keep as executive shell baseline, map panel standard | P3 |
+| Setup | public/control-center/pages/setup.js | 1562 | setup | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | tighten setup->backend contract doc | P2 |
+| Library | public/control-center/pages/library.js | 2955 | library | single-route owner + submodules | custom root mount | yes | medium | medium | high | medium | high | lock library css authority and panel boundaries | P1 |
+| Integrations | public/control-center/pages/integrations.js | 1672 | integrations | single-route owner + submodules | custom root mount | yes | medium | medium | medium | medium | medium | resolve orphan submodule ownership (layout/state) | P2 |
+| AI Command | public/control-center/pages/ai-command.js | 1976 | ai-command | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | define AI panel boundary vs workflows handoff | P2 |
+| Workflows | public/control-center/pages/workflows.js | 1992 | workflows | single-route owner | custom root mount | yes | high | high | medium | medium | high | formalize Auto Mode trigger/gate contract | P1 |
+| Campaign Studio | public/control-center/pages/campaign-studio.js | 1981 | campaign-studio | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | document handoff payload authority boundary | P2 |
+| Content Studio Workspace | public/control-center/pages/content-studio-workspace.js | 2336 | content-studio | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | align file naming conventions with route doctrine | P3 |
+| Media Studio Workspace | public/control-center/pages/media-studio-workspace.js | 3216 | media-studio | single-route owner | custom root mount | yes | high | medium | medium | medium | high | verify backend/local handoff failover contract | P1 |
+| Publishing | public/control-center/pages/publishing.js | 1838 | publishing | single-route owner | custom root mount | yes | high | high | medium | medium | high | lock publish gate behavior and explicit approvals | P1 |
+| Ads Manager | public/control-center/pages/ads-manager.js | 617 | ads-manager | single-route owner | custom root mount | limited/direct-low | low | low | medium | medium | low | decide whether to increase backend projection depth | P3 |
+| Insights | public/control-center/pages/insights.js | 1519 | insights | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | align insight->handoff policy with governance | P2 |
+| Research | public/control-center/pages/research.js | 1612 | research | single-route owner | custom root mount | yes | medium | medium | medium | medium | medium | define canonical research intelligence cache policy | P2 |
+| Governance | public/control-center/pages/governance.js | 1100 | governance | single-route owner | governance-shell | yes | medium | high | medium | medium | high | reduce frontend policy-shaping authority | P1 |
+| Settings | public/control-center/pages/settings.js | 1929 | settings | single-route owner | settings-page-surface | yes | medium | high | medium | medium | high | move policy normalization authority backend-side | P1 |
+| Task Center | public/control-center/pages/operations-centers.js | 1837 | task-center | shared owner file | ops-shell | yes | medium | medium | medium | medium | medium | split lifecycle ownership doc for ops centers | P2 |
+| Queue Center | public/control-center/pages/operations-centers.js | 1837 | queue-center | shared owner file | ops-shell | yes | medium | medium | medium | medium | medium | split lifecycle ownership doc for ops centers | P2 |
+| Job Monitor | public/control-center/pages/operations-centers.js | 1837 | job-monitor | shared owner file | ops-shell | yes | medium | medium | medium | medium | medium | split lifecycle ownership doc for ops centers | P2 |
+| Notification Center | public/control-center/pages/operations-centers.js | 1837 | notification-center | shared owner file | ops-shell | yes | medium | medium | medium | medium | medium | retire notifications alias selectors after policy decision | P2 |
+
+## Matrix notes
+- All route exports currently use disableStandardLayout: true.
+- Operations centers share one large file, increasing coupling risk for lifecycle and regression.
+- Highest-risk pages are those combining automation, authority-adjacent payload shaping, and cross-page handoff logic.
+
+# Route Role Fallback Authority Closeout Report
+
+## Status
+Closed and pushed.
+
+## Branch
+architecture/frontend-consolidation-v1
+
+## Implementation commit
+02dde34 Centralize route role fallback authority
+
+## Audit baseline
+96ec03f Add route role fallback authority audit
+
+## Scope
+Centralized frontend route-role fallback authority into one shared module while preserving existing behavior.
+
+## Production files changed
+- public/control-center/runtime/authority/route-role-fallback.js
+- public/control-center/app.js
+- public/control-center/router.js
+
+## Audit/report file added
+- audits/frontend/authority-boundary/route-role-fallback-implementation/ROUTE_ROLE_FALLBACK_IMPLEMENTATION_REPORT.md
+
+## What changed
+- Created a single frontend fallback authority module.
+- Removed duplicate ACTIVE_ROUTE_ROLES and DEFAULT_ROUTE_ROLE_ACCESS definitions from app.js and router.js.
+- Preserved app.js backend-projection-first behavior.
+- Preserved router.js resolver-first behavior.
+- Preserved compatibility fallback when backend projection is absent.
+
+## What did not change
+- No backend changes.
+- No route changes.
+- No role redesign.
+- No UI redesign.
+- No page shell changes.
+- No Auto Mode changes.
+- No data/projects changes.
+
+## Validation performed
+- node --check passed:
+  - public/control-center/runtime/authority/route-role-fallback.js
+  - public/control-center/app.js
+  - public/control-center/router.js
+
+- Duplicate constant check passed:
+  - constants now exist only in route-role-fallback.js
+
+- Wiring check passed:
+  - setRouteAccessResolver remains wired
+  - resolveRouteAccess remains active
+  - getRouteAccess remains resolver-first
+  - getDefaultRouteAccess remains available as router fallback
+
+- Parity check passed:
+  - roleOk: true
+  - routesOk: true
+  - roleCount: 9
+  - routeCount: 19
+  - decisionChecks: 171
+  - failures: []
+
+## Browser QA
+Browser QA passed after implementation.
+
+Confirmed:
+- accessDeniedVisible: false
+- bodyReady: true
+- loadingStateCount: 0
+- stdPageShellCount: 0
+- opsShellCount: 1 only for Operations pages
+
+Pages checked include:
+- setup
+- job-monitor
+- remaining core pages manually confirmed by browser QA
+
+## Architectural result
+Frontend route-role fallback authority is now centralized.
+
+Current doctrine remains:
+- Backend projection first
+- Single frontend fallback only when backend projection is absent
+- Frontend fallback is compatibility guard, not primary authority
+
+## Next recommended phase
+Phase 1 Step 3 — Authority Boundary Next Target
+
+Recommended next target:
+Publishing Runtime Ownership Audit
+
+Reason:
+- Publishing contains Auto Mode.
+- Publishing contains publish/approve/fail/schedule execution controls.
+- It is high-impact and should be audited before redesign or extraction.
+
+Alternative:
+Workflows Runtime Ownership Audit
+
+Reason:
+- Workflows contains Auto Mode and runAutomationPlan.
+- It controls automation planning and approval gates.
+
+Recommended order:
+1. Publishing Runtime Ownership Audit
+2. Workflows Runtime Ownership Audit
+3. AI Command Operating Room Audit
+4. Lifecycle listener/timer registry audit
+5. CSS authority cleanup plan
