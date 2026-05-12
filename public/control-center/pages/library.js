@@ -30,6 +30,7 @@ const libraryProtectedUrlCache = new Map();
 const LIBRARY_PAGE_SIZE = 10;
 const libraryProtectedUrlPromiseCache = new Map();
 let disposeLibraryGlobalListeners = null;
+let _libraryFeedback = null;
 const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;
 const LIBRARY_THUMB_BATCH_LIMIT = 18;
 let libraryThumbLoadsInFlight = 0;
@@ -209,6 +210,13 @@ function shortAssetId(value = "") {
   if (!id) return "-";
   if (id.length <= 20) return id;
   return `${id.slice(0, 10)}...${id.slice(-8)}`;
+}
+
+function truncateMiddle(value = "", maxLength = 44) {
+  const text = asString(value).trim();
+  if (!text || text.length <= maxLength) return text || "-";
+  const keep = Math.max(6, Math.floor((maxLength - 3) / 2));
+  return `${text.slice(0, keep)}...${text.slice(-keep)}`;
 }
 
 function formatCount(value) {
@@ -437,7 +445,7 @@ function mountLibraryGlobalListeners() {
 
           try {
             await navigator.clipboard.writeText(value);
-            alert("Asset path copied.");
+            _libraryFeedback?.("Asset path copied.");
           } catch {
             window.prompt("Copy asset path:", value);
           }
@@ -1442,6 +1450,8 @@ function bindLibraryWorkspace({
   escapeHtml
 }) {
   const resolveActiveProjectName = () => asString(projectName || $("projectSwitcher")?.value || "").trim().toLowerCase();
+  _libraryFeedback = showMessage;
+
 
   const rerender = () => {
     bindLibraryWorkspace({
@@ -1573,7 +1583,7 @@ function bindLibraryWorkspace({
       const tone = item.status === "present" ? "success" : item.status === "missing" ? "danger" : "warning";
       const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
       const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
-      const reasonHint = item.why.length > 120 ? `${item.why.slice(0, 117)}...` : item.why;
+      const reasonHint = item.why.length > 84 ? `${item.why.slice(0, 81)}...` : item.why;
 
       return `
         <article class="library-required-card">
@@ -1581,7 +1591,7 @@ function bindLibraryWorkspace({
             <h4>${escapeHtml(item.label)}</h4>
             <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
           </div>
-          <p>${escapeHtml(reasonHint)}</p>
+          <p class="library-required-why">${escapeHtml(reasonHint)}</p>
           <div class="library-required-card-foot">
             <small>${escapeHtml(`Detected: ${formatCount(item.totalCount)}`)}</small>
             <button
@@ -1737,7 +1747,8 @@ function bindLibraryWorkspace({
       ? paginatedAssets.map((asset) => {
         const tone = toStatusTone(asset.status);
         const statusLabel = toStatusLabel(asset.status);
-        const pathHint = assetContextHint(asset);
+        const fileName = truncateMiddle(asset.filename || basename(asset.file_path || "") || "-");
+        const titleName = truncateMiddle(asset.name, 52);
         const assetPreviewUrl = getAssetPreviewUrl(asset);
         const previewNode = asset.is_image && assetPreviewUrl
           ? requiresProtectedMediaFetch(assetPreviewUrl)
@@ -1748,9 +1759,8 @@ function bindLibraryWorkspace({
         return `
           <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
             <div class="library-grid-preview">${previewNode}</div>
-            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</div>
-            <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
-            <div class="library-grid-meta library-grid-path" title="${escapeHtml(pathHint)}">${escapeHtml(pathHint)}</div>
+            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(titleName)}</div>
+            <div class="library-grid-meta" title="${escapeHtml(asset.filename || "-")}">${escapeHtml(fileName)}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
@@ -1837,8 +1847,10 @@ function bindLibraryWorkspace({
         <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
 
         <details class="library-inspector-more">
-          <summary>More details</summary>
+          <summary>Technical details</summary>
           <div class="data-stack">
+            <div class="data-row"><span>Review Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
+            <div class="data-row"><span>Source Status</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Source of truth" : "Not source of truth")}</strong></div>
             <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(shortAssetId(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-"))}</strong></div>
             <div class="data-row"><span>Full Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
             <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
@@ -1846,8 +1858,6 @@ function bindLibraryWorkspace({
             <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
           </div>
         </details>
-
-        <div class="library-inspector-path">Selected-asset actions are consolidated in the Action Panel for a cleaner operating flow.</div>
       `
       : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
   }
@@ -1865,7 +1875,7 @@ function bindLibraryWorkspace({
     aiPanelMount.innerHTML = renderLibraryAiPanel({
       readiness: readinessSummary,
       selectedAsset,
-      disabled: true
+      disabled: false
     });
   }
 
@@ -1939,7 +1949,7 @@ function bindLibraryWorkspace({
       const input = $("quickCommandInput");
       if (input) input.value = buildAiPrompt(projectName, "classify");
       navigateTo("ai-command");
-      showMessage?.("AI classification prompt sent.");
+      showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");
     };
   });
 
@@ -1955,6 +1965,9 @@ function bindLibraryWorkspace({
           session.selectedAssetId = assetId;
         }
       });
+      const selectedId = button.getAttribute("data-library-select") || "";
+      const selected = allAssets.find((asset) => asset.id === selectedId);
+      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
       bindLibraryWorkspace({
         $,
         projectName,
@@ -1988,6 +2001,8 @@ function bindLibraryWorkspace({
           session.selectedAssetId = assetId;
         }
       });
+      const selected = allAssets.find((asset) => asset.id === nextId);
+      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
       bindLibraryWorkspace({
         $,
         projectName,
@@ -2015,6 +2030,8 @@ function bindLibraryWorkspace({
           session.selectedAssetId = assetId;
         }
       });
+      const selected = allAssets.find((asset) => asset.id === nextId);
+      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
       bindLibraryWorkspace({
         $,
         projectName,
@@ -2044,6 +2061,8 @@ function bindLibraryWorkspace({
           session.selectedAssetId = assetId;
         }
       });
+      const _fbCard = allAssets.find((a) => a.id === nextId);
+      if (_fbCard?.name) showMessage?.(`Selected ${_fbCard.name}. Review status and available actions.`);
       rerender();
     };
 
@@ -2057,6 +2076,8 @@ function bindLibraryWorkspace({
           session.selectedAssetId = assetId;
         }
       });
+      const selected = allAssets.find((asset) => asset.id === nextId);
+      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
       rerender();
     };
   });
@@ -2374,6 +2395,8 @@ viewToggleButtons.forEach((button) => {
         }
       });
 
+      const _fbCardKey = allAssets.find((a) => a.id === nextId);
+      if (_fbCardKey?.name) showMessage?.(`Selected ${_fbCardKey.name}. Review status and available actions.`);
       rerender();
     };
   });
@@ -2652,7 +2675,7 @@ viewToggleButtons.forEach((button) => {
       const input = $("quickCommandInput");
       if (input) input.value = buildAiPrompt(projectName, "classify");
       navigateTo("ai-command");
-      showMessage?.("AI classification prompt sent.");
+      showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");
     };
   }
 
@@ -2662,7 +2685,7 @@ viewToggleButtons.forEach((button) => {
       const input = $("quickCommandInput");
       if (input) input.value = buildAiPrompt(projectName, "missing", { missing: missingRequiredAssets });
       navigateTo("ai-command");
-      showMessage?.("AI missing-assets prompt sent.");
+      showMessage?.("Missing asset review prepared. The system will focus on required categories that still need attention.");
     };
   }
 
@@ -2677,7 +2700,7 @@ viewToggleButtons.forEach((button) => {
       const input = $("quickCommandInput");
       if (input) input.value = buildAiPrompt(projectName, "extract", { docs: [selectedAsset.name] });
       navigateTo("ai-command");
-      showMessage?.("Selected document extraction prompt sent.");
+      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
     };
   }
 
@@ -2691,7 +2714,22 @@ viewToggleButtons.forEach((button) => {
       const input = $("quickCommandInput");
       if (input) input.value = buildAiPrompt(projectName, "extract", { docs });
       navigateTo("ai-command");
-      showMessage?.("AI document extraction prompt sent.");
+      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
+    };
+  }
+
+  const sendToAiBtn = document.querySelector("[data-library-command=\"send-to-ai\"]");
+  if (sendToAiBtn && !sendToAiBtn.disabled) {
+    sendToAiBtn.onclick = () => {
+      if (!selectedAsset) {
+        showMessage?.("Select an asset first to prepare AI context.");
+        return;
+      }
+
+      const input = $("quickCommandInput");
+      if (input) input.value = buildAiPrompt(projectName, "classify");
+      showMessage?.(`AI context prepared for ${selectedAsset.name}. Open AI Command to review recommendations.`);
+      navigateTo("ai-command");
     };
   }
 }
@@ -2773,7 +2811,7 @@ export const libraryRoute = {
 
         <section class="card library-actions-card">
           <div class="card-head">
-            <h3>Asset Decision Panel</h3>
+            <h3>Asset Intake</h3>
             <div class="library-action-toolbar">
               <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
               <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
@@ -2782,8 +2820,8 @@ export const libraryRoute = {
           </div>
           <div class="library-upload-grid">
             <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
-              <strong>Upload Assets</strong>
-              <span>Drop files here or click to browse</span>
+              <strong>Upload Asset</strong>
+              <span>Drop files or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
               <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
               <input id="libraryUploadInput" class="library-file-input" type="file" multiple>
@@ -2795,7 +2833,7 @@ export const libraryRoute = {
                   <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
                 `).join("")}
               </select>
-              <div class="setup-helper">Primary upload action for Library intake and readiness flow.</div>
+              <div class="setup-helper">Upload and classify for readiness in one step.</div>
               <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
             </div>
           </div>
@@ -2805,7 +2843,7 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <h3>Asset Workspace</h3>
-            <span class="card-badge neutral">Browser + Selected Asset Rail</span>
+            <span class="card-badge neutral">Selected asset workspace</span>
           </div>
           <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
             <div class="library-workspace-main">
@@ -2874,15 +2912,10 @@ export const libraryRoute = {
             </div>
 
             <aside class="library-workspace-side">
-              <div class="library-operating-surface-head">
-                <p class="eyebrow">Asset Command</p>
-                <h3>Selected Asset</h3>
-              </div>
               <div class="library-side-stack">
                 <section class="card library-preview-card">
                   <div class="card-head">
-                    <h3>Selected Asset</h3>
-                    <span class="card-badge neutral">Readiness Context</span>
+                    <h3>Preview</h3>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>

@@ -10,8 +10,8 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
   const copyPathValue = escapePanelHtml(filePath);
   const selectedHint = hasSelectedAsset
-    ? "Selected asset commands are centralized here for faster, safer decisions."
-    : "Select an asset in the workspace to activate command actions.";
+    ? "Use clear action groups to make trusted updates without leaving this workspace."
+    : "Select an asset in the workspace to activate asset actions.";
   const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
   const durableDisabledAttr = disabled || !hasSelectedAsset || !selectedRegistryAssetId ? " disabled aria-disabled=\"true\"" : "";
@@ -20,10 +20,9 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
     <section class="card library-action-panel" data-library-action-panel>
       <div class="card-head library-panel-head">
         <div>
-          <p class="eyebrow">Asset Command</p>
-          <h3>Asset Decision Panel</h3>
+          <p class="eyebrow">Selected Asset</p>
+          <h3>Actions</h3>
         </div>
-        <span class="card-badge neutral">Selected Asset</span>
       </div>
 
       <div class="library-panel-hero">
@@ -33,7 +32,7 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
 
       <div class="library-panel-metrics">
         <div class="library-panel-metric">
-          <span>Status</span>
+          <span>Review Status</span>
           <strong>${status}</strong>
         </div>
         <div class="library-panel-metric">
@@ -41,21 +40,28 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
           <strong>${assetType}</strong>
         </div>
         <div class="library-panel-metric">
-          <span>Authority</span>
+          <span>Source Status</span>
           <strong>${escapePanelHtml(sourceLabel)}</strong>
         </div>
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Primary actions</p>
+        <p class="setup-helper">Primary Actions</p>
         <div class="library-panel-action-grid library-panel-actions-primary">
           <button class="btn btn-primary" type="button" data-library-open="${selectedAssetId}"${disabledAttr}>Open</button>
+          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI</button>
+        </div>
+      </div>
+
+      <div class="library-panel-section">
+        <p class="setup-helper">Utility</p>
+        <div class="library-panel-action-grid library-panel-actions-utility">
           <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
         </div>
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Asset decisions</p>
+        <p class="setup-helper">Decisions</p>
         <div class="library-panel-action-grid library-panel-actions-durable">
           ${isManagedMedia
       ? `<button class="btn btn-secondary" type="button" disabled aria-disabled="true">${escapePanelHtml(selectedAsset?.source_label || "Managed")}</button>`
@@ -68,7 +74,7 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
       </div>
 
       <div class="library-panel-section library-panel-section-danger">
-        <p class="setup-helper">Destructive action</p>
+        <p class="setup-helper">Danger</p>
         <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft Delete</button>
       </div>
     </section>
