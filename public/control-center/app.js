@@ -4,6 +4,10 @@ import {
   getProjectedActiveRole,
   getProjectedRoutePermissions
 } from "./runtime/authority/authority-projection.js";
+import {
+  ACTIVE_ROUTE_ROLES,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
 
 import {
   initRouter,
@@ -81,38 +85,6 @@ setApiBaseUrl("");
 const CONTROL_WRITE_HEADER = "x-mh-control-key";
 const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
 const DEFAULT_ACTIVE_ROLE = "admin";
-const ACTIVE_ROUTE_ROLES = [
-  "strategist",
-  "writer",
-  "designer",
-  "video_lead",
-  "publisher",
-  "ads_operator",
-  "analyst",
-  "compliance_reviewer",
-  "admin"
-];
-const DEFAULT_ROUTE_ROLE_ACCESS = {
-  home: ["strategist", "analyst", "admin"],
-  "ai-command": ACTIVE_ROUTE_ROLES,
-  "campaign-studio": ["strategist", "ads_operator", "admin"],
-  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
-  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
-  publishing: ["publisher", "compliance_reviewer", "admin"],
-  research: ["strategist", "analyst", "writer", "admin"],
-  setup: ACTIVE_ROUTE_ROLES,
-  "task-center": ACTIVE_ROUTE_ROLES,
-  "queue-center": ACTIVE_ROUTE_ROLES,
-  "job-monitor": ACTIVE_ROUTE_ROLES,
-  "notification-center": ACTIVE_ROUTE_ROLES,
-  governance: ["compliance_reviewer", "admin", "analyst"],
-  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
-  insights: ["analyst", "strategist", "ads_operator", "admin"],
-  integrations: ["admin"],
-  workflows: ACTIVE_ROUTE_ROLES,
-  library: ["designer", "video_lead", "publisher", "admin"],
-  settings: ["admin"]
-};
 
 function persistCanonicalControlKey(key) {
   const normalized = String(key || "").trim();
@@ -257,27 +229,10 @@ function resolveRouteAccess(route) {
   const routePermissions = getProjectedRoutePermissions({ operations });
   const activeRole = getActiveRole();
 
-  function buildBlockedReason(allowedRoles) {
-    const rolesStr = allowedRoles.join(", ");
-    return (
-      `Route "${route}" requires one of: [${rolesStr}]. ` +
-      `Your current role is "${activeRole}". ` +
-      `Use the Role selector in the top bar to switch roles for internal testing.`
-    );
-  }
-
   const explicitRule = routePermissions.find((item) => item?.route === route);
 
   if (!explicitRule) {
-    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
-    if (!Array.isArray(fallbackRoles)) {
-      return { allowed: true, reason: "" };
-    }
-    const allowed = fallbackRoles.includes(activeRole);
-    return {
-      allowed,
-      reason: allowed ? "" : buildBlockedReason(fallbackRoles)
-    };
+    return getFallbackRouteAccess(route, activeRole);
   }
 
   const allowedRoles = Array.isArray(explicitRule.roles)
@@ -287,7 +242,11 @@ function resolveRouteAccess(route) {
 
   return {
     allowed,
-    reason: allowed ? "" : buildBlockedReason(allowedRoles)
+    reason: allowed
+      ? ""
+      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+        `Your current role is "${activeRole}". ` +
+        `Use the Role selector in the top bar to switch roles for internal testing.`
   };
 }
 
