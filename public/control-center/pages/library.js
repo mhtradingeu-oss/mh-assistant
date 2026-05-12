@@ -1745,11 +1745,11 @@ function bindLibraryWorkspace({
           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
 
         return `
-          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
+          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
             <div class="library-grid-preview">${previewNode}</div>
-            <div class="library-grid-title">${escapeHtml(asset.name)}</div>
+            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</div>
             <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
-            <div class="library-grid-meta">${escapeHtml(pathHint)}</div>
+            <div class="library-grid-meta library-grid-path" title="${escapeHtml(pathHint)}">${escapeHtml(pathHint)}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
