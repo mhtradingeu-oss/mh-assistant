@@ -1,0 +1,522 @@
+===== STATUS =====
+?? audits/frontend/page-upgrade-roadmap/library-action-feedback/
+
+===== LIBRARY ACTION BUTTONS =====
+public/control-center/pages/library/ai-panel.js:48:          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI for next move</button>
+public/control-center/pages/library/ai-panel.js:78:      description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns."
+public/control-center/pages/library/ai-panel.js:84:      title: "Review before production",
+public/control-center/pages/library/catalog-readiness.js:60:    label: "Review and approve Library assets",
+public/control-center/pages/library/catalog-readiness.js:61:    reason: "Required asset coverage is available. Review quality and source-of-truth status.",
+public/control-center/pages/library/action-panel.js:52:          <button class="btn btn-primary" type="button" data-library-open="${selectedAssetId}"${disabledAttr}>Open</button>
+public/control-center/pages/library/action-panel.js:53:          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
+public/control-center/pages/library/action-panel.js:62:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${selectedAssetId}"${disabledAttr}>${escapePanelHtml(getPanelSourceOfTruth(selectedAsset) ? "Unsource" : "Source")}</button>
+public/control-center/pages/library/action-panel.js:63:             <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve</button>
+public/control-center/pages/library/action-panel.js:64:             <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Review</button>`}
+public/control-center/pages/library/action-panel.js:65:          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename</button>
+public/control-center/pages/library/action-panel.js:66:          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive</button>
+public/control-center/pages/library/action-panel.js:72:        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft Delete</button>
+public/control-center/pages/library.js:235:function buildPreviewUrl(projectName, asset) {
+public/control-center/pages/library.js:265:function getAssetPreviewUrl(asset) {
+public/control-center/pages/library.js:283:    getAssetPreviewUrl(asset)
+public/control-center/pages/library.js:329:  const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:430:          const button = event.target.closest?.("[data-copy-asset-path]");
+public/control-center/pages/library.js:435:          const value = button.getAttribute("data-copy-asset-path") || "";
+public/control-center/pages/library.js:584:  if (value === "needs_review") return "Needs Review";
+public/control-center/pages/library.js:666:      buildPreviewUrl(projectName, {
+public/control-center/pages/library.js:834:  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+public/control-center/pages/library.js:843:    needsReviewAssets,
+public/control-center/pages/library.js:849:      ? `${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}`
+public/control-center/pages/library.js:864:    let status = "Needs Review";
+public/control-center/pages/library.js:868:      status = "Needs Review";
+public/control-center/pages/library.js:1012:function getPreviewExtensionForAsset(asset = {}) {
+public/control-center/pages/library.js:1028:function toDocumentPreviewLabel(extension = "") {
+public/control-center/pages/library.js:1038:function canAttemptDocumentPreview(asset = {}) {
+public/control-center/pages/library.js:1040:    getAssetPreviewUrl(asset) ||
+public/control-center/pages/library.js:1050:function renderPreview(asset, escapeHtml) {
+public/control-center/pages/library.js:1055:  const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:1056:  const protectedPreview = requiresProtectedMediaFetch(previewUrl);
+public/control-center/pages/library.js:1059:    if (protectedPreview) {
+public/control-center/pages/library.js:1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1075:    if (protectedPreview) {
+public/control-center/pages/library.js:1099:    if (protectedPreview) {
+public/control-center/pages/library.js:1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1115:    if (protectedPreview) {
+public/control-center/pages/library.js:1130:  const previewExtension = getPreviewExtensionForAsset(asset);
+public/control-center/pages/library.js:1133:    const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:1134:    const label = toDocumentPreviewLabel(previewExtension);
+public/control-center/pages/library.js:1137:      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
+public/control-center/pages/library.js:1148:    if (isPdf && canAttemptDocumentPreview(asset)) {
+public/control-center/pages/library.js:1165:          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+public/control-center/pages/library.js:1184:      <div class="library-preview-copy">Preview not available for this file type.</div>
+public/control-center/pages/library.js:1189:async function hydrateProtectedAssetPreview({
+public/control-center/pages/library.js:1225:    if (getPreviewExtensionForAsset(asset) === "pdf") {
+public/control-center/pages/library.js:1239:      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+public/control-center/pages/library.js:1313:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+public/control-center/pages/library.js:1320:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+public/control-center/pages/library.js:1511:    needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,
+public/control-center/pages/library.js:1553:        <strong>${escapeHtml(formatCount(overview.needsReviewAssets))}</strong>
+public/control-center/pages/library.js:1574:      const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
+public/control-center/pages/library.js:1575:      const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
+public/control-center/pages/library.js:1741:        const assetPreviewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:1742:        const previewNode = asset.is_image && assetPreviewUrl
+public/control-center/pages/library.js:1743:          ? requiresProtectedMediaFetch(assetPreviewUrl)
+public/control-center/pages/library.js:1745:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+public/control-center/pages/library.js:1806:  const previewVisual = $("libraryPreviewVisual");
+public/control-center/pages/library.js:1808:    previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+public/control-center/pages/library.js:1810:    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+public/control-center/pages/library.js:1811:    if (protectedPreviewNode && selectedAsset) {
+public/control-center/pages/library.js:1812:      hydrateProtectedAssetPreview({
+public/control-center/pages/library.js:1813:        previewNode: protectedPreviewNode,
+public/control-center/pages/library.js:1822:  const previewMeta = $("libraryPreviewMeta");
+public/control-center/pages/library.js:2116:  const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+public/control-center/pages/library.js:2119:      const id = button.getAttribute("data-library-open") || "";
+public/control-center/pages/library.js:2144:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+public/control-center/pages/library.js:2154:      const assetId = button.getAttribute("data-library-source-truth") || "";
+public/control-center/pages/library.js:2175:  const statusActionButtons = Array.from(document.querySelectorAll("[data-asset-status-action]"));
+public/control-center/pages/library.js:2185:      const status = button.getAttribute("data-asset-status-action") || "needs_review";
+public/control-center/pages/library.js:2214:  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+public/control-center/pages/library.js:2224:      const id = button.getAttribute("data-library-archive") || "";
+public/control-center/pages/library.js:2248:  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+public/control-center/pages/library.js:2258:      const id = button.getAttribute("data-library-rename") || "";
+public/control-center/pages/library.js:2289:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+public/control-center/pages/library.js:2299:      const id = button.getAttribute("data-library-delete") || "";
+public/control-center/pages/library.js:2424:  const uploadBtn = $("libraryUploadBtn");
+public/control-center/pages/library.js:2629:  const refreshBtn = $("libraryRefreshScanBtn");
+public/control-center/pages/library.js:2649:  const classifyBtn = $("libraryAiClassifyBtn");
+public/control-center/pages/library.js:2669:  const extractSelectedDocBtn = $("libraryAiExtractSelectedDocBtn");
+public/control-center/pages/library.js:2684:  const extractBtn = $("libraryAiExtractBtn");
+public/control-center/pages/library.js:2761:            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh</button>
+public/control-center/pages/library.js:2778:              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+public/control-center/pages/library.js:2779:              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+public/control-center/pages/library.js:2780:              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+public/control-center/pages/library.js:2792:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+public/control-center/pages/library.js:2799:              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
+public/control-center/pages/library.js:2887:                  <div id="libraryPreviewVisual"></div>
+public/control-center/pages/library.js:2888:                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+
+===== MESSAGE / TOAST / ERROR MARKERS =====
+public/control-center/app.js:294:      <div id="accessKeyStatus" class="access-key-status" aria-live="polite"></div>
+public/control-center/app.js:300:function setAccessKeyStatus(message, type) {
+public/control-center/app.js:303:  status.textContent = message;
+public/control-center/app.js:399:    if (requestResult.message) {
+public/control-center/app.js:400:      lines.push(`probe message: ${requestResult.message}`);
+public/control-center/app.js:423:        message: "No key available from input/runtime/localStorage"
+public/control-center/app.js:441:      message: response.ok ? "ok" : "not-ok"
+public/control-center/app.js:456:        message: error?.message || "request failed"
+public/control-center/app.js:473:  showMessage(`Loaded project: ${projectToLoad}`);
+public/control-center/app.js:519:        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+public/control-center/app.js:572:            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+public/control-center/app.js:721:let messageTimer = null;
+public/control-center/app.js:723:function showMessage(message) {
+public/control-center/app.js:727:  box.textContent = message || "";
+public/control-center/app.js:728:  box.style.display = message ? "block" : "none";
+public/control-center/app.js:730:  if (message) {
+public/control-center/app.js:740:function showError(message) {
+public/control-center/app.js:744:  if (message && isFatalErrorPanelVisible()) {
+public/control-center/app.js:750:  box.textContent = message || "";
+public/control-center/app.js:751:  box.style.display = message ? "block" : "none";
+public/control-center/app.js:755:  showMessage("");
+public/control-center/app.js:756:  showError("");
+public/control-center/app.js:760:  if (messageTimer) {
+public/control-center/app.js:761:    clearTimeout(messageTimer);
+public/control-center/app.js:764:  messageTimer = setTimeout(() => {
+public/control-center/app.js:765:    showMessage("");
+public/control-center/app.js:986:    detail: String(details.detail || details.message || ""),
+public/control-center/app.js:1321:  const message = String(error?.message || error || "Unknown startup error").trim();
+public/control-center/app.js:1326:    message,
+public/control-center/app.js:1333:    message,
+public/control-center/app.js:1340:  startupDiagnostics.lastErrorMessage = message;
+public/control-center/app.js:1349:    detail: `${String(source || "startup")}: ${message}`,
+public/control-center/app.js:1362:      message
+public/control-center/app.js:1489:  showMessage("Interface unlocked.");
+public/control-center/app.js:1511:function isMissingReadKeyMessage(message) {
+public/control-center/app.js:1512:  return /missing\s+read\s+key/i.test(String(message || ""));
+public/control-center/app.js:1521:  const message = String(error?.message || "");
+public/control-center/app.js:1528:    isMissingReadKeyMessage(message) ||
+public/control-center/app.js:1553:  const message = "Project data requires a valid access key.";
+public/control-center/app.js:1558:    detail: String(error?.message || "missing read key")
+public/control-center/app.js:1565:  setError(message);
+public/control-center/app.js:1566:  showError(message);
+public/control-center/app.js:1567:  showMessage(message);
+public/control-center/app.js:1568:  setAccessKeyStatus(message, "error");
+public/control-center/app.js:1572:  showFatalErrorPanel(message, renderStartupDiagnosticsText("access-key-required"));
+public/control-center/app.js:1607:function showFatalErrorPanel(message, details = "") {
+public/control-center/app.js:1610:    showError(message);
+public/control-center/app.js:1618:    text.textContent = message || "Control Center failed to start.";
+public/control-center/app.js:1634:    detail: `${String(source || "startup")}: ${String(err.message || "unknown error")}`
+public/control-center/app.js:1640:  setError(err.message || "Control Center initialization failed");
+public/control-center/app.js:1641:  showError(err.message || "Control Center initialization failed");
+public/control-center/app.js:1707:      showError(unlockMessage);
+public/control-center/app.js:1708:      showMessage(unlockMessage);
+public/control-center/app.js:1737:    startupRuntimeState.lastApiMessage = String(detail.message || "");
+public/control-center/app.js:1742:        detail.message,
+public/control-center/app.js:1756:    const message = event?.message || "Unhandled browser error";
+public/control-center/app.js:1757:    const err = event?.error instanceof Error ? event.error : new Error(message);
+public/control-center/app.js:2055:      showMessage,
+public/control-center/app.js:2056:      showError,
+public/control-center/app.js:2102:        showMessage,
+public/control-center/app.js:2115:    showMessage,
+public/control-center/app.js:2131:    setError(renderError.message || "Failed to render project page");
+public/control-center/app.js:2132:    showError(renderError.message || "Failed to render project page");
+public/control-center/app.js:2158:function withTimeout(promise, timeoutMs, message = "Operation timed out.") {
+public/control-center/app.js:2163:      const error = new Error(message);
+public/control-center/app.js:2331:      detail: `${nextError.phase}: ${nextError.message}`,
+public/control-center/app.js:2476:        message: String(fallbackError?.message || "Failed to verify project fallback")
+public/control-center/app.js:2503:  showError("Project details are still syncing.");
+public/control-center/app.js:2504:  showMessage("Project details are still syncing.");
+public/control-center/app.js:2550:      showError(warning);
+public/control-center/app.js:2603:      showError(warning);
+public/control-center/app.js:2610:            detail: String(entry?.message || entry?.section || "Optional warning")
+public/control-center/app.js:2615:        const failure = new Error(String(entry?.message || "Optional endpoint failed"));
+public/control-center/app.js:2630:    console.warn("Optional project data failed:", optionalError?.message || optionalError);
+public/control-center/app.js:2634:      detail: String(optionalError?.message || optionalError || "Optional payload error")
+public/control-center/app.js:2637:    showError("Loaded required project data, but optional sections failed to refresh.");
+public/control-center/app.js:2677:    showMessage(`Project ${safeProjectName} is already loading.`);
+public/control-center/app.js:2833:        const renderMessage = renderGlobalError?.message || "Failed to render global UI.";
+public/control-center/app.js:2835:        showError(renderMessage);
+public/control-center/app.js:2861:        const renderMessage = pageRenderError?.message || "Failed to render current page.";
+public/control-center/app.js:2863:        showError(renderMessage);
+public/control-center/app.js:2876:      showMessage(`Loaded project: ${loadedProjectName}`);
+public/control-center/app.js:2884:          detail: String(error?.message || "response-text-watchdog")
+public/control-center/app.js:2901:        showError(unlockMessage);
+public/control-center/app.js:2902:        showMessage(unlockMessage);
+public/control-center/app.js:2915:          detail: String(error?.message || "parse-watchdog")
+public/control-center/app.js:2921:        showError(warning);
+public/control-center/app.js:2922:        showMessage(warning);
+public/control-center/app.js:2947:      setError(error.message || "Failed to load project data");
+public/control-center/app.js:2948:      showError(error.message || "Failed to load project data");
+public/control-center/app.js:2950:        error.message || "Failed to load project data",
+public/control-center/app.js:2957:        detail: String(error.message || "Failed to load project data")
+public/control-center/app.js:3051:        showMessage("Search handler is not available.");
+public/control-center/app.js:3059:        showError("Please select a project first.");
+public/control-center/app.js:3073:        showMessage("AI Command opened.");
+public/control-center/app.js:3122:      showError(error?.message || "Action failed.");
+public/control-center/app.js:3174:      showError("Please select a valid project.");
+public/control-center/app.js:3181:      showMessage(`Test project ignored. Loading ${projectName}.`);
+public/control-center/app.js:3493:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3513:    showError(`No route matches "${query}".`);
+public/control-center/app.js:3519:    showMessage(`Opened ${matches[0].label}.`);
+public/control-center/app.js:3524:  showMessage(`Matches: ${top.map((item) => item.label).join(" • ")}. Press Enter again to open ${top[0].label}.`);
+public/control-center/app.js:3564:    showError("Please enter a command first.");
+public/control-center/app.js:3572:      message: value,
+public/control-center/app.js:3740:      showMessage("AI suggestion loaded.");
+public/control-center/app.js:3921:    const setProjectStatus = (message, tone = "info") => {
+public/control-center/app.js:3923:      projectStatus.textContent = message || "";
+public/control-center/app.js:3963:        showMessage(`Project ${projectName} created.`);
+public/control-center/app.js:3967:        setProjectStatus(error?.message || "Failed to create project.", "error");
+public/control-center/app.js:3993:        showMessage("Started guided workflow.");
+public/control-center/app.js:4119:      showMessage("Project list is still syncing. Continuing with default project.");
+public/control-center/pages/library.js:440:            alert("Asset path copied.");
+public/control-center/pages/library.js:460:            const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:462:              : `Could not open file: ${error.message || "Unknown error."}`;
+public/control-center/pages/library.js:463:            alert(message);
+public/control-center/pages/library.js:728:  const briefText = asString(payload.video_brief || payload.voice_script || payload.message || asset.notes);
+public/control-center/pages/library.js:1194:  showError
+public/control-center/pages/library.js:1237:    const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:1239:      : `Preview unavailable: ${error.message || "Could not load this file."}`;
+public/control-center/pages/library.js:1241:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+public/control-center/pages/library.js:1244:      showError?.(message);
+public/control-center/pages/library.js:1256:  showError
+public/control-center/pages/library.js:1285:    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+public/control-center/pages/library.js:1440:  showMessage,
+public/control-center/pages/library.js:1441:  showError,
+public/control-center/pages/library.js:1458:      showMessage,
+public/control-center/pages/library.js:1459:      showError,
+public/control-center/pages/library.js:1629:        showMessage,
+public/control-center/pages/library.js:1630:        showError,
+public/control-center/pages/library.js:1660:        showMessage,
+public/control-center/pages/library.js:1661:        showError,
+public/control-center/pages/library.js:1696:        showMessage,
+public/control-center/pages/library.js:1697:        showError,
+public/control-center/pages/library.js:1727:        showMessage,
+public/control-center/pages/library.js:1728:        showError,
+public/control-center/pages/library.js:1802:      showError
+public/control-center/pages/library.js:1817:        showError
+public/control-center/pages/library.js:1932:          showMessage,
+public/control-center/pages/library.js:1933:          showError,
+public/control-center/pages/library.js:1942:      showMessage?.("AI classification prompt sent.");
+public/control-center/pages/library.js:1969:        showMessage,
+public/control-center/pages/library.js:1970:        showError,
+public/control-center/pages/library.js:2002:        showMessage,
+public/control-center/pages/library.js:2003:        showError,
+public/control-center/pages/library.js:2029:        showMessage,
+public/control-center/pages/library.js:2030:        showError,
+public/control-center/pages/library.js:2129:        showError?.("Asset not found.");
+public/control-center/pages/library.js:2136:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2138:          : `Could not open file: ${error.message || "Unknown error."}`;
+public/control-center/pages/library.js:2139:        showError?.(message);
+public/control-center/pages/library.js:2150:        showError?.("Select a project before updating source of truth.");
+public/control-center/pages/library.js:2157:        showError?.("Asset not found.");
+public/control-center/pages/library.js:2165:        showMessage?.(`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.`);
+public/control-center/pages/library.js:2167:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2169:          : (error.message || "Failed to update source of truth.");
+public/control-center/pages/library.js:2170:        showError?.(message);
+public/control-center/pages/library.js:2181:        showError?.("Select a project before updating asset status.");
+public/control-center/pages/library.js:2191:        showError?.("Missing asset id.");
+public/control-center/pages/library.js:2204:        showMessage?.(`Asset status updated to ${toStatusLabel(status)}.`);
+public/control-center/pages/library.js:2206:        const message = error instanceof AccessKeyError
+public/control-center/pages/library.js:2208:          : (error.message || "Failed to update asset status.");
+public/control-center/pages/library.js:2209:        showError?.(message);
+public/control-center/pages/library.js:2220:        showError?.("Select a project before archiving assets.");
+public/control-center/pages/library.js:2229:        showError?.("Missing asset id.");
+public/control-center/pages/library.js:2241:        showMessage?.("Asset archived.");
+public/control-center/pages/library.js:2243:        showError?.(error.message || "Failed to archive asset.");
+public/control-center/pages/library.js:2254:        showError?.("Select a project before renaming assets.");
+public/control-center/pages/library.js:2263:        showError?.("Asset not found.");
+public/control-center/pages/library.js:2274:        showError?.("Asset name cannot be empty.");
+public/control-center/pages/library.js:2282:        showMessage?.("Asset renamed.");
+public/control-center/pages/library.js:2284:        showError?.(error.message || "Failed to rename asset.");
+public/control-center/pages/library.js:2295:        showError?.("Select a project before deleting assets.");
+public/control-center/pages/library.js:2304:        showError?.("Missing asset id.");
+public/control-center/pages/library.js:2318:        showMessage?.("Asset deleted (soft delete).");
+public/control-center/pages/library.js:2320:        showError?.(error.message || "Failed to delete asset.");
+public/control-center/pages/library.js:2354:      showMessage?.(`Upload category set to ${uploadType}.`);
+public/control-center/pages/library.js:2430:      const message = files.length ? `${files.length} file${files.length === 1 ? "" : "s"} selected: ${names}${suffix}` : "No files selected";
+public/control-center/pages/library.js:2432:      if (info) info.textContent = message;
+public/control-center/pages/library.js:2467:        showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+public/control-center/pages/library.js:2508:          showMessage?.(`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.`);
+public/control-center/pages/library.js:2535:        showError?.("Select a project before uploading.");
+public/control-center/pages/library.js:2543:        showError?.("Select at least one file to upload.");
+public/control-center/pages/library.js:2551:        showError?.(error.message || "Invalid upload category.");
+public/control-center/pages/library.js:2571:        showMessage,
+public/control-center/pages/library.js:2572:        showError,
+public/control-center/pages/library.js:2591:              error: error.message || "Upload failed",
+public/control-center/pages/library.js:2612:          showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.`);
+public/control-center/pages/library.js:2614:          showError?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, ${failed.length} failed.`);
+public/control-center/pages/library.js:2616:          showError?.("Upload failed for all selected files.");
+public/control-center/pages/library.js:2633:        showError?.("Select a project before refreshing.");
+public/control-center/pages/library.js:2640:        showMessage?.("Library scan refreshed.");
+public/control-center/pages/library.js:2642:        showError?.(error.message || "Failed to refresh library scan.");
+public/control-center/pages/library.js:2655:      showMessage?.("AI classification prompt sent.");
+public/control-center/pages/library.js:2665:      showMessage?.("AI missing-assets prompt sent.");
+public/control-center/pages/library.js:2673:        showError?.("Select a document asset first.");
+public/control-center/pages/library.js:2680:      showMessage?.("Selected document extraction prompt sent.");
+public/control-center/pages/library.js:2694:      showMessage?.("AI document extraction prompt sent.");
+public/control-center/pages/library.js:2717:    showMessage,
+public/control-center/pages/library.js:2718:    showError,
+public/control-center/pages/library.js:2909:      showMessage,
+public/control-center/pages/library.js:2910:      showError,
+
+===== PREVIEW / SELECTED ASSET MARKERS =====
+public/control-center/pages/library/command-router.js:9:  OPEN_PREVIEW: "open-preview",
+public/control-center/pages/library/session-store.js:2:  selectedAssetId: "",
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:2:  const hasSelectedAsset = Boolean(selectedAsset);
+public/control-center/pages/library/ai-panel.js:6:  const selectedName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No selected asset");
+public/control-center/pages/library/ai-panel.js:8:  const nextBestAction = buildLibraryAiNextBestAction({ readiness, selectedAsset });
+public/control-center/pages/library/ai-panel.js:55:function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } = {}) {
+public/control-center/pages/library/ai-panel.js:58:  if (!selectedAsset && missingCount > 0) {
+public/control-center/pages/library/ai-panel.js:65:  if (!selectedAsset) {
+public/control-center/pages/library/ai-panel.js:72:  const isSource = Boolean(selectedAsset?.source_of_truth ?? selectedAsset?.sourceOfTruth ?? selectedAsset?.is_source_of_truth);
+public/control-center/pages/library/ai-panel.js:73:  const status = String(selectedAsset?.status || "").toLowerCase();
+public/control-center/pages/library/action-panel.js:1:export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/action-panel.js:2:  const hasSelectedAsset = Boolean(selectedAsset);
+public/control-center/pages/library/action-panel.js:3:  const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
+public/control-center/pages/library/action-panel.js:4:  const selectedRegistryAssetId = escapePanelHtml(selectedAsset?.mutation_id || selectedAsset?.asset_id || "");
+public/control-center/pages/library/action-panel.js:5:  const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
+public/control-center/pages/library/action-panel.js:6:  const assetType = escapePanelHtml(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a");
+public/control-center/pages/library/action-panel.js:7:  const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
+public/control-center/pages/library/action-panel.js:8:  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+public/control-center/pages/library/action-panel.js:9:  const isManagedMedia = selectedAsset?.kind === "managed_media";
+public/control-center/pages/library/action-panel.js:10:  const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
+public/control-center/pages/library/action-panel.js:11:  const copyPathValue = escapePanelHtml(filePath);
+public/control-center/pages/library/action-panel.js:15:  const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
+public/control-center/pages/library/action-panel.js:52:          <button class="btn btn-primary" type="button" data-library-open="${selectedAssetId}"${disabledAttr}>Open</button>
+public/control-center/pages/library/action-panel.js:53:          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
+public/control-center/pages/library/action-panel.js:61:      ? `<button class="btn btn-secondary" type="button" disabled aria-disabled="true">${escapePanelHtml(selectedAsset?.source_label || "Managed")}</button>`
+public/control-center/pages/library/action-panel.js:62:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${selectedAssetId}"${disabledAttr}>${escapePanelHtml(getPanelSourceOfTruth(selectedAsset) ? "Unsource" : "Source")}</button>
+public/control-center/pages/library/action-panel.js:63:             <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve</button>
+public/control-center/pages/library/action-panel.js:64:             <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Review</button>`}
+public/control-center/pages/library/action-panel.js:65:          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename</button>
+public/control-center/pages/library/action-panel.js:66:          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive</button>
+public/control-center/pages/library/action-panel.js:72:        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft Delete</button>
+public/control-center/pages/library.js:268:    asset.preview_url
+public/control-center/pages/library.js:329:  const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:330:  const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");
+public/control-center/pages/library.js:332:  if (!requiresProtectedMediaFetch(previewUrl)) {
+public/control-center/pages/library.js:334:      objectUrl: previewUrl,
+public/control-center/pages/library.js:362:    const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);
+public/control-center/pages/library.js:456:            preview_url: fileUrl,
+public/control-center/pages/library.js:497:      selectedAssetId: "",
+public/control-center/pages/library.js:663:    const previewUrl = merged.preview_url ||
+public/control-center/pages/library.js:699:      preview_url: previewUrl,
+public/control-center/pages/library.js:753:    preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),
+public/control-center/pages/library.js:761:    text_preview: promptText || briefText,
+public/control-center/pages/library.js:762:    json_preview: payload,
+public/control-center/pages/library.js:1018:    asset.preview_url ||
+public/control-center/pages/library.js:1044:    asset.preview_url ||
+public/control-center/pages/library.js:1050:function renderPreview(asset, escapeHtml) {
+public/control-center/pages/library.js:1052:    return `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
+public/control-center/pages/library.js:1055:  const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:1056:  const protectedPreview = requiresProtectedMediaFetch(previewUrl);
+public/control-center/pages/library.js:1058:  if (asset.is_image && asString(asset.image_url || previewUrl).trim()) {
+public/control-center/pages/library.js:1061:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1062:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1068:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1074:  if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {
+public/control-center/pages/library.js:1077:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1078:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1084:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1085:        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+public/control-center/pages/library.js:1090:  if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {
+public/control-center/pages/library.js:1092:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1093:        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+public/control-center/pages/library.js:1098:  if (asset.is_image && previewUrl) {
+public/control-center/pages/library.js:1101:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1102:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1108:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+public/control-center/pages/library.js:1114:  if (asset.is_video && previewUrl) {
+public/control-center/pages/library.js:1117:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1118:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1124:      <div class="library-preview-frame">
+public/control-center/pages/library.js:1125:        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+public/control-center/pages/library.js:1130:  const previewExtension = getPreviewExtensionForAsset(asset);
+public/control-center/pages/library.js:1132:  if (isDocumentExtension(previewExtension)) {
+public/control-center/pages/library.js:1133:    const previewUrl = getAssetPreviewUrl(asset);
+public/control-center/pages/library.js:1134:    const label = toDocumentPreviewLabel(previewExtension);
+public/control-center/pages/library.js:1135:    const isPdf = previewExtension === "pdf";
+public/control-center/pages/library.js:1136:    const openButton = previewUrl
+public/control-center/pages/library.js:1140:    if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {
+public/control-center/pages/library.js:1142:        <div class="library-pdf-preview">
+public/control-center/pages/library.js:1143:          <iframe src="${escapeHtml(previewUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+public/control-center/pages/library.js:1150:        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+public/control-center/pages/library.js:1151:          <div class="library-preview-extension">PDF</div>
+public/control-center/pages/library.js:1153:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+public/control-center/pages/library.js:1159:      <div class="library-preview-fallback library-document-preview">
+public/control-center/pages/library.js:1160:        <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
+public/control-center/pages/library.js:1162:        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+public/control-center/pages/library.js:1163:        <div class="library-document-preview-actions">
+public/control-center/pages/library.js:1172:  if (asset.text_preview) {
+public/control-center/pages/library.js:1173:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
+public/control-center/pages/library.js:1176:  const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);
+public/control-center/pages/library.js:1178:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(jsonFallback)}</div>`;
+public/control-center/pages/library.js:1182:    <div class="library-preview-fallback">
+public/control-center/pages/library.js:1183:      <div class="library-preview-extension">${escapeHtml((asset.extension || "file").toUpperCase())}</div>
+public/control-center/pages/library.js:1184:      <div class="library-preview-copy">Preview not available for this file type.</div>
+public/control-center/pages/library.js:1190:  previewNode,
+public/control-center/pages/library.js:1196:  if (!previewNode || !asset) {
+public/control-center/pages/library.js:1206:    if (!previewNode.isConnected) {
+public/control-center/pages/library.js:1210:    const currentId = previewNode.getAttribute("data-preview-asset-id") || "";
+public/control-center/pages/library.js:1216:      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+public/control-center/pages/library.js:1221:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+public/control-center/pages/library.js:1226:      previewNode.outerHTML = `
+public/control-center/pages/library.js:1227:        <div class="library-pdf-preview">
+public/control-center/pages/library.js:1228:          <iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>
+public/control-center/pages/library.js:1233:    if (!previewNode.isConnected) {
+public/control-center/pages/library.js:1241:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+public/control-center/pages/library.js:1268:    image.alt = alt || asset.name || "Asset preview";
+public/control-center/pages/library.js:1285:    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+public/control-center/pages/library.js:1494:  const selectedAssetExists = filteredAssets.some((asset) => asset.id === session.selectedAssetId);
+public/control-center/pages/library.js:1495:  if (!selectedAssetExists) {
+public/control-center/pages/library.js:1496:    session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
+public/control-center/pages/library.js:1499:  const selectedAsset = filteredAssets.find((asset) => asset.id === session.selectedAssetId)
+public/control-center/pages/library.js:1500:    || allAssets.find((asset) => asset.id === session.selectedAssetId)
+public/control-center/pages/library.js:1742:        const previewNode = asset.is_image && assetPreviewUrl
+public/control-center/pages/library.js:1749:          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
+public/control-center/pages/library.js:1750:            <div class="library-grid-preview">${previewNode}</div>
+public/control-center/pages/library.js:1784:      if (leftId === session.selectedAssetId) return -1;
+public/control-center/pages/library.js:1785:      if (rightId === session.selectedAssetId) return 1;
+public/control-center/pages/library.js:1806:  const previewVisual = $("libraryPreviewVisual");
+public/control-center/pages/library.js:1807:  if (previewVisual) {
+public/control-center/pages/library.js:1808:    previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
+public/control-center/pages/library.js:1810:    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+public/control-center/pages/library.js:1811:    if (protectedPreviewNode && selectedAsset) {
+public/control-center/pages/library.js:1813:        previewNode: protectedPreviewNode,
+public/control-center/pages/library.js:1815:        asset: selectedAsset,
+public/control-center/pages/library.js:1822:  const previewMeta = $("libraryPreviewMeta");
+public/control-center/pages/library.js:1823:  if (previewMeta) {
+public/control-center/pages/library.js:1824:    previewMeta.innerHTML = selectedAsset
+public/control-center/pages/library.js:1827:          <strong>${escapeHtml(selectedAsset.name)}</strong>
+public/control-center/pages/library.js:1828:          <span>${escapeHtml(selectedAsset.filename || basename(selectedAsset.file_path || "") || "-")}</span>
+public/control-center/pages/library.js:1832:          <span class="card-badge ${escapeHtml(toStatusTone(selectedAsset.status))}">${escapeHtml(toStatusLabel(selectedAsset.status))}</span>
+public/control-center/pages/library.js:1833:          <span class="card-badge ${selectedAsset.source_of_truth ? "success" : "neutral"}">${escapeHtml(selectedAsset.source_of_truth ? "Source" : "Not Source")}</span>
+public/control-center/pages/library.js:1834:          <span class="card-badge neutral">${escapeHtml(selectedAsset.asset_type)}</span>
+public/control-center/pages/library.js:1837:        <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
+public/control-center/pages/library.js:1842:            <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(shortAssetId(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-"))}</strong></div>
+public/control-center/pages/library.js:1843:            <div class="data-row"><span>Full Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
+public/control-center/pages/library.js:1844:            <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
+public/control-center/pages/library.js:1845:            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
+public/control-center/pages/library.js:1846:            <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
+public/control-center/pages/library.js:1852:      : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
+public/control-center/pages/library.js:1858:      selectedAsset,
+public/control-center/pages/library.js:1867:      selectedAsset,
+public/control-center/pages/library.js:1955:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:1988:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2015:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2044:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2057:          session.selectedAssetId = assetId;
+public/control-center/pages/library.js:2120:      dispatchLibraryCommand("open-preview", { assetId: id }, {
+public/control-center/pages/library.js:2121:        "open-preview": ({ assetId }) => ({
+public/control-center/pages/library.js:2163:        session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2202:        if (asset?.id) session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2239:        if (asset?.id) session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2280:        session.selectedAssetId = asset.id;
+public/control-center/pages/library.js:2314:        if (asset?.id === session.selectedAssetId) {
+public/control-center/pages/library.js:2315:          session.selectedAssetId = "";
+public/control-center/pages/library.js:2672:      if (!selectedAsset) {
+public/control-center/pages/library.js:2678:      if (input) input.value = buildAiPrompt(projectName, "extract", { docs: [selectedAsset.name] });
+public/control-center/pages/library.js:2708:    <section class="page is-active" data-page="library">
+public/control-center/pages/library.js:2819:                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+public/control-center/pages/library.js:2882:                <section class="card library-preview-card">
+public/control-center/pages/library.js:2887:                  <div id="libraryPreviewVisual"></div>
+public/control-center/pages/library.js:2888:                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+
+===== AI / ROUTING MARKERS =====
+public/control-center/pages/library/command-router.js:15:  SEND_TO_AI: "send-to-ai"
+public/control-center/pages/library/ai-panel.js:48:          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI for next move</button>
+public/control-center/pages/library/ai-panel.js:78:      description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns."
+public/control-center/pages/library/ai-panel.js:91:    description: "This selected asset looks ready for downstream campaign, media, and publishing workflows."
+public/control-center/pages/library.js:45:  { key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }
+public/control-center/pages/library.js:53:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:67:    why: "Product data anchors facts, variants, and claims for campaign and publishing.",
+public/control-center/pages/library.js:567:  if (normalized.includes("publishing_ready")) return "publishing_ready";
+public/control-center/pages/library.js:568:  if (normalized.includes("sent_to_publishing")) return "sent_to_publishing";
+public/control-center/pages/library.js:581:  if (value === "publishing_ready") return "Publishing Ready";
+public/control-center/pages/library.js:582:  if (value === "sent_to_publishing") return "Sent to Publishing";
+public/control-center/pages/library.js:593:  if (value === "publishing_ready" || value === "sent_to_publishing") return "success";
+public/control-center/pages/library.js:710:  if (mediaType === "campaign-pack") return "campaign_pack";
+public/control-center/pages/library.js:716:  if (["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status))) return "publishing_ready_asset";
+public/control-center/pages/library.js:723:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:767:    campaign: asString(asset.campaign || ""),
+public/control-center/pages/library.js:771:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:789:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:790:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+public/control-center/pages/library.js:797:          handoff_id: item.id,
+public/control-center/pages/library.js:966:      || (selectedSource === "media-studio" && asset.kind === "managed_media")
+public/control-center/pages/library.js:967:      || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
+public/control-center/pages/library.js:968:      || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
+public/control-center/pages/library.js:1310:function buildAiPrompt(projectName, mode, payload = {}) {
+public/control-center/pages/library.js:1320:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+public/control-center/pages/library.js:1438:  navigateTo,
+public/control-center/pages/library.js:1456:      navigateTo,
+public/control-center/pages/library.js:1533:    { value: "media-studio", label: "Media Studio" },
+public/control-center/pages/library.js:1535:    { value: "publishing-ready", label: "Publishing Ready" }
+public/control-center/pages/library.js:1627:        navigateTo,
+public/control-center/pages/library.js:1658:        navigateTo,
+public/control-center/pages/library.js:1694:        navigateTo,
+public/control-center/pages/library.js:1725:        navigateTo,
+public/control-center/pages/library.js:1930:          navigateTo,
+public/control-center/pages/library.js:1940:      if (input) input.value = buildAiPrompt(projectName, "classify");
+public/control-center/pages/library.js:1941:      navigateTo("ai-command");
+public/control-center/pages/library.js:1967:        navigateTo,
+public/control-center/pages/library.js:2000:        navigateTo,
+public/control-center/pages/library.js:2027:        navigateTo,
+public/control-center/pages/library.js:2569:        navigateTo,
+public/control-center/pages/library.js:2653:      if (input) input.value = buildAiPrompt(projectName, "classify");
+public/control-center/pages/library.js:2654:      navigateTo("ai-command");
+public/control-center/pages/library.js:2663:      if (input) input.value = buildAiPrompt(projectName, "missing", { missing: missingRequiredAssets });
+public/control-center/pages/library.js:2664:      navigateTo("ai-command");
+public/control-center/pages/library.js:2678:      if (input) input.value = buildAiPrompt(projectName, "extract", { docs: [selectedAsset.name] });
+public/control-center/pages/library.js:2679:      navigateTo("ai-command");
+public/control-center/pages/library.js:2692:      if (input) input.value = buildAiPrompt(projectName, "extract", { docs });
+public/control-center/pages/library.js:2693:      navigateTo("ai-command");
+public/control-center/pages/library.js:2716:    navigateTo,
+public/control-center/pages/library.js:2845:                    <option value="publishing_ready">Publishing ready</option>
+public/control-center/pages/library.js:2846:                    <option value="sent_to_publishing">Sent to publishing</option>
+public/control-center/pages/library.js:2907:      navigateTo,
+
+===== VALIDATION =====
+PASS: No legacy asset references found in active Control Center paths.
