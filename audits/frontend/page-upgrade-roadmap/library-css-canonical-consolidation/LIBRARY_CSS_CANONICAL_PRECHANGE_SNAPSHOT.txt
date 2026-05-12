@@ -1,0 +1,87 @@
+===== LIBRARY CSS CANONICAL PRE-CHANGE SNAPSHOT =====
+Date: 2026-05-12
+Branch: architecture/frontend-consolidation-v1
+File: public/control-center/styles/14-page-standard.css
+Total file lines: 1270
+
+===== LIBRARY SECTION HEADERS (before consolidation) =====
+
+Line 478:  /* ========= Library Workspace UX Polish ========= */
+Line 501:  /* ========= Compact Finder Toolbar ========= */
+Line 527:  /* ========= Compact Filter Ribbon ========= */
+Line 567:  /* ========= Upload Zone Modernization ========= */
+Line 628:  /* ========= Asset Grid Density ========= */
+Line 654:  /* ========= Preview Panel ========= */
+Line 684:  /* ========= Mobile ========= */
+Line 714:  /* ========= Library Interaction + Density Fix ========= */
+Line 878:  /* Library professional polish - 20260510 */
+Line 1040: /* ========= LIBRARY UX POLISH ========= */
+Line 1107: /* ========= LIBRARY DOCUMENT PREVIEW ========= */
+Line 1125: /* ========= LIBRARY UX FINAL SIZE + DARK UPLOAD FIX ========= */
+Line 1177: /* ========= LIBRARY OPERATING SURFACE PANELS ========= */
+
+Total historical Library sections: 13 (8 early unscoped + 5 later scoped)
+
+===== LIBRARY SELECTOR COUNT =====
+Total Library selectors: 103
+Duplicate Library selectors: 21
+
+===== DUPLICATED SELECTORS =====
+4x .library-grid-body
+3x .library-filter-bar
+3x [data-page="library"] .library-workspace-side
+2x #libraryPreviewVisual
+2x .library-asset-card
+2x .library-drop-zone
+2x .library-folder-list
+2x .library-grid-preview
+2x .library-preview-video
+2x .library-upload-grid
+2x .library-workspace-grid
+2x .library-workspace-side
+2x [data-page="library"] #libraryChooseFilesBtn
+2x [data-page="library"] #libraryDropZone
+2x [data-page="library"] .library-action-toolbar
+2x [data-page="library"] .library-finder-toolbar .btn
+2x [data-page="library"] .library-grid-card
+2x [data-page="library"] .library-panel-action-grid
+2x [data-page="library"] .library-required-grid
+2x [data-page="library"] .library-smart-shell
+2x [data-page="library"] .library-workspace-grid.library-finder-workspace
+
+===== SPECIFIC LINE RANGES OF LIBRARY CSS =====
+Library Workspace UX Polish section:      lines 478 – 500
+Compact Finder Toolbar section:           lines 501 – 526
+Compact Filter Ribbon section:            lines 527 – 566
+Upload Zone Modernization section:        lines 567 – 627
+Asset Grid Density section:               lines 628 – 653
+Preview Panel section:                    lines 654 – 683
+Mobile responsive (first pass):           lines 684 – 713
+Library Interaction + Density Fix:        lines 714 – 877
+Library professional polish 20260510:     lines 878 – 1039
+LIBRARY UX POLISH:                        lines 1040 – 1106
+LIBRARY DOCUMENT PREVIEW:                lines 1107 – 1124
+LIBRARY UX FINAL SIZE + DARK UPLOAD FIX: lines 1125 – 1176
+LIBRARY OPERATING SURFACE PANELS:        lines 1177 – 1270 (EOF)
+
+===== CONFLICT SUMMARY =====
+- .library-drop-zone: early section dark teal, professional polish light/indigo, UX POLISH dark blue — FINAL SIZE dark canonical
+- .library-grid-body: 4 definitions, FINAL SIZE + DARK is canonical (minmax 180px, gap 12px)
+- .library-filter-bar: 3 definitions, first section canonical layout, responsive stacks twice
+- .library-workspace-side: 3 definitions, professional polish scoped version is canonical
+- #libraryDropZone vs .library-drop-zone: same element, separate selectors, need to merge
+- [data-page="library"] .library-grid-card: UX POLISH card style + FINAL SIZE size overrides — need merge
+- [data-page="library"] .library-smart-shell: professional polish + responsive — need merge
+- Pointer-events block: unscoped, needs scoping to [data-page="library"]
+
+===== CANONICAL TARGET AFTER CONSOLIDATION =====
+One section:
+/* =========================================================
+   LIBRARY CANONICAL OPERATING SURFACE
+========================================================= */
+
+Expected outcome:
+- All Library rules in one scoped section
+- Zero duplicate Library selectors
+- All selectors prefixed [data-page="library"]
+- Historical sections removed

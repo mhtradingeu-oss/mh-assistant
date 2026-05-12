@@ -475,407 +475,14 @@ button,
   }
 }
 
-/* =========================================
-   Library Workspace UX Polish
-========================================= */
+/* =========================================================
+   LIBRARY CANONICAL OPERATING SURFACE
+   Single source of truth for all Library page visual rules.
+   Scoped to [data-page="library"] wherever possible.
+========================================================= */
 
-.library-workspace-grid {
-  display: grid;
-  grid-template-columns:
-    minmax(260px, 1fr)
-    minmax(340px, 420px);
+/* ── 1. Shell ─────────────────────────────────────────── */
 
-  gap: 18px;
-  align-items: start;
-}
-
-.library-workspace-main {
-  min-width: 0;
-}
-
-.library-workspace-side {
-  position: sticky;
-  top: 88px;
-}
-
-/* =========================================
-   Compact Finder Toolbar
-========================================= */
-
-.library-finder-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-
-  padding: 10px 12px;
-  margin-bottom: 12px;
-
-  border-radius: 16px;
-
-  background:
-    rgba(15, 23, 42, 0.48);
-
-  border:
-    1px solid rgba(148, 163, 184, 0.12);
-}
-
-.library-finder-toolbar .btn {
-  min-height: 38px;
-  padding: 0 14px;
-}
-
-/* =========================================
-   Compact Filter Ribbon
-========================================= */
-
-.library-filter-bar {
-  display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr))
-    minmax(240px, 1.2fr);
-
-  gap: 12px;
-
-  padding: 14px;
-  margin-bottom: 14px;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.72),
-      rgba(8, 16, 26, 0.84)
-    );
-
-  border:
-    1px solid rgba(148, 163, 184, 0.12);
-}
-
-.library-filter-field {
-  min-width: 0;
-}
-
-.library-filter-field .setup-label {
-  margin-bottom: 6px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.72;
-}
-
-/* =========================================
-   Upload Zone Modernization
-========================================= */
-
-.library-upload-grid {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    320px;
-
-  gap: 18px;
-  align-items: stretch;
-}
-
-.library-drop-zone {
-  min-height: 180px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 24px;
-
-  text-align: center;
-
-  border-radius: 24px;
-
-  border:
-    1px dashed rgba(45, 212, 191, 0.34);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.76),
-      rgba(8, 16, 26, 0.92)
-    );
-
-  transition:
-    border-color 180ms ease,
-    transform 180ms ease,
-    background 180ms ease;
-}
-
-.library-drop-zone:hover,
-.library-drop-zone.is-drag-active {
-  transform: translateY(-2px);
-
-  border-color:
-    rgba(45, 212, 191, 0.68);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(20, 32, 52, 0.92),
-      rgba(8, 16, 26, 0.98)
-    );
-}
-
-/* =========================================
-   Asset Grid Density
-========================================= */
-
-.library-grid-body {
-  gap: 14px;
-}
-
-.library-grid-item,
-.library-asset-card {
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.library-grid-preview {
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-}
-
-.library-grid-preview img,
-.library-grid-preview video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* =========================================
-   Preview Panel
-========================================= */
-
-.library-preview-card {
-  overflow: hidden;
-}
-
-#libraryPreviewVisual {
-  min-height: 260px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 18px;
-
-  background:
-    rgba(2, 6, 23, 0.72);
-
-  overflow: hidden;
-}
-
-.library-preview-image,
-.library-preview-video {
-  width: 100%;
-  max-height: 420px;
-  object-fit: contain;
-}
-
-/* =========================================
-   Mobile
-========================================= */
-
-@media (max-width: 1280px) {
-  .library-filter-bar {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .library-upload-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 980px) {
-  .library-workspace-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .library-workspace-side {
-    position: relative;
-    top: auto;
-  }
-
-  .library-filter-bar {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================================
-   Library Interaction + Density Fix
-========================================= */
-
-/* Native file input must stay functional but not visually duplicate Choose Files. */
-.library-file-input {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Ensure Library controls are clickable/editable. */
-.library-filter-bar,
-.library-filter-field,
-.library-filter-field *,
-.library-upload-grid,
-.library-upload-grid *,
-.library-drop-zone,
-.library-drop-zone *,
-.library-finder-toolbar,
-.library-finder-toolbar *,
-.library-folder-list,
-.library-folder-list *,
-.library-preview-actions,
-.library-preview-actions * {
-  pointer-events: auto !important;
-}
-
-/* Compact folder list instead of huge native-looking buttons. */
-.library-folder-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 8px;
-
-  width: 100%;
-}
-
-.library-folder-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-
-  min-height: 38px;
-  padding: 8px 10px;
-
-  border-radius: 12px;
-
-  color: var(--text-primary) !important;
-  background: rgba(15, 23, 42, 0.78) !important;
-  border: 1px solid rgba(148, 163, 184, 0.16) !important;
-
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 700;
-  text-align: left;
-
-  cursor: pointer;
-}
-
-.library-folder-item small {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-}
-
-.library-folder-item.is-active,
-.library-folder-item:hover {
-  border-color: rgba(45, 212, 191, 0.45) !important;
-  background: rgba(20, 184, 166, 0.16) !important;
-}
-
-/* Reduce oversized asset cards/previews. */
-.library-grid-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-}
-
-.library-grid-card,
-.library-grid-item,
-.library-asset-card {
-  min-height: auto !important;
-  max-height: none !important;
-}
-
-.library-grid-preview {
-  aspect-ratio: 4 / 3 !important;
-  max-height: 180px !important;
-  min-height: 120px !important;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: rgba(2, 6, 23, 0.62);
-}
-
-.library-grid-preview img,
-.library-grid-preview video,
-.library-grid-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: contain !important;
-}
-
-.library-grid-icon {
-  font-size: 1rem;
-  font-weight: 800;
-  opacity: 0.88;
-}
-
-/* Preview panel should not dominate the whole screen. */
-#libraryPreviewVisual {
-  min-height: 220px;
-  max-height: 440px;
-}
-
-.library-preview-image,
-.library-preview-video {
-  max-height: 390px;
-}
-
-/* Upload zone should be compact and not show duplicate browser input. */
-.library-drop-zone {
-  min-height: 150px;
-}
-
-.library-drop-zone .btn,
-[data-page="library"] #libraryChooseFilesBtn {
-  cursor: pointer;
-}
-
-/* Library upload buttons alignment. */
-.library-upload-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.library-upload-controls .setup-helper {
-  font-size: 0.78rem;
-  line-height: 1.45;
-}
-
-@media (max-width: 1280px) {
-  .library-folder-list {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  }
-
-  .library-grid-body {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  }
-}
-
-@media (max-width: 760px) {
-  .library-folder-list,
-  .library-grid-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Library professional polish - 20260510 */
 [data-page="library"] .library-smart-shell {
   display: grid;
   gap: 22px;
@@ -889,11 +496,25 @@ button,
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
 }
 
+/* ── 2. Overview / required cards ────────────────────── */
+
 [data-page="library"] .library-overview-grid,
 [data-page="library"] .library-required-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
+}
+
+/* ── 3. Upload area ───────────────────────────────────── */
+
+/* Native file input: hidden but functional — never remove. */
+.library-file-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 [data-page="library"] .library-upload-grid {
@@ -903,21 +524,138 @@ button,
   align-items: stretch;
 }
 
-[data-page="library"] .library-drop-zone {
-  min-height: 178px;
+[data-page="library"] .library-drop-zone,
+[data-page="library"] #libraryDropZone {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
   border-radius: 20px;
-  border: 1px dashed rgba(99, 102, 241, 0.45);
-  background:
-    radial-gradient(circle at top left, rgba(99, 102, 241, 0.12), transparent 34%),
-    rgba(248, 250, 252, 0.76);
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
+  color: #f8fafc;
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
 [data-page="library"] .library-drop-zone:hover,
-[data-page="library"] .library-drop-zone:focus {
-  border-color: rgba(79, 70, 229, 0.72);
-  box-shadow: 0 18px 42px rgba(79, 70, 229, 0.13);
-  transform: translateY(-1px);
+[data-page="library"] .library-drop-zone.is-drag-active,
+[data-page="library"] #libraryDropZone:hover,
+[data-page="library"] #libraryDropZone.is-drag-active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+[data-page="library"] #libraryChooseFilesBtn {
+  cursor: pointer;
+}
+
+[data-page="library"] #libraryUploadBtn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+[data-page="library"] #libraryDropInfo {
+  opacity: 0.82;
+  font-size: 12px;
+}
+
+[data-page="library"] .library-upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+[data-page="library"] .library-upload-controls .setup-helper {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+/* ── 4. Workspace layout ──────────────────────────────── */
+
+[data-page="library"] .library-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(340px, 420px);
+  gap: 18px;
+  align-items: start;
+}
+
+[data-page="library"] .library-workspace-grid.library-finder-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+}
+
+[data-page="library"] .library-workspace-main {
+  min-width: 0;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.96));
+  box-shadow: none;
+  color: var(--text-primary);
+}
+
+[data-page="library"] .library-workspace-side {
+  position: sticky;
+  top: 92px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.96));
+  box-shadow: none;
+  color: var(--text-primary);
+}
+
+/* ── 5. Folder list ───────────────────────────────────── */
+
+[data-page="library"] .library-folder-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+[data-page="library"] .library-folder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-page="library"] .library-folder-item small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+[data-page="library"] .library-folder-item:hover {
+  border-color: rgba(45, 212, 191, 0.45);
+  background: rgba(20, 184, 166, 0.16);
+}
+
+[data-page="library"] .library-folder-item.is-active {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #dbeafe;
+}
+
+/* ── 6. Toolbar ───────────────────────────────────────── */
+
+[data-page="library"] .library-operating-surface-head {
+  display: grid;
+  gap: 4px;
 }
 
 [data-page="library"] .library-action-toolbar {
@@ -933,38 +671,146 @@ button,
   border-radius: 999px;
 }
 
-[data-page="library"] .library-workspace-grid.library-finder-workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  gap: 18px;
-  align-items: start;
-}
-
-[data-page="library"] .library-workspace-main,
-[data-page="library"] .library-workspace-side {
-  border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.96));
-  box-shadow: none;
-  color: var(--text-primary);
-}
-
-[data-page="library"] .library-workspace-side {
-  position: sticky;
-  top: 92px;
-  max-height: calc(100vh - 120px);
-  overflow: auto;
-}
-
 [data-page="library"] .library-finder-topbar,
 [data-page="library"] .library-finder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+  padding: 10px 12px;
   border-radius: 18px;
+  background: rgba(15, 23, 42, 0.48);
+  border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
-[data-page="library"] .library-operating-surface-head {
+/* ── 7. Filter bar ────────────────────────────────────── */
+
+[data-page="library"] .library-filter-bar {
   display: grid;
-  gap: 4px;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr))
+    minmax(240px, 1.2fr);
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.72),
+      rgba(8, 16, 26, 0.84)
+    );
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+[data-page="library"] .library-filter-field {
+  min-width: 0;
+}
+
+[data-page="library"] .library-filter-field .setup-label {
+  margin-bottom: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+/* ── 8. Asset grid ────────────────────────────────────── */
+
+[data-page="library"] .library-grid-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+[data-page="library"] .library-grid-card,
+[data-page="library"] .library-grid-item,
+[data-page="library"] .library-asset-card {
+  min-height: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+[data-page="library"] .library-grid-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-1px);
+}
+
+[data-page="library"] .library-grid-card.is-active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.10);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.25),
+    0 10px 30px rgba(59, 130, 246, 0.15);
+}
+
+[data-page="library"] .library-grid-card.is-active .library-grid-title {
+  color: #93c5fd;
+}
+
+[data-page="library"] .library-grid-preview {
+  aspect-ratio: 4 / 3;
+  max-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.62);
+  overflow: hidden;
+}
+
+[data-page="library"] .library-grid-preview img,
+[data-page="library"] .library-grid-preview video,
+[data-page="library"] .library-grid-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+[data-page="library"] .library-grid-icon {
+  font-size: 1rem;
+  font-weight: 800;
+  opacity: 0.88;
+}
+
+[data-page="library"] .library-grid-title {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+[data-page="library"] .library-grid-meta {
+  font-size: 11px;
+}
+
+/* ── 9. Preview / inspector ───────────────────────────── */
+
+[data-page="library"] .library-preview-card {
+  overflow: hidden;
+}
+
+[data-page="library"] #libraryPreviewVisual {
+  min-height: 220px;
+  max-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.72);
+  overflow: hidden;
+}
+
+[data-page="library"] .library-preview-image,
+[data-page="library"] .library-preview-video {
+  width: 100%;
+  max-height: 390px;
+  object-fit: contain;
 }
 
 [data-page="library"] .library-side-stack {
@@ -1005,179 +851,7 @@ button,
   background: rgba(248, 250, 252, 0.7);
 }
 
-@media (max-width: 1180px) {
-  [data-page="library"] .library-upload-grid,
-  [data-page="library"] .library-workspace-grid.library-finder-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  [data-page="library"] .library-workspace-side {
-    position: static;
-    max-height: none;
-  }
-}
-
-@media (max-width: 720px) {
-  [data-page="library"] .library-smart-shell {
-    gap: 16px;
-  }
-
-  [data-page="library"] .library-action-toolbar {
-    justify-content: stretch;
-  }
-
-  [data-page="library"] .library-action-toolbar .btn,
-  [data-page="library"] .library-finder-toolbar .btn {
-    width: 100%;
-  }
-
-  [data-page="library"] .library-overview-grid,
-  [data-page="library"] .library-required-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================================================
-   LIBRARY UX POLISH
-   Safe visual improvements only
-========================================================= */
-
-[data-page="library"] .library-grid-card {
-  border: 1px solid rgba(255,255,255,0.08);
-  transition:
-    border-color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-  cursor: pointer;
-}
-
-[data-page="library"] .library-grid-card:hover {
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.03);
-  transform: translateY(-1px);
-}
-
-[data-page="library"] .library-grid-card.is-active {
-  border-color: #3b82f6;
-  background: rgba(59,130,246,0.10);
-  box-shadow:
-    0 0 0 1px rgba(59,130,246,0.25),
-    0 10px 30px rgba(59,130,246,0.15);
-}
-
-[data-page="library"] .library-grid-card.is-active .library-grid-title {
-  color: #93c5fd;
-}
-
-[data-page="library"] .library-folder-item.is-active {
-  background: rgba(59,130,246,0.14);
-  border-color: rgba(59,130,246,0.35);
-  color: #dbeafe;
-}
-
-[data-page="library"] #libraryDropZone {
-  border: 1px dashed rgba(255,255,255,0.16);
-  transition:
-    border-color 160ms ease,
-    background 160ms ease;
-}
-
-[data-page="library"] #libraryDropZone:hover,
-[data-page="library"] #libraryDropZone.is-drag-active {
-  border-color: #3b82f6;
-  background: rgba(59,130,246,0.08);
-}
-
-[data-page="library"] #libraryChooseFilesBtn {
-  cursor: pointer;
-}
-
-[data-page="library"] #libraryUploadBtn[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-[data-page="library"] #libraryDropInfo {
-  opacity: 0.82;
-  font-size: 12px;
-}
-
-
-/* =========================================================
-   LIBRARY DOCUMENT PREVIEW
-========================================================= */
-
-[data-page="library"] .library-document-preview {
-  display: grid;
-  gap: 12px;
-  justify-items: center;
-  text-align: center;
-}
-
-[data-page="library"] .library-document-preview-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-}
-
-/* =========================================================
-   LIBRARY UX FINAL SIZE + DARK UPLOAD FIX
-========================================================= */
-
-[data-page="library"] #libraryDropZone {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)) !important;
-  color: #f8fafc !important;
-  min-height: 132px !important;
-}
-
-[data-page="library"] .library-grid-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  gap: 12px !important;
-}
-
-[data-page="library"] .library-grid-card {
-  min-height: 0 !important;
-  padding: 10px !important;
-}
-
-[data-page="library"] .library-grid-preview {
-  aspect-ratio: 4 / 3 !important;
-  max-height: 150px !important;
-}
-
-[data-page="library"] .library-grid-title {
-  font-size: 13px !important;
-  line-height: 1.25 !important;
-}
-
-[data-page="library"] .library-grid-meta {
-  font-size: 11px !important;
-}
-
-[data-page="library"] .library-pdf-preview {
-  width: 100%;
-  height: min(520px, 62vh);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(2, 6, 23, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-[data-page="library"] .library-pdf-preview iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #ffffff;
-}
-
-
-/* =========================================================
-   LIBRARY OPERATING SURFACE PANELS
-   Scoped polish for Library Action Panel and AI Panel only.
-========================================================= */
+/* ── 10. Action Panel ─────────────────────────────────── */
 
 [data-page="library"] .library-action-panel,
 [data-page="library"] .library-ai-panel {
@@ -1254,6 +928,8 @@ button,
   justify-content: center;
 }
 
+/* ── 11. AI Panel ─────────────────────────────────────── */
+
 [data-page="library"] .library-ai-context-card {
   display: grid;
   gap: 5px;
@@ -1262,9 +938,117 @@ button,
   background: rgba(15, 23, 42, 0.045);
 }
 
+/* ── 12. Document preview ─────────────────────────────── */
+
+[data-page="library"] .library-document-preview {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+[data-page="library"] .library-document-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+[data-page="library"] .library-pdf-preview {
+  width: 100%;
+  height: min(520px, 62vh);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(2, 6, 23, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+[data-page="library"] .library-pdf-preview iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+}
+
+/* ── 13. Pointer event safety ─────────────────────────── */
+
+[data-page="library"] .library-filter-bar,
+[data-page="library"] .library-filter-field,
+[data-page="library"] .library-filter-field *,
+[data-page="library"] .library-upload-grid,
+[data-page="library"] .library-upload-grid *,
+[data-page="library"] .library-drop-zone,
+[data-page="library"] .library-drop-zone *,
+[data-page="library"] .library-finder-toolbar,
+[data-page="library"] .library-finder-toolbar *,
+[data-page="library"] .library-folder-list,
+[data-page="library"] .library-folder-list *,
+[data-page="library"] .library-preview-actions,
+[data-page="library"] .library-preview-actions * {
+  pointer-events: auto !important;
+}
+
+/* ── 14. Responsive behavior ──────────────────────────── */
+
+@media (max-width: 1280px) {
+  [data-page="library"] .library-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="library"] .library-folder-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  [data-page="library"] .library-upload-grid,
+  [data-page="library"] .library-workspace-grid,
+  [data-page="library"] .library-workspace-grid.library-finder-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="library"] .library-workspace-side {
+    position: static;
+    max-height: none;
+  }
+}
+
 @media (max-width: 1100px) {
   [data-page="library"] .library-panel-metrics,
   [data-page="library"] .library-panel-action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  [data-page="library"] .library-filter-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  [data-page="library"] .library-folder-list,
+  [data-page="library"] .library-grid-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  [data-page="library"] .library-smart-shell {
+    gap: 16px;
+  }
+
+  [data-page="library"] .library-action-toolbar {
+    justify-content: stretch;
+  }
+
+  [data-page="library"] .library-action-toolbar .btn,
+  [data-page="library"] .library-finder-toolbar .btn {
+    width: 100%;
+  }
+
+  [data-page="library"] .library-overview-grid,
+  [data-page="library"] .library-required-grid {
     grid-template-columns: 1fr;
   }
 }
