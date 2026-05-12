@@ -1745,11 +1745,11 @@ function bindLibraryWorkspace({
           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
 
         return `
-          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
+          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
             <div class="library-grid-preview">${previewNode}</div>
-            <div class="library-grid-title">${escapeHtml(asset.name)}</div>
+            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</div>
             <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
-            <div class="library-grid-meta">${escapeHtml(pathHint)}</div>
+            <div class="library-grid-meta library-grid-path" title="${escapeHtml(pathHint)}">${escapeHtml(pathHint)}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
@@ -1845,19 +1845,6 @@ function bindLibraryWorkspace({
             <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
           </div>
         </details>
-
-        <div class="library-preview-actions">
-          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
-          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
-          ${selectedAsset.kind === "managed_media"
-      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed")}</button>`
-      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
-          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
-          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
-          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
-        </div>
       `
       : `<div class="empty-box">Select an asset to view details.</div>`;
   }
@@ -1866,7 +1853,7 @@ function bindLibraryWorkspace({
   if (actionPanelMount) {
     actionPanelMount.innerHTML = renderLibraryActionPanel({
       selectedAsset,
-      disabled: true
+      disabled: false
     });
   }
 
@@ -1875,7 +1862,7 @@ function bindLibraryWorkspace({
     aiPanelMount.innerHTML = renderLibraryAiPanel({
       readiness: readinessSummary,
       selectedAsset,
-      disabled: true
+      disabled: false
     });
   }
 
@@ -2121,30 +2108,6 @@ viewToggleButtons.forEach((button) => {
   const toolbarUpload = $("libraryToolbarUploadBtn");
   if (toolbarUpload) {
     toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
-  }
-
-  const triggerToolbarAction = (selector, message) => {
-    const target = document.querySelector(selector);
-    if (!target) {
-      showError?.(message || "Select an asset first.");
-      return;
-    }
-    target.click();
-  };
-
-  const toolbarRename = $("libraryToolbarRenameBtn");
-  if (toolbarRename) {
-    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
-  }
-
-  const toolbarApprove = $("libraryToolbarApproveBtn");
-  if (toolbarApprove) {
-    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
-  }
-
-  const toolbarSource = $("libraryToolbarSourceBtn");
-  if (toolbarSource) {
-    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
   }
 
   const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
@@ -2836,15 +2799,22 @@ export const libraryRoute = {
           <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
         </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Asset Workspace</h3>
-            <span class="card-badge neutral">Finder Grid + Inspector</span>
+        <section class="card library-main-view-card">
+          <div class="card-head library-main-view-head">
+            <div>
+              <p class="eyebrow">Main View</p>
+              <h3>Asset Workspace</h3>
+              <p class="muted">Track current state, select the right asset, and run controlled actions from one canonical operating surface.</p>
+            </div>
+            <span class="card-badge neutral">Finder Grid + Side Panels</span>
           </div>
-          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+          <div id="libraryFinderWorkspace" class="library-workspace library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
             <div class="library-workspace-main">
               <div class="library-finder-topbar">
-                <div class="library-finder-sidebar-title"></div>
+                <div class="library-finder-sidebar-title">
+                  <p class="eyebrow">Asset folders</p>
+                  <span>Switch context without changing source-of-truth decisions.</span>
+                </div>
                 <div class="library-folder-list">
                   ${LIBRARY_FOLDERS.map((folder) => {
       const count = folderCounts.find((item) => item.key === folder.key)?.count || 0;
@@ -2860,13 +2830,16 @@ export const libraryRoute = {
               </div>
 
               <div class="library-finder-toolbar">
-                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
-                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
-                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
-                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+                <div class="library-toolbar-copy">
+                  <p class="eyebrow">Global actions</p>
+                  <span>Upload and navigate quickly. Selected-asset actions live in the Action Panel.</span>
+                </div>
+                <div class="library-toolbar-actions">
+                  <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
+                </div>
               </div>
 
-              <div class="library-filter-bar">
+              <div class="library-filter-bar" aria-label="Library filters">
                 <div class="library-filter-field">
                   <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
                   <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
@@ -2913,13 +2886,13 @@ export const libraryRoute = {
             <aside class="library-workspace-side">
               <div class="library-operating-surface-head">
                 <p class="eyebrow">Operating Surface</p>
-                <h3>Header + Main View + Action + AI</h3>
+                <h3>Selected Asset Command Center</h3>
               </div>
               <div class="library-side-stack">
                 <section class="card library-preview-card">
                   <div class="card-head">
                     <h3>Asset Detail</h3>
-                    <span class="card-badge neutral">Preview + Actions</span>
+                    <span class="card-badge neutral">Preview + Context</span>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
