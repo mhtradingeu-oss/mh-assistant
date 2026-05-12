@@ -1641,52 +1641,68 @@ export const integrationsRoute = {
 
     root.innerHTML = `
       <div class="integrations-wrapper integration-system-panel">
-        <section class="card integration-system-overview">
+        <section class="card integration-system-overview integration-system-overview--compact">
           <div class="card-head integration-system-overview-head">
             <div>
               <div class="setup-kicker">Integration Control Tower</div>
-              <h3>Connector workspace overview</h3>
-              <p class="home-section-copy" style="margin:6px 0 0;">Track launch-critical connectors, diagnose readiness impact, and operate integrations without leaving the standard page shell.</p>
+              <h3>Executive health</h3>
             </div>
             <span class="card-badge ${escapeHtml(attentionTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
           <div class="integration-system-overview-grid">
-            <div class="data-card integration-system-metric">
-              <span class="data-label">Total Integrations</span>
+            <div class="data-card integration-system-metric integration-system-metric--compact">
+              <span class="data-label">Total</span>
               <strong>${escapeHtml(String(overview.totalIntegrations))}</strong>
-              <span class="integration-system-metric-copy">All providers currently modeled in the control center.</span>
             </div>
-            <div class="data-card integration-system-metric">
-              <span class="data-label">Connected Integrations</span>
+            <div class="data-card integration-system-metric integration-system-metric--compact">
+              <span class="data-label">Connected</span>
               <strong>${escapeHtml(String(overview.connectedIntegrations))}</strong>
-              <span class="integration-system-metric-copy">Ready for sync, testing, or downstream workflows.</span>
             </div>
-            <div class="data-card integration-system-metric">
-              <span class="data-label">Missing Required</span>
+            <div class="data-card integration-system-metric integration-system-metric--compact">
+              <span class="data-label">Missing</span>
               <strong>${escapeHtml(String(overview.missingRequired))}</strong>
-              <span class="integration-system-metric-copy">Required launch connectors not yet fully connected.</span>
             </div>
-            <div class="data-card integration-system-metric">
-              <span class="data-label">Failed / Disconnected</span>
+            <div class="data-card integration-system-metric integration-system-metric--compact">
+              <span class="data-label">Failed</span>
               <strong>${escapeHtml(String(overview.failedOrDisconnected))}</strong>
-              <span class="integration-system-metric-copy">Connectors with missing or failed state across the full stack.</span>
             </div>
-          </div>
-          <div class="integration-system-summary-grid">
-            <div class="integration-system-summary-card">
-              <span class="data-label">Launch Readiness Impact</span>
-              <strong>${escapeHtml(overview.launchReadinessImpact)}</strong>
-              <span>System score: ${escapeHtml(String(systemScore))}% • Last global sync: ${escapeHtml(formatDateTime(lastGlobalSync))}</span>
-            </div>
-            <div class="integration-system-summary-card">
-              <span class="data-label">Next Recommended Action</span>
-              <strong>${escapeHtml(overview.nextRecommendedAction)}</strong>
-              <span>${escapeHtml(recommendations.recommendations[0]?.meta || "Review the highest-impact connector gap before the next campaign launch.")}</span>
+            <div class="data-card integration-system-metric integration-system-metric--compact">
+              <span class="data-label">Readiness</span>
+              <strong>${escapeHtml(String(systemScore))}%</strong>
             </div>
           </div>
         </section>
 
-        ${renderAISmartRecommendationModule(aiRec)}
+        ${aiRec.card ? `
+          <section class="card integration-system-next-action">
+            <div class="card-head integration-system-next-action-head">
+              <div>
+                <h3>Recommended next action</h3>
+              </div>
+              <span class="card-badge ${escapeHtml(aiRec.priorityTone)}">${escapeHtml(aiRec.priorityLabel)}</span>
+            </div>
+            <div class="integration-next-action-body">
+              <div class="integration-next-action-connector">
+                <div class="integration-next-action-connector-icon" data-integration-initials="${escapeHtml(aiRec.card.icon)}">${escapeHtml(aiRec.card.icon)}</div>
+                <div class="integration-next-action-connector-info">
+                  <strong>${escapeHtml(aiRec.card.label)}</strong>
+                  <span>${escapeHtml(aiRec.card.domainTitle)}</span>
+                </div>
+              </div>
+              <details class="integration-next-action-details">
+                <summary class="integration-next-action-summary">Why this connector first?</summary>
+                <div class="integration-next-action-why">
+                  <p>${escapeHtml(aiRec.card.whyItMatters)}</p>
+                  <p><strong>This enables:</strong> ${escapeHtml(aiRec.card.enables)}</p>
+                </div>
+              </details>
+              <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open setup</button>
+            </div>
+          </section>
+        ` : ""}
+        ${aiRec.card ? "" : renderAISmartRecommendationModule(aiRec)}
+
+
 
         <section class="integration-system-workspace">
           <div class="integration-system-workspace-main">

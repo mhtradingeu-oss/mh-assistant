@@ -86,6 +86,19 @@ export function renderDrawerProgress(card = {}) {
       `).join("")}
     </div>
   `;
+  return `
+    <div class="integration-drawer-progress">
+      ${steps.map((step, index) => `
+        <div class="integration-progress-step is-${esc(step.state)}">
+          <span class="integration-step-num">${index + 1}</span>
+          <div class="integration-step-body">
+            <strong>${esc(step.label)}</strong>
+            <span>${esc(step.meta)}</span>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function getDrawerPrimaryAction(card = {}) {
@@ -144,6 +157,16 @@ export function renderIntegrationActionButtons(card = {}) {
         ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
       </div>
       ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is recommended for this connector. Manual fields remain available as fallback.</div>` : ""}
+    </div>
+  `;
+  return `
+    <div class="integration-drawer-actions-flat">
+      <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
+      <div class="integration-drawer-secondary-actions">
+        <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test</button>
+        ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
+      </div>
+      ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth recommended. Manual fields available as fallback.</div>` : ""}
     </div>
   `;
 }
@@ -293,6 +316,34 @@ export function renderIntegrationDetailsPanel(
           <strong>Connection value</strong>
           <span>${esc(card.sourceValue || "Not set")}</span>
         </div>
+
+        <details class="integration-drawer-expandable">
+          <summary class="integration-drawer-expandable-summary">Why this connector matters</summary>
+          <div class="integration-drawer-expandable-content">
+            <p>${esc(card.whyItMatters)}</p>
+            <p><strong>Enables:</strong> ${esc(card.enables)}</p>
+          </div>
+        </details>
+      </div>
+      <div class="integration-hub-intro">
+        <div class="integration-hub-status-row">
+          <span class="integration-hub-status-label">Status</span>
+          <span>${esc(card.healthSummary)}</span>
+        </div>
+
+        ${asString(card.sourceValue).trim() ? `
+        <div class="integration-hub-status-row">
+          <span class="integration-hub-status-label">Value</span>
+          <span>${esc(card.sourceValue)}</span>
+        </div>` : ""}
+
+        <details class="integration-drawer-expandable">
+          <summary class="integration-drawer-expandable-summary">Why this matters</summary>
+          <div class="integration-drawer-expandable-content">
+            <p>${esc(card.whyItMatters)}</p>
+            <p><strong>Enables:</strong> ${esc(card.enables)}</p>
+          </div>
+        </details>
       </div>
 
       <div class="integration-drawer-requirements">
@@ -377,6 +428,24 @@ export function renderIntegrationDetailsPanel(
             : ""
         }
       </div>
+      <details class="integration-drawer-tech-details">
+        <summary class="integration-drawer-expandable-summary">Technical details</summary>
+        <div class="integration-drawer-expandable-content integration-drawer-tech-content">
+          <div class="data-stack">
+            <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
+            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+            <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
+          </div>
+          ${card.notes ? `<div class="integration-side-note">${esc(card.notes)}</div>` : ""}
+          ${
+            card.missingRequired.length
+              ? `<div class="integration-side-note">${esc(
+                  `Missing required: ${card.missingRequired.join(", ")}`
+                )}</div>`
+              : ""
+          }
+        </div>
+      </details>
     </section>
   `;
 }

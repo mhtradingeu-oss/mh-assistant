@@ -232,13 +232,14 @@ export function renderConnectorRow(card = {}, session = {}) {
     <article class="integration-control-row${isSelected ? " is-selected" : ""}">
       <div class="integration-control-row-main">
         <button class="integration-control-row-trigger" type="button" data-integration-select="${esc(card.id)}">
-          <span class="integration-control-row-icon">${esc(card.icon)}</span>
+          <span class="integration-control-row-icon" data-integration-initials="${esc(card.icon)}">${esc(card.icon)}</span>
           <span class="integration-control-row-copy">
             <span class="integration-control-row-topline">
               <strong>${esc(card.label)}</strong>
               <span class="card-badge ${esc(card.statusTone)}">${esc(statusLabel)}</span>
             </span>
             <span class="integration-control-row-meta">Sync health: ${esc(healthLabel)}</span>
+            <span class="integration-control-row-meta integration-control-row-health">${esc(healthLabel)}</span>
             <span class="integration-control-row-meta">Last sync: ${esc(formatCardDate(card.lastSync))}</span>
             <div class="integration-control-row-compact-meta">
               <span class="integration-control-meta-pill">Access: ${esc(requirementLabel || "Setup details in drawer")}</span>
@@ -250,6 +251,7 @@ export function renderConnectorRow(card = {}, session = {}) {
       <div class="integration-control-row-actions">
         ${actionButton}
         <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Setup drawer</button>
+        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Details</button>
         ${card.backendSupported === false
           ? ""
           : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>`}
