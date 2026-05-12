@@ -1,25 +1,29 @@
 export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
   const hasSelectedAsset = Boolean(selectedAsset);
+  const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
+  const selectedRegistryAssetId = escapePanelHtml(selectedAsset?.mutation_id || selectedAsset?.asset_id || "");
   const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
   const assetType = escapePanelHtml(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a");
   const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
   const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
+  const isManagedMedia = selectedAsset?.kind === "managed_media";
   const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
   const copyPathValue = escapePanelHtml(filePath);
   const selectedHint = hasSelectedAsset
-    ? "Review the asset context, then use the active inspector controls for durable changes."
-    : "Select an asset from the Library workspace to unlock contextual review guidance.";
+    ? "Selected asset commands are centralized here for faster, safer decisions."
+    : "Select an asset in the workspace to activate command actions.";
   const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
+  const durableDisabledAttr = disabled || !hasSelectedAsset || !selectedRegistryAssetId ? " disabled aria-disabled=\"true\"" : "";
 
   return `
     <section class="card library-action-panel" data-library-action-panel>
       <div class="card-head library-panel-head">
         <div>
-          <p class="eyebrow">Action Panel</p>
-          <h3>Library Operations</h3>
+          <p class="eyebrow">Asset Command</p>
+          <h3>Asset Decision Panel</h3>
         </div>
-        <span class="card-badge neutral">Context</span>
+        <span class="card-badge neutral">Selected Asset</span>
       </div>
 
       <div class="library-panel-hero">
@@ -43,18 +47,29 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Safe shortcut</p>
-        <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy asset path</button>
+        <p class="setup-helper">Primary actions</p>
+        <div class="library-panel-action-grid library-panel-actions-primary">
+          <button class="btn btn-primary" type="button" data-library-open="${selectedAssetId}"${disabledAttr}>Open</button>
+          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy Path</button>
+        </div>
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Durable actions stay in the active inspector for this pilot.</p>
-        <div class="library-panel-action-grid">
-          <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
-          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="approved"${disabledAttr}>Approve</button>
-          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="needs_review"${disabledAttr}>Needs review</button>
-          <button class="btn btn-secondary" type="button" data-library-command="archive-asset"${disabledAttr}>Archive</button>
+        <p class="setup-helper">Asset decisions</p>
+        <div class="library-panel-action-grid library-panel-actions-durable">
+          ${isManagedMedia
+      ? `<button class="btn btn-secondary" type="button" disabled aria-disabled="true">${escapePanelHtml(selectedAsset?.source_label || "Managed")}</button>`
+      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${selectedAssetId}"${disabledAttr}>${escapePanelHtml(getPanelSourceOfTruth(selectedAsset) ? "Unsource" : "Source")}</button>
+             <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve</button>
+             <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Review</button>`}
+          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename</button>
+          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive</button>
         </div>
+      </div>
+
+      <div class="library-panel-section library-panel-section-danger">
+        <p class="setup-helper">Destructive action</p>
+        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft Delete</button>
       </div>
     </section>
   `;

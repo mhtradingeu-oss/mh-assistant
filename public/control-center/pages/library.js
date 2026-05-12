@@ -1573,6 +1573,7 @@ function bindLibraryWorkspace({
       const tone = item.status === "present" ? "success" : item.status === "missing" ? "danger" : "warning";
       const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
       const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
+      const reasonHint = item.why.length > 120 ? `${item.why.slice(0, 117)}...` : item.why;
 
       return `
         <article class="library-required-card">
@@ -1580,11 +1581,11 @@ function bindLibraryWorkspace({
             <h4>${escapeHtml(item.label)}</h4>
             <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
           </div>
-          <p>${escapeHtml(item.why)}</p>
+          <p>${escapeHtml(reasonHint)}</p>
           <div class="library-required-card-foot">
-            <small>${escapeHtml(`Detected files: ${formatCount(item.totalCount)}`)}</small>
+            <small>${escapeHtml(`Detected: ${formatCount(item.totalCount)}`)}</small>
             <button
-              class="btn btn-secondary"
+              class="btn btn-secondary btn-sm"
               type="button"
               data-library-required-action="${escapeHtml(item.action)}"
               data-library-required-key="${escapeHtml(item.key)}"
@@ -1846,27 +1847,16 @@ function bindLibraryWorkspace({
           </div>
         </details>
 
-        <div class="library-preview-actions">
-          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
-          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
-          ${selectedAsset.kind === "managed_media"
-      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed")}</button>`
-      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
-          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
-          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Soft-delete this asset after confirmation">Soft Delete</button>
-          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Archive this asset after confirmation">Archive</button>`}
-        </div>
+        <div class="library-inspector-path">Selected-asset actions are consolidated in the Action Panel for a cleaner operating flow.</div>
       `
-      : `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
+      : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
   }
 
   const actionPanelMount = $("libraryActionPanelMount");
   if (actionPanelMount) {
     actionPanelMount.innerHTML = renderLibraryActionPanel({
       selectedAsset,
-      disabled: true
+      disabled: false
     });
   }
 
@@ -2121,30 +2111,6 @@ viewToggleButtons.forEach((button) => {
   const toolbarUpload = $("libraryToolbarUploadBtn");
   if (toolbarUpload) {
     toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
-  }
-
-  const triggerToolbarAction = (selector, message) => {
-    const target = document.querySelector(selector);
-    if (!target) {
-      showError?.(message || "Select an asset first.");
-      return;
-    }
-    target.click();
-  };
-
-  const toolbarRename = $("libraryToolbarRenameBtn");
-  if (toolbarRename) {
-    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
-  }
-
-  const toolbarApprove = $("libraryToolbarApproveBtn");
-  if (toolbarApprove) {
-    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
-  }
-
-  const toolbarSource = $("libraryToolbarSourceBtn");
-  if (toolbarSource) {
-    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
   }
 
   const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
@@ -2799,15 +2765,15 @@ export const libraryRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Required Assets / Readiness Gaps</h3>
-            <span class="card-badge warning">Action required where missing</span>
+            <h3>Required Assets</h3>
+            <span class="card-badge warning">Readiness gaps</span>
           </div>
           <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
         </section>
 
-        <section class="card">
+        <section class="card library-actions-card">
           <div class="card-head">
-            <h3>Asset Actions</h3>
+            <h3>Asset Decision Panel</h3>
             <div class="library-action-toolbar">
               <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
               <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
@@ -2829,7 +2795,7 @@ export const libraryRoute = {
                   <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
                 `).join("")}
               </select>
-              <div class="setup-helper">Upload, classify, and route into review and source-of-truth decisions.</div>
+              <div class="setup-helper">Primary upload action for Library intake and readiness flow.</div>
               <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
             </div>
           </div>
@@ -2839,7 +2805,7 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <h3>Asset Workspace</h3>
-            <span class="card-badge neutral">Finder Grid + Inspector</span>
+            <span class="card-badge neutral">Browser + Selected Asset Rail</span>
           </div>
           <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
             <div class="library-workspace-main">
@@ -2860,10 +2826,7 @@ export const libraryRoute = {
               </div>
 
               <div class="library-finder-toolbar">
-                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
-                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
-                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
-                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+                <button id="libraryToolbarUploadBtn" class="btn btn-secondary btn-sm" type="button">Quick Upload</button>
               </div>
 
               <div class="library-filter-bar">
@@ -2912,14 +2875,14 @@ export const libraryRoute = {
 
             <aside class="library-workspace-side">
               <div class="library-operating-surface-head">
-                <p class="eyebrow">Operating Surface</p>
-                <h3>Header + Main View + Action + AI</h3>
+                <p class="eyebrow">Asset Command</p>
+                <h3>Selected Asset</h3>
               </div>
               <div class="library-side-stack">
                 <section class="card library-preview-card">
                   <div class="card-head">
-                    <h3>Asset Detail</h3>
-                    <span class="card-badge neutral">Preview + Actions</span>
+                    <h3>Selected Asset</h3>
+                    <span class="card-badge neutral">Readiness Context</span>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>

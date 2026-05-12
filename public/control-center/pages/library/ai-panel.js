@@ -12,10 +12,10 @@ export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, dis
     <section class="card library-ai-panel" data-library-ai-panel>
       <div class="card-head library-panel-head">
         <div>
-          <p class="eyebrow">AI Panel</p>
-          <h3>Library AI Assistant</h3>
+          <p class="eyebrow">AI Guidance</p>
+          <h3>Next Best Action</h3>
         </div>
-        <span class="card-badge neutral">Read-only</span>
+        <span class="card-badge neutral">Readiness Context</span>
       </div>
 
       <div class="library-panel-hero">
@@ -35,18 +35,17 @@ export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, dis
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Current AI context</p>
+        <p class="setup-helper">Readiness Context</p>
         <div class="library-ai-context-card">
-          <span>Selected asset</span>
+          <span>Selected Asset</span>
           <strong>${selectedName}</strong>
         </div>
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">AI actions remain read-only in this pilot.</p>
+        <p class="setup-helper">Suggested next move</p>
         <div class="library-panel-action-grid">
-          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI about this asset</button>
-          <button class="btn btn-secondary" type="button" disabled aria-disabled="true">Review missing assets</button>
+          <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${disabledAttr}>Ask AI for next move</button>
         </div>
       </div>
     </section>
