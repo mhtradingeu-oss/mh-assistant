@@ -1049,7 +1049,7 @@ function canAttemptDocumentPreview(asset = {}) {
 
 function renderPreview(asset, escapeHtml) {
   if (!asset) {
-    return `<div class="empty-box">Select an asset to preview.</div>`;
+    return `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
   }
 
   const previewUrl = getAssetPreviewUrl(asset);
@@ -1757,7 +1757,7 @@ function bindLibraryWorkspace({
           </article>
         `;
       }).join("")
-      : `<div class="empty-box">No assets match this view. Adjust folder/filter/search.</div>`;
+      : `<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>`;
   }
 
   const gridPagination = $("libraryGridPagination");
@@ -1855,11 +1855,11 @@ function bindLibraryWorkspace({
           <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
           <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
           <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
-          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
-          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
+          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Soft-delete this asset after confirmation">Soft Delete</button>
+          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}" title="Archive this asset after confirmation">Archive</button>`}
         </div>
       `
-      : `<div class="empty-box">Select an asset to view details.</div>`;
+      : `<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>`;
   }
 
   const actionPanelMount = $("libraryActionPanelMount");
@@ -1892,7 +1892,7 @@ function bindLibraryWorkspace({
           `).join("")}
         </ul>
       `
-      : `<div class="empty-box">No recent uploaded or updated assets yet.</div>`;
+      : `<div class="empty-box">Recent uploads and updates will appear here after you add or refresh assets.</div>`;
   }
 
   const uploadSummary = $("libraryUploadSummary");
@@ -1908,7 +1908,7 @@ function bindLibraryWorkspace({
           `).join("")}
         </ul>
       `
-      : `<div class="empty-box">No uploads in this session yet.</div>`;
+      : `<div class="empty-box">No uploads in this session yet. Choose files and upload them to start building the asset library.</div>`;
   }
 
   const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
@@ -2264,7 +2264,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm("Archive this asset?")) {
+      if (!confirm(`Archive this asset?\n\nThis keeps the file registered but moves it out of active Library views.`)) {
         return;
       }
 
@@ -2339,7 +2339,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm("Soft-delete this asset? It will be archived in the registry.")) {
+      if (!confirm(`Soft-delete this asset?\n\nThis is a registry-level soft delete. The asset will be removed from active Library views.`)) {
         return;
       }
 
