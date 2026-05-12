@@ -3,60 +3,23 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
   const assetType = escapePanelHtml(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a");
   const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
-  const isSourceOfTruth = getPanelSourceOfTruth(selectedAsset);
-  const sourceLabel = isSourceOfTruth ? "Source of truth" : "Not source of truth";
+  const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
   const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
-  const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
-  const mutationAssetId = escapePanelHtml(selectedAsset?.mutation_id || selectedAsset?.asset_id || "");
   const copyPathValue = escapePanelHtml(filePath);
-  const openEnabled = Boolean(selectedAsset?.preview_url);
-  const statusTone = toStatusTone(selectedAsset?.status || "n/a");
   const selectedHint = hasSelectedAsset
-    ? "Run all selected-asset actions from this panel to keep operations consistent and safe."
-    : "Select an asset from the grid to unlock status, authority, and controlled action flows.";
+    ? "Review the asset context, then use the active inspector controls for durable changes."
+    : "Select an asset from the Library workspace to unlock contextual review guidance.";
   const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
-  const selectedAssetAttr = selectedAssetId || "";
-  const mutationAssetAttr = mutationAssetId || "";
-
-  if (!hasSelectedAsset) {
-    return `
-      <section class="card library-action-panel" data-library-action-panel>
-        <div class="card-head library-panel-head">
-          <div>
-            <p class="eyebrow">Action Panel</p>
-            <h3>Selected Asset Operations</h3>
-          </div>
-          <span class="card-badge neutral">Waiting for selection</span>
-        </div>
-
-        <div class="library-panel-hero is-empty">
-          <strong>No asset selected</strong>
-          <span>${escapePanelHtml(selectedHint)}</span>
-        </div>
-
-        <div class="library-panel-empty-list" role="list" aria-label="Action panel guidance">
-          <div class="library-panel-empty-item" role="listitem">1. Pick an asset card from the workspace grid.</div>
-          <div class="library-panel-empty-item" role="listitem">2. Review status and source-of-truth state here.</div>
-          <div class="library-panel-empty-item" role="listitem">3. Use safe actions before any destructive action.</div>
-        </div>
-      </section>
-    `;
-  }
-
-  const openButton = openEnabled
-    ? `<button class="btn btn-primary" type="button" data-library-open="${selectedAssetAttr}">Open asset</button>`
-    : `<button class="btn btn-primary" type="button" disabled aria-disabled="true">Open asset</button>`;
-  const sourceButtonLabel = escapePanelHtml(isSourceOfTruth ? "Unset source" : "Set source");
 
   return `
     <section class="card library-action-panel" data-library-action-panel>
       <div class="card-head library-panel-head">
         <div>
           <p class="eyebrow">Action Panel</p>
-          <h3>Selected Asset Operations</h3>
+          <h3>Library Operations</h3>
         </div>
-        <span class="card-badge ${statusTone}">${status}</span>
+        <span class="card-badge neutral">Context</span>
       </div>
 
       <div class="library-panel-hero">
@@ -80,22 +43,17 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
       </div>
 
       <div class="library-panel-section">
-        <p class="setup-helper">Safe actions</p>
-        <div class="library-panel-action-grid">
-          ${openButton}
-          <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy path</button>
-          <button class="btn btn-secondary" type="button" data-library-source-truth="${selectedAssetAttr}"${disabledAttr}>${sourceButtonLabel}</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetAttr}" data-asset-id="${mutationAssetAttr}"${disabledAttr}>Approve</button>
-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetAttr}" data-asset-id="${mutationAssetAttr}"${disabledAttr}>Needs review</button>
-          <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetAttr}" data-asset-id="${mutationAssetAttr}"${disabledAttr}>Rename</button>
-        </div>
+        <p class="setup-helper">Safe shortcut</p>
+        <button class="btn btn-secondary" type="button" data-copy-asset-path="${copyPathValue}"${copyDisabledAttr}>Copy asset path</button>
       </div>
 
-      <div class="library-panel-section library-panel-danger-zone">
-        <p class="setup-helper">Destructive actions</p>
+      <div class="library-panel-section">
+        <p class="setup-helper">Durable actions stay in the active inspector for this pilot.</p>
         <div class="library-panel-action-grid">
-          <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetAttr}" data-asset-id="${mutationAssetAttr}"${disabledAttr}>Archive</button>
-          <button class="btn btn-secondary" type="button" data-library-delete="${selectedAssetAttr}" data-asset-id="${mutationAssetAttr}"${disabledAttr}>Delete</button>
+          <button class="btn btn-secondary" type="button" data-library-command="set-source-of-truth"${disabledAttr}>Set source</button>
+          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="approved"${disabledAttr}>Approve</button>
+          <button class="btn btn-secondary" type="button" data-library-command="update-status" data-status="needs_review"${disabledAttr}>Needs review</button>
+          <button class="btn btn-secondary" type="button" data-library-command="archive-asset"${disabledAttr}>Archive</button>
         </div>
       </div>
     </section>
@@ -120,12 +78,4 @@ function toPanelStatusLabel(value = "") {
   return String(value || "n/a")
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function toStatusTone(value = "") {
-  const status = String(value || "").toLowerCase();
-  if (["approved", "ready", "publishing_ready", "live"].includes(status)) return "success";
-  if (["needs_review", "pending", "uploaded", "processing"].includes(status)) return "warning";
-  if (["archived", "rejected", "deleted", "failed"].includes(status)) return "danger";
-  return "neutral";
 }
