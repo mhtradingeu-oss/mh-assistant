@@ -961,16 +961,6 @@ function renderQueueCenter(context, state, projectName) {
     errorMessage: ""
   });
 
-  const hasQueueSnapshot =
-    asArray(queueCenter.items).length > 0 ||
-    asArray(queueCenter.queue_counts).length > 0 ||
-    asArray(asObject(queueCenter.filters).queue_types).length > 0 ||
-    asArray(asObject(queueCenter.filters).statuses).length > 0;
-
-  if (!session.errorMessage && projectName && context.fetchProjectQueueCenter && !hasQueueSnapshot) {
-    session.isLoading = true;
-  }
-
   let items = asArray(queueCenter.items).map((item, index) => ({
     ...item,
     _opsKey: getOpsItemKey(item, index, "queue")
@@ -1266,18 +1256,6 @@ function renderJobMonitor(context, state, projectName) {
     errorMessage: ""
   });
 
-  const hasJobSnapshot =
-    asArray(jobMonitor.items).length > 0 ||
-    asArray(jobMonitor.execution_logs).length > 0 ||
-    Number(jobMonitor.running_count || 0) > 0 ||
-    Number(jobMonitor.completed_count || 0) > 0 ||
-    Number(jobMonitor.failed_count || 0) > 0 ||
-    Boolean(asString(jobMonitor.health_state).trim());
-
-  if (!session.errorMessage && projectName && context.fetchProjectJobMonitor && !hasJobSnapshot) {
-    session.isLoading = true;
-  }
-
   let items = asArray(jobMonitor.items).map((item, index) => ({
     ...item,
     _opsKey: getOpsItemKey(item, index, "job")
@@ -1378,21 +1356,6 @@ function renderNotificationCenter(context, state, projectName) {
     isLoading: false,
     errorMessage: ""
   });
-
-  const hasNotificationSnapshot =
-    asArray(notificationCenter.notification_items).length > 0 ||
-    asArray(notificationCenter.sync_failure_alerts).length > 0 ||
-    asArray(notificationCenter.approval_pending_alerts).length > 0 ||
-    asArray(notificationCenter.publish_alerts).length > 0 ||
-    asArray(notificationCenter.provider_disconnect_alerts).length > 0 ||
-    asArray(notificationCenter.claim_risk_alerts).length > 0 ||
-    asArray(notificationCenter.workflow_completion_alerts).length > 0 ||
-    Number(notificationCenter.unread_count || 0) > 0 ||
-    Number(notificationCenter.critical_count || 0) > 0;
-
-  if (!session.errorMessage && projectName && context.fetchProjectNotificationCenter && !hasNotificationSnapshot) {
-    session.isLoading = true;
-  }
 
   const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
   const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
@@ -1746,15 +1709,30 @@ export const queueCenterRoute = {
 
     function doFetch() {
       if (!projectName || !context.fetchProjectQueueCenter) return;
+      const session = ensureSession(queueSessions, projectName, {
+        focus: "all",
+        status: "all",
+        search: "",
+        selectedKey: "",
+        isLoading: false,
+        errorMessage: ""
+      });
+      session.isLoading = true;
+      session.errorMessage = "";
+      renderQueueCenter(context, context.getState(), projectName);
       context.fetchProjectQueueCenter(projectName)
         .then((liveData) => {
+          session.isLoading = false;
           if (!liveData) return;
           const ops = asObject(context.getState().data.operations);
           ops.queue_center = liveData;
           renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
         })
         .catch((error) => {
-          context.showError?.(`Queue Center: ${error?.message || "Failed to load live data."}`);
+          session.isLoading = false;
+          session.errorMessage = `Queue Center: ${error?.message || "Failed to load live data."}`;
+          renderQueueCenter(context, context.getState(), projectName);
+          context.showError?.(session.errorMessage);
         });
     }
 
