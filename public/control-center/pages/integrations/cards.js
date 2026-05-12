@@ -165,6 +165,18 @@ function shortenText(value = "", max = 90) {
   return `${text.slice(0, max - 1).trimEnd()}...`;
 }
 
+function conciseSetupMethod(card = {}) {
+  if (card.backendSupported === false) {
+    return "Backend not configured";
+  }
+
+  if (card.quickConnectLabel || card.oauthSupported || card.authMode === "oauth") {
+    return "OAuth recommended";
+  }
+
+  return "Manual fields";
+}
+
 function getSetupMethodLabel(card = {}) {
   if (card.backendSupported === false) {
     return "Setup method: Backend support not configured";
@@ -207,9 +219,9 @@ export function renderConnectorRow(card = {}, session = {}) {
   const statusLabel = getConnectorStatusLabel(card, statusKey);
   const recommendedAction = getConnectorWorkspaceAction(card);
   const isSelected = asString(session.selectedIntegrationId) === card.id;
-  const healthLabel = shortenText(card.healthSummary, 88) || "No sync health detail available.";
-  const requirementLabel = shortenText(getRequirementLabel(card), 88);
-  const setupMethodLabel = getSetupMethodLabel(card);
+  const healthLabel = shortenText(card.healthSummary, 62) || "No sync health detail available.";
+  const requirementLabel = shortenText(getRequirementLabel(card), 72).replace(/^Access needed:\s*/i, "");
+  const setupMethodLabel = conciseSetupMethod(card);
   const actionButton =
     recommendedAction.action === "select"
       ? `<button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(recommendedAction.label)}</button>`
@@ -228,9 +240,10 @@ export function renderConnectorRow(card = {}, session = {}) {
             </span>
             <span class="integration-control-row-meta">Sync health: ${esc(healthLabel)}</span>
             <span class="integration-control-row-meta">Last sync: ${esc(formatCardDate(card.lastSync))}</span>
-            <span class="integration-control-row-meta">${esc(requirementLabel)}</span>
-            <span class="integration-control-row-meta">${esc(setupMethodLabel)}</span>
-            <span class="integration-control-row-meta">Recommended action: ${esc(recommendedAction.label)}</span>
+            <div class="integration-control-row-compact-meta">
+              <span class="integration-control-meta-pill">Access: ${esc(requirementLabel || "Setup details in drawer")}</span>
+              <span class="integration-control-meta-pill">Setup: ${esc(setupMethodLabel)}</span>
+            </div>
           </span>
         </button>
       </div>
@@ -371,13 +384,14 @@ export function renderIntegrationCard(card = {}, session = {}) {
 
 export function renderSelectedConnectorSummary(card = {}) {
   const smartLabel = getSmartConnectLabel(card);
+  const compactHealth = shortenText(card.healthSummary, 120) || "Use the setup drawer for connection validation and actions.";
 
   return `
     <section class="card integration-selected-summary">
       <div class="card-head">
         <div>
           <h3>Connector workspace</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure, test, sync, reconnect, or manage this connector.</p>
+          <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure fields and run connector actions.</p>
         </div>
         <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
       </div>
@@ -386,7 +400,7 @@ export function renderSelectedConnectorSummary(card = {}) {
           <div class="integration-hub-icon">${esc(card.icon)}</div>
           <div>
             <h4>${esc(card.label)}</h4>
-            <p>${esc(card.whyItMatters)}</p>
+            <p>${esc(compactHealth)}</p>
           </div>
         </div>
         <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(smartLabel)}</button>

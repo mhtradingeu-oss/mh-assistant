@@ -655,6 +655,10 @@ function ensureSession(projectName) {
       searchQuery: "",
       activeDrawerIntegrationId: "",
       drawerOpen: false,
+      drawerOriginIntegrationId: "",
+      drawerOriginScrollState: null,
+      restoreFocusIntegrationId: "",
+      restoreScrollState: null,
       validationIntegrationId: "",
       validationFieldKey: "",
       validationMessage: ""
@@ -663,18 +667,140 @@ function ensureSession(projectName) {
   return integrationSessions.get(key);
 }
 
+function isScrollableElement(element) {
+  if (!(element instanceof HTMLElement)) return false;
+
+  const style = window.getComputedStyle(element);
+  const overflowY = asString(style.overflowY).toLowerCase();
+  const allowsScroll = overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
+
+  return allowsScroll && element.scrollHeight > element.clientHeight + 2;
+}
+
+function findScrollableAncestor(start) {
+  if (!(start instanceof HTMLElement)) return null;
+
+  let node = start;
+  while (node && node !== document.body && node !== document.documentElement) {
+    if (isScrollableElement(node)) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
+function getIntegrationsScrollTarget() {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return { mode: "window", element: null };
+  }
+
+  const page = document.querySelector('[data-page="integrations"]');
+  const ancestorContainer = findScrollableAncestor(page);
+
+  if (ancestorContainer) {
+    return { mode: "element", element: ancestorContainer };
+  }
+
+  const scrollingElement = document.scrollingElement;
+  if (scrollingElement instanceof HTMLElement) {
+    return { mode: "element", element: scrollingElement };
+  }
+
+  return { mode: "window", element: null };
+}
+
+function captureIntegrationsScrollState() {
+  const target = getIntegrationsScrollTarget();
+
+  if (target.mode === "element" && target.element) {
+    return {
+      mode: "element",
+      top: Number(target.element.scrollTop || 0)
+    };
+  }
+
+  return {
+    mode: "window",
+    top: Number(window.scrollY || window.pageYOffset || 0)
+  };
+}
+
+function restoreIntegrationsScrollState(scrollState) {
+  if (!scrollState || typeof window === "undefined") return;
+
+  const safeTop = Math.max(0, Number(scrollState.top || 0));
+  const target = getIntegrationsScrollTarget();
+
+  if (scrollState.mode === "element" && target.mode === "element" && target.element) {
+    target.element.scrollTop = safeTop;
+    return;
+  }
+
+  if (target.mode === "element" && target.element instanceof HTMLElement) {
+    target.element.scrollTop = safeTop;
+    return;
+  }
+
+  window.scrollTo({ top: safeTop, behavior: "auto" });
+}
+
 function openIntegrationDrawer(session, integrationId) {
   session.selectedIntegrationId = integrationId || "";
   session.activeDrawerIntegrationId = integrationId || "";
   session.drawerOpen = Boolean(integrationId);
+  session.drawerOriginIntegrationId = integrationId || "";
+  session.drawerOriginScrollState = captureIntegrationsScrollState();
 }
 
 function closeIntegrationDrawer(session) {
+  const closedIntegrationId = session.activeDrawerIntegrationId || session.selectedIntegrationId || "";
+
   session.drawerOpen = false;
   session.activeDrawerIntegrationId = "";
+  session.selectedIntegrationId = closedIntegrationId || session.selectedIntegrationId;
+  session.restoreFocusIntegrationId = closedIntegrationId;
+  session.restoreScrollState = session.drawerOriginScrollState || captureIntegrationsScrollState();
+
   session.validationIntegrationId = "";
   session.validationFieldKey = "";
   session.validationMessage = "";
+}
+
+function restoreConnectorContext(session) {
+  if (session.drawerOpen || typeof window === "undefined" || typeof document === "undefined") {
+    return;
+  }
+
+  const targetIntegrationId = asString(session.restoreFocusIntegrationId || session.selectedIntegrationId);
+  const restoreState = session.restoreScrollState;
+
+  if (!targetIntegrationId && !restoreState) {
+    return;
+  }
+
+  session.restoreFocusIntegrationId = "";
+  session.restoreScrollState = null;
+
+  window.requestAnimationFrame(() => {
+    restoreIntegrationsScrollState(restoreState);
+
+    if (!targetIntegrationId) return;
+
+    const selector = `[data-integration-select="${targetIntegrationId}"]`;
+    const trigger = document.querySelector(selector);
+
+    if (trigger instanceof HTMLElement) {
+      trigger.focus({ preventScroll: true });
+      trigger.scrollIntoView({ block: "nearest", inline: "nearest" });
+
+      const row = trigger.closest(".integration-control-row");
+      if (row instanceof HTMLElement) {
+        row.classList.add("is-selected");
+      }
+    }
+  });
 }
 
 function setIntegrationValidation(session, integrationId, fieldKey, message) {
@@ -1176,8 +1302,9 @@ function bindIntegrationActions({
 
   Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
     button.onclick = () => {
+      const closedIntegration = getIntegrationById(session.activeDrawerIntegrationId || session.selectedIntegrationId);
       closeIntegrationDrawer(session);
-      showMessage?.("Setup drawer closed.");
+      showMessage?.(`Setup drawer closed for ${closedIntegration?.label || "connector"}.`);
       render();
     };
   });
@@ -1412,8 +1539,9 @@ function bindIntegrationActions({
     }
     integrationDrawerEscapeHandler = (event) => {
       if (event.key !== "Escape" || !session.drawerOpen) return;
+      const closedIntegration = getIntegrationById(session.activeDrawerIntegrationId || session.selectedIntegrationId);
       closeIntegrationDrawer(session);
-      showMessage?.("Setup drawer closed.");
+      showMessage?.(`Setup drawer closed for ${closedIntegration?.label || "connector"}.`);
       render();
     };
     document.addEventListener("keydown", integrationDrawerEscapeHandler);
@@ -1567,7 +1695,7 @@ export const integrationsRoute = {
                 <div>
                   <div class="setup-kicker">Required Launch Connectors</div>
                   <h3>Connector Workspace</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the setup drawer.</p>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search providers, and open setup quickly.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(filteredCards.length ? "neutral" : "warning")}">${escapeHtml(filteredCards.length ? `${filteredCards.length} visible` : "No matches")}</span>
               </div>
@@ -1615,7 +1743,7 @@ export const integrationsRoute = {
               <div class="card-head">
                 <div>
                   <h3>Diagnostics</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Review blockers, warnings, and the fixes required before campaign launch.</p>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Scan blockers, warnings, and required fixes before launch.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(diagnostics.blockers.length ? "danger" : diagnostics.warnings.length ? "warning" : "success")}">${escapeHtml(diagnostics.blockers.length ? "Blockers" : diagnostics.warnings.length ? "Warnings" : "Clear")}</span>
               </div>
@@ -1656,7 +1784,7 @@ export const integrationsRoute = {
           <div class="card-head">
             <div>
               <h3>Coverage priorities</h3>
-              <p class="home-section-copy" style="margin:6px 0 0;">Use category coverage, missing critical connectors, and next actions to close the remaining launch gaps.</p>
+              <p class="home-section-copy" style="margin:6px 0 0;">Use coverage, critical gaps, and next actions to close launch blockers.</p>
             </div>
             <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>
           </div>
@@ -1714,5 +1842,6 @@ export const integrationsRoute = {
     });
 
     focusDrawerField(session, drawerCard);
+    restoreConnectorContext(session);
   }
 };

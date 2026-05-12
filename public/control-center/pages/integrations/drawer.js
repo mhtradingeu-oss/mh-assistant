@@ -133,10 +133,18 @@ export function renderIntegrationActionButtons(card = {}) {
   const quickConnectLabel = getQuickConnectLabel(card);
 
   return `
-    <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
-    <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test Connection</button>
-    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
-    ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
+    <div class="integration-drawer-action-block integration-drawer-action-block--primary">
+      <div class="integration-mini-heading">Primary action</div>
+      <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
+    </div>
+    <div class="integration-drawer-action-block integration-drawer-action-block--secondary">
+      <div class="integration-mini-heading">Secondary actions</div>
+      <div class="integration-drawer-secondary-actions">
+        <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>
+        ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
+      </div>
+      ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is recommended for this connector. Manual fields remain available as fallback.</div>` : ""}
+    </div>
   `;
 }
 
@@ -306,7 +314,7 @@ export function renderIntegrationDetailsPanel(
 
       <div class="integration-hub-grid">
         <div>
-          <div class="integration-mini-heading">Required fields</div>
+          <div class="integration-mini-heading">Fields and validation</div>
 
           <div class="integration-field-grid">
             ${fields}
@@ -342,30 +350,32 @@ export function renderIntegrationDetailsPanel(
             Leave password fields blank to keep the current saved value.
           </div>
         </div>
-
-        <div class="integration-side-panel">
-          <div class="data-stack">
-            <div class="data-row"><span>Connection status</span><strong>${esc(card.statusLabel)}</strong></div>
-            <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
-            <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
-            <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
-            <div class="data-row"><span>Health</span><strong>${esc(card.healthSummary)}</strong></div>
-          </div>
-
-          <div class="integration-side-note">${esc(card.notes)}</div>
-
-          ${
-            card.missingRequired.length
-              ? `<div class="integration-side-note">${esc(
-                  `Missing required fields: ${card.missingRequired.join(", ")}`
-                )}</div>`
-              : ""
-          }
-        </div>
       </div>
 
       <div class="integration-action-row">
         ${renderIntegrationActionButtons(card)}
+      </div>
+
+      <div class="integration-side-panel integration-side-panel--drawer-details">
+        <div class="integration-mini-heading">Technical and status details</div>
+
+        <div class="data-stack">
+          <div class="data-row"><span>Connection status</span><strong>${esc(card.statusLabel)}</strong></div>
+          <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
+          <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
+          <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
+          <div class="data-row"><span>Health</span><strong>${esc(card.healthSummary)}</strong></div>
+        </div>
+
+        <div class="integration-side-note">${esc(card.notes)}</div>
+
+        ${
+          card.missingRequired.length
+            ? `<div class="integration-side-note">${esc(
+                `Missing required fields: ${card.missingRequired.join(", ")}`
+              )}</div>`
+            : ""
+        }
       </div>
     </section>
   `;
