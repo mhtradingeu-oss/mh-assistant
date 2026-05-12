@@ -1,0 +1,1961 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/authority-boundary/workflows-behavior-contract/
+
+===== LOG HEAD =====
+fdf81ef Add workflows runtime ownership audit
+c4dee6f Add publishing shadow compare contract
+736b0e9 Add publishing runtime ownership audit
+a6cf556 Add route role fallback closeout report
+02dde34 Centralize route role fallback authority
+96ec03f Add route role fallback authority audit
+c04b263 Add frontend consolidation audit baseline
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+cdadb61 Fix Task Center grid stretch layout
+
+===== ACTIVE ROUTE EXPORT / TEMPLATE =====
+1741:export const workflowsRoute = {
+1749:  template: `
+
+export const workflowsRoute = {
+  id: "workflows",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Workflows",
+    description: "Run structured, repeatable workflows for common marketing and execution operations."
+  },
+  template: `
+    <section class="page is-active" data-page="workflows">
+      <div id="workflowsRoot"></div>
+    </section>
+  `,
+    render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  }) {
+    const state = getState();
+    const projectName = asString(selectCurrentProject(state) || "");
+    const campaignName = asString(state.context.activeCampaign || "");
+    const executionMode = asString(state.context.executionMode || "");
+
+    const payload = asObject(selectProjectPayload(state));
+
+    const overview = asObject(payload.overview?.overview || payload.overview);
+    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+    const operations = asObject(selectOperationsSnapshot(state));
+
+    const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
+    const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
+
+    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+    const tasksTotal = Number(operations.tasks?.total || 0);
+    const approvalsTotal = Number(operations.approvals?.total || 0);
+
+    const root = $("workflowsRoot");
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="wfexec-shell">
+        <section class="wfexec-section wfexec-overview">
+          <div class="wfexec-head">
+            <h3>Workflow Overview</h3>
+            <span class="card-badge success">Ready</span>
+          </div>
+
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Current project</span>
+              <strong>${escapeHtml(projectName || "Not selected")}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Active campaign</span>
+              <strong>${escapeHtml(campaignName || "Not selected")}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Readiness</span>
+              <strong>${escapeHtml(readinessScore == null ? "Unknown" : `${readinessScore}/100`)}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Status</span>
+              <strong>${escapeHtml(readinessStatus)}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Execution mode</span>
+              <strong>${escapeHtml(executionMode || "Not set")}</strong>
+            </article>
+
+            <article class="wfexec-stat wfexec-stat-wide">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Workflow Builder</h3>
+          </div>
+
+          <div class="wfexec-field-grid">
+            <div>
+              <label class="wfexec-label" for="wfLightWorkflowType">Workflow type</label>
+              <select id="wfLightWorkflowType" class="wfexec-select">
+                ${WORKFLOW_CATALOG.map((workflow) => `
+                  <option value="${escapeHtml(workflow.id)}">${escapeHtml(workflow.title)}</option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightProject">Project</label>
+              <input id="wfLightProject" class="wfexec-input" type="text" value="${escapeHtml(projectName)}" placeholder="Current project">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightCampaign">Campaign</label>
+              <input id="wfLightCampaign" class="wfexec-input" type="text" value="${escapeHtml(campaignName)}" placeholder="Campaign name">
+            </div>
+
+            <div>
+              <label class="wfexec-label" for="wfLightGoal">Goal</label>
+              <input id="wfLightGoal" class="wfexec-input" type="text" placeholder="Workflow goal">
+            </div>
+          </div>
+
+          <div class="wfexec-action-row">
+            <button id="wfLightPrepareBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow</button>
+            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
+            <button id="wfLightCampaignBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Campaign Studio</button>
+            <button id="wfLightTasksBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Task Center</button>
+          </div>
+
+          <div id="wfLightStatus" class="wfexec-meta">
+            Workflows is ready. Prepare workflow inputs, send them to AI Workspace, or continue from Campaign Studio and Task Center.
+          </div>
+
+          <div class="wfexec-operating-strip" aria-label="Workflow execution context">
+            <div>
+              <span>Execution</span>
+              <strong>${escapeHtml(executionMode || "manual")}</strong>
+            </div>
+
+            <div>
+              <span>Workflow Runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </div>
+
+            <div>
+              <span>Runtime</span>
+              <strong>Execution ready</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="wfexec-section">
+          <div class="wfexec-head">
+            <h3>Current Operations State</h3>
+          </div>
+
+          <div class="wfexec-overview-grid">
+            <article class="wfexec-stat">
+              <span>Workflow runs</span>
+              <strong>${escapeHtml(String(workflowsTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Tasks</span>
+              <strong>${escapeHtml(String(tasksTotal))}</strong>
+            </article>
+
+            <article class="wfexec-stat">
+              <span>Approvals</span>
+              <strong>${escapeHtml(String(approvalsTotal))}</strong>
+            </article>
+          </div>
+        </section>
+      </div>
+    `;
+
+    const status = $("wfLightStatus");
+
+    const prepareBtn = $("wfLightPrepareBtn");
+    if (prepareBtn) {
+      prepareBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Workflow: ${workflow.title}`,
+          `Project: ${$("wfLightProject")?.value || projectName || "not set"}`,
+          `Campaign: ${$("wfLightCampaign")?.value || campaignName || "not set"}`,
+          `Goal: ${goal || "Prepare an execution-ready workflow plan."}`,
+          `Purpose: ${workflow.purpose}`
+        ].join("\\n");
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        if (status) {
+          status.textContent = "Workflow prompt prepared in the global AI bar. Review it before running or routing it to AI Command.";
+        }
+
+        showMessage?.("Workflow prepared.");
+      };
+    }
+
+    const aiBtn = $("wfLightAiBtn");
+    if (aiBtn) {
+      aiBtn.onclick = () => {
+        const workflowId = $("wfLightWorkflowType")?.value || WORKFLOW_CATALOG[0].id;
+        const workflow = getWorkflowDef(workflowId);
+        const goal = asString($("wfLightGoal")?.value || "").trim();
+
+        const prompt = [
+          `Build a workflow execution package.`,
+          `Workflow: ${workflow.title}`,
+          `Project: ${projectName || "not set"}`,
+          `Campaign: ${campaignName || "not set"}`,
+          `Goal: ${goal || workflow.purpose}`
+        ].join("\\n");
+
+        setSharedAiDraft(projectName, {
+          projectName,
+          modeId: workflow.aiModeId,
+          lastCommand: prompt,
+          lastResponseTitle: workflow.title,
+          routeSuggestions: [
+            {
+              label: "Workflows",
+              route: "workflows",
+              reason: "Return to workflows after AI refinement."
+            }
+          ],
+          updatedAt: nowIso()
+        });
+
+        const globalInput = $("quickCommandInput");
+        if (globalInput) {
+          globalInput.value = prompt;
+        }
+
+        navigateTo("ai-command");
+      };
+    }
+
+    const campaignBtn = $("wfLightCampaignBtn");
+    if (campaignBtn) {
+      campaignBtn.onclick = () => navigateTo("campaign-studio");
+    }
+
+    const tasksBtn = $("wfLightTasksBtn");
+    if (tasksBtn) {
+      tasksBtn.onclick = () => navigateTo("task-center");
+    }
+  }
+};
+
+===== LEGACY EXECUTION LOOP MARKERS =====
+108:let workflowBridgeRegistered = false;
+109:let workflowAutoModeUnsubscribe = null;
+110:let workflowAutomationEnabled = false;
+111:const workflowAutomationState = {
+699:      <div id="workflowAutomationProgress" class="wfexec-meta">
+700:        ${esc(workflowAutomationState.progress || "")}
+703:      <div id="workflowAutomationResult" class="wfexec-meta">
+704:        ${esc(workflowAutomationState.result || "")}
+716:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+719:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+722:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+725:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+750:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+753:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+893:function renderWorkflowExecutionLoop({
+1107:function registerWorkflowBridge(context) {
+1109:  if (workflowBridgeRegistered || typeof window === "undefined") return;
+1196:  workflowBridgeRegistered = true;
+1199:function bindWorkflowExecutionLoop({
+1214:  if (workflowAutomationEnabled) {
+1216:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1217:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1624:        workflowAutomationState.result = "No safe automation steps available.";
+1631:      workflowAutomationState.lastPlan = plan;
+1632:      workflowAutomationState.cursor = 0;
+1633:      workflowAutomationState.result = "";
+1637:          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+1641:      workflowAutomationState.lastResults = asArray(result.results);
+1642:      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+1643:      showMessage?.(workflowAutomationState.result);
+1653:        workflowAutomationState.result = "No safe automation steps available.";
+1661:      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+1666:          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+1670:      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+1671:      workflowAutomationState.lastPlan = plan;
+1672:      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+1673:      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+1676:      showMessage?.(workflowAutomationState.result);
+1681:  const autoStartBtn = $("workflowAutoStartBtn");
+1685:      workflowAutomationEnabled = true;
+1687:      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1688:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1700:  const autoPauseBtn = $("workflowAutoPauseBtn");
+1708:  const autoResumeBtn = $("workflowAutoResumeBtn");
+1716:  const autoStopBtn = $("workflowAutoStopBtn");
+1724:  const autoApproveBtn = $("workflowAutoApproveBtn");
+1732:  const autoSkipBtn = $("workflowAutoSkipBtn");
+
+===== LEGACY EXECUTION LOOP RANGES =====
+                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+              </div>
+              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last run ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
+            </article>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {
+  const output = asObject(run.output);
+  if (!output.summary) {
+    return `
+      <section class="wfexec-section">
+        <div class="wfexec-head"><h3>Execution Status / Result</h3></div>
+        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="wfexec-section">
+      <div class="wfexec-head">
+        <h3>Execution Status / Result</h3>
+        <span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>
+      </div>
+      <div class="wfexec-result-summary">${escapeHtml(output.summary)}</div>
+      ${blockedRequirements.length ? `
+        <div class="wfexec-blockers">
+          <strong>Blocked requirements</strong>
+          <ul>${blockedRequirements.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      ` : ""}
+      <div class="wfexec-result-list">
+        <div>
+          <span>Next actions</span>
+          <ul>${asArray(output.nextActions).map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("") || "<li>No next action list</li>"}</ul>
+        </div>
+      </div>
+      <div class="wfexec-action-row">
+        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
+        <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
+        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+        <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
+        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
+      </div>
+      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+    </section>
+  `;
+}
+
+function renderWorkflowExecutionLoop({
+  metrics,
+  context,
+  recommendation,
+  automationPlan,
+  autoFixPlan,
+  session,
+  workflow,
+  inputs,
+  run,
+  blockedRequirements,
+  escapeHtml
+}) {
+  return `
+    <div class="wfexec-shell">
+      ${renderOverviewSection(metrics, context, escapeHtml)}
+      <div class="wfexec-grid">
+        <div class="wfexec-left">
+          ${renderRecommendationSection(recommendation, escapeHtml)}
+          ${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}
+          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+        </div>
+        <div class="wfexec-right">
+          ${renderCatalogSection(session, context, escapeHtml)}
+          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+  const handoff = getSharedHandoff(projectName, "workflows", operations);
+  const handoffId = asString(handoff?.id);
+  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+
+  const payload = asObject(handoff?.payload);
+  const fromWorkflowId = asString(payload.workflow_id);
+  const modeId = asString(payload?.draft_context?.modeId);
+  const modeMapped = WORKFLOW_CATALOG.find((item) => item.aiModeId === modeId)?.id;
+  const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;
+
+  session.selectedWorkflowId = workflowId;
+  session.inputsByWorkflow[workflowId] = {
+    ...session.inputsByWorkflow[workflowId],
+    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+  };
+
+  if (payload.output) {
+    const run = session.runsByWorkflow[workflowId];
+    run.output = asObject(payload.output);
+    run.status = "completed";
+    run.lastRunAt = nowIso();
+    run.source = "handoff";
+    run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });
+    run.history = run.history.slice(0, 8);
+  }
+
+  session.lastAppliedHandoffId = handoffId;
+  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+    console.warn("Failed to consume workflow handoff:", error.message);
+  });
+  showMessage?.("Workflow context restored from shared handoff.");
+}
+
+async function ensureWorkflowIntelligenceLoaded({
+  projectName,
+  session,
+  getState,
+  reloadProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  rerender
+}) {
+  if (!projectName) {
+    session.intelligence = { ...session.intelligence, status: "error", error: "Select a project to run workflows." };
+    return;
+  }
+
+  const current = session.intelligence;
+  const freshEnough =
+    current.status === "ready" &&
+    current.project === projectName &&
+    current.loadedAt &&
+    (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+
+  if (freshEnough) return;
+  if (current.loadingPromise) return current.loadingPromise;
+
+  const state = getState();
+  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+
+  session.intelligence = {
+    ...current,
+    project: projectName,
+    status: "loading",
+    error: "",
+    loadingPromise: (async () => {
+      try {
+        if (needsDashboard) await reloadProjectData(projectName);
+        const [insightsResult, learningResult] = await Promise.allSettled([
+          fetchProjectInsights(projectName),
+          fetchProjectLearning(projectName)
+        ]);
+
+        session.intelligence = {
+          project: projectName,
+          status: "ready",
+          dashboard: getState().data,
+          insights: insightsResult.status === "fulfilled" ? insightsResult.value : null,
+          learning: learningResult.status === "fulfilled" ? learningResult.value : null,
+          error: insightsResult.status === "rejected" && learningResult.status === "rejected"
+            ? (insightsResult.reason?.message || learningResult.reason?.message || "Failed to load workflow intelligence")
+            : "",
+          loadedAt: nowIso(),
+          loadingPromise: null
+        };
+      } catch (error) {
+        session.intelligence = {
+          ...session.intelligence,
+          project: projectName,
+          status: "error",
+          error: error.message || "Failed to load workflow intelligence",
+          loadingPromise: null
+        };
+      } finally {
+        rerender();
+      }
+    })()
+  };
+
+  rerender();
+  return session.intelligence.loadingPromise;
+}
+
+function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
+  if (runOutput?.summary) {
+    return [
+      `Refine the ${workflow.title.toLowerCase()} execution package.`,
+      `Project: ${inputs.project || context.projectName || "not set"}`,
+      `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+      `Summary: ${runOutput.summary}`,
+      `Next actions: ${asArray(runOutput.nextActions).join("; ")}`
+    ].join("\n");
+  }
+  return [
+    `Build a ${workflow.title.toLowerCase()} execution package.`,
+    `Project: ${inputs.project || context.projectName || "not set"}`,
+    `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
+    `Product: ${inputs.product || "not set"}`,
+    `Channel: ${inputs.channel || "not set"}`,
+    `Goal: ${inputs.goal || "not set"}`,
+    context.missingIntegrations.length ? `Missing integrations: ${context.missingIntegrations.join(", ")}` : "Missing integrations: none",
+    context.missingAssets.length ? `Missing assets: ${context.missingAssets.join(", ")}` : "Missing assets: none"
+  ].join("\n");
+}
+
+function pushWorkflowToAiCommand({
+  projectName,
+  workflow,
+  inputs,
+  run,
+  context,
+  navigateTo,
+  createProjectHandoff,
+  showMessage,
+  allowPersistent
+}) {
+  const prompt = buildAiHandoffPrompt(workflow, inputs, run.output, context);
+  const aiDraft = {
+    projectName,
+    modeId: workflow.aiModeId,
+    lastCommand: prompt,
+    lastResponseTitle: asString(run.output?.title || workflow.title),
+    routeSuggestions: asArray(run.output?.routeSuggestions)
+  };
+
+  setSharedAiDraft(projectName, aiDraft);
+
+  const handoff = {
+    source_page: "workflows",
+    destination_page: "ai-command",
+    payload: {
+      prompt,
+      workflow_id: workflow.id,
+      workflow_title: workflow.title,
+      draft_context: aiDraft,
+      output: asObject(run.output)
+    },
+    status: "available"
+  };
+
+  setSharedHandoff(projectName, "ai-command", handoff);
+
+  if (allowPersistent && typeof createProjectHandoff === "function") {
+    createProjectHandoff(projectName, handoff).catch((error) => {
+      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+    });
+  }
+
+  navigateTo("ai-command");
+  showMessage?.(allowPersistent ? "Workflow context sent to AI Command." : "Workflow context sent locally to AI Command.");
+}
+
+function validateWorkflowInputs(workflow, inputs) {
+  const missing = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+  if (!missing.length) return "";
+  return `Please complete: ${missing.map(titleCase).join(", ")}.`;
+}
+
+function registerWorkflowBridge(context) {
+  lastWorkflowRenderContext = context;
+  if (workflowBridgeRegistered || typeof window === "undefined") return;
+
+  window.addEventListener("mh:submit-workflow", async (event) => {
+    if (!lastWorkflowRenderContext) return;
+
+    const detail = asObject(event?.detail);
+    const message = asString(detail.message);
+    const meta = asObject(detail.meta);
+
+    const {
+      getState,
+      reloadProjectData,
+      fetchProjectInsights,
+      fetchProjectLearning,
+      runProjectWorkflow,
+      runProjectAiWorkflow,
+      render,
+      showMessage,
+      showError
+    } = lastWorkflowRenderContext;
+
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+    const workflow = WORKFLOW_CATALOG.find((item) => item.aiModeId === asString(meta.modeId)) || WORKFLOW_CATALOG[0];
+
+    session.selectedWorkflowId = workflow.id;
+    session.inputsByWorkflow[workflow.id] = {
+      ...session.inputsByWorkflow[workflow.id],
+      project: firstNonEmpty(projectName, session.inputsByWorkflow[workflow.id].project),
+      goal: firstNonEmpty(meta.assistantTitle, session.inputsByWorkflow[workflow.id].goal),
+      campaign: firstNonEmpty(session.inputsByWorkflow[workflow.id].campaign, state.context.activeCampaign),
+      product: firstNonEmpty(session.inputsByWorkflow[workflow.id].product, state.context.currentProject)
+    };
+
+    if (!meta.autoRun) {
+      session.draftStatus = "AI prompt imported into workflow builder";
+      render();
+      return;
+    }
+
+    const run = session.runsByWorkflow[workflow.id];
+    run.status = "running";
+    render();
+
+    try {
+      await ensureWorkflowIntelligenceLoaded({
+        projectName,
+        session,
+        getState,
+        reloadProjectData,
+        fetchProjectInsights,
+        fetchProjectLearning,
+        rerender: render
+      });
+      const contextModel = buildWorkflowContext(getState(), session);
+      const createdAt = nowIso();
+      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
+        title: workflow.title,
+        status: "completed",
+        source: meta.source || "external-trigger",
+        inputs: session.inputsByWorkflow[workflow.id],
+        prompt: firstNonEmpty(message, buildWorkflowPrompt(workflow, session.inputsByWorkflow[workflow.id], contextModel)),
+        intelligence_stamp: {
+          refreshed_at: createdAt,
+          source: "workflow-auto-run"
+        }
+      });
+      const output = asObject(result?.output || result?.run?.output) || buildFallbackOutput(workflow, session.inputsByWorkflow[workflow.id], contextModel);
+      run.status = "completed";
+      run.lastRunAt = asString(result?.run?.created_at) || createdAt;
+      run.runId = asString(result?.run?.id);
+      run.source = meta.source || "external-trigger";
+      run.output = output;
+      run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);
+      run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output });
+      run.history = run.history.slice(0, 8);
+      await reloadProjectData?.(projectName);
+      showMessage?.(`${workflow.title} created from AI context.`);
+    } catch (error) {
+      run.status = "failed";
+      showError?.(error.message || "Workflow execution failed.");
+    }
+
+    render();
+  });
+
+  workflowBridgeRegistered = true;
+}
+
+function bindWorkflowExecutionLoop({
+  $,
+  getState,
+  navigateTo,
+  showMessage,
+  showError,
+  reloadProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectHandoff,
+  render
+}) {
+  if (workflowAutomationEnabled) {
+    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+      render();
+    });
+  }
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+  const workflow = getWorkflowDef(session.selectedWorkflowId);
+  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+  const run = session.runsByWorkflow[workflow.id];
+  const contextModel = buildWorkflowContext(state, session);
+  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+  const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);
+
+  function setValidation(message) {
+    session.validationMessage = message || "";
+    const box = $("wfexecValidation");
+    if (!box) return;
+
+      run.runId = asString(result?.run?.id);
+      run.source = meta.source || "external-trigger";
+      run.output = output;
+      run.blockedRequirements = asArray(output.blockedRequirements || output.blocked_requirements);
+      run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output });
+      run.history = run.history.slice(0, 8);
+      await reloadProjectData?.(projectName);
+      showMessage?.(`${workflow.title} created from AI context.`);
+    } catch (error) {
+      run.status = "failed";
+      showError?.(error.message || "Workflow execution failed.");
+    }
+
+    render();
+  });
+
+  workflowBridgeRegistered = true;
+}
+
+function bindWorkflowExecutionLoop({
+  $,
+  getState,
+  navigateTo,
+  showMessage,
+  showError,
+  reloadProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectHandoff,
+  render
+}) {
+  if (workflowAutomationEnabled) {
+    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+      render();
+    });
+  }
+
+  const state = getState();
+  const projectName = state.context.currentProject || "";
+  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+  const workflow = getWorkflowDef(session.selectedWorkflowId);
+  const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+  const run = session.runsByWorkflow[workflow.id];
+  const contextModel = buildWorkflowContext(state, session);
+  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+  const hasDirectAiState = Boolean(aiDraft.lastCommand || aiDraft.lastResponseTitle || aiDraft.modeId);
+
+  function setValidation(message) {
+    session.validationMessage = message || "";
+    const box = $("wfexecValidation");
+    if (!box) return;
+    box.textContent = session.validationMessage;
+    box.classList.toggle("is-visible", Boolean(session.validationMessage));
+  }
+
+  function syncInputField(field, value) {
+    session.inputsByWorkflow[session.selectedWorkflowId][field] = value;
+    persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft auto-saved", true);
+  }
+
+  Array.from(document.querySelectorAll("[data-wf-input]")).forEach((input) => {
+    input.oninput = () => {
+      const field = input.getAttribute("data-wf-input") || "";
+      if (!field) return;
+      syncInputField(field, input.value || "");
+      if (session.validationMessage) setValidation("");
+    };
+  });
+
+  const workflowTypeSelect = $("wfexecWorkflowType");
+  if (workflowTypeSelect) {
+    workflowTypeSelect.onchange = () => {
+      session.selectedWorkflowId = workflowTypeSelect.value || session.selectedWorkflowId;
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Workflow switched", true);
+      session.validationMessage = "";
+      render();
+    };
+  }
+
+  const saveDraftBtn = $("wfexecSaveDraftBtn");
+  if (saveDraftBtn) {
+    saveDraftBtn.onclick = () => {
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft saved", true);
+      showMessage?.("Workflow draft saved.");
+      render();
+    };
+  }
+
+  const clearDraftBtn = $("wfexecClearDraftBtn");
+  if (clearDraftBtn) {
+    clearDraftBtn.onclick = () => {
+      const defaults = createDefaultInputs(getState());
+      session.inputsByWorkflow[session.selectedWorkflowId] = { ...defaults };
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Draft cleared", true);
+      session.validationMessage = "";
+      showMessage?.("Workflow draft cleared.");
+      render();
+    };
+  }
+
+  const loadAiStateBtn = $("wfexecLoadAiStateBtn");
+  if (loadAiStateBtn) {
+    loadAiStateBtn.onclick = () => {
+      const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));
+      if (!Object.keys(draft).length) {
+        const safePrompt = `Create a workflow for ${projectName || "this project"} focused on ${inputs.goal || "operational improvement"}.`;
+        setSharedHandoff(projectName, "workflows", {
+          source_page: "workflows",
+          destination_page: "workflows",
+          payload: {
+            prompt: safePrompt,
+            draft_context: {
+              projectName,
+              modeId: workflow.aiModeId,
+              lastCommand: safePrompt,
+              lastResponseTitle: "Workflow seed"
+            }
+          },
+          status: "available"
+        });
+        session.inputsByWorkflow[session.selectedWorkflowId].goal = firstNonEmpty(inputs.goal, "Execution loop optimization");
+        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+        showMessage?.("No AI state found. Local workflow seed created safely.");
+        render();
+        return;
+      }
+
+      session.inputsByWorkflow[session.selectedWorkflowId] = {
+        ...session.inputsByWorkflow[session.selectedWorkflowId],
+        project: firstNonEmpty(draft.projectName, session.inputsByWorkflow[session.selectedWorkflowId].project),
+        goal: firstNonEmpty(draft.lastResponseTitle, session.inputsByWorkflow[session.selectedWorkflowId].goal),
+        campaign: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].campaign, state.context.activeCampaign),
+        product: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].product, state.context.currentProject),
+        channel: firstNonEmpty(session.inputsByWorkflow[session.selectedWorkflowId].channel, "multi-channel")
+      };
+      persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "AI state loaded", true);
+      showMessage?.("AI Command state loaded into workflow inputs.");
+      render();
+    };
+  }
+
+  async function runWorkflow(workflowId) {
+    const activeWorkflow = getWorkflowDef(workflowId || session.selectedWorkflowId);
+    session.selectedWorkflowId = activeWorkflow.id;
+
+    const activeInputs = asObject(session.inputsByWorkflow[activeWorkflow.id]);
+    const validationMessage = validateWorkflowInputs(activeWorkflow, activeInputs);
+    if (validationMessage) {
+      setValidation(validationMessage);
+      const firstMissing = activeWorkflow.requiredInputs.find((field) => !asString(activeInputs[field]).trim());
+      const target = $(`wfexecInput${titleCase(firstMissing)}`);
+      if (target) target.focus();
+      return;
+    }
+
+    if (!projectName) {
+      setValidation("Select a project before running a workflow.");
+      return;
+    }
+
+    setValidation("");
+    const activeRun = session.runsByWorkflow[activeWorkflow.id];
+    activeRun.status = "running";
+    activeRun.source = "manual-run";
+    render();
+
+    try {
+      await ensureWorkflowIntelligenceLoaded({
+        projectName,
+        session,
+        getState,
+        reloadProjectData,
+        fetchProjectInsights,
+        fetchProjectLearning,
+        rerender: render
+      });
+
+      const freshContext = buildWorkflowContext(getState(), session);
+      const createdAt = nowIso();
+      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {
+        title: activeWorkflow.title,
+        status: "completed",
+        source: "manual-run",
+        inputs: activeInputs,
+        prompt: buildWorkflowPrompt(activeWorkflow, activeInputs, freshContext),
+        route_target: activeWorkflow.routeHint,
+        intelligence_stamp: {
+          refreshed_at: createdAt,
+          source: "workflow-manual-run"
+        }
+      });
+
+      const output = asObject(result?.output || result?.run?.output);
+      const safeOutput = Object.keys(output).length
+        ? output
+        : buildFallbackOutput(activeWorkflow, activeInputs, freshContext);
+
+      activeRun.status = "completed";
+      activeRun.lastRunAt = asString(result?.run?.created_at) || createdAt;
+      activeRun.runId = asString(result?.run?.id);
+      activeRun.output = safeOutput;
+      activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);
+      activeRun.history.unshift({ createdAt: activeRun.lastRunAt, source: "manual-run", output: safeOutput });
+      activeRun.history = activeRun.history.slice(0, 8);
+
+      setSharedHandoff(projectName, "workflows", {
+        source_page: "workflows",
+        destination_page: "workflows",
+        payload: {
+          workflow_id: activeWorkflow.id,
+          run_id: activeRun.runId,
+          output: safeOutput,
+          inputs: activeInputs,
+          createdAt: activeRun.lastRunAt
+        },
+        status: "available"
+      });
+
+      await reloadProjectData?.(projectName);
+      showMessage?.(`${activeWorkflow.title} completed.`);
+    } catch (error) {
+      activeRun.status = "failed";
+      activeRun.output = {
+        title: `${activeWorkflow.title} failed`,
+        summary: error.message || "Workflow execution failed.",
+        blockedRequirements: ["Execution failed. Review inputs and retry."],
+        nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]
+      };
+      activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
+      showError?.(error.message || "Workflow execution failed.");
+    }
+
+    render();
+  }
+
+  const runBtn = $("workflowRunBtn");
+  if (runBtn) runBtn.onclick = () => runWorkflow(session.selectedWorkflowId);
+  const runBtnMain = $("workflowRunBtnMain");
+  if (runBtnMain) runBtnMain.onclick = () => runWorkflow(session.selectedWorkflowId);
+
+  const startRecommendedBtn = $("wfexecStartRecommendedBtn");
+  if (startRecommendedBtn) {
+    startRecommendedBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      runWorkflow(rec.workflowId);
+    };
+  }
+
+  const saveRecommendedBtn = $("wfexecSaveRecommendedBtn");
+  if (saveRecommendedBtn) {
+    saveRecommendedBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      session.selectedWorkflowId = rec.workflowId;
+      session.inputsByWorkflow[rec.workflowId].goal = firstNonEmpty(session.inputsByWorkflow[rec.workflowId].goal, rec.title);
+      persistWorkflowDraft(projectName, session, rec.workflowId, "Recommendation saved as draft", true);
+      showMessage?.("Recommended workflow saved as draft.");
+      render();
+    };
+  }
+
+  const sendRecommendedAiBtn = $("wfexecSendRecommendedAiBtn");
+  if (sendRecommendedAiBtn) {
+    sendRecommendedAiBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      const recWorkflow = getWorkflowDef(rec.workflowId);
+      session.selectedWorkflowId = recWorkflow.id;
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow: recWorkflow,
+        inputs: asObject(session.inputsByWorkflow[recWorkflow.id]),
+        run: session.runsByWorkflow[recWorkflow.id],
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  }
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-run]")).forEach((button) => {
+    button.onclick = () => runWorkflow(button.getAttribute("data-wf-catalog-run") || session.selectedWorkflowId);
+  });
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-save]")).forEach((button) => {
+    button.onclick = () => {
+      const workflowId = button.getAttribute("data-wf-catalog-save") || session.selectedWorkflowId;
+      session.selectedWorkflowId = workflowId;
+      persistWorkflowDraft(projectName, session, workflowId, "Draft saved", true);
+      showMessage?.("Workflow draft saved.");
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-wf-catalog-ai]")).forEach((button) => {
+    button.onclick = () => {
+      const workflowId = button.getAttribute("data-wf-catalog-ai") || session.selectedWorkflowId;
+      const wf = getWorkflowDef(workflowId);
+      session.selectedWorkflowId = workflowId;
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow: wf,
+        inputs: asObject(session.inputsByWorkflow[workflowId]),
+        run: session.runsByWorkflow[workflowId],
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  });
+
+  const pushAiBtn = $("workflowPushAiBtn");
+  if (pushAiBtn) {
+    pushAiBtn.onclick = () => {
+      pushWorkflowToAiCommand({
+        projectName,
+        workflow,
+        inputs,
+        run,
+        context: contextModel,
+        navigateTo,
+        createProjectHandoff,
+        showMessage,
+        allowPersistent: hasDirectAiState
+      });
+    };
+  }
+
+  const pushAiSecondaryBtn = $("workflowPushAiBtnSecondary");
+  if (pushAiSecondaryBtn) pushAiSecondaryBtn.onclick = pushAiBtn?.onclick || null;
+
+  const saveTaskBtn = $("workflowSaveTaskBtn");
+  if (saveTaskBtn) {
+    saveTaskBtn.onclick = async () => {
+      if (!run.output) {
+        showError?.("Run the workflow before saving a task.");
+        return;
+      }
+      try {
+        await createProjectTask?.(projectName, {
+          title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
+          description: asString(run.output.summary),
+          workflow_id: workflow.id,
+          source_type: "workflow_run",
+          source_id: run.runId || run.lastRunAt || "",
+          owner_role: "admin",
+          assignee_role: "admin",
+          service_domain: workflow.id === "generate-report" || workflow.id === "research-competitors" ? "research" : "campaign",
+          route_target: "workflows",
+          output: asObject(run.output),
+          notes: asArray(run.output.nextActions || [])
+        });
+        await reloadProjectData?.(projectName);
+        showMessage?.("Structured workflow task saved.");
+      } catch (error) {
+        showError?.(error.message || "Failed to save workflow task.");
+      }
+    };
+  }
+
+  const recommendBtn = $("workflowRecommendBtn");
+  if (recommendBtn) {
+    recommendBtn.onclick = () => {
+      const rec = buildSmartRecommendation(contextModel, session, getGlobalNextBestAction(getState()));
+      const prompt = [
+        "Recommend the best workflow to run next.",
+        `Project: ${projectName || "not set"}`,
+        `Current recommendation: ${rec.title}`,
+        `Reason: ${rec.reason}`,
+        `Missing integrations: ${contextModel.missingIntegrations.join(", ") || "none"}`,
+        `Missing assets: ${contextModel.missingAssets.join(", ") || "none"}`
+      ].join("\n");
+      setSharedAiDraft(projectName, {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: "Workflow recommendation"
+      });
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "workflows",
+        destination_page: "ai-command",
+        payload: {
+          prompt,
+          draft_context: {
+            projectName,
+            modeId: "operations",
+            lastCommand: prompt,
+            lastResponseTitle: "Workflow recommendation"
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+    };
+  }
+
+  const customBtn = $("workflowBuildCustomBtn");
+  if (customBtn) {
+    customBtn.onclick = () => {
+      const prompt = [
+        "Build a custom workflow blueprint.",
+        `Project: ${inputs.project || projectName || "not set"}`,
+        `Campaign: ${inputs.campaign || "not set"}`,
+        `Product: ${inputs.product || "not set"}`,
+        `Channel: ${inputs.channel || "not set"}`,
+        `Goal: ${inputs.goal || "not set"}`,
+        "Return structured steps, blockers, route suggestions, and KPI checks."
+      ].join("\n");
+      setSharedAiDraft(projectName, {
+        projectName,
+        modeId: "operations",
+        lastCommand: prompt,
+        lastResponseTitle: "Custom workflow builder"
+      });
+      setSharedHandoff(projectName, "ai-command", {
+        source_page: "workflows",
+        destination_page: "ai-command",
+        payload: {
+          prompt,
+          draft_context: {
+            projectName,
+            modeId: "operations",
+            lastCommand: prompt,
+            lastResponseTitle: "Custom workflow builder"
+          }
+        },
+        status: "available"
+      });
+      navigateTo("ai-command");
+    };
+  }
+
+  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+  if (fullAutomationBtn) {
+    fullAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+      const confirmed = window.confirm(`Run ${plan.length} safe automation steps?`);
+      if (!confirmed) return;
+
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.cursor = 0;
+      workflowAutomationState.result = "";
+      const result = await runAutomationPlan(plan, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: stepResult }) => {
+          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+          render();
+        }
+      });
+      workflowAutomationState.lastResults = asArray(result.results);
+      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+  if (stepAutomationBtn) {
+    stepAutomationBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      if (!plan.length) {
+        workflowAutomationState.result = "No safe automation steps available.";
+        render();
+        return;
+      }
+
+      const confirmed = window.confirm("Run next safe automation step?");
+      if (!confirmed) return;
+
+      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+      const singleStep = [plan[nextIndex]];
+      const stepResult = await runAutomationPlan(singleStep, {
+        context: { getState, navigateTo, createProjectHandoff, projectName },
+        onProgress: ({ index, total, step, result: runResult }) => {
+          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+        }
+      });
+
+      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+      workflowAutomationState.lastPlan = plan;
+      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+        ? "Step-by-step automation completed."
+        : "Step executed. Run again for next step.";
+      showMessage?.(workflowAutomationState.result);
+      render();
+    };
+  }
+
+  const autoStartBtn = $("workflowAutoStartBtn");
+  if (autoStartBtn) {
+    autoStartBtn.onclick = async () => {
+      const plan = buildAutomationPlan(getState());
+      workflowAutomationEnabled = true;
+      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+        render();
+      });
+
+      await startAutoMode(plan, {
+        mode: "auto_until_approval",
+        context: { getState, navigateTo, createProjectHandoff, projectName }
+      });
+      showMessage?.("Workflow Auto Mode started.");
+    };
+  }
+
+  const autoPauseBtn = $("workflowAutoPauseBtn");
+  if (autoPauseBtn) {
+    autoPauseBtn.onclick = () => {
+      pauseAutoMode();
+      showMessage?.("Auto Mode paused.");
+    };
+  }
+
+  const autoResumeBtn = $("workflowAutoResumeBtn");
+  if (autoResumeBtn) {
+    autoResumeBtn.onclick = async () => {
+      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode resumed.");
+    };
+  }
+
+  const autoStopBtn = $("workflowAutoStopBtn");
+  if (autoStopBtn) {
+    autoStopBtn.onclick = () => {
+      stopAutoMode();
+      showMessage?.("Auto Mode stopped.");
+    };
+  }
+
+  const autoApproveBtn = $("workflowAutoApproveBtn");
+  if (autoApproveBtn) {
+    autoApproveBtn.onclick = async () => {
+      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Approval gate accepted.");
+    };
+  }
+
+  const autoSkipBtn = $("workflowAutoSkipBtn");
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode skipped gated step.");
+    };
+  }
+}
+
+export const workflowsRoute = {
+  id: "workflows",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Workflows",
+    description: "Run structured, repeatable workflows for common marketing and execution operations."
+  },
+
+===== ACTIVE LIGHT ROUTE ACTIONS =====
+10:  setSharedAiDraft,
+11:  setSharedHandoff
+1060:  navigateTo,
+1074:  setSharedAiDraft(projectName, aiDraft);
+1089:  setSharedHandoff(projectName, "ai-command", handoff);
+1097:  navigateTo("ai-command");
+1202:  navigateTo,
+1215:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1291:        setSharedHandoff(projectName, "workflows", {
+1390:      setSharedHandoff(projectName, "workflows", {
+1457:        navigateTo,
+1490:        navigateTo,
+1507:        navigateTo,
+1559:      setSharedAiDraft(projectName, {
+1565:      setSharedHandoff(projectName, "ai-command", {
+1579:      navigateTo("ai-command");
+1595:      setSharedAiDraft(projectName, {
+1601:      setSharedHandoff(projectName, "ai-command", {
+1615:      navigateTo("ai-command");
+1635:        context: { getState, navigateTo, createProjectHandoff, projectName },
+1664:        context: { getState, navigateTo, createProjectHandoff, projectName },
+1686:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1694:        context: { getState, navigateTo, createProjectHandoff, projectName }
+1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1758:    navigateTo,
+1855:            <button id="wfLightPrepareBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow</button>
+1856:            <button id="wfLightAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
+1857:            <button id="wfLightCampaignBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Campaign Studio</button>
+1858:            <button id="wfLightTasksBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Open Task Center</button>
+1915:    const prepareBtn = $("wfLightPrepareBtn");
+1930:        const globalInput = $("quickCommandInput");
+1943:    const aiBtn = $("wfLightAiBtn");
+1958:        setSharedAiDraft(projectName, {
+1973:        const globalInput = $("quickCommandInput");
+1978:        navigateTo("ai-command");
+1982:    const campaignBtn = $("wfLightCampaignBtn");
+1984:      campaignBtn.onclick = () => navigateTo("campaign-studio");
+1987:    const tasksBtn = $("wfLightTasksBtn");
+1989:      tasksBtn.onclick = () => navigateTo("task-center");
+
+===== RUNTIME / AUTO MODE ACTIONS =====
+public/control-center/pages/workflows.js:18:  startAutoMode,
+public/control-center/pages/workflows.js:19:  pauseAutoMode,
+public/control-center/pages/workflows.js:20:  resumeAutoMode,
+public/control-center/pages/workflows.js:21:  stopAutoMode,
+public/control-center/pages/workflows.js:22:  approveCurrentGate,
+public/control-center/pages/workflows.js:23:  skipCurrentStep,
+public/control-center/pages/workflows.js:26:  runAutomationPlan
+public/control-center/pages/workflows.js:691:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+public/control-center/pages/workflows.js:694:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:716:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+public/control-center/pages/workflows.js:719:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:722:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:725:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+public/control-center/pages/workflows.js:750:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:753:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:807:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Run Workflow</button>
+public/control-center/pages/workflows.js:808:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Run</button>
+public/control-center/pages/workflows.js:1123:      runProjectWorkflow,
+public/control-center/pages/workflows.js:1124:      runProjectAiWorkflow,
+public/control-center/pages/workflows.js:1166:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
+public/control-center/pages/workflows.js:1208:  runProjectWorkflow,
+public/control-center/pages/workflows.js:1209:  runProjectAiWorkflow,
+public/control-center/pages/workflows.js:1364:      const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, activeWorkflow.id, {
+public/control-center/pages/workflows.js:1420:  const runBtn = $("workflowRunBtn");
+public/control-center/pages/workflows.js:1422:  const runBtnMain = $("workflowRunBtnMain");
+public/control-center/pages/workflows.js:1619:  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+public/control-center/pages/workflows.js:1634:      const result = await runAutomationPlan(plan, {
+public/control-center/pages/workflows.js:1648:  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+public/control-center/pages/workflows.js:1663:      const stepResult = await runAutomationPlan(singleStep, {
+public/control-center/pages/workflows.js:1681:  const autoStartBtn = $("workflowAutoStartBtn");
+public/control-center/pages/workflows.js:1692:      await startAutoMode(plan, {
+public/control-center/pages/workflows.js:1700:  const autoPauseBtn = $("workflowAutoPauseBtn");
+public/control-center/pages/workflows.js:1703:      pauseAutoMode();
+public/control-center/pages/workflows.js:1708:  const autoResumeBtn = $("workflowAutoResumeBtn");
+public/control-center/pages/workflows.js:1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1716:  const autoStopBtn = $("workflowAutoStopBtn");
+public/control-center/pages/workflows.js:1719:      stopAutoMode();
+public/control-center/pages/workflows.js:1724:  const autoApproveBtn = $("workflowAutoApproveBtn");
+public/control-center/pages/workflows.js:1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1732:  const autoSkipBtn = $("workflowAutoSkipBtn");
+public/control-center/pages/workflows.js:1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/automation-engine.js:473:export async function runAutomationPlan(plan, options = {}) {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:597:    pauseAutoMode,
+public/control-center/automation-engine.js:598:    resumeAutoMode,
+public/control-center/automation-engine.js:599:    stopAutoMode,
+public/control-center/automation-engine.js:600:    approveCurrentGate,
+public/control-center/automation-engine.js:601:    skipCurrentStep,
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:636:export function pauseAutoMode() {
+public/control-center/automation-engine.js:645:export async function resumeAutoMode(options = {}) {
+public/control-center/automation-engine.js:664:export function stopAutoMode() {
+public/control-center/automation-engine.js:675:export async function approveCurrentGate(options = {}) {
+public/control-center/automation-engine.js:708:export async function skipCurrentStep(options = {}) {
+
+===== API / BACKEND WORKFLOW ROUTES =====
+1477:export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
+1494:export async function runProjectAiWorkflow(projectName, workflowId, payload = {}) {
+2162:export async function createProjectHandoff(projectName, payload = {}) {
+2175:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+
+11133:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11134:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11285:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+11286:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+11364:      error: error.message || 'Failed to list approvals'
+11404:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+11405:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+11406:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+11407:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+11408:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+11409:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+11516:      error: error.message || 'Failed to list handoffs'
+11549:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+11550:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+11551:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+11552:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+11553:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+11554:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+
+2040:function recordWorkflowRun(projectName, input = {}) {
+2555:function createApproval(projectName, input = {}) {
+2741:function decideApproval(projectName, approvalId, input = {}) {
+2931:function createHandoff(projectName, input = {}) {
+3099:function consumeHandoff(projectName, handoffId, input = {}) {
+4062:  recordWorkflowRun,
+4077:  createApproval,
+4079:  decideApproval,
+4084:  createHandoff,
+4086:  consumeHandoff,
+
+===== SHARED CONTEXT =====
+public/control-center/shared-context.js:2:const aiDraftCache = new Map();
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:52:export function setSharedAiDraft(projectName, draft) {
+public/control-center/shared-context.js:54:  aiDraftCache.set(buildKey(projectName), draft);
+public/control-center/shared-context.js:58:  const cached = aiDraftCache.get(buildKey(projectName));
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:74:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:10:  setSharedAiDraft,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:925:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:1074:  setSharedAiDraft(projectName, aiDraft);
+public/control-center/pages/workflows.js:1089:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1291:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1390:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1559:      setSharedAiDraft(projectName, {
+public/control-center/pages/workflows.js:1565:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1595:      setSharedAiDraft(projectName, {
+public/control-center/pages/workflows.js:1601:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1958:        setSharedAiDraft(projectName, {
+
+===== PRIOR WORKFLOWS AUDIT =====
+# Workflows Runtime Ownership Audit
+
+## Scope
+- Branch: architecture/frontend-consolidation-v1
+- Baseline: c4dee6f, 736b0e9, 02dde34
+- Mode: audit only (no production code changes)
+- Primary page audited: public/control-center/pages/workflows.js
+- Related runtime surfaces: public/control-center/automation-engine.js, public/control-center/shared-context.js, public/control-center/api.js, runtime/orchestrator-service/server.js, runtime/orchestrator-service/lib/ops/backbone.js
+
+## Doctrine Alignment Check
+- Backend authority doctrine is explicit in public/control-center/runtime/authority/authority-projection.js:7-18.
+- Route fallback authority projection exists in public/control-center/runtime/authority/route-role-fallback.js.
+- Workflows contains authority-adjacent execution helpers and Auto Mode controls, but durable authority remains in backend workflow/handoff/approval routes and backbone persistence.
+
+## 1) What Workflows Owns Today
+
+### Display-only state
+- Overview cards, counts, readiness/status display in current exported route render: public/control-center/pages/workflows.js:1782-1913.
+- Legacy execution-loop renderer output sections (overview/recommendation/automation/catalog/result): public/control-center/pages/workflows.js:615-920.
+
+### Local session/UI state
+- In-memory sessions by project via workflowSessions map: public/control-center/pages/workflows.js:106, 309-356.
+- Local draft persistence key and helpers: public/control-center/pages/workflows.js:104, 250-306.
+- UI-only automation banners/progress/cursor state: public/control-center/pages/workflows.js:111-116.
+
+### Workflow plan generation
+- Workflow builder prompt generation and fallback output packaging: public/control-center/pages/workflows.js:500-538.
+- Recommendation-to-workflow mapping: public/control-center/pages/workflows.js:543-612.
+- Automation plan generation delegated to automation-engine buildAutomationPlan/getAutoFixPlan: public/control-center/pages/workflows.js:14-27, 1622, 1651.
+
+### Auto Mode state
+- Module-level toggles/subscription refs in workflows page: public/control-center/pages/workflows.js:108-110.
+- Engine-owned state machine in sessionStorage and module runtime: public/control-center/automation-engine.js:4, 30-34, 62-90, 125-142, 607-739.
+
+### Approval/gate state
+- Auto Mode gate state is runtime-local (approvalRequiredStep) in automation engine: public/control-center/automation-engine.js:71, 535-541, 675-731.
+- Approve/skip gate handlers in workflows page call engine gate APIs with local context: public/control-center/pages/workflows.js:1724-1736.
+
+### Handoff state
+- Shared-context in-memory handoff cache is read/write frontend cache: public/control-center/shared-context.js:3, 69-76.
+- Workflows writes handoffs locally and may persist to backend when createProjectHandoff is available: public/control-center/pages/workflows.js:1076-1093, 1291-1304, 1390-1399.
+
+### Backend-projected workflow state
+- Session run state is refreshed from operations.workflows.items (backend projection): public/control-center/pages/workflows.js:367-391.
+- Current route also projects operations totals/readiness only: public/control-center/pages/workflows.js:1766-1777, 1815-1913.
+
+### Durable workflow actions
+- runProjectWorkflow / runProjectAiWorkflow -> backend durable run routes: public/control-center/api.js:1477-1507.
+- createProjectHandoff / consumeProjectHandoff -> backend durable handoff routes: public/control-center/api.js:2162-2188.
+- Backend records workflow runs durably: runtime/orchestrator-service/server.js:11096-11134.
+- Backend records handoffs durably: runtime/orchestrator-service/server.js:11523-11554 and runtime/orchestrator-service/lib/ops/backbone.js:2958-3130.
+
+### Local-only UX actions
+- Current exported route actions are prompt prep, AI draft seed, and navigation: public/control-center/pages/workflows.js:1917-1989.
+- Shared-context-only handoff/draft writes are local cache until explicit durable handoff call occurs: public/control-center/shared-context.js:52-76.
+
+### High-risk execution actions
+- Durable AI workflow execution route: runtime/orchestrator-service/server.js:11188-11286.
+- Durable workflow run recording route: runtime/orchestrator-service/server.js:11096-11134.
+- Durable handoff create/consume routes: runtime/orchestrator-service/server.js:11523-11554.
+- Backend approval decision routes (governance boundary): runtime/orchestrator-service/server.js:11371-11409.
+
+## 2) Where Workflow Runtime Actions Are Defined
+
+### Action definitions found in workflows page
+- start Auto Mode: public/control-center/pages/workflows.js:1681-1696
+- pause Auto Mode: public/control-center/pages/workflows.js:1700-1704
+- resume Auto Mode: public/control-center/pages/workflows.js:1708-1712
+- stop Auto Mode: public/control-center/pages/workflows.js:1716-1720
+- approve gate: public/control-center/pages/workflows.js:1724-1728
+- skip step: public/control-center/pages/workflows.js:1732-1736
+- run automation plan (full): public/control-center/pages/workflows.js:1619-1643
+- run single automation step: public/control-center/pages/workflows.js:1648-1676
+- create handoff (workflow->ai-command): public/control-center/pages/workflows.js:1076-1093
+- navigate to target route: public/control-center/pages/workflows.js:1097, 1579, 1615, 1984, 1989
+
+### Engine definitions
+- createAutoModeController/start/pause/resume/stop/approve/skip/subscribe: public/control-center/automation-engine.js:589-739
+- runAutomationPlan: public/control-center/automation-engine.js:473-520
+
+### Important active-vs-defined nuance
+- The above runtime controls are defined in workflows.js, but current exported route render does not call bindWorkflowExecutionLoop/registerWorkflowBridge/renderWorkflowExecutionLoop.
+- Current exported route is the light builder shell path: public/control-center/pages/workflows.js:1741-1991.
+- Therefore many workflow runtime buttons/data attributes are presently defined in code but not mounted in the active route template.
+
+## 3) Auto Mode Lifecycle Findings
+
+- createAutoModeController import in workflows: public/control-center/pages/workflows.js:16.
+- createAutoModeController use sites in workflows: public/control-center/pages/workflows.js:1215, 1686.
+- subscribeAutoMode use sites in workflows: public/control-center/pages/workflows.js:1217, 1688.
+- startAutoMode call site in workflows: public/control-center/pages/workflows.js:1692.
+- runAutomationPlan call sites in workflows: public/control-center/pages/workflows.js:1634, 1663.
+- Auto Mode starts from explicit user click handler (workflowAutoStartBtn), not from mount: public/control-center/pages/workflows.js:1683-1696.
+- Controller/subscription binding also appears inside bindWorkflowExecutionLoop preamble if workflowAutomationEnabled is already true: public/control-center/pages/workflows.js:1214-1218.
+- Guard flags exist: workflowAutomationEnabled and workflowAutoModeUnsubscribe replacement logic: public/control-center/pages/workflows.js:110, 1214-1217, 1685-1688.
+- Unsubscribe cleanup exists as replacement before new subscribe, but no explicit route unmount teardown in workflows file.
+- Repeated route-visit leak risk:
+  - In current active route path, Auto Mode controls are not mounted, so leak risk is latent.
+  - In legacy execution-loop path, module-level flags/subscription refs can persist across route revisits; duplicate subscription is partially guarded by unsubscribe replacement and bridge registration flag (workflowBridgeRegistered), but not fully lifecycle-scoped.
+
+## 4) Backend Authority Alignment
+
+### Actions that call backend
+- Workflow run creation:
+  - Frontend call: runProjectWorkflow/runProjectAiWorkflow in workflows handlers (public/control-center/pages/workflows.js:1166-1177, 1364-1377)
+  - API routes: public/control-center/api.js:1477-1507
+  - Server handlers: runtime/orchestrator-service/server.js:11096-11134, 11188-11286
+- Durable handoff create/consume:
+  - Frontend calls: public/control-center/pages/workflows.js:1091-1093, 956-957
+  - API routes: public/control-center/api.js:2162-2188
+  - Server handlers: runtime/orchestrator-service/server.js:11523-11554
+
+### Frontend-only actions
+- Prompt preparation + quick command input seed + navigateTo in current route: public/control-center/pages/workflows.js:1917-1989.
+- Shared-context handoff/draft cache writes without guaranteed backend persistence: public/control-center/pages/workflows.js:1291-1304, 1390-1399, 1566-1578, 1602-1614; public/control-center/shared-context.js:52-76.
+- Auto Mode gate controls are engine-local state transitions/navigation, not backend approvals: public/control-center/automation-engine.js:675-731.
+
+### Durable handoff/workflow run status
+- Durable workflow runs: recorded via recordWorkflowRun in server/backbone path: runtime/orchestrator-service/server.js:11096-11134 and runtime/orchestrator-service/lib/ops/backbone.js:2042-2142.
+- Durable handoffs: create/consume in backbone collections and events: runtime/orchestrator-service/lib/ops/backbone.js:2958-3130.
+
+### Alignment conclusion
+- Durable truth remains backend-owned.
+- Workflows frontend mixes projection/local UX with optional durable writes.
+- Any action that mutates workflow run, handoff, or approval semantics should stay backend-authoritative.
+
+## 5) Approval/Gate Boundary
+
+- Auto Mode gate approval in workflows/automation-engine is frontend runtime gating, not backend durable approval:
+  - approveCurrentGate/skipCurrentStep operate on autoModeState and optional navigation only: public/control-center/automation-engine.js:675-731.
+- No direct backend approval decision call is made by workflow Auto Mode gate actions.
+- Backend has separate durable approvals APIs and storage:
+  - server routes: runtime/orchestrator-service/server.js:11371-11409
+  - backbone approvals persistence/decision: runtime/orchestrator-service/lib/ops/backbone.js:2557-2919
+- runAutomationPlan enforces safe-action constraints via type whitelist and block patterns:
+  - safe types: public/control-center/automation-engine.js:6-14
+  - block patterns: public/control-center/automation-engine.js:16-26
+  - safety checks: public/control-center/automation-engine.js:192-214, 473-520
+- Therefore: Auto Mode gate approval != governance approval. It is an execution-flow pause/continue gate in frontend, not a durable policy decision.
+
+## 6) Handoff Boundary
+
+### Where handoffs are created
+- In automation engine run steps (create_draft/create_handoff/prepare_workflow/prepare_publishing_draft): public/control-center/automation-engine.js:360-469.
+- In workflows push-to-AI and local seed actions: public/control-center/pages/workflows.js:1076-1093, 1291-1304, 1390-1399, 1566-1578, 1602-1614.
+
+### Durable vs cache
+- Shared-context handoffs are cache-level (in-memory map): public/control-center/shared-context.js:3, 69-76.
+- Durable handoffs require createProjectHandoff/consumeProjectHandoff APIs -> backend backbone handoffs store.
+
+### Workflow steps and handoff targets
+- To AI Command: pushWorkflowToAiCommand path in workflows page.
+- To Publishing/Content/Media/Library/Workflows: automation-engine targetPage in create_handoff/create_draft/prepare_* steps.
+- To Campaign route (local navigation): current route button navigation and route hints (campaign-studio) in catalog metadata.
+
+### Orphan risk
+- Cached handoffs can be superseded/lost if not durably persisted.
+- Optional persistence pattern (allowPersistent flags and catch-ignore) can leave partial local-only transfer.
+
+### Authority-adjacent handoff actions
+- Any handoff that implies ownership transfer, next role, or route transition should be treated authority-adjacent even if initiated from frontend.
+
+## 7) Loading/Session Lifecycle
+
+- Session state initialization and cache keyed by project: public/control-center/pages/workflows.js:309-356.
+- Intelligence loading lifecycle with loadingPromise, status/error, and rerender: public/control-center/pages/workflows.js:962-1029.
+- Render-triggered runtime work:
+  - Current exported route render builds a light UI and binds local button handlers only.
+  - Legacy execution-loop path can trigger ensureWorkflowIntelligenceLoaded and runtime calls when handlers run.
+- Rebind/listener behavior:
+  - registerWorkflowBridge uses global workflowBridgeRegistered guard with window listener: public/control-center/pages/workflows.js:1107-1197.
+  - No explicit removeEventListener teardown in workflows file.
+- Cleanup:
+  - Auto Mode subscribe replacement calls prior unsubscribe if present, but no explicit route unmount cleanup.
+
+## 8) Authority Risk Classification (Summary)
+
+- Safe projection:
+  - Operations/readiness/workflow totals rendering and catalog/readiness derivations.
+- Safe local UX:
+  - Local draft save/clear, quick prompt prep, local navigation, client-side validation.
+- Authority-adjacent:
+  - Handoff payload shaping, role-like ownership metadata in task payload, auto gate decisions.
+- Duplicate authority risk:
+  - Frontend cache handoff state can diverge from durable backend handoff records.
+  - Legacy runtime paths exist in code but may not match currently mounted UI behavior.
+- High-risk execution:
+  - Durable workflow run creation and AI workflow execution endpoints.
+- Needs backend confirmation:
+  - Any workflow run persistence, handoff durability, approval/governance decisions.
+- Needs explicit user action:
+  - Auto Mode start/pause/resume/stop/approve/skip and manual run operations in legacy runtime path.
+- Should not be changed yet:
+  - Legacy runtime control surfaces until behavior contract and shadow-compare plan are documented.
+
+## 9) Compare Workflows With Publishing
+
+### Shared Auto Mode risks
+- Both rely on module-level Auto Mode state/subscriptions and process-lifetime flags.
+- Both use explicit button-trigger starts, but lifecycle teardown/unsubscribe is not strictly route-unmount managed.
+
+### Durable backend authority differences
+- Publishing active UI directly mounts durable mutation controls (schedule/approve/publish/fail) and backend governance gates are central.
+- Workflows current exported route is primarily local prep/navigation; heavy durable runtime actions exist mostly in legacy, not currently mounted path.
+
+### Local-only state differences
+- Publishing local-only branches can mark statuses for local drafts and are tightly coupled to queue semantics.
+- Workflows local state centers on drafts/prompts/handoffs and run session visualization.
+
+### Handoff model differences
+- Publishing handoff usage is focused on loading/pushing operational publish context.
+- Workflows handoff usage is broader cross-page orchestration (workflows <-> ai-command plus automation-engine-generated destination handoffs).
+
+### Which should refactor first and why
+- Publishing should remain first for pure-helper extraction (already audited + has shadow-compare plan and direct durable mutation risk).
+- Workflows should first complete behavior contract and shadow-compare planning because active route and legacy runtime path are split, increasing hidden parity risk.
+
+## 10) Recommended Next Step
+
+Recommended option: B. Create workflows behavior contract.
+
+Why this is safest:
+- Audit found two behavior surfaces in one file: a currently mounted light route and a legacy heavy runtime loop with Auto Mode controls.
+- Before any extraction or lifecycle registry work, expected behavior must be frozen in a contract to avoid accidentally activating/deactivating paths.
+- This aligns with doctrine: Audit -> Confirm -> Decide -> Implement, and with non-extraction-before-contract/shadow-compare constraints.
+
+## Risk Summary
+- Primary risk: mixed active vs dormant runtime surfaces in workflows.js can cause accidental behavior drift during future refactor.
+- Secondary risk: frontend Auto Mode gates can be mistaken for governance approvals; they are not durable backend approvals.
+- Tertiary risk: optional/non-mandatory durable handoff persistence can create local cache vs backend truth divergence.
+# Workflows Action Matrix
+
+| Action / control | Location / line | Trigger | Frontend local state? | Backend/API call? | Durable? | Approval / gate required? | Risk level | Classification | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| Prepare Workflow (light route) | public/control-center/pages/workflows.js:1917-1941 | Button click wfLightPrepareBtn | Yes (quickCommandInput/status text) | No | No | No | Low | Safe local UX | Keep local; no authority coupling |
+| Send to AI Workspace (light route) | public/control-center/pages/workflows.js:1945-1979 | Button click wfLightAiBtn | Yes (shared ai draft + input seed) | No direct API | No | No | Low | Safe local UX | Keep local and explicit |
+| Open Campaign Studio | public/control-center/pages/workflows.js:1982-1985 | Button click wfLightCampaignBtn | No meaningful mutation | No | No | No | Low | Safe projection/navigation | Keep local navigation only |
+| Open Task Center | public/control-center/pages/workflows.js:1987-1989 | Button click wfLightTasksBtn | No meaningful mutation | No | No | No | Low | Safe projection/navigation | Keep local navigation only |
+| Manual Run Workflow (legacy loop) | public/control-center/pages/workflows.js:1326-1417 | Button click workflowRunBtn/workflowRunBtnMain | Yes (session run state/history) | Yes via runProjectWorkflow/runProjectAiWorkflow | Yes (workflow run) | Explicit user click; no frontend gate | High | High-risk execution | Preserve backend authority; do not extract yet |
+| AI-triggered auto-run from bridge | public/control-center/pages/workflows.js:1111-1191 | Window event mh:submit-workflow with meta.autoRun | Yes | Yes via runProjectAiWorkflow/runProjectWorkflow | Yes | Event-driven; not button-only | High | Authority-adjacent + high-risk execution | Add behavior contract before lifecycle changes |
+| Run full automation plan | public/control-center/pages/workflows.js:1619-1643 | Button click workflowRunFullAutomationBtn + window.confirm | Yes (workflowAutomationState) | Indirect (per-step createProjectHandoff optional) | Mixed (durable only for persisted handoff steps) | Confirm dialog only | Medium | Authority-adjacent | Keep explicit confirm; verify safe-step-only contract |
+| Run single automation step | public/control-center/pages/workflows.js:1648-1676 | Button click workflowRunStepAutomationBtn + window.confirm | Yes | Indirect (same as above) | Mixed | Confirm dialog only | Medium | Authority-adjacent | Same as full automation |
+| Start Auto Mode | public/control-center/pages/workflows.js:1681-1696 | Button click workflowAutoStartBtn | Yes (enable flags + subscription) | Indirect per step | Mixed | Explicit click; engine gate on risky steps | Medium | Authority-adjacent | Keep explicit start requirement |
+| Pause Auto Mode | public/control-center/pages/workflows.js:1700-1704 | Button click workflowAutoPauseBtn | Yes (engine runtime state) | No | No | No | Low | Safe local UX | Keep local runtime control |
+| Resume Auto Mode | public/control-center/pages/workflows.js:1708-1712 | Button click workflowAutoResumeBtn | Yes | Indirect per upcoming steps | Mixed | Runtime-state preconditions | Medium | Authority-adjacent | Validate mode/plan guards in contract |
+| Stop Auto Mode | public/control-center/pages/workflows.js:1716-1720 | Button click workflowAutoStopBtn | Yes | No | No | No | Low | Safe local UX | Keep local |
+| Approve Auto Mode gate | public/control-center/pages/workflows.js:1724-1728 and public/control-center/automation-engine.js:675-706 | Button click workflowAutoApproveBtn | Yes (autoModeState progression) | No direct approval API | No | Yes (only when waiting_approval) | Medium | Authority-adjacent | Clarify this is not governance approval |
+| Skip Auto Mode gated step | public/control-center/pages/workflows.js:1732-1736 and public/control-center/automation-engine.js:708-729 | Button click workflowAutoSkipBtn | Yes | No | No | Yes (only when waiting_approval) | Medium | Authority-adjacent | Keep explicit and auditable |
+| Create workflow->AI handoff (pushWorkflowToAiCommand) | public/control-center/pages/workflows.js:1076-1093 | Buttons: push/recommend/catalog AI | Yes (shared cache) | Optional createProjectHandoff | Mixed | No | Medium | Authority-adjacent | Require explicit durable intent in future |
+| Local handoff seed when no AI state | public/control-center/pages/workflows.js:1287-1308 | Button click wfexecLoadAiStateBtn | Yes | No | No | No | Low | Safe local UX | Keep local fallback |
+| Set workflows handoff after run | public/control-center/pages/workflows.js:1390-1399 | After manual run success | Yes | No immediate API in this block | No by itself | No | Medium | Authority-adjacent | Consider explicit durable handoff policy |
+| Save structured workflow task | public/control-center/pages/workflows.js:1518-1542 | Button click workflowSaveTaskBtn | Yes | Yes via createProjectTask | Yes (task) | Explicit click | Medium | Needs backend confirmation | Keep backend-first |
+| Navigate on approved gate | public/control-center/automation-engine.js:685-689 | approveCurrentGate path | Minimal local | No | No | Happens after gate approval | Low | Safe projection/navigation | Keep non-mutating |
+| runProjectWorkflow API | public/control-center/api.js:1477-1491 | Called by workflows handlers | N/A | Yes POST /workflows/:id/run | Yes | Backend policy path | High | Needs backend confirmation | No frontend duplication |
+| runProjectAiWorkflow API | public/control-center/api.js:1494-1507 | Called by workflows handlers | N/A | Yes POST /ai/workflows/:id/run | Yes | Backend policy path | High | Needs backend confirmation | No frontend duplication |
+| createProjectHandoff API | public/control-center/api.js:2162-2171 | Called by workflows/automation paths | N/A | Yes POST /handoffs | Yes | Depends on calling action | Medium | Needs backend confirmation | Prefer durable when ownership transfer matters |
+| consumeProjectHandoff API | public/control-center/api.js:2175-2188 | Called when applying handoff | N/A | Yes POST /handoffs/:id/consume | Yes | Explicit action path | Medium | Needs backend confirmation | Maintain consume semantics |
+| Durable workflow run record route | runtime/orchestrator-service/server.js:11096-11134 | Backend handler | N/A | Server internal to backbone | Yes | Backend owns | High | Backend authority | Keep as source of truth |
+| Durable approvals routes | runtime/orchestrator-service/server.js:11371-11409 | Backend handler | N/A | Yes approvals create/decision | Yes | Governance-controlled | High | Backend authority | Do not replicate in frontend |
+| Durable handoff persistence | runtime/orchestrator-service/lib/ops/backbone.js:2958-3130 | Backend create/consume | N/A | Internal storage and events | Yes | Backend-controlled | Medium | Backend authority | Keep frontend as projection initiator only |
+
+## Notes
+- Active route currently mounted is the light shell in public/control-center/pages/workflows.js:1741-1991.
+- Many legacy controls in this matrix are defined in the same file but not mounted by current route render.
+- Any extraction or lifecycle change should first freeze active-vs-legacy behavior in a dedicated behavior contract.
+# Workflows Runtime Implementation Plan
+
+## Status
+- Audit complete.
+- No production code changes in this step.
+
+## Recommended Next Step
+- B. Create workflows behavior contract.
+
+## Why This Is Safest
+- Workflows page contains both:
+  - currently mounted light route behavior (prompt prep/navigation), and
+  - legacy heavy execution loop with Auto Mode and durable run/handoff integrations.
+- Without a behavior contract, extraction/lifecycle work can unintentionally alter which runtime surface is active.
+- This preserves doctrine order: Audit -> Confirm -> Decide -> Implement.
+
+## Future Step-by-Step Plan (Implementation Later)
+
+1. Create behavior contract document for Workflows runtime surface.
+- Define active route truth (what is mounted today).
+- Define legacy runtime loop status (defined but not currently mounted).
+- Freeze action semantics for run, handoff, auto mode, and gate controls.
+
+2. Create Workflows shadow-compare plan (after contract).
+- Mirror publishing shadow-compare structure for workflows actions.
+- Include strict no-duplicate-backend-call rule.
+- Include active-vs-legacy route parity checks.
+
+3. Add non-invasive lifecycle registry draft for Auto Mode pages (design only first).
+- Identify where controller/subscription/listener are created.
+- Identify explicit cleanup expectations for unmount/revisit.
+- Do not change behavior yet.
+
+4. Decision gate.
+- If contract and shadow-compare are accepted, choose implementation scope:
+  - keep active light route only and archive legacy loop, or
+  - formally remount legacy loop with explicit lifecycle guardrails.
+
+5. Implementation phase (future, guarded).
+- Apply smallest possible changes.
+- Never move backend authority into frontend.
+- Keep durable run/handoff/approval operations backend-owned.
+
+## Validation Commands (for future implementation checkpoints)
+
+```bash
+cd /opt/mh-assistant
+
+# 1) Branch and working tree safety
+git branch --show-current
+git status --short
+
+# 2) Ensure workflows runtime symbols map remains stable
+rg -n "workflowsRoute|bindWorkflowExecutionLoop|registerWorkflowBridge|startAutoMode|runAutomationPlan|createProjectHandoff|runProjectWorkflow|runProjectAiWorkflow" public/control-center/pages/workflows.js public/control-center/automation-engine.js
+
+# 3) Verify API durable endpoints still unchanged
+rg -n "runProjectWorkflow|runProjectAiWorkflow|createProjectHandoff|consumeProjectHandoff" public/control-center/api.js
+rg -n "workflows/:workflowId/run|ai/workflows/:workflowId/run|/approvals|/handoffs" runtime/orchestrator-service/server.js
+
+# 4) Syntax safety
+node --check public/control-center/pages/workflows.js
+node --check public/control-center/automation-engine.js
+node --check public/control-center/shared-context.js
+```
+
+## Browser QA Checklist (future implementation)
+
+1. Open Workflows route and confirm mounted UI matches contract baseline (light shell controls present).
+2. Click Prepare Workflow and verify only prompt staging occurs.
+3. Click Send to AI Workspace and verify navigation + draft projection only.
+4. Confirm no Auto Mode controls are visible in active route unless explicitly intended by contract.
+5. If legacy loop is intentionally activated in future, verify:
+- Auto Mode starts only on explicit click.
+- No auto-run on mount/render.
+- Gate approve/skip does not call backend approval decision endpoints.
+- Any durable run/handoff call is single-call and backend acknowledged.
+6. Navigate away and back repeatedly to detect listener/subscription duplication symptoms.
+7. Verify durable handoff/workflow run counts in operations reflect backend truth, not local-only cache artifacts.
+
+## Rollback Plan (future implementation)
+
+1. If parity drifts or lifecycle regressions appear, revert implementation commit(s) only (no destructive git reset).
+2. Restore previous workflows runtime behavior contract baseline.
+3. Re-run validation commands and browser checklist.
+4. Re-open audit with mismatch evidence before retry.
+
+## Explicit Non-Goals
+- No production refactor in this audit step.
+- No backend route or backbone logic changes.
+- No authority model redesign.
+- No extraction of helpers before behavior contract and shadow-compare plan are approved.
+- No page redesign.
+
+## Decision Summary
+- Immediate action: remain audit-only for code.
+- Next artifact to create: Workflows behavior contract (option B).
+- Follow-up artifact: Workflows shadow-compare plan.
+- Only then decide on lifecycle registry/extraction sequence.
+===== PUBLISHING SHADOW COMPARE REFERENCE =====
+# Publishing Shadow-Compare Plan
+
+## Objective
+Define parity checks that allow future extraction to be validated without changing publishing behavior or duplicating backend mutations.
+
+## Compare Scope
+- Target: publishing handlers in public/control-center/pages/publishing.js
+- Target APIs: savePublishingSchedule, reschedulePublishingItem, approvePublishingItem, publishPublishingItem, failPublishingItem
+- Target lifecycle: Auto Mode prepare/stop/approve-gate/skip-gate behavior
+- Out of scope in shadow-run: duplicate backend mutation calls
+
+## Required Compare Points Per Action
+- action key
+- selected item id
+- localOnly status
+- payload sent to API
+- backend function called or not called
+- local draft mutations
+- shared-context writes
+- queue status before and after
+- visible status label before and after
+- reloadProjectData called or not
+- showMessage called or not
+- showError called or not
+- Auto Mode state before and after
+
+## Safe Shadow Trace Schema (Design Only, Not Implemented)
+
+```json
+{
+  "event_id": "string-uuid-or-monotonic-id",
+  "timestamp": "ISO-8601",
+  "route": "publishing",
+  "project": "string",
+  "action_key": "save_draft|schedule|reschedule|pause|retry|approve|publish|fail|load_handoff|send_ai|auto_prepare|auto_stop|auto_approve_gate|auto_skip_gate|local_only_publish|local_only_approve|local_only_fail",
+  "item_id": "jobId or local draft id",
+  "local_only": true,
+  "before_snapshot": {
+    "session": {
+      "selected_id": "string",
+      "form": {},
+      "validation": {}
+    },
+    "queue": {
+      "item_status": "draft|ready|scheduled|published|failed",
+      "visible_label": "string"
+    },
+    "auto_mode": {
+      "enabled": false,
+      "status": "idle|running|waiting_approval|paused|completed|failed",
+      "step_index": 0
+    }
+  },
+  "intended_api_call": {
+    "function": "string-or-null",
+    "endpoint": "string-or-null",
+    "payload": {}
+  },
+  "actual_api_call": {
+    "function": "string-or-null",
+    "endpoint": "string-or-null",
+    "payload": {},
+    "attempted": true,
+    "succeeded": true
+  },
+  "after_snapshot": {
+    "session": {
+      "selected_id": "string",
+      "form": {},
+      "validation": {}
+    },
+    "queue": {
+      "item_status": "draft|ready|scheduled|published|failed",
+      "visible_label": "string"
+    },
+    "auto_mode": {
+      "enabled": false,
+      "status": "idle|running|waiting_approval|paused|completed|failed",
+      "step_index": 0
+    }
+  },
+  "ui_visible_result": {
+    "show_message_called": true,
+    "show_error_called": false,
+    "message_text": "string",
+    "error_text": "string"
+  },
+  "error": {
+    "name": "string",
+    "message": "string",
+    "code": "string"
+  },
+  "parity_result": {
+    "passed": true,
+    "mismatches": []
+  }
+}
+```
+
+## Forbidden Rule: No Duplicate Backend Call
+- Shadow mode must never issue a second backend mutation for the same user action.
+- For mutation actions, shadow logic is observe-only and compare-only.
+- Disallowed in shadow mode: any second call to /publishing/schedule, /publishing/:jobId/reschedule, /publishing/:jobId/ready, /publishing/:jobId/publish, /publishing/:jobId/fail.
+- Reason: duplicate calls can create double status transitions, duplicate execution results, duplicate queue events, or duplicate notifications.
+
+## Never Shadow-Execute (Observe Only)
+- publish
+- fail
+- approve ready
+- reschedule
+- all backend mutations
+
+Why:
+- These paths are authoritative and durable in backend storage.
+- Server routes enforce governance and can reject/mutate based on current policy and approval state.
+- Double execution can alter durable truth and invalidate parity evidence.
+
+## Compare Mechanics
+- Capture before snapshot at click-handler entry.
+- Capture intended API function and payload at decision point.
+- Observe actual API invocation metadata from wrapper/interceptor (no second call).
+- Capture after snapshot after rerender/reload settle point.
+- Emit parity result with field-level mismatch list.
+
+## Parity Pass Criteria
+- Action mapping unchanged: same action key and target id resolution.
+- API parity unchanged: same backend function called (or intentionally not called) with equivalent payload semantics.
+- Local draft parity unchanged: same local storage mutation semantics for localOnly paths.
+- Shared-context parity unchanged: same setSharedAiDraft/setSharedHandoff writes for AI/handoff actions.
+- UI parity unchanged: equivalent visible status label, same message/error behavior category.
+- Reload parity unchanged: reloadProjectData invocation matches baseline for durable actions.
+- Auto Mode parity unchanged: no auto-start from render; same gated behavior for publish-like steps.
+
+## Parity Fail Conditions
+- Backend call introduced/removed unexpectedly for an action.
+- Payload field/value drift for durable mutation actions.
+- LocalOnly path starts invoking durable backend mutation.
+- Durable path stops invoking reloadProjectData.
+- Success path emits showError or failure path suppresses showError.
+- Auto Mode begins without explicit button click.
+- Any duplicate backend mutation detected for one user action.
+
+## Decision Gate After Shadow-Compare
+- Pass: proceed to pure-helper extraction only.
+- Fail: block extraction, capture mismatch evidence, rollback candidate implementation.
