@@ -124,6 +124,15 @@ function getConnectorWorkspaceStatusLabel(statusKey) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function getConnectorStatusLabel(card = {}, statusKey = "") {
+  if (card.statusLabel === "Connected") return "Connected";
+  if (card.statusLabel === "Partial") return "Partial";
+  if (card.statusLabel === "Token expired") return "Token expired";
+  if (card.statusLabel === "Error") return "Error";
+  if (card.statusLabel === "Not Connected") return "Not Connected";
+  return getConnectorWorkspaceStatusLabel(statusKey);
+}
+
 function getConnectorWorkspaceAction(card = {}) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
@@ -132,25 +141,80 @@ function getConnectorWorkspaceAction(card = {}) {
   }
 
   if (statusKey === "connected") {
-    return { action: "sync", label: "Sync Now" };
+    return { action: "sync", label: "Sync" };
   }
 
   if (statusKey === "failed") {
-    return { action: "reconnect", label: "Reconnect Now" };
+    return {
+      action: "reconnect",
+      label: card.statusLabel === "Error" ? "Fix connection" : "Reconnect"
+    };
   }
 
   if (statusKey === "needs_setup") {
-    return { action: "connect", label: "Complete Setup" };
+    return { action: "connect", label: "Complete setup" };
   }
 
-  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+  return { action: "connect", label: "Connect" };
+}
+
+function shortenText(value = "", max = 90) {
+  const text = asString(value).trim();
+  if (!text) return "";
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1).trimEnd()}...`;
+}
+
+function getSetupMethodLabel(card = {}) {
+  if (card.backendSupported === false) {
+    return "Setup method: Backend support not configured";
+  }
+
+  if (card.quickConnectLabel || card.oauthSupported || card.authMode === "oauth") {
+    return "Setup method: OAuth recommended";
+  }
+
+  return "Setup method: Manual fields";
+}
+
+function getRequirementLabel(card = {}) {
+  if (card.backendSupported === false) {
+    return "Backend support: Not configured";
+  }
+
+  const requiredFields = Array.isArray(card.fields)
+    ? card.fields.filter((field) => field?.required)
+    : [];
+
+  if (requiredFields.length) {
+    const labels = requiredFields
+      .slice(0, 2)
+      .map((field) => asString(field.label).trim())
+      .filter(Boolean);
+    const suffix = requiredFields.length > 2 ? " +more" : "";
+    return `Access needed: ${labels.join(", ")}${suffix}`;
+  }
+
+  if (asString(card.permissionScopeSummary).trim()) {
+    return `Access needed: ${card.permissionScopeSummary}`;
+  }
+
+  return "Access needed: Setup details in drawer";
 }
 
 export function renderConnectorRow(card = {}, session = {}) {
   const statusKey = getConnectorWorkspaceStatus(card);
-  const statusLabel = getConnectorWorkspaceStatusLabel(statusKey);
+  const statusLabel = getConnectorStatusLabel(card, statusKey);
   const recommendedAction = getConnectorWorkspaceAction(card);
   const isSelected = asString(session.selectedIntegrationId) === card.id;
+  const healthLabel = shortenText(card.healthSummary, 88) || "No sync health detail available.";
+  const requirementLabel = shortenText(getRequirementLabel(card), 88);
+  const setupMethodLabel = getSetupMethodLabel(card);
+  const actionButton =
+    recommendedAction.action === "select"
+      ? `<button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(recommendedAction.label)}</button>`
+      : `<button class="btn btn-primary" type="button" data-integration-primary="${esc(recommendedAction.action)}" data-integration-id="${esc(card.id)}">${esc(recommendedAction.label)}</button>`;
+  const showSyncAction = card.backendSupported !== false && statusKey === "connected";
 
   return `
     <article class="integration-control-row${isSelected ? " is-selected" : ""}">
@@ -162,22 +226,23 @@ export function renderConnectorRow(card = {}, session = {}) {
               <strong>${esc(card.label)}</strong>
               <span class="card-badge ${esc(card.statusTone)}">${esc(statusLabel)}</span>
             </span>
-            <span class="integration-control-row-meta">Why it matters: ${esc(card.whyItMatters)}</span>
+            <span class="integration-control-row-meta">Sync health: ${esc(healthLabel)}</span>
+            <span class="integration-control-row-meta">Last sync: ${esc(formatCardDate(card.lastSync))}</span>
+            <span class="integration-control-row-meta">${esc(requirementLabel)}</span>
+            <span class="integration-control-row-meta">${esc(setupMethodLabel)}</span>
             <span class="integration-control-row-meta">Recommended action: ${esc(recommendedAction.label)}</span>
           </span>
         </button>
       </div>
       <div class="integration-control-row-actions">
-        ${recommendedAction.action === "select"
-          ? `<button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Open setup</button>`
-          : `<button class="btn btn-primary" type="button" data-integration-primary="${esc(recommendedAction.action)}" data-integration-id="${esc(card.id)}">${esc(recommendedAction.label)}</button>`}
-        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Workspace</button>
+        ${actionButton}
+        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Setup drawer</button>
         ${card.backendSupported === false
           ? ""
-          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test</button>`}
-        ${card.backendSupported === false
-          ? ""
-          : `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>`}
+          : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>`}
+        ${showSyncAction
+          ? `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>`
+          : ""}
       </div>
     </article>
   `;
@@ -221,14 +286,22 @@ function getSmartConnectLabel(card = {}) {
   }
 
   if (card.statusLabel === "Connected") {
-    return "Manage Connection";
+    return "Manage";
   }
 
-  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+  if (card.statusLabel === "Partial") {
+    return "Complete setup";
+  }
+
+  if (card.statusLabel === "Token expired") {
     return "Reconnect";
   }
 
-  return `Connect ${card.label || "Integration"}`;
+  if (card.statusLabel === "Error") {
+    return "Fix connection";
+  }
+
+  return "Connect";
 }
 
 export function renderIntegrationCard(card = {}, session = {}) {
@@ -303,8 +376,8 @@ export function renderSelectedConnectorSummary(card = {}) {
     <section class="card integration-selected-summary">
       <div class="card-head">
         <div>
-          <h3>Selected connector</h3>
-          <p class="home-section-copy" style="margin:6px 0 0;">Open Smart Connect to configure, test, or reconnect this connector without leaving the overview.</p>
+          <h3>Connector workspace</h3>
+          <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure, test, sync, reconnect, or manage this connector.</p>
         </div>
         <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>
       </div>

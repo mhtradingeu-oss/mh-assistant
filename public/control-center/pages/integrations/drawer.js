@@ -94,14 +94,22 @@ function getDrawerPrimaryAction(card = {}) {
   }
 
   if (card.statusLabel === "Connected") {
-    return { action: "manage", label: "Manage Connection" };
+    return { action: "manage", label: "Manage" };
   }
 
-  if (["Partial", "Token expired", "Error"].includes(card.statusLabel)) {
+  if (card.statusLabel === "Partial") {
+    return { action: "connect", label: "Complete setup" };
+  }
+
+  if (card.statusLabel === "Token expired") {
     return { action: "reconnect", label: "Reconnect" };
   }
 
-  return { action: "connect", label: `Connect ${card.label || "Integration"}` };
+  if (card.statusLabel === "Error") {
+    return { action: "reconnect", label: "Fix connection" };
+  }
+
+  return { action: "connect", label: "Connect" };
 }
 
 function getQuickConnectLabel(card = {}) {
@@ -127,7 +135,7 @@ export function renderIntegrationActionButtons(card = {}) {
   return `
     <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
     <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test Connection</button>
-    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync Now</button>` : ""}
+    ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
     ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth-style quick connect is the recommended path for this provider. Manual fields remain available as fallback.</div>` : ""}
   `;
 }
@@ -164,6 +172,17 @@ export function renderIntegrationDetailsPanel(
 
   const requiredFields = card.fields.filter((field) => field.required);
   const optionalFields = card.fields.filter((field) => !field.required);
+  const requiredFieldSummary = requiredFields
+    .slice(0, 3)
+    .map((field) => asString(field.label).trim())
+    .filter(Boolean)
+    .join(", ");
+  const hasOAuthSetup = Boolean(card.quickConnectLabel || card.oauthSupported || card.authMode === "oauth");
+  const setupMethod = card.backendSupported === false
+    ? "Backend support not configured"
+    : hasOAuthSetup
+      ? "OAuth recommended"
+      : "Manual fields";
 
   const fields = requiredFields
     .map((field) =>
@@ -258,13 +277,28 @@ export function renderIntegrationDetailsPanel(
 
       <div class="integration-hub-intro">
         <div class="integration-hub-why">
-          <strong>Status</strong>
+          <strong>Connection status</strong>
           <span>${esc(card.healthSummary)}</span>
         </div>
 
         <div class="integration-hub-why">
           <strong>Connection value</strong>
           <span>${esc(card.sourceValue || "Not set")}</span>
+        </div>
+      </div>
+
+      <div class="integration-drawer-requirements">
+        <strong>Connection requirements</strong>
+        <div class="integration-drawer-requirements-grid">
+          <span class="integration-requirement-pill">${esc(
+            requiredFieldSummary
+              ? `Access needed: ${requiredFieldSummary}${requiredFields.length > 3 ? " +more" : ""}`
+              : "Access needed: Setup details below"
+          )}</span>
+          <span class="integration-requirement-pill">${esc(`Setup method: ${setupMethod}`)}</span>
+          ${asString(card.permissionScopeSummary).trim()
+            ? `<span class="integration-requirement-pill">${esc(`Permission scope: ${card.permissionScopeSummary}`)}</span>`
+            : ""}
         </div>
       </div>
 
@@ -311,7 +345,7 @@ export function renderIntegrationDetailsPanel(
 
         <div class="integration-side-panel">
           <div class="data-stack">
-            <div class="data-row"><span>Status</span><strong>${esc(card.statusLabel)}</strong></div>
+            <div class="data-row"><span>Connection status</span><strong>${esc(card.statusLabel)}</strong></div>
             <div class="data-row"><span>Last test</span><strong>${esc(formatDrawerDate(card.lastTest))}</strong></div>
             <div class="data-row"><span>Last sync</span><strong>${esc(formatDrawerDate(card.lastSync))}</strong></div>
             <div class="data-row"><span>Last import</span><strong>${esc(formatDrawerDate(card.lastImport))}</strong></div>
@@ -352,7 +386,7 @@ export function renderIntegrationDrawer(card = null, session = {}, options = {})
       <button
         class="integration-drawer-backdrop"
         type="button"
-        aria-label="Close connector setup"
+        aria-label="Close setup drawer"
         data-integration-drawer-close="backdrop"
       ></button>
 

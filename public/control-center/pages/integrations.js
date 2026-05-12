@@ -772,11 +772,11 @@ function getQuickConnectLabel(integration) {
 
 function getSmartConnectLabel(card) {
   if (card.backendSupported === false) return "Open setup";
-  if (card.statusLabel === "Connected") return "Manage Connection";
-  if (card.statusLabel === "Partial") return "Complete Setup";
-  if (card.statusLabel === "Token expired") return "Reconnect Now";
-  if (card.statusLabel === "Error") return "Fix Connection";
-  return getQuickConnectLabel(card) || (card.id === "website" ? "Connect Website" : `Connect ${card.label}`);
+  if (card.statusLabel === "Connected") return "Manage";
+  if (card.statusLabel === "Partial") return "Complete setup";
+  if (card.statusLabel === "Token expired") return "Reconnect";
+  if (card.statusLabel === "Error") return "Fix connection";
+  return getQuickConnectLabel(card) || "Connect";
 }
 
 function getDrawerPrimaryAction(card) {
@@ -784,7 +784,7 @@ function getDrawerPrimaryAction(card) {
     return { action: "select", label: "Open setup" };
   }
   if (card.statusLabel === "Connected") {
-    return { action: "sync", label: "Sync Now" };
+    return { action: "sync", label: "Sync" };
   }
   if (["Token expired", "Error"].includes(card.statusLabel)) {
     return { action: "reconnect", label: getSmartConnectLabel(card) };
@@ -1025,20 +1025,23 @@ function getConnectorWorkspaceAction(card) {
 
   if (statusKey === "connected") {
     return {
-      label: card.lastSync ? "Test" : "Sync",
-      action: card.lastSync ? "test" : "sync"
+      label: "Sync",
+      action: "sync"
     };
   }
 
   if (statusKey === "failed") {
-    return { label: getSmartConnectLabel(card), action: "reconnect" };
+    return {
+      label: card.statusLabel === "Error" ? "Fix connection" : "Reconnect",
+      action: "reconnect"
+    };
   }
 
   if (statusKey === "needs_setup") {
-    return { label: getSmartConnectLabel(card), action: "select" };
+    return { label: "Complete setup", action: "select" };
   }
 
-  return { label: getSmartConnectLabel(card), action: "connect" };
+  return { label: "Connect", action: "connect" };
 }
 
 function focusDrawerField(session, card) {
@@ -1082,7 +1085,9 @@ function bindIntegrationActions({
   Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {
     button.onclick = () => {
       const integrationId = button.getAttribute("data-integration-select") || "";
+      const integration = getIntegrationById(integrationId);
       openIntegrationDrawer(session, integrationId);
+      showMessage?.(`Setup drawer opened for ${integration?.label || "connector"}.`);
       render();
     };
   });
@@ -1091,7 +1096,9 @@ function bindIntegrationActions({
     button.onclick = async () => {
       const action = button.getAttribute("data-integration-primary") || "";
       const integrationId = button.getAttribute("data-integration-id") || "";
+      const integration = getIntegrationById(integrationId);
       openIntegrationDrawer(session, integrationId);
+      showMessage?.(`Setup drawer opened for ${integration?.label || "connector"}.`);
 
       if (action === "manage") {
         render();
@@ -1170,6 +1177,43 @@ function bindIntegrationActions({
   Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {
     button.onclick = () => {
       closeIntegrationDrawer(session);
+      showMessage?.("Setup drawer closed.");
+      render();
+    };
+  });
+
+  Array.from(document.querySelectorAll("[data-integration-diagnostics]")).forEach((button) => {
+    button.onclick = () => {
+      const state = getState();
+      const domainModels = buildDomainModels(state, session, {
+        domains: INTEGRATION_DOMAINS,
+        buildIntegrationCardModel: (integration, localSession, localState) => buildIntegrationCardModel(
+          integration,
+          localSession,
+          localState,
+          {
+            getLegacySourceValue,
+            getLegacySources,
+            getServerRecord,
+            unsupportedIntegrationIds: UNSUPPORTED_INTEGRATION_IDS,
+            normalizeStatusLabel,
+            getLocalFillCount,
+            getRequiredMissing,
+            getIntegrationAccessModel,
+            asArray,
+            asObject,
+            asString,
+            titleCase,
+            inferScopeKeys,
+            buildSuggestedValues,
+            getSuggestedFieldValue,
+            getHealthSummary
+          }
+        )
+      });
+      const allCards = domainModels.flatMap((domain) => domain.cards);
+      const diagnostics = buildLaunchDiagnostics(allCards);
+      showMessage?.(`Diagnostics reviewed: ${diagnostics.blockers.length} blockers, ${diagnostics.warnings.length} warnings.`);
       render();
     };
   });
@@ -1358,7 +1402,7 @@ function bindIntegrationActions({
         input.value = prompt;
       }
       navigateTo("ai-command");
-      showMessage?.("Integration review prompt added to AI Command.");
+      showMessage?.("Diagnostics prompt added to AI Command.");
     };
   });
 
@@ -1369,6 +1413,7 @@ function bindIntegrationActions({
     integrationDrawerEscapeHandler = (event) => {
       if (event.key !== "Escape" || !session.drawerOpen) return;
       closeIntegrationDrawer(session);
+      showMessage?.("Setup drawer closed.");
       render();
     };
     document.addEventListener("keydown", integrationDrawerEscapeHandler);
@@ -1471,8 +1516,8 @@ export const integrationsRoute = {
         <section class="card integration-system-overview">
           <div class="card-head integration-system-overview-head">
             <div>
-              <div class="setup-kicker">Integration Overview</div>
-              <h3>System Control Panel</h3>
+              <div class="setup-kicker">Integration Control Tower</div>
+              <h3>Connector workspace overview</h3>
               <p class="home-section-copy" style="margin:6px 0 0;">Track launch-critical connectors, diagnose readiness impact, and operate integrations without leaving the standard page shell.</p>
             </div>
             <span class="card-badge ${escapeHtml(attentionTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
@@ -1522,7 +1567,7 @@ export const integrationsRoute = {
                 <div>
                   <div class="setup-kicker">Required Launch Connectors</div>
                   <h3>Connector Workspace</h3>
-                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the connector setup workspace.</p>
+                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search any provider, and move directly into the setup drawer.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(filteredCards.length ? "neutral" : "warning")}">${escapeHtml(filteredCards.length ? `${filteredCards.length} visible` : "No matches")}</span>
               </div>
@@ -1541,7 +1586,7 @@ export const integrationsRoute = {
                     <option value="connected" ${session.statusFilter === "connected" ? "selected" : ""}>Connected</option>
                     <option value="missing" ${session.statusFilter === "missing" ? "selected" : ""}>Missing</option>
                     <option value="failed" ${session.statusFilter === "failed" ? "selected" : ""}>Failed</option>
-                    <option value="needs_setup" ${session.statusFilter === "needs_setup" ? "selected" : ""}>Needs setup</option>
+                    <option value="needs_setup" ${session.statusFilter === "needs_setup" ? "selected" : ""}>Partial</option>
                   </select>
                 </label>
                 <label class="integration-filter-field integration-filter-search">
@@ -1564,12 +1609,12 @@ export const integrationsRoute = {
           </div>
 
           <aside class="integration-system-workspace-side">
-            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open Smart Connect.</div>`}
+            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open the setup drawer.</div>`}
 
             <section class="card integration-system-diagnostics">
               <div class="card-head">
                 <div>
-                  <h3>Diagnostics / Readiness Impact</h3>
+                  <h3>Diagnostics</h3>
                   <p class="home-section-copy" style="margin:6px 0 0;">Review blockers, warnings, and the fixes required before campaign launch.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(diagnostics.blockers.length ? "danger" : diagnostics.warnings.length ? "warning" : "success")}">${escapeHtml(diagnostics.blockers.length ? "Blockers" : diagnostics.warnings.length ? "Warnings" : "Clear")}</span>
@@ -1587,6 +1632,7 @@ export const integrationsRoute = {
                 ${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.")}
               </div>
               <div class="integration-system-prompt-row">
+                <button class="btn btn-secondary" type="button" data-integration-diagnostics="run">Run diagnostics</button>
                 ${recommendations.prompts.slice(0, 2).map((item) => `
                   <button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>
                 `).join("")}
@@ -1596,7 +1642,7 @@ export const integrationsRoute = {
             <section class="card integration-system-activity">
               <div class="card-head">
                 <div>
-                  <h3>Activity / Recent Syncs</h3>
+                  <h3>Sync health</h3>
                   <p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(activityFeed.some((item) => item.source === "real") ? "success" : "neutral")}">${escapeHtml(activityFeed.some((item) => item.source === "real") ? "Live feed" : "Derived feed")}</span>
@@ -1609,7 +1655,7 @@ export const integrationsRoute = {
         <section class="card integration-system-readiness-map">
           <div class="card-head">
             <div>
-              <h3>Coverage & Recovery Priorities</h3>
+              <h3>Coverage priorities</h3>
               <p class="home-section-copy" style="margin:6px 0 0;">Use category coverage, missing critical connectors, and next actions to close the remaining launch gaps.</p>
             </div>
             <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>

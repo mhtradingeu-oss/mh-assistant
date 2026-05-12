@@ -37,9 +37,9 @@ export function renderAISmartRecommendation(rec = {}) {
       <section class="card ai-smart-rec ai-smart-rec--healthy">
         <div class="ai-smart-rec-header">
           <div class="ai-smart-rec-kicker">
-            <span class="ai-smart-rec-badge success">AI Smart Connect</span>
+            <span class="ai-smart-rec-badge success">Integration Control Tower</span>
           </div>
-          <h3>Integration layer is healthy</h3>
+          <h3>Connector workspace is healthy</h3>
           <p class="ai-smart-rec-sub">All critical connectors are active. The system is operating with full launch-critical data coverage.</p>
         </div>
         ${nextHtml}
@@ -58,7 +58,7 @@ export function renderAISmartRecommendation(rec = {}) {
     <section class="card ai-smart-rec">
       <div class="ai-smart-rec-header">
         <div class="ai-smart-rec-kicker">
-          <span class="ai-smart-rec-badge ${esc(rec.priorityTone)}">AI Smart Connect</span>
+          <span class="ai-smart-rec-badge ${esc(rec.priorityTone)}">Integration Control Tower</span>
           <span class="card-badge ${esc(rec.priorityTone)}">${esc(rec.priorityLabel)}</span>
         </div>
         <h3>Connect <strong>${esc(card.label)}</strong> next</h3>
@@ -83,7 +83,7 @@ export function renderAISmartRecommendation(rec = {}) {
         ${chipsHtml}
         <div class="ai-smart-rec-actions">
           <button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">
-            Open Smart Connect
+            Open setup drawer
           </button>
           <span class="ai-smart-rec-cta-note">Opens the ${esc(card.label)} setup drawer and focuses the first required field.</span>
         </div>
