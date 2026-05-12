@@ -1,0 +1,437 @@
+     1	<!doctype html>
+     2	<html lang="en">
+     3	<head>
+     4	  <meta charset="utf-8">
+     5	  <title>MH Assistant OS</title>
+     6	  <meta name="viewport" content="width=device-width, initial-scale=1">
+     7	  <meta name="description" content="MH Assistant OS - AI Marketing Operating System">
+     8	  <link rel="stylesheet" href="./styles/00-tokens.css?v=20260508-tokens-1">
+     9	  <link rel="stylesheet" href="./styles/01-reset.css?v=20260508-reset-1">
+    10	  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+    11	  <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+    12	  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+    13	  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+    14	  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+    15	  <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
+    16	  <link rel="stylesheet" href="./styles/08-components-foundation.css?v=20260508-components-1">
+    17	  <link rel="stylesheet" href="./styles/09-operations-centers.css?v=20260511-task-center-layout-1">
+    18	  <link rel="stylesheet" href="./styles/12-pages.css?v=20260508-pages-1">
+    19	  <link rel="stylesheet" href="./styles/13-home-executive.css?v=20260508-home-executive-1">
+    20	  <link rel="stylesheet" href="./styles/14-page-standard.css?v=20260510-library-polish-1">
+    21	</head>
+    22	
+    23	<body>
+    24	  <div id="app" class="app-shell">
+    25	    <!-- Mobile sidebar backdrop -->
+    26	    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+    27	
+    28	    <!-- Global feedback -->
+    29	    <div id="globalMessage" class="global-message" role="status" aria-live="polite"></div>
+    30	    <div id="globalError" class="global-error" role="alert" aria-live="assertive"></div>
+    31	
+    32	    <!-- Startup diagnostics -->
+    33	    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+    34	      Startup step: idle
+    35	    </div>
+    36	
+    37	    <div
+    38	      id="startupUnlockBar"
+    39	      class="startup-unlock-bar"
+    40	      role="alert"
+    41	      aria-live="assertive"
+    42	      aria-hidden="true"
+    43	      hidden
+    44	    >
+    45	      <span id="startupUnlockText">Startup is taking longer than expected.</span>
+    46	      <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+    47	    </div>
+    48	
+    49	    <aside
+    50	      id="startupTracePanel"
+    51	      class="startup-trace-panel"
+    52	      aria-live="polite"
+    53	      aria-hidden="true"
+    54	      hidden
+    55	    >
+    56	      <div class="startup-trace-head">
+    57	        <strong>Startup Trace</strong>
+    58	        <button id="startupTraceUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+    59	      </div>
+    60	      <div id="startupTraceMeta" class="startup-trace-meta">Startup trace is idle.</div>
+    61	      <div id="startupTraceBody" class="startup-trace-body">No startup events recorded yet.</div>
+    62	    </aside>
+    63	
+    64	    <section
+    65	      id="fatalErrorPanel"
+    66	      class="fatal-error-panel"
+    67	      role="alert"
+    68	      aria-live="assertive"
+    69	      aria-hidden="true"
+    70	      hidden
+    71	    >
+    72	      <h3 id="fatalErrorTitle">Control Center startup failed</h3>
+    73	      <p id="fatalErrorText">The app could not finish loading.</p>
+    74	      <div id="fatalErrorDetails" class="fatal-error-details">No diagnostics yet.</div>
+    75	      <div id="fatalStartupSteps" class="fatal-startup-steps">No startup steps recorded yet.</div>
+    76	      <div class="fatal-error-actions">
+    77	        <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
+    78	        <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
+    79	      </div>
+    80	    </section>
+    81	
+    82	    <!-- Global loading -->
+    83	    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+    84	      <div class="loading-card" role="status" aria-live="polite">
+    85	        <div class="loading-spinner" aria-hidden="true"></div>
+    86	        <h3 id="loadingTitle">Loading project</h3>
+    87	        <p id="loadingText">Please wait while the system loads the workspace.</p>
+    88	      </div>
+    89	    </div>
+    90	
+    91	    <div class="os-layout">
+    92	      <!-- Sidebar -->
+    93	      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
+    94	        <div class="sidebar-brand">
+    95	          <div class="brand-badge">AI OS</div>
+    96	          <h1>MH Assistant</h1>
+    97	          <p>Marketing, launch, content, ads, insights, and operations.</p>
+    98	        </div>
+    99	
+   100	        <div class="sidebar-project">
+   101	          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+   102	          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+   103	            <option value="">Select project</option>
+   104	          </select>
+   105	        </div>
+   106	
+   107	        <nav class="sidebar-nav" aria-label="Primary navigation">
+   108	          <div class="nav-group">
+   109	            <div class="nav-group-title">Primary</div>
+   110	            <button class="nav-item is-active" data-route="home" data-page="home" type="button">Home</button>
+   111	            <button class="nav-item" data-route="setup" data-page="setup" type="button">Setup</button>
+   112	            <button class="nav-item" data-route="library" data-page="library" type="button">Library</button>
+   113	            <button class="nav-item" data-route="integrations" data-page="integrations" type="button">Integrations</button>
+   114	            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+   115	            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+   116	            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+   117	            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+   118	          </div>
+   119	
+   120	          <div class="nav-group">
+   121	            <div class="nav-group-title">Secondary</div>
+   122	            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+   123	            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+   124	            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+   125	            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+   126	            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+   127	          </div>
+   128	
+   129	          <div class="nav-group">
+   130	            <div class="nav-group-title">System</div>
+   131	            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+   132	            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+   133	            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+   134	            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+   135	            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+   136	            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
+   137	          </div>
+   138	        </nav>
+   139	
+   140	        <div class="sidebar-actions">
+   141	          <button id="refreshAllBtn" class="btn btn-primary" data-action="refresh-project" type="button">
+   142	            Refresh All
+   143	          </button>
+   144	          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+   145	            Open AI Workspace
+   146	          </button>
+   147	        </div>
+   148	      </aside>
+   149	
+   150	      <!-- Main shell -->
+   151	      <div class="main-shell">
+   152	        <!-- Topbar -->
+   153	        <header id="topbar" class="topbar" role="banner">
+   154	          <button
+   155	            id="sidebarToggleBtn"
+   156	            class="sidebar-toggle"
+   157	            type="button"
+   158	            aria-label="Toggle sidebar"
+   159	            aria-controls="sidebarNav"
+   160	            aria-expanded="false"
+   161	          >
+   162	            ☰
+   163	          </button>
+   164	
+   165	          <div class="topbar-left">
+   166	            <div class="page-context">
+   167	              <span id="pageEyebrow" class="page-eyebrow">Start</span>
+   168	              <h2 id="pageTitle" class="page-title">Home</h2>
+   169	            </div>
+   170	          </div>
+   171	
+   172	          <div class="topbar-right">
+   173	            <div class="workspace-chip" aria-label="Current workspace">
+   174	              <span class="workspace-dot"></span>
+   175	              <strong id="ctxProject">-</strong>
+   176	            </div>
+   177	
+   178	            <div class="exec-action-cluster" aria-label="Executive actions">
+   179	              <button
+   180	                id="commandToggleBtn"
+   181	                class="btn btn-secondary command-toggle"
+   182	                type="button"
+   183	                aria-label="Toggle command bar"
+   184	                aria-controls="globalCommandBar"
+   185	                aria-expanded="false"
+   186	              >
+   187	                Command
+   188	              </button>
+   189	              <button
+   190	                id="execNewBtn"
+   191	                class="btn btn-primary exec-action-btn"
+   192	                type="button"
+   193	              >
+   194	                + New
+   195	              </button>
+   196	              <button
+   197	                id="execAskAiBtn"
+   198	                class="btn btn-secondary exec-action-btn"
+   199	                type="button"
+   200	              >
+   201	                AI Workspace
+   202	              </button>
+   203	            </div>
+   204	          </div>
+   205	
+   206	          <!-- Kept hidden; app.js/page-standard.js may update or read it -->
+   207	          <p id="pageDescription" class="page-description" hidden></p>
+   208	        </header>
+   209	
+   210	        <!-- Command bar -->
+   211	        <div id="commandBackdrop" class="command-backdrop" aria-hidden="true" hidden></div>
+   212	
+   213	        <section id="globalCommandBar" class="command-bar" aria-hidden="true" hidden aria-label="Global command bar">
+   214	          <div class="command-bar-left">
+   215	            <input
+   216	              id="globalSearch"
+   217	              class="command-input"
+   218	              type="text"
+   219	              placeholder="Search pages, assets, campaigns, workflows..."
+   220	              aria-label="Global search"
+   221	              autocomplete="off"
+   222	            >
+   223	          </div>
+   224	
+   225	          <div class="command-bar-center">
+   226	            <input
+   227	              id="quickCommandInput"
+   228	              class="command-input"
+   229	              type="text"
+   230	              placeholder="Talk to the system: e.g. build a launch campaign for Germany"
+   231	              aria-label="Quick command"
+   232	              autocomplete="off"
+   233	            >
+   234	          </div>
+   235	
+   236	          <div class="command-bar-right">
+   237	            <button id="runSearchBtn" class="btn btn-secondary" data-action="search" type="button">Search</button>
+   238	            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+   239	            <button id="newCampaignBtn" class="btn btn-secondary" data-action="open-campaign-studio" type="button">New Campaign</button>
+   240	            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+   241	          </div>
+   242	        </section>
+   243	
+   244	        <!-- Workspace -->
+   245	        <main id="workspace" class="workspace page-container" role="main" aria-live="polite">
+   246	          <div id="pageRoot" class="section"></div>
+   247	        </main>
+   248	      </div>
+   249	    </div>
+   250	  </div>
+   251	
+   252	  <script>
+   253	    (function bootstrapControlCenterFallback() {
+   254	      function hideLoadingOverlay() {
+   255	        var overlay = document.getElementById("loadingOverlay");
+   256	        if (!overlay) return;
+   257	
+   258	        overlay.classList.remove("is-visible");
+   259	        overlay.setAttribute("aria-hidden", "true");
+   260	        overlay.style.display = "none";
+   261	        overlay.style.pointerEvents = "none";
+   262	      }
+   263	
+   264	      function showFatalStartupError(message, details) {
+   265	        hideLoadingOverlay();
+   266	
+   267	        var panel = document.getElementById("fatalErrorPanel");
+   268	        var text = document.getElementById("fatalErrorText");
+   269	        var diagnostics = document.getElementById("fatalErrorDetails");
+   270	        var globalError = document.getElementById("globalError");
+   271	
+   272	        if (text) {
+   273	          text.textContent = message || "The app failed to initialize.";
+   274	        }
+   275	
+   276	        if (diagnostics) {
+   277	          diagnostics.textContent = details || "No additional diagnostics available.";
+   278	        }
+   279	
+   280	        if (panel) {
+   281	          panel.hidden = false;
+   282	          panel.classList.add("is-visible");
+   283	          panel.setAttribute("aria-hidden", "false");
+   284	        }
+   285	
+   286	        if (globalError) {
+   287	          globalError.textContent = message || "The app failed to initialize.";
+   288	          globalError.style.display = "block";
+   289	        }
+   290	      }
+   291	
+   292	      var retryBtn = document.getElementById("fatalRetryBtn");
+   293	      if (retryBtn) {
+   294	        retryBtn.addEventListener("click", function () {
+   295	          window.location.reload();
+   296	        });
+   297	      }
+   298	
+   299	      var accessKeyBtn = document.getElementById("fatalAccessKeyBtn");
+   300	      if (accessKeyBtn) {
+   301	        accessKeyBtn.addEventListener("click", function () {
+   302	          try {
+   303	            var entered = window.prompt("Paste Control Center access key:", "");
+   304	            if (entered && entered.trim()) {
+   305	              window.localStorage.setItem("mh-control-write-key", entered.trim());
+   306	              window.location.reload();
+   307	            }
+   308	          } catch (_) {
+   309	            // Ignore localStorage errors in restricted contexts.
+   310	          }
+   311	        });
+   312	      }
+   313	
+   314	      window.addEventListener("error", function (event) {
+   315	        if (window.__mhControlCenterStarted) return;
+   316	
+   317	        var target = event && event.target;
+   318	        var src = target && target.src ? String(target.src) : "";
+   319	        var tagName = target && target.tagName ? String(target.tagName).toUpperCase() : "";
+   320	        var isModuleLoadError =
+   321	          tagName === "SCRIPT" &&
+   322	          src.indexOf("/control-center/app.js") !== -1;
+   323	
+   324	        if (!isModuleLoadError) return;
+   325	
+   326	        showFatalStartupError(
+   327	          "Control Center JavaScript failed to load.",
+   328	          src || "Module script load error"
+   329	        );
+   330	      }, true);
+   331	
+   332	      window.addEventListener("unhandledrejection", function (event) {
+   333	        if (window.__mhControlCenterStarted) return;
+   334	
+   335	        var reason = event && event.reason;
+   336	        var message = reason && reason.message
+   337	          ? reason.message
+   338	          : String(reason || "Unhandled startup rejection");
+   339	
+   340	        showFatalStartupError("Control Center startup promise failed.", message);
+   341	      });
+   342	    })();
+   343	  </script>
+   344	
+   345	  <script src="./runtime/command-runtime.js?v=20260510-command-runtime-classic-2"></script>
+   346	  <script type="module" src="./app.js?v=20260510-interaction-rerender-fix-2"></script>
+   347	
+   348	    <div id="aiDock" class="ai-dock">
+   349	      <button
+   350	        id="aiDockToggle"
+   351	        class="ai-dock-toggle"
+   352	        type="button"
+   353	        aria-expanded="false"
+   354	        aria-controls="aiDockPanel"
+   355	      >
+   356	        <span class="ai-dock-status-dot"></span>
+   357	        <span class="ai-dock-label">MH Assistant</span>
+   358	        <span class="ai-dock-state">Ready</span>
+   359	      </button>
+   360	
+   361	      <section
+   362	        id="aiDockPanel"
+   363	        class="ai-dock-panel"
+   364	        aria-hidden="true"
+   365	      >
+   366	        <header class="ai-dock-header">
+   367	          <div>
+   368	            <strong>MH Assistant</strong>
+   369	            <p id="aiDockContext">AI operating layer ready.</p>
+   370	          </div>
+   371	
+   372	          <button
+   373	            id="aiDockClose"
+   374	            class="ai-dock-close"
+   375	            type="button"
+   376	            aria-label="Close assistant"
+   377	          >
+   378	            ×
+   379	          </button>
+   380	        </header>
+   381	
+   382	        <div class="ai-dock-body">
+   383	          <div class="ai-dock-section">
+   384	            <span class="ai-dock-section-label">Suggested next step</span>
+   385	
+   386	            <button
+   387	              class="ai-dock-suggestion"
+   388	              type="button"
+   389	              data-ai-suggestion="Review the current workspace and suggest the next best action."
+   390	            >
+   391	              Review current workspace
+   392	            </button>
+   393	
+   394	            <button
+   395	              class="ai-dock-suggestion"
+   396	              type="button"
+   397	              data-ai-suggestion="Build a smart workflow for the current project."
+   398	            >
+   399	              Build AI workflow
+   400	            </button>
+   401	
+   402	            <button
+   403	              class="ai-dock-suggestion"
+   404	              type="button"
+   405	              data-ai-suggestion="Summarize blockers and operational risks."
+   406	            >
+   407	              Analyze blockers
+   408	            </button>
+   409	          </div>
+   410	
+   411	          <div class="ai-dock-section">
+   412	            <span class="ai-dock-section-label">Quick actions</span>
+   413	
+   414	            <div class="ai-dock-actions">
+   415	              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+   416	                Campaign
+   417	              </button>
+   418	
+   419	              <button class="ai-dock-chip" data-ai-route="content-studio">
+   420	                Content
+   421	              </button>
+   422	
+   423	              <button class="ai-dock-chip" data-ai-route="media-studio">
+   424	                Media
+   425	              </button>
+   426	
+   427	              <button class="ai-dock-chip" data-ai-route="publishing">
+   428	                Publish
+   429	              </button>
+   430	            </div>
+   431	          </div>
+   432	        </div>
+   433	      </section>
+   434	    </div>
+   435	
+   436	</body>
+   437	</html>

@@ -1,0 +1,889 @@
+===== public/control-center/pages/setup.js:1149 =====
+        </button>
+        <span id="setupTemplateStatus" class="setup-template-status"></span>
+      </div>
+    </section>
+  `;
+}
+
+
+export const setupRoute = {
+  id: "setup",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Start",
+    title: "Smart Guided Setup",
+    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
+  },
+  template: `
+    <section class="page is-active" data-page="setup">
+      <div id="setupRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage,
+    showError,
+    reloadProjectData,
+    saveProjectSetup
+  }) {
+    const state = getState();
+    const overviewData = asObject(state.data.overview?.overview);
+    const readiness = asObject(state.data.readiness);
+    const readinessDashboard = asObject(readiness.dashboard);
+    const integrations = asObject(state.data.integrations);
+    const assets = asObject(state.data.assets);
+
+    const projectName = state.context.currentProject || overviewData.project_name || "";
+    const draft = loadSetupDraft(projectName);
+    const values = { ...buildSetupValues(state), ...(draft || {}) };
+
+    const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
+    const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "needs_work";
+    const missingAssets = getMissingAssetLabels(assets);
+
+===== public/control-center/pages/workflows.js:1741 =====
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+      showMessage?.("Auto Mode skipped gated step.");
+    };
+  }
+}
+
+export const workflowsRoute = {
+  id: "workflows",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Workflows",
+    description: "Run structured, repeatable workflows for common marketing and execution operations."
+  },
+  template: `
+    <section class="page is-active" data-page="workflows">
+      <div id="workflowsRoot"></div>
+    </section>
+  `,
+    render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  }) {
+    const state = getState();
+    const projectName = asString(selectCurrentProject(state) || "");
+    const campaignName = asString(state.context.activeCampaign || "");
+    const executionMode = asString(state.context.executionMode || "");
+
+    const payload = asObject(selectProjectPayload(state));
+
+    const overview = asObject(payload.overview?.overview || payload.overview);
+    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+    const operations = asObject(selectOperationsSnapshot(state));
+
+    const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
+    const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
+
+    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+    const tasksTotal = Number(operations.tasks?.total || 0);
+    const approvalsTotal = Number(operations.approvals?.total || 0);
+
+===== public/control-center/pages/research.js:1101 =====
+      session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => `${item.title}:${item.target}`);
+      session.savedRecommendations = session.savedRecommendations.slice(0, 12);
+      render();
+      showMessage?.("Structured recommendation saved.");
+    };
+  }
+}
+
+export const researchRoute = {
+  id: "research",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Research",
+    description: "A premium intelligence lab for competitors, audiences, search, offers, and strategic opportunities."
+  },
+  template: `
+    <section class="page is-active" data-page="research">
+      <div id="researchRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    fetchProjectInsights,
+    fetchProjectLearning,
+    createProjectHandoff
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const session = ensureSession(projectName);
+    const root = $("researchRoot");
+    if (!root) return;
+
+    const rerender = () => this.render({
+      getState,
+      $,
+      escapeHtml,
+      safeText,
+      navigateTo,
+
+===== public/control-center/pages/settings.js:1890 =====
+      bindSettingsAiButtons(context, session);
+    });
+  });
+
+  bindSettingsActionButtons(context, session);
+  bindSettingsAiButtons(context, session);
+}
+
+export const settingsRoute = {
+  id: "settings",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "System",
+    title: "Settings",
+    description: "Configure project defaults, AI behavior, publishing rules, approvals, sync behavior, and governance."
+  },
+  template: `<section class="page is-active" data-page="settings"><div class="settings-page-surface"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject;
+
+    if (!projectName) {
+      const root = context.$("pageRoot");
+      if (!root) return;
+      root.innerHTML = `
+        <section class="page is-active" data-page="settings">
+          <div class="panel panel-span-2">
+            <div class="empty-box">
+              Select a project to configure system defaults, approvals, sync policies, and governance rules.
+            </div>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    const session = ensureSession(state);
+    replacePage(context, session);
+    bindFormEvents(context, session);
+
+    if (!session.loaded && !session.loading) {
+      loadDurableSettings(session, state, () => {
+        replacePage(context, session);
+        bindFormEvents(context, session);
+      });
+
+===== public/control-center/pages/operations-centers.js:1660 =====
+        context.showError?.(error.message || "Failed to update notification.");
+      }
+    };
+  });
+  bindRouteButtons(root, context);
+  bindOpsAssistantButtons(root, context, prompts);
+}
+
+export const taskCenterRoute = {
+  id: "task-center",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operate",
+    title: "Task Center",
+    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+  },
+  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject || "";
+
+    // Render immediately from state as fallback
+    renderTaskCenter(context, context.getState(), projectName);
+
+    // Fetch live data and re-render on success
+    function doFetch() {
+      if (!projectName || !context.fetchProjectTaskCenter) return;
+      context.fetchProjectTaskCenter(projectName)
+        .then((liveData) => {
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.task_center = liveData;
+          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+          context.showError?.(`Task Center: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
+  }
+};
+
+export const queueCenterRoute = {
+  id: "queue-center",
+
+===== public/control-center/pages/operations-centers.js:1695 =====
+          context.showError?.(`Task Center: ${error?.message || "Failed to load live data."}`);
+        });
+    }
+
+    doFetch();
+  }
+};
+
+export const queueCenterRoute = {
+  id: "queue-center",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operate",
+    title: "Queue Center",
+    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+  },
+  template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject || "";
+
+    renderQueueCenter(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectQueueCenter) return;
+      const session = ensureSession(queueSessions, projectName, {
+        focus: "all",
+        status: "all",
+        search: "",
+        selectedKey: "",
+        isLoading: false,
+        errorMessage: ""
+      });
+      session.isLoading = true;
+      session.errorMessage = "";
+      renderQueueCenter(context, context.getState(), projectName);
+      context.fetchProjectQueueCenter(projectName)
+        .then((liveData) => {
+          session.isLoading = false;
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.queue_center = liveData;
+          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+
+===== public/control-center/pages/operations-centers.js:1743 =====
+          context.showError?.(session.errorMessage);
+        });
+    }
+
+    doFetch();
+  }
+};
+
+export const jobMonitorRoute = {
+  id: "job-monitor",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operate",
+    title: "Job Monitor",
+    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+  },
+  template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject || "";
+
+    renderJobMonitor(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectJobMonitor) return;
+      const session = ensureSession(jobSessions, projectName, {
+        focus: "all",
+        kind: "all",
+        search: "",
+        selectedKey: "",
+        isLoading: false,
+        errorMessage: ""
+      });
+      session.isLoading = true;
+      session.errorMessage = "";
+      renderJobMonitor(context, context.getState(), projectName);
+      context.fetchProjectJobMonitor(projectName)
+        .then((liveData) => {
+          session.isLoading = false;
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.job_monitor = liveData;
+          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+
+===== public/control-center/pages/operations-centers.js:1791 =====
+          context.showError?.(session.errorMessage);
+        });
+    }
+
+    doFetch();
+  }
+};
+
+export const notificationCenterRoute = {
+  id: "notification-center",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operate",
+    title: "Notification Center",
+    description: "Review sync failures, pending approvals, publish events, provider disconnects, claim risks, and workflow completion alerts."
+  },
+  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject || "";
+
+    renderNotificationCenter(context, context.getState(), projectName);
+
+    function doFetch() {
+      if (!projectName || !context.fetchProjectNotificationCenter) return;
+      const session = ensureSession(notificationSessions, projectName, {
+        focus: "all",
+        severity: "all",
+        search: "",
+        selectedKey: "",
+        isLoading: false,
+        errorMessage: ""
+      });
+      session.isLoading = true;
+      session.errorMessage = "";
+      renderNotificationCenter(context, context.getState(), projectName);
+      context.fetchProjectNotificationCenter(projectName)
+        .then((liveData) => {
+          session.isLoading = false;
+          if (!liveData) return;
+          const ops = asObject(context.getState().data.operations);
+          ops.notification_center = liveData;
+          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+        })
+        .catch((error) => {
+
+===== public/control-center/pages/publishing.js:1714 =====
+  if (autoSkipBtn) {
+    autoSkipBtn.onclick = async () => {
+      await skipCurrentStep({ context: { getState, navigateTo, projectName } });
+      showMessage?.("Gated step skipped.");
+    };
+  }
+}
+
+export const publishingRoute = {
+  id: "publishing",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Publishing",
+    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+  },
+  template: `
+    <section class="page is-active" data-page="publishing">
+      <div id="publishingRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    reloadProjectData,
+    savePublishingSchedule,
+    reschedulePublishingItem,
+    approvePublishingItem,
+    publishPublishingItem,
+    failPublishingItem
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const operations = asObject(state.data.operations);
+    const queue = buildQueue(state, projectName);
+    const session = ensureSession(projectName, state);
+    const checks = asObject(state.data.integrations?.readiness?.checks);
+    const channels = buildChannels(state, queue);
+    const handoff = getPublishingHandoff(projectName, operations);
+    const globalBlockers = getReadinessBlockers(state);
+
+===== public/control-center/pages/library.js:2733 =====
+      const input = $("quickCommandInput");
+      if (input) input.value = buildAiPrompt(projectName, "extract", { docs });
+      navigateTo("ai-command");
+      showMessage?.("AI document extraction prompt sent.");
+    };
+  }
+}
+
+export const libraryRoute = {
+  id: "library",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Start",
+    title: "Library",
+    description: "Smart Asset Library"
+  },
+  template: `
+    <section class="page is-active" data-page="library">
+      <div id="libraryRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage,
+    showError,
+    reloadProjectData
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const registry = asObject(state.data.registry);
+    const baseAssetsData = Array.isArray(state.data.assets) ? { assets: state.data.assets } : asObject(state.data.assets);
+    const registryAssets = asArray(registry.assets || registry.items || registry.records);
+    const assetsDataAssets = asArray(baseAssetsData.assets);
+    const assetsData = {
+      ...baseAssetsData,
+      assets: assetsDataAssets.length ? assetsDataAssets : registryAssets
+    };
+    const operations = asObject(state.data.operations);
+    const session = ensureLibrarySession(projectName);
+    session.viewMode = "grid";
+    const categoryReadiness = getCategoryReadinessList(assetsData);
+    const missingRequiredAssets = getMissingAssetLabels(assetsData);
+
+===== public/control-center/pages/media-studio-workspace.js:3122 =====
+
+  try {
+    navigateTo("publishing");
+  } catch (error) {
+    showError?.(error.message || "Failed to open Publishing.");
+  }
+}
+
+export const mediaStudioRoute = {
+  id: "media-studio",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operations",
+    title: "Media Studio",
+    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review, approvals, and publishing routing."
+  },
+  template: `
+    <section class="page is-active" data-page="media-studio">
+      <div id="mediaStudioRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage,
+    showError
+  }) {
+    const state = getState();
+    const projectName = getProjectName(state);
+    const backendProjectName = getBackendProjectName(state);
+    const root = $("mediaStudioRoot");
+    if (!root) return;
+
+    const session = ensureSession(projectName, state);
+    const rerender = () => mediaStudioRoute.render({
+      getState,
+      $,
+      escapeHtml,
+      navigateTo,
+      showMessage,
+      showError
+    });
+
+
+===== public/control-center/pages/insights.js:1027 =====
+      }
+
+      navigateTo("ai-command");
+      showMessage?.("Insight prompt added to AI Command.");
+    };
+  });
+}
+
+export const insightsRoute = {
+  id: "insights",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Insights",
+    description: "Cross-platform marketing intelligence for performance, learning, and optimization."
+  },
+  template: `
+    <section class="page is-active" data-page="insights">
+      <div id="insightsRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    fetchProjectInsights,
+    createProjectHandoff
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const refreshState = getInsightsRefreshState(projectName);
+    const overview = asObject(state.data.overview?.overview);
+    const currency = overview.currency || "USD";
+    const connections = getConnections(state);
+    const insightRoot = getInsightRoot(state);
+    const feeds = {
+      social: asObject(insightRoot.social || insightRoot.social_platforms || {}),
+      marketplace: asObject(insightRoot.marketplace || insightRoot.commerce || {}),
+      website: asObject(insightRoot.website || insightRoot.analytics || insightRoot.ga4 || {}),
+      seo: asObject(insightRoot.seo || insightRoot.search_console || {}),
+      paid: asObject(insightRoot.paid || insightRoot.paid_media || {})
+
+===== public/control-center/pages/integrations.js:1378 =====
+      if (event.key !== "Escape" || !session.drawerOpen) return;
+      closeIntegrationDrawer(session);
+      render();
+    };
+    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+  }
+}
+
+export const integrationsRoute = {
+  id: "integrations",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Start",
+    title: "Integrations",
+    description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."
+  },
+  template: `
+    <section class="page is-active" data-page="integrations">
+      <div id="integrationsRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    reloadProjectData,
+    connectProjectIntegration,
+    reconnectProjectIntegration,
+    testProjectIntegration,
+    syncProjectIntegration,
+    importProjectIntegrationHistory,
+    disconnectProjectIntegration
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const session = ensureSession(projectName);
+    const domainModels = buildDomainModels(state, session, {
+      domains: INTEGRATION_DOMAINS,
+      buildIntegrationCardModel: (integration, localSession, localState) => buildIntegrationCardModel(
+        integration,
+        localSession,
+
+===== public/control-center/pages/governance.js:1068 =====
+      if (!prompt) return;
+      savePromptToQuickCommand(context, prompt.prompt);
+      context.navigateTo("ai-command");
+      context.showMessage?.("Governance prompt added to AI Command.");
+    };
+  });
+}
+
+export const governanceRoute = {
+  id: "governance",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "System",
+    title: "Governance",
+    description: "Review approvals, policy violations, overrides, escalation, and audit visibility across content, media, campaigns, and publishing."
+  },
+  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+  render(context) {
+    const state = context.getState();
+    const projectName = state?.context?.currentProject || "";
+    const session = ensureSession(projectName);
+    const root = context.$("pageRoot");
+
+    if (!root) return;
+
+    const rerender = () => {
+      root.innerHTML = renderPage(projectName, session, context.escapeHtml);
+      bindGovernance(context, projectName, session);
+    };
+
+    rerender();
+
+    if (!projectName) {
+      return;
+    }
+
+    if (!session.loaded && !session.loading) {
+      loadGovernance(projectName, session, rerender);
+    }
+  }
+};
+
+===== public/control-center/pages/home.js:605 =====
+function setGlobalAiPrompt($, prompt) {
+  const input = $("quickCommandInput");
+  if (input) {
+    input.value = prompt;
+    input.focus?.();
+  }
+}
+
+export const homeRoute = {
+  id: "home",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Executive",
+    title: "Executive Command Center",
+    description: "Understand the whole system in seconds and take the most important action now."
+  },
+  template: `
+    <section class="page is-active" data-page="home">
+      <div id="homeExecRoot"></div>
+    </section>
+  `,
+  render({ getState, $, escapeHtml, navigateTo, showMessage }) {    const state = getState();
+    const dashboard = buildExecutiveData(state);
+    const aiTeamCards = buildAiTeamCards(state);
+
+    const root = $("homeExecRoot");
+    if (!root) return;
+
+    const capabilityCards = asArray(dashboard.capabilities).slice(0, 5);
+    const statusItems = asArray(dashboard.statusBoard).slice(0, 6);
+    const campaignChannels = asArray(dashboard.campaign.channels);
+
+    root.innerHTML = `
+      <div class="home-command-center">
+        ${renderHomeExecutiveIntro({
+          dashboard,
+          capabilityCards,
+          escapeHtml,
+          formatPercent,
+          toneLabel
+        })}
+
+        <section class="card home-decision-section">
+          <div class="home-decision-section-head">
+            <div>
+
+===== public/control-center/pages/campaign-studio.js:1448 =====
+        showError
+      });
+      render();
+      showMessage?.("Refreshing campaign intelligence.");
+    };
+  }
+}
+
+export const campaignStudioRoute = {
+  id: "campaign-studio",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "AI & Build",
+    title: "Campaign Studio",
+    description: "Plan campaign basics, launch waves, channel mix, and required assets in one execution-oriented workspace."
+  },
+  template: `
+    <section class="page is-active" data-page="campaign-studio">
+      <div id="campaignStudioRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage,
+    showError,
+    fetchProjectInsights,
+    fetchProjectLearning,
+    saveProjectCampaign,
+    createProjectHandoff
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const session = ensureSession(projectName, buildDefaults(state));
+    applyAiCampaignHandoff(projectName, state.data.operations, session);
+    const values = session.values;
+    const root = $("campaignStudioRoot");
+    if (!root) return;
+
+    const rerender = () => this.render({
+      getState,
+      $,
+
+===== public/control-center/pages/content-studio-workspace.js:2247 =====
+        showMessage?.(`${agent.title} prompt sent to AI Command.`);
+      }
+
+      rerender();
+    };
+  });
+}
+
+export const contentStudioRoute = {
+  id: "content-studio",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Operations",
+    title: "Content Studio",
+    description: "Smart content production hub for draft generation, review, and routing to Media Studio and Publishing."
+  },
+  template: `
+    <section class="page is-active" data-page="content-studio">
+      <div id="contentStudioRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage,
+    showError
+  }) {
+    const state = getState();
+    const projectName = firstText(state.context?.currentProject);
+    const root = $("contentStudioRoot");
+    if (!root) return;
+
+    const session = ensureSession(projectName, state);
+    const rerender = () => contentStudioRoute.render({
+      getState,
+      $,
+      escapeHtml,
+      navigateTo,
+      showMessage,
+      showError
+    });
+
+    if (!session.loaded && !session.loading && projectName) {
+
+===== public/control-center/pages/ads-manager.js:286 =====
+  }
+
+  const libraryBtn = $("adsManagerOpenLibraryBtn");
+  if (libraryBtn) {
+    libraryBtn.onclick = () => navigateTo("library");
+  }
+}
+
+export const adsManagerRoute = {
+  id: "ads-manager",
+  disableStandardLayout: true,
+  meta: {
+    eyebrow: "Execute & Grow",
+    title: "Ads Manager",
+    description: "Plan budgets, assess pacing, review platform readiness, and manage paid media decisions from one ad-ops workspace."
+  },
+  template: `
+    <section class="page is-active" data-page="ads-manager">
+      <div id="adsManagerRoot"></div>
+    </section>
+  `,
+  render({
+    getState,
+    $,
+    escapeHtml,
+    safeText,
+    navigateTo,
+    showMessage
+  }) {
+    const state = getState();
+    const projectName = state.context.currentProject || "";
+    const overview = asObject(state.data.overview?.overview);
+    const session = ensureSession(projectName, state);
+    const values = session.values;
+    const currency = overview.currency || "USD";
+    const totalBudget = toNumber(values.totalBudget, 0);
+    const dailyBudget = toNumber(values.dailyBudget, 0);
+    const spendToDate = asString(values.spendToDate).trim() === "" ? null : toNumber(values.spendToDate, 0);
+    const platformCards = buildPlatformCards(state, totalBudget);
+    const creativeMappings = buildCreativeMappings(platformCards, state);
+    const connectedPlatforms = platformCards.filter((item) => item.status !== "Blocked").length;
+    const operationalPlatforms = platformCards.filter((item) => item.status === "Operational").length;
+    const monthProgress = Math.min(1, new Date().getUTCDate() / 30);
+    const plannedSpendToDate = totalBudget ? totalBudget * monthProgress : 0;
+    const pacingDelta = spendToDate == null ? null : spendToDate - plannedSpendToDate;
+
+===== public/control-center/pages/ai-command.js:1637 =====
+		chips: buildImpactChips(["Content", "Campaign", "Automation"])
+	};
+}
+
+// ============================================================
+//  ROUTE EXPORT
+// ============================================================
+
+export const aiCommandRoute = {
+	id: "ai-command",
+   disableStandardLayout: true,
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Workspace",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+  const {
+    getState,
+    $,
+    escapeHtml,
+    navigateTo,
+    showMessage
+  } = context;
+
+  const state = getState();
+  const projectName = asString(selectCurrentProject(state) || "");
+  const market = asString(state.context.currentMarket || "");
+  const language = asString(state.context.currentLanguage || "");
+  const campaign = asString(state.context.activeCampaign || "");
+  const executionMode = asString(state.context.executionMode || "");
+
+  const payload = asObject(selectProjectPayload(state));
+
+  const overview = asObject(payload.overview?.overview || payload.overview);
+  const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+  const operations = asObject(selectOperationsSnapshot(state));
+
+  const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
+

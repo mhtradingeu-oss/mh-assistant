@@ -1,0 +1,1674 @@
+===== BRANCH =====
+architecture/frontend-consolidation-v1
+
+===== STATUS =====
+?? audits/frontend/consolidation/final-system-audit/
+?? audits/frontend/consolidation/pass-2-surface-ownership/
+
+===== LOG =====
+c73886b Add frontend consolidation QA report
+b09ce0f Fix operations center loading settlement
+cdadb61 Fix Task Center grid stretch layout
+3b567ff Clean Settings duplicate heading labels
+69d354f Clean Governance duplicate heading labels
+e061a22 Clean Operations in-page loading states
+d62b412 Set Home as custom layout authority
+b617f18 Audit Home layout authority
+8733611 Set Ads Manager as custom layout authority
+67db87d Audit Ads Manager layout authority
+11b50bf Set Research as custom layout authority
+b776885 Audit Research layout authority
+fc0f726 Set Setup as custom layout authority
+0d1644f Audit Setup layout authority
+2dc0556 Set Insights as custom layout authority
+343c592 Audit Insights layout authority
+960e0c2 Set Integrations as custom layout authority
+276e938 Audit Integrations layout authority
+5a8f286 Audit remaining page layout authority
+2e2c761 Set System pages as explicit custom layout authority
+
+===== PAGE LINE COUNTS =====
+  29047 total
+   3216 public/control-center/pages/media-studio-workspace.js
+   2955 public/control-center/pages/library.js
+   2336 public/control-center/pages/content-studio-workspace.js
+   1992 public/control-center/pages/workflows.js
+   1981 public/control-center/pages/campaign-studio.js
+   1976 public/control-center/pages/ai-command.js
+   1929 public/control-center/pages/settings.js
+   1838 public/control-center/pages/publishing.js
+   1837 public/control-center/pages/operations-centers.js
+   1672 public/control-center/pages/integrations.js
+   1612 public/control-center/pages/research.js
+   1562 public/control-center/pages/setup.js
+   1519 public/control-center/pages/insights.js
+   1100 public/control-center/pages/governance.js
+    905 public/control-center/pages/home.js
+    617 public/control-center/pages/ads-manager.js
+
+===== disableStandardLayout =====
+public/control-center/pages/publishing.js:1716:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1662:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1697:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1745:  disableStandardLayout: true,
+public/control-center/pages/operations-centers.js:1793:  disableStandardLayout: true,
+public/control-center/pages/home.js:607:  disableStandardLayout: true,
+public/control-center/pages/ai-command.js:1639:   disableStandardLayout: true,
+public/control-center/pages/media-studio-workspace.js:3124:  disableStandardLayout: true,
+public/control-center/pages/research.js:1103:  disableStandardLayout: true,
+public/control-center/pages/content-studio-workspace.js:2249:  disableStandardLayout: true,
+public/control-center/pages/setup.js:1151:  disableStandardLayout: true,
+public/control-center/pages/campaign-studio.js:1450:  disableStandardLayout: true,
+public/control-center/pages/ads-manager.js:288:  disableStandardLayout: true,
+public/control-center/pages/integrations.js:1380:  disableStandardLayout: true,
+public/control-center/pages/insights.js:1029:  disableStandardLayout: true,
+public/control-center/pages/library.js:2735:  disableStandardLayout: true,
+public/control-center/pages/settings.js:1892:  disableStandardLayout: true,
+public/control-center/pages/governance.js:1070:  disableStandardLayout: true,
+public/control-center/pages/workflows.js:1743:  disableStandardLayout: true,
+public/control-center/app.js:2138:    if (!routeDef.disableStandardLayout) {
+
+===== STANDARD PAGE SHELL =====
+public/control-center/app.js:15:import { applyStandardPageLayout } from "./ui/page-standard.js";
+public/control-center/app.js:2139:      applyStandardPageLayout({
+public/control-center/app.js:2152:  applyStandardPageLayout({
+public/control-center/ui/page-standard.js:397:  const existing = page.querySelector(".std-page-shell");
+public/control-center/ui/page-standard.js:407:  shell.className = "std-page-shell std-page-shell-compact";
+public/control-center/ui/page-standard.js:504:export function applyStandardPageLayout(context) {
+
+===== CUSTOM SHELL MARKERS =====
+public/control-center/pages/operations-centers.js:464:      <div class="ops-shell ops-workspace">
+public/control-center/pages/operations-centers.js:802:      <div class="ops-shell ops-workspace">
+public/control-center/pages/operations-centers.js:1093:      <div class="ops-shell ops-workspace">
+public/control-center/pages/operations-centers.js:1448:      <div class="ops-shell ops-workspace">
+public/control-center/pages/operations-centers.js:1668:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1703:  template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1751:  template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1799:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/governance.js:487:        <div class="governance-shell governance-workspace">
+public/control-center/pages/governance.js:515:        <div class="governance-shell governance-workspace">
+public/control-center/pages/governance.js:543:        <div class="governance-shell governance-workspace">
+public/control-center/pages/governance.js:602:      <div class="governance-shell governance-workspace">
+public/control-center/pages/governance.js:1076:  template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
+public/control-center/styles/09-operations-centers.css:7:[data-page="task-center"] .ops-shell,
+public/control-center/styles/09-operations-centers.css:367:[data-page="queue-center"] .ops-shell,
+public/control-center/styles/09-operations-centers.css:764:[data-page="job-monitor"] .ops-shell,
+public/control-center/styles/09-operations-centers.css:1170::is([data-page="notification-center"], [data-page="notifications"]) .ops-shell,
+
+===== LOADING MARKERS =====
+public/control-center/pages/publishing.js:880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/operations-centers.js:460:  const showLoadingState = Boolean(session.isLoading);
+public/control-center/pages/operations-centers.js:501:              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+public/control-center/pages/operations-centers.js:644:    isLoading: false,
+public/control-center/pages/operations-centers.js:678:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:683:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:690:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:766:  const showLoadingState = Boolean(session.isLoading);
+public/control-center/pages/operations-centers.js:768:  const showStateCard = (showLoadingState || showErrorState) && items.length > 0;
+public/control-center/pages/operations-centers.js:839:              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+public/control-center/pages/operations-centers.js:960:    isLoading: false,
+public/control-center/pages/operations-centers.js:990:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:995:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1002:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1056:  const showLoadingState = Boolean(session.isLoading);
+public/control-center/pages/operations-centers.js:1058:  const showStateCard = (showLoadingState || showErrorState) && items.length > 0;
+public/control-center/pages/operations-centers.js:1129:              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+public/control-center/pages/operations-centers.js:1255:    isLoading: false,
+public/control-center/pages/operations-centers.js:1283:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1288:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1295:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1356:    isLoading: false,
+public/control-center/pages/operations-centers.js:1414:  const showLoadingState = Boolean(session.isLoading);
+public/control-center/pages/operations-centers.js:1416:  const showStateCard = (showLoadingState || showErrorState) && listItems.length > 0;
+public/control-center/pages/operations-centers.js:1484:              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
+public/control-center/pages/operations-centers.js:1603:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1608:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1615:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1717:        isLoading: false,
+public/control-center/pages/operations-centers.js:1720:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1725:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1732:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1765:        isLoading: false,
+public/control-center/pages/operations-centers.js:1768:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1773:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1780:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1813:        isLoading: false,
+public/control-center/pages/operations-centers.js:1816:      session.isLoading = true;
+public/control-center/pages/operations-centers.js:1821:          session.isLoading = false;
+public/control-center/pages/operations-centers.js:1828:          session.isLoading = false;
+public/control-center/pages/ai-command.js:1110:	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+public/control-center/pages/media-studio-workspace.js:572:  if (!backendProjectName || session.loading || session.loaded) return;
+public/control-center/pages/media-studio-workspace.js:574:  session.loading = true;
+public/control-center/pages/media-studio-workspace.js:633:    session.loading = false;
+public/control-center/pages/media-studio-workspace.js:3159:    if (!session.loaded && !session.loading) {
+public/control-center/pages/media-studio-workspace.js:3183:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/research.js:1240:                value: session.intelligence.status === "loading" ? "Refreshing" : model.hasLiveIntelligence ? "Live + inferred" : "Context-only",
+public/control-center/pages/content-studio-workspace.js:775:  if (!projectName || session.loading || session.loaded) return;
+public/control-center/pages/content-studio-workspace.js:776:  session.loading = true;
+public/control-center/pages/content-studio-workspace.js:807:    session.loading = false;
+public/control-center/pages/content-studio-workspace.js:2283:    if (!session.loaded && !session.loading && projectName) {
+public/control-center/pages/content-studio-workspace.js:2307:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/campaign-studio.js:1443:      showMessage?.("Refreshing campaign intelligence.");
+public/control-center/pages/campaign-studio.js:1550:              <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
+public/control-center/pages/insights.js:1067:      ? "Refreshing..."
+public/control-center/pages/library.js:1062:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1078:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1102:          <div class="library-preview-fallback">Loading protected image preview...</div>
+public/control-center/pages/library.js:1118:          <div class="library-preview-fallback">Loading protected video preview...</div>
+public/control-center/pages/library.js:1153:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+public/control-center/pages/settings.js:1088:  if (!session.projectName || session.loading) return;
+public/control-center/pages/settings.js:1090:  session.loading = true;
+public/control-center/pages/settings.js:1118:    session.loading = false;
+public/control-center/pages/settings.js:1511:        <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
+public/control-center/pages/settings.js:1643:          <strong>${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</strong>
+public/control-center/pages/settings.js:1922:    if (!session.loaded && !session.loading) {
+public/control-center/pages/governance.js:109:  if (!projectName || session.loading) return;
+public/control-center/pages/governance.js:111:  session.loading = true;
+public/control-center/pages/governance.js:123:    session.loading = false;
+public/control-center/pages/governance.js:512:  if (session.loading && !session.loaded) {
+public/control-center/pages/governance.js:523:              <span class="card-badge neutral">Loading</span>
+public/control-center/pages/governance.js:533:            <div class="empty-box">Loading governance console...</div>
+public/control-center/pages/governance.js:610:            <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+public/control-center/pages/governance.js:1096:    if (!session.loaded && !session.loading) {
+public/control-center/app.js:23:  setLoading,
+public/control-center/app.js:814:function showLoading(
+public/control-center/app.js:815:  title = "Loading project",
+public/control-center/app.js:824:    recordLoadingTransition("show-blocked-non-explicit", { token, reason });
+public/control-center/app.js:829:    recordLoadingTransition("show-blocked-stale-token", { token, reason });
+public/control-center/app.js:834:    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+public/control-center/app.js:839:    recordLoadingTransition("show-blocked-manual-unlock", { token, reason });
+public/control-center/app.js:843:  const wasVisible = isLoadingVisible();
+public/control-center/app.js:862:    installLoadingWatchdog(reason, wasVisible);
+public/control-center/app.js:863:    recordLoadingTransition("show", { token, reason });
+public/control-center/app.js:867:function removeLoadingBodyClasses() {
+public/control-center/app.js:880:function hideLoading(options = {}) {
+public/control-center/app.js:886:    recordLoadingTransition("hide-blocked-stale-token", { token, reason });
+public/control-center/app.js:903:  removeLoadingBodyClasses();
+public/control-center/app.js:905:  clearLoadingWatchdog();
+public/control-center/app.js:906:  startupRuntimeState.hideLoadingCalled = true;
+public/control-center/app.js:907:  startupRuntimeState.hideLoadingReason = reason;
+public/control-center/app.js:908:  startupRuntimeState.hideLoadingAt = new Date().toISOString();
+public/control-center/app.js:909:  recordLoadingTransition(force ? "hide-force" : "hide", { token, reason });
+public/control-center/app.js:914:function isLoadingVisible() {
+public/control-center/app.js:945:let globalLoadingWatchdogTimer = null;
+public/control-center/app.js:972:  hideLoadingCalled: false,
+public/control-center/app.js:973:  hideLoadingReason: "",
+public/control-center/app.js:974:  hideLoadingAt: "",
+public/control-center/app.js:1042:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+public/control-center/app.js:1043:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+public/control-center/app.js:1049:    appLoading: Boolean(state.loading),
+public/control-center/app.js:1073:      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+public/control-center/app.js:1075:      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+public/control-center/app.js:1137:    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+public/control-center/app.js:1138:    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+public/control-center/app.js:1139:    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+public/control-center/app.js:1148:    appLoading: Boolean(state.loading),
+public/control-center/app.js:1329:function recordLoadingTransition(action, details = {}) {
+public/control-center/app.js:1336:    visible: isLoadingVisible(),
+public/control-center/app.js:1443:function forceHideLoadingOverlay(reason = "access-key-recovery") {
+public/control-center/app.js:1444:  recordStartupStep("forceHideLoadingOverlay.start", {
+public/control-center/app.js:1448:  hideLoading({ reason, force: true });
+public/control-center/app.js:1452:    recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1467:  removeLoadingBodyClasses();
+public/control-center/app.js:1468:  clearLoadingWatchdog();
+public/control-center/app.js:1474:  recordStartupStep("forceHideLoadingOverlay.done", {
+public/control-center/app.js:1507:    forceHideLoadingOverlay("manual-unlock");
+public/control-center/app.js:1509:    forceHideLoadingOverlay(reason);
+public/control-center/app.js:1511:  setLoading(false);
+public/control-center/app.js:1512:  removeLoadingBodyClasses();
+public/control-center/app.js:1602:  setLoading(false);
+public/control-center/app.js:1603:  hideLoading({ token: loadToken, reason: "access-key-required" });
+public/control-center/app.js:1604:  forceHideLoadingOverlay("access-key-required-force");
+public/control-center/app.js:1679:  setLoading(false);
+public/control-center/app.js:1680:  hideLoading({ reason: "startup-fatal", force: true });
+public/control-center/app.js:1689:function clearLoadingWatchdog() {
+public/control-center/app.js:1695:function installLoadingWatchdog(reason = "project-load", preserveStart = false) {
+public/control-center/app.js:1702:function installGlobalLoadingWatchdog() {
+public/control-center/app.js:1703:  if (globalLoadingWatchdogTimer || typeof window === "undefined") {
+public/control-center/app.js:1707:  globalLoadingWatchdogTimer = window.setInterval(() => {
+public/control-center/app.js:1724:      isLoadingVisible() &&
+public/control-center/app.js:1739:      setLoading(false);
+public/control-center/app.js:1740:      forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:1741:      recordStartupStep("loadProjectData.hideLoading.done", {
+public/control-center/app.js:1758:      isLoadingVisible() &&
+public/control-center/app.js:1794:    const startupPhase = !getState().initialized || isLoadingVisible();
+public/control-center/app.js:1803:    const startupPhase = !getState().initialized || isLoadingVisible();
+public/control-center/app.js:2574:    if (!isLoadingVisible()) {
+public/control-center/app.js:2578:    const hidden = hideLoading({
+public/control-center/app.js:2728:  startupRuntimeState.hideLoadingCalled = false;
+public/control-center/app.js:2729:  startupRuntimeState.hideLoadingReason = "";
+public/control-center/app.js:2730:  startupRuntimeState.hideLoadingAt = "";
+public/control-center/app.js:2754:    setLoading(true);
+public/control-center/app.js:2755:    recordStartupStep("loadProjectData.setLoading.true", {
+public/control-center/app.js:2770:    showLoading("Loading project", `Please wait while ${safeProjectName} is being loaded.`, {
+public/control-center/app.js:2802:        showLoading("Loading project", `Please wait while ${DEFAULT_PROJECT_SLUG} is being loaded.`, {
+public/control-center/app.js:2856:      setLoading(false);
+public/control-center/app.js:2857:      hideLoading({ token: loadToken, reason: "required-load-done" });
+public/control-center/app.js:2858:      hideLoading({ token: loadToken, reason: "required-load-done-hard-clear", force: true });
+public/control-center/app.js:2859:      recordStartupStep("loadProjectData.hideLoading.done", {
+public/control-center/app.js:2872:        setLoading(false);
+public/control-center/app.js:2873:        forceHideLoadingOverlay("render-global-ui-error");
+public/control-center/app.js:2900:        setLoading(false);
+public/control-center/app.js:2901:        forceHideLoadingOverlay("safe-render-current-page-error");
+public/control-center/app.js:2933:        setLoading(false);
+public/control-center/app.js:2934:        forceHideLoadingOverlay("response-text-watchdog");
+public/control-center/app.js:2935:        recordStartupStep("loadProjectData.hideLoading.done", {
+public/control-center/app.js:2958:        setLoading(false);
+public/control-center/app.js:2959:        forceHideLoadingOverlay("parse-watchdog");
+public/control-center/app.js:2978:      setLoading(false);
+public/control-center/app.js:2979:      forceHideLoadingOverlay(`load-project-error-${String(error?.phase || "unknown")}`);
+public/control-center/app.js:3003:        setLoading(false);
+public/control-center/app.js:3004:        recordStartupStep("loadProjectData.finally.setLoading.false", {
+public/control-center/app.js:3008:        hideLoading({ token: loadToken, reason: "required-load-finally" });
+public/control-center/app.js:3009:        hideLoading({ token: loadToken, reason: "required-load-finally-hard-clear", force: true });
+public/control-center/app.js:3010:        recordStartupStep("loadProjectData.finally.hideLoading", {
+public/control-center/app.js:3222:      showMessage(`Test project ignored. Loading ${projectName}.`);
+public/control-center/app.js:4109:    installGlobalLoadingWatchdog();
+public/control-center/app.js:4200:    (!isEditingFormField && state.loading !== window.__mhLastGlobalUiLoading) ||
+public/control-center/app.js:4208:  window.__mhLastGlobalUiLoading = state.loading;
+
+===== AUTO MODE / INTELLIGENCE =====
+public/control-center/pages/publishing.js:9:  createAutoModeController,
+public/control-center/pages/publishing.js:11:  startAutoMode,
+public/control-center/pages/publishing.js:15:  subscribeAutoMode
+public/control-center/pages/publishing.js:70:    createAutoModeController(getState, { getState, navigateTo });
+public/control-center/pages/publishing.js:78:  publishingAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/publishing.js:957:        <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
+public/control-center/pages/publishing.js:959:      <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+public/control-center/pages/publishing.js:1672:      const runResult = await startAutoMode(plan, {
+public/control-center/pages/publishing.js:1693:      showMessage?.("Auto Mode stopped.");
+public/control-center/pages/workflows.js:16:  createAutoModeController,
+public/control-center/pages/workflows.js:18:  startAutoMode,
+public/control-center/pages/workflows.js:24:  subscribeAutoMode,
+public/control-center/pages/workflows.js:26:  runAutomationPlan
+public/control-center/pages/workflows.js:708:        <h3>Auto Mode</h3>
+public/control-center/pages/workflows.js:717:          Start Auto Mode From Plan
+public/control-center/pages/workflows.js:747:              ${esc(gate.whatWillHappen || "Auto Mode is paused.")}
+public/control-center/pages/workflows.js:1215:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1217:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1634:      const result = await runAutomationPlan(plan, {
+public/control-center/pages/workflows.js:1663:      const stepResult = await runAutomationPlan(singleStep, {
+public/control-center/pages/workflows.js:1686:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1688:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+public/control-center/pages/workflows.js:1692:      await startAutoMode(plan, {
+public/control-center/pages/workflows.js:1696:      showMessage?.("Workflow Auto Mode started.");
+public/control-center/pages/workflows.js:1704:      showMessage?.("Auto Mode paused.");
+public/control-center/pages/workflows.js:1712:      showMessage?.("Auto Mode resumed.");
+public/control-center/pages/workflows.js:1720:      showMessage?.("Auto Mode stopped.");
+public/control-center/pages/workflows.js:1736:      showMessage?.("Auto Mode skipped gated step.");
+public/control-center/automation-engine.js:1:import { buildSystemIntelligence } from "./system-intelligence.js";
+public/control-center/automation-engine.js:18:  { test: /\bdelete\b|\bremove\b|\bdestroy\b|\berase\b/i, reason: "Destructive actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:19:  { test: /\boverwrite\b|\breplace\b|\btruncate\b/i, reason: "Overwrite actions are blocked in Auto Mode." },
+public/control-center/automation-engine.js:20:  { test: /disconnect|revoke|unlink/i, reason: "Connection removal is blocked in Auto Mode." },
+public/control-center/automation-engine.js:108:          message: "Auto Mode did not continue after reload. Resume manually if needed."
+public/control-center/automation-engine.js:239:      whatWillHappen: "Auto Mode will stop at this step and wait for approval."
+public/control-center/automation-engine.js:247:  const intelligence = buildSystemIntelligence(state);
+public/control-center/automation-engine.js:280:  const intelligence = buildSystemIntelligence(state);
+public/control-center/automation-engine.js:473:export async function runAutomationPlan(plan, options = {}) {
+public/control-center/automation-engine.js:584:  pushAutoLog("Auto Mode completed all safe steps.", "success");
+public/control-center/automation-engine.js:589:export function createAutoModeController(state, context = {}) {
+public/control-center/automation-engine.js:596:    startAutoMode,
+public/control-center/automation-engine.js:603:    subscribeAutoMode
+public/control-center/automation-engine.js:607:export async function startAutoMode(plan, options = {}) {
+public/control-center/automation-engine.js:621:  pushAutoLog(`Auto Mode started in ${mode} mode with ${steps.length} step(s).`, "info");
+public/control-center/automation-engine.js:628:    pushAutoLog("Auto Mode failed: no plan steps provided.", "error");
+public/control-center/automation-engine.js:640:  pushAutoLog("Auto Mode paused.", "info");
+public/control-center/automation-engine.js:659:  pushAutoLog("Auto Mode resumed.", "info");
+public/control-center/automation-engine.js:670:  pushAutoLog("Auto Mode stopped.", "info");
+public/control-center/automation-engine.js:697:    pushAutoLog("Auto Mode completed after approval gate.", "success");
+public/control-center/automation-engine.js:719:    pushAutoLog("Auto Mode completed after skipping gated step.", "success");
+public/control-center/automation-engine.js:734:export function subscribeAutoMode(listener) {
+public/control-center/system-intelligence.js:365:export function buildSystemIntelligence(state) {
+public/control-center/system-intelligence.js:412:  return buildSystemIntelligence(state).nextBestAction;
+public/control-center/system-intelligence.js:477:  const intelligence = buildSystemIntelligence(state);
+public/control-center/system-intelligence.js:485:  return buildSystemIntelligence(state).blockers;
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+
+===== FRONTEND AUTHORITY MARKERS =====
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/authority/authority-projection.js:68:  return safeArray(model.route_permissions);
+public/control-center/shared-context.js:3:const handoffCache = new Map();
+public/control-center/shared-context.js:23:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:24:  const available = handoffs.filter((item) => {
+public/control-center/shared-context.js:61:  const handoff =
+public/control-center/shared-context.js:66:  return asObject(handoff?.payload?.draft_context);
+public/control-center/shared-context.js:69:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:70:  if (!projectName || !destinationPage || !handoff) return;
+public/control-center/shared-context.js:71:  handoffCache.set(buildKey(projectName, destinationPage), handoff);
+public/control-center/shared-context.js:75:  const cached = handoffCache.get(buildKey(projectName, destinationPage));
+public/control-center/styles/12-pages.css:42:.setup-smart-handoff-actions,
+public/control-center/styles/12-pages.css:64:.content-handoff-grid,
+public/control-center/styles/12-pages.css:299:  .content-handoff-grid,
+public/control-center/styles/12-pages.css:332:  .content-handoff-grid,
+public/control-center/pages/publishing.js:816:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing.js:817:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing.js:821:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing.js:822:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing.js:846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+public/control-center/pages/publishing.js:877:  if (handoff) {
+public/control-center/pages/publishing.js:880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:966:        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1141:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/publishing.js:1142:  if (!handoff) {
+public/control-center/pages/publishing.js:1157:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/publishing.js:1294:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/publishing.js:1303:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+public/control-center/pages/publishing.js:1334:  handoff
+public/control-center/pages/publishing.js:1594:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1619:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+public/control-center/pages/publishing.js:1749:    const handoff = getPublishingHandoff(projectName, operations);
+public/control-center/pages/publishing.js:1770:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+public/control-center/pages/publishing.js:1798:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/publishing.js:1835:      handoff
+public/control-center/pages/operations-centers.js:533:                    <span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+public/control-center/pages/operations-centers.js:568:                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+public/control-center/pages/operations-centers.js:658:  if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);
+public/control-center/pages/home.js:172:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:180:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/ai-command.js:75:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:179:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:581:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:954:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:955:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:956:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:958:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:974:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:975:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:976:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:42:  handoffRole: "publisher"
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:170:  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:471:      handoffs: [],
+public/control-center/pages/media-studio-workspace.js:524:    owner_role: asString(raw.owner_role || ownerRoleForMode(mode)),
+public/control-center/pages/media-studio-workspace.js:536:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/media-studio-workspace.js:594:      handoffsResult,
+public/control-center/pages/media-studio-workspace.js:606:    const handoffs = fulfilledValue(handoffsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:618:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/media-studio-workspace.js:657:function extractHandoffSummary(handoff) {
+public/control-center/pages/media-studio-workspace.js:658:  const payload = asObject(handoff?.payload);
+public/control-center/pages/media-studio-workspace.js:662:    id: asString(handoff?.id || payload.workflow_id || payload.media_job_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/media-studio-workspace.js:663:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/media-studio-workspace.js:677:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:678:  if (!handoff) return;
+public/control-center/pages/media-studio-workspace.js:679:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:766:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:834:    owner_role: ownerRoleForMode(mode),
+public/control-center/pages/media-studio-workspace.js:977:  const backend = asArray(session.handoffs).find((entry) => {
+public/control-center/pages/media-studio-workspace.js:1023:  const handoffPayload = {
+public/control-center/pages/media-studio-workspace.js:1027:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1048:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1050:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1054:    handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),
+public/control-center/pages/media-studio-workspace.js:1063:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1064:      const savedHandoff = asObject(result?.handoff);
+public/control-center/pages/media-studio-workspace.js:1065:      const savedId = asString(savedHandoff.id || handoffPayload.id);
+public/control-center/pages/media-studio-workspace.js:1069:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1074:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1080:      session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];
+public/control-center/pages/media-studio-workspace.js:1089:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1098:    showMessage?.("Selected version saved to Library (local handoff).");
+public/control-center/pages/media-studio-workspace.js:1157:function buildRecommendation(metrics, handoff, selectedItem) {
+public/control-center/pages/media-studio-workspace.js:1175:      action: "Send the publishing-ready media handoff",
+public/control-center/pages/media-studio-workspace.js:1176:      why: `${ready.title} is ready for Publishing with a safe handoff payload.`
+public/control-center/pages/media-studio-workspace.js:1179:  if (handoff) {
+public/control-center/pages/media-studio-workspace.js:1182:      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> Publishing flow."
+public/control-center/pages/media-studio-workspace.js:1210:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1217:    publishing_handoff: publishingConnected,
+public/control-center/pages/media-studio-workspace.js:1579:        <div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1585:function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1592:    ["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]
+public/control-center/pages/media-studio-workspace.js:1684:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "If no generation backend exists, this becomes a prompt/job ready item for review and handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:1701:function renderPromptBuilder(session, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1709:        <span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>
+public/control-center/pages/media-studio-workspace.js:1713:        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>
+public/control-center/pages/media-studio-workspace.js:1726:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1727:  if (!handoff) {
+public/control-center/pages/media-studio-workspace.js:1742:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:1778:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2126:          <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
+public/control-center/pages/media-studio-workspace.js:2275:    ["publishing handoff", readiness.publishing_handoff],
+public/control-center/pages/media-studio-workspace.js:2322:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2323:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:2342:      title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2356:        title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2394:  handoff,
+public/control-center/pages/media-studio-workspace.js:2601:      const summary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/media-studio-workspace.js:2603:        session.draftMessage = "No workflow handoff is available.";
+public/control-center/pages/media-studio-workspace.js:2612:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/media-studio-workspace.js:2701:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:2817:            summary: session.form.reviewNotes || "Review media output before publishing handoff.",
+public/control-center/pages/media-studio-workspace.js:2882:            owner_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2883:            assignee_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2886:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3095:  const handoff = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3096:  const handoffScopes = new Set([asString(projectName)]);
+public/control-center/pages/media-studio-workspace.js:3098:    handoffScopes.add("__default__");
+public/control-center/pages/media-studio-workspace.js:3100:  handoffScopes.forEach((scope) => {
+public/control-center/pages/media-studio-workspace.js:3101:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3106:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3107:      showMessage?.("Publishing handoff created from Media Studio.");
+public/control-center/pages/media-studio-workspace.js:3109:      showMessage?.("Publishing handoff kept locally because backend handoff save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3112:    showMessage?.("Publishing handoff created locally.");
+public/control-center/pages/media-studio-workspace.js:3173:    const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:3175:    const recommendation = buildRecommendation(metrics, handoff, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3181:        ${renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3183:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:3187:            ${renderPromptBuilder(session, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3195:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3209:      handoff,
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:87:      <div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>
+public/control-center/pages/research.js:856:  createProjectHandoff,
+public/control-center/pages/research.js:917:        createProjectHandoff?.(projectName, {
+public/control-center/pages/research.js:935:          console.warn("Failed to persist research AI handoff:", error.message);
+public/control-center/pages/research.js:964:      const handoff = {
+public/control-center/pages/research.js:976:          owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:981:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:982:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:983:        console.warn("Failed to persist research route handoff:", error.message);
+public/control-center/pages/research.js:1124:    createProjectHandoff
+public/control-center/pages/research.js:1142:      createProjectHandoff
+public/control-center/pages/research.js:1606:      createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:58:  handoffRole: "publisher"
+public/control-center/pages/content-studio-workspace.js:67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+public/control-center/pages/content-studio-workspace.js:114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+public/control-center/pages/content-studio-workspace.js:116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:187:  if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";
+public/control-center/pages/content-studio-workspace.js:188:  if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";
+public/control-center/pages/content-studio-workspace.js:498:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/content-studio-workspace.js:540:      handoffs: [],
+public/control-center/pages/content-studio-workspace.js:620:  if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";
+public/control-center/pages/content-studio-workspace.js:651:    owner_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:734:function buildInboundSummary(handoff) {
+public/control-center/pages/content-studio-workspace.js:735:  const payload = asObject(handoff?.payload);
+public/control-center/pages/content-studio-workspace.js:739:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+public/control-center/pages/content-studio-workspace.js:740:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:767:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/content-studio-workspace.js:768:  if (!handoff) return;
+public/control-center/pages/content-studio-workspace.js:769:  const summary = buildInboundSummary(handoff);
+public/control-center/pages/content-studio-workspace.js:781:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:795:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/content-studio-workspace.js:828:      why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."
+public/control-center/pages/content-studio-workspace.js:855:    why: "Higher-quality prompt context improves draft quality and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:891:      .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1059:        .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1096:    ["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],
+public/control-center/pages/content-studio-workspace.js:1158:function renderComposer(session, state, handoff, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1237:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1441:function renderInboundHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1442:  if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1448:            <h3>No inbound handoff available</h3>
+public/control-center/pages/content-studio-workspace.js:1462:          <h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>
+public/control-center/pages/content-studio-workspace.js:1463:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/content-studio-workspace.js:1467:      <div class="content-handoff-grid">
+public/control-center/pages/content-studio-workspace.js:1468:        <div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1469:        <div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1470:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1471:        <div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1473:      <div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>
+public/control-center/pages/content-studio-workspace.js:1554:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1584:      title: firstText(selectedItem?.title, session.form.title, "Content handoff")
+public/control-center/pages/content-studio-workspace.js:1593:  const backend = asArray(session.handoffs).find((item) => {
+public/control-center/pages/content-studio-workspace.js:1665:  const handoff = {
+public/control-center/pages/content-studio-workspace.js:1690:  setSharedHandoff(projectName || "__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1692:    setSharedHandoff("__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1697:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1698:      const saved = asObject(result?.handoff);
+public/control-center/pages/content-studio-workspace.js:1699:      const handoffId = asString(saved.id || handoff.id);
+public/control-center/pages/content-studio-workspace.js:1702:        id: handoffId || libraryAsset.id,
+public/control-center/pages/content-studio-workspace.js:1703:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1707:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1720:        handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1725:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/content-studio-workspace.js:1734:      handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1739:    showMessage?.("Content draft saved to Library (local handoff).");
+public/control-center/pages/content-studio-workspace.js:1745:async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {
+public/control-center/pages/content-studio-workspace.js:1746:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1748:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1753:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1789:  handoff,
+public/control-center/pages/content-studio-workspace.js:1837:      if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1838:        session.draftMessage = "No inbound handoff is available.";
+public/control-center/pages/content-studio-workspace.js:1844:        mode: firstText(handoff.mode, session.form.mode, "social-post"),
+public/control-center/pages/content-studio-workspace.js:1845:        project: firstText(handoff.project, session.form.project, projectName),
+public/control-center/pages/content-studio-workspace.js:1846:        campaign: firstText(handoff.campaign, session.form.campaign),
+public/control-center/pages/content-studio-workspace.js:1847:        product: firstText(handoff.product, session.form.product),
+public/control-center/pages/content-studio-workspace.js:1848:        channel: firstText(handoff.channel, session.form.channel),
+public/control-center/pages/content-studio-workspace.js:1849:        language: firstText(handoff.language, session.form.language),
+public/control-center/pages/content-studio-workspace.js:1850:        tone: firstText(handoff.tone, session.form.tone),
+public/control-center/pages/content-studio-workspace.js:1851:        objective: firstText(handoff.objective, session.form.objective),
+public/control-center/pages/content-studio-workspace.js:1852:        brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),
+public/control-center/pages/content-studio-workspace.js:1853:        title: firstText(handoff.title, session.form.title),
+public/control-center/pages/content-studio-workspace.js:1854:        status: normalizeStatus(handoff.readinessStatus || "draft", "draft")
+public/control-center/pages/content-studio-workspace.js:1859:        outputContent: firstText(handoff.contentBody),
+public/control-center/pages/content-studio-workspace.js:1864:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:1865:        notes: `Loaded from ${titleCase(handoff.sourcePage || "handoff")}.`
+public/control-center/pages/content-studio-workspace.js:2072:      const handoffPayload = buildMediaHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2075:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2078:        failMessage: "Media handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2079:        successMessage: "Media Studio handoff created.",
+public/control-center/pages/content-studio-workspace.js:2080:        localMessage: "Media Studio handoff created locally."
+public/control-center/pages/content-studio-workspace.js:2104:      const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2107:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2110:        failMessage: "Publishing handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2111:        successMessage: "Publishing handoff created.",
+public/control-center/pages/content-studio-workspace.js:2112:        localMessage: "Publishing handoff created locally."
+public/control-center/pages/content-studio-workspace.js:2307:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:2329:      handoff: inboundSummary,
+public/control-center/pages/setup.js:1379:                <p class="home-section-copy">Distribution channels and operator handoff notes.</p>
+public/control-center/pages/setup.js:1382:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}
+public/control-center/pages/setup.js:1466:        <section class="card setup-smart-handoff-panel">
+public/control-center/pages/setup.js:1471:          <div class="setup-smart-handoff-actions">
+public/control-center/pages/integrations/builders.js:489:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+public/control-center/pages/campaign-studio.js:382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+public/control-center/pages/campaign-studio.js:384:  const payload = asObject(handoff.payload);
+public/control-center/pages/campaign-studio.js:421:  session.lastAiHandoffId = handoffId;
+public/control-center/pages/campaign-studio.js:454:    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:464:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:468:  const handoff = {
+public/control-center/pages/campaign-studio.js:484:      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:491:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:492:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:493:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1253:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1278:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+public/control-center/pages/campaign-studio.js:1339:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1354:          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1360:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1370:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1383:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1391:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1399:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1472:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1493:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:1977:      createProjectHandoff,
+public/control-center/pages/integrations.js:512:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/pages/integrations.js:531:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/pages/integrations.js:563:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/pages/integrations.js:565:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/pages/integrations.js:582:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/pages/insights.js:947:function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+public/control-center/pages/insights.js:997:        const handoff = {
+public/control-center/pages/insights.js:1015:        setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/insights.js:1016:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1017:          console.warn("Failed to persist Insights handoff:", error.message);
+public/control-center/pages/insights.js:1049:    createProjectHandoff
+public/control-center/pages/insights.js:1420:      createProjectHandoff
+public/control-center/pages/insights.js:1437:          createProjectHandoff
+public/control-center/pages/insights.js:1455:          createProjectHandoff
+public/control-center/pages/insights.js:1470:        createProjectHandoff
+public/control-center/pages/insights.js:1497:            createProjectHandoff
+public/control-center/pages/insights.js:1513:            createProjectHandoff
+public/control-center/pages/library.js:723:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:771:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:789:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:797:          handoff_id: item.id,
+public/control-center/pages/settings.js:236:        path: "ai.approvalRequiredMode",
+public/control-center/pages/settings.js:710:    approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),
+public/control-center/pages/settings.js:746:      owner_role: "admin"
+public/control-center/pages/settings.js:791:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/settings.js:912:      approvalRequiredMode: "Only high-risk",
+public/control-center/pages/settings.js:1190:    approvalMode: `${form.ai.approvalRequiredMode} • ${form.approval.requirements.length} human triggers`,
+public/control-center/pages/settings.js:1751:          await context.createProjectHandoff?.(session.projectName, {
+public/control-center/pages/governance.js:94:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/workflows.js:49:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:525:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:526:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:656:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:662:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:925:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:926:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:927:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:929:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:950:    run.source = "handoff";
+public/control-center/pages/workflows.js:955:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:956:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:957:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:959:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1061:  createProjectHandoff,
+public/control-center/pages/workflows.js:1076:  const handoff = {
+public/control-center/pages/workflows.js:1089:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1091:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1092:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1093:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1211:  createProjectHandoff,
+public/control-center/pages/workflows.js:1215:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1306:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1458:        createProjectHandoff,
+public/control-center/pages/workflows.js:1491:        createProjectHandoff,
+public/control-center/pages/workflows.js:1508:        createProjectHandoff,
+public/control-center/pages/workflows.js:1532:          owner_role: "admin",
+public/control-center/pages/workflows.js:1533:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1635:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1664:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1686:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1694:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/automation-engine.js:10:  "create_handoff",
+public/control-center/automation-engine.js:69:    approvalRequiredStep: null
+public/control-center/automation-engine.js:87:    approvalRequiredStep: parsed.approvalRequiredStep == null ? null : asObject(parsed.approvalRequiredStep)
+public/control-center/automation-engine.js:256:      type: "create_handoff",
+public/control-center/automation-engine.js:296:      type: "create_handoff",
+public/control-center/automation-engine.js:298:      action: "Create content-to-media handoff",
+public/control-center/automation-engine.js:307:      type: "create_handoff",
+public/control-center/automation-engine.js:309:      action: "Create media-to-library handoff",
+public/control-center/automation-engine.js:318:      type: "create_handoff",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:396:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:397:        context.createProjectHandoff(projectName, draftPayload).catch(() => {});
+public/control-center/automation-engine.js:404:      const handoff = {
+public/control-center/automation-engine.js:415:      setSharedHandoff(projectName, "workflows", handoff);
+public/control-center/automation-engine.js:416:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:417:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:424:      const handoff = {
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:437:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:438:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:443:    if (normalizeText(step.type) === "create_handoff") {
+public/control-center/automation-engine.js:445:      const handoff = {
+public/control-center/automation-engine.js:460:      setSharedHandoff(projectName, destination, handoff);
+public/control-center/automation-engine.js:461:      if (typeof context.createProjectHandoff === "function") {
+public/control-center/automation-engine.js:462:        context.createProjectHandoff(projectName, handoff).catch(() => {});
+public/control-center/automation-engine.js:536:      autoModeState.approvalRequiredStep = {
+public/control-center/automation-engine.js:583:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:620:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:658:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:669:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:676:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:678:  const gate = asObject(autoModeState.approvalRequiredStep);
+public/control-center/automation-engine.js:691:  autoModeState.approvalRequiredStep = null;
+public/control-center/automation-engine.js:709:  if (autoModeState.status !== "waiting_approval" || !autoModeState.approvalRequiredStep) return getAutoModeState();
+public/control-center/automation-engine.js:710:  const index = Number(autoModeState.approvalRequiredStep.index) || autoModeState.currentStepIndex;
+public/control-center/automation-engine.js:713:  autoModeState.approvalRequiredStep = null;
+public/control-center/system-intelligence.js:48:  handoffPayload = null,
+public/control-center/system-intelligence.js:63:    handoffPayload
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:157:    handoffs
+public/control-center/system-intelligence.js:162:  return asArray(signals.handoffs)
+public/control-center/system-intelligence.js:171:        title: asString(payload?.workflow_title || payload?.title || payload?.prompt || "Cross-page handoff"),
+public/control-center/system-intelligence.js:263:      title: "Run a workflow to create cross-page handoff",
+public/control-center/system-intelligence.js:264:      reason: "No workflow output/handoff is currently available for downstream routing.",
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:368:  const handoffs = mapHandoffs(signals);
+public/control-center/system-intelligence.js:406:    handoffs,
+public/control-center/system-intelligence.js:489:  return buildSystemIntelligence(state).handoffs;
+public/control-center/router.js:26:const ACTIVE_ROUTE_ROLES = [
+public/control-center/router.js:37:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/router.js:39:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:45:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:46:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:47:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:48:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:49:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:54:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/router.js:185:  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/app.js:56:  createProjectHandoff,
+public/control-center/app.js:84:const ACTIVE_ROUTE_ROLES = [
+public/control-center/app.js:95:const DEFAULT_ROUTE_ROLE_ACCESS = {
+public/control-center/app.js:97:  "ai-command": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:103:  setup: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:104:  "task-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:105:  "queue-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:106:  "job-monitor": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:107:  "notification-center": ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:112:  workflows: ACTIVE_ROUTE_ROLES,
+public/control-center/app.js:179:    if (stored && ACTIVE_ROUTE_ROLES.includes(stored.trim().toLowerCase())) {
+public/control-center/app.js:272:    const fallbackRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+public/control-center/app.js:2119:      createProjectHandoff,
+public/control-center/legacy/styles.legacy-20260508.css:448:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-20260508.css:1862:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-20260508.css:2020:.setup-smart-handoff-actions,
+public/control-center/legacy/styles.legacy-20260508.css:4712:.setup-smart-handoff-panel {
+public/control-center/legacy/styles.legacy-20260508.css:4722:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-20260508.css:4727:.setup-smart-handoff-actions .btn {
+public/control-center/legacy/styles.legacy-20260508.css:4801:.setup-smart-handoff-panel {
+public/control-center/legacy/styles.legacy-20260508.css:4805:.setup-smart-handoff-panel .card-head {
+public/control-center/legacy/styles.legacy-20260508.css:4809:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-20260508.css:4827:.setup-smart-handoff-panel .card-head {
+public/control-center/legacy/styles.legacy-20260508.css:4834:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-20260508.css:4840:.setup-smart-handoff-actions .btn {
+public/control-center/legacy/styles.legacy-20260508.css:4857:.setup-smart-handoff-actions .btn {
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:278:      "Generate the next launch wave with dependencies and handoffs."
+public/control-center/legacy/page-standard.legacy-20260508.js:580:    savedFindings: asArray(ops.handoffs?.items).filter((item) => asString(item.source_page) === "research").length,
+public/control-center/legacy/page-standard.legacy-20260508.js:672:      card("Saved findings", String(m.savedFindings), "Research handoffs preserved for downstream work.", m.savedFindings ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:1083:      { label: "Data used", value: "Workflow catalog, workflow runs, handoffs, job monitor" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1091:      { label: "Data used", value: "Content items, approvals, handoffs, AI rewrite requests" },
+public/control-center/legacy/integrations.monolith-20260508.js:478:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/legacy/integrations.monolith-20260508.js:497:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/legacy/integrations.monolith-20260508.js:529:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:531:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:548:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/legacy/integrations.monolith-20260508.js:2166:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/legacy/styles.legacy-full.css:1230:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:3129:  .setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:3386:  .setup-smart-handoff-actions,
+public/control-center/legacy/styles.legacy-full.css:6447:.setup-smart-handoff-panel {
+public/control-center/legacy/styles.legacy-full.css:6457:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:6462:.setup-smart-handoff-actions .btn {
+public/control-center/legacy/styles.legacy-full.css:6549:.setup-smart-handoff-panel {
+public/control-center/legacy/styles.legacy-full.css:6553:.setup-smart-handoff-panel .card-head {
+public/control-center/legacy/styles.legacy-full.css:6557:.setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:6575:  .setup-smart-handoff-panel .card-head {
+public/control-center/legacy/styles.legacy-full.css:6582:  .setup-smart-handoff-actions {
+public/control-center/legacy/styles.legacy-full.css:6588:  .setup-smart-handoff-actions .btn {
+public/control-center/legacy/styles.legacy-full.css:6605:  .setup-smart-handoff-actions .btn {
+public/control-center/ai-team-model.js:13:export const AI_TEAM_ROLES = [
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:99:    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+public/control-center/ai-team-model.js:129:  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+public/control-center/ai-team-model.js:138:  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+public/control-center/api.js:2157:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2158:    "Failed to load handoffs"
+public/control-center/api.js:2162:export async function createProjectHandoff(projectName, payload = {}) {
+public/control-center/api.js:2168:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2171:    "Failed to create handoff"
+public/control-center/api.js:2175:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2180:  if (!handoffId) {
+public/control-center/api.js:2181:    throw new Error("Missing handoff id");
+public/control-center/api.js:2185:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2188:    "Failed to consume handoff"
+public/control-center/pages/publishing.js:816:function extractHandoffSummary(handoff) {
+public/control-center/pages/publishing.js:817:  const payload = asObject(handoff?.payload);
+public/control-center/pages/publishing.js:821:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing.js:822:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing.js:846:function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers }) {
+public/control-center/pages/publishing.js:877:  if (handoff) {
+public/control-center/pages/publishing.js:880:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:966:        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+public/control-center/pages/publishing.js:1141:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/publishing.js:1142:  if (!handoff) {
+public/control-center/pages/publishing.js:1157:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1293:function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/publishing.js:1294:  const handoffSummary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/publishing.js:1303:    handoffSummary ? `Workflow handoff: ${handoffSummary.title} - ${summarizeText(handoffSummary.summary)}` : "Workflow handoff: none",
+public/control-center/pages/publishing.js:1334:  handoff
+public/control-center/pages/publishing.js:1594:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/publishing.js:1619:      const prompt = buildPublishingAiPrompt(projectName, current, session, handoff);
+public/control-center/pages/publishing.js:1749:    const handoff = getPublishingHandoff(projectName, operations);
+public/control-center/pages/publishing.js:1770:    const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
+public/control-center/pages/publishing.js:1798:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/publishing.js:1835:      handoff
+public/control-center/pages/operations-centers.js:533:                    <span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+public/control-center/pages/operations-centers.js:568:                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+public/control-center/pages/operations-centers.js:658:  if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);
+public/control-center/pages/home.js:172:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:180:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/home.js:181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+public/control-center/pages/ai-command.js:75:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:179:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:581:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+public/control-center/pages/ai-command.js:954:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:955:	const handoffId = asString(handoff?.id);
+public/control-center/pages/ai-command.js:956:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:958:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:974:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:975:	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/ai-command.js:976:		console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/media-studio-workspace.js:4:  createProjectHandoff,
+public/control-center/pages/media-studio-workspace.js:42:  handoffRole: "publisher"
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:170:  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:471:      handoffs: [],
+public/control-center/pages/media-studio-workspace.js:524:    owner_role: asString(raw.owner_role || ownerRoleForMode(mode)),
+public/control-center/pages/media-studio-workspace.js:536:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/media-studio-workspace.js:594:      handoffsResult,
+public/control-center/pages/media-studio-workspace.js:606:    const handoffs = fulfilledValue(handoffsResult, { items: [] });
+public/control-center/pages/media-studio-workspace.js:618:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/media-studio-workspace.js:657:function extractHandoffSummary(handoff) {
+public/control-center/pages/media-studio-workspace.js:658:  const payload = asObject(handoff?.payload);
+public/control-center/pages/media-studio-workspace.js:662:    id: asString(handoff?.id || payload.workflow_id || payload.media_job_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/media-studio-workspace.js:663:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/media-studio-workspace.js:677:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:678:  if (!handoff) return;
+public/control-center/pages/media-studio-workspace.js:679:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:766:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:834:    owner_role: ownerRoleForMode(mode),
+public/control-center/pages/media-studio-workspace.js:977:  const backend = asArray(session.handoffs).find((entry) => {
+public/control-center/pages/media-studio-workspace.js:1023:  const handoffPayload = {
+public/control-center/pages/media-studio-workspace.js:1027:    source_role: selectedItem?.owner_role || ownerRoleForMode(session.form.mode || session.mode || "image"),
+public/control-center/pages/media-studio-workspace.js:1048:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1050:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1054:    handoff_id: asString(existing.backend?.id || existing.local?.handoff_id || ""),
+public/control-center/pages/media-studio-workspace.js:1063:      const result = await createProjectHandoff(backendProjectName, handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1064:      const savedHandoff = asObject(result?.handoff);
+public/control-center/pages/media-studio-workspace.js:1065:      const savedId = asString(savedHandoff.id || handoffPayload.id);
+public/control-center/pages/media-studio-workspace.js:1069:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1074:        handoff_id: savedId,
+public/control-center/pages/media-studio-workspace.js:1080:      session.handoffs = [savedHandoff, ...asArray(session.handoffs).filter((item) => asString(item.id) !== savedId)];
+public/control-center/pages/media-studio-workspace.js:1089:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1098:    showMessage?.("Selected version saved to Library (local handoff).");
+public/control-center/pages/media-studio-workspace.js:1157:function buildRecommendation(metrics, handoff, selectedItem) {
+public/control-center/pages/media-studio-workspace.js:1175:      action: "Send the publishing-ready media handoff",
+public/control-center/pages/media-studio-workspace.js:1176:      why: `${ready.title} is ready for Publishing with a safe handoff payload.`
+public/control-center/pages/media-studio-workspace.js:1179:  if (handoff) {
+public/control-center/pages/media-studio-workspace.js:1182:      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> Publishing flow."
+public/control-center/pages/media-studio-workspace.js:1210:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1217:    publishing_handoff: publishingConnected,
+public/control-center/pages/media-studio-workspace.js:1579:        <div class="media-overview-item"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:1585:function renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1592:    ["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]
+public/control-center/pages/media-studio-workspace.js:1684:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "If no generation backend exists, this becomes a prompt/job ready item for review and handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:1701:function renderPromptBuilder(session, handoff, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1709:        <span class="card-badge neutral">${escapeHtml(handoff ? "Handoff available" : "Context")}</span>
+public/control-center/pages/media-studio-workspace.js:1713:        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>
+public/control-center/pages/media-studio-workspace.js:1726:function renderWorkflowHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:1727:  if (!handoff) {
+public/control-center/pages/media-studio-workspace.js:1742:  const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:1778:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2126:          <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
+public/control-center/pages/media-studio-workspace.js:2275:    ["publishing handoff", readiness.publishing_handoff],
+public/control-center/pages/media-studio-workspace.js:2322:    source_role: source.owner_role || ownerRoleForMode(source.mode),
+public/control-center/pages/media-studio-workspace.js:2323:    destination_role: MEDIA_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/media-studio-workspace.js:2342:      title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2356:        title: source.title || session.form.title || "Media handoff",
+public/control-center/pages/media-studio-workspace.js:2394:  handoff,
+public/control-center/pages/media-studio-workspace.js:2601:      const summary = handoff ? extractHandoffSummary(handoff) : null;
+public/control-center/pages/media-studio-workspace.js:2603:        session.draftMessage = "No workflow handoff is available.";
+public/control-center/pages/media-studio-workspace.js:2612:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/media-studio-workspace.js:2701:      const summary = extractHandoffSummary(handoff);
+public/control-center/pages/media-studio-workspace.js:2817:            summary: session.form.reviewNotes || "Review media output before publishing handoff.",
+public/control-center/pages/media-studio-workspace.js:2882:            owner_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2883:            assignee_role: item.owner_role || ownerRoleForMode(item.mode),
+public/control-center/pages/media-studio-workspace.js:2886:            handoff_roles: [MEDIA_ROLE_DEFAULTS.handoffRole, MEDIA_ROLE_DEFAULTS.reviewRole],
+public/control-center/pages/media-studio-workspace.js:3095:  const handoff = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3096:  const handoffScopes = new Set([asString(projectName)]);
+public/control-center/pages/media-studio-workspace.js:3098:    handoffScopes.add("__default__");
+public/control-center/pages/media-studio-workspace.js:3100:  handoffScopes.forEach((scope) => {
+public/control-center/pages/media-studio-workspace.js:3101:    setSharedHandoff(scope, "publishing", handoff);
+public/control-center/pages/media-studio-workspace.js:3106:      await createProjectHandoff(backendProjectName, handoff);
+public/control-center/pages/media-studio-workspace.js:3107:      showMessage?.("Publishing handoff created from Media Studio.");
+public/control-center/pages/media-studio-workspace.js:3109:      showMessage?.("Publishing handoff kept locally because backend handoff save is unavailable.");
+public/control-center/pages/media-studio-workspace.js:3112:    showMessage?.("Publishing handoff created locally.");
+public/control-center/pages/media-studio-workspace.js:3173:    const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/media-studio-workspace.js:3175:    const recommendation = buildRecommendation(metrics, handoff, selectedItem);
+public/control-center/pages/media-studio-workspace.js:3181:        ${renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3183:        ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:3187:            ${renderPromptBuilder(session, handoff, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3195:            ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:3209:      handoff,
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:87:      <div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>
+public/control-center/pages/research.js:856:  createProjectHandoff,
+public/control-center/pages/research.js:917:        createProjectHandoff?.(projectName, {
+public/control-center/pages/research.js:935:          console.warn("Failed to persist research AI handoff:", error.message);
+public/control-center/pages/research.js:964:      const handoff = {
+public/control-center/pages/research.js:976:          owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/research.js:981:      setSharedHandoff(projectName, action.route, handoff);
+public/control-center/pages/research.js:982:      createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/research.js:983:        console.warn("Failed to persist research route handoff:", error.message);
+public/control-center/pages/research.js:1124:    createProjectHandoff
+public/control-center/pages/research.js:1142:      createProjectHandoff
+public/control-center/pages/research.js:1606:      createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:3:  createProjectHandoff,
+public/control-center/pages/content-studio-workspace.js:58:  handoffRole: "publisher"
+public/control-center/pages/content-studio-workspace.js:67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+public/control-center/pages/content-studio-workspace.js:114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+public/control-center/pages/content-studio-workspace.js:116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:187:  if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";
+public/control-center/pages/content-studio-workspace.js:188:  if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";
+public/control-center/pages/content-studio-workspace.js:498:    linked_handoffs: asArray(raw.linked_handoffs),
+public/control-center/pages/content-studio-workspace.js:540:      handoffs: [],
+public/control-center/pages/content-studio-workspace.js:620:  if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";
+public/control-center/pages/content-studio-workspace.js:651:    owner_role: CONTENT_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/content-studio-workspace.js:734:function buildInboundSummary(handoff) {
+public/control-center/pages/content-studio-workspace.js:735:  const payload = asObject(handoff?.payload);
+public/control-center/pages/content-studio-workspace.js:739:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+public/control-center/pages/content-studio-workspace.js:740:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:767:  const handoff = getInboundHandoff(projectName, session);
+public/control-center/pages/content-studio-workspace.js:768:  if (!handoff) return;
+public/control-center/pages/content-studio-workspace.js:769:  const summary = buildInboundSummary(handoff);
+public/control-center/pages/content-studio-workspace.js:781:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:795:    session.handoffs = asArray(handoffs.items);
+public/control-center/pages/content-studio-workspace.js:828:      why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."
+public/control-center/pages/content-studio-workspace.js:855:    why: "Higher-quality prompt context improves draft quality and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:891:      .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1059:        .content-handoff-grid {
+public/control-center/pages/content-studio-workspace.js:1096:    ["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],
+public/control-center/pages/content-studio-workspace.js:1158:function renderComposer(session, state, handoff, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1237:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1441:function renderInboundHandoff(handoff, session, escapeHtml) {
+public/control-center/pages/content-studio-workspace.js:1442:  if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1448:            <h3>No inbound handoff available</h3>
+public/control-center/pages/content-studio-workspace.js:1462:          <h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>
+public/control-center/pages/content-studio-workspace.js:1463:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/content-studio-workspace.js:1467:      <div class="content-handoff-grid">
+public/control-center/pages/content-studio-workspace.js:1468:        <div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1469:        <div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1470:        <div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1471:        <div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1473:      <div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>
+public/control-center/pages/content-studio-workspace.js:1554:    destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,
+public/control-center/pages/content-studio-workspace.js:1584:      title: firstText(selectedItem?.title, session.form.title, "Content handoff")
+public/control-center/pages/content-studio-workspace.js:1593:  const backend = asArray(session.handoffs).find((item) => {
+public/control-center/pages/content-studio-workspace.js:1665:  const handoff = {
+public/control-center/pages/content-studio-workspace.js:1690:  setSharedHandoff(projectName || "__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1692:    setSharedHandoff("__default__", "library", handoff);
+public/control-center/pages/content-studio-workspace.js:1697:      const result = await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1698:      const saved = asObject(result?.handoff);
+public/control-center/pages/content-studio-workspace.js:1699:      const handoffId = asString(saved.id || handoff.id);
+public/control-center/pages/content-studio-workspace.js:1702:        id: handoffId || libraryAsset.id,
+public/control-center/pages/content-studio-workspace.js:1703:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1707:        handoff_id: handoffId,
+public/control-center/pages/content-studio-workspace.js:1720:        handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1725:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/content-studio-workspace.js:1734:      handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1739:    showMessage?.("Content draft saved to Library (local handoff).");
+public/control-center/pages/content-studio-workspace.js:1745:async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {
+public/control-center/pages/content-studio-workspace.js:1746:  setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1748:    setSharedHandoff("__default__", handoff.destination_page, handoff);
+public/control-center/pages/content-studio-workspace.js:1753:      await createProjectHandoff(projectName, handoff);
+public/control-center/pages/content-studio-workspace.js:1789:  handoff,
+public/control-center/pages/content-studio-workspace.js:1837:      if (!handoff) {
+public/control-center/pages/content-studio-workspace.js:1838:        session.draftMessage = "No inbound handoff is available.";
+public/control-center/pages/content-studio-workspace.js:1844:        mode: firstText(handoff.mode, session.form.mode, "social-post"),
+public/control-center/pages/content-studio-workspace.js:1845:        project: firstText(handoff.project, session.form.project, projectName),
+public/control-center/pages/content-studio-workspace.js:1846:        campaign: firstText(handoff.campaign, session.form.campaign),
+public/control-center/pages/content-studio-workspace.js:1847:        product: firstText(handoff.product, session.form.product),
+public/control-center/pages/content-studio-workspace.js:1848:        channel: firstText(handoff.channel, session.form.channel),
+public/control-center/pages/content-studio-workspace.js:1849:        language: firstText(handoff.language, session.form.language),
+public/control-center/pages/content-studio-workspace.js:1850:        tone: firstText(handoff.tone, session.form.tone),
+public/control-center/pages/content-studio-workspace.js:1851:        objective: firstText(handoff.objective, session.form.objective),
+public/control-center/pages/content-studio-workspace.js:1852:        brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),
+public/control-center/pages/content-studio-workspace.js:1853:        title: firstText(handoff.title, session.form.title),
+public/control-center/pages/content-studio-workspace.js:1854:        status: normalizeStatus(handoff.readinessStatus || "draft", "draft")
+public/control-center/pages/content-studio-workspace.js:1859:        outputContent: firstText(handoff.contentBody),
+public/control-center/pages/content-studio-workspace.js:1864:        approvalStatus: firstText(handoff.approvalStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:1865:        notes: `Loaded from ${titleCase(handoff.sourcePage || "handoff")}.`
+public/control-center/pages/content-studio-workspace.js:2072:      const handoffPayload = buildMediaHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2075:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2078:        failMessage: "Media handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2079:        successMessage: "Media Studio handoff created.",
+public/control-center/pages/content-studio-workspace.js:2080:        localMessage: "Media Studio handoff created locally."
+public/control-center/pages/content-studio-workspace.js:2104:      const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);
+public/control-center/pages/content-studio-workspace.js:2107:        handoff: handoffPayload,
+public/control-center/pages/content-studio-workspace.js:2110:        failMessage: "Publishing handoff kept locally because backend save is unavailable.",
+public/control-center/pages/content-studio-workspace.js:2111:        successMessage: "Publishing handoff created.",
+public/control-center/pages/content-studio-workspace.js:2112:        localMessage: "Publishing handoff created locally."
+public/control-center/pages/content-studio-workspace.js:2307:        ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:2329:      handoff: inboundSummary,
+public/control-center/pages/setup.js:1379:                <p class="home-section-copy">Distribution channels and operator handoff notes.</p>
+public/control-center/pages/setup.js:1382:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}
+public/control-center/pages/setup.js:1466:        <section class="card setup-smart-handoff-panel">
+public/control-center/pages/setup.js:1471:          <div class="setup-smart-handoff-actions">
+public/control-center/pages/integrations/builders.js:489:      description: "Automation and coordination tools that help orchestrate tasks, handoffs, notifications, and AI-assisted operations.",
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:381:  const handoffId = asString(handoff?.id || handoff?.updated_at || handoff?.created_at || handoff?.payload?.prompt);
+public/control-center/pages/campaign-studio.js:382:  if (!handoffId || handoffId === asString(session.lastAiHandoffId)) return false;
+public/control-center/pages/campaign-studio.js:384:  const payload = asObject(handoff.payload);
+public/control-center/pages/campaign-studio.js:421:  session.lastAiHandoffId = handoffId;
+public/control-center/pages/campaign-studio.js:454:    owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:464:function persistCampaignRouteHandoff({ projectName, session, destinationPage, createProjectHandoff }) {
+public/control-center/pages/campaign-studio.js:468:  const handoff = {
+public/control-center/pages/campaign-studio.js:484:      owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:491:  setSharedHandoff(projectName, destinationPage, handoff);
+public/control-center/pages/campaign-studio.js:492:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:493:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1253:  createProjectHandoff
+public/control-center/pages/campaign-studio.js:1278:      // Explicit actions such as Save, Build, Refresh, and route handoffs still
+public/control-center/pages/campaign-studio.js:1339:      createProjectHandoff?.(projectName, {
+public/control-center/pages/campaign-studio.js:1354:          owner_role: CAMPAIGN_ROLE_DEFAULTS.ownerRole,
+public/control-center/pages/campaign-studio.js:1360:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1370:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1383:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1391:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1399:      persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1472:    createProjectHandoff
+public/control-center/pages/campaign-studio.js:1493:      createProjectHandoff
+public/control-center/pages/campaign-studio.js:1977:      createProjectHandoff,
+public/control-center/pages/integrations.js:512:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/pages/integrations.js:531:        enables: "Alerts, commands, approval handoff, and ops notifications.",
+public/control-center/pages/integrations.js:563:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/pages/integrations.js:565:        enables: "Workflow automation, triggers, sync jobs, and handoffs.",
+public/control-center/pages/integrations.js:582:        enables: "Custom events, syncs, notifications, and system handoffs.",
+public/control-center/pages/insights.js:947:function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
+public/control-center/pages/insights.js:997:        const handoff = {
+public/control-center/pages/insights.js:1015:        setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/insights.js:1016:        createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/insights.js:1017:          console.warn("Failed to persist Insights handoff:", error.message);
+public/control-center/pages/insights.js:1049:    createProjectHandoff
+public/control-center/pages/insights.js:1420:      createProjectHandoff
+public/control-center/pages/insights.js:1437:          createProjectHandoff
+public/control-center/pages/insights.js:1455:          createProjectHandoff
+public/control-center/pages/insights.js:1470:        createProjectHandoff
+public/control-center/pages/insights.js:1497:            createProjectHandoff
+public/control-center/pages/insights.js:1513:            createProjectHandoff
+public/control-center/pages/library.js:723:  const id = asString(asset.handoff_id || asset.id || `media-managed-${index}`);
+public/control-center/pages/library.js:744:    file_path: asString(asset.handoff_id || asset.media_job_id || ""),
+public/control-center/pages/library.js:771:    source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"
+public/control-center/pages/library.js:789:  const backendHandoffs = asArray(operations?.handoffs?.items)
+public/control-center/pages/library.js:797:          handoff_id: item.id,
+public/control-center/pages/settings.js:236:        path: "ai.approvalRequiredMode",
+public/control-center/pages/settings.js:710:    approvalRequiredMode: asString(normalized.ai?.approvalRequiredMode || bridge.approval_mode),
+public/control-center/pages/settings.js:746:      owner_role: "admin"
+public/control-center/pages/settings.js:791:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/settings.js:912:      approvalRequiredMode: "Only high-risk",
+public/control-center/pages/settings.js:1190:    approvalMode: `${form.ai.approvalRequiredMode} • ${form.approval.requirements.length} human triggers`,
+public/control-center/pages/settings.js:1751:          await context.createProjectHandoff?.(session.projectName, {
+public/control-center/pages/governance.js:94:      approval_mode: asString(ai.approvalRequiredMode) || "Only high-risk",
+public/control-center/pages/workflows.js:49:    purpose: "Prepare media production inputs, format guidance, and downstream handoff steps.",
+public/control-center/pages/workflows.js:525:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:526:      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+public/control-center/pages/workflows.js:656:  const gate = asObject(autoMode?.approvalRequiredStep);
+public/control-center/pages/workflows.js:662:        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+public/control-center/pages/workflows.js:925:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:926:  const handoffId = asString(handoff?.id);
+public/control-center/pages/workflows.js:927:  if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/workflows.js:929:  const payload = asObject(handoff?.payload);
+public/control-center/pages/workflows.js:950:    run.source = "handoff";
+public/control-center/pages/workflows.js:955:  session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/workflows.js:956:  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
+public/control-center/pages/workflows.js:957:    console.warn("Failed to consume workflow handoff:", error.message);
+public/control-center/pages/workflows.js:959:  showMessage?.("Workflow context restored from shared handoff.");
+public/control-center/pages/workflows.js:1061:  createProjectHandoff,
+public/control-center/pages/workflows.js:1076:  const handoff = {
+public/control-center/pages/workflows.js:1089:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1091:  if (allowPersistent && typeof createProjectHandoff === "function") {
+public/control-center/pages/workflows.js:1092:    createProjectHandoff(projectName, handoff).catch((error) => {
+public/control-center/pages/workflows.js:1093:      console.warn("Failed to persist workflow-to-ai handoff:", error.message);
+public/control-center/pages/workflows.js:1211:  createProjectHandoff,
+public/control-center/pages/workflows.js:1215:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1306:        persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
+public/control-center/pages/workflows.js:1458:        createProjectHandoff,
+public/control-center/pages/workflows.js:1491:        createProjectHandoff,
+public/control-center/pages/workflows.js:1508:        createProjectHandoff,
+public/control-center/pages/workflows.js:1532:          owner_role: "admin",
+public/control-center/pages/workflows.js:1533:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1635:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1664:        context: { getState, navigateTo, createProjectHandoff, projectName },
+public/control-center/pages/workflows.js:1686:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+public/control-center/pages/workflows.js:1694:        context: { getState, navigateTo, createProjectHandoff, projectName }
+public/control-center/pages/workflows.js:1711:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1727:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+public/control-center/pages/workflows.js:1735:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+
+===== BACKEND AUTHORITY MARKERS =====
+runtime/orchestrator-service/lib/ops/backbone.js:17:// Canonical defaults for policy_rules — these are the authoritative safe values.
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:33:  workflowRuns: 250,
+runtime/orchestrator-service/lib/ops/backbone.js:38:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:43:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:62:  workflow_runs: {
+runtime/orchestrator-service/lib/ops/backbone.js:68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:72:    types: ['ai_response', 'workflow_output', 'recommendation_bundle', 'memory_snapshot']
+runtime/orchestrator-service/lib/ops/backbone.js:79:    scopes: ['project', 'campaign', 'workflow', 'channel', 'audience', 'content'],
+runtime/orchestrator-service/lib/ops/backbone.js:82:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:95:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:112:    routes: ['home', 'campaign-studio', 'workflows', 'research', 'insights'],
+runtime/orchestrator-service/lib/ops/backbone.js:119:    routes: ['content-studio', 'workflows', 'research'],
+runtime/orchestrator-service/lib/ops/backbone.js:121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:126:    routes: ['media-studio', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:133:    routes: ['media-studio', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:135:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:140:    routes: ['publishing', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:147:    routes: ['ads-manager', 'campaign-studio', 'workflows', 'insights'],
+runtime/orchestrator-service/lib/ops/backbone.js:154:    routes: ['insights', 'research', 'workflows', 'home'],
+runtime/orchestrator-service/lib/ops/backbone.js:168:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:185:  workflows: TEAM_ROLE_DEFS.map((role) => role.id),
+runtime/orchestrator-service/lib/ops/backbone.js:193:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:197:    page_permissions: ['campaign-studio', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:201:    owner_role: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:209:    owner_role: 'designer',
+runtime/orchestrator-service/lib/ops/backbone.js:211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:217:    owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:219:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:225:    owner_role: 'analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:229:    page_permissions: ['research', 'workflows', 'insights']
+runtime/orchestrator-service/lib/ops/backbone.js:233:    owner_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:235:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:246:  workflow_run: 'research',
+runtime/orchestrator-service/lib/ops/backbone.js:247:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:389:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:403:    route_permissions: Object.entries(ROUTE_ROLE_ACCESS).map(([route, roles]) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:411:        owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:413:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:438:    route_permissions: defaults.route_permissions,
+runtime/orchestrator-service/lib/ops/backbone.js:527:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:541:    owner_role: normalizeRoleKey(record.owner_role || ownerRole, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:542:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+runtime/orchestrator-service/lib/ops/backbone.js:543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:544:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:545:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:546:    owner_display: roleDisplay(team, record.owner_role || ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+runtime/orchestrator-service/lib/ops/backbone.js:784:    workflowsPath: path.join(opsDir, 'workflow-runs.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:816:      'workflow_runs',
+runtime/orchestrator-service/lib/ops/backbone.js:822:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:825:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:833:  ensureJsonFile(paths.workflowsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:839:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:842:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:848:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:852:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:853:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:860:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:871:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:873:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:905:      'workflow_runs',
+runtime/orchestrator-service/lib/ops/backbone.js:911:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:914:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:969:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:970:  if (value.includes('workflow')) return 'workflow';
+runtime/orchestrator-service/lib/ops/backbone.js:973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:1183: *  - policy_rules is always an object (never null/undefined/non-object)
+runtime/orchestrator-service/lib/ops/backbone.js:1184: *  - Any missing policy_rules key is filled from DEFAULT_POLICY_RULES
+runtime/orchestrator-service/lib/ops/backbone.js:1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1192:  const rawRules = doc.policy_rules;
+runtime/orchestrator-service/lib/ops/backbone.js:1193:  // If policy_rules is not a plain object (missing, null, array, string, etc.)
+runtime/orchestrator-service/lib/ops/backbone.js:1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1210:    policy_rules: mergedRules
+runtime/orchestrator-service/lib/ops/backbone.js:1240:    policy_rules: {
+runtime/orchestrator-service/lib/ops/backbone.js:1241:      ...asObject(current.policy_rules),
+runtime/orchestrator-service/lib/ops/backbone.js:1242:      ...asObject(sourcePatch.policy_rules)
+runtime/orchestrator-service/lib/ops/backbone.js:1244:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1245:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1246:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1269:      policy_rules: next.policy_rules,
+runtime/orchestrator-service/lib/ops/backbone.js:1284:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1475:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1486:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1488:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1500:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1511:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1525:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1528:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1599:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1617:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1630:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1638:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1640:      owner_role: item.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1665:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1666:      owner_role: job.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1701:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1702:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1703:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1827:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1828:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1829:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1830:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1857:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1877:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1970:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1971:    owner_role: normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1972:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:2042:  const items = readCollection(paths.workflowsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2043:  const workflowId = asString(input.workflow_id || input.workflowId || input.workflow_type);
+runtime/orchestrator-service/lib/ops/backbone.js:2045:  if (!workflowId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2046:    throw new Error('Missing workflow_id');
+runtime/orchestrator-service/lib/ops/backbone.js:2056:    workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2057:    workflow_type: asString(input.workflow_type || current.workflow_type || workflowId),
+runtime/orchestrator-service/lib/ops/backbone.js:2058:    title: asString(input.title || current.title) || workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2075:      current.id ? 'workflow_run_updated' : 'workflow_run_recorded',
+runtime/orchestrator-service/lib/ops/backbone.js:2078:        workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2085:  writeCollection(paths.workflowsPath, upsertById(items, run), MAX_ITEMS.workflowRuns);
+runtime/orchestrator-service/lib/ops/backbone.js:2087:    queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2088:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2095:    route: inferRouteTarget('workflow_run', run),
+runtime/orchestrator-service/lib/ops/backbone.js:2097:      workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2103:    type: current.id ? 'workflow_run_updated' : 'workflow_run_recorded',
+runtime/orchestrator-service/lib/ops/backbone.js:2104:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2107:    summary: `${run.title} was recorded as a durable workflow run.`,
+runtime/orchestrator-service/lib/ops/backbone.js:2110:      workflow_id: workflowId,
+runtime/orchestrator-service/lib/ops/backbone.js:2116:    category: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2117:    type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:2138:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2140:      route: inferRouteTarget('workflow_run', run)
+runtime/orchestrator-service/lib/ops/backbone.js:2142:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:2405:  return listItems(readCollection(paths.workflowsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2408:function getWorkflowRun(projectName, workflowRunId) {
+runtime/orchestrator-service/lib/ops/backbone.js:2410:  return findById(readCollection(paths.workflowsPath), workflowRunId);
+runtime/orchestrator-service/lib/ops/backbone.js:2432:  const ownerRole = normalizeRoleKey(input.owner_role || current.owner_role || routing.owner_role, routing.owner_role);
+runtime/orchestrator-service/lib/ops/backbone.js:2440:    owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2455:    workflow_id: asString(input.workflow_id || current.workflow_id),
+runtime/orchestrator-service/lib/ops/backbone.js:2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2461:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2465:      review_role: routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2466:      review_label: roleDisplay(team, routing.reviewer_role)
+runtime/orchestrator-service/lib/ops/backbone.js:2497:      workflow_id: task.workflow_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2501:      owner_role: ownerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2557:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2577:    input.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2578:      current.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2581:      routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2582:    routing.reviewer_role
+runtime/orchestrator-service/lib/ops/backbone.js:2587:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2594:    reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2610:      owner_role: routing.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2611:      owner_label: roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2612:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2631:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2637:        reviewer_role: reviewerRole
+runtime/orchestrator-service/lib/ops/backbone.js:2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2646:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2647:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2648:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2649:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2650:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2653:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2654:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2655:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2659:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2660:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2661:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2662:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2666:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2668:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2675:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2676:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2677:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2678:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2679:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2686:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2690:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2709:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2710:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2714:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2715:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2724:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2733:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2738:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2741:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2743:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2745:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2749:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2765:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+runtime/orchestrator-service/lib/ops/backbone.js:2786:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2797:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2800:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2801:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2813:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2814:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2820:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2822:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2824:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2845:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2851:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2865:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2901:      owner_role: escalationTargetRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2907:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2919:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2933:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2957:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+runtime/orchestrator-service/lib/ops/backbone.js:2958:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2961:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:2970:    source_role: normalizeRoleKey(input.source_role || current.source_role || sourceRouting.owner_role, sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2972:    source_role_label: roleDisplay(team, input.source_role || current.source_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2983:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2999:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3000:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3011:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3013:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3022:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3023:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3024:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3026:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3027:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3029:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3030:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3031:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3041:        owner_role: asString(record.owner_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3042:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3043:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3044:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3046:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3052:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3054:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3058:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3059:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3064:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3065:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3074:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3082:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3099:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3101:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3122:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3126:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3127:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3130:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3172:      owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3270:      item.owner_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3272:      item.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3369:  if (normalizedType === 'task') return 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3370:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3371:  if (normalizedType === 'workflow_run') return 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3404:        owner_role: asString(task.owner_role || task.assignee_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3406:        assignee_role: asString(task.assignee_role || task.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3436:      owners: mapFilterCounts(items, 'owner_role'),
+runtime/orchestrator-service/lib/ops/backbone.js:3444:function buildWorkflowQueueFallback(workflowRuns = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3445:  return asArray(workflowRuns)
+runtime/orchestrator-service/lib/ops/backbone.js:3449:      queue_type: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:3450:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3452:      title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3457:      route: inferRouteTarget('workflow_run', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3459:        workflow_id: asString(item.workflow_id),
+runtime/orchestrator-service/lib/ops/backbone.js:3510:function buildQueueCenter(queueItems = [], workflowRuns = [], events = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3512:  const workflowQueue = normalizedQueue.filter((item) => item.queue_type === 'workflow' || item.entity_type === 'workflow_run');
+runtime/orchestrator-service/lib/ops/backbone.js:3513:  const workflowFallback = workflowQueue.length ? workflowQueue : buildWorkflowQueueFallback(workflowRuns);
+runtime/orchestrator-service/lib/ops/backbone.js:3519:    workflow: workflowFallback,
+runtime/orchestrator-service/lib/ops/backbone.js:3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3556:    workflow_queue: workflowFallback,
+runtime/orchestrator-service/lib/ops/backbone.js:3559:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3566:function buildJobEntries(workflowRuns = [], mediaJobs = [], queueItems = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3567:  const workflowJobs = asArray(workflowRuns).map((item) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3569:    kind: 'workflow',
+runtime/orchestrator-service/lib/ops/backbone.js:3570:    entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3572:    title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3574:    route: inferRouteTarget('workflow_run', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3612:  return [...workflowJobs, ...mediaJobItems, ...publishingJobs]
+runtime/orchestrator-service/lib/ops/backbone.js:3627:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+runtime/orchestrator-service/lib/ops/backbone.js:3676:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3678:  workflowRuns = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3704:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3708:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3709:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3724:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3780:  const workflowCompletionAlerts = asArray(workflowRuns)
+runtime/orchestrator-service/lib/ops/backbone.js:3784:      id: `workflow-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3785:      title: asString(item.title) || asString(item.workflow_id) || 'Workflow run',
+runtime/orchestrator-service/lib/ops/backbone.js:3791:      source: 'workflow_completion',
+runtime/orchestrator-service/lib/ops/backbone.js:3792:      entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/backbone.js:3799:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3803:    ...workflowCompletionAlerts
+runtime/orchestrator-service/lib/ops/backbone.js:3816:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3820:    workflow_completion_alerts: workflowCompletionAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3833:  const workflowRuns = readCollection(paths.workflowsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3839:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3842:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3848:  const workflowLimit = Number(options.workflowLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3862:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3868:    owner_role: domain.owner_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3869:    owner_label: roleDisplay(team, domain.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3880:  const queueCenter = buildQueueCenter(queueItems, workflowRuns, events);
+runtime/orchestrator-service/lib/ops/backbone.js:3881:  const jobMonitor = buildJobMonitor(buildJobEntries(workflowRuns, mediaJobs, queueItems), events);
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3886:    workflowRuns,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    team_service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:3909:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3930:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3937:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3967:    workflows: {
+runtime/orchestrator-service/lib/ops/backbone.js:3968:      total_runs: workflowRuns.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3969:      completed_runs: workflowRuns.filter((item) => asString(item.status) === 'completed').length,
+runtime/orchestrator-service/lib/ops/backbone.js:3970:      recent_runs: workflowRuns.slice(0, workflowLimit),
+runtime/orchestrator-service/lib/ops/backbone.js:3971:      items: workflowRuns.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:3973:    workflow_runs: {
+runtime/orchestrator-service/lib/ops/backbone.js:3974:      total: workflowRuns.length,
+runtime/orchestrator-service/lib/ops/backbone.js:3975:      items: workflowRuns.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:3980:      items: aiCommands.slice(0, workflowLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4001:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4002:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4005:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4017:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4018:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4021:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4033:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:147:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  if (intent === 'workflow') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:204:      actionType: 'workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:215:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:235:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:300:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:447:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:557:    normalizeRouteSuggestion('workflows', 'Use Workflows when this needs structured repeatable execution.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:571:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:578:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:623:function buildWorkflowOutput(workflowId, inputs, context) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:627:  const routeTarget = workflowId === 'generate-ad-strategy'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:    : workflowId === 'build-content-plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:631:      : workflowId === 'launch-new-campaign'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:633:        : workflowId === 'competitor-research'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:635:          : 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:638:    title: titleCase(workflowId),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:639:    summary: `${titleCase(workflowId)} prepared for ${campaign} with ${goal} as the primary target and ${audience} as the main audience.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:643:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:646:      context.summary.recommendations[0] || `Route this workflow output into ${titleCase(routeTarget)} for execution.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:648:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:651:      `Open ${titleCase(routeTarget)} to action the workflow output.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:656:      normalizeRouteSuggestion(routeTarget, 'Primary downstream page for this workflow output.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:765:          scope: classified.intent === 'workflow' ? 'workflow' : 'project',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:792:        if (classified.actionType === 'workflow') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:794:            workflow_id: 'ai-command-orchestration',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:795:            workflow_type: 'ai_command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:799:            route_target: 'workflows',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:811:          linkedEntities.push({ entity_type: 'workflow_run', entity_id: run.id, route: 'workflows', label: run.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:814:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:815:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:816:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:823:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:826:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:828:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:865:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:902:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:963:    executeWorkflow(projectName, workflowId, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:964:      const cleanWorkflowId = asString(workflowId);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:966:        throw new Error('Missing workflow id');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        type: 'workflow_output',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:978:        source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:980:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:988:        workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:989:        workflow_type: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:991:        source: input.source || 'server-ai-workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1013:          source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1022:        scope: 'workflow',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1026:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1030:        source_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1035:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1036:        source_page: 'workflows',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:          entity_type: 'workflow_run',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1045:          workflow_id: cleanWorkflowId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1046:          workflow_title: output.title,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1060:        handoff,
+runtime/orchestrator-service/server.js:3941:      'ready_for_manual_handoff',
+runtime/orchestrator-service/server.js:5983:    return 'approval_required';
+runtime/orchestrator-service/server.js:6052:    approval_required: mode === 'approval_required',
+runtime/orchestrator-service/server.js:6059:        mode === 'approval_required'
+runtime/orchestrator-service/server.js:6060:          ? 'Prepare execution summary and request approval.'
+runtime/orchestrator-service/server.js:6752:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'insights', 'workflows'],
+runtime/orchestrator-service/server.js:7255:    approval_note: normalizeSetupTextValue(asset.approval_note),
+runtime/orchestrator-service/server.js:8379:    record.approval_status ||
+runtime/orchestrator-service/server.js:10546:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:11068:      error: error.message || 'Failed to list workflow runs'
+runtime/orchestrator-service/server.js:11073:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+runtime/orchestrator-service/server.js:11074:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+runtime/orchestrator-service/server.js:11085:      error: error.message || 'Failed to load workflow run'
+runtime/orchestrator-service/server.js:11090:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+runtime/orchestrator-service/server.js:11091:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+runtime/orchestrator-service/server.js:11097:      workflow_id: req.params.workflowId,
+runtime/orchestrator-service/server.js:11110:        type: 'workflow_output',
+runtime/orchestrator-service/server.js:11111:        title: req.body?.title || req.params.workflowId,
+runtime/orchestrator-service/server.js:11114:        source_type: 'workflow_run',
+runtime/orchestrator-service/server.js:11128:      error: error.message || 'Failed to record workflow run'
+runtime/orchestrator-service/server.js:11133:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11134:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+runtime/orchestrator-service/server.js:11188:      req.params.workflowId,
+runtime/orchestrator-service/server.js:11197:      error: error.message || 'Failed to execute AI workflow'
+runtime/orchestrator-service/server.js:11285:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:11286:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+runtime/orchestrator-service/server.js:11364:      error: error.message || 'Failed to list approvals'
+runtime/orchestrator-service/server.js:11371:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11373:      approval,
+runtime/orchestrator-service/server.js:11378:      error: error.message || 'Failed to create approval'
+runtime/orchestrator-service/server.js:11385:    const approval = decideApproval(req.params.project, req.params.approvalId, {
+runtime/orchestrator-service/server.js:11394:      approval,
+runtime/orchestrator-service/server.js:11399:      error: error.message || 'Failed to update approval'
+runtime/orchestrator-service/server.js:11404:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:11405:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:11406:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11407:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11408:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11409:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11516:      error: error.message || 'Failed to list handoffs'
+runtime/orchestrator-service/server.js:11523:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11525:      handoff,
+runtime/orchestrator-service/server.js:11530:      error: error.message || 'Failed to create handoff'
+runtime/orchestrator-service/server.js:11537:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+runtime/orchestrator-service/server.js:11539:      handoff,
+runtime/orchestrator-service/server.js:11544:      error: error.message || 'Failed to consume handoff'
+runtime/orchestrator-service/server.js:11549:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11550:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11551:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11552:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11553:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11554:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:13341:      result.execution_status = 'ready_for_manual_handoff';
+runtime/orchestrator-service/server.js:13342:      result.action_type = 'manual_marketplace_handoff';
+runtime/orchestrator-service/server.js:13343:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+runtime/orchestrator-service/server.js:13616:  // getGovernancePolicy always returns a normalized policy with policy_rules merged
+runtime/orchestrator-service/server.js:13617:  // from DEFAULT_POLICY_RULES, so policy_rules is always a fully-populated object.
+runtime/orchestrator-service/server.js:13619:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+runtime/orchestrator-service/server.js:13620:    ? governance.policy_rules
+runtime/orchestrator-service/server.js:13627:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:13632:  //   approval_before_publish → default true (restrictive — approval is required by default)
+runtime/orchestrator-service/server.js:13636:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+runtime/orchestrator-service/server.js:13637:    ? policyRules.approval_before_publish
+runtime/orchestrator-service/server.js:13638:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+runtime/orchestrator-service/server.js:13662:  if (approvalSensitiveAction && approvalBeforePublish) {
+runtime/orchestrator-service/server.js:13664:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:13669:          rule: 'approval_before_publish'
+runtime/orchestrator-service/server.js:13674:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:13675:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:13677:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+runtime/orchestrator-service/server.js:13678:      logGovernanceBlock('approval_before_publish', {
+runtime/orchestrator-service/server.js:13680:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:13686:          rule: 'approval_before_publish',
+runtime/orchestrator-service/server.js:13688:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:16076:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+
+===== GLOBAL LISTENERS =====
+public/control-center/pages/integrations.js:1374:    document.addEventListener("keydown", integrationDrawerEscapeHandler);
+public/control-center/pages/workflows.js:1111:  window.addEventListener("mh:submit-workflow", async (event) => {
+public/control-center/app.js:1216:  document.addEventListener("click", (event) => {
+public/control-center/app.js:1772:  window.addEventListener("mh:control-center-api-trace", (event) => {
+public/control-center/app.js:1793:  window.addEventListener("error", (event) => {
+public/control-center/app.js:1802:  window.addEventListener("unhandledrejection", (event) => {
+public/control-center/app.js:3128:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3187:  window.addEventListener("mh:route-change", (event) => {
+public/control-center/app.js:3195:  window.addEventListener("hashchange", () => {
+public/control-center/app.js:3383:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3400:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3409:  window.addEventListener("resize", () => {
+public/control-center/app.js:3416:  window.addEventListener("orientationchange", syncCompactShellState);
+public/control-center/app.js:3653:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3667:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3761:  document.addEventListener("click", (event) => {
+public/control-center/app.js:3767:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:3806:  window.addEventListener("hashchange", syncContext);
+public/control-center/app.js:4053:  document.addEventListener("keydown", (event) => {
+public/control-center/app.js:4216:window.addEventListener("DOMContentLoaded", init);
