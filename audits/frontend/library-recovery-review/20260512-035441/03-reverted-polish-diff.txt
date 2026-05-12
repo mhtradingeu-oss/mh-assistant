@@ -1,0 +1,496 @@
+===== REVERTED POLISH DIFF =====
+commit 11a57c988d12e312e38fc37255f53b872396a854
+Author: Nadeem <mhtradingeu@gmail.com>
+Date:   Tue May 12 03:19:03 2026 +0000
+
+    Polish Library main view and operating surface styling
+
+ public/control-center/pages/library.js             |  83 ++----
+ .../control-center/pages/library/action-panel.js   |  76 ++++-
+ public/control-center/pages/library/ai-panel.js    |  73 ++++-
+ public/control-center/styles/14-page-standard.css  | 315 +++++++++++++++++++++
+ 4 files changed, 472 insertions(+), 75 deletions(-)
+commit 11a57c988d12e312e38fc37255f53b872396a854
+Author: Nadeem <mhtradingeu@gmail.com>
+Date:   Tue May 12 03:19:03 2026 +0000
+
+    Polish Library main view and operating surface styling
+
+diff --git a/public/control-center/pages/library.js b/public/control-center/pages/library.js
+index ebab028..8d636e8 100644
+--- a/public/control-center/pages/library.js
++++ b/public/control-center/pages/library.js
+@@ -1745,11 +1745,11 @@ function bindLibraryWorkspace({
+           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
+ 
+         return `
+-          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
++          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
+             <div class="library-grid-preview">${previewNode}</div>
+-            <div class="library-grid-title">${escapeHtml(asset.name)}</div>
++            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</div>
+             <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
+-            <div class="library-grid-meta">${escapeHtml(pathHint)}</div>
++            <div class="library-grid-meta library-grid-path" title="${escapeHtml(pathHint)}">${escapeHtml(pathHint)}</div>
+             <div class="library-grid-foot">
+               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
+               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+@@ -1845,19 +1845,6 @@ function bindLibraryWorkspace({
+             <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
+           </div>
+         </details>
+-
+-        <div class="library-preview-actions">
+-          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
+-          <button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(selectedAsset.file_path || selectedAsset.preview_url || "")}">Copy Path</button>
+-          ${selectedAsset.kind === "managed_media"
+-      ? `<button class="btn btn-secondary" type="button" disabled>${escapeHtml(selectedAsset.source_label || "Managed")}</button>`
+-      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+-          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
+-          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
+-          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
+-          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
+-          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
+-        </div>
+       `
+       : `<div class="empty-box">Select an asset to view details.</div>`;
+   }
+@@ -1866,7 +1853,7 @@ function bindLibraryWorkspace({
+   if (actionPanelMount) {
+     actionPanelMount.innerHTML = renderLibraryActionPanel({
+       selectedAsset,
+-      disabled: true
++      disabled: false
+     });
+   }
+ 
+@@ -1875,7 +1862,7 @@ function bindLibraryWorkspace({
+     aiPanelMount.innerHTML = renderLibraryAiPanel({
+       readiness: readinessSummary,
+       selectedAsset,
+-      disabled: true
++      disabled: false
+     });
+   }
+ 
+@@ -2123,30 +2110,6 @@ viewToggleButtons.forEach((button) => {
+     toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+   }
+ 
+-  const triggerToolbarAction = (selector, message) => {
+-    const target = document.querySelector(selector);
+-    if (!target) {
+-      showError?.(message || "Select an asset first.");
+-      return;
+-    }
+-    target.click();
+-  };
+-
+-  const toolbarRename = $("libraryToolbarRenameBtn");
+-  if (toolbarRename) {
+-    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
+-  }
+-
+-  const toolbarApprove = $("libraryToolbarApproveBtn");
+-  if (toolbarApprove) {
+-    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
+-  }
+-
+-  const toolbarSource = $("libraryToolbarSourceBtn");
+-  if (toolbarSource) {
+-    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+-  }
+-
+   const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+   openButtons.forEach((button) => {
+     button.onclick = async () => {
+@@ -2836,15 +2799,22 @@ export const libraryRoute = {
+           <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
+         </section>
+ 
+-        <section class="card">
+-          <div class="card-head">
+-            <h3>Asset Workspace</h3>
+-            <span class="card-badge neutral">Finder Grid + Inspector</span>
++        <section class="card library-main-view-card">
++          <div class="card-head library-main-view-head">
++            <div>
++              <p class="eyebrow">Main View</p>
++              <h3>Asset Workspace</h3>
++              <p class="muted">Track current state, select the right asset, and run controlled actions from one canonical operating surface.</p>
++            </div>
++            <span class="card-badge neutral">Finder Grid + Side Panels</span>
+           </div>
+-          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
++          <div id="libraryFinderWorkspace" class="library-workspace library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+             <div class="library-workspace-main">
+               <div class="library-finder-topbar">
+-                <div class="library-finder-sidebar-title"></div>
++                <div class="library-finder-sidebar-title">
++                  <p class="eyebrow">Asset folders</p>
++                  <span>Switch context without changing source-of-truth decisions.</span>
++                </div>
+                 <div class="library-folder-list">
+                   ${LIBRARY_FOLDERS.map((folder) => {
+       const count = folderCounts.find((item) => item.key === folder.key)?.count || 0;
+@@ -2860,13 +2830,16 @@ export const libraryRoute = {
+               </div>
+ 
+               <div class="library-finder-toolbar">
+-                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
+-                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
+-                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+-                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
++                <div class="library-toolbar-copy">
++                  <p class="eyebrow">Global actions</p>
++                  <span>Upload and navigate quickly. Selected-asset actions live in the Action Panel.</span>
++                </div>
++                <div class="library-toolbar-actions">
++                  <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
++                </div>
+               </div>
+ 
+-              <div class="library-filter-bar">
++              <div class="library-filter-bar" aria-label="Library filters">
+                 <div class="library-filter-field">
+                   <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+                   <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+@@ -2913,13 +2886,13 @@ export const libraryRoute = {
+             <aside class="library-workspace-side">
+               <div class="library-operating-surface-head">
+                 <p class="eyebrow">Operating Surface</p>
+-                <h3>Header + Main View + Action + AI</h3>
++                <h3>Selected Asset Command Center</h3>
+               </div>
+               <div class="library-side-stack">
+                 <section class="card library-preview-card">
+                   <div class="card-head">
+                     <h3>Asset Detail</h3>
+-                    <span class="card-badge neutral">Preview + Actions</span>
++                    <span class="card-badge neutral">Preview + Context</span>
+                   </div>
+                   <div id="libraryPreviewVisual"></div>
+                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+diff --git a/public/control-center/styles/14-page-standard.css b/public/control-center/styles/14-page-standard.css
+index 9d77061..5a7bd41 100644
+--- a/public/control-center/styles/14-page-standard.css
++++ b/public/control-center/styles/14-page-standard.css
+@@ -1268,3 +1268,318 @@ button,
+     grid-template-columns: 1fr;
+   }
+ }
++
++/* =========================================================
++   LIBRARY MAIN VIEW POLISH
++   Scoped UX improvements for the Library workspace only.
++========================================================= */
++
++[data-page="library"] .library-main-view-card {
++  overflow: hidden;
++}
++
++[data-page="library"] .library-main-view-head {
++  align-items: start;
++}
++
++[data-page="library"] .library-main-view-head .muted {
++  margin: 4px 0 0;
++  max-width: 720px;
++  line-height: 1.45;
++}
++
++[data-page="library"] .library-finder-sidebar-title {
++  display: grid;
++  gap: 4px;
++  padding: 2px 2px 8px;
++}
++
++[data-page="library"] .library-finder-sidebar-title span,
++[data-page="library"] .library-toolbar-copy span {
++  color: var(--muted);
++  font-size: 0.78rem;
++  line-height: 1.35;
++}
++
++[data-page="library"] .library-finder-toolbar {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  gap: 14px;
++}
++
++[data-page="library"] .library-toolbar-copy {
++  display: grid;
++  gap: 4px;
++  min-width: 220px;
++}
++
++[data-page="library"] .library-toolbar-actions {
++  display: flex;
++  flex-wrap: wrap;
++  justify-content: flex-end;
++  gap: 8px;
++}
++
++[data-page="library"] .library-filter-bar {
++  position: relative;
++}
++
++[data-page="library"] .library-filter-bar::before {
++  content: "Refine the active asset view";
++  position: absolute;
++  top: -18px;
++  left: 2px;
++  color: var(--muted);
++  font-size: 0.72rem;
++  letter-spacing: 0.02em;
++}
++
++[data-page="library"] .library-grid-card {
++  position: relative;
++  outline: none;
++}
++
++[data-page="library"] .library-grid-card:focus-visible {
++  box-shadow:
++    0 0 0 3px rgba(99, 102, 241, 0.2),
++    0 16px 38px rgba(15, 23, 42, 0.14);
++  border-color: rgba(99, 102, 241, 0.44);
++}
++
++[data-page="library"] .library-grid-path {
++  opacity: 0.78;
++}
++
++[data-page="library"] .library-grid-foot {
++  margin-top: auto;
++}
++
++@media (max-width: 900px) {
++  [data-page="library"] .library-finder-toolbar {
++    align-items: stretch;
++    flex-direction: column;
++  }
++
++  [data-page="library"] .library-toolbar-actions {
++    justify-content: flex-start;
++  }
++}
++
++/* =========================================================
++   LIBRARY PREMIUM CONSOLIDATION
++   Safe, scoped UX polish for international operating surface clarity.
++========================================================= */
++
++[data-page="library"] .library-smart-shell {
++  gap: 18px;
++}
++
++[data-page="library"] .library-smart-shell > .card {
++  border: 1px solid rgba(148, 163, 184, 0.14);
++  border-radius: 18px;
++  background: linear-gradient(180deg, rgba(9, 14, 24, 0.96), rgba(4, 8, 16, 0.98));
++  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.34);
++}
++
++[data-page="library"] .library-main-view-card,
++[data-page="library"] .library-preview-card,
++[data-page="library"] .library-action-panel,
++[data-page="library"] .library-ai-panel {
++  background: linear-gradient(180deg, rgba(9, 14, 24, 0.98), rgba(2, 6, 23, 0.98));
++}
++
++[data-page="library"] .library-main-view-head,
++[data-page="library"] .library-panel-head,
++[data-page="library"] .card-head {
++  align-items: center;
++}
++
++[data-page="library"] .library-main-view-head .muted {
++  color: rgba(203, 213, 225, 0.82);
++  max-width: 760px;
++}
++
++[data-page="library"] .library-workspace-grid.library-finder-workspace {
++  gap: 14px;
++  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
++}
++
++[data-page="library"] .library-workspace-main,
++[data-page="library"] .library-workspace-side {
++  border: 1px solid rgba(148, 163, 184, 0.14);
++  border-radius: 16px;
++  background: rgba(2, 6, 23, 0.52);
++  padding: 12px;
++}
++
++[data-page="library"] .library-workspace-side {
++  top: 86px;
++}
++
++[data-page="library"] .library-side-stack {
++  gap: 10px;
++}
++
++[data-page="library"] .library-finder-topbar,
++[data-page="library"] .library-finder-toolbar,
++[data-page="library"] .library-filter-bar {
++  border: 1px solid rgba(148, 163, 184, 0.14);
++  border-radius: 14px;
++  background: rgba(15, 23, 42, 0.4);
++}
++
++[data-page="library"] .library-finder-toolbar {
++  justify-content: space-between;
++  gap: 10px;
++  margin-bottom: 10px;
++  padding: 10px 12px;
++}
++
++[data-page="library"] .library-toolbar-copy {
++  min-width: 240px;
++}
++
++[data-page="library"] .library-toolbar-copy span,
++[data-page="library"] .library-finder-sidebar-title span {
++  color: rgba(203, 213, 225, 0.72);
++}
++
++[data-page="library"] .library-filter-bar {
++  gap: 10px;
++  padding: 12px;
++  margin-bottom: 12px;
++}
++
++[data-page="library"] .library-filter-bar::before {
++  content: "Refine workspace";
++  color: rgba(148, 163, 184, 0.88);
++}
++
++[data-page="library"] .library-filter-field .setup-label {
++  color: rgba(148, 163, 184, 0.88);
++  font-size: 0.68rem;
++}
++
++[data-page="library"] .library-filter-field .setup-input {
++  min-height: 36px;
++  border-radius: 10px;
++  border: 1px solid rgba(148, 163, 184, 0.2);
++  background: rgba(2, 6, 23, 0.62);
++}
++
++[data-page="library"] .library-drop-zone {
++  border: 1px dashed rgba(148, 163, 184, 0.4);
++  background: linear-gradient(180deg, rgba(11, 18, 32, 0.96), rgba(2, 6, 23, 1));
++}
++
++[data-page="library"] .library-drop-zone:hover,
++[data-page="library"] .library-drop-zone.is-drag-active {
++  border-color: rgba(16, 185, 129, 0.7);
++  background: linear-gradient(180deg, rgba(12, 24, 36, 0.96), rgba(2, 10, 20, 1));
++}
++
++[data-page="library"] .library-folder-item {
++  background: rgba(2, 6, 23, 0.68) !important;
++  border-color: rgba(148, 163, 184, 0.2) !important;
++}
++
++[data-page="library"] .library-folder-item.is-active,
++[data-page="library"] .library-folder-item:hover {
++  border-color: rgba(16, 185, 129, 0.56) !important;
++  background: rgba(16, 185, 129, 0.16) !important;
++  color: #e2e8f0;
++}
++
++[data-page="library"] .library-grid-card {
++  border-color: rgba(148, 163, 184, 0.18);
++  background: rgba(2, 6, 23, 0.5);
++}
++
++[data-page="library"] .library-grid-card.is-active {
++  border-color: rgba(16, 185, 129, 0.7);
++  background: rgba(16, 185, 129, 0.12);
++  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.25), 0 10px 24px rgba(2, 6, 23, 0.45);
++}
++
++[data-page="library"] .library-grid-card.is-active .library-grid-title {
++  color: #d1fae5;
++}
++
++[data-page="library"] .library-panel-hero,
++[data-page="library"] .library-panel-metric,
++[data-page="library"] .library-ai-context-card,
++[data-page="library"] .library-ai-context-chip {
++  background: rgba(2, 6, 23, 0.56);
++  border: 1px solid rgba(148, 163, 184, 0.18);
++}
++
++[data-page="library"] .library-panel-hero span,
++[data-page="library"] .library-panel-metric span,
++[data-page="library"] .library-ai-context-card span,
++[data-page="library"] .library-ai-context-chip span {
++  color: rgba(148, 163, 184, 0.88);
++}
++
++[data-page="library"] .library-panel-metrics {
++  grid-template-columns: repeat(3, minmax(0, 1fr));
++}
++
++[data-page="library"] .library-panel-action-grid {
++  gap: 8px;
++}
++
++[data-page="library"] .library-panel-danger-zone {
++  border-top: 1px dashed rgba(248, 113, 113, 0.35);
++  padding-top: 10px;
++}
++
++[data-page="library"] .library-panel-danger-zone .setup-helper {
++  color: rgba(252, 165, 165, 0.92);
++}
++
++[data-page="library"] .library-panel-empty-list {
++  display: grid;
++  gap: 8px;
++}
++
++[data-page="library"] .library-panel-empty-item {
++  border: 1px solid rgba(148, 163, 184, 0.16);
++  border-radius: 12px;
++  background: rgba(2, 6, 23, 0.5);
++  padding: 8px 10px;
++  color: rgba(203, 213, 225, 0.84);
++  font-size: 0.82rem;
++}
++
++[data-page="library"] .library-ai-context-grid {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 8px;
++}
++
++[data-page="library"] .library-ai-context-chip {
++  display: grid;
++  gap: 4px;
++  border-radius: 12px;
++  padding: 8px 10px;
++}
++
++[data-page="library"] .library-ai-suggestion-list {
++  margin: 0;
++  padding-left: 18px;
++  display: grid;
++  gap: 7px;
++  color: rgba(203, 213, 225, 0.9);
++}
++
++[data-page="library"] .library-ai-suggestion-list li {
++  line-height: 1.45;
++}
++
++@media (max-width: 1180px) {
++  [data-page="library"] .library-workspace-grid.library-finder-workspace,
++  [data-page="library"] .library-ai-context-grid {
++    grid-template-columns: 1fr;
++  }
++}

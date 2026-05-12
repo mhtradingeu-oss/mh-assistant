@@ -1,0 +1,326 @@
+===== CURRENT LIBRARY STRUCTURE =====
+1:import { renderLibraryActionPanel } from "./library/action-panel.js";
+2:import { renderLibraryAiPanel } from "./library/ai-panel.js";
+3:import { normalizeLibraryAsset } from "./library/projection-adapter.js";
+4:import { normalizeLibrarySession } from "./library/session-store.js";
+5:import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";
+6:import { mountLibraryListeners } from "./library/listener-lifecycle.js";
+24:} from "../asset-library.js";
+26:const librarySessionStore = new Map();
+27:let librarySearchRenderTimer = null;
+28:const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+29:const libraryProtectedUrlCache = new Map();
+31:const libraryProtectedUrlPromiseCache = new Map();
+35:let libraryThumbLoadsInFlight = 0;
+36:const libraryThumbLoadQueue = [];
+60:    why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",
+130:    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+288:  const entry = libraryProtectedUrlCache.get(key);
+292:  libraryProtectedUrlCache.delete(key);
+296:  if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {
+300:  const nextJob = libraryThumbLoadQueue.shift();
+305:  libraryThumbLoadsInFlight += 1;
+309:      libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);
+316:    libraryThumbLoadQueue.push(async () => {
+342:  const cached = libraryProtectedUrlCache.get(cacheKey);
+356:  const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);
+364:    libraryProtectedUrlCache.set(cacheKey, {
+378:  libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);
+383:    if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {
+384:      libraryProtectedUrlPromiseCache.delete(cacheKey);
+426:        Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));
+431:          if (!button || !button.closest(".library-workspace")) return;
+446:          const link = event.target.closest?.("a.library-link-btn");
+447:          if (!link || !link.closest(".library-workspace")) return;
+467:          const root = event.target?.closest?.(".library-workspace");
+470:          if (event.target?.closest?.(".library-action-menu")) {
+474:          closeAllLibraryActionDropdowns();
+494:  if (!librarySessionStore.has(key)) {
+495:    librarySessionStore.set(key, normalizeLibrarySession({
+507:      uploading: false,
+512:  const current = librarySessionStore.get(key);
+515:    librarySessionStore.set(key, normalized);
+517:  return librarySessionStore.get(key);
+525:function closeAllLibraryActionDropdowns() {
+526:  Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {
+685:      kind: "library_asset",
+691:      source_key: asString(merged.source_key || merged.source || merged.scan_source || "library").toLowerCase(),
+790:    .filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")
+793:      const libraryAsset = asObject(payload.library_asset);
+796:          ...libraryAsset,
+800:          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+838:  const nextAction = requiredGroups.find((item) => item.status === "missing") || requiredGroups.find((item) => item.status === "needs_review") || null;
+848:    nextAction: nextAction
+849:      ? `${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}`
+1052:    return `<div class="empty-box">Select an asset to preview.</div>`;
+1061:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1062:          <div class="library-preview-fallback">Loading protected image preview...</div>
+1068:      <div class="library-preview-frame">
+1069:        <img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+1077:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1078:          <div class="library-preview-fallback">Loading protected video preview...</div>
+1084:      <div class="library-preview-frame">
+1085:        <video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>
+1092:      <div class="library-preview-frame">
+1101:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1102:          <div class="library-preview-fallback">Loading protected image preview...</div>
+1108:      <div class="library-preview-frame">
+1109:        <img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">
+1117:        <div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1118:          <div class="library-preview-fallback">Loading protected video preview...</div>
+1124:      <div class="library-preview-frame">
+1125:        <video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>
+1137:      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
+1142:        <div class="library-pdf-preview">
+1150:        <div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+1151:          <div class="library-preview-extension">PDF</div>
+1153:          <div class="library-preview-copy">Loading protected PDF preview...</div>
+1159:      <div class="library-preview-fallback library-document-preview">
+1160:        <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
+1162:        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
+1163:        <div class="library-document-preview-actions">
+1165:          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
+1173:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
+1178:    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(jsonFallback)}</div>`;
+1182:    <div class="library-preview-fallback">
+1183:      <div class="library-preview-extension">${escapeHtml((asset.extension || "file").toUpperCase())}</div>
+1184:      <div class="library-preview-copy">Preview not available for this file type.</div>
+1216:      previewNode.innerHTML = `<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">`;
+1221:      previewNode.innerHTML = `<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>`;
+1227:        <div class="library-pdf-preview">
+1241:    previewNode.innerHTML = `<div class="library-preview-fallback">${escapeHtml(message)}</div>`;
+1313:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+1320:  return `Extract key facts from these library documents for ${project}: ${docs}. Return compliance notes, pricing references, and campaign-usable claims.`;
+1470:    rerender();
+1540:  const overviewBox = $("libraryOverviewCards");
+1565:        <strong class="library-overview-next-action">${escapeHtml(overview.nextAction)}</strong>
+1570:  const requiredBox = $("libraryRequiredAssetsGrid");
+1578:        <article class="library-required-card">
+1579:          <div class="library-required-card-head">
+1584:          <div class="library-required-card-foot">
+1589:              data-library-required-action="${escapeHtml(item.action)}"
+1590:              data-library-required-key="${escapeHtml(item.key)}"
+1591:              data-library-upload-type="${escapeHtml(item.uploadType)}"
+1599:  const typeSelect = $("libraryFilterTypeSelect");
+1635:  const statusSelect = $("libraryFilterStatusSelect");
+1666:  const sourceSelect = $("libraryFilterSourceSelect");
+1702:  const sortSelect = $("librarySortSelect");
+1733:  const gridBody = $("libraryAssetGridBody");
+1743:            ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
+1744:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+1745:          : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
+1748:          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0">
+1749:            <div class="library-grid-preview">${previewNode}</div>
+1750:            <div class="library-grid-title">${escapeHtml(asset.name)}</div>
+1751:            <div class="library-grid-meta">${escapeHtml(asset.filename || "-")}</div>
+1752:            <div class="library-grid-meta">${escapeHtml(pathHint)}</div>
+1753:            <div class="library-grid-foot">
+1755:              <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+1760:      : `<div class="empty-box">No assets match this view. Adjust folder/filter/search.</div>`;
+1763:  const gridPagination = $("libraryGridPagination");
+1769:      <div class="library-grid-page-info">Showing ${escapeHtml(String(showingStart))}-${escapeHtml(String(showingEnd))} of ${escapeHtml(String(filteredAssets.length))}</div>
+1770:      <div class="library-grid-page-actions">
+1771:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+1773:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+1778:  const protectedThumbNodes = Array.from(document.querySelectorAll("[data-library-protected-thumb]"));
+1781:      const leftId = left.getAttribute("data-library-protected-thumb") || "";
+1782:      const rightId = right.getAttribute("data-library-protected-thumb") || "";
+1790:    const assetId = node.getAttribute("data-library-protected-thumb") || "";
+1798:      className: "library-grid-thumb",
+1800:      fallbackMarkup: `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`,
+1805:  const previewVisual = $("libraryPreviewVisual");
+1809:    const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
+1821:  const previewMeta = $("libraryPreviewMeta");
+1825:        <div class="library-inspector-title">
+1830:        <div class="library-inspector-quick">
+1836:        <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
+1838:        <details class="library-inspector-more">
+1849:        <div class="library-preview-actions">
+1850:          ${selectedAsset.preview_url ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(selectedAsset.id)}">Open</button>` : `<button class="btn btn-primary" type="button" disabled>Open</button>`}
+1854:      : `<button class="btn btn-secondary" type="button" data-library-source-truth="${escapeHtml(selectedAsset.id)}">${escapeHtml(selectedAsset.source_of_truth ? "Unsource" : "Source")}</button>
+1855:          <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Approve</button>
+1856:          <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Review</button>
+1857:          <button class="btn btn-secondary" type="button" data-library-rename="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Rename</button>
+1858:          <button class="btn btn-secondary" type="button" data-library-delete="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Delete</button>
+1859:          <button class="btn btn-secondary" type="button" data-library-archive="${escapeHtml(selectedAsset.id)}" data-asset-id="${escapeHtml(selectedAsset.mutation_id || selectedAsset.asset_id)}">Archive</button>`}
+1862:      : `<div class="empty-box">Select an asset to view details.</div>`;
+1865:  const actionPanelMount = $("libraryActionPanelMount");
+1867:    actionPanelMount.innerHTML = renderLibraryActionPanel({
+1873:  const aiPanelMount = $("libraryAiPanelMount");
+1882:  const activityBox = $("libraryRecentActivity");
+1895:      : `<div class="empty-box">No recent uploaded or updated assets yet.</div>`;
+1898:  const uploadSummary = $("libraryUploadSummary");
+1911:      : `<div class="empty-box">No uploads in this session yet.</div>`;
+1914:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+1915:  requiredActionButtons.forEach((button) => {
+1917:      const action = button.getAttribute("data-library-required-action") || "review";
+1918:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+1922:        const uploadTypeSelect = $("libraryUploadTypeSelect");
+1924:        const uploadInput = $("libraryUploadInput");
+1952:      showMessage?.("AI classification prompt sent.");
+1956:  const selectButtons = Array.from(document.querySelectorAll("[data-library-select]"));
+1962:        assetId: button.getAttribute("data-library-select") || ""
+1986:  const selectableRows = Array.from(document.querySelectorAll("[data-library-row-select]"));
+1993:      const nextId = row.getAttribute("data-library-row-select") || "";
+2021:      const nextId = row.getAttribute("data-library-row-select") || "";
+2046:  const selectableCards = Array.from(document.querySelectorAll("[data-library-grid-select]"));
+2050:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2057:      rerender();
+2063:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2070:      rerender();
+2074:  const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
+2077:      const folderKey = button.getAttribute("data-library-folder-select") || "all_assets";
+2093:      rerender();
+2097:  const viewToggleButtons = Array.from(document.querySelectorAll("[data-library-view-mode]"));
+2100:    const mode = button.getAttribute("data-library-view-mode") || "grid";
+2111:    rerender();
+2115:  const finderWorkspace = $("libraryFinderWorkspace");
+2117:    finderWorkspace.setAttribute("data-library-view-mode", session.viewMode === "grid" ? "grid" : "list");
+2121:  const toolbarUpload = $("libraryToolbarUploadBtn");
+2123:    toolbarUpload.onclick = () => $("libraryUploadInput")?.click();
+2126:  const triggerToolbarAction = (selector, message) => {
+2135:  const toolbarRename = $("libraryToolbarRenameBtn");
+2137:    toolbarRename.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-rename]", "Select an asset to rename.");
+2140:  const toolbarApprove = $("libraryToolbarApproveBtn");
+2142:    toolbarApprove.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-asset-status-action='approved']", "Select an asset to approve.");
+2145:  const toolbarSource = $("libraryToolbarSourceBtn");
+2147:    toolbarSource.onclick = () => triggerToolbarAction("#libraryPreviewMeta [data-library-source-truth]", "Select an asset first.");
+2150:  const openButtons = Array.from(document.querySelectorAll("[data-library-open]"));
+2153:      const id = button.getAttribute("data-library-open") || "";
+2178:  const sourceOfTruthButtons = Array.from(document.querySelectorAll("[data-library-source-truth]"));
+2181:      closeAllLibraryActionDropdowns();
+2188:      const assetId = button.getAttribute("data-library-source-truth") || "";
+2198:        await reloadOrRerender();
+2209:  const statusActionButtons = Array.from(document.querySelectorAll("[data-asset-status-action]"));
+2210:  statusActionButtons.forEach((button) => {
+2212:      closeAllLibraryActionDropdowns();
+2220:      const id = button.getAttribute("data-library-asset") || "";
+2237:        await reloadOrRerender();
+2248:  const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));
+2251:      closeAllLibraryActionDropdowns();
+2258:      const id = button.getAttribute("data-library-archive") || "";
+2274:        await reloadOrRerender();
+2282:  const renameButtons = Array.from(document.querySelectorAll("[data-library-rename]"));
+2285:      closeAllLibraryActionDropdowns();
+2292:      const id = button.getAttribute("data-library-rename") || "";
+2308:        showError?.("Asset name cannot be empty.");
+2315:        await reloadOrRerender();
+2323:  const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));
+2326:      closeAllLibraryActionDropdowns();
+2333:      const id = button.getAttribute("data-library-delete") || "";
+2351:        await reloadOrRerender();
+2359:  const actionToggleButtons = Array.from(document.querySelectorAll(".library-action-toggle"));
+2365:      const menu = button.closest(".library-action-menu");
+2366:      const dropdown = menu?.querySelector(".library-action-dropdown");
+2370:      closeAllLibraryActionDropdowns();
+2379:  const pickUploadTypeButtons = Array.from(document.querySelectorAll("[data-library-upload-type]"));
+2382:      const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+2384:      const uploadTypeSelect = $("libraryUploadTypeSelect");
+2392:  const gridPageButtons = Array.from(document.querySelectorAll("[data-library-grid-page]"));
+2398:      const action = button.getAttribute("data-library-grid-page");
+2411:      rerender();
+2415:  const searchInput = $("librarySearchInput");
+2429:      if (librarySearchRenderTimer) {
+2430:        window.clearTimeout(librarySearchRenderTimer);
+2433:      librarySearchRenderTimer = window.setTimeout(() => {
+2434:        rerender();
+2439:  const uploadTypeSelect = $("libraryUploadTypeSelect");
+2456:  const dropZone = $("libraryDropZone");
+2457:  const uploadInput = $("libraryUploadInput");
+2458:  const uploadBtn = $("libraryUploadBtn");
+2465:      const info = $("libraryDropInfo");
+2469:        uploadBtn.disabled = session.uploading || files.length === 0;
+2470:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2505:    if (!dropZone.dataset.libraryDndBound) {
+2526:      dropZone.dataset.libraryDndBound = "1";
+2550:    const chooseFilesBtn = $("libraryChooseFilesBtn");
+2563:    uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2564:    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2569:        showError?.("Select a project before uploading.");
+2573:      if (session.uploading) return;
+2575:      const files = Array.from($("libraryUploadInput")?.files || []);
+2583:        assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);
+2593:      session.uploading = true;
+2638:        const input = $("libraryUploadInput");
+2640:        const dropInfo = $("libraryDropInfo");
+2642:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2643:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2653:        session.uploading = false;
+2654:        uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
+2655:        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+2657:          rerender();
+2663:  const refreshBtn = $("libraryRefreshScanBtn");
+2676:        showError?.(error.message || "Failed to refresh library scan.");
+2683:  const classifyBtn = $("libraryAiClassifyBtn");
+2689:      showMessage?.("AI classification prompt sent.");
+2693:  const missingBtn = $("libraryAiMissingBtn");
+2699:      showMessage?.("AI missing-assets prompt sent.");
+2703:  const extractSelectedDocBtn = $("libraryAiExtractSelectedDocBtn");
+2718:  const extractBtn = $("libraryAiExtractBtn");
+2728:      showMessage?.("AI document extraction prompt sent.");
+2733:export const libraryRoute = {
+2734:  id: "library",
+2735:  disableStandardLayout: true,
+2742:    <section class="page is-active" data-page="library">
+2743:      <div id="libraryRoot"></div>
+2746:  render({
+2782:    const root = $("libraryRoot");
+2788:      <div class="library-smart-shell">
+2795:            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh</button>
+2797:          <div id="libraryOverviewCards" class="library-overview-grid"></div>
+2803:            <span class="card-badge warning">Action required where missing</span>
+2805:          <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
+2810:            <h3>Asset Actions</h3>
+2811:            <div class="library-action-toolbar">
+2812:              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+2813:              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+2814:              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+2817:          <div class="library-upload-grid">
+2818:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+2821:              <small id="libraryDropInfo">No files selected</small>
+2822:              <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
+2823:              <input id="libraryUploadInput" class="library-file-input" type="file" multiple>
+2825:            <div class="library-upload-controls">
+2826:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+2827:              <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+2833:              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
+2836:          <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
+2844:          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+2845:            <div class="library-workspace-main">
+2846:              <div class="library-finder-topbar">
+2847:                <div class="library-finder-sidebar-title"></div>
+2848:                <div class="library-folder-list">
+2853:                      <button type="button" class="library-folder-item ${active ? "is-active" : ""}" data-library-folder-select="${escapeHtml(folder.key)}">
+2862:              <div class="library-finder-toolbar">
+2863:                <button id="libraryToolbarUploadBtn" class="btn btn-secondary" type="button">Upload</button>
+2864:                <button id="libraryToolbarRenameBtn" class="btn btn-secondary" type="button">Rename</button>
+2865:                <button id="libraryToolbarApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+2866:                <button id="libraryToolbarSourceBtn" class="btn btn-secondary" type="button">Source of Truth</button>
+2869:              <div class="library-filter-bar">
+2870:                <div class="library-filter-field">
+2871:                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+2872:                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+2874:                <div class="library-filter-field">
+2875:                  <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
+2876:                  <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+2889:                <div class="library-filter-field">
+2890:                  <label class="setup-label" for="libraryFilterSourceSelect">Source</label>
+2891:                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
+2893:                <div class="library-filter-field">
+2894:                  <label class="setup-label" for="librarySortSelect">Sort</label>
+2895:                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+2903:                <div class="library-filter-field library-filter-search">
+2904:                  <label class="setup-label" for="librarySearchInput">Search</label>
+2905:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+2909:              <div id="libraryAssetGridBody" class="library-grid-body"></div>
+2910:              <div id="libraryGridPagination" class="library-grid-pagination"></div>
+2913:            <aside class="library-workspace-side">
+2914:              <div class="library-operating-surface-head">
+2916:                <h3>Header + Main View + Action + AI</h3>
+2918:              <div class="library-side-stack">
+2919:                <section class="card library-preview-card">
+2922:                    <span class="card-badge neutral">Preview + Actions</span>
+2924:                  <div id="libraryPreviewVisual"></div>
+2925:                  <div id="libraryPreviewMeta" class="library-preview-meta"></div>
+2927:                <div id="libraryActionPanelMount" class="library-panel-mount"></div>
+2928:                <div id="libraryAiPanelMount" class="library-panel-mount"></div>
