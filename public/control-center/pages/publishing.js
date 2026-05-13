@@ -1544,6 +1544,12 @@ function bindPublishingWorkspace({
         return;
       }
 
+      const confirmed = window.confirm("Confirm fail action\n\nAction: Mark this publishing item as failed.\nRisk: This creates a permanent failure record and stops the publishing lifecycle for this item.\nPolicy: Use only when this item cannot proceed and requires explicit failure logging.\n\nSelect Cancel to keep this item in its current state.");
+      if (!confirmed) {
+        rerender();
+        return;
+      }
+
       await runAndRefresh(
         () => failPublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
         { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
