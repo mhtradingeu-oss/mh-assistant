@@ -1,30 +1,20 @@
+import { createLifecycleRegistry } from "../../runtime/lifecycle/lifecycle-registry.js";
+
 export function createListenerRegistry() {
-  const disposers = [];
+  // Runtime cleanup plumbing only. Backend authority remains unchanged.
+  const registry = createLifecycleRegistry("library-listeners");
 
   function add(target, type, handler, options) {
-    if (!target || typeof target.addEventListener !== "function" || typeof handler !== "function") {
-      return () => {};
-    }
-
-    target.addEventListener(type, handler, options);
-
-    const dispose = () => {
-      target.removeEventListener(type, handler, options);
-    };
-
-    disposers.push(dispose);
-    return dispose;
+    return registry.addEventListener(target, type, handler, options);
   }
 
   function disposeAll() {
-    while (disposers.length) {
-      const dispose = disposers.pop();
-      try {
-        dispose();
-      } catch (error) {
-        console.warn("[Library] listener dispose failed", error);
-      }
-    }
+    const errorCountBefore = registry.getErrors().length;
+    registry.cleanup();
+    const cleanupErrors = registry.getErrors().slice(errorCountBefore);
+    cleanupErrors.forEach((entry) => {
+      console.warn("[Library] listener dispose failed", entry.error);
+    });
   }
 
   return {
