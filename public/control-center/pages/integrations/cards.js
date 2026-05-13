@@ -137,7 +137,7 @@ function getConnectorWorkspaceAction(card = {}) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
   if (card.backendSupported === false) {
-    return { action: "select", label: "Open setup" };
+    return { action: "select", label: "Open details" };
   }
 
   if (statusKey === "connected") {
@@ -227,6 +227,7 @@ export function renderConnectorRow(card = {}, session = {}) {
       ? `<button class="btn btn-primary" type="button" data-integration-select="${esc(card.id)}">${esc(recommendedAction.label)}</button>`
       : `<button class="btn btn-primary" type="button" data-integration-primary="${esc(recommendedAction.action)}" data-integration-id="${esc(card.id)}">${esc(recommendedAction.label)}</button>`;
   const showSyncAction = card.backendSupported !== false && statusKey === "connected";
+  const showDetailsAction = !(card.backendSupported === false && recommendedAction.action === "select");
 
   return `
     <article class="integration-control-row${isSelected ? " is-selected" : ""}">
@@ -238,7 +239,6 @@ export function renderConnectorRow(card = {}, session = {}) {
               <strong>${esc(card.label)}</strong>
               <span class="card-badge ${esc(card.statusTone)}">${esc(statusLabel)}</span>
             </span>
-            <span class="integration-control-row-meta">Sync health: ${esc(healthLabel)}</span>
             <span class="integration-control-row-meta integration-control-row-health">${esc(healthLabel)}</span>
             <span class="integration-control-row-meta">Last sync: ${esc(formatCardDate(card.lastSync))}</span>
             <div class="integration-control-row-compact-meta">
@@ -250,8 +250,9 @@ export function renderConnectorRow(card = {}, session = {}) {
       </div>
       <div class="integration-control-row-actions">
         ${actionButton}
-        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Setup drawer</button>
-        <button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Details</button>
+        ${showDetailsAction
+          ? `<button class="btn btn-secondary" type="button" data-integration-select="${esc(card.id)}">Open details</button>`
+          : ""}
         ${card.backendSupported === false
           ? ""
           : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>`}

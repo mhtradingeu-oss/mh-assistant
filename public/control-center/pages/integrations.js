@@ -1646,6 +1646,7 @@ export const integrationsRoute = {
             <div>
               <div class="setup-kicker">Integration Control Tower</div>
               <h3>Executive health</h3>
+              <p class="home-section-copy integration-system-purpose">Connect business platforms so MH-OS can sync performance, automate actions, and learn from live operating data.</p>
             </div>
             <span class="card-badge ${escapeHtml(attentionTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
@@ -1671,35 +1672,34 @@ export const integrationsRoute = {
               <strong>${escapeHtml(String(systemScore))}%</strong>
             </div>
           </div>
-        </section>
 
-        ${aiRec.card ? `
-          <section class="card integration-system-next-action">
-            <div class="card-head integration-system-next-action-head">
-              <div>
-                <h3>Recommended next action</h3>
+          ${aiRec.card ? `
+            <div class="integration-system-overview-next integration-system-next-action" data-integration-next-action>
+              <div class="integration-system-overview-next-head">
+                <h4>Next best action</h4>
+                <span class="card-badge ${escapeHtml(aiRec.priorityTone)}">${escapeHtml(aiRec.priorityLabel)}</span>
               </div>
-              <span class="card-badge ${escapeHtml(aiRec.priorityTone)}">${escapeHtml(aiRec.priorityLabel)}</span>
-            </div>
-            <div class="integration-next-action-body">
-              <div class="integration-next-action-connector">
-                <div class="integration-next-action-connector-icon" data-integration-initials="${escapeHtml(aiRec.card.icon)}">${escapeHtml(aiRec.card.icon)}</div>
-                <div class="integration-next-action-connector-info">
-                  <strong>${escapeHtml(aiRec.card.label)}</strong>
-                  <span>${escapeHtml(aiRec.card.domainTitle)}</span>
+              <div class="integration-next-action-body">
+                <div class="integration-next-action-connector">
+                  <div class="integration-next-action-connector-icon" data-integration-initials="${escapeHtml(aiRec.card.icon)}">${escapeHtml(aiRec.card.icon)}</div>
+                  <div class="integration-next-action-connector-info">
+                    <strong>${escapeHtml(aiRec.card.label)}</strong>
+                    <span>${escapeHtml(aiRec.card.domainTitle)}</span>
+                  </div>
                 </div>
+                <details class="integration-next-action-details">
+                  <summary class="integration-next-action-summary">Why this action now?</summary>
+                  <div class="integration-next-action-why">
+                    <p><strong>Unlocks:</strong> ${escapeHtml(aiRec.card.enables)}</p>
+                    <p><strong>Decision confidence:</strong> ${escapeHtml(aiRec.card.whyItMatters)}</p>
+                    <p><strong>Risk if missing:</strong> ${escapeHtml(aiRec.reasonLabel)} remains unresolved.</p>
+                  </div>
+                </details>
+                <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open setup</button>
               </div>
-              <details class="integration-next-action-details">
-                <summary class="integration-next-action-summary">Why this connector first?</summary>
-                <div class="integration-next-action-why">
-                  <p>${escapeHtml(aiRec.card.whyItMatters)}</p>
-                  <p><strong>This enables:</strong> ${escapeHtml(aiRec.card.enables)}</p>
-                </div>
-              </details>
-              <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open setup</button>
             </div>
-          </section>
-        ` : ""}
+          ` : ""}
+        </section>
         ${aiRec.card ? "" : renderAISmartRecommendationModule(aiRec)}
 
 
@@ -1800,22 +1800,22 @@ export const integrationsRoute = {
           <div class="card-head">
             <div>
               <h3>Coverage priorities</h3>
-              <p class="home-section-copy" style="margin:6px 0 0;">Use coverage, critical gaps, and next actions to close launch blockers.</p>
+              <p class="home-section-copy" style="margin:6px 0 0;">Review critical gaps, next moves, and coverage status to close launch risk.</p>
             </div>
             <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>
           </div>
           <div class="integration-ai-grid">
             <div>
-              <h4 class="integration-mini-heading">Critical missing integrations</h4>
+              <h4 class="integration-mini-heading">Critical gaps</h4>
               ${renderIntegrationCriticalMissing(criticalMissing)}
             </div>
             <div>
-              <h4 class="integration-mini-heading">Recommended next actions</h4>
+              <h4 class="integration-mini-heading">Recommended moves</h4>
               ${renderIntegrationRecommendationsList(recommendations.recommendations)}
             </div>
           </div>
           <div class="integration-system-coverage-block">
-            <h4 class="integration-mini-heading">Launch coverage</h4>
+            <h4 class="integration-mini-heading">Coverage map</h4>
             ${renderIntegrationCoverageMap(coverageMap)}
           </div>
         </section>
