@@ -409,3 +409,5 @@ if (typeof module !== 'undefined' && module.exports) {
     createNoopLifecycleRegistry
   };
 }
+
+export { createLifecycleRegistry, createNoopLifecycleRegistry };
