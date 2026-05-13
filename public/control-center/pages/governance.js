@@ -1010,6 +1010,11 @@ function bindGovernance(context, projectName, session) {
           approvalOwners[control.getAttribute("data-governance-owner")] = control.value || "";
         });
 
+        const confirmed = window.confirm("Confirm governance policy save\n\nAction: Save governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+        if (!confirmed) {
+          return;
+        }
+
         try {
           await updateProjectGovernancePolicy(projectName, {
             actor: "governance-console",
