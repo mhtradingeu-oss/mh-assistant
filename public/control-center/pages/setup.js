@@ -1469,9 +1469,9 @@ export const setupRoute = {
             <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run smart action</button>
           </div>
           <div class="setup-smart-handoff-actions">
-            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
-            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
-            <button id="setupReviewReadinessBtn" class="btn btn-ghost" type="button">Review readiness</button>
+            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Navigate: Open Integrations Workspace</button>
+            <button id="setupReviewReadinessBtn" class="btn btn-ghost" type="button">Navigate: Open Home Readiness Overview</button>
             <button id="setupSaveBackendBtnBottom" class="btn btn-primary" type="button">Save setup</button>
           </div>
         </section>
@@ -1483,7 +1483,7 @@ export const setupRoute = {
           <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">AI Audience</button>
           <button id="setupAiToneBtn" class="btn btn-ghost" type="button">AI Tone</button>
           <button id="setupAiFillMissingBtn" class="btn btn-ghost" type="button">AI Fill Missing</button>
-          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Workspace</button>
+          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI: Send Setup Context to AI Workspace</button>
           <p id="setupAiPositioningText"></p>
           <p id="setupAiAudienceText"></p>
           <p id="setupAiToneText"></p>

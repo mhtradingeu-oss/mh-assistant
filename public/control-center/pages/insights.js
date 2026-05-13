@@ -1343,10 +1343,10 @@ export const insightsRoute = {
             </div>
           </div>
           <div class="insights-assistant-toolbar" style="margin-top: 16px;">
-            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing</button>
+            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Navigate: Open Campaign Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Navigate: Open Content Studio Workspace</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Navigate: Open Ads Manager</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Navigate: Open Publishing Workspace</button>
           </div>
         </section>
 
@@ -1397,7 +1397,7 @@ export const insightsRoute = {
             Use AI Workspace to dig deeper into the current signal. Opening AI Workspace only navigates. Sending a prompt prefills context and navigates.
           </p>
           <div class="insights-assistant-toolbar">
-            <button class="btn ghost" type="button" data-insights-open>Open AI Workspace</button>
+            <button class="btn ghost" type="button" data-insights-open>Open AI: Review in AI Workspace</button>
           </div>
           <div class="insights-prompt-list">
             ${promptItems.map((item, index) => `

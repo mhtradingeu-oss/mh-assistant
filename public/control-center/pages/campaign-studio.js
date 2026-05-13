@@ -1954,7 +1954,7 @@ export const campaignStudioRoute = {
                   <span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>
                 </button>
                 <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Open Library</span>
+                  <span class="home-action-title">Navigate: Open Library Workspace</span>
                   <span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>
                 </button>
               </div>

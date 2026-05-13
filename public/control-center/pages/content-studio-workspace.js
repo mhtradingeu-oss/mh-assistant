@@ -1231,7 +1231,7 @@ function renderComposer(session, state, handoff, escapeHtml) {
         <button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
         <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send to Media Studio</button>
         <button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
-        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Send to AI Workspace</button>
+        <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
       </div>
 
       ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}

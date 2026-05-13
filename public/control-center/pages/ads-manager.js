@@ -371,8 +371,8 @@ export const adsManagerRoute = {
           </div>
 
           <div class="setup-hero-actions">
-            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Review Creatives</button>
-            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Open Publishing</button>
+            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Navigate: Open Publishing Workspace</button>
           </div>
         </div>
 

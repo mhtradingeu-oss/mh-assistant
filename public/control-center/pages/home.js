@@ -731,7 +731,7 @@ export const homeRoute = {
               <h3>What happened recently?</h3>
             </div>
             <button id="homeOpenOperationsBtn" class="btn btn-secondary" type="button">
-              Open Operations
+              Navigate: Open Operations Centers
             </button>
           </div>
 
@@ -745,7 +745,7 @@ export const homeRoute = {
               <h3>Who should help next?</h3>
             </div>
             <button id="homeOpenAiTeamBtn" class="btn btn-secondary" type="button">
-              Open AI Workspace
+              Open AI: Review in AI Workspace
             </button>
           </div>
 
@@ -793,27 +793,27 @@ export const homeRoute = {
 
           <div class="home-decision-quick-actions">
             <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Start campaign</span>
+              <span class="home-action-title">Navigate: Open Campaign Studio</span>
               <span class="home-action-meta">Open Campaign Studio and work on launch waves.</span>
             </button>
 
             <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Upload asset</span>
+              <span class="home-action-title">Navigate: Open Library Workspace</span>
               <span class="home-action-meta">Open Library and close missing asset blockers.</span>
             </button>
 
             <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Connect platform</span>
+              <span class="home-action-title">Navigate: Open Integrations Workspace</span>
               <span class="home-action-meta">Open Integrations and fix connector gaps.</span>
             </button>
 
             <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Review readiness</span>
+              <span class="home-action-title">Navigate: Open Setup Workspace</span>
               <span class="home-action-meta">Open Setup and resolve foundation issues.</span>
             </button>
 
             <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Open AI Workspace</span>
+              <span class="home-action-title">Open AI: Review Recommended Next Action</span>
               <span class="home-action-meta">Send current next action to AI for guidance.</span>
             </button>
           </div>

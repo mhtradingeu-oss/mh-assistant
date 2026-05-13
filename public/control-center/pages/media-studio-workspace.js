@@ -1613,7 +1613,7 @@ function renderRecommendation(recommendation, metrics, selectedItem, handoff, es
       <div class="media-action-row">
         <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
         <button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Send to AI Workspace</button>
+        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
         <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Send to Publishing if ready</button>
       </div>
     </section>
