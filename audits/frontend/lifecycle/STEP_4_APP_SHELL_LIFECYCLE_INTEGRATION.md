@@ -58,7 +58,7 @@ import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.
 
 // Module-level registry for app shell listeners
 // Manages global listeners (resize, orientation, route change, navigation)
-// Cleaned up on route changes to prevent listener accumulation
+// Registered through lifecycle registry and persisted for the normal app session; cleanup is available but not invoked on normal route changes
 const appShellLifecycle = createLifecycleRegistry("app-shell");
 
 // Helper function to register app shell listeners with the registry
