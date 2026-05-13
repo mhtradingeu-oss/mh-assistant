@@ -75,12 +75,34 @@ import {
   CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
 } from "./constants.js";
 import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
 
 /* =========================
    CONFIG
 ========================= */
 
 setApiBaseUrl("");
+
+/* =========================
+   APP SHELL LIFECYCLE REGISTRY
+========================= */
+
+// Module-level registry for app shell listeners
+// Manages global listeners (resize, orientation, route change, navigation)
+// Cleaned up on route changes to prevent listener accumulation
+const appShellLifecycle = createLifecycleRegistry("app-shell");
+
+// Helper function to register app shell listeners with the registry
+function addAppShellListener(target, type, handler, options) {
+  if (!target || typeof handler !== "function") {
+    return () => {};
+  }
+  return appShellLifecycle.addEventListener(target, type, handler, options);
+}
+
+/* =========================
+   CONTROL
+========================= */
 
 const CONTROL_WRITE_HEADER = "x-mh-control-key";
 const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
@@ -3127,6 +3149,9 @@ function bindDelegatedClickRouting() {
 }
 
 function bindRouteListener() {
+  if (window.__mhRouteListenerBound) return;
+  window.__mhRouteListenerBound = true;
+
   function resetShellScrollContext() {
     const workspace = $("workspace");
     if (workspace) {
@@ -3143,7 +3168,9 @@ function bindRouteListener() {
     }
   }
 
-  window.addEventListener("mh:route-change", (event) => {
+  // Register route change listener with lifecycle registry
+  // Handles shell-level route change (different from page content)
+  addAppShellListener(window, "mh:route-change", (event) => {
     const route = event?.detail?.route || "home";
     setCurrentRoute(route);
     renderCurrentPage();
@@ -3151,7 +3178,8 @@ function bindRouteListener() {
   });
 
   // Back/Forward support — hashchange fires when the user navigates browser history
-  window.addEventListener("hashchange", () => {
+  // Register with lifecycle registry for proper cleanup on route changes
+  addAppShellListener(window, "hashchange", () => {
     const route = (location.hash.slice(1) || "home").trim();
     if (route && route !== getState().currentRoute) {
       navigateTo(route);
@@ -3365,14 +3393,16 @@ window.__mhResponsiveUiBound = true;
     }
   });
 
-  window.addEventListener("resize", () => {
+  // Register responsive shell listeners with lifecycle registry
+  // These ensure proper cleanup on route changes
+  addAppShellListener(window, "resize", () => {
     if (!isMobileViewport()) {
       closeSidebar();
     }
     syncCompactShellState();
   });
 
-  window.addEventListener("orientationchange", syncCompactShellState);
+  addAppShellListener(window, "orientationchange", syncCompactShellState);
   syncCompactShellState();
 }
 
@@ -3762,7 +3792,9 @@ window.__mhAiDockBound = true;
   };
 
   syncContext();
-  window.addEventListener("hashchange", syncContext);
+  // Register AI dock context sync listener with lifecycle registry
+  // Updates dock to reflect current route context
+  addAppShellListener(window, "hashchange", syncContext);
 }
 
 
