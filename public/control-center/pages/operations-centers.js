@@ -582,7 +582,7 @@ function renderTaskCenterLayout({
                 <div>
                   <div class="panel-kicker">Action Panel</div>
                   <h3>Task actions</h3>
-                  <p>Active actions are safe and non-destructive. Mutation actions remain deferred.</p>
+                  <p>Active actions are safe and non-destructive. Mutation actions remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -604,7 +604,7 @@ function renderTaskCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -897,7 +897,7 @@ function renderQueueCenterLayout({
                 <div>
                   <div class="panel-kicker">Action Panel</div>
                   <h3>Queue actions</h3>
-                  <p>Safe actions are active. Queue mutation and execution controls remain deferred.</p>
+                  <p>Safe actions are active. Queue mutation and execution controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -925,7 +925,7 @@ function renderQueueCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1187,7 +1187,7 @@ function renderJobMonitorLayout({
                 <div>
                   <div class="panel-kicker">Action Panel</div>
                   <h3>Execution actions</h3>
-                  <p>Safe actions are active. Mutation and destructive controls remain deferred.</p>
+                  <p>Safe actions are active. Mutation and destructive controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1220,7 +1220,7 @@ function renderJobMonitorLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1541,7 +1541,7 @@ function renderNotificationCenter(context, state, projectName) {
                 <div>
                   <div class="panel-kicker">Action Panel</div>
                   <h3>Notification actions</h3>
-                  <p>Safe actions are active. Notification mutation controls remain deferred.</p>
+                  <p>Safe actions are active. Notification mutation controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1576,7 +1576,7 @@ function renderNotificationCenter(context, state, projectName) {
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">

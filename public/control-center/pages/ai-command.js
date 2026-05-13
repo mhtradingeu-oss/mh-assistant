@@ -1259,7 +1259,7 @@ function renderCommandComposer(session, aiContext, escapeHtml) {
 					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
 					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
 				</div>
-				<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only — send to execute</div>
+				<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>
 			</div>
 		</div>
 	`;

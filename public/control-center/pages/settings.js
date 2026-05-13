@@ -1655,7 +1655,7 @@ function renderSummary(summary, session, escapeHtml) {
       </div>
 
       <div class="simple-banner">
-        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Settings sync into the shared governance and team records so every page can reuse the same operating policy.
+        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Settings sync into the shared governance and team records so every page can reuse the same operating policy. Policy enforcement remains backend-controlled in Governance rules.
       </div>
     </aside>
   `;

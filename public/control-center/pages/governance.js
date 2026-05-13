@@ -899,7 +899,7 @@ function renderPage(projectName, session, escapeHtml) {
             <div>
               <div class="panel-kicker">Governance AI assistant</div>
               <h3>Governance AI assistant</h3>
-              <p>Opens AI with governance context only. No approval, publishing, or backend execution is performed.</p>
+              <p>Context-only handoff: opens AI with governance context only. No approval, publishing, or backend execution is performed.</p>
             </div>
           </div>
           <div class="governance-ai-toolbar">
