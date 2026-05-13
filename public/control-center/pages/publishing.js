@@ -925,10 +925,11 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
       <div class="publishing-action-row">
         <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
         <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send to AI Workspace</button>
+        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Open AI: Send Context to AI Workspace</button>
         <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
         <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
       </div>
+      <div class="simple-banner">Opens AI with this context only. No approval, publishing, or backend execution is performed.</div>
       <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
       ${asArray(recommendation.externalBlockers).length ? `
         <div class="simple-banner" style="margin-top:12px;">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>

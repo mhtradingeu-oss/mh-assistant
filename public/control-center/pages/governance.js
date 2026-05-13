@@ -899,11 +899,11 @@ function renderPage(projectName, session, escapeHtml) {
             <div>
               <div class="panel-kicker">Governance AI assistant</div>
               <h3>Governance AI assistant</h3>
-              <p>AI Workspace for governance help after you review the current state and selected decision item.</p>
+              <p>Opens AI with governance context only. No approval, publishing, or backend execution is performed.</p>
             </div>
           </div>
           <div class="governance-ai-toolbar">
-            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Workspace</button>
+            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
           </div>
           <div class="quick-actions">
             ${prompts.map((item, index) => `

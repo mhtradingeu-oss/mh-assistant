@@ -604,11 +604,11 @@ function renderTaskCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Prompt-only guidance. Navigation opens AI Command for explicit execution.</p>
+                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -925,11 +925,11 @@ function renderQueueCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Prompt-only queue guidance. Navigation opens AI Command for explicit execution.</p>
+                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -1220,11 +1220,11 @@ function renderJobMonitorLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Prompt-only guidance. Navigation opens AI Command for explicit execution.</p>
+                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -1576,11 +1576,11 @@ function renderNotificationCenter(context, state, projectName) {
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Prompt-only guidance. Navigation opens AI Command for explicit execution.</p>
+                  <p>Opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
