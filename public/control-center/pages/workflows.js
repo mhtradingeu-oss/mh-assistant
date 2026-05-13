@@ -1632,7 +1632,7 @@ function bindWorkflowExecutionLoop({
         render();
         return;
       }
-      const confirmed = window.confirm(`Run ${plan.length} safe automation steps?`);
+      const confirmed = window.confirm(`Confirm automation run\n\nAction: Run ${plan.length} safe automation steps.\nRisk: This can execute workflow actions that create downstream tasks or handoffs.\n\nSelect Cancel to stop automation.`);
       if (!confirmed) return;
 
       workflowAutomationState.lastPlan = plan;
@@ -1662,7 +1662,7 @@ function bindWorkflowExecutionLoop({
         return;
       }
 
-      const confirmed = window.confirm("Run next safe automation step?");
+      const confirmed = window.confirm("Confirm single automation step\n\nAction: Run the next safe automation step.\nRisk: This can execute a workflow action and change downstream state.\n\nSelect Cancel to keep the current state.");
       if (!confirmed) return;
 
       const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);

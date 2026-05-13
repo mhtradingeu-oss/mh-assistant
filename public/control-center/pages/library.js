@@ -2213,7 +2213,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      const confirmed = status === "approved" ? true : confirm(`Set this asset status to "${status}"?`);
+      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness state and may affect downstream review/publishing flow.\n\nSelect Cancel to keep the current status.`);
       if (!confirmed) {
         return;
       }
@@ -2251,7 +2251,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm(`Archive this asset?\n\nThis keeps the file registered but moves it out of active Library views.`)) {
+      if (!confirm(`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry.\n\nSelect Cancel to keep this asset active.`)) {
         return;
       }
 
@@ -2326,7 +2326,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm(`Soft-delete this asset?\n\nThis is a registry-level soft delete. The asset will be removed from active Library views.`)) {
+      if (!confirm(`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows.\n\nSelect Cancel to keep this asset available.`)) {
         return;
       }
 
