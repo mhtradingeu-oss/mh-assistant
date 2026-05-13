@@ -1477,6 +1477,11 @@ function bindPublishingWorkspace({
       }
 
       if (action === "publish") {
+        const confirmed = window.confirm("Confirm publish action\n\nAction: Publish this item to configured channels now.\nRisk: This can create an external live effect and may be difficult to reverse.\nPolicy: Publish should proceed only when approval and readiness checks are satisfied.\n\nSelect Cancel to keep this item in queue.");
+        if (!confirmed) {
+          rerender();
+          return;
+        }
         await runAndRefresh(
           () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
           { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
