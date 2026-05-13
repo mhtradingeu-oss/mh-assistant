@@ -1740,6 +1740,12 @@ function bindSettingsActionButtons(context, session) {
         try {
           const governancePayload = mapSettingsToGovernancePolicy(session.form);
           const teamPayload = mapSettingsToTeamPayload(session.form);
+
+          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+          if (!confirmed) {
+            return;
+          }
+
           await Promise.all([
             saveProjectTeam(session.projectName, teamPayload),
             updateProjectGovernancePolicy(session.projectName, {
