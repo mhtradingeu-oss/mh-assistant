@@ -571,12 +571,6 @@ function updateWizardDashboard({
   const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
   const requiredCompleted = countCompleted(requiredNames, values);
   const dependencyGapCount = missingAssets.length + missingConnectors.length + criticalGaps.length;
-  const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
-  const brandStatus = getSetupBrandStatus(values);
-  const localizationStatus = getSetupLocalizationStatus(values);
-  const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
-  const contentTruthStatus = getSetupContentTruthStatus(values);
-  const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
   const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
   const launchReadiness = getLaunchReadinessSummary({
     missingFields,
@@ -770,7 +764,7 @@ function updateWizardDashboard({
   const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
   if (recommendedBtn) {
     recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
-    recommendedBtn.textContent = "Focus step";
+    recommendedBtn.setAttribute("aria-label", `Focus recommended step: ${recommendedStep.title}`);
   }
 
   const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
@@ -1243,6 +1237,12 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
   const currentLabel = overviewData.business_template?.label || getBusinessTemplateLabel(currentType);
   const requiredAssets = Array.isArray(overviewData.required_assets) ? overviewData.required_assets : [];
   const starterChecklist = Array.isArray(overviewData.starter_checklist) ? overviewData.starter_checklist : [];
+  const requirementsText = requiredAssets.length
+    ? compactListText(requiredAssets, "")
+    : "No template requirements loaded.";
+  const checklistText = starterChecklist.length
+    ? compactListText(starterChecklist, "")
+    : "No starter checklist loaded.";
 
   return `
     <section class="card setup-business-template-panel">
@@ -1267,14 +1267,14 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
           </select>
         </label>
 
-        <div class="setup-template-preview">
+        <div class="setup-template-preview${requiredAssets.length ? "" : " is-empty"}">
           <strong>Requirements</strong>
-          <span>${escapeHtml(compactListText(requiredAssets, "No template requirements loaded."))}</span>
+          <span class="${requiredAssets.length ? "" : "setup-template-empty"}">${escapeHtml(requirementsText)}</span>
         </div>
 
-        <div class="setup-template-preview">
+        <div class="setup-template-preview${starterChecklist.length ? "" : " is-empty"}">
           <strong>Starter checklist</strong>
-          <span>${escapeHtml(compactListText(starterChecklist, "No starter checklist loaded."))}</span>
+          <span class="${starterChecklist.length ? "" : "setup-template-empty"}">${escapeHtml(checklistText)}</span>
         </div>
       </div>
 
@@ -1381,35 +1381,8 @@ export const setupRoute = {
             </div>
           </div>
 
-          <div class="setup-config-intelligence" aria-label="Configuration intelligence summary">
-            <article class="setup-config-intel-card">
-              <div class="setup-config-intel-head">
-                <h4>Configuration intelligence</h4>
-                <span class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
-              </div>
-              <p class="setup-intel-next">Next best action: <span id="setupNextBestAction">${escapeHtml(nextBestAction)}</span></p>
-              <div class="setup-config-intel-metrics">
-                <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
-                <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
-                <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
-              </div>
-            </article>
-            <article class="setup-config-intel-card">
-              <div class="setup-config-intel-head">
-                <h4>Source-of-truth impact</h4>
-                <span class="card-badge neutral">Downstream</span>
-              </div>
-              <div class="setup-impact-chip-row">
-                <span class="setup-impact-chip">Library assets</span>
-                <span class="setup-impact-chip">Integrations</span>
-                <span class="setup-impact-chip">Campaign defaults</span>
-                <span class="setup-impact-chip">AI context</span>
-              </div>
-            </article>
-          </div>
-
-          <div class="setup-smart-overview-grid">
-            <article class="setup-smart-overview-card">
+          <div class="setup-top-summary-row" aria-label="Configuration intelligence summary">
+            <article class="setup-top-summary-item">
               <span class="data-label">Completion</span>
               <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
               <div class="setup-progress" aria-label="Setup completion">
@@ -1418,31 +1391,35 @@ export const setupRoute = {
                 </div>
               </div>
             </article>
-            <article class="setup-smart-overview-card">
-              <span class="data-label">Required Completed</span>
+            <article class="setup-top-summary-item">
+              <span class="data-label">Required complete</span>
               <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
-              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> required fields missing</span>
+              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
             </article>
-            <article class="setup-smart-overview-card">
-              <span class="data-label">Missing dependencies</span>
+            <article class="setup-top-summary-item">
+              <span class="data-label">Dependencies</span>
               <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
-              <span class="setup-helper">Assets, connectors, and critical gaps.</span>
+              <span class="setup-helper">Assets and connectors pending</span>
             </article>
-            <article class="setup-smart-overview-card">
-              <span class="data-label">Validation and readiness</span>
+            <article class="setup-top-summary-item">
+              <span class="data-label">Validation</span>
               <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
-              <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
               <div class="setup-inline-status-row">
+                <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
                 <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
-                <span id="setupBusinessIdentityStatus" class="card-badge ${toStatusTone(businessIdentityStatus)}">Identity ${escapeHtml(businessIdentityStatus)}</span>
-                <span id="setupBrandStatus" class="card-badge ${toStatusTone(brandStatus)}">Brand ${escapeHtml(brandStatus)}</span>
-                <span id="setupLocalizationStatus" class="card-badge ${toStatusTone(localizationStatus)}">Locale ${escapeHtml(localizationStatus)}</span>
-                <span id="setupChannelsStatus" class="card-badge ${toStatusTone(channelsStatus)}">${escapeHtml(channelsStatus)}</span>
-                <span id="setupContentTruthStatus" class="card-badge ${toStatusTone(contentTruthStatus)}">Truth ${escapeHtml(contentTruthStatus)}</span>
-                <span id="setupAiGuidanceStatus" class="card-badge ${toStatusTone(aiGuidanceStatus)}">AI ${escapeHtml(aiGuidanceStatus)}</span>
               </div>
               <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
             </article>
+          </div>
+
+          <div class="setup-guidance-strip">
+            <strong>Next best action</strong>
+            <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+            <div class="setup-config-intel-metrics">
+              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
+              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
+            </div>
           </div>
         </section>
 
@@ -1450,12 +1427,12 @@ export const setupRoute = {
           <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
             <h4>Guided Setup Steps</h4>
             <p class="setup-helper">Select a step to load that section in the main form.</p>
-            <article class="setup-smart-recommended-step">
-              <span class="data-label">Recommended Step</span>
-              <strong id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</strong>
-              <p id="setupRecommendedStepReason">${escapeHtml(getRecommendedStep(values).description)}</p>
-              <button id="setupRecommendedStepBtn" class="btn btn-secondary" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">Open step</button>
-            </article>
+            <div class="setup-smart-recommended-inline">
+              <span class="setup-smart-recommended-label">Recommended</span>
+              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+                <span id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</span>
+              </button>
+            </div>
             <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
               ${STEP_DEFINITIONS.map((step, index) => {
                 const status = getStepStatus(step, values);
@@ -1625,16 +1602,25 @@ export const setupRoute = {
           </div>
           <p class="setup-v2-subtitle">Safe actions only: save, navigate, or open AI context.</p>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
-            <button id="setupSaveBackendBtnBottom" class="btn btn-primary" type="button">Save setup</button>
+            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save before continuing</button>
             <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
             <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
           </div>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
-            <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
-            <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
-            <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
-            <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
-            <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+            <div class="setup-action-group">
+              <span class="setup-action-group-label">Continue</span>
+              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+            </div>
+            <div class="setup-action-group">
+              <span class="setup-action-group-label">AI and review</span>
+              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+            </div>
+            <div class="setup-action-group">
+              <span class="setup-action-group-label">Local draft</span>
+              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
+              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+            </div>
           </div>
         </section>
 
