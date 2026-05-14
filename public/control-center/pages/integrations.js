@@ -1453,6 +1453,11 @@ function bindIntegrationActions({
       return;
     }
 
+    const confirmed = window.confirm(`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.`);
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await disconnectProjectIntegration(projectName, integrationId, {
         notes: `${integration.label} disconnected from the Control Center.`
