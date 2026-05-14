@@ -1090,7 +1090,7 @@ function renderJobMonitorLayout({
 
   return `
     <section class="page is-active" data-page="job-monitor">
-      <div class="ops-shell ops-workspace">
+      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
         <section class="std-context-ribbon">
           <div class="std-context-main">
             <div class="std-context-line">
@@ -1119,7 +1119,7 @@ function renderJobMonitorLayout({
         })}
 
         <div class="ops-layout-grid">
-          <article class="panel ops-main-column">
+          <article class="panel ops-main-column mhos-clean-stack">
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Main View</div>
@@ -1155,8 +1155,8 @@ function renderJobMonitorLayout({
             )}
           </article>
 
-          <aside class="ops-right-rail">
-            <section class="panel ops-detail-card">
+          <aside class="ops-right-rail mhos-clean-stack">
+            <section class="panel ops-detail-card mhos-clean-surface">
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Selected Job</div>
@@ -1182,7 +1182,7 @@ function renderJobMonitorLayout({
               ` : `<div class="empty-box">No job is selected.</div>`}
             </section>
 
-            <section class="panel ops-action-panel">
+            <section class="panel ops-action-panel mhos-clean-surface">
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Action Panel</div>
@@ -1215,7 +1215,7 @@ function renderJobMonitorLayout({
               </div>
             </section>
 
-            <section class="panel ops-ai-panel">
+            <section class="panel ops-ai-panel mhos-clean-surface">
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">AI Panel</div>
