@@ -812,3 +812,986 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* SETTINGS OPERATING SURFACE VISUAL BINDING */
+[data-page="settings"] .settings-page-surface {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-main-stack,
+[data-page="settings"] .settings-right-rail {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-overview,
+[data-page="settings"] .settings-summary,
+[data-page="settings"] .settings-actions,
+[data-page="settings"] .settings-ai-assistant,
+[data-page="settings"] .settings-section {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+[data-page="settings"] .settings-section {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border-primary);
+  background: linear-gradient(160deg, rgba(14, 33, 50, 0.9), rgba(8, 24, 38, 0.92));
+  transition: border-color var(--transition-fast), box-shadow var(--transition-base), background var(--transition-base);
+}
+
+[data-page="settings"] .settings-section:hover,
+[data-page="settings"] .settings-section:focus-within {
+  border-color: rgba(122, 169, 205, 0.34);
+  box-shadow: var(--shadow-md);
+}
+
+[data-page="settings"] .settings-group-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+[data-page="settings"] .settings-group-block {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(16, 39, 58, 0.52);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-group-block:hover,
+[data-page="settings"] .settings-group-block:focus-within {
+  border-color: rgba(122, 169, 205, 0.32);
+  background: rgba(16, 39, 58, 0.64);
+}
+
+[data-page="settings"] .settings-group-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+[data-page="settings"] .settings-group-head h4,
+[data-page="settings"] .settings-group-head p {
+  margin: 0;
+}
+
+[data-page="settings"] .settings-group-head h4 {
+  font-size: var(--font-size-section-title);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+}
+
+[data-page="settings"] .settings-group-head p,
+[data-page="settings"] .settings-section-copy {
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+[data-page="settings"] .settings-section-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid rgba(96, 165, 250, 0.36);
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.12);
+  color: #dbeafe;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-emphasis);
+  white-space: nowrap;
+}
+
+[data-page="settings"] .settings-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+[data-page="settings"] .settings-field-block {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(12, 30, 47, 0.56);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-field-block:hover,
+[data-page="settings"] .settings-field-block:focus-within {
+  border-color: rgba(96, 165, 250, 0.32);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.16);
+  background: rgba(12, 30, 47, 0.66);
+}
+
+[data-page="settings"] .settings-field-block-span-2 {
+  grid-column: 1 / -1;
+}
+
+[data-page="settings"] .settings-field-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-strong);
+}
+
+[data-page="settings"] .settings-control {
+  width: 100%;
+  min-height: 40px;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: rgba(6, 18, 29, 0.88);
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-control:hover {
+  border-color: rgba(122, 169, 205, 0.34);
+}
+
+[data-page="settings"] .settings-control:focus,
+[data-page="settings"] .settings-control:focus-visible {
+  outline: none;
+  border-color: rgba(62, 230, 184, 0.58);
+  box-shadow: 0 0 0 3px rgba(62, 230, 184, 0.14);
+  background: rgba(8, 22, 34, 0.9);
+}
+
+[data-page="settings"] .settings-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+[data-page="settings"] .settings-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-choice-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(16, 39, 58, 0.52);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+[data-page="settings"] .settings-choice-card:hover,
+[data-page="settings"] .settings-choice-card:focus-within {
+  border-color: rgba(96, 165, 250, 0.34);
+  background: rgba(17, 45, 66, 0.62);
+}
+
+[data-page="settings"] .settings-choice-card input {
+  margin-top: 2px;
+}
+
+[data-page="settings"] .settings-choice-card-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-choice-card-body strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-tight);
+}
+
+[data-page="settings"] .settings-choice-card-body small {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
+}
+
+[data-page="settings"] .settings-choice-card input:checked + .settings-choice-card-body {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(96, 165, 250, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.36);
+}
+
+[data-page="settings"] .settings-choice-card input:checked + .settings-choice-card-body strong {
+  color: #dbeafe;
+}
+
+[data-page="settings"] .settings-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-secondary);
+  background: rgba(16, 39, 58, 0.52);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[data-page="settings"] .settings-chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-strong);
+  line-height: 1;
+}
+
+[data-page="settings"] .settings-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-page="settings"] .settings-chip:hover {
+  border-color: rgba(122, 169, 205, 0.34);
+}
+
+[data-page="settings"] .settings-chip input:checked + span {
+  border-radius: inherit;
+  background: rgba(45, 212, 191, 0.14);
+  color: #d7fff1;
+  box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.36);
+}
+
+[data-page="settings"] .settings-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 46px;
+  padding: 10px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(12, 30, 47, 0.52);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-toggle:hover,
+[data-page="settings"] .settings-toggle:focus-within {
+  border-color: rgba(96, 165, 250, 0.32);
+  background: rgba(12, 30, 47, 0.64);
+}
+
+[data-page="settings"] .settings-toggle-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-page="settings"] .settings-toggle-pill {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 169, 205, 0.42);
+  background: rgba(16, 39, 58, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(8, 24, 38, 0.44);
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[data-page="settings"] .settings-toggle-pill::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c9d8e6;
+  box-shadow: 0 2px 5px rgba(2, 8, 15, 0.34);
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-toggle-input:checked + .settings-toggle-pill {
+  border-color: rgba(45, 212, 191, 0.54);
+  background: rgba(45, 212, 191, 0.22);
+}
+
+[data-page="settings"] .settings-toggle-input:checked + .settings-toggle-pill::before {
+  transform: translateX(20px);
+  background: #d7fff1;
+}
+
+[data-page="settings"] .settings-toggle-input:focus-visible + .settings-toggle-pill {
+  box-shadow: 0 0 0 3px rgba(62, 230, 184, 0.18);
+}
+
+[data-page="settings"] .settings-role-matrix {
+  display: grid;
+  gap: var(--space-3);
+}
+
+[data-page="settings"] .settings-role-matrix-head {
+  display: grid;
+  gap: 4px;
+}
+
+[data-page="settings"] .settings-role-matrix-head h4,
+[data-page="settings"] .settings-role-matrix-head p {
+  margin: 0;
+}
+
+[data-page="settings"] .settings-role-matrix-head p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+}
+
+[data-page="settings"] .settings-role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+[data-page="settings"] .settings-role-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(16, 39, 58, 0.52);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-role-card:hover,
+[data-page="settings"] .settings-role-card:focus-within {
+  border-color: rgba(122, 169, 205, 0.34);
+  background: rgba(16, 39, 58, 0.62);
+}
+
+[data-page="settings"] .settings-role-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-role-card-head strong,
+[data-page="settings"] .settings-role-card-head span,
+[data-page="settings"] .settings-role-description {
+  margin: 0;
+}
+
+[data-page="settings"] .settings-role-card-head strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+}
+
+[data-page="settings"] .settings-role-card-head span,
+[data-page="settings"] .settings-role-description {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
+}
+
+[data-page="settings"] .settings-role-card-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-overview-grid,
+[data-page="settings"] .settings-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-overview-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: rgba(16, 39, 58, 0.58);
+}
+
+[data-page="settings"] .settings-overview-item span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+[data-page="settings"] .settings-overview-item strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-tight);
+}
+
+[data-page="settings"] .settings-risk-panel {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: var(--radius-md);
+  background: rgba(120, 53, 15, 0.16);
+}
+
+[data-page="settings"] .settings-risk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+[data-page="settings"] .settings-risk-head h4 {
+  margin: 0;
+  color: #fde68a;
+  font-size: var(--font-size-section-title);
+}
+
+[data-page="settings"] .settings-risk-list {
+  margin: 0;
+}
+
+[data-page="settings"] .settings-risk-list li {
+  border-color: rgba(251, 191, 36, 0.24);
+  background: rgba(180, 83, 9, 0.18);
+  color: #ffe9bb;
+}
+
+[data-page="settings"] .settings-actions-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+[data-page="settings"] .settings-actions-buttons .btn,
+[data-page="settings"] .settings-actions-buttons button,
+[data-page="settings"] .settings-toolbar .btn,
+[data-page="settings"] .settings-toolbar button {
+  min-height: 36px;
+  border-radius: var(--radius-md);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-actions-buttons .btn:hover,
+[data-page="settings"] .settings-actions-buttons button:hover,
+[data-page="settings"] .settings-toolbar .btn:hover,
+[data-page="settings"] .settings-toolbar button:hover {
+  transform: translateY(-1px);
+}
+
+[data-page="settings"] .settings-actions-buttons .btn:focus-visible,
+[data-page="settings"] .settings-actions-buttons button:focus-visible,
+[data-page="settings"] .settings-toolbar .btn:focus-visible,
+[data-page="settings"] .settings-toolbar button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(62, 230, 184, 0.16);
+}
+
+[data-page="settings"] .settings-ai-assistant {
+  border-color: rgba(56, 189, 248, 0.24);
+  background:
+    radial-gradient(220px 110px at 100% 0, rgba(56, 189, 248, 0.08), transparent 70%),
+    linear-gradient(170deg, rgba(12, 24, 41, 0.92), rgba(8, 16, 26, 0.95));
+}
+
+@media (max-width: 1180px) {
+  [data-page="settings"] .settings-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="settings"] .settings-right-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="settings"] .settings-summary,
+  [data-page="settings"] .settings-actions,
+  [data-page="settings"] .settings-ai-assistant {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  [data-page="settings"] .settings-fields-grid,
+  [data-page="settings"] .settings-overview-grid,
+  [data-page="settings"] .settings-summary-grid,
+  [data-page="settings"] .settings-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="settings"] .settings-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="settings"] .settings-right-rail {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="settings"] .settings-section-meta {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 680px) {
+  [data-page="settings"] .settings-actions-buttons,
+  [data-page="settings"] .settings-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  [data-page="settings"] .settings-actions-buttons .btn,
+  [data-page="settings"] .settings-actions-buttons button,
+  [data-page="settings"] .settings-toolbar .btn,
+  [data-page="settings"] .settings-toolbar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* SETTINGS OPERATING SURFACE VISUAL BINDING + DENSITY POLISH */
+[data-page="settings"] .settings-page-surface {
+  gap: 12px;
+}
+
+[data-page="settings"] .settings-workspace-grid {
+  grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+[data-page="settings"] .settings-main-stack,
+[data-page="settings"] .settings-right-rail {
+  min-width: 0;
+  gap: 10px;
+}
+
+[data-page="settings"] .settings-right-rail {
+  width: 100%;
+  max-width: 100%;
+}
+
+[data-page="settings"] .settings-right-rail > * {
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-section {
+  gap: 10px;
+  padding: 12px;
+  border-color: rgba(122, 169, 205, 0.22);
+  box-shadow: 0 8px 18px rgba(3, 10, 18, 0.2);
+}
+
+[data-page="settings"] .settings-group-grid {
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-group-block {
+  gap: 8px;
+  padding: 10px;
+  border-color: rgba(122, 169, 205, 0.2);
+  background: rgba(12, 30, 47, 0.44);
+  box-shadow: none;
+}
+
+[data-page="settings"] .settings-group-head {
+  gap: 6px;
+}
+
+[data-page="settings"] .settings-section-copy {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+[data-page="settings"] .settings-section-meta {
+  gap: 6px;
+}
+
+[data-page="settings"] .settings-group-head h4 {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+[data-page="settings"] .settings-group-head p,
+[data-page="settings"] .settings-section-meta,
+[data-page="settings"] .settings-role-description,
+[data-page="settings"] .settings-risk-list,
+[data-page="settings"] .settings-choice-card-body small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+[data-page="settings"] .settings-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-page="settings"] .settings-badge {
+  min-height: 22px;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+[data-page="settings"] .settings-fields-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-field-block {
+  gap: 6px;
+  padding: 9px;
+  border-color: rgba(122, 169, 205, 0.2);
+  background: rgba(10, 24, 37, 0.46);
+  box-shadow: none;
+}
+
+[data-page="settings"] .settings-control,
+[data-page="settings"] .settings-textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-color: rgba(122, 169, 205, 0.28);
+  border-radius: 10px;
+  background: rgba(5, 16, 26, 0.9);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.35;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+[data-page="settings"] .settings-control::placeholder,
+[data-page="settings"] .settings-textarea::placeholder {
+  color: rgba(186, 205, 220, 0.72);
+}
+
+[data-page="settings"] .settings-control:focus-visible,
+[data-page="settings"] .settings-textarea:focus-visible {
+  outline: none;
+  border-color: rgba(62, 230, 184, 0.54);
+  box-shadow: 0 0 0 3px rgba(62, 230, 184, 0.14);
+  background: rgba(6, 19, 30, 0.94);
+}
+
+[data-page="settings"] .settings-textarea {
+  min-height: 108px;
+  max-width: 100%;
+  resize: vertical;
+}
+
+[data-page="settings"] .settings-choice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-choice-card {
+  gap: 8px;
+  padding: 9px;
+  border-color: rgba(122, 169, 205, 0.24);
+  background: rgba(12, 30, 47, 0.48);
+  box-shadow: none;
+}
+
+[data-page="settings"] .settings-choice-card:hover,
+[data-page="settings"] .settings-choice-card:focus-within {
+  border-color: rgba(96, 165, 250, 0.36);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.16);
+}
+
+[data-page="settings"] .settings-choice-card-body {
+  min-width: 0;
+  gap: 3px;
+}
+
+[data-page="settings"] .settings-choice-card-body strong {
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+[data-page="settings"] .settings-checklist {
+  gap: 6px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-chip {
+  max-width: 100%;
+}
+
+[data-page="settings"] .settings-chip span {
+  max-width: 100%;
+  padding: 0 10px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+[data-page="settings"] .settings-toggle {
+  min-height: 42px;
+  gap: 8px;
+  padding: 8px 9px;
+  border-color: rgba(122, 169, 205, 0.24);
+  background: rgba(10, 24, 37, 0.5);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .settings-toggle-pill {
+  width: 40px;
+  height: 22px;
+  border-color: rgba(122, 169, 205, 0.34);
+}
+
+[data-page="settings"] .settings-toggle-pill::before {
+  width: 16px;
+  height: 16px;
+}
+
+[data-page="settings"] .settings-toggle-input:checked + .settings-toggle-pill::before {
+  transform: translateX(18px);
+}
+
+[data-page="settings"] .settings-role-matrix,
+[data-page="settings"] .settings-overview-grid,
+[data-page="settings"] .settings-summary-grid {
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-role-card,
+[data-page="settings"] .settings-overview-item {
+  padding: 9px;
+  border-color: rgba(122, 169, 205, 0.2);
+  background: rgba(12, 30, 47, 0.48);
+}
+
+[data-page="settings"] .settings-role-card-head {
+  gap: 6px;
+}
+
+[data-page="settings"] .settings-risk-panel {
+  gap: 8px;
+  padding: 10px;
+  border-color: rgba(251, 191, 36, 0.24);
+  background: rgba(120, 53, 15, 0.14);
+}
+
+[data-page="settings"] .settings-risk-head {
+  gap: 6px;
+}
+
+[data-page="settings"] .settings-risk-head h4 {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+[data-page="settings"] .settings-risk-list {
+  padding-left: 18px;
+}
+
+[data-page="settings"] .settings-risk-list li {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+[data-page="settings"] .settings-actions-buttons,
+[data-page="settings"] .settings-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="settings"] .settings-actions-buttons .btn,
+[data-page="settings"] .settings-actions-buttons button,
+[data-page="settings"] .settings-toolbar .btn,
+[data-page="settings"] .settings-toolbar button,
+[data-page="settings"] .quick-action-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+[data-page="settings"] .quick-action-btn:hover,
+[data-page="settings"] .quick-action-btn:focus-visible {
+  transform: translateY(-1px);
+}
+
+[data-page="settings"] .settings-ai-assistant {
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+[data-page="settings"] .settings-ai-assistant .settings-actions-buttons,
+[data-page="settings"] .settings-ai-assistant .settings-toolbar {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+[data-page="settings"] .settings-ai-assistant .btn,
+[data-page="settings"] .settings-ai-assistant button,
+[data-page="settings"] .settings-ai-assistant .quick-action-btn {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-page="settings"] .simple-banner {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(122, 169, 205, 0.24);
+  background: rgba(12, 30, 47, 0.5);
+}
+
+[data-page="settings"] .governance-policy-block {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(122, 169, 205, 0.22);
+  border-radius: var(--radius-md);
+  background: rgba(10, 24, 37, 0.44);
+}
+
+[data-page="settings"] .governance-rule-list {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="settings"] .governance-rule-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid rgba(122, 169, 205, 0.18);
+  border-radius: 8px;
+  background: rgba(12, 30, 47, 0.42);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1180px) {
+  [data-page="settings"] .settings-workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-page="settings"] .settings-right-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  [data-page="settings"] .settings-page-surface,
+  [data-page="settings"] .settings-main-stack,
+  [data-page="settings"] .settings-right-rail {
+    gap: 8px;
+  }
+
+  [data-page="settings"] .settings-section,
+  [data-page="settings"] .settings-group-block,
+  [data-page="settings"] .settings-field-block,
+  [data-page="settings"] .settings-risk-panel,
+  [data-page="settings"] .governance-policy-block {
+    padding: 8px;
+  }
+
+  [data-page="settings"] .settings-fields-grid,
+  [data-page="settings"] .settings-overview-grid,
+  [data-page="settings"] .settings-summary-grid,
+  [data-page="settings"] .settings-role-grid,
+  [data-page="settings"] .settings-choice-grid,
+  [data-page="settings"] .settings-actions-buttons,
+  [data-page="settings"] .settings-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-page="settings"] .settings-control,
+  [data-page="settings"] .settings-textarea,
+  [data-page="settings"] .quick-action-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-page="settings"] .settings-control,
+  [data-page="settings"] .settings-textarea,
+  [data-page="settings"] .settings-field-block,
+  [data-page="settings"] .settings-choice-card,
+  [data-page="settings"] .settings-toggle,
+  [data-page="settings"] .settings-actions-buttons .btn,
+  [data-page="settings"] .settings-actions-buttons button,
+  [data-page="settings"] .settings-toolbar .btn,
+  [data-page="settings"] .settings-toolbar button,
+  [data-page="settings"] .quick-action-btn {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
+}
