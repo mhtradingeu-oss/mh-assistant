@@ -1139,6 +1139,58 @@ function formatRelativeTime(value) {
   return `Saved ${days} day${days === 1 ? "" : "s"} ago`;
 }
 
+function buildReadinessModel(session, summary) {
+  const form = session.form;
+  const hasRisks = summary.risks.length > 0;
+  const approvalOwnersReady = Boolean(form.approval.contentOwner && form.approval.mediaOwner && form.approval.adsOwner);
+  const publishingReady = Array.isArray(form.publishing.channels) && form.publishing.channels.length > 0 && Boolean(form.publishing.approvalBeforePublish);
+  const aiSafetyReady = Boolean(form.safety.aiClaimCheck) && !String(form.ai.claimSafetyMode || "").toLowerCase().includes("relaxed");
+  const integrationReady = Boolean(form.sync.frequency && Array.isArray(form.alerts.enabledRules) && form.alerts.enabledRules.length);
+
+  const checks = [
+    {
+      label: "Governance and approvals",
+      ready: approvalOwnersReady,
+      helper: approvalOwnersReady
+        ? "Ownership is defined for content, media, and ads decisions."
+        : "Assign approval owners to avoid ambiguous review authority."
+    },
+    {
+      label: "Publishing and release safety",
+      ready: publishingReady,
+      helper: publishingReady
+        ? "Channels are selected and approval-before-publish is active."
+        : "Select channels and confirm approval-before-publish before launch."
+    },
+    {
+      label: "AI and policy safety",
+      ready: aiSafetyReady,
+      helper: aiSafetyReady
+        ? "Claim checks and safety posture are configured for controlled AI use."
+        : "Tighten claim safety mode and enable AI claim checks."
+    },
+    {
+      label: "Integrations and operations alerts",
+      ready: integrationReady,
+      helper: integrationReady
+        ? "Sync cadence and alert routing are defined for operations visibility."
+        : "Set sync cadence and alert coverage so operations can intervene safely."
+    }
+  ];
+
+  const nextBestAction = hasRisks
+    ? "Review the top blocker, fix it in this page, then save to sync durable governance and team records."
+    : "Save this configuration, then open Governance to verify policy impact and approval readiness.";
+
+  return {
+    checks,
+    blockers: summary.risks,
+    blockerCount: summary.risks.length,
+    readyCount: checks.filter((item) => item.ready).length,
+    nextBestAction
+  };
+}
+
 function collectRisks(form) {
   const risks = [];
 
@@ -1496,21 +1548,21 @@ function renderGroupedSection(group, session, escapeHtml) {
 }
 
 function renderSettingsOverview(summary, session, escapeHtml) {
-  const riskItems = summary.risks.length
-    ? summary.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-    : `<li>Critical controls are populated. Backend persistence is the main remaining readiness gap.</li>`;
+  const readiness = buildReadinessModel(session, summary);
+  const riskItems = readiness.blockers.length
+    ? readiness.blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+    : `<li>No active blockers are visible from current Settings signals.</li>`;
 
   return `
-    <section class="panel settings-overview">
+    <section class="panel settings-overview std-detail-card mhos-clean-surface">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings command center</div>
-          <h3>System configuration for ${escapeHtml(session.projectName || "this project")}</h3>
-          <p class="settings-section-copy">Keep project setup, AI behavior, approvals, team access, and sync policy readable from one consistent workspace.</p>
+          <div class="panel-kicker">Settings operating surface</div>
+          <h3>Launch configuration for ${escapeHtml(session.projectName || "this project")}</h3>
+          <p class="settings-section-copy">Settings defines durable defaults for Governance, Publishing, AI, Integrations, and Operations. Backend remains the authority for enforcement.</p>
         </div>
         <span class="card-badge neutral">${escapeHtml(session.saveMode === "durable" ? "Durable backbone" : session.loading ? "Syncing..." : "Durable pending")}</span>
       </div>
-      <div class="panel-kicker">Configuration signals</div>
       <div class="settings-overview-grid">
         <div class="settings-overview-item">
           <span>Project mode</span>
@@ -1537,14 +1589,33 @@ function renderSettingsOverview(summary, session, escapeHtml) {
           <strong>${escapeHtml(formatRelativeTime(session.savedAt))}</strong>
         </div>
       </div>
+
       <div class="settings-risk-panel">
         <div class="settings-risk-head">
-          <h4>Current configuration risks</h4>
-          <span class="card-badge ${summary.risks.length ? "danger" : "success"}">
-            ${summary.risks.length ? `${summary.risks.length} open` : "Ready"}
+          <h4>Readiness and blockers</h4>
+          <span class="card-badge ${readiness.blockerCount ? "danger" : "success"}">
+            ${escapeHtml(`${readiness.readyCount}/${readiness.checks.length} ready`)}
           </span>
         </div>
+        <div class="governance-rule-list">
+          ${readiness.checks.map((item) => `
+            <div class="governance-rule-item">
+              <strong>${escapeHtml(item.label)}</strong>
+              <span>${escapeHtml(item.ready ? "Ready" : "Needs review")}</span>
+            </div>
+          `).join("")}
+        </div>
         <ul class="simple-list settings-risk-list">${riskItems}</ul>
+      </div>
+
+      <div class="governance-policy-block">
+        <h4>Next best action</h4>
+        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+        <div class="settings-actions-buttons std-action-row">
+          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="approval">Review approvals</button>
+          <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="publishing">Review publishing</button>
+          <button class="btn btn-secondary" type="button" data-settings-open-ai>Ask AI for guidance</button>
+        </div>
       </div>
     </section>
   `;
@@ -1553,18 +1624,21 @@ function renderSettingsOverview(summary, session, escapeHtml) {
 function renderSettingsAssistant(session, escapeHtml) {
   const prompts = buildSettingsPrompts(session);
   return `
-    <section class="panel settings-ai-assistant">
+    <section class="panel settings-ai-assistant std-ai-panel mhos-clean-surface">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">AI review</div>
-          <h3>Settings AI assistant</h3>
-          <p class="settings-section-copy">Use AI for configuration review and recommendations after you inspect the actual settings above.</p>
+          <div class="panel-kicker">Settings AI assistant</div>
+          <h3>Analyze configuration, then execute in controlled paths</h3>
+          <p class="settings-section-copy">AI provides context and recommendations. Durable changes happen only through explicit Settings and Governance actions.</p>
         </div>
       </div>
-      <div class="settings-toolbar">
-        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI Workspace</button>
+      <div class="simple-banner">
+        <strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.
       </div>
-      <div class="quick-actions">
+      <div class="settings-toolbar">
+        <button class="btn btn-secondary" type="button" data-settings-open-ai>Open AI: Review in AI Workspace</button>
+      </div>
+      <div class="quick-actions std-quick-actions">
         ${prompts.map((item, index) => `
           <button class="quick-action-btn" type="button" data-settings-ai-prompt="${index}">
             <span class="home-action-title">${escapeHtml(item.label)}</span>
@@ -1603,18 +1677,42 @@ function renderSection(section, session, escapeHtml) {
 }
 
 function renderSummary(summary, session, escapeHtml) {
-  const riskItems = summary.risks.length
-    ? summary.risks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-    : `<li>Critical controls are populated. Backend persistence is the main remaining readiness gap.</li>`;
+  const relationships = [
+    {
+      title: "Governance",
+      detail: "Approval ownership, policy rules, and settings bridge state are written into the durable governance policy."
+    },
+    {
+      title: "Publishing",
+      detail: "Channel defaults, scheduling behavior, and approval-before-publish shape outbound execution safety."
+    },
+    {
+      title: "AI",
+      detail: "Tone, strictness, claim safety, and approval-required mode define AI operating boundaries."
+    },
+    {
+      title: "Integrations and operations",
+      detail: "Sync cadence and alert routes determine how quickly teams detect connector or launch risk."
+    }
+  ];
 
   return `
-    <aside class="settings-summary panel">
+    <aside class="settings-summary panel std-detail-card mhos-clean-surface">
       <div class="panel-header">
         <div>
-          <div class="panel-kicker">Settings summary</div>
-          <h3>System operating profile</h3>
-          <p>Live view of how this project will behave with the current configuration.</p>
+          <div class="panel-kicker">Cross-page operating impact</div>
+          <h3>How Settings drives other operating surfaces</h3>
+          <p>Use this map to understand where configuration choices influence runtime behavior across MH-OS.</p>
         </div>
+      </div>
+
+      <div class="governance-rule-list">
+        ${relationships.map((item) => `
+          <div class="governance-rule-item">
+            <strong>${escapeHtml(item.title)}</strong>
+            <span>${escapeHtml(item.detail)}</span>
+          </div>
+        `).join("")}
       </div>
 
       <div class="settings-summary-grid">
@@ -1644,18 +1742,13 @@ function renderSummary(summary, session, escapeHtml) {
         </div>
       </div>
 
-      <div class="settings-summary-block">
-        <div class="settings-risk-head">
-          <h4>Key risks</h4>
-          <span class="card-badge ${summary.risks.length ? "danger" : "success"}">
-            ${summary.risks.length ? `${summary.risks.length} open` : "Ready"}
-          </span>
-        </div>
-        <ul class="simple-list settings-risk-list">${riskItems}</ul>
-      </div>
-
       <div class="simple-banner">
-        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Settings sync into the shared governance and team records so every page can reuse the same operating policy. Policy enforcement remains backend-controlled in Governance rules.
+        <strong>Status:</strong> ${escapeHtml(formatRelativeTime(session.savedAt))}. Save updates durable team and governance records; backend enforcement remains authoritative.
+      </div>
+      <div class="settings-actions-buttons std-action-row">
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="operating">Open operating mode</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="sync">Open sync policy</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="open-governance">Open Governance page</button>
       </div>
     </aside>
   `;
@@ -1665,18 +1758,28 @@ function renderActions(session, escapeHtml) {
   const dirtyText = session.dirty ? "Unsaved changes" : "All changes captured";
 
   return `
-    <div class="settings-actions panel">
-      <div class="settings-actions-copy">
-        <div class="panel-kicker">Settings actions</div>
-        <h3>Save or review this configuration</h3>
-        <p>${escapeHtml(dirtyText)}. Saving writes this configuration into the durable team and governance records used across the system.</p>
+    <section class="settings-actions panel std-action-panel mhos-clean-surface">
+      <div class="panel-header">
+        <div class="settings-actions-copy">
+          <div class="panel-kicker">Settings actions</div>
+          <h3>Execute safe configuration updates</h3>
+          <p>${escapeHtml(dirtyText)}. Saving writes this configuration into durable team and governance records used across the operating system.</p>
+        </div>
       </div>
-      <div class="settings-actions-buttons">
+      <div class="simple-banner">
+        <strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.
+      </div>
+      <div class="settings-actions-buttons std-action-row">
         <button class="btn btn-primary" type="button" data-settings-action="save-all">Save Settings</button>
-        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
         <button class="btn btn-secondary" type="button" data-settings-action="review-critical">Review Critical Settings</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="restore-defaults">Restore Defaults</button>
       </div>
-    </div>
+      <div class="settings-actions-buttons std-action-row">
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="project">Project defaults</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="team">Team permissions</button>
+        <button class="btn btn-secondary" type="button" data-settings-action="focus-section" data-section-id="safety">Safety and governance</button>
+      </div>
+    </section>
   `;
 }
 
@@ -1686,11 +1789,17 @@ function buildPageMarkup(session, escapeHtml) {
   return `
     <section class="page is-active" data-page="settings">
       <div class="settings-page-surface">
-        ${renderSettingsOverview(summary, session, escapeHtml)}
-        ${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}
-        ${renderSummary(summary, session, escapeHtml)}
-        ${renderActions(session, escapeHtml)}
-        ${renderSettingsAssistant(session, escapeHtml)}
+        <div class="settings-workspace-grid">
+          <div class="settings-main-stack std-main-column mhos-clean-stack">
+            ${renderSettingsOverview(summary, session, escapeHtml)}
+            ${SETTINGS_GROUPS.map((group) => renderGroupedSection(group, session, escapeHtml)).join("")}
+          </div>
+          <aside class="settings-right-rail std-right-rail mhos-clean-stack">
+            ${renderSummary(summary, session, escapeHtml)}
+            ${renderActions(session, escapeHtml)}
+            ${renderSettingsAssistant(session, escapeHtml)}
+          </aside>
+        </div>
       </div>
     </section>
   `;
@@ -1810,6 +1919,18 @@ function bindSettingsActionButtons(context, session) {
         replacePage(context, session);
         bindFormEvents(context, session);
         context.showMessage(`${titleCase(sectionId)} settings reset to defaults.`);
+        return;
+      }
+
+      if (action === "focus-section" && sectionId) {
+        const target = context.$(`settings-section-${sectionId}`) || context.$(`settings-group-${sectionId}`);
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        context.showMessage(`Focused ${titleCase(sectionId)} settings.`);
+        return;
+      }
+
+      if (action === "open-governance") {
+        context.navigateTo("governance");
         return;
       }
 
