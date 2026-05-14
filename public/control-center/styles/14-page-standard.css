@@ -468,6 +468,36 @@ button,
   width: 100%;
 }
 
+:where(.std-section-head) {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+:where(.std-eyebrow) {
+  margin: 0;
+  font-size: var(--font-size-eyebrow, 0.72rem);
+  font-weight: var(--font-weight-emphasis, 700);
+  letter-spacing: var(--letter-spacing-eyebrow, 0.08em);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+:where(.std-panel-title) {
+  margin: 0;
+  font-size: var(--font-size-card-title, 1rem);
+  line-height: var(--line-height-tight, 1.2);
+  font-weight: var(--font-weight-strong, 700);
+  color: var(--text-primary);
+}
+
+:where(.std-panel-copy) {
+  margin: 0;
+  font-size: var(--font-size-body, 0.9rem);
+  line-height: var(--line-height-relaxed, 1.45);
+  color: var(--text-secondary);
+}
+
 :where(.std-right-rail) {
   display: flex;
   flex-direction: column;
@@ -493,6 +523,10 @@ button,
     );
   box-shadow:
     0 14px 34px rgba(0, 0, 0, 0.12);
+  transition:
+    border-color 180ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
 }
 
 :where(.std-action-panel) {
@@ -511,6 +545,10 @@ button,
     );
   box-shadow:
     0 16px 36px rgba(0, 0, 0, 0.14);
+  transition:
+    border-color 180ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
 }
 
 :where(.std-ai-panel) {
@@ -529,6 +567,25 @@ button,
     );
   box-shadow:
     0 16px 36px rgba(0, 0, 0, 0.14);
+  transition:
+    border-color 180ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+:where(.std-detail-card:hover, .std-detail-card:focus-within) {
+  border-color: rgba(148, 163, 184, 0.26);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+}
+
+:where(.std-action-panel:hover, .std-action-panel:focus-within) {
+  border-color: rgba(45, 212, 191, 0.3);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.18);
+}
+
+:where(.std-ai-panel:hover, .std-ai-panel:focus-within) {
+  border-color: rgba(56, 189, 248, 0.28);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.18);
 }
 
 :where(.std-action-row) {
@@ -536,6 +593,11 @@ button,
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+:where(.std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button) {
+  min-height: 36px;
+  border-radius: 10px;
 }
 
 :where(.std-deferred-actions) {
@@ -547,6 +609,306 @@ button,
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-2);
+}
+
+:where(.std-quick-actions > .btn, .std-quick-actions > button) {
+  min-height: 40px;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+:where(.std-readiness-list, .std-blockers-list, .std-safe-path-list) {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.34);
+}
+
+:where(.std-state-card) {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.42);
+}
+
+:where(.std-state-card.is-empty) {
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+:where(.std-state-card.is-loading) {
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(30, 64, 175, 0.1);
+}
+
+:where(.std-state-card.is-error) {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(127, 29, 29, 0.16);
+}
+
+/* =========================================
+   Global Visual System Finalization (std-*)
+   Shared premium operating-surface language for all standard pages.
+========================================= */
+
+:where(.std-page-shell, .std-main-column, .std-right-rail) {
+  --std-surface-base: rgba(15, 23, 42, 0.86);
+  --std-surface-elevated: rgba(8, 16, 26, 0.94);
+  --std-surface-info: rgba(20, 31, 49, 0.9);
+  --std-surface-action: rgba(11, 31, 32, 0.92);
+  --std-surface-ai: rgba(12, 24, 41, 0.92);
+  --std-border-base: rgba(148, 163, 184, 0.18);
+  --std-border-strong: rgba(148, 163, 184, 0.3);
+  --std-border-action: rgba(45, 212, 191, 0.24);
+  --std-border-ai: rgba(56, 189, 248, 0.24);
+  --std-text-main: var(--text-primary);
+  --std-text-muted: var(--text-secondary);
+  --std-text-dim: var(--text-muted);
+  --std-accent-primary: rgba(45, 212, 191, 0.88);
+  --std-accent-ai: rgba(56, 189, 248, 0.9);
+  --std-accent-success: rgba(52, 211, 153, 0.9);
+  --std-accent-warning: rgba(251, 191, 36, 0.92);
+  --std-accent-danger: rgba(248, 113, 113, 0.92);
+  --std-accent-blocked: rgba(244, 114, 182, 0.9);
+  --std-motion-fast: 140ms cubic-bezier(0.2, 0, 0, 1);
+  --std-motion-base: 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  --std-shadow-card: 0 14px 34px rgba(0, 0, 0, 0.12);
+  --std-shadow-card-hover: 0 18px 40px rgba(0, 0, 0, 0.16);
+  --std-focus-ring: 0 0 0 2px rgba(56, 189, 248, 0.38);
+}
+
+:where(.std-panel-title) {
+  font-size: clamp(0.98rem, 1.25vw, 1.06rem);
+  letter-spacing: -0.01em;
+}
+
+:where(.std-panel-copy) {
+  max-width: 82ch;
+  color: var(--std-text-muted);
+  font-size: clamp(0.88rem, 1vw, 0.94rem);
+}
+
+:where(.std-eyebrow) {
+  color: rgba(203, 213, 225, 0.8);
+}
+
+:where(.std-panel-meta, .std-helper-text, .std-status-text) {
+  margin: 0;
+  color: var(--std-text-dim);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+:where(.std-detail-card) {
+  border-color: var(--std-border-base);
+  background: linear-gradient(180deg, var(--std-surface-base), var(--std-surface-elevated));
+  box-shadow: var(--std-shadow-card);
+}
+
+:where(.std-action-panel) {
+  border-color: var(--std-border-action);
+  background: linear-gradient(180deg, var(--std-surface-action), var(--std-surface-elevated));
+}
+
+:where(.std-ai-panel) {
+  border-color: var(--std-border-ai);
+  background: linear-gradient(180deg, var(--std-surface-ai), var(--std-surface-elevated));
+}
+
+:where(.std-detail-card:hover, .std-detail-card:focus-within) {
+  border-color: var(--std-border-strong);
+  box-shadow: var(--std-shadow-card-hover);
+}
+
+:where(.std-action-panel:hover, .std-action-panel:focus-within) {
+  border-color: rgba(45, 212, 191, 0.34);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+}
+
+:where(.std-ai-panel:hover, .std-ai-panel:focus-within) {
+  border-color: rgba(56, 189, 248, 0.34);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+}
+
+:where(.std-detail-card.is-selected, .std-action-panel.is-selected, .std-ai-panel.is-selected, .std-readiness-item.is-selected, .std-blocker-item.is-selected, .std-safe-step.is-selected, .std-state-card.is-selected, .std-detail-card[aria-selected="true"], .std-action-panel[aria-selected="true"], .std-ai-panel[aria-selected="true"]) {
+  border-color: rgba(96, 165, 250, 0.46);
+  box-shadow: var(--std-focus-ring), 0 18px 38px rgba(8, 47, 73, 0.28);
+  transform: translateY(-1px);
+}
+
+:where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+  transition: border-color var(--std-motion-fast), background var(--std-motion-base), box-shadow var(--std-motion-base), transform var(--std-motion-fast);
+}
+
+:where(.std-readiness-item:hover, .std-blocker-item:hover, .std-safe-step:hover) {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.44);
+}
+
+:where(.std-context-chip) {
+  transition: border-color var(--std-motion-fast), background var(--std-motion-fast), color var(--std-motion-fast);
+}
+
+:where(.std-context-chip.is-success) {
+  border-color: rgba(52, 211, 153, 0.34);
+  background: rgba(16, 185, 129, 0.12);
+  color: rgba(167, 243, 208, 0.95);
+}
+
+:where(.std-context-chip.is-warning) {
+  border-color: rgba(251, 191, 36, 0.34);
+  background: rgba(251, 191, 36, 0.12);
+  color: rgba(253, 230, 138, 0.98);
+}
+
+:where(.std-context-chip.is-danger) {
+  border-color: rgba(248, 113, 113, 0.36);
+  background: rgba(248, 113, 113, 0.12);
+  color: rgba(254, 202, 202, 0.98);
+}
+
+:where(.std-context-chip.is-blocked) {
+  border-color: rgba(244, 114, 182, 0.34);
+  background: rgba(190, 24, 93, 0.16);
+  color: rgba(251, 207, 232, 0.96);
+}
+
+:where(.std-state-card.is-ready) {
+  border-color: rgba(52, 211, 153, 0.36);
+  background: rgba(6, 95, 70, 0.22);
+}
+
+:where(.std-state-card.is-info) {
+  border-color: rgba(56, 189, 248, 0.34);
+  background: rgba(8, 47, 73, 0.24);
+}
+
+:where(.std-state-card.is-warning) {
+  border-color: rgba(251, 191, 36, 0.36);
+  background: rgba(120, 53, 15, 0.24);
+}
+
+:where(.std-state-card.is-danger, .std-state-card.is-failed) {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(127, 29, 29, 0.24);
+}
+
+:where(.std-state-card.is-blocked) {
+  border-color: rgba(244, 114, 182, 0.38);
+  background: rgba(131, 24, 67, 0.24);
+}
+
+:where(.std-state-card.is-pending) {
+  border-color: rgba(148, 163, 184, 0.34);
+  background: rgba(15, 23, 42, 0.48);
+}
+
+:where(.std-state-card.is-running) {
+  border-color: rgba(45, 212, 191, 0.34);
+  background: rgba(6, 78, 59, 0.22);
+}
+
+:where(.std-state-card.is-completed, .std-state-card.is-success) {
+  border-color: rgba(52, 211, 153, 0.38);
+  background: rgba(6, 95, 70, 0.24);
+}
+
+:where(.std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button) {
+  transition: transform var(--std-motion-fast), border-color var(--std-motion-fast), background var(--std-motion-base), box-shadow var(--std-motion-base), color var(--std-motion-fast), opacity var(--std-motion-fast);
+}
+
+:where(.std-action-row > .btn:hover, .std-action-row > button:hover, .std-context-actions > .btn:hover, .std-context-actions > button:hover, .std-quick-actions > .btn:hover, .std-quick-actions > button:hover) {
+  transform: translateY(-1px);
+}
+
+:where(.std-action-row > .btn:active, .std-action-row > button:active, .std-context-actions > .btn:active, .std-context-actions > button:active, .std-quick-actions > .btn:active, .std-quick-actions > button:active) {
+  transform: translateY(0);
+}
+
+:where(.std-action-row > .btn:focus-visible, .std-action-row > button:focus-visible, .std-context-actions > .btn:focus-visible, .std-context-actions > button:focus-visible, .std-quick-actions > .btn:focus-visible, .std-quick-actions > button:focus-visible) {
+  outline: none;
+  box-shadow: var(--std-focus-ring);
+}
+
+:where(.std-action-row > .btn-primary, .std-action-row > button.btn-primary, .std-context-actions > .btn-primary, .std-context-actions > button.btn-primary, .std-quick-actions > .btn-primary, .std-quick-actions > button.btn-primary) {
+  border-color: rgba(45, 212, 191, 0.4);
+  background: rgba(45, 212, 191, 0.18);
+  color: var(--std-text-main);
+}
+
+:where(.std-action-row > .btn-secondary, .std-action-row > button.btn-secondary, .std-context-actions > .btn-secondary, .std-context-actions > button.btn-secondary, .std-quick-actions > .btn-secondary, .std-quick-actions > button.btn-secondary) {
+  border-color: rgba(96, 165, 250, 0.34);
+  background: rgba(59, 130, 246, 0.14);
+  color: var(--std-text-main);
+}
+
+:where(.std-action-row > .btn-ghost, .std-action-row > button.btn-ghost, .std-context-actions > .btn-ghost, .std-context-actions > button.btn-ghost, .std-quick-actions > .btn-ghost, .std-quick-actions > button.btn-ghost) {
+  border-color: var(--std-border-base);
+  background: rgba(30, 41, 59, 0.34);
+  color: var(--std-text-muted);
+}
+
+:where(.std-action-row > .btn-danger, .std-action-row > button.btn-danger, .std-context-actions > .btn-danger, .std-context-actions > button.btn-danger, .std-quick-actions > .btn-danger, .std-quick-actions > button.btn-danger) {
+  border-color: rgba(248, 113, 113, 0.42);
+  background: rgba(127, 29, 29, 0.28);
+  color: rgba(254, 202, 202, 0.98);
+}
+
+:where(.std-action-row > .btn-ai, .std-action-row > button.btn-ai, .std-context-actions > .btn-ai, .std-context-actions > button.btn-ai, .std-quick-actions > .btn-ai, .std-quick-actions > button.btn-ai) {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(8, 47, 73, 0.26);
+  color: rgba(186, 230, 253, 0.98);
+}
+
+:where(.std-action-row > .btn[disabled], .std-action-row > button[disabled], .std-context-actions > .btn[disabled], .std-context-actions > button[disabled], .std-quick-actions > .btn[disabled], .std-quick-actions > button[disabled]) {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 980px) {
+  :where(.std-main-column, .std-right-rail) {
+    gap: var(--space-3);
+  }
+
+  :where(.std-action-row) {
+    align-items: stretch;
+  }
+
+  :where(.std-action-row > .btn, .std-action-row > button) {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 760px) {
+  :where(.std-detail-card, .std-action-panel, .std-ai-panel) {
+    padding: var(--space-3);
+    border-radius: 14px;
+  }
+
+  :where(.std-panel-copy) {
+    font-size: 0.88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.std-detail-card, .std-action-panel, .std-ai-panel, .std-readiness-item, .std-blocker-item, .std-safe-step, .std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button, .std-context-chip) {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* =========================================
@@ -577,6 +939,10 @@ button,
 
   :where(.std-quick-actions) {
     grid-template-columns: 1fr;
+  }
+
+  :where(.std-right-rail) {
+    gap: var(--space-3);
   }
 }
 
