@@ -75,7 +75,7 @@ function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } =
     return {
       title: "Select an asset to start",
       description: "Choose an asset to get clear source status, review status, and practical guidance.",
-      suggestedMove: "Select an asset, then use Open or Ask AI from the Actions panel."
+      suggestedMove: "Select an asset, then use Open asset or Ask AI to review asset from the Actions panel."
     };
   }
 
@@ -86,7 +86,7 @@ function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } =
     return {
       title: "Confirm source-of-truth",
       description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns.",
-      suggestedMove: "Mark as Source once validated, then approve for operating use."
+      suggestedMove: "Mark as source once validated, then approve for operating use."
     };
   }
 
@@ -94,14 +94,14 @@ function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } =
     return {
       title: "Review before production",
       description: "This asset needs review before it becomes a trusted production input.",
-      suggestedMove: "Use Review or Approve from the Actions panel after validation."
+      suggestedMove: "Use Mark for review or Approve for use from the Actions panel after validation."
     };
   }
 
   return {
     title: "Asset ready for operating use",
     description: "This selected asset looks ready for downstream campaign, media, and publishing workflows.",
-    suggestedMove: "Use Open to verify final quality, then proceed to downstream workflows."
+    suggestedMove: "Use Open asset to verify final quality, then proceed to downstream workflows."
   };
 }
 
