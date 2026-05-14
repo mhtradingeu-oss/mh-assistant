@@ -901,53 +901,23 @@ export const homeRoute = {
 
 
     const handleAiRoleClick = (roleId, roleName) => {
-      const roleRouting = {
-        strategist: {
-          route: "campaign-studio",
-          message: `Opening Campaign Studio for ${roleName}.`
-        },
-        writer: {
-          route: "content-studio",
-          message: `Opening Content Studio for ${roleName}.`
-        },
-        designer: {
-          route: "media-studio",
-          message: `Opening Media Studio for ${roleName}.`
-        },
-        video_lead: {
-          route: "media-studio",
-          message: `Opening Media Studio for ${roleName}.`
-        },
-        publisher: {
-          route: "publishing",
-          message: `Opening Publishing for ${roleName}.`
-        },
-        ads_operator: {
-          route: "ads-manager",
-          message: `Opening Ads Manager for ${roleName}.`
-        },
-        analyst: {
-          route: "insights",
-          message: `Opening Insights for ${roleName}.`
-        },
-        compliance_reviewer: {
-          route: "governance",
-          message: `Opening Governance for ${roleName}.`
-        },
-        admin: {
-          route: "operations-centers",
-          message: `Opening Operations for ${roleName}.`
-        }
+      const projectLabel = dashboard.projectName || "this project";
+      const rolePrompts = {
+        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
       };
 
-      const destination = roleRouting[roleId];
-      if (destination) {
-        openRoute(destination.route, destination.message);
-      } else {
-        openAiWithPrompt(`I am the ${roleName} AI specialist. Help me understand the current project state and recommend my next best action.`);
-      }
+      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+      openAiWithPrompt(prompt);
+      showMessage?.(`${roleName} context prepared in AI Command.`);
     };
-
 
     const nextBtn = $("homeNextActionBtn");
     if (nextBtn) {

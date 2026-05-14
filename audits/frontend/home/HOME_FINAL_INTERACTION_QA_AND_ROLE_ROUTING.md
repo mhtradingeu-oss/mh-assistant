@@ -499,3 +499,27 @@ The Home page is now **interaction-complete** and ready for staging environment 
 **Last Updated:** May 14, 2026  
 **Prepared By:** GitHub Copilot (Claude Haiku 4.5)  
 **Review Status:** Ready for staging deployment
+
+---
+
+## Final routing amendment
+
+After browser review, Home AI Team cards were adjusted to open AI Command with a specialist-specific prompt instead of navigating directly to specialist destination pages.
+
+Reason:
+- Home should remain an Executive Command Center.
+- Specialist conversations should happen in AI Command.
+- Role cards now prepare safe guidance-only context.
+- No backend execution is triggered.
+- No fake specialist backend service was introduced.
+
+Final behavior:
+- Strategist opens AI Command with strategist context.
+- Content Writer opens AI Command with writing context.
+- Media Director opens AI Command with creative/media context.
+- Video Lead opens AI Command with video context.
+- Publisher opens AI Command with publishing readiness context.
+- Ads Optimizer opens AI Command with paid media context.
+- SEO & Insights Analyst opens AI Command with analytics/insights context.
+- Compliance Reviewer opens AI Command with governance/safety context.
+- Operations Lead opens AI Command with operations context.
