@@ -101,6 +101,10 @@ const {
 } = require('./lib/ops/backbone');
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 const {
+  createJobDispatchOrchestrator
+} = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+
+const {
   listProviderModels,
   listProviderModelsByMediaType
 } = require('./lib/media/native/providers/provider-model-catalog');
@@ -11805,6 +11809,37 @@ app.get('/media-manager/project/:project/native-media/providers', handleGetNativ
 app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
 app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
 app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+async function handleNativeMediaGenerate(req, res) {
+  try {
+    const orchestrator = createJobDispatchOrchestrator();
+
+    const result = await orchestrator.dispatch({
+      media_type: req.body?.media_type || req.body?.type || 'image',
+      provider: req.body?.provider || 'native',
+      project: req.params.project,
+      platform: req.body?.platform || '',
+      prompt: req.body?.prompt || '',
+      priority: req.body?.priority || 'normal'
+    });
+
+    return res.json({
+      success: true,
+      project: req.params.project,
+      runtime: 'mh-os-native-media-runtime',
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'native_media_generation_failed',
+      message: error.message
+    });
+  }
+}
+
+app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+
 
 
 app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
