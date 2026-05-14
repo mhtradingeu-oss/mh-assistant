@@ -1290,7 +1290,7 @@ function bindCampaignStudio({
           session.recordId = result.campaign.id;
           setSharedCampaignRecord(projectName, result.campaign);
         }
-        showMessage?.("Campaign plan saved to the shared operating backbone.");
+        showMessage?.("Campaign draft saved to the shared operating backbone.");
       } catch (error) {
         showError?.(error.message || "Failed to save campaign plan.");
       }
@@ -1310,7 +1310,7 @@ function bindCampaignStudio({
           session.recordId = result.campaign.id;
           setSharedCampaignRecord(projectName, result.campaign);
         }
-        showMessage?.("Campaign plan is now stored as a durable shared record.");
+        showMessage?.("Campaign plan saved as a durable shared record.");
       } catch (error) {
         showError?.(error.message || "Failed to structure the campaign plan.");
       }
@@ -1360,7 +1360,7 @@ function bindCampaignStudio({
         console.warn("Failed to persist campaign handoff:", error.message);
       });
       navigateTo("ai-command");
-      showMessage?.("Campaign planning prompt added to AI Command.");
+      showMessage?.("Campaign context sent to AI Command.");
     };
   }
 
@@ -1405,7 +1405,7 @@ function bindCampaignStudio({
   if (generatePackageBtn) {
     generatePackageBtn.onclick = () => {
       session.generatedPackages += 1;
-      showMessage?.("Campaign execution package drafted in session. Backend export wiring can be connected next.");
+      showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");
       render();
     };
   }
@@ -1559,9 +1559,9 @@ export const campaignStudioRoute = {
             </div>
           </div>
           <div class="campaign-toolbar">
-            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh Intelligence</button>
-            <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Build Campaign</button>
+            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh campaign intelligence</button>
+            <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save campaign draft</button>
+            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Save campaign plan</button>
           </div>
         </section>
 
@@ -1916,7 +1916,7 @@ export const campaignStudioRoute = {
                 <span class="card-badge ${hasLiveIntelligence ? "success" : "neutral"}">${escapeHtml(hasLiveIntelligence ? "Intelligence-assisted" : "Draft-assisted")}</span>
               </div>
               <div class="campaign-section-copy">
-                Send to AI Workspace prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
+                Send campaign context to AI prefills the current campaign draft and then navigates there. The downstream send actions open the linked workspace with the current campaign context attached.
               </div>
               <div class="data-stack">
                 ${renderSummaryItem("Campaign", values.campaignName, escapeHtml)}
@@ -1928,33 +1928,33 @@ export const campaignStudioRoute = {
               </div>
               <div class="quick-actions">
                 <button id="campaignAskAiBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Send to AI Workspace</span>
+                  <span class="home-action-title">Send campaign context to AI</span>
                   <span class="home-action-meta">Prefill AI Command with the current draft, blockers, and campaign context, then open that page.</span>
                 </button>
               </div>
               <div class="campaign-routing-grid">
                 <button id="campaignOpenContentStudioBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Content Studio</span>
-                  <span class="home-action-meta">Open content planning with the current campaign context attached.</span>
+                  <span class="home-action-meta">Open Content Studio with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenMediaStudioBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Media Studio</span>
-                  <span class="home-action-meta">Open media planning with the current campaign context attached.</span>
+                  <span class="home-action-meta">Open Media Studio with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Publishing</span>
-                  <span class="home-action-meta">Open publishing setup with the current campaign context attached.</span>
+                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
                   <span class="home-action-title">Send to Ads Manager</span>
-                  <span class="home-action-meta">Open paid activation planning with the current campaign context attached.</span>
+                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
                 </button>
                 <button id="campaignReviewDependenciesBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Review Missing Dependencies</span>
+                  <span class="home-action-title">Review campaign dependencies</span>
                   <span class="home-action-meta">Jump to the highest-priority place to close launch blockers.</span>
                 </button>
                 <button id="campaignReviewAssetsBtn" class="quick-action-btn" type="button">
-                  <span class="home-action-title">Navigate: Open Library Workspace</span>
+                  <span class="home-action-title">Review campaign assets in Library</span>
                   <span class="home-action-meta">Navigation only. Review missing assets before execution starts.</span>
                 </button>
               </div>
