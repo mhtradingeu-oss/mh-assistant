@@ -16,24 +16,24 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 
-  padding: 14px 16px;
+  padding: 12px 14px;
 
-  border-radius: 18px;
+  border-radius: 16px;
 
   background:
     linear-gradient(
       135deg,
-      rgba(15, 23, 42, 0.82),
-      rgba(8, 16, 26, 0.92)
+      rgba(15, 23, 42, 0.78),
+      rgba(8, 16, 26, 0.9)
     );
 
   border:
-    1px solid rgba(148, 163, 184, 0.16);
+    1px solid rgba(148, 163, 184, 0.14);
 
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.18);
+    0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
 .std-context-main {
@@ -65,9 +65,10 @@
 
   min-width: 0;
 
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 850;
-  letter-spacing: -0.025em;
+  font-size: clamp(0.98rem, 1.8vw, 1.16rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 
   color:
     var(--text-primary);
@@ -86,12 +87,12 @@
   color:
     var(--text-secondary);
 
-  font-size: 0.9rem;
-  line-height: 1.45;
+  font-size: 0.88rem;
+  line-height: 1.5;
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .std-context-metrics {
@@ -168,15 +169,18 @@
 }
 
 .std-context-btn {
-  min-height: 36px;
+  min-height: 34px;
+  min-width: 0;
 
   padding:
-    0 13px;
+    6px 12px;
 
   border-radius:
-    999px;
+    10px;
 
-  white-space: nowrap;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .std-smart-strip-compact {
@@ -369,14 +373,14 @@ button,
   background:
     linear-gradient(
       180deg,
-      rgba(15, 23, 42, 0.88),
-      rgba(8, 16, 26, 0.92)
+      rgba(15, 23, 42, 0.82),
+      rgba(8, 16, 26, 0.9)
     );
 
   border:
-    1px solid rgba(148, 163, 184, 0.16);
+    1px solid rgba(148, 163, 184, 0.14);
 
-  border-radius: 18px;
+  border-radius: 15px;
 }
 
 /* =========================================
@@ -593,6 +597,7 @@ button,
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 :where(.std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button) {
@@ -607,12 +612,13 @@ button,
 
 :where(.std-quick-actions) {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: var(--space-2);
+  min-width: 0;
 }
 
 :where(.std-quick-actions > .btn, .std-quick-actions > button) {
-  min-height: 40px;
+  min-height: 36px;
   justify-content: flex-start;
   text-align: left;
 }
@@ -664,15 +670,15 @@ button,
 ========================================= */
 
 :where(.std-page-shell, .std-main-column, .std-right-rail) {
-  --std-surface-base: rgba(15, 23, 42, 0.86);
-  --std-surface-elevated: rgba(8, 16, 26, 0.94);
-  --std-surface-info: rgba(20, 31, 49, 0.9);
-  --std-surface-action: rgba(11, 31, 32, 0.92);
-  --std-surface-ai: rgba(12, 24, 41, 0.92);
-  --std-border-base: rgba(148, 163, 184, 0.18);
-  --std-border-strong: rgba(148, 163, 184, 0.3);
-  --std-border-action: rgba(45, 212, 191, 0.24);
-  --std-border-ai: rgba(56, 189, 248, 0.24);
+  --std-surface-base: rgba(15, 23, 42, 0.84);
+  --std-surface-elevated: rgba(8, 16, 26, 0.92);
+  --std-surface-info: rgba(20, 31, 49, 0.88);
+  --std-surface-action: rgba(11, 31, 32, 0.9);
+  --std-surface-ai: rgba(12, 24, 41, 0.9);
+  --std-border-base: rgba(148, 163, 184, 0.16);
+  --std-border-strong: rgba(148, 163, 184, 0.26);
+  --std-border-action: rgba(45, 212, 191, 0.22);
+  --std-border-ai: rgba(56, 189, 248, 0.22);
   --std-text-main: var(--text-primary);
   --std-text-muted: var(--text-secondary);
   --std-text-dim: var(--text-muted);
@@ -684,9 +690,9 @@ button,
   --std-accent-blocked: rgba(244, 114, 182, 0.9);
   --std-motion-fast: 140ms cubic-bezier(0.2, 0, 0, 1);
   --std-motion-base: 200ms cubic-bezier(0.22, 1, 0.36, 1);
-  --std-shadow-card: 0 14px 34px rgba(0, 0, 0, 0.12);
-  --std-shadow-card-hover: 0 18px 40px rgba(0, 0, 0, 0.16);
-  --std-focus-ring: 0 0 0 2px rgba(56, 189, 248, 0.38);
+  --std-shadow-card: 0 10px 24px rgba(0, 0, 0, 0.1);
+  --std-shadow-card-hover: 0 14px 30px rgba(0, 0, 0, 0.14);
+  --std-focus-ring: 0 0 0 2px rgba(56, 189, 248, 0.34);
 }
 
 :where(.std-panel-title) {
@@ -712,19 +718,30 @@ button,
 }
 
 :where(.std-detail-card) {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 15px;
   border-color: var(--std-border-base);
   background: linear-gradient(180deg, var(--std-surface-base), var(--std-surface-elevated));
   box-shadow: var(--std-shadow-card);
 }
 
 :where(.std-action-panel) {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 15px;
   border-color: var(--std-border-action);
   background: linear-gradient(180deg, var(--std-surface-action), var(--std-surface-elevated));
+  box-shadow: var(--std-shadow-card);
 }
 
 :where(.std-ai-panel) {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 15px;
   border-color: var(--std-border-ai);
   background: linear-gradient(180deg, var(--std-surface-ai), var(--std-surface-elevated));
+  box-shadow: var(--std-shadow-card);
 }
 
 :where(.std-detail-card:hover, .std-detail-card:focus-within) {
@@ -733,13 +750,13 @@ button,
 }
 
 :where(.std-action-panel:hover, .std-action-panel:focus-within) {
-  border-color: rgba(45, 212, 191, 0.34);
-  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+  border-color: rgba(45, 212, 191, 0.3);
+  box-shadow: var(--std-shadow-card-hover);
 }
 
 :where(.std-ai-panel:hover, .std-ai-panel:focus-within) {
-  border-color: rgba(56, 189, 248, 0.34);
-  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: var(--std-shadow-card-hover);
 }
 
 :where(.std-detail-card.is-selected, .std-action-panel.is-selected, .std-ai-panel.is-selected, .std-readiness-item.is-selected, .std-blocker-item.is-selected, .std-safe-step.is-selected, .std-state-card.is-selected, .std-detail-card[aria-selected="true"], .std-action-panel[aria-selected="true"], .std-ai-panel[aria-selected="true"]) {
@@ -826,6 +843,12 @@ button,
 }
 
 :where(.std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button) {
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
   transition: transform var(--std-motion-fast), border-color var(--std-motion-fast), background var(--std-motion-base), box-shadow var(--std-motion-base), color var(--std-motion-fast), opacity var(--std-motion-fast);
 }
 
@@ -889,6 +912,10 @@ button,
   }
 
   :where(.std-action-row > .btn, .std-action-row > button) {
+    flex: 1 1 180px;
+  }
+
+  :where(.std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button) {
     flex: 1 1 180px;
   }
 }
