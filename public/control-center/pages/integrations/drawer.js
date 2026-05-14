@@ -105,11 +105,11 @@ function getDrawerPrimaryAction(card = {}) {
   }
 
   if (card.statusLabel === "Token expired") {
-    return { action: "reconnect", label: "Reconnect" };
+    return { action: "reconnect", label: "Reconnect integration" };
   }
 
   if (card.statusLabel === "Error") {
-    return { action: "reconnect", label: "Fix connection" };
+    return { action: "reconnect", label: "Repair integration connection" };
   }
 
   return { action: "connect", label: "Connect" };
@@ -140,7 +140,7 @@ export function renderIntegrationActionButtons(card = {}) {
       <button class="quick-action-btn quick-action-btn--primary" type="button" data-integration-action="${esc(primary.action)}" data-integration-id="${esc(card.id)}">${esc(primary.label)}</button>
       <div class="integration-drawer-secondary-actions">
         <button class="quick-action-btn" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>
-        ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>` : ""}
+        ${card.statusLabel === "Connected" ? `<button class="quick-action-btn" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Run backend sync</button>` : ""}
       </div>
       ${quickConnectLabel && card.statusLabel !== "Connected" ? `<div class="integration-quick-connect-note">OAuth recommended. Manual fields available as fallback.</div>` : ""}
     </div>

@@ -900,8 +900,8 @@ function getSmartConnectLabel(card) {
   if (card.backendSupported === false) return "Open setup";
   if (card.statusLabel === "Connected") return "Manage";
   if (card.statusLabel === "Partial") return "Complete setup";
-  if (card.statusLabel === "Token expired") return "Reconnect";
-  if (card.statusLabel === "Error") return "Fix connection";
+  if (card.statusLabel === "Token expired") return "Reconnect integration";
+  if (card.statusLabel === "Error") return "Repair integration connection";
   return getQuickConnectLabel(card) || "Connect";
 }
 
@@ -910,7 +910,7 @@ function getDrawerPrimaryAction(card) {
     return { action: "select", label: "Open setup" };
   }
   if (card.statusLabel === "Connected") {
-    return { action: "sync", label: "Sync" };
+    return { action: "sync", label: "Run backend sync" };
   }
   if (["Token expired", "Error"].includes(card.statusLabel)) {
     return { action: "reconnect", label: getSmartConnectLabel(card) };
@@ -1151,14 +1151,14 @@ function getConnectorWorkspaceAction(card) {
 
   if (statusKey === "connected") {
     return {
-      label: "Sync",
+      label: "Run backend sync",
       action: "sync"
     };
   }
 
   if (statusKey === "failed") {
     return {
-      label: card.statusLabel === "Error" ? "Fix connection" : "Reconnect",
+      label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",
       action: "reconnect"
     };
   }
@@ -1437,7 +1437,7 @@ function bindIntegrationActions({
       }
       clearDraft(session, integrationId);
       clearIntegrationValidation(session, integrationId);
-      showMessage?.(reconnect ? `${integration.label} reconnected.` : `${integration.label} connected.`);
+      showMessage?.(reconnect ? `${integration.label} integration reconnected.` : `${integration.label} connected.`);
       await reloadProjectData(projectName);
       render();
     } catch (error) {
@@ -1489,7 +1489,7 @@ function bindIntegrationActions({
         await syncProjectIntegration(projectName, integrationId, {
           notes: `${integration.label} sync triggered from the Control Center.`
         });
-        showMessage?.(`${integration.label} sync started.`);
+        showMessage?.(`${integration.label} backend sync started.`);
       } else if (type === "import") {
         await importProjectIntegrationHistory(projectName, integrationId, {
           notes: `${integration.label} historical import triggered from the Control Center.`

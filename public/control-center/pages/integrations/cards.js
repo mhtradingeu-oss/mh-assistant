@@ -141,13 +141,13 @@ function getConnectorWorkspaceAction(card = {}) {
   }
 
   if (statusKey === "connected") {
-    return { action: "sync", label: "Sync" };
+    return { action: "sync", label: "Run backend sync" };
   }
 
   if (statusKey === "failed") {
     return {
       action: "reconnect",
-      label: card.statusLabel === "Error" ? "Fix connection" : "Reconnect"
+      label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration"
     };
   }
 
@@ -257,7 +257,7 @@ export function renderConnectorRow(card = {}, session = {}) {
           ? ""
           : `<button class="btn btn-secondary" type="button" data-integration-action="test" data-integration-id="${esc(card.id)}">Test connection</button>`}
         ${showSyncAction
-          ? `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Sync</button>`
+          ? `<button class="btn btn-secondary" type="button" data-integration-action="sync" data-integration-id="${esc(card.id)}">Run backend sync</button>`
           : ""}
       </div>
     </article>
@@ -310,11 +310,11 @@ function getSmartConnectLabel(card = {}) {
   }
 
   if (card.statusLabel === "Token expired") {
-    return "Reconnect";
+    return "Reconnect integration";
   }
 
   if (card.statusLabel === "Error") {
-    return "Fix connection";
+    return "Repair integration connection";
   }
 
   return "Connect";
