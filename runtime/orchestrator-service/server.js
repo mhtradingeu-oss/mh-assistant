@@ -103,6 +103,9 @@ const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 const {
   createJobDispatchOrchestrator
 } = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+const {
+  registerDefaultModels
+} = require('./lib/media/native/models/default-models');
 
 const {
   listProviderModels,
@@ -11811,6 +11814,7 @@ app.get('/media-manager/project/:project/native-media/providers/readiness', hand
 app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
 
 async function handleNativeMediaGenerate(req, res) {
+  registerDefaultModels();
   try {
     const orchestrator = createJobDispatchOrchestrator();
 
