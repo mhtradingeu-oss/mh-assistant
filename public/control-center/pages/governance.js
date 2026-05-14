@@ -149,7 +149,7 @@ function renderReviewOwnership(summary, escapeHtml) {
   const escalationChain = asObject(reviewModel.escalation_chain);
 
   return `
-    <article class="panel">
+    <article class="panel std-detail-card mhos-clean-surface">
       <div class="panel-header"><div><div class="panel-kicker">Review model</div><h3>Ownership and escalation chain</h3></div></div>
       <div class="governance-card-list">
         ${Object.entries(ownership).map(([key, value]) => `
@@ -480,11 +480,66 @@ function buildGovernancePrompts(projectName, selectedItem, focusLabel) {
   ];
 }
 
+function buildReadinessSnapshot(summary, queueItems, selectedItem) {
+  const sections = asObject(summary?.sections);
+  const policy = asObject(summary?.policy);
+  const rules = asObject(policy.policy_rules);
+  const owners = asObject(policy.approval_owners);
+  const approvals = asArray(sections.approval_queue).length;
+  const violations = asArray(sections.policy_violations).length;
+  const escalations = asArray(sections.escalation_queue).length;
+  const publishGuardrails = asArray(sections.publish_guardrails).length;
+  const ownerCoverage = Object.values(owners).filter((value) => asString(value).trim()).length;
+  const blockers = [];
+
+  if (rules.freeze_publishing) {
+    blockers.push("Publishing is currently frozen by governance policy.");
+  }
+  if (approvals > 0) {
+    blockers.push(`${approvals} approval item${approvals === 1 ? " is" : "s are"} waiting for a decision.`);
+  }
+  if (violations > 0) {
+    blockers.push(`${violations} policy violation${violations === 1 ? " requires" : "s require"} operator review.`);
+  }
+  if (escalations > 0) {
+    blockers.push(`${escalations} escalation${escalations === 1 ? " is" : "s are"} open for higher-level review.`);
+  }
+
+  let state = "Launch ready";
+  if (rules.freeze_publishing || escalations > 0) {
+    state = "Blocked";
+  } else if (blockers.length > 0) {
+    state = "Attention required";
+  }
+
+  let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";
+  if (selectedItem?.queue_kind === "approval") {
+    nextBestAction = "Review the selected approval, document decision reasoning, and submit a governance decision.";
+  } else if (approvals > 0) {
+    nextBestAction = "Switch to Approvals focus and clear highest-risk decisions first.";
+  } else if (violations > 0) {
+    nextBestAction = "Inspect policy violations and request approvals where review is still missing.";
+  } else if (publishGuardrails > 0) {
+    nextBestAction = "Review publish guardrails to ensure release paths remain compliant and safe.";
+  }
+
+  return {
+    state,
+    blockers,
+    nextBestAction,
+    ownerCoverage,
+    totalQueue: queueItems.length,
+    approvals,
+    violations,
+    escalations
+  };
+}
+
 function renderPage(projectName, session, escapeHtml) {
   if (!projectName) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="governance-shell governance-workspace">
+        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
           <section class="panel">
             <div class="panel-header">
               <div>
@@ -512,7 +567,7 @@ function renderPage(projectName, session, escapeHtml) {
   if (session.loading && !session.loaded) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="governance-shell governance-workspace">
+        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
           <section class="panel">
             <div class="panel-header">
               <div>
@@ -540,7 +595,7 @@ function renderPage(projectName, session, escapeHtml) {
   if (session.error && !session.summary) {
     return `
       <section class="page is-active" data-page="governance">
-        <div class="governance-shell governance-workspace">
+        <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
           <section class="panel">
             <div class="panel-header">
               <div>
@@ -596,18 +651,24 @@ function renderPage(projectName, session, escapeHtml) {
   const owners = asObject(policy.approval_owners);
   const settingsBridge = asObject(policy.settings_bridge);
   const recentTimeline = asArray(sections.audit_timeline).slice(0, 4);
+  const readiness = buildReadinessSnapshot(summary, queueItems, selectedItem);
 
   return `
     <section class="page is-active" data-page="governance">
-      <div class="governance-shell governance-workspace">
+      <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
         <section class="panel">
           <div class="panel-header">
             <div>
               <div class="panel-kicker">Command surface</div>
               <h3>Governance command center for ${escapeHtml(projectName)}</h3>
-              <p>Header and control surface for policy pressure, approval demand, and next governance decisions.</p>
+              <p>Operating surface for policy authority, approval flow, and safe execution routing.</p>
             </div>
             <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+          </div>
+          <div class="governance-actions std-action-row">
+            <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
+            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
+            <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>
           </div>
         </section>
 
@@ -616,7 +677,7 @@ function renderPage(projectName, session, escapeHtml) {
             <div>
               <div class="panel-kicker">System signals</div>
               <h3>Current system signals</h3>
-              <p>Live governance metrics and latest recorded governance activity.</p>
+              <p>Live governance pressure across approvals, policy, publishing, and escalations.</p>
             </div>
           </div>
           <div class="governance-overview-grid">
@@ -639,14 +700,66 @@ function renderPage(projectName, session, escapeHtml) {
           </div>
         </section>
 
+        <section class="panel std-detail-card mhos-clean-surface">
+          <div class="panel-header">
+            <div>
+              <div class="panel-kicker">Readiness and blockers</div>
+              <h3>Launch readiness and next best governance action</h3>
+              <p>Use this to understand whether Governance is clear to operate and what to do next.</p>
+            </div>
+            <span class="card-badge ${readiness.state === "Blocked" ? "danger" : readiness.state === "Attention required" ? "warning" : "success"}">${escapeHtml(readiness.state)}</span>
+          </div>
+          <div class="governance-policy-summary-grid">
+            <div class="governance-policy-block">
+              <h4>Readiness status</h4>
+              <div class="governance-rule-list">
+                <div class="governance-rule-item">
+                  <strong>Decision queue</strong>
+                  <span>${escapeHtml(asString(readiness.totalQueue))} open items</span>
+                </div>
+                <div class="governance-rule-item">
+                  <strong>Approval owners assigned</strong>
+                  <span>${escapeHtml(`${readiness.ownerCoverage} configured`)}</span>
+                </div>
+                <div class="governance-rule-item">
+                  <strong>Escalations</strong>
+                  <span>${escapeHtml(asString(readiness.escalations))} active</span>
+                </div>
+              </div>
+            </div>
+            <div class="governance-policy-block">
+              <h4>Current blockers</h4>
+              <div class="governance-activity-list">
+                ${readiness.blockers.length
+                  ? readiness.blockers.map((item) => `
+                    <div class="governance-activity-item">
+                      <strong>Action needed</strong>
+                      <span>${escapeHtml(item)}</span>
+                    </div>
+                  `).join("")
+                  : `<div class="empty-box">No active blockers were detected from current governance signals.</div>`}
+              </div>
+            </div>
+            <div class="governance-policy-block">
+              <h4>Next best action</h4>
+              <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+              <div class="governance-actions std-action-row">
+                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
+                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
+                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div class="governance-workspace-grid">
-          <div class="governance-action-stack">
-            <section class="panel">
+          <div class="governance-action-stack std-main-column mhos-clean-stack">
+            <section class="panel std-detail-card mhos-clean-surface">
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Policy and rule summary</div>
                   <h3>Policy visibility</h3>
-                  <p>Keep active rules, ownership, and settings bridge state visible from the main view.</p>
+                  <p>Track enforceable rules, owner accountability, and Settings bridge state in one view.</p>
                 </div>
               </div>
               <div class="governance-policy-summary-grid">
@@ -686,12 +799,12 @@ function renderPage(projectName, session, escapeHtml) {
               </div>
             </section>
 
-            <section class="panel">
+            <section class="panel std-detail-card mhos-clean-surface">
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Decision queue</div>
                   <h3>Pending approvals and governance decisions</h3>
-                  <p>Browse the combined governance queue, then inspect one selected item before taking action.</p>
+                  <p>Prioritize high-risk governance work, then open one item for safe decisioning.</p>
                 </div>
                 <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
               </div>
@@ -746,13 +859,13 @@ function renderPage(projectName, session, escapeHtml) {
             </section>
           </div>
 
-          <div class="governance-action-stack">
-          <section class="panel">
+          <div class="governance-action-stack std-right-rail mhos-clean-stack">
+          <section class="panel std-detail-card mhos-clean-surface">
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Selected decision</div>
                 <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
-                <p>${escapeHtml(selectedItem ? "Review the selected item, its flags, and linked approval history before deciding." : "Choose a governance item from the queue to inspect it.")}</p>
+                  <p>${escapeHtml(selectedItem ? "Review risk, policy implications, and linked approval history before committing a decision." : "Choose a governance item from the queue to inspect it.")}</p>
               </div>
             </div>
             ${
@@ -819,17 +932,18 @@ function renderPage(projectName, session, escapeHtml) {
 
           ${renderReviewOwnership(summary, escapeHtml)}
 
-          <section class="panel">
+          <section class="panel std-action-panel mhos-clean-surface">
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Governance actions</div>
                 <h3>Review, decide, and maintain policy controls</h3>
-                <p>Only real governance actions are shown here. Approve and reject actions appear only for real approvals.</p>
+                <p>Execute backend-authoritative actions only. Approval decisions appear only for real queued approvals.</p>
               </div>
             </div>
             <div class="governance-action-stack">
+              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, add rationale, execute one action, then refresh and validate queue impact.</div>
               <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
-              <div class="governance-actions">
+              <div class="governance-actions std-action-row">
                 <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
                 <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
                 <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Sync Settings Rules</button>
@@ -894,18 +1008,19 @@ function renderPage(projectName, session, escapeHtml) {
           </div>
         </div>
 
-        <section class="panel">
+        <section class="panel std-ai-panel mhos-clean-surface">
           <div class="panel-header">
             <div>
               <div class="panel-kicker">Governance AI assistant</div>
               <h3>Governance AI assistant</h3>
-              <p>Context-only handoff: opens AI with governance context only. No approval, publishing, or backend execution is performed.</p>
+              <p>Context-only intelligence handoff. AI helps with analysis and recommendations; execution stays in governed controls.</p>
             </div>
           </div>
+          <div class="simple-banner"><strong>AI context scope:</strong> Policy pressure, approval readiness, ownership coverage, and next best governance move.</div>
           <div class="governance-ai-toolbar">
             <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
           </div>
-          <div class="quick-actions">
+          <div class="quick-actions std-quick-actions">
             ${prompts.map((item, index) => `
               <button class="quick-action-btn" type="button" data-governance-ai-prompt="${index}">
                 <span class="home-action-title">${escapeHtml(item.label)}</span>
