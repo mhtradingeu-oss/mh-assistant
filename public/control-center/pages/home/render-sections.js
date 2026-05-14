@@ -90,13 +90,13 @@ export function renderAiTeamCards(cards, escapeHtml) {
   return `
     <div class="home-ai-team-grid">
       ${safeCards.map((agent) => `
-        <article class="home-ai-team-card">
+          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Click to open ${escapeHtml(agent.name)} workspace">
           <div class="home-ai-team-card-head">
             <strong>${escapeHtml(agent.name)}</strong>
             ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
           </div>
           <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
-        </article>
+          </button>
       `).join("")}
     </div>
   `;

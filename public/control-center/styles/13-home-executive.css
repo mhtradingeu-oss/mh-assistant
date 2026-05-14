@@ -1,493 +1,640 @@
 /*
-  Executive Home UX
+  Executive Home UX - Final Operating Surface
   International AI-native operational dashboard layer.
+  Date: 2026-05-14
 */
 
 /* =========================================
-   Executive Home Shell
+   Command Center Container
 ========================================= */
 
 .home-command-center {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
+  display: grid;
+  gap: 20px;
   width: 100%;
   min-width: 0;
 }
 
 /* =========================================
-   Hero
+   1. EXECUTIVE SMART HEADER
 ========================================= */
 
-.home-exec-hero {
-  position: relative;
-
-  overflow: hidden;
-
-  border-radius: 24px;
+.home-exec-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: flex-start;
 
   padding: 28px;
-
-  background:
-    radial-gradient(circle at top right,
-      rgba(99, 102, 241, 0.18),
-      transparent 34%),
-    linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.96),
-      rgba(15, 23, 42, 0.92)
-    );
-
-  border:
-    1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.22);
-}
-
-.home-exec-hero-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-}
-
-.home-exec-hero h2 {
-  margin-top: 10px;
-  margin-bottom: 12px;
-
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.05;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.home-decision-copy {
-  max-width: 760px;
-
-  color: rgba(255,255,255,0.76);
-
-  line-height: 1.7;
-  font-size: 1rem;
-}
-
-/* =========================================
-   Hero Status
-========================================= */
-
-.home-exec-hero-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.home-exec-hero-status strong {
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-/* =========================================
-   Hero Actions
-========================================= */
-
-.home-exec-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-
-  margin-top: 28px;
-}
-
-.home-exec-hero-actions .btn {
-  min-height: 48px;
-
-  padding-inline: 18px;
-
-  border-radius: 14px;
-
-  font-weight: 700;
-}
-
-/* =========================================
-   KPI Grid
-========================================= */
-
-.home-kpi-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
-
-  gap: 18px;
-}
-
-.home-kpi-card {
-  padding: 22px;
   border-radius: 20px;
 
   background:
+    radial-gradient(460px 180px at 100% 0,
+      rgba(45, 212, 191, 0.12),
+      transparent 60%),
     linear-gradient(
-      180deg,
-      rgba(255,255,255,0.03),
-      rgba(255,255,255,0.015)
+      160deg,
+      rgba(15, 30, 50, 0.95),
+      rgba(10, 22, 38, 0.92)
     );
 
-  border:
-    1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(45, 212, 191, 0.22);
 
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease;
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.18);
 }
 
-.home-kpi-card:hover {
-  transform: translateY(-2px);
-
-  border-color:
-    rgba(99,102,241,0.34);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(99,102,241,0.08),
-      rgba(255,255,255,0.02)
-    );
+.home-header-left {
+  min-width: 0;
 }
 
-.home-kpi-card strong {
-  display: block;
-
-  margin-top: 14px;
-  margin-bottom: 10px;
-
-  font-size: 2rem;
+.home-header-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
   font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(45, 212, 191, 0.88);
+  margin-bottom: 6px;
+}
+
+.home-header-title {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.home-header-subtitle {
+  margin: 8px 0 0;
+  max-width: 700px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(237, 247, 255, 0.72);
+}
+
+.home-header-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.home-header-score {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.home-header-score strong {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.home-header-score-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(237, 247, 255, 0.68);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* =========================================
-   Executive Sections
+   2. EXECUTIVE SNAPSHOT / KEY INDICATORS
 ========================================= */
 
-.home-decision-section {
-  border-radius: 22px;
-  padding: 24px;
+.home-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.home-snapshot-card {
+  display: grid;
+  gap: 10px;
+
+  padding: 16px;
+  border-radius: 16px;
 
   background:
     linear-gradient(
-      180deg,
-      rgba(255,255,255,0.03),
-      rgba(255,255,255,0.015)
+      150deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.01)
     );
 
-  border:
-    1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(122, 169, 205, 0.14);
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.home-decision-section-head {
+.home-snapshot-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(45, 212, 191, 0.28);
+  box-shadow: 0 8px 20px rgba(45, 212, 191, 0.1);
+}
+
+.home-snapshot-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-snapshot-detail {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(237, 247, 255, 0.68);
+  margin: 2px 0 0;
+}
+
+/* =========================================
+   3. NEXT BEST ACTION PANEL
+========================================= */
+
+.home-next-action-panel {
+  display: grid;
+  gap: 16px;
+
+  padding: 20px;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      150deg,
+      rgba(52, 211, 153, 0.06),
+      rgba(255, 255, 255, 0.02)
+    );
+
+  border: 1px solid rgba(52, 211, 153, 0.22);
+
+  box-shadow: 0 10px 24px rgba(52, 211, 153, 0.08);
+}
+
+.home-action-panel-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
-
-  margin-bottom: 24px;
+  gap: 16px;
 }
 
-.home-decision-section h3 {
-  margin-top: 8px;
-
-  font-size: 1.35rem;
+.home-action-panel-head h3 {
+  margin: 6px 0 0;
+  font-size: 1.3rem;
   font-weight: 800;
-
   letter-spacing: -0.02em;
 }
 
+.home-action-explanation {
+  display: grid;
+  gap: 8px;
+}
+
+.home-action-explanation p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.home-action-destination {
+  color: rgba(237, 247, 255, 0.62);
+  font-size: 0.82rem;
+}
+
+.home-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* =========================================
-   Blockers
+   4. MAIN EXECUTIVE WORKSPACE
+========================================= */
+
+.home-workspace-main {
+  display: grid;
+  gap: 16px;
+}
+
+.home-workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.home-workspace-section {
+  padding: 18px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border: 1px solid rgba(122, 169, 205, 0.12);
+}
+
+.home-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+
+  margin-bottom: 14px;
+}
+
+.home-section-head h3 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.home-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.home-status-item {
+  display: grid;
+  gap: 6px;
+
+  padding: 10px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(122, 169, 205, 0.08);
+}
+
+.home-status-item strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-campaign-info {
+  display: grid;
+  gap: 8px;
+}
+
+.home-campaign-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(122, 169, 205, 0.08);
+}
+
+.home-campaign-row:last-child {
+  border-bottom: none;
+}
+
+.home-info-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(237, 247, 255, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex: 0 0 auto;
+}
+
+.home-campaign-row strong {
+  text-align: right;
+  flex: 1 1 auto;
+}
+
+/* =========================================
+   Blockers Grid
 ========================================= */
 
 .home-blocker-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(260px, 1fr));
-
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 .home-blocker-card {
-  border-radius: 18px;
+  padding: 14px;
+  border-radius: 14px;
 
-  padding: 18px;
+  background: rgba(248, 113, 113, 0.04);
+  border: 1px solid rgba(248, 113, 113, 0.16);
+}
 
-  background:
-    rgba(255,255,255,0.02);
+.home-blocker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 
-  border:
-    1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px;
+}
+
+.home-empty-state {
+  padding: 20px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgba(52, 211, 153, 0.05);
+  border: 1px solid rgba(52, 211, 153, 0.16);
+}
+
+.home-empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(237, 247, 255, 0.76);
 }
 
 /* =========================================
-   Activity
+   Status Board
 ========================================= */
 
-.home-activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.home-status-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
-.home-activity-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
+.home-status-board-card {
+  display: grid;
+  gap: 6px;
+
+  padding: 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(122, 169, 205, 0.08);
+}
+
+.home-status-board-card strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.home-status-board-card p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: rgba(237, 247, 255, 0.62);
+}
+
+/* =========================================
+   5. ACTION PANEL
+========================================= */
+
+.home-action-panel {
+  display: grid;
+  gap: 14px;
 
   padding: 18px;
-
   border-radius: 16px;
 
   background:
-    rgba(255,255,255,0.02);
+    linear-gradient(
+      150deg,
+      rgba(99, 102, 241, 0.05),
+      rgba(255, 255, 255, 0.01)
+    );
 
-  border:
-    1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(99, 102, 241, 0.16);
+}
+
+.home-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.home-panel-head h3 {
+  margin: 6px 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.home-action-group {
+  display: grid;
+  gap: 8px;
+
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(122, 169, 205, 0.08);
+}
+
+.home-action-group:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.home-action-group-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(45, 212, 191, 0.76);
 }
 
 /* =========================================
-   AI Team
+   6. AI GUIDANCE PANEL
+========================================= */
+
+.home-ai-guidance-panel {
+  display: grid;
+  gap: 14px;
+
+  padding: 18px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      150deg,
+      rgba(45, 212, 191, 0.06),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border: 1px solid rgba(45, 212, 191, 0.18);
+}
+
+.home-ai-prompt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.home-ai-prompt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 12px;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(45, 212, 191, 0.18);
+
+  cursor: pointer;
+  text-align: left;
+  font-weight: inherit;
+  color: inherit;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.home-ai-prompt-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(45, 212, 191, 0.36);
+  box-shadow: 0 6px 16px rgba(45, 212, 191, 0.12);
+}
+
+.home-prompt-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.home-prompt-meta {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: rgba(237, 247, 255, 0.65);
+}
+
+.home-ai-team-area {
+  display: grid;
+  gap: 10px;
+
+  padding-top: 14px;
+  border-top: 1px solid rgba(45, 212, 191, 0.12);
+}
+
+/* =========================================
+   AI TEAM GRID & CARDS (Interactive)
 ========================================= */
 
 .home-ai-team-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(240px, 1fr));
-
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
 }
 
 .home-ai-team-card {
-  border-radius: 18px;
+  display: grid;
+  gap: 8px;
+  align-content: flex-start;
 
-  padding: 20px;
+  padding: 12px;
+  border-radius: 12px;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(99,102,241,0.08),
-      rgba(255,255,255,0.02)
-    );
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(122, 169, 205, 0.12);
 
-  border:
-    1px solid rgba(99,102,241,0.14);
+  text-align: left;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.home-ai-team-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(45, 212, 191, 0.28);
+  background: rgba(45, 212, 191, 0.06);
+  box-shadow: 0 6px 16px rgba(45, 212, 191, 0.08);
+}
+
+.home-ai-team-card:focus-visible {
+  outline: 2px solid rgba(45, 212, 191, 0.6);
+  outline-offset: 2px;
+}
+
+.home-ai-team-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.home-ai-team-card-head strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1 1 auto;
+  line-height: 1.3;
+}
+
+.home-ai-team-card p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgba(237, 247, 255, 0.65);
 }
 
 /* =========================================
-   Quick Actions
+   QUICK ACTION BUTTONS
 ========================================= */
 
-.home-decision-quick-actions,
-.home-ai-prompt-grid {
+.quick-action-btn {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(240px, 1fr));
+  gap: 4px;
+  align-content: flex-start;
 
-  gap: 16px;
+  padding: 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(122, 169, 205, 0.12);
+
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.28);
+  background: rgba(99, 102, 241, 0.06);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.08);
+}
+
+.quick-action-btn:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline-offset: 2px;
 }
 
 .home-action-title {
-  display: block;
-
-  margin-bottom: 8px;
-
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
 }
 
 .home-action-meta {
-  color:
-    rgba(255,255,255,0.68);
-
-  line-height: 1.5;
-}
-
-/* =========================================
-   Responsive
-========================================= */
-
-@media (max-width: 980px) {
-
-  .home-exec-hero-content {
-    flex-direction: column;
-  }
-
-  .home-exec-hero-status {
-    align-items: flex-start;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .home-command-center {
-    gap: 18px;
-  }
-
-  .home-exec-hero,
-  .home-decision-section {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .home-exec-hero h2 {
-    font-size: 2rem;
-  }
-
-  .home-kpi-grid,
-  .home-blocker-grid,
-  .home-ai-team-grid,
-  .home-decision-quick-actions,
-  .home-ai-prompt-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================================
-   Compact Operational Context Bar
-========================================= */
-
-.page-standard-hero,
-.page-standard-summary,
-.page-power-summary {
-  display: none !important;
-}
-
-.page-context-ribbon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-
-  flex-wrap: wrap;
-
-  min-height: 64px;
-
-  padding: 14px 18px;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,0.03),
-      rgba(255,255,255,0.015)
-    );
-
-  border:
-    1px solid rgba(255,255,255,0.06);
-}
-
-.page-context-ribbon-left,
-.page-context-ribbon-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  flex-wrap: wrap;
-}
-
-.page-context-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  min-height: 36px;
-
-  padding:
-    0 14px;
-
-  border-radius: 999px;
-
-  background:
-    rgba(255,255,255,0.04);
-
-  border:
-    1px solid rgba(255,255,255,0.06);
-
-  font-size: 0.88rem;
-  font-weight: 600;
-
-  color:
-    rgba(255,255,255,0.82);
-}
-
-.page-context-chip strong {
-  color: white;
-}
-
-.page-context-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-
-  letter-spacing: -0.02em;
-}
-
-.page-context-subtle {
-  color:
-    rgba(255,255,255,0.58);
-}
-
-/* =========================================
-   Compact KPI Density
-========================================= */
-
-.home-kpi-grid {
-  grid-template-columns:
-    repeat(auto-fit, minmax(180px, 1fr));
-
-  gap: 14px;
-}
-
-.home-kpi-card {
-  padding: 16px;
-  border-radius: 16px;
-}
-
-.home-kpi-card strong {
-  font-size: 1.4rem;
-
-  margin-top: 10px;
-  margin-bottom: 6px;
-}
-
-/* =========================================
-   Wide Sections
-========================================= */
-
-.home-decision-section {
-  padding: 18px;
-  border-radius: 18px;
-}
-
-/* =========================================
-   Better Reading Width
-========================================= */
-
-.home-command-center {
-  max-width: 1600px;
-}
-
-/* =========================================
-   Compact Mobile
-========================================= */
-
-@media (max-width: 768px) {
-
-  .page-context-ribbon {
-    padding: 12px;
-    border-radius: 14px;
-  }
-
-  .page-context-chip {
-    min-height: 32px;
-    font-size: 0.8rem;
-  }
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: rgba(237, 247, 255, 0.65);
 }
