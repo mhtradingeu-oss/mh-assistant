@@ -2456,7 +2456,7 @@ viewToggleButtons.forEach((button) => {
 
       if (uploadBtn) {
         uploadBtn.disabled = session.uploading || files.length === 0;
-        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+        uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";
       }
     };
 
@@ -2550,7 +2550,7 @@ viewToggleButtons.forEach((button) => {
 
   if (uploadBtn) {
     uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
-    uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+    uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";
     uploadBtn.onclick = async () => {
       const activeProjectName = resolveActiveProjectName();
 
@@ -2629,7 +2629,7 @@ viewToggleButtons.forEach((button) => {
         const dropInfo = $("libraryDropInfo");
         if (dropInfo) dropInfo.textContent = "No files selected";
         uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
-        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+        uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";
 
         if (uploaded.length && !failed.length) {
           showMessage?.(`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.`);
@@ -2641,7 +2641,7 @@ viewToggleButtons.forEach((button) => {
       } finally {
         session.uploading = false;
         uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;
-        uploadBtn.textContent = session.uploading ? "Uploading..." : "Upload Asset";
+        uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";
         if (!reloadedFromServer) {
           rerender();
         }
@@ -2660,7 +2660,7 @@ viewToggleButtons.forEach((button) => {
       try {
         await refreshProjectLibrary(projectName);
         await reloadProjectData?.(projectName);
-        showMessage?.("Library scan refreshed.");
+        showMessage?.("Library backend scan refreshed.");
       } catch (error) {
         showError?.(error.message || "Failed to refresh library scan.");
       } finally {
@@ -2796,7 +2796,7 @@ export const libraryRoute = {
               <div class="setup-kicker">Asset Control System</div>
               <h3>${escapeHtml(projectName ? `${projectName} Asset Overview` : "Asset Overview")}</h3>
             </div>
-            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh</button>
+            <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh Library scan</button>
           </div>
           <div id="libraryOverviewCards" class="library-overview-grid"></div>
         </section>
@@ -2820,7 +2820,7 @@ export const libraryRoute = {
           </div>
           <div class="library-upload-grid">
             <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
-              <strong>Upload Asset</strong>
+              <strong>Upload asset to Library</strong>
               <span>Drop files or click to browse</span>
               <small id="libraryDropInfo">No files selected</small>
               <button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>
@@ -2834,7 +2834,7 @@ export const libraryRoute = {
                 `).join("")}
               </select>
               <div class="setup-helper">Upload and classify for readiness in one step.</div>
-              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload Asset</button>
+              <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload asset to Library</button>
             </div>
           </div>
           <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
