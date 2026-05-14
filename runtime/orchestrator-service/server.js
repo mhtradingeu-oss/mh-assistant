@@ -100,6 +100,16 @@ const {
   syncPublishingJob
 } = require('./lib/ops/backbone');
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+const {
+  listProviderModels,
+  listProviderModelsByMediaType
+} = require('./lib/media/native/providers/provider-model-catalog');
+const {
+  getProviderReadiness
+} = require('./lib/media/native/providers/provider-readiness');
+const {
+  getLocalRenderingCapabilities
+} = require('./lib/media/native/capabilities/local-rendering-capabilities');
 
 const compression = require('compression');
 const helmet = require('helmet');
@@ -11755,6 +11765,48 @@ async function handleProjectIntegrationAction(req, res, actionType) {
 }
 
 app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+function handleGetNativeMediaProviders(req, res) {
+  try {
+    const mediaType = String(req.query?.media_type || '').trim();
+    const providers = mediaType
+      ? listProviderModelsByMediaType(mediaType)
+      : listProviderModels();
+
+    return res.json({
+      project: req.params.project,
+      providers,
+      count: providers.length
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to list native media providers',
+      message: error.message
+    });
+  }
+}
+
+function handleGetNativeMediaProviderReadiness(req, res) {
+  try {
+    return res.json({
+      project: req.params.project,
+      readiness: getProviderReadiness(),
+      capabilities: getLocalRenderingCapabilities()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to load native media provider readiness',
+      message: error.message
+    });
+  }
+}
+
+app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+
 app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
 
 app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
