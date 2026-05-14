@@ -5,7 +5,9 @@ const crypto = require('crypto');
 const { createWorkerJobContract } = require('../protocol/worker-job-contract');
 const { selectBestWorker } = require('../registry/worker-selection-engine');
 const { selectBestModel } = require('../models/model-selection-engine');
-const { createExternalGpuWorkerAdapter } = require('../workers/external-gpu-worker-adapter');
+const {
+  createProviderExecutionRouter
+} = require('../providers/router/provider-execution-router');
 
 function hashValue(value = '') {
   return crypto
@@ -16,7 +18,7 @@ function hashValue(value = '') {
 }
 
 function createJobDispatchOrchestrator(options = {}) {
-  const workerAdapter = createExternalGpuWorkerAdapter(options);
+  const providerRouter = createProviderExecutionRouter(options.providerRouter || {});
 
   async function dispatch(input = {}) {
     const mediaType = String(input.media_type || input.type || 'video');
@@ -60,10 +62,11 @@ function createJobDispatchOrchestrator(options = {}) {
       quality: input.quality || {}
     });
 
-    const workerSubmission = await workerAdapter.submitJob({
+    const workerSubmission = await providerRouter.execute({
       ...workerJob,
-      worker_id: selectedWorker.worker_id,
-      model_id: selectedModel.model_id
+      provider: selectedModel.provider || workerJob.provider || 'native',
+      model_id: selectedModel.model_id,
+      worker_id: selectedWorker.worker_id
     });
 
     return {
