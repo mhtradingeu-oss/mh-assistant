@@ -455,6 +455,101 @@ button,
 }
 
 /* =========================================
+   Global Shell Primitives
+   Opt-in shared layout and surface classes for future page-by-page adoption.
+========================================= */
+
+:where(.std-main-column) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  min-width: 0;
+  width: 100%;
+}
+
+:where(.std-right-rail) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  min-width: 0;
+  width: 100%;
+}
+
+:where(.std-detail-card) {
+  display: grid;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(8, 16, 26, 0.92)
+    );
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+:where(.std-action-panel) {
+  display: grid;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+
+  border-radius: 18px;
+  border: 1px solid rgba(45, 212, 191, 0.18);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 30, 31, 0.9),
+      rgba(8, 16, 26, 0.94)
+    );
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.14);
+}
+
+:where(.std-ai-panel) {
+  display: grid;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 20, 36, 0.9),
+      rgba(8, 16, 26, 0.94)
+    );
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.14);
+}
+
+:where(.std-action-row) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+:where(.std-deferred-actions) {
+  display: grid;
+  gap: var(--space-2);
+}
+
+:where(.std-quick-actions) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+
+/* =========================================
    Better Wide / Dense Layouts
 ========================================= */
 
@@ -471,6 +566,16 @@ button,
 
 @media (max-width: 1100px) {
   .home-two-column-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  :where(.std-action-row) {
+    align-items: stretch;
+  }
+
+  :where(.std-quick-actions) {
     grid-template-columns: 1fr;
   }
 }
