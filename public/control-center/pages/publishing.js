@@ -924,9 +924,9 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
       </div>
       <div class="publishing-action-row">
         <button id="publishingOpenQueueBtn" class="btn btn-secondary" type="button">Open Publish Queue</button>
-        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Open AI: Send Context to AI Workspace</button>
-        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto Prepare Publishing</button>
+        <button id="publishingSaveDraftBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+        <button id="publishingPushAiBtn" class="btn btn-primary" type="button">Send publishing context to AI</button>
+        <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
         <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
       </div>
       <div class="simple-banner">Opens AI with this context only. No approval, publishing, or backend execution is performed.</div>
@@ -939,8 +939,8 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
       ${getAutoModeState().status === "waiting_approval" ? `
         <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
         <div class="publishing-action-row" style="margin-top:8px;">
-          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve and Continue</button>
-          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip Step</button>
+          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
+          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
         </div>
       ` : ""}
     </section>
@@ -977,11 +977,11 @@ function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
         </button>
         <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
         <div class="publishing-queue-actions">
-          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review</button>
-          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule</button>
-          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish now</button>
-          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause</button>
-          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry</button>
+          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review item</button>
+          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule item</button>
+          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish to configured channels</button>
+          <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
+          <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
         </div>
       </article>
     `).join("")
@@ -1060,7 +1060,7 @@ function renderBuilder(session, channels, checks, escapeHtml) {
           <div class="setup-field-group">
             <div class="setup-field-head">
               <label class="setup-label" for="publishingDateInput">Publish date</label>
-              <span class="setup-field-state is-optional">Schedule</span>
+              <span class="setup-field-state is-optional">Schedule item</span>
             </div>
             <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
             ${fieldError(session, "publishDate", escapeHtml)}
@@ -1104,8 +1104,8 @@ function renderBuilder(session, channels, checks, escapeHtml) {
       </form>
       <div class="publishing-form-actions">
         <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
-        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Schedule</button>
+        <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
+        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Schedule item</button>
       </div>
       ${session.draftMessage ? `<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>` : ""}
     </section>
@@ -1758,8 +1758,8 @@ export const publishingRoute = {
                 <span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>
               </div>
               <div class="publishing-action-row">
-                <button id="publishingApproveBtn" class="btn btn-secondary" type="button">Approve</button>
-                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark Failed</button>
+                <button id="publishingApproveBtn" class="btn btn-secondary" type="button">Mark item ready for publishing</button>
+                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark publishing item as failed</button>
               </div>
             </section>
           </div>
