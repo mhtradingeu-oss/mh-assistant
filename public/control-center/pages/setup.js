@@ -20,6 +20,7 @@ const STEP_DEFINITIONS = [
   {
     id: "business-basics",
     title: "Business Basics",
+    description: "Define the project identity, type, website, and launch window.",
     fields: ["project_name", "project_type", "website_url", "launch_window"]
   },
   {
@@ -320,20 +321,90 @@ function getSetupLocalizationStatus(values) {
   return "In progress";
 }
 
+function getSetupBusinessIdentityStatus(values) {
+  const fields = ["project_name", "project_type", "website_url"];
+  const completed = fields.filter((field) => asString(values[field]).trim()).length;
+  if (completed === fields.length) return "Ready";
+  if (completed === 0) return "Missing";
+  return "In progress";
+}
+
+function getSetupContentTruthStatus(values) {
+  const fields = ["brand_promise", "offer_positioning", "competitors", "differentiation"];
+  const completed = fields.filter((field) => asString(values[field]).trim()).length;
+  if (completed >= 3) return "Ready";
+  if (completed === 0) return "Missing";
+  return "In progress";
+}
+
+function getSetupChannelsStatus(values, missingConnectors) {
+  const hasChannels = Boolean(asString(values.social_channels).trim());
+  if (!hasChannels) return "Missing";
+  if (asArray(missingConnectors).length > 0) return "In progress";
+  return "Ready";
+}
+
+function getSetupAiGuidanceStatus(values) {
+  const fields = ["primary_goal", "audience_primary", "brand_voice", "operator_notes"];
+  const completed = fields.filter((field) => asString(values[field]).trim()).length;
+  if (completed >= 3) return "Ready";
+  if (completed === 0) return "Missing";
+  return "In progress";
+}
+
+function toStatusTone(status) {
+  if (status === "Ready") return "success";
+  if (status === "Missing") return "danger";
+  return "warning";
+}
+
+function getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }) {
+  const fieldGapCount = asArray(missingFields).length;
+  const assetGapCount = asArray(missingAssets).length;
+  const connectorGapCount = asArray(missingConnectors).length;
+  const criticalGapCount = asArray(criticalGaps).length;
+  const totalGaps = fieldGapCount + assetGapCount + connectorGapCount + criticalGapCount;
+
+  if (totalGaps === 0) {
+    return {
+      tone: "success",
+      label: "Launch readiness: strong"
+    };
+  }
+
+  if (fieldGapCount > 0) {
+    return {
+      tone: "warning",
+      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+    };
+  }
+
+  return {
+    tone: "warning",
+    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+  };
+}
+
 function getNextSetupActionText(missingFields, missingAssets, missingConnectors) {
   if (missingFields.length) {
-    return `Complete required setup fields (${missingFields.length} remaining).`;
+    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
   }
 
   if (missingAssets.length) {
-    return `Upload missing required assets (${missingAssets.length}) in Library.`;
+    return `Upload ${missingAssets.length} missing required asset${missingAssets.length === 1 ? "" : "s"} in Library.`;
   }
 
   if (missingConnectors.length) {
-    return `Connect missing platforms (${missingConnectors.length}) in Integrations.`;
+    return `Connect ${missingConnectors.length} missing integration${missingConnectors.length === 1 ? "" : "s"}.`;
   }
 
-  return "Save and continue to Library.";
+  return "Save setup, then continue to Library or Integrations.";
+}
+
+function compactListText(list, fallback) {
+  const items = asArray(list).filter(Boolean);
+  if (!items.length) return fallback;
+  return items.slice(0, 3).join(" • ");
 }
 
 function renderField({
@@ -359,7 +430,6 @@ function renderField({
       <div class="setup-field-head">
         <div class="setup-label-with-info">
           <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
-          ${infoText ? `<button class="setup-info-icon" type="button" aria-label="Info about ${escapeHtml(label)}" title="${escapeHtml(infoText)}">i<span class="setup-info-tooltip" role="tooltip">${escapeHtml(infoText)}</span></button>` : ""}
         </div>
         <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
       </div>
@@ -368,7 +438,7 @@ function renderField({
           ? `<textarea id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
           : `<input id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
       }
-      <div class="setup-helper">${escapeHtml(helper)}</div>
+      <div class="setup-helper">${escapeHtml(infoText)}</div>
     </div>
   `;
 }
@@ -473,13 +543,13 @@ function buildToneSuggestion(values) {
 
 function updateAiAssistantPreview(values) {
   const positioning = document.getElementById("setupAiPositioningText");
-  if (positioning) positioning.textContent = buildPositioningSuggestion(values);
+  if (positioning) positioning.textContent = compactListText([buildPositioningSuggestion(values)], "Generate positioning guidance from setup context.");
 
   const audience = document.getElementById("setupAiAudienceText");
-  if (audience) audience.textContent = buildAudienceSuggestion(values);
+  if (audience) audience.textContent = compactListText([buildAudienceSuggestion(values)], "Identify missing launch inputs for audience targeting.");
 
   const tone = document.getElementById("setupAiToneText");
-  if (tone) tone.textContent = buildToneSuggestion(values);
+  if (tone) tone.textContent = compactListText([buildToneSuggestion(values)], "Suggest channel priorities and launch checklist guidance.");
 }
 
 function updateWizardDashboard({
@@ -499,9 +569,21 @@ function updateWizardDashboard({
   const completionPercent = getCompletionPercent(values);
   const allFields = getAllSetupFieldNames();
   const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
-  const optionalNames = allFields.filter((name) => !requiredNames.includes(name));
   const requiredCompleted = countCompleted(requiredNames, values);
-  const optionalCompleted = countCompleted(optionalNames, values);
+  const dependencyGapCount = missingAssets.length + missingConnectors.length + criticalGaps.length;
+  const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
+  const brandStatus = getSetupBrandStatus(values);
+  const localizationStatus = getSetupLocalizationStatus(values);
+  const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+  const contentTruthStatus = getSetupContentTruthStatus(values);
+  const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
+  const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+  const launchReadiness = getLaunchReadinessSummary({
+    missingFields,
+    missingAssets,
+    missingConnectors,
+    criticalGaps
+  });
 
   const validationSummary = getValidationSummary({
     missingFields,
@@ -514,23 +596,26 @@ function updateWizardDashboard({
 
   updateSetupFieldIndicators(form, values);
 
-  const completionText = document.getElementById("setupCompletionPercent");
-  if (completionText) completionText.textContent = `${completionPercent}%`;
-
   const completionTextWide = document.getElementById("setupCompletionPercentValue");
   if (completionTextWide) completionTextWide.textContent = `${completionPercent}%`;
+
+  const topCompletionBadge = document.getElementById("setupTopCompletionBadge");
+  if (topCompletionBadge) {
+    topCompletionBadge.className = "card-badge neutral";
+    topCompletionBadge.textContent = `Fields configured: ${completionPercent}%`;
+  }
+
+  const topReadinessBadge = document.getElementById("setupTopReadinessBadge");
+  if (topReadinessBadge) {
+    topReadinessBadge.className = `card-badge ${launchReadiness.tone}`;
+    topReadinessBadge.textContent = launchReadiness.label;
+  }
 
   const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
   if (requiredCompleteEl) requiredCompleteEl.textContent = String(requiredCompleted);
 
   const requiredTotalEl = document.getElementById("setupRequiredTotal");
   if (requiredTotalEl) requiredTotalEl.textContent = String(requiredNames.length);
-
-  const optionalCompleteEl = document.getElementById("setupOptionalCompleted");
-  if (optionalCompleteEl) optionalCompleteEl.textContent = String(optionalCompleted);
-
-  const optionalTotalEl = document.getElementById("setupOptionalTotal");
-  if (optionalTotalEl) optionalTotalEl.textContent = String(optionalNames.length);
 
   const completionBar = document.getElementById("setupCompletionBar");
   if (completionBar) {
@@ -548,6 +633,48 @@ function updateWizardDashboard({
   const missingCount = document.getElementById("setupMissingCount");
   if (missingCount) missingCount.textContent = String(missingFields.length);
 
+  const nextBestActionEl = document.getElementById("setupNextBestAction");
+  if (nextBestActionEl) {
+    nextBestActionEl.textContent = nextBestAction;
+  }
+
+  const readinessMissingFieldsEl = document.getElementById("setupReadinessMissingFields");
+  if (readinessMissingFieldsEl) {
+    readinessMissingFieldsEl.textContent = String(missingFields.length);
+  }
+
+  const readinessMissingAssetsEl = document.getElementById("setupReadinessMissingAssets");
+  if (readinessMissingAssetsEl) {
+    readinessMissingAssetsEl.textContent = String(missingAssets.length);
+  }
+
+  const readinessMissingConnectorsEl = document.getElementById("setupReadinessMissingConnectors");
+  if (readinessMissingConnectorsEl) {
+    readinessMissingConnectorsEl.textContent = String(missingConnectors.length);
+  }
+
+  const dependencyGapCardEl = document.getElementById("setupDependencyGapCount");
+  if (dependencyGapCardEl) {
+    dependencyGapCardEl.textContent = String(dependencyGapCount);
+  }
+
+  const statusMap = [
+    { id: "setupBusinessIdentityStatus", value: businessIdentityStatus },
+    { id: "setupBrandStatus", value: brandStatus },
+    { id: "setupLocalizationStatus", value: localizationStatus },
+    { id: "setupChannelsStatus", value: channelsStatus },
+    { id: "setupContentTruthStatus", value: contentTruthStatus },
+    { id: "setupAiGuidanceStatus", value: aiGuidanceStatus }
+  ];
+
+  statusMap.forEach((item) => {
+    const el = document.getElementById(item.id);
+    if (!el) return;
+    const tone = toStatusTone(item.value);
+    el.className = `card-badge ${tone}`;
+    el.textContent = item.value;
+  });
+
   const readinessBadge = document.getElementById("setupReadinessBadge");
   if (readinessBadge) {
     const label = getWizardReadinessStatus(values, readinessScore, readinessStatus);
@@ -559,15 +686,6 @@ function updateWizardDashboard({
   if (validationBadge) {
     validationBadge.className = `card-badge ${validationSummary.tone}`;
     validationBadge.textContent = validationSummary.label;
-  }
-
-  const missingList = document.getElementById("setupMissingFields");
-  if (missingList) {
-    missingList.innerHTML = renderIndicatorList(
-      missingInsights.map((item) => `${item.label} - ${item.reason}`),
-      escapeHtml,
-      "All required setup fields are complete."
-    );
   }
 
   const missingActionList = document.getElementById("setupMissingActions");
@@ -630,8 +748,8 @@ function updateWizardDashboard({
       if (status.tone === "warning") button.classList.add("is-warning");
       if (status.tone === "success") button.classList.add("is-ready");
       if (recommendedStep.id === step.id) button.classList.add("is-recommended");
-      button.title = `${step.description} Status: ${status.label}.`;
       button.setAttribute("data-step-tone", status.tone);
+      button.setAttribute("aria-label", `${step.title}. ${step.description}. Status: ${status.label}.`);
     }
     if (statusNote) {
       statusNote.className = `setup-smart-step-note tone-${status.tone}`;
@@ -652,11 +770,12 @@ function updateWizardDashboard({
   const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
   if (recommendedBtn) {
     recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
-    recommendedBtn.textContent = `Open ${recommendedStep.title}`;
+    recommendedBtn.textContent = "Focus step";
   }
 
   const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
   const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+  const continueCampaignBtn = document.getElementById("setupContinueCampaignBtn");
   const missingFieldCount = missingFields.length;
   const hasMissing = missingFieldCount > 0;
   const warningText = `${missingFieldCount} required field${missingFieldCount === 1 ? "" : "s"} still missing`;
@@ -664,17 +783,16 @@ function updateWizardDashboard({
   if (continueLibraryBtn) {
     continueLibraryBtn.disabled = false;
     continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${warningText})` : "Continue to Library";
-    continueLibraryBtn.title = hasMissing
-      ? "You can continue, but setup readiness will remain incomplete until required fields are complete."
-      : "Proceed to Library.";
   }
 
   if (continueIntegrationsBtn) {
     continueIntegrationsBtn.disabled = false;
     continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${warningText})` : "Continue to Integrations";
-    continueIntegrationsBtn.title = hasMissing
-      ? "You can continue, but setup readiness will remain incomplete until required fields are complete."
-      : "Proceed to Integrations.";
+  }
+
+  if (continueCampaignBtn) {
+    continueCampaignBtn.disabled = false;
+    continueCampaignBtn.textContent = hasMissing ? `Continue to Campaign Studio (${warningText})` : "Continue to Campaign Studio";
   }
 
   const stepCounter = document.getElementById("setupStepCounter");
@@ -1034,6 +1152,33 @@ function bindSetupActions({
     };
   }
 
+  const continueCampaignBtn = $("setupContinueCampaignBtn");
+  if (continueCampaignBtn) {
+    continueCampaignBtn.onclick = () => {
+      navigateTo("campaign-studio");
+    };
+  }
+
+  const reviewMissingBtn = $("setupReviewMissingBtn");
+  if (reviewMissingBtn) {
+    reviewMissingBtn.onclick = () => {
+      const values = refreshSummary();
+      const missing = getMissingRequiredFields(values);
+      if (!missing.length) {
+        showMessage?.("No required setup gaps found.");
+        return;
+      }
+      const first = missing[0];
+      const stepId = getFieldStepId(first.name);
+      activateStep(stepId);
+      const input = form.querySelector(`[name="${first.name}"]`);
+      if (input && typeof input.focus === "function") {
+        input.focus();
+      }
+      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+    };
+  }
+
   const reviewReadinessBtn = $("setupReviewReadinessBtn");
   if (reviewReadinessBtn) {
     reviewReadinessBtn.onclick = () => {
@@ -1104,10 +1249,8 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
       <div class="setup-template-head">
         <div>
           <div class="setup-kicker">Business Template</div>
-          <h3 class="setup-v2-title">Project operating model</h3>
-          <p class="setup-v2-subtitle">
-            Choose or update the project type so the system can apply the right assets, channels, checklist, AI team defaults, and workspace priorities.
-          </p>
+          <h3 class="setup-v2-title">Project Operating Model</h3>
+          <p class="setup-v2-subtitle">Select the template that sets setup defaults, checklist scope, and launch priorities.</p>
         </div>
         <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
       </div>
@@ -1125,19 +1268,19 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
         </label>
 
         <div class="setup-template-preview">
-          <strong>Current requirements</strong>
-          <span>${escapeHtml(requiredAssets.length ? requiredAssets.join(", ") : "No template assets applied yet.")}</span>
+          <strong>Requirements</strong>
+          <span>${escapeHtml(compactListText(requiredAssets, "No template requirements loaded."))}</span>
         </div>
 
         <div class="setup-template-preview">
           <strong>Starter checklist</strong>
-          <span>${escapeHtml(starterChecklist.length ? starterChecklist.join(", ") : "No template checklist applied yet.")}</span>
+          <span>${escapeHtml(compactListText(starterChecklist, "No starter checklist loaded."))}</span>
         </div>
       </div>
 
       <div class="setup-template-actions">
         <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
-          Apply / Change Template
+          Apply Template
         </button>
         <span id="setupTemplateStatus" class="setup-template-status"></span>
       </div>
@@ -1189,6 +1332,13 @@ export const setupRoute = {
     const missingFieldInsights = getMissingFieldInsights(missingFields);
     const completionPercent = getCompletionPercent(values);
     const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+    const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
+    const brandStatus = getSetupBrandStatus(values);
+    const localizationStatus = getSetupLocalizationStatus(values);
+    const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+    const contentTruthStatus = getSetupContentTruthStatus(values);
+    const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
+    const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
     const failedCount = asArray(integrations.readiness?.failed).length;
     const validationSummary = getValidationSummary({
       missingFields,
@@ -1201,7 +1351,7 @@ export const setupRoute = {
     const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
     const optionalNames = allFields.filter((name) => !requiredNames.includes(name));
     const requiredCompleted = countCompleted(requiredNames, values);
-    const optionalCompleted = countCompleted(optionalNames, values);
+    const dependencyGapCount = missingAssets.length + missingConnectors.length + criticalGaps.length;
     const lastSavedAt = formatUpdatedAt(
       readinessDashboard.updated_at ||
       readinessDashboard.last_saved_at ||
@@ -1217,24 +1367,45 @@ export const setupRoute = {
         <section class="card setup-smart-overview">
           <div class="setup-wizard-header-top">
             <div>
-              <div class="setup-kicker">Setup Completion Overview</div>
-              <h3 class="setup-v2-title">Project Source-of-Truth Status</h3>
-              <p class="setup-v2-subtitle">Track completion, validation quality, and what to resolve next before continuing.</p>
+              <h3 class="setup-v2-title">Smart Guided Setup</h3>
+              <p class="setup-v2-subtitle">Configure the project source of truth used by AI, campaigns, and launch execution.</p>
+              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+              <div class="setup-operating-chips">
+                <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+              </div>
             </div>
             <div class="setup-v2-toolbar">
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
-              <button id="setupSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
-              <span class="setup-save-note"></span>
+              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
             </div>
           </div>
 
-          <div class="setup-guidance-strip">
-            <div>
-              <strong>Project Source of Truth</strong>
-              <p>Setup defines the business, brand, market, audience, goals, and channels used by AI, campaigns, publishing, and insights.</p>
-            </div>
-            <span class="card-badge neutral">Guided setup</span>
+          <div class="setup-config-intelligence" aria-label="Configuration intelligence summary">
+            <article class="setup-config-intel-card">
+              <div class="setup-config-intel-head">
+                <h4>Configuration intelligence</h4>
+                <span class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+              </div>
+              <p class="setup-intel-next">Next best action: <span id="setupNextBestAction">${escapeHtml(nextBestAction)}</span></p>
+              <div class="setup-config-intel-metrics">
+                <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+                <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
+                <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
+              </div>
+            </article>
+            <article class="setup-config-intel-card">
+              <div class="setup-config-intel-head">
+                <h4>Source-of-truth impact</h4>
+                <span class="card-badge neutral">Downstream</span>
+              </div>
+              <div class="setup-impact-chip-row">
+                <span class="setup-impact-chip">Library assets</span>
+                <span class="setup-impact-chip">Integrations</span>
+                <span class="setup-impact-chip">Campaign defaults</span>
+                <span class="setup-impact-chip">AI context</span>
+              </div>
+            </article>
           </div>
 
           <div class="setup-smart-overview-grid">
@@ -1253,19 +1424,24 @@ export const setupRoute = {
               <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> required fields missing</span>
             </article>
             <article class="setup-smart-overview-card">
-              <span class="data-label">Optional Completed</span>
-              <strong><span id="setupOptionalCompleted">${escapeHtml(String(optionalCompleted))}</span>/<span id="setupOptionalTotal">${escapeHtml(String(optionalNames.length))}</span></strong>
-              <span class="setup-helper">Optional setup context quality</span>
+              <span class="data-label">Missing dependencies</span>
+              <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
+              <span class="setup-helper">Assets, connectors, and critical gaps.</span>
             </article>
             <article class="setup-smart-overview-card">
-              <span class="data-label">Validation Status</span>
+              <span class="data-label">Validation and readiness</span>
               <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
-              <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
-            </article>
-            <article class="setup-smart-overview-card">
-              <span class="data-label">Last Saved / Updated</span>
-              <strong>${escapeHtml(lastSavedAt)}</strong>
               <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+              <div class="setup-inline-status-row">
+                <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+                <span id="setupBusinessIdentityStatus" class="card-badge ${toStatusTone(businessIdentityStatus)}">Identity ${escapeHtml(businessIdentityStatus)}</span>
+                <span id="setupBrandStatus" class="card-badge ${toStatusTone(brandStatus)}">Brand ${escapeHtml(brandStatus)}</span>
+                <span id="setupLocalizationStatus" class="card-badge ${toStatusTone(localizationStatus)}">Locale ${escapeHtml(localizationStatus)}</span>
+                <span id="setupChannelsStatus" class="card-badge ${toStatusTone(channelsStatus)}">${escapeHtml(channelsStatus)}</span>
+                <span id="setupContentTruthStatus" class="card-badge ${toStatusTone(contentTruthStatus)}">Truth ${escapeHtml(contentTruthStatus)}</span>
+                <span id="setupAiGuidanceStatus" class="card-badge ${toStatusTone(aiGuidanceStatus)}">AI ${escapeHtml(aiGuidanceStatus)}</span>
+              </div>
+              <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
             </article>
           </div>
         </section>
@@ -1273,28 +1449,25 @@ export const setupRoute = {
         <div class="setup-wizard-layout">
           <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
             <h4>Guided Setup Steps</h4>
-            <p class="setup-helper">Each step shows status, purpose, and a direct action.</p>
+            <p class="setup-helper">Select a step to load that section in the main form.</p>
             <article class="setup-smart-recommended-step">
               <span class="data-label">Recommended Step</span>
               <strong id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</strong>
               <p id="setupRecommendedStepReason">${escapeHtml(getRecommendedStep(values).description)}</p>
-              <button id="setupRecommendedStepBtn" class="btn btn-secondary" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">Open ${escapeHtml(getRecommendedStep(values).title)}</button>
+              <button id="setupRecommendedStepBtn" class="btn btn-secondary" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">Open step</button>
             </article>
             <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
               ${STEP_DEFINITIONS.map((step, index) => {
                 const status = getStepStatus(step, values);
                 const icon = STEP_ICONS[step.id] || "•";
                 return `
-                  <article class="setup-smart-step-item">
-                    <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}" title="${escapeHtml(step.description)}">
-                      <span class="setup-wizard-step-meta">Step ${index + 1}</span>
-                      <span class="setup-wizard-step-title"><span class="setup-step-icon" aria-hidden="true">${escapeHtml(icon)}</span>${escapeHtml(step.title)}</span>
-                      <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
-                    </button>
-                    <p>${escapeHtml(step.description)}</p>
-                    <div class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</div>
-                    <button class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(step.id)}">Open Step</button>
-                  </article>
+                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+                    <span class="setup-wizard-step-meta">Step ${index + 1}</span>
+                    <span class="setup-wizard-step-title"><span class="setup-step-icon" aria-hidden="true">${escapeHtml(icon)}</span>${escapeHtml(step.title)}</span>
+                    <span class="setup-wizard-step-purpose">${escapeHtml(step.description)}</span>
+                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+                  </button>
                 `;
               }).join("")}
             </div>
@@ -1315,7 +1488,6 @@ export const setupRoute = {
             <form id="setupProjectForm" class="setup-v2-form">
               <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
                 <h4>Business Basics</h4>
-                <p class="home-section-copy"></p>
                 <div class="setup-form-grid setup-form-grid-2">
                   ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
                   ${renderField({ name: "project_type", label: "Project type", value: values.project_type, helper: "Broad business model.", placeholder: "e.g. Ecommerce", escapeHtml, required: true })}
@@ -1406,9 +1578,6 @@ export const setupRoute = {
                 : `<div class="empty-box">All required setup fields are complete.</div>`
               }
             </div>
-            <div id="setupMissingFields">
-              ${renderIndicatorList(missingFieldInsights.map((item) => `${item.label} - ${item.reason}`), escapeHtml, "All required setup fields are complete.")}
-            </div>
             <div class="setup-wizard-missing-divider"></div>
             <h5>System blockers</h5>
             <div id="setupSystemGaps">
@@ -1446,47 +1615,43 @@ export const setupRoute = {
                 <p>Missing or failed connector checks.</p>
               </article>
             </div>
-            <div class="setup-v2-answers">
-              <article class="setup-v2-answer-card">
-                <h4>Setup diagnostics</h4>
-                <p>Readiness score: ${escapeHtml(formatPercent(readinessScore))}</p>
-                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
-                <p>Critical gaps: ${escapeHtml(String(criticalGaps.length))}</p>
-              </article>
-              <article class="setup-v2-answer-card">
-                <h4>Dependency diagnostics</h4>
-                <p>Missing assets: ${escapeHtml(String(missingAssets.length))}</p>
-                <p>Missing connectors: ${escapeHtml(String(missingConnectors.length))}</p>
-                <p>Failed connectors: ${escapeHtml(String(failedCount))}</p>
-              </article>
-            </div>
           </section>
         </div>
 
         <section class="card setup-smart-handoff-panel">
           <div class="card-head">
-            <h4>Continue / Handoff</h4>
-            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run smart action</button>
+            <h4>Next Actions</h4>
+            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
           </div>
-          <div class="setup-smart-handoff-actions">
-            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
-            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Navigate: Open Integrations Workspace</button>
-            <button id="setupReviewReadinessBtn" class="btn btn-ghost" type="button">Navigate: Open Home Readiness Overview</button>
+          <p class="setup-v2-subtitle">Safe actions only: save, navigate, or open AI context.</p>
+          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
             <button id="setupSaveBackendBtnBottom" class="btn btn-primary" type="button">Save setup</button>
+            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+          </div>
+          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
+            <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+            <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+            <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+            <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
+            <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
           </div>
         </section>
 
         ${renderBusinessTemplatePanel({ values, overviewData, escapeHtml })}
 
-        <section class="card setup-smart-ai-tools" hidden>
-          <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">AI Positioning</button>
-          <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">AI Audience</button>
-          <button id="setupAiToneBtn" class="btn btn-ghost" type="button">AI Tone</button>
-          <button id="setupAiFillMissingBtn" class="btn btn-ghost" type="button">AI Fill Missing</button>
-          <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI: Send Setup Context to AI Workspace</button>
-          <p id="setupAiPositioningText"></p>
-          <p id="setupAiAudienceText"></p>
-          <p id="setupAiToneText"></p>
+        <section class="card setup-smart-ai-tools">
+          <div class="card-head">
+            <h4>AI Guidance Panel</h4>
+            <span class="card-badge neutral">Assistive only</span>
+          </div>
+          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+          <div class="setup-smart-handoff-actions">
+            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+          </div>
         </section>
       </div>
     `;
