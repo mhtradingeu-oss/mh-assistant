@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { enqueueMediaJob } = require('../media-job-queue');
 const { writeMediaOutput } = require('../media-output-storage');
 const { createNativeMediaIntelligence } = require('../intelligence/native-media-intelligence');
+const { createRenderingEngineRegistry } = require('../rendering/rendering-engine-registry');
 
 function hashPrompt(prompt = '') {
   return crypto
@@ -16,6 +17,7 @@ function hashPrompt(prompt = '') {
 
 function createNativeRuntimeExecutor(options = {}) {
   const intelligence = createNativeMediaIntelligence();
+  const renderingEngines = createRenderingEngineRegistry(options);
 
   async function execute(input = {}) {
     const prepared = intelligence.prepare(input);
@@ -41,12 +43,30 @@ function createNativeRuntimeExecutor(options = {}) {
       created_at: new Date().toISOString()
     });
 
+    const renderingEngine = renderingEngines[prepared.brief.media_type] || renderingEngines.video;
+    const renderingResult = renderingEngine && typeof renderingEngine.render === 'function'
+      ? await renderingEngine.render({
+          ...input,
+          prompt: prepared.prompt,
+          brief: prepared.brief,
+          quality: prepared.quality,
+          project: input.project || 'default',
+          platform: prepared.brief.platform,
+          duration: prepared.brief.recommended_duration
+        })
+      : {
+          success: false,
+          status: 'missing_renderer',
+          message: `No renderer available for media type: ${prepared.brief.media_type}`
+        };
+
     const fakeOutput = {
       result_type: prepared.brief.media_type,
       generated_at: new Date().toISOString(),
       prompt: prepared.prompt,
       brief: prepared.brief,
-      quality: prepared.quality
+      quality: prepared.quality,
+      rendering: renderingResult
     };
 
     const outputBuffer = Buffer.from(
