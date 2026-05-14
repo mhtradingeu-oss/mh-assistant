@@ -1092,14 +1092,11 @@ export const governanceRoute = {
       bindGovernance(context, projectName, session);
     };
 
-    rerender();
-
-    if (!projectName) {
+    if (projectName && !session.loaded && !session.loading) {
+      loadGovernance(projectName, session, rerender);
       return;
     }
 
-    if (!session.loaded && !session.loading) {
-      loadGovernance(projectName, session, rerender);
-    }
+    rerender();
   }
 };
