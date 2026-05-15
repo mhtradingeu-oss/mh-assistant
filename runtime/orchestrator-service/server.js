@@ -11959,6 +11959,129 @@ app.get(
 );
 
 
+
+
+function handleCustomerOperationsConversations(req, res) {
+  try {
+    return res.json({
+      conversations:
+        customerOperationsRuntime.conversations.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_conversations_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsMessages(req, res) {
+  try {
+    return res.json({
+      messages:
+        customerOperationsRuntime.messages.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_messages_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsCustomers(req, res) {
+  try {
+    return res.json({
+      customers:
+        customerOperationsRuntime.customers.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_customers_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsSla(req, res) {
+  try {
+    return res.json({
+      sla:
+        customerOperationsRuntime.sla.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_sla_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsEscalations(req, res) {
+  try {
+    return res.json({
+      escalations:
+        customerOperationsRuntime.escalation.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_escalations_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get(
+  '/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+
 app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
 app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
 app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
