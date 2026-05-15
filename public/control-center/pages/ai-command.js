@@ -83,8 +83,193 @@ const MODE_ID_ALIASES = {
 	campaign: "strategist",
 	content: "writer",
 	seo: "analyst",
-	research: "researcher"
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	admin: "operations"
 };
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+const SPECIALIST_DEFS = [
+	{
+		id: "strategist",
+		label: "Strategist",
+		icon: "🎯",
+		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+		placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",
+		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+		status: "Ready"
+	},
+	{
+		id: "writer",
+		label: "Content Writer",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+		destinations: ["Content Studio", "Publishing", "AI Command"],
+		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+		status: "Ready"
+	},
+	{
+		id: "media",
+		label: "Media Director",
+		icon: "🎨",
+		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+		destinations: ["Asset Library", "Content Studio", "AI Command"],
+		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+		status: "Ready"
+	},
+	{
+		id: "video_lead",
+		label: "Video Lead",
+		icon: "🎬",
+		summary: "Short-form video scripts, motion direction, and reel strategy.",
+		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+		destinations: ["Asset Library", "Content Studio", "Media Native"],
+		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+		status: "Ready"
+	},
+	{
+		id: "publisher",
+		label: "Publisher",
+		icon: "📤",
+		summary: "Publishing readiness, schedule review, and handoff preparation.",
+		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Send to live channels directly"],
+		destinations: ["Publishing", "Workflows", "AI Command"],
+		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+		status: "Ready"
+	},
+	{
+		id: "ads",
+		label: "Ads Optimizer",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+		status: "Ready"
+	},
+	{
+		id: "analyst",
+		label: "SEO & Insights Analyst",
+		icon: "📊",
+		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+		destinations: ["Insights", "Integrations", "Setup"],
+		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+		status: "Ready"
+	},
+	{
+		id: "compliance_reviewer",
+		label: "Compliance Reviewer",
+		icon: "🛡️",
+		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+		destinations: ["Workflows", "Publishing", "Governance"],
+		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+		status: "Ready"
+	},
+	{
+		id: "operations",
+		label: "Operations Lead",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+		destinations: ["Workflows", "Operations Centers", "AI Command"],
+		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+		status: "Ready"
+	}
+];
+
+// Role-specific suggested prompt chips (prefill only, no auto-execute)
+const SPECIALIST_SUGGESTED_PROMPTS = {
+	strategist: [
+		{ label: "What should I do next?", sub: "Review priorities and blockers" },
+		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+		{ label: "Suggest the next campaign move", sub: "Based on current project state" }
+	],
+	writer: [
+		{ label: "Draft campaign captions", sub: "For the active campaign" },
+		{ label: "Write a hook sequence", sub: "3 hook variants to test" },
+		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+		{ label: "Suggest message variants", sub: "Test different angles and tones" }
+	],
+	media: [
+		{ label: "Write a creative brief", sub: "For the next campaign visual" },
+		{ label: "Review brand consistency", sub: "Flag misaligned assets" },
+		{ label: "Map format requirements", sub: "By platform and campaign phase" },
+		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+	],
+	video_lead: [
+		{ label: "Write a reel script", sub: "For the current campaign" },
+		{ label: "Plan short-form content", sub: "Map next 4 video concepts" },
+		{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },
+		{ label: "Map video asset needs", sub: "By platform and format" }
+	],
+	publisher: [
+		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+		{ label: "Check scheduled jobs", sub: "Review the current queue" },
+		{ label: "Prepare a handoff package", sub: "For the approver review" }
+	],
+	ads: [
+		{ label: "Draft ad concepts", sub: "For the current campaign" },
+		{ label: "Review targeting angles", sub: "Map audience and platform fit" },
+		{ label: "Suggest creative variants", sub: "Test different hooks and CTAs" },
+		{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }
+	],
+	analyst: [
+		{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },
+		{ label: "Analyze content performance", sub: "What is working and what is not" },
+		{ label: "Map data coverage gaps", sub: "Which integrations are missing" },
+		{ label: "Suggest next improvements", sub: "Based on current signals" }
+	],
+	compliance_reviewer: [
+		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+		{ label: "Prepare governance notes", sub: "Document compliance status" },
+		{ label: "Review approval requirements", sub: "What needs sign-off" }
+	],
+	operations: [
+		{ label: "Turn this into tasks", sub: "Break down into action items" },
+		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
+		{ label: "Map the next execution steps", sub: "Sequence and prioritize" }
+	]
+};
+
+// Full Team mode suggested prompts
+const TEAM_SUGGESTED_PROMPTS = [
+	{ label: "What should the team focus on?", sub: "Full team priority review" },
+	{ label: "Map the next launch wave", sub: "End-to-end team workflow preview" },
+	{ label: "Prepare a handoff sequence", sub: "Strategy → Content → Publishing" },
+	{ label: "Review team readiness", sub: "Check all specialist areas" }
+];
 
 // 4 quick-action prompts shown in the composer
 const QUICK_ACTIONS = [
@@ -192,6 +377,32 @@ const aiAutomationState = {
 };
 
 function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+	function detectSpecialistFromBridgePrompt(prompt) {
+		const text = asString(prompt);
+		if (/act as the strategist/i.test(text)) return "strategist";
+		if (/act as the content writer/i.test(text)) return "writer";
+		if (/act as the media director/i.test(text)) return "media";
+		if (/act as the video lead/i.test(text)) return "video_lead";
+		if (/act as the publisher/i.test(text)) return "publisher";
+		if (/act as the ads optimizer/i.test(text)) return "ads";
+		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+		if (/act as the operations lead/i.test(text)) return "operations";
+		// Fallback: use keyword scoring from existing classifyIntent
+		const classified = classifyIntent(text, null);
+		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+			return classified.resolvedModeId;
+		}
+		return null;
+	}
+
 	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
 	const plan = [
 		{
@@ -366,6 +577,7 @@ function ensureSession(projectName) {
 	if (!aiSessions.has(key)) {
 		aiSessions.set(key, {
 			modeId: "operations",
+			teamMode: "solo",
 			draftMessage: "",
 			commandType: "strategy",
 			targetType: "current-project",
@@ -1633,6 +1845,333 @@ function buildSmartRecommendation(aiContext) {
 // ============================================================
 //  ROUTE EXPORT
 // ============================================================
+//  PHASE 1 RENDER HELPERS — AI TEAM COMMAND CENTER
+// ============================================================
+
+
+function getPhase1SpecialistById(value) {
+  const normalize = (input) =>
+    String(input || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_");
+
+  const requestedId = normalize(value || "strategist");
+  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+
+  const definitions = Array.isArray(rawDefinitions)
+    ? rawDefinitions
+    : Object.entries(rawDefinitions || {}).map(([id, item]) => ({
+        id,
+        ...(item && typeof item === "object" ? item : {})
+      }));
+
+  return (
+    definitions.find((item) =>
+      normalize(item?.id || item?.role || item?.key || item?.name) === requestedId
+    ) ||
+    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+    definitions[0] ||
+    null
+  );
+}
+
+function renderPhase1Header(session, projectName, escapeHtml) {
+	const spec = getPhase1SpecialistById(session.modeId);
+	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+	return `
+		<header class="aicmd-v2-header">
+			<div class="aicmd-v2-header-main">
+				<p class="aicmd-v2-eyebrow">MH-OS · AI Team</p>
+				<h1 class="aicmd-v2-title">AI Team Command Center</h1>
+				<p class="aicmd-v2-subtitle">Work with one specialist or your full AI team to turn ideas into guidance, tasks, workflows, content, media, and handoffs.</p>
+			</div>
+			<div class="aicmd-v2-header-meta">
+				<div class="aicmd-v2-meta-chip">
+					<span>Project</span>
+					<strong>${escapeHtml(projectName || "Not selected")}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Specialist</span>
+					<strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : spec.label)}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Mode</span>
+					<strong>${escapeHtml(modeLabel)}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip aicmd-v2-safe-chip">
+					<span>Status</span>
+					<strong>Guidance &amp; drafts only</strong>
+				</div>
+			</div>
+		</header>
+	`;
+}
+
+function renderPhase1TeamRail(session, escapeHtml) {
+	const teamBanner = session.teamMode === "team" ? `
+		<div class="aicmd-v2-team-mission">
+			<p class="aicmd-v2-team-mission-label">Full Team Mode</p>
+			<p class="aicmd-v2-team-mission-text">All specialists collaborate toward the shared project mission. Each specialist contributes their domain. You guide the flow.</p>
+		</div>
+	` : "";
+
+	return `
+		<aside class="aicmd-v2-left">
+			<div class="aicmd-v2-mode-toggle">
+				<button class="aicmd-v2-toggle-btn${session.teamMode === "solo" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+					Solo Specialist
+				</button>
+				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+					Full Team
+				</button>
+			</div>
+			${teamBanner}
+			<div class="aicmd-v2-team-rail">
+				${SPECIALIST_DEFS.map((spec) => {
+					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+					return `
+						<button
+							class="aicmd-v2-spec-btn${isActive ? " is-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							title="${escapeHtml(spec.summary)}"
+						>
+							<span class="aicmd-v2-spec-icon">${spec.icon}</span>
+							<div class="aicmd-v2-spec-info">
+								<span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
+								<span class="aicmd-v2-spec-summary">${escapeHtml(spec.summary)}</span>
+							</div>
+							<span class="aicmd-v2-spec-status${isActive ? " is-active" : ""}">${isActive ? "Active" : escapeHtml(spec.status)}</span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+		</aside>
+	`;
+}
+
+function renderPhase1Profile(session, escapeHtml) {
+	if (session.teamMode === "team") {
+		return `
+			<div class="aicmd-v2-profile aicmd-v2-team-profile">
+				<div class="aicmd-v2-profile-header">
+					<span class="aicmd-v2-profile-icon">🤝</span>
+					<div>
+						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
+						<p class="aicmd-v2-profile-purpose">All specialists collaborate on the project together. Each specialist contributes their domain expertise toward the shared mission.</p>
+					</div>
+				</div>
+				<div class="aicmd-v2-profile-grid">
+					<div class="aicmd-v2-profile-col">
+						<span class="aicmd-v2-profile-label">Team can help with</span>
+						<ul class="aicmd-v2-profile-list">
+							${["Strategy and campaign planning", "Content drafts and copy", "Media direction and briefs", "SEO and performance analysis", "Compliance and governance review", "Publishing readiness and handoffs", "Task planning and execution sequencing"].map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
+						</ul>
+					</div>
+					<div class="aicmd-v2-profile-col">
+						<span class="aicmd-v2-profile-label">Team cannot do</span>
+						<ul class="aicmd-v2-profile-list">
+							${["Publish without explicit approval", "Execute workflows automatically", "Grant approvals or override governance", "Run backend operations without confirmation"].map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
+						</ul>
+					</div>
+				</div>
+				<div class="aicmd-v2-profile-destinations">
+					<span class="aicmd-v2-profile-label">Key destinations</span>
+					<div class="aicmd-v2-dest-row">
+						${["Campaign Studio", "Content Studio", "Publishing", "Workflows", "Insights"].map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	const spec = getPhase1SpecialistById(session.modeId);
+	return `
+		<div class="aicmd-v2-profile">
+			<div class="aicmd-v2-profile-header">
+				<span class="aicmd-v2-profile-icon">${spec.icon}</span>
+				<div>
+					<h2 class="aicmd-v2-profile-title">${escapeHtml(spec.label)}</h2>
+					<p class="aicmd-v2-profile-purpose">${escapeHtml(spec.summary)}</p>
+				</div>
+			</div>
+			<div class="aicmd-v2-profile-grid">
+				<div class="aicmd-v2-profile-col">
+					<span class="aicmd-v2-profile-label">Can help with</span>
+					<ul class="aicmd-v2-profile-list">
+						${spec.canHelp.map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
+					</ul>
+				</div>
+				<div class="aicmd-v2-profile-col">
+					<span class="aicmd-v2-profile-label">Cannot do</span>
+					<ul class="aicmd-v2-profile-list">
+						${spec.cannotDo.map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
+					</ul>
+				</div>
+			</div>
+			<div class="aicmd-v2-profile-destinations">
+				<span class="aicmd-v2-profile-label">Destination pages</span>
+				<div class="aicmd-v2-dest-row">
+					${spec.destinations.map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
+				</div>
+			</div>
+		</div>
+	`;
+}
+
+function renderPhase1Composer(session, escapeHtml) {
+	const spec = getPhase1SpecialistById(session.modeId);
+	const placeholder = session.teamMode === "team"
+		? "Describe what you want the full AI team to work on — strategy, content, media, compliance, and handoffs together…"
+		: escapeHtml(spec.placeholder);
+	const specLabel = session.teamMode === "team" ? "Full Team" : escapeHtml(spec.label);
+
+	return `
+		<div class="aicmd-v2-composer">
+			<div class="aicmd-v2-composer-head">
+				<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "🤝" : spec.icon}</span>
+				<span class="aicmd-v2-composer-label">${specLabel} — Workspace Composer</span>
+			</div>
+			<textarea
+				id="aicmdV2Input"
+				class="aicmd-v2-textarea"
+				rows="5"
+				placeholder="${placeholder}"
+			>${escapeHtml(session.draftMessage)}</textarea>
+			<div class="aicmd-v2-action-row">
+				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-primary" type="button">
+					Prepare Guidance
+				</button>
+				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
+					Draft Task
+				</button>
+				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
+					Prepare Handoff
+				</button>
+				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
+					Save Draft
+				</button>
+				<button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost" type="button">
+					Clear
+				</button>
+			</div>
+			<div id="aicmdV2Status" class="aicmd-v2-composer-hint">
+				${escapeHtml(session.draftStatus || "Choose a specialist, fill in your request, and use Prepare Guidance to stage it for review. Ctrl / Cmd + Enter to prepare.")}
+			</div>
+		</div>
+	`;
+}
+
+function renderPhase1SuggestedPrompts(session, escapeHtml) {
+	const prompts = session.teamMode === "team"
+		? TEAM_SUGGESTED_PROMPTS
+		: (SPECIALIST_SUGGESTED_PROMPTS[session.modeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+	return `
+		<div class="aicmd-v2-prompts">
+			<div class="aicmd-v2-prompts-head">
+				<span class="aicmd-v2-prompts-label">Suggested prompts</span>
+				<span class="aicmd-v2-prompts-hint">Click to prefill the composer — send when ready</span>
+			</div>
+			<div class="aicmd-v2-prompts-grid">
+				${prompts.map((p, idx) => `
+					<button
+						class="aicmd-v2-prompt-chip"
+						type="button"
+						data-aicmdv2-prompt="${idx}"
+						data-aicmdv2-prompt-text="${escapeHtml(p.label)}"
+					>
+						<span class="aicmd-v2-prompt-chip-label">${escapeHtml(p.label)}</span>
+						<span class="aicmd-v2-prompt-chip-sub">${escapeHtml(p.sub)}</span>
+					</button>
+				`).join("")}
+			</div>
+		</div>
+	`;
+}
+
+function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+	const projectName = aiContext.projectName;
+	const readiness = aiContext.readinessScore;
+	const assetCount = aiContext.approvedAssets.length;
+	const hasIntegrations = aiContext.coveredCount > 0;
+	const hasOperations = Boolean(state.data.operations);
+	const hasDraft = Boolean(aiContext.recommendations.length || session.messages.length);
+
+	return `
+		<div class="aicmd-v2-context">
+			<div class="aicmd-v2-context-head">
+				<span class="aicmd-v2-context-label">Context &amp; Knowledge</span>
+				<span class="aicmd-v2-context-hint">What the specialist can see</span>
+			</div>
+			<div class="aicmd-v2-context-grid">
+				<div class="aicmd-v2-context-item${projectName ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Project profile</span>
+					<span class="aicmd-v2-context-item-value">${projectName ? escapeHtml(projectName) : "Not selected yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${readiness != null ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Readiness</span>
+					<span class="aicmd-v2-context-item-value">${readiness != null ? `${readiness}/100` : "No readiness data yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${assetCount > 0 ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Approved assets</span>
+					<span class="aicmd-v2-context-item-value">${assetCount > 0 ? `${assetCount} asset${assetCount !== 1 ? "s" : ""} ready` : "No approved assets yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${hasIntegrations ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Integrations</span>
+					<span class="aicmd-v2-context-item-value">${hasIntegrations ? `${aiContext.coveredCount} of ${aiContext.coverageTotal} connected` : "No integrations connected yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${hasOperations ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Operations snapshot</span>
+					<span class="aicmd-v2-context-item-value">${hasOperations ? "Available" : "No operations snapshot yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${aiContext.hasLiveIntelligence ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">AI intelligence</span>
+					<span class="aicmd-v2-context-item-value">${aiContext.hasLiveIntelligence ? "Live intelligence loaded" : "No campaign brief attached yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${hasDraft ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Previous AI outputs</span>
+					<span class="aicmd-v2-context-item-value">${hasDraft ? `${session.messages.length} message${session.messages.length !== 1 ? "s" : ""} in session` : "No recent AI output yet"}</span>
+				</div>
+				<div class="aicmd-v2-context-item${aiContext.campaign && aiContext.campaign !== "Not selected" ? " is-present" : " is-empty"}">
+					<span class="aicmd-v2-context-item-label">Active campaign</span>
+					<span class="aicmd-v2-context-item-value">${aiContext.campaign && aiContext.campaign !== "Not selected" ? escapeHtml(aiContext.campaign) : "No campaign brief attached yet"}</span>
+				</div>
+			</div>
+		</div>
+	`;
+}
+
+function renderPhase1SafetyPanel(escapeHtml) {
+	return `
+		<div class="aicmd-v2-safety">
+			<div class="aicmd-v2-safety-head">
+				<span class="aicmd-v2-safety-icon">🔒</span>
+				<span class="aicmd-v2-safety-label">How this workspace operates</span>
+			</div>
+			<div class="aicmd-v2-safety-rules">
+				<div class="aicmd-v2-safety-rule">
+					<span class="aicmd-v2-safety-bullet">●</span>
+					<span>Guidance only — no execution happens from this workspace without confirmation.</span>
+				</div>
+				<div class="aicmd-v2-safety-rule">
+					<span class="aicmd-v2-safety-bullet">●</span>
+					<span>Drafts are not execution — prepared content stays local until you act on it.</span>
+				</div>
+				<div class="aicmd-v2-safety-rule">
+					<span class="aicmd-v2-safety-bullet">●</span>
+					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+				</div>
+				<div class="aicmd-v2-safety-rule">
+					<span class="aicmd-v2-safety-bullet">●</span>
+					<span>Backend owns authority — AI Command prepares guidance and routes. It does not override execution controls.</span>
+				</div>
+			</div>
+		</div>
+	`;
+}
+
+// ============================================================
 
 export const aiCommandRoute = {
 	id: "ai-command",
@@ -1648,329 +2187,212 @@ export const aiCommandRoute = {
 		</section>
 	`,
 	render(context) {
-  const {
-    getState,
-    $,
-    escapeHtml,
-    navigateTo,
-    showMessage
-  } = context;
+		const {
+			getState,
+			$,
+			escapeHtml,
+			navigateTo,
+			showMessage,
+			fetchProjectInsights,
+			fetchProjectLearning,
+			reloadProjectData
+		} = context;
 
-  const state = getState();
-  const projectName = asString(selectCurrentProject(state) || "");
-  const market = asString(state.context.currentMarket || "");
-  const language = asString(state.context.currentLanguage || "");
-  const campaign = asString(state.context.activeCampaign || "");
-  const executionMode = asString(state.context.executionMode || "");
+		const state = getState();
+		const projectName = asString(selectCurrentProject(state) || "");
+		const sessionKey = projectName || "__default__";
+		const session = ensureSession(sessionKey);
+		hydrateSessionDraft(sessionKey, session);
 
-  const payload = asObject(selectProjectPayload(state));
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+		const globalInput = $("quickCommandInput");
+		const bridgeValue = asString(globalInput?.value || "").trim();
+		if (bridgeValue) {
+			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+			if (detectedSpecialist) session.modeId = detectedSpecialist;
+			session.draftMessage = bridgeValue;
+			persistSessionDraft(sessionKey, session, "Specialist context loaded from workspace");
+			if (globalInput) globalInput.value = "";
+		}
+		// ─────────────────────────────────────────────────────────────
 
-  const overview = asObject(payload.overview?.overview || payload.overview);
-  const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
-  const operations = asObject(selectOperationsSnapshot(state));
+		const payload = asObject(selectProjectPayload(state));
+		const overview = asObject(payload.overview?.overview || payload.overview);
+		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+		const operations = asObject(selectOperationsSnapshot(state));
+		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
 
-  const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
-  const aiCommandsTotal = Number(operations.ai_commands?.total || 0);
-  const aiArtifactsTotal = Number(operations.ai_artifacts?.total || 0);
-  const recommendationsTotal = Number(operations.ai_recommendations?.open_count || 0);
+		const intelligenceStatus = session.intelligence.status || "idle";
+		const aiContext = buildUnifiedAiContext(state, session.intelligence);
 
-  const session = ensureSession(projectName || "__default__");
-  hydrateSessionDraft(projectName || "__default__", session);
+		const root = $("ctrlRoomRoot");
+		if (!root) return;
 
-  const projectedAgentCards = buildProjectedAgentCards(state);
-  const currentMode = getModeMeta(session.modeId || "operations");
-  const root = $("ctrlRoomRoot");
-  if (!root) return;
+		root.innerHTML = `
+			<div class="aicmd-v2-shell">
+				${renderPhase1Header(session, projectName, escapeHtml)}
+				<div class="aicmd-v2-body">
+					${renderPhase1TeamRail(session, escapeHtml)}
+					<main class="aicmd-v2-main">
+						${renderPhase1Profile(session, escapeHtml)}
+						${renderPhase1Composer(session, escapeHtml)}
+						${renderPhase1SuggestedPrompts(session, escapeHtml)}
+						${renderPhase1ContextPanel(state, session, aiContext, escapeHtml)}
+						${renderPhase1SafetyPanel(escapeHtml)}
+					</main>
+				</div>
+			</div>
+		`;
 
-  root.innerHTML = `
-    <div class="aicmd-shell">
-      <section class="aicmd-section aicmd-overview">
-        <div class="aicmd-section-head">
-          <h3>AI Workspace</h3>
-          <span class="card-badge success">Ready</span>
-        </div>
+		const input = $("aicmdV2Input");
+		const statusEl = $("aicmdV2Status");
 
-        <div class="aicmd-overview-grid">
-          <div class="aicmd-stat">
-            <span>Current project</span>
-            <strong>${escapeHtml(projectName || "Not selected")}</strong>
-          </div>
+		const updateStatus = (msg) => {
+			if (statusEl) statusEl.textContent = msg;
+		};
 
-          <div class="aicmd-stat">
-            <span>Readiness</span>
-            <strong>${escapeHtml(readinessScore == null ? "--" : `${readinessScore}/100`)}</strong>
-          </div>
+		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
+		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+			btn.onclick = () => {
+				const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+				session.modeId = specId;
+				session.teamMode = "solo";
+				const spec = getPhase1SpecialistById(specId);
+				if (!session.draftMessage) {
+					session.draftMessage = "";
+				}
+				persistSessionDraft(sessionKey, session, `${spec.label} selected`);
+				aiCommandRoute.render(context);
+			};
+		});
 
-          <div class="aicmd-stat">
-            <span>Market</span>
-            <strong>${escapeHtml(market || "Not set")}</strong>
-          </div>
+		// ── SOLO / TEAM TOGGLE ───────────────────────────────────────
+		Array.from(document.querySelectorAll("[data-aicmdv2-team-mode]")).forEach((btn) => {
+			btn.onclick = () => {
+				const mode = btn.getAttribute("data-aicmdv2-team-mode") || "solo";
+				session.teamMode = mode;
+				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+				aiCommandRoute.render(context);
+			};
+		});
 
-          <div class="aicmd-stat">
-            <span>Language</span>
-            <strong>${escapeHtml(language || "Not set")}</strong>
-          </div>
+		// ── SUGGESTED PROMPTS: PREFILL ONLY ─────────────────────────
+		Array.from(document.querySelectorAll("[data-aicmdv2-prompt]")).forEach((btn) => {
+			btn.onclick = () => {
+				const text = asString(btn.getAttribute("data-aicmdv2-prompt-text") || "");
+				if (!text) return;
+				session.draftMessage = text;
+				if (input) input.value = text;
+				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+				updateStatus("Suggested prompt loaded into composer. Review it, then use Prepare Guidance.");
+				input?.focus?.();
+			};
+		});
 
-          <div class="aicmd-stat aicmd-stat-wide">
-            <span>Active campaign</span>
-            <strong>${escapeHtml(campaign || "Not selected")}</strong>
-          </div>
+		// ── INPUT HANDLING ───────────────────────────────────────────
+		if (input) {
+			input.oninput = () => {
+				session.draftMessage = input.value || "";
+				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+			};
 
-          <div class="aicmd-stat aicmd-stat-wide">
-            <span>Execution mode</span>
-            <strong>${escapeHtml(executionMode || "Not set")}</strong>
-          </div>
-        </div>
-      </section>
+			input.onkeydown = (event) => {
+				if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+					event.preventDefault();
+					$("aicmdV2PrepareBtn")?.click?.();
+				}
+			};
+		}
 
-      <section class="aicmd-section">
-        <div class="aicmd-section-head">
-          <h3>Choose your AI specialist</h3>
-          <span class="card-badge neutral">${escapeHtml(currentMode.label)}</span>
-        </div>
+		// ── PREPARE GUIDANCE (primary action) ───────────────────────
+		// Phase 1: stages draft locally, does NOT execute backend AI command.
+		const prepareBtn = $("aicmdV2PrepareBtn");
+		if (prepareBtn) {
+			prepareBtn.onclick = () => {
+				const value = asString(input?.value || session.draftMessage || "").trim();
+				if (!value) {
+					updateStatus("Please write your request in the composer first.");
+					input?.focus?.();
+					return;
+				}
+				const spec = getPhase1SpecialistById(session.modeId);
+				session.draftMessage = value;
+				persistSessionDraft(sessionKey, session, "Guidance prepared — draft ready for review");
+				updateStatus("Guidance prepared. Review the draft, then route to the right workspace or save for later.");
+				showMessage?.(`${session.teamMode === "team" ? "Team" : spec.label} guidance prepared.`);
+			};
+		}
 
-        <div class="aicmd-agent-grid">
-          ${projectedAgentCards.map((agent) => `
-            <article class="aicmd-agent-card${agent.id === session.modeId ? " is-active" : ""}">
-              <h4>${escapeHtml(agent.name)}</h4>
-              <div class="aicmd-agent-meta">
-                <span>Purpose</span>
-                <p>${escapeHtml(agent.purpose)}</p>
-              </div>
-              <div class="aicmd-agent-meta">
-                <span>Best use</span>
-                <p>${escapeHtml(agent.bestUse)}</p>
-              </div>
-              <div class="aicmd-agent-meta">
-                <span>Suggested prompt</span>
-                <p>${escapeHtml(agent.suggestedPrompt)}</p>
-              </div>
-              <button
-                class="aicmd-btn aicmd-btn-secondary"
-                type="button"
-                data-aicmd-start-agent="${escapeHtml(agent.id)}"
-              >
-                Start with ${escapeHtml(agent.name)}
-              </button>
-            </article>
-          `).join("")}
-        </div>
-      </section>
+		// ── DRAFT TASK (secondary action) ────────────────────────────
+		// Phase 1: prefills a task-framed version of the prompt. No backend execution.
+		const draftTaskBtn = $("aicmdV2DraftTaskBtn");
+		if (draftTaskBtn) {
+			draftTaskBtn.onclick = () => {
+				const value = asString(input?.value || session.draftMessage || "").trim();
+				const spec = getPhase1SpecialistById(session.modeId);
+				const taskPrompt = value
+					? `Draft a task plan for: ${value}`
+					: `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
+				session.draftMessage = taskPrompt;
+				if (input) input.value = taskPrompt;
+				persistSessionDraft(sessionKey, session, "Task draft framed — review before acting");
+				updateStatus("Task draft framed. Review and prepare guidance when ready.");
+			};
+		}
 
-      <section class="aicmd-section">
-        <div class="aicmd-section-head">
-          <h3>${escapeHtml(currentMode.icon)} ${escapeHtml(currentMode.label)} Command Composer</h3>
-        </div>
+		// ── PREPARE HANDOFF (secondary action) ───────────────────────
+		// Phase 1: frames a handoff prompt in the composer. No backend write.
+		const handoffBtn = $("aicmdV2HandoffBtn");
+		if (handoffBtn) {
+			handoffBtn.onclick = () => {
+				const value = asString(input?.value || session.draftMessage || "").trim();
+				const spec = getPhase1SpecialistById(session.modeId);
+				const handoffPrompt = value
+					? `Prepare a handoff summary for: ${value}`
+					: `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+				session.draftMessage = handoffPrompt;
+				if (input) input.value = handoffPrompt;
+				persistSessionDraft(sessionKey, session, "Handoff draft framed — review before acting");
+				updateStatus("Handoff draft framed. Review and prepare guidance when ready.");
+			};
+		}
 
-        <div>
-          <label class="aicmd-label" for="ctrlComposerInput">Prompt</label>
-          <textarea
-            id="ctrlComposerInput"
-            class="aicmd-textarea"
-            rows="7"
-            placeholder="Ask ${escapeHtml(currentMode.label)} what to do next for this project..."
-          >${escapeHtml(session.draftMessage || "")}</textarea>
-        </div>
+		// ── SAVE DRAFT ───────────────────────────────────────────────
+		const saveBtn = $("aicmdV2SaveBtn");
+		if (saveBtn) {
+			saveBtn.onclick = () => {
+				session.draftMessage = asString(input?.value || session.draftMessage || "");
+				persistSessionDraft(sessionKey, session, "Draft saved locally");
+				updateStatus("Draft saved locally.");
+				showMessage?.("Draft saved.");
+			};
+		}
 
-        <div class="aicmd-action-row">
-          <button id="aiCommandSendBtn" class="aicmd-btn aicmd-btn-primary" type="button">
-            Prepare Command
-          </button>
-          <button id="aicmdSaveDraftBtn" class="aicmd-btn aicmd-btn-secondary" type="button">
-            Save Draft
-          </button>
-          <button id="aicmdClearBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
-            Clear
-          </button>
-          <button id="aicmdOpenWorkflowsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
-            Open Workflows
-          </button>
-          <button id="aicmdOpenCampaignBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
-            Open Campaign Studio
-          </button>
-          <button id="aicmdOpenInsightsBtn" class="aicmd-btn aicmd-btn-ghost" type="button">
-            Open Insights
-          </button>
-        </div>
+		// ── CLEAR ────────────────────────────────────────────────────
+		const clearBtn = $("aicmdV2ClearBtn");
+		if (clearBtn) {
+			clearBtn.onclick = () => {
+				session.draftMessage = "";
+				if (input) input.value = "";
+				persistSessionDraft(sessionKey, session, "Draft cleared");
+				updateStatus("Draft cleared.");
+				showMessage?.("Draft cleared.");
+			};
+		}
 
-        <div id="aicmdStatus" class="aicmd-draft-state">
-          ${escapeHtml(session.draftStatus || "AI Workspace is ready. Choose a specialist, prepare a command, then review and run it from the workspace command controls.")}
-        </div>
-
-        <div class="aicmd-operating-strip" aria-label="AI workspace operating context">
-          <div>
-            <span>Specialist</span>
-            <strong>${escapeHtml(currentMode.label || "Strategist")}</strong>
-          </div>
-          <div>
-            <span>Commands</span>
-            <strong>${escapeHtml(String(aiCommandsTotal))}</strong>
-          </div>
-          <div>
-            <span>Recommendations</span>
-            <strong>${escapeHtml(String(recommendationsTotal))}</strong>
-          </div>
-          <div>
-            <span>Workspace</span>
-            <strong>Operating mode</strong>
-          </div>
-        </div>
-      </section>
-
-      <section class="aicmd-section">
-        <div class="aicmd-section-head">
-          <h3>Quick Actions</h3>
-        </div>
-
-        <div class="aicmd-suggestions">
-          ${QUICK_ACTIONS.map((action) => `
-            <article class="aicmd-suggestion-card">
-              <h4>${escapeHtml(action.icon)} ${escapeHtml(action.label)}</h4>
-              <p>${escapeHtml(action.sub)}</p>
-              <div class="aicmd-action-row">
-                <button
-                  class="aicmd-btn aicmd-btn-secondary"
-                  type="button"
-                  data-aicmd-quick-template="${escapeHtml(action.template.replace("{project}", projectName || "this project"))}"
-                >
-                  Use Prompt
-                </button>
-              </div>
-            </article>
-          `).join("")}
-        </div>
-      </section>
-
-      <section class="aicmd-section">
-        <div class="aicmd-section-head">
-          <h3>Current AI State</h3>
-        </div>
-
-        <div class="aicmd-overview-grid">
-          <div class="aicmd-stat">
-            <span>Selected specialist</span>
-            <strong>${escapeHtml(currentMode.label)}</strong>
-          </div>
-
-          <div class="aicmd-stat">
-            <span>AI commands</span>
-            <strong>${escapeHtml(String(aiCommandsTotal))}</strong>
-          </div>
-
-          <div class="aicmd-stat">
-            <span>AI artifacts</span>
-            <strong>${escapeHtml(String(aiArtifactsTotal))}</strong>
-          </div>
-
-          <div class="aicmd-stat">
-            <span>Open recommendations</span>
-            <strong>${escapeHtml(String(recommendationsTotal))}</strong>
-          </div>
-        </div>
-      </section>
-    </div>
-  `;
-
-  const input = $("ctrlComposerInput");
-  const status = $("aicmdStatus");
-
-  Array.from(document.querySelectorAll("[data-aicmd-start-agent]")).forEach((button) => {
-    button.onclick = () => {
-      const agentId = button.getAttribute("data-aicmd-start-agent") || "operations";
-      const card = AGENT_CARDS.find((item) => item.id === agentId);
-      session.modeId = agentId;
-      session.draftMessage = card?.suggestedPrompt || "";
-      persistSessionDraft(projectName || "__default__", session, "Agent prompt loaded");
-      aiCommandRoute.render(context);
-    };
-  });
-
-  Array.from(document.querySelectorAll("[data-aicmd-quick-template]")).forEach((button) => {
-    button.onclick = () => {
-      const template = button.getAttribute("data-aicmd-quick-template") || "";
-      session.draftMessage = template;
-      if (input) input.value = template;
-      persistSessionDraft(projectName || "__default__", session, "Quick prompt loaded");
-      if (status) status.textContent = "Quick prompt loaded. Review it before running.";
-    };
-  });
-
-  if (input) {
-    input.oninput = () => {
-      session.draftMessage = input.value || "";
-      persistSessionDraft(projectName || "__default__", session, "Draft auto-saved locally");
-    };
-
-    input.onkeydown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-        event.preventDefault();
-        const sendBtn = $("aiCommandSendBtn");
-        sendBtn?.click?.();
-      }
-    };
-  }
-
-  const sendBtn = $("aiCommandSendBtn");
-  if (sendBtn) {
-    sendBtn.onclick = () => {
-      const value = asString(input?.value || session.draftMessage || "").trim();
-
-      if (!value) {
-        if (status) status.textContent = "Please write a command first.";
-        input?.focus?.();
-        return;
-      }
-
-      session.draftMessage = value;
-      persistSessionDraft(projectName || "__default__", session, "Command prepared");
-
-      const globalInput = $("quickCommandInput");
-      if (globalInput) {
-        globalInput.value = `[${currentMode.label}] ${value}`;
-      }
-
-      if (status) {
-        status.textContent = "Command prepared in AI Workspace. Review it, then run it from the command controls.";
-      }
-
-      showMessage?.(`${currentMode.label} command prepared.`);
-    };
-  }
-
-  const saveDraftBtn = $("aicmdSaveDraftBtn");
-  if (saveDraftBtn) {
-    saveDraftBtn.onclick = () => {
-      session.draftMessage = asString(input?.value || session.draftMessage || "");
-      persistSessionDraft(projectName || "__default__", session, "Draft saved");
-      if (status) status.textContent = "Draft saved locally.";
-      showMessage?.("AI draft saved.");
-    };
-  }
-
-  const clearBtn = $("aicmdClearBtn");
-  if (clearBtn) {
-    clearBtn.onclick = () => {
-      session.draftMessage = "";
-      persistSessionDraft(projectName || "__default__", session, "Draft cleared");
-      if (input) input.value = "";
-      if (status) status.textContent = "Draft cleared.";
-      showMessage?.("AI draft cleared.");
-    };
-  }
-
-  const workflowsBtn = $("aicmdOpenWorkflowsBtn");
-  if (workflowsBtn) {
-    workflowsBtn.onclick = () => navigateTo("workflows");
-  }
-
-  const campaignBtn = $("aicmdOpenCampaignBtn");
-  if (campaignBtn) {
-    campaignBtn.onclick = () => navigateTo("campaign-studio");
-  }
-
-  const insightsBtn = $("aicmdOpenInsightsBtn");
-  if (insightsBtn) {
-    insightsBtn.onclick = () => navigateTo("insights");
-  }
-}
+		// ── LOAD INTELLIGENCE if needed ──────────────────────────────
+		if (projectName && session.intelligence.status === "idle") {
+			ensureIntelligenceLoaded({
+				projectName,
+				session,
+				getState,
+				reloadProjectData,
+				fetchProjectInsights,
+				fetchProjectLearning,
+				rerender: () => aiCommandRoute.render(context)
+			}).catch(() => {});
+		}
+	}
 };
