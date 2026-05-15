@@ -7,6 +7,7 @@ import {
 
 let API_BASE_URL = "";
 const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
+const AI_GUIDANCE_REQUEST_TIMEOUT_MS = 90000;
 const DEFAULT_RESPONSE_TEXT_TIMEOUT_MS = 20000;
 const DEFAULT_PARSE_TIMEOUT_MS = 2000;
 const REQUIRED_PROJECT_RESPONSE_TEXT_TIMEOUT_MS = 3000;
@@ -1571,7 +1572,8 @@ export async function executeProjectAiGuidance(projectName, payload = {}) {
     `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
     "POST",
     payload,
-    "Failed to request AI guidance"
+    "Failed to request AI guidance",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
   );
 }
 

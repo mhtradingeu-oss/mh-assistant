@@ -187,6 +187,18 @@ function buildGuidancePrompt(input = {}) {
     'Guidance-only response. Do not execute operations. Do not claim execution happened.'
   );
 
+  const specialistInstruction = specialistId === 'writer'
+    ? 'As Content Writer, produce actual copy: hooks, captions, headlines, emails, scripts, and CTA lines when requested.'
+    : specialistId === 'video_lead'
+      ? 'As Video Lead, produce actual video hooks, script lines, and storyboard beats when requested.'
+      : specialistId === 'strategist'
+        ? 'As Strategist, produce a strategic plan with priorities, rationale, and ordered next moves.'
+        : specialistId === 'compliance_reviewer'
+          ? 'As Compliance Reviewer, produce a concrete risk checklist and safer wording replacements.'
+          : specialistId === 'operations'
+            ? 'As Operations Lead, produce task and workflow draft steps only; do not execute any operation.'
+            : 'Produce concrete specialist output, not a high-level summary.';
+
   return [
     `Guidance-only specialist response for MH Assistant OS.`,
     `Specialist ID: ${specialistId || 'specialist'}`,
@@ -195,9 +207,15 @@ function buildGuidancePrompt(input = {}) {
     `Language: ${language}`,
     `Safety instruction: ${safetyInstruction}`,
     'Answer as the selected specialist.',
-    'Match the user language.',
+    'Match the user language exactly.',
+    'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+    'Do not describe what you would do.',
+    'Do not answer with a generic summary.',
+    'Give practical, ready-to-copy output.',
     'Provide practical guidance/content only.',
+    specialistInstruction,
     'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
     'Do not claim approvals were granted.',
     'Do not claim operations were run.',
     'Output must be review-ready.',
@@ -206,6 +224,34 @@ function buildGuidancePrompt(input = {}) {
     'User request:',
     request
   ].filter(Boolean).join('\n');
+}
+
+function extractGuidanceProviderText(providerOutput = {}, response = {}) {
+  const provider = asObject(providerOutput);
+  const raw = asObject(provider.raw);
+
+  const directCandidates = [
+    provider.content,
+    provider.summary,
+    provider.text,
+    provider.output,
+    provider.message,
+    raw.content,
+    raw.text,
+    raw.output,
+    raw.message,
+    response.content,
+    response.summary,
+    response.analysis,
+    response.title
+  ];
+
+  for (const candidate of directCandidates) {
+    const text = humanizeValue(candidate);
+    if (text) return text;
+  }
+
+  return '';
 }
 
 function pickRouteForIntent(intent, modeId) {
@@ -1106,7 +1152,7 @@ function createAiOrchestrationService(deps) {
         });
 
         const response = buildResponseFromContext(request, context, classified, providerOutput);
-        const responseText = humanizeValue(response.content || response.summary || response.analysis || response.title);
+        const responseText = extractGuidanceProviderText(providerOutput, response);
         const sections = [
           {
             title: 'Recommendations',
