@@ -7,6 +7,9 @@ const messageStore = require('./conversations/messages/message-store');
 
 const customerProfileStore = require('./customers/store/customer-profile-store');
 
+const slaPolicyStore = require('./sla/store/sla-policy-store');
+
+
 
 const {
   registerDefaultChannels
@@ -31,6 +34,14 @@ function createCustomerOperationsRuntime() {
 
 
 
+
+
+    sla: {
+      create: slaPolicyStore.createSlaPolicy,
+      get: slaPolicyStore.getSlaPolicy,
+      list: slaPolicyStore.listSlaPolicies,
+      update: slaPolicyStore.updateSlaPolicy
+    },
 
     customers: {
       create: customerProfileStore.createCustomerProfile,
@@ -68,6 +79,7 @@ function createCustomerOperationsRuntime() {
           channels: true,
           messages: true,
           customers: true,
+          sla: true,
           voice: false,
           ivr: false,
           outreach: false,
