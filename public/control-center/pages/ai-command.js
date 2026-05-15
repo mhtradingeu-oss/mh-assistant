@@ -2641,6 +2641,18 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 	`;
 }
 
+function renderLanguageMarketStrip(aiContext, escapeHtml) {
+	const outputLang = escapeHtml(asString(aiContext.language || "Auto"));
+	const market = escapeHtml(asString(aiContext.market || "Auto"));
+	return `
+		<div class="aicmd-v2-lang-strip">
+			<span class="aicmd-v2-planned-chip is-available" title="Language you chat in \u2014 auto-detected from your message">You talk: Auto</span>
+			<span class="aicmd-v2-planned-chip is-available" title="Language used for publishable copy, hooks, captions, scripts">We publish: ${outputLang}</span>
+			<span class="aicmd-v2-planned-chip is-available" title="Target market from project Setup">Market: ${market}</span>
+		</div>
+	`;
+}
+
 function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 	const providerConfigured = isProviderLikelyConfigured(aiContext);
 	const readinessItems = [
@@ -2663,7 +2675,7 @@ function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 	`;
 }
 
-function renderPhase1Composer(session, escapeHtml) {
+function renderPhase1Composer(session, aiContext, escapeHtml) {
 	const spec = getPhase1SpecialistById(session.modeId);
 	const placeholder = session.teamMode === "team"
 		? "Describe what you want the full AI team to work on — strategy, content, media, compliance, and handoffs together…"
@@ -2676,6 +2688,7 @@ function renderPhase1Composer(session, escapeHtml) {
 				<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "🤝" : spec.icon}</span>
 				<span class="aicmd-v2-composer-label">${specLabel} — Workspace Composer</span>
 			</div>
+			${renderLanguageMarketStrip(aiContext, escapeHtml)}
 			<textarea
 				id="aicmdV2Input"
 				class="aicmd-v2-textarea"
@@ -3109,7 +3122,7 @@ export const aiCommandRoute = {
 					${renderPhase1TeamRail(session, escapeHtml)}
 					<main class="aicmd-v2-main">
 						${renderPhase1Profile(session, escapeHtml)}
-						${renderPhase1Composer(session, escapeHtml)}
+						${renderPhase1Composer(session, aiContext, escapeHtml)}
 						${renderPhase35WorkspaceTabs(session, responseBridge, escapeHtml)}
 						${tabContent[activeTab] || tabContent.preview}
 						${renderPhase35ReadinessStrip(aiContext, responseBridge, escapeHtml)}
@@ -3257,7 +3270,10 @@ export const aiCommandRoute = {
 						mode: session.teamMode === "team" ? "team" : "solo",
 						request: value,
 						prompt: packagedPrompt,
-						language: aiContext.language || "user language",
+						language: aiContext.language || "",
+						outputLanguage: aiContext.language || "",
+						market: aiContext.market || "",
+						marketLanguage: aiContext.language || "",
 						contextSummary: {
 							projectName,
 							campaign: aiContext.campaign,

@@ -150,17 +150,33 @@ const SPECIALIST_MODE_MAP = {
   team: 'executive'
 };
 
-function inferLanguagePreference(input = {}) {
-  const explicit = asString(input.language || input.languagePreference || input.language_preference);
-  if (explicit) return explicit;
-
+function inferConversationLanguage(input = {}) {
+  // Detect from request text — the language the user is writing/chatting in
   const source = asString(input.request || input.prompt || input.command);
   if (!source) return 'user language';
-
   if (/[\u0600-\u06FF]/.test(source)) return 'Arabic';
   if (/[\u0400-\u04FF]/.test(source)) return 'Cyrillic language';
   if (/[\u4E00-\u9FFF]/.test(source)) return 'Chinese';
   return 'user language';
+}
+
+function inferOutputLanguage(input = {}) {
+  // Publishing/content output language: explicit override > project/market/setup language > fallback
+  const explicit = asString(
+    input.outputLanguage ||
+    input.output_language ||
+    input.marketLanguage ||
+    input.market_language
+  );
+  if (explicit) return explicit;
+  const projectLang = asString(input.language || input.languagePreference || input.language_preference);
+  if (projectLang) return projectLang;
+  return 'user language';
+}
+
+// Backward-compatible alias — now resolves publishing/output language
+function inferLanguagePreference(input = {}) {
+  return inferOutputLanguage(input);
 }
 
 function resolveGuidanceModeId(input = {}) {
@@ -179,7 +195,10 @@ function buildGuidancePrompt(input = {}) {
   const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
   const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
   const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
-  const language = inferLanguagePreference(input);
+  const conversationLanguage = inferConversationLanguage(input);
+  const outputLanguage = inferOutputLanguage(input);
+  const market = asString(input.market || '');
+  const languagesDiffer = outputLanguage !== 'user language' && outputLanguage !== conversationLanguage;
   const contextSummary = humanizeValue(input.contextSummary || input.context_summary || '');
   const safetyInstruction = asString(
     input.safetyInstruction ||
@@ -204,12 +223,22 @@ function buildGuidancePrompt(input = {}) {
     `Specialist ID: ${specialistId || 'specialist'}`,
     `Specialist name: ${specialistName}`,
     `Mode: ${teamMode}`,
-    `Language: ${language}`,
+    `Conversation language (language the user is writing in): ${conversationLanguage}`,
+    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+    market ? `Market: ${market}` : '',
     `Safety instruction: ${safetyInstruction}`,
     'You are answering inside a live specialist chat.',
     'Answer the user directly as the selected specialist.',
-    'Match the user language exactly.',
-    'If the user writes Arabic, answer Arabic. If the user writes German, answer German.',
+    conversationLanguage !== 'user language'
+      ? `Always respond to the user, explain, and interact in ${conversationLanguage}.`
+      : 'Match the language the user writes in for all explanations and interaction.',
+    languagesDiffer
+      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+      : 'Generate publishable content in the same language as your conversation.',
+    languagesDiffer
+      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+      : '',
+    'If the user explicitly requests a different output language, use that language for publishable content instead.',
     'If the user asks for N items, return exactly N items.',
     'Example rule: if the user asks for 3 hooks, return exactly 3 hooks.',
     'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
@@ -1127,7 +1156,10 @@ function createAiOrchestrationService(deps) {
       const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
       const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
       const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
-      const language = inferLanguagePreference(input);
+      const conversationLanguage = inferConversationLanguage(input);
+      const outputLanguage = inferOutputLanguage(input);
+      const language = outputLanguage; // backward-compat alias
+      const market = asString(input.market || input.marketLanguage || '');
       const modeId = resolveGuidanceModeId(input);
       const guidanceCommand = buildGuidancePrompt(input);
       const classified = classifyIntent(request, modeId);
@@ -1184,6 +1216,9 @@ function createAiOrchestrationService(deps) {
             specialist_id: specialistId,
             specialist_name: specialistName,
             language_preference: language,
+            conversation_language: conversationLanguage,
+            output_language: outputLanguage,
+            market,
             guidance_only: true
           },
           research: context.research,
@@ -1215,7 +1250,10 @@ function createAiOrchestrationService(deps) {
             id: specialistId,
             name: specialistName,
             mode: teamMode,
-            language
+            language,
+            conversationLanguage,
+            outputLanguage,
+            market
           },
           safety_label: 'guidance_only_no_operational_side_effects',
           side_effects: {
@@ -1296,7 +1334,10 @@ function createAiOrchestrationService(deps) {
             id: specialistId,
             name: specialistName,
             mode: teamMode,
-            language
+            language,
+            conversationLanguage,
+            outputLanguage,
+            market
           },
           safety_label: 'guidance_only_no_operational_side_effects'
         };
