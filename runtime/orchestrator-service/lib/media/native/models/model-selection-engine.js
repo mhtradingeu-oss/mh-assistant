@@ -4,7 +4,17 @@ const { listEnabledModels } = require('./model-registry-store');
 
 function modelSupportsRequest(model, request = {}) {
   const mediaType = String(request.media_type || request.type || 'video');
-  return model.media_type === mediaType;
+  const provider = String(request.provider || '').toLowerCase();
+
+  if (model.media_type !== mediaType) {
+    return false;
+  }
+
+  if (provider && String(model.provider || '').toLowerCase() !== provider) {
+    return false;
+  }
+
+  return true;
 }
 
 function selectBestModel(request = {}) {

@@ -5,6 +5,27 @@ const { registerModel } = require('./model-registry-store');
 function registerDefaultModels() {
   return [
     registerModel({
+      model_id: 'gpt-image-1',
+      provider: 'openai',
+      media_type: 'image',
+      category: 'image-generation-editing',
+      quality_tier: 'high',
+      vram_requirement_gb: 0,
+      supported_resolutions: ['1024x1024']
+    }),
+
+    registerModel({
+      model_id: 'gpt-realtime',
+      provider: 'openai',
+      media_type: 'voice_chat',
+      category: 'realtime-voice',
+      quality_tier: 'high',
+      vram_requirement_gb: 0,
+      supports_realtime: true,
+      supports_streaming: true
+    }),
+
+    registerModel({
       model_id: 'flux-dev',
       provider: 'native',
       media_type: 'image',

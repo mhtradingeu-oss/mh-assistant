@@ -25,6 +25,7 @@ function createJobDispatchOrchestrator(options = {}) {
 
     const selectedModel = selectBestModel({
       media_type: mediaType,
+      provider: input.provider || '',
       quality_tier: input.quality_tier || 'standard'
     });
 
