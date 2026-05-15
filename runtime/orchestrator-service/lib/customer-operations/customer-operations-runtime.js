@@ -26,6 +26,11 @@ const {
 } = require('./channels/registry/channel-registry-store');
 
 
+const {
+  registerIntegrationChannel
+} = require('./channels/register-integration-channel');
+
+
 function createCustomerOperationsRuntime() {
   registerDefaultChannels();
 
@@ -81,7 +86,8 @@ function createCustomerOperationsRuntime() {
     },
 
     channels: {
-      list: listChannels
+      list: listChannels,
+      registerIntegration: registerIntegrationChannel
     },
 
     tickets: {
@@ -99,6 +105,7 @@ function createCustomerOperationsRuntime() {
           conversations: true,
           tickets: true,
           channels: true,
+          integration_bridge: true,
           messages: true,
           customers: true,
           sla: true,
