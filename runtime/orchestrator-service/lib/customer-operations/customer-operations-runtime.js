@@ -36,11 +36,15 @@ const {
 } = require('./channels/register-integration-channel');
 
 
+const {
+  createCustomerOperationsReadinessSnapshot
+} = require('./readiness/customer-operations-readiness-snapshot');
+
 function createCustomerOperationsRuntime() {
   registerDefaultChannels();
 
 
-  return {
+  const runtime = {
     conversations: {
       create: conversationStore.createConversation,
       get: conversationStore.getConversation,
@@ -103,6 +107,10 @@ function createCustomerOperationsRuntime() {
       update: ticketStore.updateTicket
     },
 
+    readiness: {
+      snapshot: () => createCustomerOperationsReadinessSnapshot(runtime)
+    },
+
     health() {
       return {
         runtime: 'mh-os-customer-operations',
@@ -126,6 +134,8 @@ function createCustomerOperationsRuntime() {
       };
     }
   };
+
+  return runtime;
 }
 
 module.exports = {
