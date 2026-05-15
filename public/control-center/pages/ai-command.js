@@ -2373,6 +2373,11 @@ function renderPhase1Profile(session, escapeHtml) {
 					${spec.destinations.map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
 				</div>
 			</div>
+			${spec.safetyNote ? `
+			<div class="aicmd-v2-profile-safety">
+				<span class="aicmd-v2-profile-safety-icon">🔒</span>
+				<span>${escapeHtml(spec.safetyNote)}</span>
+			</div>` : ""}
 		</div>
 	`;
 }
@@ -2417,7 +2422,13 @@ function renderPhase1Composer(session, escapeHtml) {
 				</button>
 			</div>
 			<div id="aicmdV2Status" class="aicmd-v2-composer-hint">
-				${escapeHtml(session.draftStatus || "Choose a specialist, fill in your request, and use Prepare Guidance to stage it for review. Ctrl / Cmd + Enter to prepare.")}
+				${escapeHtml(session.draftStatus || "Choose a specialist, write your request, then use Prepare Guidance. Ctrl / Cmd + Enter to prepare.")}
+			</div>
+			<div class="aicmd-v2-planned-row">
+				<span class="aicmd-v2-planned-chip is-available">Read preview available (browser)</span>
+				<span class="aicmd-v2-planned-chip">Voice input — planned</span>
+				<span class="aicmd-v2-planned-chip">Team chat — requires execution bridge</span>
+				<span class="aicmd-v2-planned-chip">Media generation — requires provider/worker</span>
 			</div>
 		</div>
 	`;
@@ -2466,6 +2477,7 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			</div>
 
 			<div class="aicmd-v2-preview-body">
+				<p class="aicmd-v2-preview-what-heading">What the specialist prepared</p>
 				<h4 class="aicmd-v2-preview-output-title">${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h4>
 				<p class="aicmd-v2-preview-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
 
@@ -2488,14 +2500,14 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 				` : ""}
 
 				<div class="aicmd-v2-preview-section">
-					<span class="aicmd-v2-preview-label">Next safe action</span>
-					<p class="aicmd-v2-preview-note">${escapeHtml(humanizeValue(preview.nextSafeAction, "Review in destination workspace."))}</p>
+					<span class="aicmd-v2-preview-label">What you can do next</span>
+					<p class="aicmd-v2-preview-next-action">${escapeHtml(humanizeValue(preview.nextSafeAction, "Review in destination workspace."))}</p>
 				</div>
 
 				<div class="aicmd-v2-preview-section">
-					<span class="aicmd-v2-preview-label">Confirmation note</span>
-					<p class="aicmd-v2-preview-note">${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation."))}</p>
-					<p class="aicmd-v2-preview-safety">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only."))}</p>
+					<span class="aicmd-v2-preview-label">What requires confirmation</span>
+					<p class="aicmd-v2-preview-confirmation">${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation."))}</p>
+					<p class="aicmd-v2-preview-safety">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</p>
 				</div>
 			</div>
 
@@ -2516,19 +2528,23 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 	const providerStatus = providerConfigured
 		? "Configured in integrations"
 		: "Status not connected yet";
+	const speechSynthAvailable = typeof speechSynthesis !== "undefined";
 
 	return `
 		<section class="aicmd-v2-media-status">
 			<div class="aicmd-v2-media-status-head">
-				<h3 class="aicmd-v2-media-status-title">Media Capability Status</h3>
-				<span class="aicmd-v2-media-status-badge">Honest capability view</span>
+				<h3 class="aicmd-v2-media-status-title">Media, Voice &amp; Chat Capability</h3>
+				<span class="aicmd-v2-media-status-badge">Honest readiness view</span>
 			</div>
 			<ul class="aicmd-v2-media-status-list">
-				<li><span>Image prompt / provider routing</span><strong>${escapeHtml(providerStatus)}</strong></li>
-				<li><span>Video brief generation</span><strong>Draft-ready</strong></li>
-				<li><span>Native GPU video rendering</span><strong>Requires connected GPU worker</strong></li>
-				<li><span>Voice script</span><strong>Draft-ready</strong></li>
-				<li><span>Realtime voice chat</span><strong>Future connection</strong></li>
+				<li><span>Image prompt generation</span><strong class="${providerConfigured ? "is-available" : "is-planned"}">${escapeHtml(providerConfigured ? "Provider configured" : "Needs provider connection")}</strong></li>
+				<li><span>Video brief / script draft</span><strong class="is-draft-ready">Draft-ready — no generation executed</strong></li>
+				<li><span>Native GPU video rendering</span><strong class="is-planned">Requires connected GPU worker</strong></li>
+				<li><span>Voice script preparation</span><strong class="is-draft-ready">Draft-ready — script only, no audio</strong></li>
+				<li><span>Read preview aloud (browser)</span><strong class="${speechSynthAvailable ? "is-available" : "is-planned"}">${speechSynthAvailable ? "Available in this browser" : "Not supported in this browser"}</strong></li>
+				<li><span>Voice input (microphone)</span><strong class="is-planned">Planned — SpeechRecognition not enabled</strong></li>
+				<li><span>Team chat execution bridge</span><strong class="is-planned">Planned — requires backend bridge</strong></li>
+				<li><span>Realtime voice chat</span><strong class="is-planned">Future — needs provider + bridge</strong></li>
 			</ul>
 		</section>
 	`;
