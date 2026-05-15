@@ -135,6 +135,79 @@ const OUTPUT_TYPE_BY_MODE = {
   operations: 'operations_plan'
 };
 
+const SPECIALIST_MODE_MAP = {
+  strategist: 'campaign',
+  writer: 'content',
+  designer: 'content',
+  media: 'content',
+  video_lead: 'content',
+  publisher: 'operations',
+  ads: 'ads',
+  analyst: 'seo',
+  researcher: 'research',
+  compliance_reviewer: 'operations',
+  operations: 'operations',
+  team: 'executive'
+};
+
+function inferLanguagePreference(input = {}) {
+  const explicit = asString(input.language || input.languagePreference || input.language_preference);
+  if (explicit) return explicit;
+
+  const source = asString(input.request || input.prompt || input.command);
+  if (!source) return 'user language';
+
+  if (/[\u0600-\u06FF]/.test(source)) return 'Arabic';
+  if (/[\u0400-\u04FF]/.test(source)) return 'Cyrillic language';
+  if (/[\u4E00-\u9FFF]/.test(source)) return 'Chinese';
+  return 'user language';
+}
+
+function resolveGuidanceModeId(input = {}) {
+  const requestedMode = normalizeAiModeId(input.mode_id || input.modeId);
+  if (requestedMode && OUTPUT_TYPE_BY_MODE[requestedMode]) {
+    return requestedMode;
+  }
+
+  const specialistId = asString(input.specialistId || input.specialist_id).toLowerCase();
+  const mapped = SPECIALIST_MODE_MAP[specialistId];
+  return normalizeAiModeId(mapped || 'executive');
+}
+
+function buildGuidancePrompt(input = {}) {
+  const request = asString(input.request || input.prompt || input.command);
+  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+  const language = inferLanguagePreference(input);
+  const contextSummary = humanizeValue(input.contextSummary || input.context_summary || '');
+  const safetyInstruction = asString(
+    input.safetyInstruction ||
+    input.safety_instruction ||
+    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+  );
+
+  return [
+    `Guidance-only specialist response for MH Assistant OS.`,
+    `Specialist ID: ${specialistId || 'specialist'}`,
+    `Specialist name: ${specialistName}`,
+    `Mode: ${teamMode}`,
+    `Language: ${language}`,
+    `Safety instruction: ${safetyInstruction}`,
+    'Answer as the selected specialist.',
+    'Match the user language.',
+    'Provide practical guidance/content only.',
+    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+    'Do not claim approvals were granted.',
+    'Do not claim operations were run.',
+    'Output must be review-ready.',
+    contextSummary ? `Context summary: ${contextSummary}` : '',
+    '',
+    'User request:',
+    request
+  ].filter(Boolean).join('\n');
+}
+
 function pickRouteForIntent(intent, modeId) {
   if (intent === 'ads') return 'ads-manager';
   if (intent === 'campaign') return 'campaign-studio';
@@ -957,6 +1030,189 @@ function createAiOrchestrationService(deps) {
         });
         executionError.payload = structuredFailure;
         throw executionError;
+      }
+    },
+
+    async executeGuidance(projectName, input = {}) {
+      const request = asString(input.request || input.prompt || input.command);
+      if (!request) {
+        throw new Error('Missing guidance request');
+      }
+
+      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+      const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+      const language = inferLanguagePreference(input);
+      const modeId = resolveGuidanceModeId(input);
+      const guidanceCommand = buildGuidancePrompt(input);
+      const classified = classifyIntent(request, modeId);
+
+      let providerConfig = null;
+
+      try {
+        logger.info('ai_guidance_received', {
+          route: 'ai-guidance',
+          action: 'execute',
+          project: asString(projectName).toLowerCase(),
+          specialist_id: specialistId,
+          mode: teamMode
+        });
+
+        const context = buildServerContext(projectName, deps);
+        providerConfig = resolveAiProviderConfig(process.env);
+
+        if (!isAiProviderSupported(providerConfig.provider)) {
+          throw createProviderConfigError(
+            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+            {
+              code: 'AI_PROVIDER_UNSUPPORTED',
+              statusCode: 503,
+              provider: providerConfig.provider
+            }
+          );
+        }
+
+        assertAiProviderConfig(providerConfig);
+        const provider = getAiProvider(providerConfig.provider, { logger });
+        if (!provider) {
+          throw createProviderConfigError(`AI provider adapter is not registered for "${providerConfig.provider}"`, {
+            code: 'AI_PROVIDER_ADAPTER_MISSING',
+            statusCode: 503,
+            provider: providerConfig.provider
+          });
+        }
+
+        logger.info('ai_guidance_provider_call_started', {
+          route: 'ai-guidance',
+          provider: providerConfig.provider,
+          model: providerConfig.model,
+          project: asString(projectName).toLowerCase()
+        });
+
+        const providerOutput = await provider.execute({
+          command: guidanceCommand,
+          modeId,
+          outputType: classified.outputType,
+          contextSummary: {
+            ...asObject(context.summary),
+            request_context: humanizeValue(input.contextSummary || input.context_summary || ''),
+            specialist_id: specialistId,
+            specialist_name: specialistName,
+            language_preference: language,
+            guidance_only: true
+          },
+          research: context.research,
+          config: providerConfig
+        });
+
+        const response = buildResponseFromContext(request, context, classified, providerOutput);
+        const responseText = humanizeValue(response.content || response.summary || response.analysis || response.title);
+        const sections = [
+          {
+            title: 'Recommendations',
+            items: normalizeReadableList(response.recommendations, 6)
+          },
+          {
+            title: 'Key findings',
+            items: normalizeReadableList(response.findings, 6)
+          },
+          {
+            title: 'Next actions',
+            items: normalizeReadableList(response.nextActions, 6)
+          }
+        ].filter((section) => section.items.length > 0);
+
+        const guidancePayload = {
+          status: 'completed',
+          timestamp: new Date().toISOString(),
+          specialist: {
+            id: specialistId,
+            name: specialistName,
+            mode: teamMode,
+            language
+          },
+          safety_label: 'guidance_only_no_operational_side_effects',
+          side_effects: {
+            created_task: false,
+            created_workflow: false,
+            created_handoff: false,
+            created_approval: false,
+            published: false,
+            persisted_memory: false,
+            persisted_artifact: false,
+            mutated_operations: false
+          },
+          provider: {
+            id: asString(providerOutput.provider || providerConfig.provider),
+            model: asString(providerOutput.model || providerConfig.model),
+            usage: asObject(providerOutput.usage)
+          },
+          response_text: responseText,
+          bullets: normalizeReadableList(response.recommendations.length ? response.recommendations : response.nextActions, 8),
+          sections,
+          response: {
+            status: 'completed',
+            title: response.title,
+            summary: response.summary,
+            content: response.content,
+            analysis: response.analysis,
+            findings: response.findings,
+            recommendations: response.recommendations,
+            nextActions: response.nextActions,
+            outputType: response.outputType,
+            routeSuggestions: response.routeSuggestions,
+            missingData: response.missingData,
+            taskBlock: {
+              owner: specialistName,
+              title: 'Guidance only',
+              steps: [
+                'Review guidance output in AI Command.',
+                'Create task/workflow/handoff manually only if explicitly approved.'
+              ]
+            }
+          }
+        };
+
+        logger.info('ai_guidance_response_returned', {
+          route: 'ai-guidance',
+          project: asString(projectName).toLowerCase(),
+          provider: guidancePayload.provider.id,
+          model: guidancePayload.provider.model,
+          specialist_id: specialistId
+        });
+
+        return guidancePayload;
+      } catch (error) {
+        logger.error('ai_guidance_error', {
+          route: 'ai-guidance',
+          action: 'execute',
+          project: asString(projectName).toLowerCase(),
+          provider: providerConfig?.provider || null,
+          model: providerConfig?.model || null,
+          specialist_id: specialistId,
+          error: serializeErrorForLog(error)
+        });
+
+        const failureMessage = asString(error.message) || 'AI guidance execution failed';
+        const statusCode = Number(error.statusCode) || 500;
+        const guidanceError = createAiCommandExecutionError(failureMessage, {
+          code: asString(error.code) || 'AI_GUIDANCE_EXECUTION_FAILED',
+          statusCode
+        });
+        guidanceError.payload = {
+          status: 'failed',
+          error: failureMessage,
+          code: asString(error.code) || 'AI_GUIDANCE_EXECUTION_FAILED',
+          timestamp: new Date().toISOString(),
+          specialist: {
+            id: specialistId,
+            name: specialistName,
+            mode: teamMode,
+            language
+          },
+          safety_label: 'guidance_only_no_operational_side_effects'
+        };
+        throw guidanceError;
       }
     },
 

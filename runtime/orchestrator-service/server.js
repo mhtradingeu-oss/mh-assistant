@@ -11198,6 +11198,49 @@ async function handleExecuteAiCommand(req, res) {
   }
 }
 
+async function handleExecuteAiGuidance(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+
+  appLogger.info('ai_guidance_http_received', {
+    route: 'ai-guidance',
+    action: 'execute',
+    project,
+    specialist_id: specialistId
+  });
+
+  try {
+    const result = await getAiOrchestrator().executeGuidance(req.params.project, req.body || {});
+    appLogger.info('ai_guidance_http_returned', {
+      route: 'ai-guidance',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || null,
+      specialist_id: result?.specialist?.id || specialistId
+    });
+    return res.json(result);
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI guidance'
+      };
+
+    appLogger.error('ai_guidance_http_error', {
+      route: 'ai-guidance',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
+    });
+
+    return res.status(statusCode).json(payload);
+  }
+}
+
 function handleExecuteAiWorkflow(req, res) {
   try {
     const result = getAiOrchestrator().executeWorkflow(
@@ -11299,6 +11342,8 @@ app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCom
 app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
 app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
 app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
 app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
 app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
 app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);

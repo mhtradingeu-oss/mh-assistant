@@ -1521,6 +1521,19 @@ export async function executeProjectAiCommand(projectName, payload = {}) {
   );
 }
 
+export async function executeProjectAiGuidance(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
+    "POST",
+    payload,
+    "Failed to request AI guidance"
+  );
+}
+
 export async function createProjectTask(projectName, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");

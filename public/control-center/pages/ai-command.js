@@ -13,6 +13,9 @@ import {
 import {
 	getCategoryReadinessList
 } from "../asset-library.js";
+import {
+	executeProjectAiGuidance
+} from "../api.js";
 
 // ============================================================
 //  AI TEAM DEFINITIONS
@@ -807,19 +810,17 @@ function saveLocalOutput(projectName, outputPayload) {
 	return map[key];
 }
 
-function getAiResponseBridgeStatus(executeProjectAiCommandFn) {
-	if (typeof executeProjectAiCommandFn !== "function") {
+function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+	if (typeof executeProjectAiGuidanceFn !== "function") {
 		return {
 			available: false,
-			reason: "AI response bridge is not connected yet (API function unavailable)."
+			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
 		};
 	}
 
-	// Phase 3 safety gate: the current backend AI command path persists artifacts/memory and auto-creates handoffs.
-	// Keep the specialist chat bridge unavailable until a guidance-only backend mode is exposed.
 	return {
-		available: false,
-		reason: "AI response bridge is not connected yet. Existing backend AI command execution is not guidance-only for this phase."
+		available: true,
+		reason: "Guidance bridge connected."
 	};
 }
 
@@ -846,8 +847,20 @@ function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, project
 }
 
 function extractGeneratedResponseText(response = {}) {
-	const direct = humanizeValue(response.content || response.summary || response.analysis || response.title);
+	const direct = humanizeValue(
+		response.response_text ||
+		response.content ||
+		response.summary ||
+		response.analysis ||
+		response.title
+	);
 	if (direct) return direct;
+
+	const bullets = normalizeDisplayList(response.bullets, 6)
+		.map((item) => `- ${item}`)
+		.join("\n");
+
+	if (bullets) return bullets;
 
 	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
 		.map((item, index) => `${index + 1}. ${item}`)
@@ -857,7 +870,17 @@ function extractGeneratedResponseText(response = {}) {
 		.map((item) => `- ${item}`)
 		.join("\n");
 
-	return [recommendationLine, findingLine].filter(Boolean).join("\n\n");
+	const sectionLine = asArray(response.sections)
+		.map((section) => {
+			const title = humanizeValue(section?.title);
+			const items = normalizeDisplayList(section?.items, 4);
+			if (!items.length) return "";
+			return [title ? `${title}:` : "", ...items.map((item) => `- ${item}`)].filter(Boolean).join("\n");
+		})
+		.filter(Boolean)
+		.join("\n\n");
+
+	return [recommendationLine, findingLine, sectionLine].filter(Boolean).join("\n\n");
 }
 
 function destinationRouteForSpecialist(specialistId, outputType) {
@@ -2813,6 +2836,9 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 	const latest = asArray(session.responseHistory)[0] || null;
 	const bridgeLabel = bridgeStatus.available ? "Connected" : "Guarded";
+	const safetyLine = bridgeStatus.available
+		? "Guidance only — no workflow/task/handoff was created."
+		: "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
 	const emptyBody = bridgeStatus.available
 		? "Ask a specialist to receive a generated response in this panel."
 		: "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
@@ -2827,7 +2853,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 				<span class="aicmd-v2-chat-bridge ${bridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
 
-			<div class="aicmd-v2-chat-safety">Guidance only. No workflow run, publish, approval, or authority mutation from this panel.</div>
+			<div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
 
 			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist…</div>` : ""}
 			${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
@@ -3036,7 +3062,7 @@ export const aiCommandRoute = {
 
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
-		const responseBridge = getAiResponseBridgeStatus(executeProjectAiCommand);
+		const responseBridge = getAiResponseBridgeStatus(executeProjectAiGuidance);
 		if (!session.workspaceTabInitialized) {
 			session.workspaceTab = responseBridge.available ? "chat" : "preview";
 			session.workspaceTabInitialized = true;
@@ -3223,29 +3249,51 @@ export const aiCommandRoute = {
 				});
 
 				try {
-					const result = await executeProjectAiCommand(projectName, {
-						command: packagedPrompt,
-						mode_id: session.modeId,
-						source: "ai-command-phase3-specialist-chat",
+					const result = await executeProjectAiGuidance(projectName, {
+						project: projectName,
+						specialistId: specialist.id || session.modeId,
+						specialistName: specialist.label || "Specialist",
+						mode: session.teamMode === "team" ? "team" : "solo",
+						request: value,
+						prompt: packagedPrompt,
+						language: aiContext.language || "user language",
+						contextSummary: {
+							projectName,
+							campaign: aiContext.campaign,
+							readinessScore: aiContext.readinessScore,
+							readinessSummary: aiContext.summary
+						},
+						safetyInstruction: "Guidance only. No task/workflow/handoff/approval/publish execution.",
+						source: "ai-command-phase3b-specialist-guidance",
 						actor: "mh-assistant"
 					});
 
 					const response = asObject(result?.response);
-					const responseText = extractGeneratedResponseText(response);
+					const responseText = extractGeneratedResponseText({
+						...response,
+						response_text: result?.response_text,
+						sections: result?.sections,
+						bullets: result?.bullets
+					});
 					if (!responseText) {
-						throw new Error("AI response bridge returned no response text.");
+						throw new Error("Guidance bridge returned no response text.");
 					}
 
-					const routeSuggestion = asArray(response.routeSuggestions)[0];
+					const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+					const safetyLabel = asString(result?.safety_label || "guidance_only");
 					session.responseHistory.unshift({
 						id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
 						prompt: value,
 						specialistId: specialist.id || session.modeId,
 						specialistLabel: specialist.label || "Specialist",
-						generatedAt: nowIso(),
+						generatedAt: asString(result?.timestamp) || nowIso(),
 						responseTitle: humanizeValue(response.title, "Generated specialist response"),
 						responseText,
-						responseRaw: response,
+						responseRaw: {
+							...response,
+							safety_label: safetyLabel,
+							provider: result?.provider
+						},
 						destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
 					});
 					session.responseHistory = session.responseHistory.slice(0, 12);
@@ -3258,8 +3306,8 @@ export const aiCommandRoute = {
 						teamMode: session.teamMode
 					});
 					aiCommandRoute.render(context);
-					updateStatus("Specialist response generated.");
-					showMessage?.("Specialist response generated.");
+					updateStatus("Specialist guidance generated (no workflow/task/handoff created).");
+					showMessage?.("Specialist guidance generated. Guidance only — no workflow/task/handoff was created.");
 				} catch (error) {
 					session.responseLoading = false;
 					session.responseError = asString(error?.message || "Failed to generate specialist response.");
