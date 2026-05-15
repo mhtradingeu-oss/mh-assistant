@@ -622,7 +622,11 @@ function ensureSession(projectName) {
 			},
 			lastAppliedHandoffId: ""
 			,
-			outputPreview: null
+			outputPreview: null,
+			responseHistory: [],
+			responseLoading: false,
+			responseError: "",
+			responseHistoryLoaded: false
 		});
 	}
 	return aiSessions.get(key);
@@ -721,6 +725,59 @@ function saveLocalOutput(projectName, outputPayload) {
 	};
 	writeLocalOutputMap(map);
 	return map[key];
+}
+
+function getAiResponseBridgeStatus(executeProjectAiCommandFn) {
+	if (typeof executeProjectAiCommandFn !== "function") {
+		return {
+			available: false,
+			reason: "AI response bridge is not connected yet (API function unavailable)."
+		};
+	}
+
+	// Phase 3 safety gate: the current backend AI command path persists artifacts/memory and auto-creates handoffs.
+	// Keep the specialist chat bridge unavailable until a guidance-only backend mode is exposed.
+	return {
+		available: false,
+		reason: "AI response bridge is not connected yet. Existing backend AI command execution is not guidance-only for this phase."
+	};
+}
+
+function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language }) {
+	const cleanPrompt = asString(prompt).trim();
+	const safeProject = asString(projectName || "current project").trim();
+	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+	const safeLanguage = asString(language || "user language").trim();
+
+	return [
+		`Role: ${safeSpecialist}`,
+		`Project: ${safeProject}`,
+		`Mode: ${safeMode}`,
+		`Language: ${safeLanguage}`,
+		"Return practical guidance and content only.",
+		"Never claim actions were executed.",
+		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+		"Deliver a structured, review-ready answer.",
+		"",
+		"User request:",
+		cleanPrompt
+	].join("\n");
+}
+
+function extractGeneratedResponseText(response = {}) {
+	const direct = humanizeValue(response.content || response.summary || response.analysis || response.title);
+	if (direct) return direct;
+
+	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+		.map((item, index) => `${index + 1}. ${item}`)
+		.join("\n");
+
+	const findingLine = normalizeDisplayList(response.findings, 4)
+		.map((item) => `- ${item}`)
+		.join("\n");
+
+	return [recommendationLine, findingLine].filter(Boolean).join("\n\n");
 }
 
 function destinationRouteForSpecialist(specialistId, outputType) {
@@ -2402,7 +2459,10 @@ function renderPhase1Composer(session, escapeHtml) {
 				placeholder="${placeholder}"
 			>${escapeHtml(session.draftMessage)}</textarea>
 			<div class="aicmd-v2-action-row">
-				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-primary" type="button">
+				<button id="aicmdV2AskBtn" class="aicmd-v2-btn-primary" type="button">
+					Ask Specialist
+				</button>
+				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">
 					Prepare Guidance
 				</button>
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
@@ -2422,7 +2482,7 @@ function renderPhase1Composer(session, escapeHtml) {
 				</button>
 			</div>
 			<div id="aicmdV2Status" class="aicmd-v2-composer-hint">
-				${escapeHtml(session.draftStatus || "Choose a specialist, write your request, then use Prepare Guidance. Ctrl / Cmd + Enter to prepare.")}
+				${escapeHtml(session.draftStatus || "Choose a specialist, write your request, then use Ask Specialist for generated output or Prepare Guidance for local preview.")}
 			</div>
 			<div class="aicmd-v2-planned-row">
 				<span class="aicmd-v2-planned-chip is-available">Read preview available (browser)</span>
@@ -2546,6 +2606,59 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 				<li><span>Team chat execution bridge</span><strong class="is-planned">Planned — requires backend bridge</strong></li>
 				<li><span>Realtime voice chat</span><strong class="is-planned">Future — needs provider + bridge</strong></li>
 			</ul>
+		</section>
+	`;
+}
+
+function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+	const latest = asArray(session.responseHistory)[0] || null;
+	const bridgeLabel = bridgeStatus.available ? "Connected" : "Unavailable";
+	const emptyBody = bridgeStatus.available
+		? "Ask a specialist to receive a generated response in this panel."
+		: humanizeValue(bridgeStatus.reason, "AI response bridge is not connected yet.");
+
+	return `
+		<section class="aicmd-v2-chat">
+			<div class="aicmd-v2-chat-head">
+				<div>
+					<h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
+					<p class="aicmd-v2-chat-subtitle">Real generated specialist responses appear here when the safe response bridge is connected.</p>
+				</div>
+				<span class="aicmd-v2-chat-bridge ${bridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+			</div>
+
+			<div class="aicmd-v2-chat-safety">Guidance only. No workflow run, publish, approval, or authority mutation from this panel.</div>
+
+			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist…</div>` : ""}
+			${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
+
+			${latest ? `
+				<div class="aicmd-v2-chat-card">
+					<div class="aicmd-v2-chat-meta">
+						<span><strong>Specialist:</strong> ${escapeHtml(latest.specialistLabel || "Specialist")}</span>
+						<span><strong>Time:</strong> ${escapeHtml(formatTime(latest.generatedAt))}</span>
+					</div>
+					<div class="aicmd-v2-chat-user">
+						<span class="aicmd-v2-chat-label">User request</span>
+						<p>${escapeHtml(latest.prompt || "")}</p>
+					</div>
+					<div class="aicmd-v2-chat-response">
+						<span class="aicmd-v2-chat-label">Generated response</span>
+						<p>${escapeHtml(latest.responseText || "")}</p>
+					</div>
+				</div>
+			` : `
+				<div class="aicmd-v2-chat-empty">${escapeHtml(emptyBody)}</div>
+			`}
+
+			<div class="aicmd-v2-chat-actions">
+				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy response</button>
+				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in composer</button>
+				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save local response</button>
+				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Convert to preview</button>
+				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Send to destination</button>
+				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read response</button>
+			</div>
 		</section>
 	`;
 }
@@ -2680,6 +2793,7 @@ export const aiCommandRoute = {
 			escapeHtml,
 			navigateTo,
 			showMessage,
+			executeProjectAiCommand,
 			fetchProjectInsights,
 			fetchProjectLearning,
 			reloadProjectData
@@ -2690,10 +2804,14 @@ export const aiCommandRoute = {
 		const sessionKey = projectName || "__default__";
 		const session = ensureSession(sessionKey);
 		hydrateSessionDraft(sessionKey, session);
+		const savedOutput = asObject(loadLocalOutput(sessionKey));
 		if (!session.outputPreview) {
-			const savedOutput = asObject(loadLocalOutput(sessionKey));
 			const preview = asObject(savedOutput.preview);
 			if (preview.outputType) session.outputPreview = preview;
+		}
+		if (!session.responseHistoryLoaded) {
+			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+			session.responseHistoryLoaded = true;
 		}
 
 		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
@@ -2718,6 +2836,7 @@ export const aiCommandRoute = {
 
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+		const responseBridge = getAiResponseBridgeStatus(executeProjectAiCommand);
 
 		const root = $("ctrlRoomRoot");
 		if (!root) return;
@@ -2730,6 +2849,7 @@ export const aiCommandRoute = {
 					<main class="aicmd-v2-main">
 						${renderPhase1Profile(session, escapeHtml)}
 						${renderPhase1Composer(session, escapeHtml)}
+						${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
 						${renderPhase2PreviewPanel(session, escapeHtml)}
 						${renderPhase1SuggestedPrompts(session, escapeHtml)}
 						${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
@@ -2815,7 +2935,92 @@ export const aiCommandRoute = {
 			input.onkeydown = (event) => {
 				if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
 					event.preventDefault();
-					$("aicmdV2PrepareBtn")?.click?.();
+					$("aicmdV2AskBtn")?.click?.();
+				}
+			};
+		}
+
+		// ── ASK SPECIALIST (Phase 3 response bridge) ────────────────
+		const askBtn = $("aicmdV2AskBtn");
+		if (askBtn) {
+			askBtn.onclick = async () => {
+				const value = asString(input?.value || session.draftMessage || "").trim();
+				if (!value) {
+					updateStatus("Please write your request in the composer first.");
+					input?.focus?.();
+					return;
+				}
+
+				session.draftMessage = value;
+				session.responseError = "";
+
+				if (!responseBridge.available) {
+					session.responseLoading = false;
+					session.responseError = responseBridge.reason;
+					aiCommandRoute.render(context);
+					updateStatus(responseBridge.reason);
+					showMessage?.("AI response bridge is not connected yet.");
+					return;
+				}
+
+				session.responseLoading = true;
+				aiCommandRoute.render(context);
+
+				const specialist = session.teamMode === "team"
+					? { id: "team", label: "Full Team" }
+					: getPhase1SpecialistById(session.modeId);
+				const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+				const packagedPrompt = buildSpecialistChatPrompt({
+					prompt: value,
+					specialistLabel: specialist.label,
+					modeLabel,
+					projectName,
+					language: aiContext.language || "user language"
+				});
+
+				try {
+					const result = await executeProjectAiCommand(projectName, {
+						command: packagedPrompt,
+						mode_id: session.modeId,
+						source: "ai-command-phase3-specialist-chat",
+						actor: "mh-assistant"
+					});
+
+					const response = asObject(result?.response);
+					const responseText = extractGeneratedResponseText(response);
+					if (!responseText) {
+						throw new Error("AI response bridge returned no response text.");
+					}
+
+					const routeSuggestion = asArray(response.routeSuggestions)[0];
+					session.responseHistory.unshift({
+						id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+						prompt: value,
+						specialistId: specialist.id || session.modeId,
+						specialistLabel: specialist.label || "Specialist",
+						generatedAt: nowIso(),
+						responseTitle: humanizeValue(response.title, "Generated specialist response"),
+						responseText,
+						responseRaw: response,
+						destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+					});
+					session.responseHistory = session.responseHistory.slice(0, 12);
+					session.responseLoading = false;
+					session.responseError = "";
+					saveLocalOutput(sessionKey, {
+						preview: session.outputPreview,
+						responses: session.responseHistory,
+						modeId: session.modeId,
+						teamMode: session.teamMode
+					});
+					aiCommandRoute.render(context);
+					updateStatus("Specialist response generated.");
+					showMessage?.("Specialist response generated.");
+				} catch (error) {
+					session.responseLoading = false;
+					session.responseError = asString(error?.message || "Failed to generate specialist response.");
+					aiCommandRoute.render(context);
+					updateStatus(session.responseError);
 				}
 			};
 		}
@@ -2905,6 +3110,133 @@ export const aiCommandRoute = {
 				persistSessionDraft(sessionKey, session, "Draft cleared");
 				updateStatus("Composer draft cleared.");
 				showMessage?.("Composer draft cleared.");
+			};
+		}
+
+		// ── RESPONSE ACTIONS (Phase 3 safe actions) ──────────────────
+		const latestResponse = asArray(session.responseHistory)[0] || null;
+
+		const responseCopyBtn = $("aicmdV3ResponseCopyBtn");
+		if (responseCopyBtn) {
+			responseCopyBtn.onclick = async () => {
+				if (!latestResponse?.responseText) return;
+				try {
+					if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+						await navigator.clipboard.writeText(latestResponse.responseText);
+						updateStatus("Response copied to clipboard.");
+						showMessage?.("Response copied.");
+					}
+				} catch (_) {
+					updateStatus("Copy failed. Clipboard access may be blocked.");
+				}
+			};
+		}
+
+		const responseUseBtn = $("aicmdV3ResponseUseBtn");
+		if (responseUseBtn) {
+			responseUseBtn.onclick = () => {
+				if (!latestResponse?.responseText) return;
+				session.draftMessage = latestResponse.responseText;
+				if (input) {
+					input.value = latestResponse.responseText;
+					input.focus();
+				}
+				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");
+				updateStatus("Response inserted into composer.");
+			};
+		}
+
+		const responseSaveBtn = $("aicmdV3ResponseSaveBtn");
+		if (responseSaveBtn) {
+			responseSaveBtn.onclick = () => {
+				if (!latestResponse) return;
+				const saved = saveLocalOutput(sessionKey, {
+					preview: session.outputPreview,
+					responses: session.responseHistory,
+					modeId: session.modeId,
+					teamMode: session.teamMode
+				});
+				updateStatus(`Response saved locally ${formatTime(saved.updatedAt)}.`);
+				showMessage?.("Response saved locally.");
+			};
+		}
+
+		const responseConvertBtn = $("aicmdV3ResponseConvertBtn");
+		if (responseConvertBtn) {
+			responseConvertBtn.onclick = () => {
+				if (!latestResponse) return;
+				const preview = buildPhase2OutputPreview({
+					intent: "guidance",
+					session,
+					prompt: latestResponse.prompt,
+					projectName
+				});
+				session.outputPreview = {
+					...preview,
+					title: latestResponse.responseTitle || preview.title,
+					summary: latestResponse.responseText,
+					bullets: normalizeDisplayList(asArray(latestResponse.responseRaw?.recommendations), 8),
+					steps: normalizeDisplayList(asArray(latestResponse.responseRaw?.nextActions), 8),
+					generatedAt: latestResponse.generatedAt || nowIso(),
+					sourcePrompt: latestResponse.prompt
+				};
+				saveLocalOutput(sessionKey, {
+					preview: session.outputPreview,
+					responses: session.responseHistory,
+					modeId: session.modeId,
+					teamMode: session.teamMode
+				});
+				aiCommandRoute.render(context);
+				showMessage?.("Generated response converted to preview.");
+			};
+		}
+
+		const responseSendBtn = $("aicmdV3ResponseSendBtn");
+		if (responseSendBtn) {
+			responseSendBtn.onclick = () => {
+				if (!latestResponse) return;
+				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+				const draftContext = {
+					projectName: projectName || "",
+					modeId: latestResponse.specialistId || session.modeId,
+					lastCommand: latestResponse.prompt || "",
+					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+					phase3_response: latestResponse
+				};
+				setSharedAiDraft(projectName || "__default__", draftContext);
+				setSharedHandoff(projectName || "__default__", destination, {
+					id: `aicmd-response-${Date.now()}`,
+					source_page: "ai-command",
+					destination_page: destination,
+					status: "available",
+					created_at: nowIso(),
+					payload: {
+						prompt: latestResponse.prompt,
+						draft_context: draftContext,
+						output: latestResponse.responseRaw || {
+							title: latestResponse.responseTitle,
+							summary: latestResponse.responseText
+						}
+					}
+				});
+				showMessage?.("Response context prepared. Review before saving or executing.");
+				navigateTo(destination);
+			};
+		}
+
+		const responseReadBtn = $("aicmdV3ResponseReadBtn");
+		if (responseReadBtn) {
+			responseReadBtn.onclick = () => {
+				if (!latestResponse?.responseText) return;
+				if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") {
+					updateStatus("Read response is not supported in this browser.");
+					return;
+				}
+				const utterance = new SpeechSynthesisUtterance(latestResponse.responseText);
+				speechSynthesis.cancel();
+				speechSynthesis.speak(utterance);
+				updateStatus("Reading response locally in browser.");
 			};
 		}
 
