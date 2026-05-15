@@ -13,6 +13,11 @@ const escalationStore = require('./escalation/store/escalation-store');
 
 const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
 
+const {
+  createIntegrationInboxSeed
+} = require('./unified-inbox/register-integration-inbox');
+
+
 
 
 
@@ -53,7 +58,8 @@ function createCustomerOperationsRuntime() {
       create: unifiedInboxStore.createInboxEntry,
       get: unifiedInboxStore.getInboxEntry,
       list: unifiedInboxStore.listInboxEntries,
-      update: unifiedInboxStore.updateInboxEntry
+      update: unifiedInboxStore.updateInboxEntry,
+      createFromIntegration: createIntegrationInboxSeed
     },
 
     escalation: {
@@ -111,6 +117,7 @@ function createCustomerOperationsRuntime() {
           sla: true,
           escalation: true,
           unified_inbox: true,
+          integration_inbox_bridge: true,
           voice: false,
           ivr: false,
           outreach: false,
