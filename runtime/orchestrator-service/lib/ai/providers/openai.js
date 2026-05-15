@@ -52,6 +52,109 @@ function compactList(values, limit = 5) {
   return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
 }
 
+function normalizeReadableList(values, limit = 12) {
+  return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
+}
+
+function renderNumberedLines(items = []) {
+  return asArray(items)
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join('\n');
+}
+
+function buildContentPackText(contentPack = {}, nextActions = []) {
+  const pack = contentPack && typeof contentPack === 'object' ? contentPack : {};
+  const hooks = normalizeReadableList(pack.hooks, 12);
+  const captions = normalizeReadableList(pack.captions, 8);
+  const scripts = normalizeReadableList(pack.scripts || pack.reelScripts || pack.reel_scripts, 8);
+  const emailCopy = normalizeReadableList(pack.emailCopy || pack.email_copy || pack.emails, 6);
+  const landingPageSections = normalizeReadableList(pack.landingPageSections || pack.landing_page_sections, 8);
+  const postIdeas = normalizeReadableList(pack.postIdeas || pack.post_ideas || pack.ideas, 8);
+  const blocks = [];
+
+  if (hooks.length) {
+    blocks.push(renderNumberedLines(hooks));
+  }
+  if (captions.length) {
+    blocks.push(['Captions:', renderNumberedLines(captions)].join('\n'));
+  }
+  if (scripts.length) {
+    blocks.push(['Scripts:', renderNumberedLines(scripts)].join('\n'));
+  }
+  if (emailCopy.length) {
+    blocks.push(['Email Copy:', renderNumberedLines(emailCopy)].join('\n'));
+  }
+  if (landingPageSections.length) {
+    blocks.push(['Landing Page Sections:', renderNumberedLines(landingPageSections)].join('\n'));
+  }
+  if (postIdeas.length) {
+    blocks.push(['Post Ideas:', renderNumberedLines(postIdeas)].join('\n'));
+  }
+
+  const suggestion = normalizeReadableList(nextActions, 1)[0];
+  if (suggestion) {
+    blocks.push(`Next step: ${suggestion}`);
+  }
+
+  return blocks.filter(Boolean).join('\n\n').trim();
+}
+
+function buildAdIdeasText(adIdeas = [], nextActions = []) {
+  const ideas = asArray(adIdeas).map((item) => {
+    if (typeof item === 'string') {
+      return humanizeValue(item);
+    }
+
+    const record = item && typeof item === 'object' ? item : {};
+    const hook = humanizeValue(record.hook || record.title || record.headline || record.angle);
+    const primaryText = humanizeValue(record.primaryText || record.primary_text || record.copy || record.text || record.body);
+    const headline = humanizeValue(record.headline || record.title);
+    const cta = humanizeValue(record.cta || record.CTA || record.callToAction || record.call_to_action);
+    const parts = [hook, primaryText, headline ? `Headline: ${headline}` : '', cta ? `CTA: ${cta}` : ''].filter(Boolean);
+    return parts.join(' | ');
+  }).filter(Boolean);
+
+  const blocks = [];
+  if (ideas.length) {
+    blocks.push(renderNumberedLines(ideas));
+  }
+  const suggestion = normalizeReadableList(nextActions, 1)[0];
+  if (suggestion) {
+    blocks.push(`Next step: ${suggestion}`);
+  }
+  return blocks.filter(Boolean).join('\n\n').trim();
+}
+
+function buildStructuredContent(parsed = {}) {
+  const outputType = asString(parsed.outputType || parsed.output_type);
+  const nextActions = parsed.nextActions || parsed.next_actions || parsed.actions;
+
+  if (outputType === 'content_pack') {
+    return buildContentPackText(parsed.contentPack || parsed.content_pack || {}, nextActions);
+  }
+
+  if (outputType === 'ad_ideas') {
+    return buildAdIdeasText(parsed.adIdeas || parsed.ad_ideas || [], nextActions);
+  }
+
+  return '';
+}
+
+function shouldPreferStructuredContent(parsed = {}, content = '', structuredContent = '') {
+  if (!structuredContent) return false;
+
+  const outputType = asString(parsed.outputType || parsed.output_type);
+  if (!['content_pack', 'ad_ideas'].includes(outputType)) {
+    return false;
+  }
+
+  if (!content) return true;
+
+  const shortFlatContent = content.length < 140 && !content.includes('\n');
+  const structuredHasDepth = structuredContent.length > content.length;
+  return shortFlatContent && structuredHasDepth;
+}
+
 function normalizeRouteSuggestions(value) {
   return asArray(value)
     .map((item) => {
@@ -110,7 +213,14 @@ function normalizeProviderOutput(rawText) {
   const parsed = parseJsonObject(rawText);
 
   if (parsed && typeof parsed === 'object') {
-    const content = humanizeValue(parsed.content || parsed.summary || parsed.message || parsed.output);
+    const structuredContent = buildStructuredContent(parsed);
+    let content = humanizeValue(parsed.content || parsed.message || parsed.output);
+    if (shouldPreferStructuredContent(parsed, content, structuredContent)) {
+      content = structuredContent;
+    }
+    if (!content) {
+      content = humanizeValue(structuredContent || parsed.summary);
+    }
     const summary = humanizeValue(parsed.summary || content);
     const analysis = humanizeValue(parsed.analysis || parsed.rationale || parsed.reasoning || parsed.context);
     const recommendations = compactList(
@@ -135,6 +245,7 @@ function normalizeProviderOutput(rawText) {
       operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
       executiveBrief: parsed.executiveBrief || parsed.executive_brief || null,
       missingData: compactList(parsed.missingData || parsed.missing_data || parsed.blockers, 8),
+      chat_answer: humanizeValue(parsed.chat_answer || parsed.chatAnswer || content),
       raw: parsed
     };
   }
@@ -157,6 +268,7 @@ function normalizeProviderOutput(rawText) {
     operationsPlan: null,
     executiveBrief: null,
     missingData: [],
+    chat_answer: asString(rawText),
     raw: null
   };
 }
@@ -280,6 +392,7 @@ function createOpenAiProvider(options = {}) {
         title: normalized.title,
         summary: normalized.summary,
         content: normalized.content,
+        chat_answer: normalized.chat_answer,
         analysis: normalized.analysis,
         recommendations: normalized.recommendations,
         nextActions: normalized.nextActions,
