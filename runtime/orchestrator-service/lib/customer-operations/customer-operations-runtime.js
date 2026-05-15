@@ -9,6 +9,9 @@ const customerProfileStore = require('./customers/store/customer-profile-store')
 
 const slaPolicyStore = require('./sla/store/sla-policy-store');
 
+const escalationStore = require('./escalation/store/escalation-store');
+
+
 
 
 const {
@@ -35,6 +38,14 @@ function createCustomerOperationsRuntime() {
 
 
 
+
+
+    escalation: {
+      create: escalationStore.createEscalation,
+      get: escalationStore.getEscalation,
+      list: escalationStore.listEscalations,
+      update: escalationStore.updateEscalation
+    },
 
     sla: {
       create: slaPolicyStore.createSlaPolicy,
@@ -80,6 +91,7 @@ function createCustomerOperationsRuntime() {
           messages: true,
           customers: true,
           sla: true,
+          escalation: true,
           voice: false,
           ivr: false,
           outreach: false,
