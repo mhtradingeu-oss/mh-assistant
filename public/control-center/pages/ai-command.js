@@ -417,7 +417,7 @@ const PHASE35_SPECIALIST_TOOLS = {
 		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
 		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
 		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
-		{ id: "sales-handoff-draft", label: "Sales Handoff Draft", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
 	]
 };
 
@@ -1114,7 +1114,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 		if (outputType === "task") {
 			return {
 				...base,
-				title: `Task Draft: Strategic plan for ${projectName || "current project"}`,
+				title: `Task: Strategic plan for ${projectName || "current project"}`,
 				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
 				steps: [
 					"Define top 3 strategic priorities for this cycle",
@@ -1140,7 +1140,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 	if (specialistId === "writer") {
 		return {
 			...base,
-			title: outputType === "task" ? "Task Draft: Draft campaign copy" : "Content Guidance: Messaging draft",
+			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
 			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
 			hooks: [
 				`Problem-aware hook direction for ${projectName || "this project"}`,
@@ -1194,7 +1194,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 	if (specialistId === "video_lead") {
 		return {
 			...base,
-			title: outputType === "task" ? "Task Draft: Video production plan" : "Video Brief: Hook, script, storyboard",
+			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
 			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
 			steps: [
 				"Draft opening hook and audience angle",
@@ -1229,7 +1229,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 	if (specialistId === "ads") {
 		return {
 			...base,
-			title: outputType === "task" ? "Task Draft: Paid test plan" : "Ads Draft: Angles and tests",
+			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
 			summary: "Ad angle and audience testing draft prepared for review.",
 			hooks: [
 				"German problem-led ad hook",
@@ -1257,7 +1257,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 	if (specialistId === "analyst") {
 		return {
 			...base,
-			title: outputType === "task" ? "Task Draft: Analysis plan" : "Insights Guidance: Signal review",
+			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
 			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
 			bullets: [
 				"Signals to check: readiness, channel performance, data coverage",
@@ -1318,7 +1318,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 	if (specialistId === "sales_crm") {
 		return {
 			...base,
-			title: outputType === "handoff" ? "Sales Handoff Draft" : "Sales / CRM Draft: Lead and outreach plan",
+			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
 			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
 			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
 			outreachDraft: [
@@ -1356,7 +1356,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 		if (outputType === "workflow") {
 			return {
 				...base,
-				title: "Workflow Draft: Operating sequence",
+				title: "Workflow: Operating sequence",
 				summary: "Workflow draft prepared with stage owners and checkpoints.",
 				steps: [
 					"Stage 1: Intake and objective alignment",
@@ -1410,7 +1410,7 @@ function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
 	return {
 		...base,
 		specialistId: "team",
-		title: outputType === "workflow" ? "Team Workflow Draft" : `Team ${titleCase(outputType)} Preview`,
+		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
 		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
 		bullets: [
 			"Strategist defines priorities and sequence",
@@ -1425,8 +1425,8 @@ function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
 function formatOutputTypeLabel(outputType) {
 	const labels = {
 		guidance: "Guidance",
-		task: "Task Draft",
-		workflow: "Workflow Draft",
+		task: "Task",
+		workflow: "Workflow",
 		handoff: "Handoff Preview",
 		media_brief: "Media Brief"
 	};
@@ -3008,22 +3008,22 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 			</div>
 			<div class="aicmd-v2-action-row">
 				<button id="aicmdV2AskBtn" class="aicmd-v2-btn-primary" type="button">
-					Ask Specialist
+					Ask AI Team
 				</button>
 				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">
-					Preview Draft
+					Preview
 				</button>
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
-					Task Draft
+					Task
 				</button>
 				<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">
-					Workflow Draft
+					Workflow
 				</button>
 				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
-					Handoff Draft
+					Handoff
 				</button>
 				<button id="aicmdV2VoiceBtn" class="aicmd-v2-btn-secondary" type="button">
-					Browser Voice
+					Voice
 				</button>
 				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
 					Save
@@ -3118,8 +3118,8 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 
 			<div class="aicmd-v2-preview-actions">
 				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
-				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
-				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use Above</button>
+				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
 				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
 				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
 				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
@@ -3172,7 +3172,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 			<div class="aicmd-v2-chat-head">
 				<div>
 					<h3 class="aicmd-v2-chat-title">Chat</h3>
-					<p class="aicmd-v2-chat-subtitle">Specialist answers appear here. Continue from the main Composer above.</p>
+					<p class="aicmd-v2-chat-subtitle">Chat shows specialist responses. Write or continue from the Composer above.</p>
 				</div>
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
@@ -3207,17 +3207,17 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 			`}
 
 			<div class="aicmd-v2-chat-composer-note">
-			        Write new instructions in the Composer above, or use “Continue in Composer” to focus the workspace input.
+			        This area is for reading responses. Use the Composer above to write the next instruction.
 			</div>
 
 			<div class="aicmd-v2-chat-actions">
 				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
-				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
-				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Preview</button>
-				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
-				<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Continue in Composer</button>
+				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use Above</button>
+				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Preview</button>
+				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route</button>
+				<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Write Follow-up Above</button>
 				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
-				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read response</button>
+				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
 			</div>
 		</section>
 	`;
@@ -4038,7 +4038,7 @@ export const aiCommandRoute = {
 			responseReadBtn.onclick = () => {
 				if (!latestResponse?.responseText) return;
 				if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") {
-					updateStatus("Read response is not supported in this browser.");
+					updateStatus("Read is not supported in this browser.");
 					return;
 				}
 				const utterance = new SpeechSynthesisUtterance(latestResponse.responseText);
