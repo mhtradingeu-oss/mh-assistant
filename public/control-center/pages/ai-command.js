@@ -683,6 +683,62 @@ function applyTokenTemplate(template, context = {}) {
 	return asString(template).replace(/\{(project|specialist|campaign)\}/g, (_, token) => tokenMap[token] || "");
 }
 
+
+function normalizeAiComposerPrompt(value) {
+  let text = asString(value).trim();
+
+  if (!text) return "";
+
+  const commandPrefixes = [
+    "Prepare a handoff summary for:",
+    "Draft a workflow sequence for:",
+    "Draft a task plan for:",
+    "Build a launch campaign for:",
+    "Generate content for:",
+    "Analyze current performance for:",
+    "Fix readiness for:"
+  ];
+
+  // Collapse exact repeated prefixes.
+  for (const prefix of commandPrefixes) {
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const repeatedPattern = new RegExp(`^(?:${escaped}\\s*){2,}`, "i");
+    text = text.replace(repeatedPattern, `${prefix} `);
+  }
+
+  // If the composer contains a chain of quick actions, keep only the latest action.
+  const latestMarker = commandPrefixes
+    .map((marker) => ({ marker, index: text.lastIndexOf(marker) }))
+    .filter((item) => item.index > 0)
+    .sort((a, b) => b.index - a.index)[0];
+
+  if (latestMarker) {
+    text = text.slice(latestMarker.index).trim();
+  }
+
+  // Remove accidental duplicate "X for: X for:" fragments anywhere.
+  for (const prefix of commandPrefixes) {
+    const duplicate = `${prefix} ${prefix}`;
+    while (text.includes(duplicate)) {
+      text = text.replace(duplicate, prefix);
+    }
+  }
+
+  return text.replace(/\s+/g, " ").trim();
+}
+
+
+function setAiComposerValue(session, input, value) {
+  const cleanValue = normalizeAiComposerPrompt(value);
+  session.draftMessage = cleanValue;
+  if (input) {
+    input.value = cleanValue;
+    input.focus?.();
+  }
+  return cleanValue;
+}
+
+
 function normalizeDisplayList(value, limit = 8) {
 	return asArray(value)
 		.map((item) => humanizeValue(item))
@@ -2955,19 +3011,19 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 					Ask Specialist
 				</button>
 				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">
-					Preview
+					Preview Draft
 				</button>
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
-					Task
+					Task Draft
 				</button>
 				<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">
-					Workflow
+					Workflow Draft
 				</button>
 				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
-					Handoff
+					Handoff Draft
 				</button>
 				<button id="aicmdV2VoiceBtn" class="aicmd-v2-btn-secondary" type="button">
-					Voice Ready
+					Browser Voice
 				</button>
 				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
 					Save
@@ -3063,7 +3119,7 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			<div class="aicmd-v2-preview-actions">
 				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
 				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
-				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Send to Destination</button>
+				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
 				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
 				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
 				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
@@ -3154,7 +3210,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
 				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
 				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Preview</button>
-				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Destination</button>
+				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
 				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
 				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read response</button>
 			</div>
@@ -3367,7 +3423,7 @@ export const aiCommandRoute = {
 		if (bridgeValue) {
 			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
 			if (detectedSpecialist) session.modeId = detectedSpecialist;
-			session.draftMessage = bridgeValue;
+			setAiComposerValue(session, input, bridgeValue);
 			persistSessionDraft(sessionKey, session, "Specialist context loaded from workspace");
 			if (globalInput) globalInput.value = "";
 		}
@@ -3597,7 +3653,7 @@ export const aiCommandRoute = {
 					recognition.onresult = (event) => {
 						const transcript = asString(event?.results?.[0]?.[0]?.transcript || "").trim();
 						if (!transcript) return;
-						session.draftMessage = transcript;
+						setAiComposerValue(session, input, transcript);
 						if (input) {
 							input.value = transcript;
 							input.focus();
@@ -3751,8 +3807,7 @@ export const aiCommandRoute = {
 				const taskPrompt = value
 					? `Draft a task plan for: ${value}`
 					: `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
-				if (input) input.value = taskPrompt;
-				session.draftMessage = taskPrompt;
+				setAiComposerValue(session, input, taskPrompt);
 				setPreviewFromIntent("task", taskPrompt, { switchTab: "preview" });
 				updateStatus("Task draft preview prepared locally. Review before creating durable tasks.");
 				showMessage?.("Task draft preview prepared.");
@@ -3768,8 +3823,7 @@ export const aiCommandRoute = {
 				const workflowPrompt = value
 					? `Draft a workflow sequence for: ${value}`
 					: `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
-				if (input) input.value = workflowPrompt;
-				session.draftMessage = workflowPrompt;
+				setAiComposerValue(session, input, workflowPrompt);
 				setPreviewFromIntent("workflow", workflowPrompt, { switchTab: "preview" });
 				updateStatus("Workflow draft preview prepared locally. No workflow run started.");
 				showMessage?.("Workflow draft preview prepared.");
@@ -3786,8 +3840,7 @@ export const aiCommandRoute = {
 				const handoffPrompt = value
 					? `Prepare a handoff summary for: ${value}`
 					: `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
-				if (input) input.value = handoffPrompt;
-				session.draftMessage = handoffPrompt;
+				setAiComposerValue(session, input, handoffPrompt);
 				setPreviewFromIntent("handoff", handoffPrompt, { switchTab: "preview" });
 				updateStatus("Handoff preview prepared locally. Review destination before sending.");
 				showMessage?.("Handoff preview prepared.");
@@ -3816,10 +3869,7 @@ export const aiCommandRoute = {
 					campaign: aiContext.campaign
 				});
 
-				session.draftMessage = preparedPrompt;
-				if (input) {
-					input.value = preparedPrompt;
-				}
+				setAiComposerValue(session, input, preparedPrompt);
 
 				if (tool.intent === "task") {
 					setPreviewFromIntent("task", preparedPrompt, { switchTab: "preview" });
@@ -3881,9 +3931,8 @@ export const aiCommandRoute = {
 		if (responseUseBtn) {
 			responseUseBtn.onclick = () => {
 				if (!latestResponse?.responseText) return;
-				session.draftMessage = latestResponse.responseText;
+				setAiComposerValue(session, input, latestResponse.responseText);
 				if (input) {
-					input.value = latestResponse.responseText;
 					input.focus();
 				}
 				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");

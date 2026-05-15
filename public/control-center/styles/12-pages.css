@@ -4399,3 +4399,184 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* AI Team Phase 4.1 terminal polish: density, chat readability, and command hygiene */
+.aicmd-v2-shell {
+  --aicmd-compact-gap: 10px;
+}
+
+.aicmd-v2-header,
+.aicmd-v2-composer,
+.aicmd-v2-profile,
+.aicmd-v2-chat-panel {
+  animation: aicmd-soft-in 160ms ease-out;
+}
+
+@keyframes aicmd-soft-in {
+  from {
+    opacity: 0.96;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aicmd-v2-composer textarea,
+.aicmd-v2-composer-input,
+#aicmdV2ComposerInput {
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+.aicmd-v2-composer textarea:focus,
+#aicmdV2ComposerInput:focus {
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.55), 0 0 0 4px rgba(34, 211, 238, 0.08);
+}
+
+.aicmd-v2-action-row,
+.aicmd-v2-toolbar,
+.aicmd-v2-response-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aicmd-v2-btn-primary,
+.aicmd-v2-btn-secondary,
+.aicmd-v2-btn-ghost {
+  min-height: 30px;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, opacity 120ms ease;
+}
+
+.aicmd-v2-btn-primary:hover,
+.aicmd-v2-btn-secondary:hover,
+.aicmd-v2-btn-ghost:hover {
+  transform: translateY(-1px);
+}
+
+.aicmd-v2-btn-secondary:disabled,
+.aicmd-v2-btn-ghost:disabled {
+  opacity: 0.45;
+  transform: none;
+}
+
+.aicmd-v2-chat-card,
+.aicmd-v2-chat-empty,
+.aicmd-v2-preview-empty {
+  border-radius: 14px;
+}
+
+.aicmd-v2-chat-card.is-latest {
+  border-color: rgba(34, 211, 238, 0.55);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(8, 17, 30, 0.96));
+}
+
+.aicmd-v2-chat-response {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.aicmd-v2-chat-response p {
+  margin: 0 0 8px;
+}
+
+.aicmd-v2-tabs {
+  gap: 8px;
+}
+
+.aicmd-v2-tab.is-active,
+.aicmd-v2-spec-btn.is-active {
+  border-color: rgba(34, 211, 238, 0.72);
+  box-shadow: inset 3px 0 0 rgba(34, 211, 238, 0.95);
+}
+
+.aicmd-v2-tool-chip,
+.aicmd-v2-chip {
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.aicmd-v2-context-list,
+.aicmd-v2-media-status-list {
+  gap: 8px;
+}
+
+@media (max-width: 1280px) {
+  .aicmd-v2-shell {
+    gap: 10px;
+  }
+
+  .aicmd-v2-left {
+    width: 220px;
+  }
+
+  .aicmd-v2-spec-summary,
+  .aicmd-v2-meta-chip span {
+    font-size: 10px;
+  }
+
+  .aicmd-v2-composer textarea,
+  #aicmdV2ComposerInput {
+    min-height: 88px;
+  }
+}
+
+/* AI Team Phase 4.1 action clarity: professional tool and button semantics */
+.aicmd-v2-btn-primary,
+.aicmd-v2-btn-secondary,
+.aicmd-v2-btn-ghost,
+.aicmd-v2-tool-chip,
+.aicmd-v2-prompt-card,
+.aicmd-v2-tab {
+  cursor: pointer;
+}
+
+.aicmd-v2-btn-secondary[disabled],
+.aicmd-v2-btn-ghost[disabled],
+.aicmd-v2-btn-primary[disabled] {
+  cursor: not-allowed;
+}
+
+.aicmd-v2-tool-card,
+.aicmd-v2-prompt-card {
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.aicmd-v2-tool-card:hover,
+.aicmd-v2-prompt-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(34, 211, 238, 0.42);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.aicmd-v2-tool-card strong,
+.aicmd-v2-prompt-card strong {
+  letter-spacing: 0.01em;
+}
+
+.aicmd-v2-tool-card span,
+.aicmd-v2-prompt-card span {
+  color: rgba(203, 213, 225, 0.78);
+}
+
+.aicmd-v2-tab {
+  position: relative;
+}
+
+.aicmd-v2-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.85);
+}
+
+.aicmd-v2-context-grid,
+.aicmd-v2-tool-grid,
+.aicmd-v2-preview-grid {
+  align-items: stretch;
+}
