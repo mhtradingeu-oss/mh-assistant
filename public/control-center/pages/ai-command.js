@@ -848,6 +848,7 @@ function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, project
 
 function extractGeneratedResponseText(response = {}) {
 	const direct = humanizeValue(
+		response.chat_answer ||
 		response.response_text ||
 		response.content ||
 		response.summary ||
@@ -3271,6 +3272,7 @@ export const aiCommandRoute = {
 					const response = asObject(result?.response);
 					const responseText = extractGeneratedResponseText({
 						...response,
+						chat_answer: result?.chat_answer,
 						response_text: result?.response_text,
 						sections: result?.sections,
 						bullets: result?.bullets

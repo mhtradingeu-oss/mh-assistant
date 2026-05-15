@@ -188,30 +188,38 @@ function buildGuidancePrompt(input = {}) {
   );
 
   const specialistInstruction = specialistId === 'writer'
-    ? 'As Content Writer, produce actual copy: hooks, captions, headlines, emails, scripts, and CTA lines when requested.'
+    ? 'As Content Writer, return actual copy now: hooks, captions, CTA lines, emails, scripts, and landing copy. Never answer with only a description of what the copy could be.'
     : specialistId === 'video_lead'
-      ? 'As Video Lead, produce actual video hooks, script lines, and storyboard beats when requested.'
+      ? 'As Video Lead, return actual script output now: hooks, script lines, storyboard beats, and shot-list style sequencing when requested.'
       : specialistId === 'strategist'
-        ? 'As Strategist, produce a strategic plan with priorities, rationale, and ordered next moves.'
+        ? 'As Strategist, return a practical priority plan with positioning, rationale, and ordered next moves.'
         : specialistId === 'compliance_reviewer'
-          ? 'As Compliance Reviewer, produce a concrete risk checklist and safer wording replacements.'
+          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
           : specialistId === 'operations'
-            ? 'As Operations Lead, produce task and workflow draft steps only; do not execute any operation.'
-            : 'Produce concrete specialist output, not a high-level summary.';
+            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+            : 'Produce concrete specialist chat output, not a high-level summary.';
 
   return [
-    `Guidance-only specialist response for MH Assistant OS.`,
+    `Guidance-only live specialist chat response for MH Assistant OS.`,
     `Specialist ID: ${specialistId || 'specialist'}`,
     `Specialist name: ${specialistName}`,
     `Mode: ${teamMode}`,
     `Language: ${language}`,
     `Safety instruction: ${safetyInstruction}`,
-    'Answer as the selected specialist.',
+    'You are answering inside a live specialist chat.',
+    'Answer the user directly as the selected specialist.',
     'Match the user language exactly.',
+    'If the user writes Arabic, answer Arabic. If the user writes German, answer German.',
+    'If the user asks for N items, return exactly N items.',
+    'Example rule: if the user asks for 3 hooks, return exactly 3 hooks.',
     'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+    'Do not summarize the task.',
+    'Do not say "I can create" or "I would create".',
+    'Create the requested output now.',
     'Do not describe what you would do.',
     'Do not answer with a generic summary.',
     'Give practical, ready-to-copy output.',
+    'After delivering the requested output, add one short next-step suggestion.',
     'Provide practical guidance/content only.',
     specialistInstruction,
     'Do not claim task/workflow/handoff/approval/publish actions were executed.',
@@ -240,6 +248,37 @@ function extractGuidanceProviderText(providerOutput = {}, response = {}) {
     raw.text,
     raw.output,
     raw.message,
+    response.content,
+    response.summary,
+    response.analysis,
+    response.title
+  ];
+
+  for (const candidate of directCandidates) {
+    const text = humanizeValue(candidate);
+    if (text) return text;
+  }
+
+  return '';
+}
+
+function extractGuidanceChatAnswer(providerOutput = {}, response = {}) {
+  const provider = asObject(providerOutput);
+  const raw = asObject(provider.raw);
+
+  const directCandidates = [
+    provider.chat_answer,
+    raw.chat_answer,
+    provider.content,
+    provider.text,
+    provider.output,
+    provider.message,
+    provider.summary,
+    raw.content,
+    raw.text,
+    raw.output,
+    raw.message,
+    raw.summary,
     response.content,
     response.summary,
     response.analysis,
@@ -1152,7 +1191,8 @@ function createAiOrchestrationService(deps) {
         });
 
         const response = buildResponseFromContext(request, context, classified, providerOutput);
-        const responseText = extractGuidanceProviderText(providerOutput, response);
+        const chatAnswer = extractGuidanceChatAnswer(providerOutput, response);
+        const responseText = chatAnswer || extractGuidanceProviderText(providerOutput, response);
         const sections = [
           {
             title: 'Recommendations',
@@ -1193,11 +1233,13 @@ function createAiOrchestrationService(deps) {
             model: asString(providerOutput.model || providerConfig.model),
             usage: asObject(providerOutput.usage)
           },
+          chat_answer: responseText,
           response_text: responseText,
           bullets: normalizeReadableList(response.recommendations.length ? response.recommendations : response.nextActions, 8),
           sections,
           response: {
             status: 'completed',
+            chat_answer: responseText,
             title: response.title,
             summary: response.summary,
             content: response.content,
