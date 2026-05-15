@@ -11862,6 +11862,103 @@ function handleGetNativeMediaProviderReadiness(req, res) {
   }
 }
 
+
+
+function handleCustomerOperationsHealth(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.health()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_health_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsReadiness(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.readiness.snapshot()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_readiness_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsChannels(req, res) {
+  try {
+    return res.json({
+      channels:
+        customerOperationsRuntime.channels.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_channels_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsInbox(req, res) {
+  try {
+    return res.json({
+      inbox:
+        customerOperationsRuntime.unifiedInbox.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_inbox_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get(
+  '/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+
 app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
 app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
 app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
