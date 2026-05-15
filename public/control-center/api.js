@@ -718,6 +718,47 @@ async function getJson(path, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOU
   });
 }
 
+
+async function sendRawJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
+  const { headers } = buildWriteHeaders();
+  const response = await fetchWithTimeout(path, {
+    method,
+    headers,
+    body: body == null ? undefined : JSON.stringify(body)
+  }, timeoutMs);
+
+  const rawText = await response.text();
+  let payload = null;
+
+  if (rawText) {
+    try {
+      payload = JSON.parse(rawText);
+    } catch (error) {
+      const parseError = new Error(fallbackMessage || "Response was not valid JSON.");
+      parseError.status = response.status;
+      parseError.payload = {
+        status: response.ok ? "failed" : "error",
+        error: "Response was not valid JSON.",
+        raw: rawText.slice(0, 500)
+      };
+      throw parseError;
+    }
+  } else {
+    payload = {};
+  }
+
+  if (!response.ok) {
+    const message = String(payload?.error || payload?.message || fallbackMessage || "Request failed").trim();
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+
 async function sendJson(path, method, body, fallbackMessage, timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS) {
   const { headers, keyPresent, keySource } = buildWriteHeaders();
   const response = await fetchWithTimeout(path, {
@@ -1526,7 +1567,7 @@ export async function executeProjectAiGuidance(projectName, payload = {}) {
     throw new Error("Missing project name");
   }
 
-  return sendJson(
+  return sendRawJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/ai/guidance`,
     "POST",
     payload,
