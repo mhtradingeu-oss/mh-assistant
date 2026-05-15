@@ -16,68 +16,87 @@ import {
 import {
 	executeProjectAiGuidance
 } from "../api.js";
-
-// ============================================================
 //  AI TEAM DEFINITIONS
 // ============================================================
 
 const MODE_DEFS = [
-	{
-		id: "strategist",
-		label: "Strategist",
-		icon: "🎯",
-		summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
-		routeHint: "campaign-studio"
-	},
-	{
-		id: "writer",
-		label: "Writer",
-		icon: "✍️",
-		summary: "Captions, hooks, scripts, emails, and landing page copy.",
-		routeHint: "content-studio"
-	},
-	{
-		id: "designer",
-		label: "Designer",
-		icon: "🎨",
-		summary: "Visual direction, creative brief, format guidance, and brand consistency.",
-		routeHint: "content-studio"
-	},
-	{
-		id: "media",
-		label: "Media Agent",
-		icon: "📸",
-		summary: "Image selection, video direction, asset readiness, and media strategy.",
-		routeHint: "library"
-	},
-	{
-		id: "ads",
-		label: "Ads Specialist",
-		icon: "📢",
-		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
-		routeHint: "ads-manager"
-	},
-	{
-		id: "analyst",
-		label: "Analyst",
-		icon: "📊",
-		summary: "SEO, performance data, content insights, and traffic patterns.",
-		routeHint: "insights"
-	},
-	{
-		id: "researcher",
-		label: "Researcher",
-		icon: "🔬",
-		summary: "Competitors, market trends, audience research, and positioning gaps.",
-		routeHint: "research"
-	},
-	{
-		id: "operations",
-		label: "Operations",
-		icon: "⚙️",
-		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
-		routeHint: "workflows"
-	}
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "designer",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox, tickets, SLA, customer replies.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Leads, CRM, outreach, follow-ups.",
+                routeHint: "workflows"
+        }
 ];
 
 // Map legacy mode IDs from older sessions to new team IDs
@@ -90,6 +109,12 @@ const MODE_ID_ALIASES = {
 	video_lead: "video_lead",
 	publisher: "publisher",
 	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
 	admin: "operations"
 };
 
@@ -205,6 +230,30 @@ const SPECIALIST_DEFS = [
 		destinations: ["Workflows", "Operations Centers", "AI Command"],
 		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
 		status: "Ready"
+	},
+	{
+		id: "customer_ops",
+		label: "Customer Operations Lead",
+		icon: "🎧",
+		summary: "Inbox, tickets, SLA, customer replies.",
+		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a reply, check SLA risk, or prepare an escalation…",
+		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+		status: "Ready"
+	},
+	{
+		id: "sales_crm",
+		label: "Sales / CRM Lead",
+		icon: "💼",
+		summary: "Leads, CRM, outreach, follow-ups.",
+		placeholder: "Ask the Sales / CRM Lead to qualify leads, draft outreach, plan follow-ups, or prepare a sales handoff…",
+		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+		destinations: ["CRM", "Workflows", "Operations Centers"],
+		safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",
+		status: "Ready"
 	}
 ];
 
@@ -263,6 +312,18 @@ const SPECIALIST_SUGGESTED_PROMPTS = {
 		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
 		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
 		{ label: "Map the next execution steps", sub: "Sequence and prioritize" }
+	],
+	customer_ops: [
+		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+		{ label: "Draft customer reply", sub: "Safe response for review" },
+		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+	],
+	sales_crm: [
+		{ label: "Qualify this lead", sub: "Fit, intent, urgency, next step" },
+		{ label: "Draft outreach", sub: "Personalized message for review" },
+		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+		{ label: "Prepare sales handoff", sub: "Route context to operations" }
 	]
 };
 
@@ -274,28 +335,26 @@ const TEAM_SUGGESTED_PROMPTS = [
 	{ label: "Review team readiness", sub: "Check all specialist areas" }
 ];
 
-const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context"];
+const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
 
 const PHASE35_SPECIALIST_TOOLS = {
 	strategist: [
-		{ id: "build-strategy-brief", label: "Build strategy brief", action: "preview", intent: "guidance", template: "Build a strategy brief for {project}. Include objective, audience, offer, channels, blockers, and next move." },
-		{ id: "prioritize-next-move", label: "Prioritize next move", action: "preview", intent: "guidance", template: "Prioritize the next move for {project}. Rank by impact, urgency, and dependencies." },
-		{ id: "map-blockers", label: "Map blockers", action: "preview", intent: "task", template: "Map blockers for {project}. List blocker, owner, severity, and first fix action." },
-		{ id: "prepare-campaign-direction", label: "Prepare campaign direction", action: "preview", intent: "guidance", template: "Prepare campaign direction for {project}. Include positioning, channel mix, and launch phases." },
-		{ id: "prepare-team-mission", label: "Prepare team mission", action: "preview", intent: "handoff", template: "Prepare a full-team mission brief for {project}. Define shared objective, role responsibilities, and handoff order." }
+		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
 	],
 	writer: [
-		{ id: "write-hooks", label: "Write hooks", action: "preview", intent: "guidance", template: "Write 5 hook variants for {project}. Keep each concise and testable." },
-		{ id: "draft-captions", label: "Draft captions", action: "preview", intent: "guidance", template: "Draft captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
-		{ id: "improve-cta", label: "Improve CTA", action: "preview", intent: "task", template: "Improve CTA options for {project}. Provide conversion-focused variants for awareness, consideration, and action stages." },
-		{ id: "draft-landing-copy", label: "Draft landing copy", action: "preview", intent: "guidance", template: "Draft landing page copy for {project}. Include hero, proof points, objections, and CTA section." },
-		{ id: "prepare-publisher-handoff", label: "Prepare Publisher handoff", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include approved-ready copy package and remaining checks." }
+		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
 	],
 	media: [
-		{ id: "create-image-prompt", label: "Create image prompt", action: "preview", intent: "guidance", template: "Create image prompt directions for {project}. Include visual style, composition, subject, and brand constraints." },
-		{ id: "review-visual-direction", label: "Review visual direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
-		{ id: "map-missing-assets", label: "Map missing assets", action: "preview", intent: "task", template: "Map missing assets for {project}. List must-have files, usage context, and priority." },
-		{ id: "prepare-media-brief", label: "Prepare media brief", action: "preview", intent: "media", template: "Prepare a media brief for {project}. Include concept, visual rules, needed assets, and production notes." },
+		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
 		{ id: "open-media-studio", label: "Send to Media Studio", action: "route", route: "media-studio" }
 	],
 	video_lead: [
@@ -306,39 +365,59 @@ const PHASE35_SPECIALIST_TOOLS = {
 		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
 	],
 	publisher: [
-		{ id: "build-publish-checklist", label: "Build publish checklist", action: "preview", intent: "handoff", template: "Build a publish checklist for {project}. Include assets, copy, legal checks, and channel readiness." },
-		{ id: "prepare-schedule-draft", label: "Prepare schedule draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence and dependencies." },
-		{ id: "review-channel-readiness", label: "Review channel readiness", action: "preview", intent: "guidance", template: "Review channel readiness for {project}. Flag blockers before any publish step." },
-		{ id: "prepare-publishing-handoff", label: "Prepare publishing handoff", action: "preview", intent: "handoff", template: "Prepare a publishing handoff package for {project}. Include checklist and required approvals." },
+		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
 		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
 	],
 	ads: [
-		{ id: "draft-ad-angles", label: "Draft ad angles", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, and hook direction." },
-		{ id: "suggest-audience-tests", label: "Suggest audience tests", action: "preview", intent: "task", template: "Suggest audience tests for {project}. Provide hypotheses, segments, and measurement notes." },
-		{ id: "prepare-creative-variants", label: "Prepare creative variants", action: "preview", intent: "guidance", template: "Prepare creative variants for {project}. Include copy and visual variant matrix." },
-		{ id: "review-budget-notes", label: "Review budget notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
 		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
 	],
 	analyst: [
-		{ id: "suggest-keywords", label: "Suggest keywords", action: "preview", intent: "guidance", template: "Suggest keyword opportunities for {project}. Include intent and content mapping." },
-		{ id: "review-signals", label: "Review signals", action: "preview", intent: "guidance", template: "Review current signals for {project}. Identify strongest and weakest lanes." },
-		{ id: "prepare-insight-questions", label: "Prepare insight questions", action: "preview", intent: "task", template: "Prepare insight questions for {project}. Focus on conversion, traffic quality, and content fit." },
-		{ id: "draft-analysis-plan", label: "Draft analysis plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
 		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
 	],
 	compliance_reviewer: [
-		{ id: "review-claims", label: "Review claims", action: "preview", intent: "guidance", template: "Review claims for {project}. Flag unsupported or high-risk wording." },
-		{ id: "check-approval-risks", label: "Check approval risks", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, and mitigation." },
-		{ id: "prepare-safety-checklist", label: "Prepare safety checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks and evidence required." },
-		{ id: "review-publish-readiness", label: "Review publish readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
 		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
 	],
 	operations: [
-		{ id: "draft-task", label: "Draft task", action: "preview", intent: "task", template: "Draft operational tasks for {project}. Include owner, dependencies, and due sequence." },
-		{ id: "draft-workflow", label: "Draft workflow", action: "preview", intent: "workflow", template: "Draft workflow sequence for {project}. Include stages, gates, and handoffs." },
-		{ id: "prepare-handoff-chain", label: "Prepare handoff chain", action: "preview", intent: "handoff", template: "Prepare a handoff chain for {project}. Include source, destination, and decision gates." },
-		{ id: "review-blockers", label: "Review blockers", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
 		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+	],
+	customer_ops: [
+		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+	],
+	sales_crm: [
+		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+		{ id: "sales-handoff-draft", label: "Sales Handoff Draft", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
 	]
 };
 
@@ -467,6 +546,8 @@ function buildAutoPlanFromCommand(commandText, session) {
 		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
 		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
 		if (/act as the operations lead/i.test(text)) return "operations";
+		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
 		// Fallback: use keyword scoring from existing classifyIntent
 		const classified = classifyIntent(text, null);
 		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
@@ -529,6 +610,8 @@ function detectSpecialistFromBridgePrompt(prompt) {
 	if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
 	if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
 	if (/act as the operations lead/i.test(text)) return "operations";
+	if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+	if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
 	const classified = classifyIntent(text, null);
 	if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
 		return classified.resolvedModeId;
@@ -628,6 +711,32 @@ function formatTime(value) {
 	const date = value ? new Date(value) : new Date();
 	if (Number.isNaN(date.getTime())) return "-";
 	return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function getWorkspaceLanguagePlan(aiContext = {}) {
+	const overview = asObject(aiContext.overview);
+	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+	const market = rawMarket || "Germany";
+	const configuredPublishLanguage = asString(
+		overview.publishing_language ||
+		overview.publish_language ||
+		overview.output_language ||
+		overview.market_language ||
+		""
+	).trim();
+	const publishLanguage = configuredPublishLanguage || "German";
+	const conversationLanguage = asString(
+		overview.conversation_language ||
+		overview.input_language ||
+		overview.chat_language ||
+		""
+	).trim() || "Auto";
+
+	return {
+		conversationLanguage,
+		publishLanguage,
+		market
+	};
 }
 
 function titleCase(value) {
@@ -824,19 +933,24 @@ function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
 	};
 }
 
-function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language }) {
+function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
 	const cleanPrompt = asString(prompt).trim();
 	const safeProject = asString(projectName || "current project").trim();
 	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
 	const safeMode = asString(modeLabel || "Solo Specialist").trim();
 	const safeLanguage = asString(language || "user language").trim();
+	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+	const safeMarket = asString(market || "Germany").trim();
 
 	return [
 		`Role: ${safeSpecialist}`,
 		`Project: ${safeProject}`,
 		`Mode: ${safeMode}`,
-		`Language: ${safeLanguage}`,
+		`User conversation language: ${safeLanguage}`,
+		`Publishable output language: ${safeOutputLanguage}`,
+		`Target market: ${safeMarket}`,
 		"Return practical guidance and content only.",
+		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
 		"Never claim actions were executed.",
 		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
 		"Deliver a structured, review-ready answer.",
@@ -896,6 +1010,8 @@ function destinationRouteForSpecialist(specialistId, outputType) {
 	if (id === "analyst") return "insights";
 	if (id === "compliance_reviewer") return "governance";
 	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+	if (id === "customer_ops") return outputType === "task" ? "task-center" : "workflows";
+	if (id === "sales_crm") return "workflows";
 	return "workflows";
 }
 
@@ -907,6 +1023,7 @@ function routeLabel(route) {
 		publishing: "Publishing",
 		"ads-manager": "Ads Manager",
 		insights: "Insights",
+		integrations: "Integrations",
 		governance: "Governance",
 		"task-center": "Task Center",
 		workflows: "Workflows"
@@ -969,6 +1086,25 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 			...base,
 			title: outputType === "task" ? "Task Draft: Draft campaign copy" : "Content Guidance: Messaging draft",
 			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+			hooks: [
+				`Problem-aware hook direction for ${projectName || "this project"}`,
+				"Outcome-led hook direction for a German publishing draft",
+				"Proof-led hook direction with claims marked for review"
+			],
+			captions: [
+				"Caption opens with the audience problem, then moves into the practical value promise.",
+				"German caption version should keep the CTA direct and easy to approve."
+			],
+			ctas: [
+				"Jetzt mehr erfahren",
+				"Mehr Details ansehen",
+				"Zum Angebot"
+			],
+			notes: [
+				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+				"Claims, health, or performance promises need evidence before publishing."
+			],
+			nextStep: "Send this package to Content Studio or Publisher after review.",
 			steps: [
 				"Draft 3 hook variants",
 				"Draft captions with CTA",
@@ -985,6 +1121,10 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 			outputType: outputType === "guidance" ? "media_brief" : outputType,
 			title: "Media Brief: Visual direction draft",
 			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+			notes: [
+				"Define the hero subject, composition, lighting, and brand guardrails before production.",
+				"Confirm platform formats before routing to Media Studio."
+			],
 			bullets: [
 				"Visual direction and brand constraints summarized",
 				"Prompt ideas prepared for image/video planning",
@@ -1015,6 +1155,10 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 			...base,
 			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
 			summary: "Publishing checklist and schedule draft prepared.",
+			notes: [
+				"Final copy should be German for the Germany market unless a destination overrides it.",
+				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+			],
 			steps: [
 				"Validate asset and copy readiness",
 				"Draft publish schedule by channel",
@@ -1031,6 +1175,20 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 			...base,
 			title: outputType === "task" ? "Task Draft: Paid test plan" : "Ads Draft: Angles and tests",
 			summary: "Ad angle and audience testing draft prepared for review.",
+			hooks: [
+				"German problem-led ad hook",
+				"German outcome-led ad hook",
+				"German objection-led ad hook"
+			],
+			ctas: [
+				"Jetzt testen",
+				"Mehr erfahren",
+				"Angebot ansehen"
+			],
+			notes: [
+				"Keep budget, launch, and live ad changes inside Ads Manager.",
+				"Use this as copy and testing direction only."
+			],
 			bullets: [
 				"Primary ad angle draft",
 				"Audience/testing suggestions",
@@ -1067,6 +1225,74 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 			],
 			confirmationRequired: true,
 			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+		};
+	}
+
+	if (specialistId === "customer_ops") {
+		return {
+			...base,
+			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+			replyDraft: [
+				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+				"Avoid promising refunds, replacements, or timelines until the owning team confirms them."
+			],
+			ticketDraft: [
+				"Issue summary: customer concern or request captured for review.",
+				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+				"Owner: support, sales, or operations to be confirmed before creation."
+			],
+			notes: [
+				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+				"SLA and escalation decisions require confirmation in the owning operations surface."
+			],
+			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+			steps: [
+				"Summarize the customer thread",
+				"Draft a safe customer reply",
+				"Create ticket draft fields for review",
+				"Confirm escalation or routing before action"
+			],
+			confirmationRequired: true,
+			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+		};
+	}
+
+	if (specialistId === "sales_crm") {
+		return {
+			...base,
+			title: outputType === "handoff" ? "Sales Handoff Draft" : "Sales / CRM Draft: Lead and outreach plan",
+			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+			outreachDraft: [
+				"Opening: personalized reason for reaching out based on the lead segment.",
+				"Value: concise project-specific offer or collaboration angle.",
+				"CTA: ask for a low-friction next step."
+			],
+			followUps: [
+				"Follow-up 1: clarify value and ask for interest.",
+				"Follow-up 2: add proof or relevant context.",
+				"Stop condition: pause when the lead opts out or owner confirms no fit."
+			],
+			ctas: [
+				"Would you like a short intro?",
+				"Can I send more details?",
+				"Should we schedule the next step?"
+			],
+			notes: [
+				"CRM profile and pipeline changes remain outside AI Team.",
+				"Outreach and follow-ups require confirmation before sending."
+			],
+			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+			steps: [
+				"Qualify fit, intent, urgency, and missing fields",
+				"Draft outreach for review",
+				"Prepare follow-up sequence",
+				"Route sales handoff without mutating CRM data"
+			],
+			confirmationRequired: true,
+			safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."
 		};
 	}
 
@@ -1172,6 +1398,59 @@ function buildPreviewText(output, specialistLabel) {
 	lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
 	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
 	return lines.join("\n");
+}
+
+function buildStructuredPreviewBlocks(preview = {}) {
+	const mainOutputItems = normalizeDisplayList(
+		[
+			preview.mainOutput,
+			preview.output,
+			preview.generatedOutput,
+			preview.summary
+		].filter(Boolean),
+		3
+	);
+	const fieldDefs = [
+		{ key: "hooks", label: "Hooks" },
+		{ key: "captions", label: "Captions" },
+		{ key: "replyDraft", label: "Reply Draft" },
+		{ key: "ticketDraft", label: "Ticket Draft" },
+		{ key: "outreachDraft", label: "Outreach Draft" },
+		{ key: "followUps", label: "Follow-ups" },
+		{ key: "ctas", label: "CTA" },
+		{ key: "notes", label: "Notes" }
+	];
+	const blocks = mainOutputItems.length
+		? [{ label: "Main output", items: mainOutputItems }]
+		: [];
+
+	blocks.push(...fieldDefs
+		.map((field) => ({
+			label: field.label,
+			items: normalizeDisplayList(preview[field.key], 8)
+		}))
+		.filter((field) => field.items.length));
+
+	const bullets = normalizeDisplayList(preview.bullets, 8);
+	const steps = normalizeDisplayList(preview.steps, 8);
+	const summary = humanizeValue(preview.summary, "");
+
+	if (bullets.length) {
+		blocks.push({ label: mainOutputItems.length ? "Details" : "Main output", items: bullets });
+	}
+
+	if (steps.length) {
+		blocks.push({ label: "Next step", items: steps, ordered: true });
+	}
+
+	if (preview.nextStep) {
+		blocks.push({ label: "Next step", items: [humanizeValue(preview.nextStep)] });
+	}
+
+	return {
+		blocks,
+		draftText: summary && (summary.length > 160 || summary.includes("\n")) ? summary : ""
+	};
 }
 
 function isProviderLikelyConfigured(aiContext) {
@@ -1308,7 +1587,9 @@ function scoreMode(text, modeId) {
 		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
 		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
 		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
-		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"]
+		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
 	};
 	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
 		return total + (query.includes(keyword) ? 1 : 0);
@@ -2394,151 +2675,118 @@ function getPhase1SpecialistById(value) {
   );
 }
 
-function renderPhase1Header(session, projectName, escapeHtml) {
-	const spec = getPhase1SpecialistById(session.modeId);
-	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
-	return `
-		<header class="aicmd-v2-header">
-			<div class="aicmd-v2-header-main">
-				<p class="aicmd-v2-eyebrow">MH-OS · AI Team</p>
-				<h1 class="aicmd-v2-title">AI Team Command Center</h1>
-				<p class="aicmd-v2-subtitle">Work with one specialist or the full team to turn ideas into guidance, drafts, workflows, and handoffs.</p>
-			</div>
-			<div class="aicmd-v2-header-meta">
-				<div class="aicmd-v2-meta-chip">
-					<span>Project</span>
-					<strong>${escapeHtml(projectName || "Not selected")}</strong>
-				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Specialist</span>
-					<strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : spec.label)}</strong>
-				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Mode</span>
-					<strong>${escapeHtml(modeLabel)}</strong>
-				</div>
-				<div class="aicmd-v2-meta-chip aicmd-v2-safe-chip">
-					<span>Status</span>
-					<strong>Guidance &amp; drafts only</strong>
-				</div>
-			</div>
-		</header>
-	`;
+function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+        const safeBridgeStatus = bridgeStatus || { available: false };
+        const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+
+        return `
+                <header class="aicmd-v2-header">
+                        <div class="aicmd-v2-header-meta">
+                                <div class="aicmd-v2-meta-chip is-project">
+                                        <span>Project</span>
+                                        <strong>${escapeHtml(projectName || "Not selected")}</strong>
+                                </div>
+                                <div class="aicmd-v2-meta-chip">
+                                        <span>Mode</span>
+                                        <strong>${escapeHtml(modeLabel)}</strong>
+                                </div>
+                                <div class="aicmd-v2-meta-chip">
+                                        <span>You talk</span>
+                                        <strong>${escapeHtml(languagePlan.conversationLanguage)}</strong>
+                                </div>
+                                <div class="aicmd-v2-meta-chip">
+                                        <span>We publish</span>
+                                        <strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
+                                </div>
+                                <div class="aicmd-v2-meta-chip">
+                                        <span>Market</span>
+                                        <strong>${escapeHtml(languagePlan.market)}</strong>
+                                </div>
+                        </div>
+                        <div class="aicmd-v2-header-actions">
+                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+                                        ${escapeHtml(safeBridgeStatus.available ? "Connected" : "Ready")}
+                                </span>
+                                <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
+                                <button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
+                        </div>
+                </header>
+        `;
 }
 
-function renderPhase1TeamRail(session, escapeHtml) {
-	const teamBanner = session.teamMode === "team" ? `
-		<div class="aicmd-v2-team-mission">
-			<p class="aicmd-v2-team-mission-label">Full Team Mode</p>
-			<p class="aicmd-v2-team-mission-text">All specialists collaborate toward the shared project mission. Each specialist contributes their domain. You guide the flow.</p>
-		</div>
-	` : "";
+function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+        const safeBridgeStatus = bridgeStatus || { available: false };
+        const teamBanner = session.teamMode === "team" ? `
+                <div class="aicmd-v2-team-mission">
+                        <p class="aicmd-v2-team-mission-label">Full Team Mode</p>
+                        <div class="aicmd-v2-chat-empty">
+                                <p>No chat yet.</p>
+                                <span>${escapeHtml(safeBridgeStatus.available ? "Ask a specialist in the Composer." : "Use Preview tools to generate guidance.")}</span>
+                        </div>
+                </div>
+        ` : "";
 
-	return `
-		<aside class="aicmd-v2-left">
-			<div class="aicmd-v2-mode-toggle">
-				<button class="aicmd-v2-toggle-btn${session.teamMode === "solo" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
-					Solo Specialist
-				</button>
-				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
-					Full Team
-				</button>
-			</div>
-			${teamBanner}
-			<div class="aicmd-v2-team-rail">
-				${SPECIALIST_DEFS.map((spec) => {
-					const isActive = spec.id === session.modeId && session.teamMode === "solo";
-					const railSummary = asString(spec.summary).split(",")[0] || spec.summary;
-					return `
-						<button
-							class="aicmd-v2-spec-btn${isActive ? " is-active" : ""}"
-							type="button"
-							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
-							title="${escapeHtml(spec.summary)}"
-						>
-							<span class="aicmd-v2-spec-icon">${spec.icon}</span>
-							<div class="aicmd-v2-spec-info">
-								<span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
-								<span class="aicmd-v2-spec-summary">${escapeHtml(railSummary)}</span>
-							</div>
-							<span class="aicmd-v2-spec-status${isActive ? " is-active" : ""}">${isActive ? "Active" : escapeHtml(spec.status)}</span>
-						</button>
-					`;
-				}).join("")}
-			</div>
-		</aside>
-	`;
+        return `
+                <aside class="aicmd-v2-left">
+                        <div class="aicmd-v2-team-toggle" role="group" aria-label="AI team mode">
+                                <button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+                                        Solo Specialist
+                                </button>
+                                <button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+                                        Full Team
+                                </button>
+                        </div>
+                        ${teamBanner}
+                        <div class="aicmd-v2-rail-head">
+                                <span>AI specialist team</span>
+                        </div>
+                        <div class="aicmd-v2-team-rail">
+                                ${SPECIALIST_DEFS.map((spec) => {
+                                        const isActive = spec.id === session.modeId && session.teamMode === "solo";
+                                        const railSummary = asString(spec.summary).split(",")[0] || spec.summary;
+                                        return `
+                                                <button
+                                                        class="aicmd-v2-spec-btn${isActive ? " is-active" : ""}"
+                                                        type="button"
+                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+                                                        title="${escapeHtml(spec.summary)}"
+                                                >
+                                                        <span class="aicmd-v2-spec-icon">${escapeHtml(spec.icon)}</span>
+                                                        <div class="aicmd-v2-spec-info">
+                                                                <span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
+                                                                <span class="aicmd-v2-spec-summary">${escapeHtml(railSummary)}</span>
+                                                        </div>
+                                                </button>
+                                        `;
+                                }).join("")}
+                        </div>
+                </aside>
+        `;
 }
 
 function renderPhase1Profile(session, escapeHtml) {
-	const renderTopTools = (toolItems = []) => {
-		return asArray(toolItems)
-			.slice(0, 5)
-			.map((tool) => `<li class="aicmd-v2-profile-item">${escapeHtml(tool.label)}</li>`)
-			.join("");
-	};
-
-	const renderCompactDetails = (leftTitle, leftItems, rightTitle, rightItems) => `
-		<details class="aicmd-v2-profile-details">
-			<summary>View details</summary>
-			<div class="aicmd-v2-profile-grid">
-				<div class="aicmd-v2-profile-col">
-					<span class="aicmd-v2-profile-label">${leftTitle}</span>
-					<ul class="aicmd-v2-profile-list">
-						${leftItems.map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
-					</ul>
-				</div>
-				<div class="aicmd-v2-profile-col">
-					<span class="aicmd-v2-profile-label">${rightTitle}</span>
-					<ul class="aicmd-v2-profile-list">
-						${rightItems.map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
-					</ul>
-				</div>
-			</div>
-		</details>
-	`;
-
 	if (session.teamMode === "team") {
-		const teamTools = asArray(PHASE35_SPECIALIST_TOOLS.operations)
-			.concat(asArray(PHASE35_SPECIALIST_TOOLS.strategist))
-			.slice(0, 5);
+		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
 		return `
 			<div class="aicmd-v2-profile aicmd-v2-team-profile">
 				<div class="aicmd-v2-profile-header">
-					<span class="aicmd-v2-profile-icon">🤝</span>
+					<span class="aicmd-v2-profile-icon">Team</span>
 					<div>
 						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
-						<p class="aicmd-v2-profile-purpose">Coordinate specialists to prepare guidance, drafts, workflows, and safe handoffs.</p>
+						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
 					</div>
 				</div>
-				<div class="aicmd-v2-profile-col">
-					<span class="aicmd-v2-profile-label">Top team tools</span>
-					<ul class="aicmd-v2-profile-list">
-						${renderTopTools(teamTools)}
-					</ul>
+				<div class="aicmd-v2-strength-row">
+					${lanes.map((lane) => `<span class="aicmd-v2-strength-chip">${escapeHtml(lane)}</span>`).join("")}
 				</div>
-				<div class="aicmd-v2-profile-destinations">
-					<span class="aicmd-v2-profile-label">Key destinations</span>
-					<div class="aicmd-v2-dest-row">
-						${["Campaign Studio", "Content Studio", "Publishing", "Workflows", "Insights"].map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
-					</div>
-				</div>
-				<div class="aicmd-v2-profile-safety">
-					<span class="aicmd-v2-profile-safety-icon">🔒</span>
-					<span>Guidance and draft workspace only. Team execution still requires explicit confirmation in destination pages.</span>
-				</div>
-				${renderCompactDetails(
-					"Team can help with",
-					["Strategy and campaign planning", "Content drafts and copy", "Media direction and briefs", "SEO and performance analysis", "Compliance and governance review", "Publishing readiness and handoffs", "Task planning and execution sequencing"],
-					"Team cannot do",
-					["Publish without explicit approval", "Execute workflows automatically", "Grant approvals or override governance", "Run backend operations without confirmation"]
-				)}
 			</div>
 		`;
 	}
 
 	const spec = getPhase1SpecialistById(session.modeId);
 	const specialistTools = asArray(PHASE35_SPECIALIST_TOOLS[spec.id] || PHASE35_SPECIALIST_TOOLS.operations);
+	const strengths = asArray(spec.canHelp).slice(0, 3);
 	return `
 		<div class="aicmd-v2-profile">
 			<div class="aicmd-v2-profile-header">
@@ -2548,24 +2796,10 @@ function renderPhase1Profile(session, escapeHtml) {
 					<p class="aicmd-v2-profile-purpose">${escapeHtml(spec.summary)}</p>
 				</div>
 			</div>
-			<div class="aicmd-v2-profile-col">
-				<span class="aicmd-v2-profile-label">Top tools</span>
-				<ul class="aicmd-v2-profile-list">
-					${renderTopTools(specialistTools)}
-				</ul>
+			<div class="aicmd-v2-strength-row">
+				${strengths.map((item) => `<span class="aicmd-v2-strength-chip">${escapeHtml(item)}</span>`).join("")}
+				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
 			</div>
-			<div class="aicmd-v2-profile-destinations">
-				<span class="aicmd-v2-profile-label">Destination pages</span>
-				<div class="aicmd-v2-dest-row">
-					${spec.destinations.map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
-				</div>
-			</div>
-			${spec.safetyNote ? `
-			<div class="aicmd-v2-profile-safety">
-				<span class="aicmd-v2-profile-safety-icon">🔒</span>
-				<span>${escapeHtml(spec.safetyNote)}</span>
-			</div>` : ""}
-			${renderCompactDetails("Can help with", spec.canHelp, "Cannot do", spec.cannotDo)}
 		</div>
 	`;
 }
@@ -2573,10 +2807,10 @@ function renderPhase1Profile(session, escapeHtml) {
 function getPhase35ToolSet(session) {
 	if (session.teamMode === "team") {
 		return [
-			{ id: "team-mission", label: "Prepare team mission", action: "preview", intent: "handoff", template: "Prepare a team mission package for {project}. Include specialist ownership and handoff sequence." },
-			{ id: "team-workflow", label: "Draft full-team workflow", action: "preview", intent: "workflow", template: "Draft a full-team workflow for {project}. Include strategy, content, media, compliance, and publishing gates." },
-			{ id: "team-blockers", label: "Map cross-team blockers", action: "preview", intent: "task", template: "Map cross-team blockers for {project}. Include owner, dependency, and unblock sequence." },
-			{ id: "team-handoff", label: "Prepare handoff chain", action: "preview", intent: "handoff", template: "Prepare a cross-team handoff chain for {project}. Include required confirmations and destination pages." },
+			{ id: "team-mission", label: "Team Mission Brief", action: "preview", intent: "handoff", template: "Prepare a team mission package for {project}. Include specialist ownership and handoff sequence." },
+			{ id: "team-workflow", label: "Full-Team Workflow", action: "preview", intent: "workflow", template: "Draft a full-team workflow for {project}. Include strategy, content, media, compliance, and publishing gates." },
+			{ id: "team-blockers", label: "Cross-Team Blockers", action: "preview", intent: "task", template: "Map cross-team blockers for {project}. Include owner, dependency, and unblock sequence." },
+			{ id: "team-handoff", label: "Handoff Chain", action: "preview", intent: "handoff", template: "Prepare a cross-team handoff chain for {project}. Include required confirmations and destination pages." },
 			{ id: "team-open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
 		];
 	}
@@ -2589,7 +2823,8 @@ function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
 		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
 		{ id: "preview", label: "Preview", hint: "Draft output" },
 		{ id: "tools", label: "Tools", hint: "Role actions" },
-		{ id: "context", label: "Context", hint: "Safety + readiness" }
+		{ id: "context", label: "Context", hint: "Live state" },
+		{ id: "history", label: "History", hint: "Saved outputs" }
 	];
 
 	return `
@@ -2612,12 +2847,15 @@ function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
 
 function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 	const tools = getPhase35ToolSet(session);
+	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
 
 	return `
 		<section class="aicmd-v2-tools">
 			<div class="aicmd-v2-tools-head">
-				<h3 class="aicmd-v2-tools-title">Specialist Tools</h3>
-				<span class="aicmd-v2-tools-subtitle">Tools fill composer or create local preview only.</span>
+				<div>
+					<h3 class="aicmd-v2-tools-title">Tools</h3>
+					<span class="aicmd-v2-tools-subtitle">${tools.length} specialist actions</span>
+				</div>
 			</div>
 			<div class="aicmd-v2-tools-grid">
 				${tools.map((tool) => {
@@ -2636,19 +2874,18 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 					`;
 				}).join("")}
 			</div>
-			<div class="aicmd-v2-tools-note">Project: ${escapeHtml(projectName || "Not selected")} · Campaign: ${escapeHtml(aiContext.campaign || "Not selected")}</div>
+			${projectName ? `<div class="aicmd-v2-tools-note">Project: ${escapeHtml(projectName)}</div>` : ""}
 		</section>
 	`;
 }
 
 function renderLanguageMarketStrip(aiContext, escapeHtml) {
-	const outputLang = escapeHtml(asString(aiContext.language || "Auto"));
-	const market = escapeHtml(asString(aiContext.market || "Auto"));
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
 	return `
 		<div class="aicmd-v2-lang-strip">
-			<span class="aicmd-v2-planned-chip is-available" title="Language you chat in \u2014 auto-detected from your message">You talk: Auto</span>
-			<span class="aicmd-v2-planned-chip is-available" title="Language used for publishable copy, hooks, captions, scripts">We publish: ${outputLang}</span>
-			<span class="aicmd-v2-planned-chip is-available" title="Target market from project Setup">Market: ${market}</span>
+			<span class="aicmd-v2-lang-chip" title="Input language">🎤 ${escapeHtml(languagePlan.conversationLanguage)}</span>
+			<span class="aicmd-v2-lang-chip" title="Publishing language">📝 ${escapeHtml(languagePlan.publishLanguage)}</span>
+			<span class="aicmd-v2-lang-chip" title="Target market">🌍 ${escapeHtml(languagePlan.market)}</span>
 		</div>
 	`;
 }
@@ -2656,11 +2893,11 @@ function renderLanguageMarketStrip(aiContext, escapeHtml) {
 function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 	const providerConfigured = isProviderLikelyConfigured(aiContext);
 	const readinessItems = [
-		{ label: "Read preview", value: "Available", className: "is-available" },
-		{ label: "Voice input", value: "Planned", className: "is-planned" },
-		{ label: "Team chat", value: bridgeStatus.available ? "Connected" : "Requires guidance-only bridge", className: bridgeStatus.available ? "is-available" : "is-planned" },
-		{ label: "Media generation", value: "Requires provider/worker", className: "is-planned" },
-		{ label: "GPU video", value: "Requires worker", className: "is-planned" },
+		{ label: "Read preview", value: "Ready", className: "is-available" },
+		{ label: "Voice input", value: "Coming", className: "is-planned" },
+		{ label: "Team chat", value: bridgeStatus.available ? "Ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+		{ label: "Media gen", value: "Coming", className: "is-planned" },
+		{ label: "GPU video", value: "Coming", className: "is-planned" },
 		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
 	];
 
@@ -2668,7 +2905,7 @@ function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 		<section class="aicmd-v2-readiness-strip">
 			${readinessItems.map((item) => `
 				<span class="aicmd-v2-readiness-chip ${item.className}">
-					<strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(item.value)}
+					<strong>${escapeHtml(item.label)}</strong> ${escapeHtml(item.value)}
 				</span>
 			`).join("")}
 		</section>
@@ -2681,52 +2918,65 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 		? "Describe what you want the full AI team to work on — strategy, content, media, compliance, and handoffs together…"
 		: escapeHtml(spec.placeholder);
 	const specLabel = session.teamMode === "team" ? "Full Team" : escapeHtml(spec.label);
+	const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+	const projectLabel = aiContext.projectName || "this project";
 
 	return `
 		<div class="aicmd-v2-composer">
 			<div class="aicmd-v2-composer-head">
-				<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "🤝" : spec.icon}</span>
-				<span class="aicmd-v2-composer-label">${specLabel} — Workspace Composer</span>
+				<div class="aicmd-v2-composer-title-row">
+					<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "Team" : spec.icon}</span>
+					<span class="aicmd-v2-composer-label">${specLabel} Composer</span>
+				</div>
+				<span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>
 			</div>
 			${renderLanguageMarketStrip(aiContext, escapeHtml)}
 			<textarea
 				id="aicmdV2Input"
 				class="aicmd-v2-textarea"
-				rows="5"
+				rows="4"
 				placeholder="${placeholder}"
 			>${escapeHtml(session.draftMessage)}</textarea>
+			<div class="aicmd-v2-quick-actions" aria-label="Quick actions">
+				${QUICK_ACTIONS.map((action, index) => `
+					<button
+						class="aicmd-v2-quick-btn"
+						type="button"
+						data-aicmdv2-quick="${index}"
+						data-aicmdv2-quick-template="${escapeHtml(action.template.replace("{project}", projectLabel))}"
+					>
+						<span>${action.icon}</span>
+						<strong>${escapeHtml(action.label)}</strong>
+					</button>
+				`).join("")}
+			</div>
 			<div class="aicmd-v2-action-row">
 				<button id="aicmdV2AskBtn" class="aicmd-v2-btn-primary" type="button">
 					Ask Specialist
 				</button>
 				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">
-					Prepare Guidance
+					Preview
 				</button>
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
-					Draft Task
+					Task
 				</button>
 				<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">
-					Draft Workflow
+					Workflow
 				</button>
 				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
-					Prepare Handoff
+					Handoff
+				</button>
+				<button id="aicmdV2VoiceBtn" class="aicmd-v2-btn-secondary" type="button">
+					Voice Ready
 				</button>
 				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
-					Save Local Draft
+					Save
 				</button>
 				<button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost" type="button">
 					Clear
 				</button>
 			</div>
-			<div id="aicmdV2Status" class="aicmd-v2-composer-hint">
-				${escapeHtml(session.draftStatus || "Choose a specialist, write your request, then use Ask Specialist for generated output or Prepare Guidance for local preview.")}
-			</div>
-			<div class="aicmd-v2-planned-row">
-				<span class="aicmd-v2-planned-chip is-available">Read preview available (browser)</span>
-				<span class="aicmd-v2-planned-chip">Voice input — planned</span>
-				<span class="aicmd-v2-planned-chip">Team chat — requires execution bridge</span>
-				<span class="aicmd-v2-planned-chip">Media generation — requires provider/worker</span>
-			</div>
+			<div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
 		</div>
 	`;
 }
@@ -2743,25 +2993,28 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			<section class="aicmd-v2-preview">
 				<div class="aicmd-v2-preview-head">
 					<div>
-						<h3 class="aicmd-v2-preview-title">Specialist Output Preview</h3>
-						<p class="aicmd-v2-preview-subtitle">Choose a specialist, write a request, then prepare guidance, a task draft, a workflow draft, or a handoff preview.</p>
+						<h3 class="aicmd-v2-preview-title">Preview</h3>
+						<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>
 					</div>
 					<span class="aicmd-v2-preview-status aicmd-v2-preview-status-empty">Waiting</span>
+				</div>
+				<div class="aicmd-v2-preview-empty-state">
+					<strong>No preview yet</strong>
+					<span>Ask a specialist or send the chat response to preview.</span>
 				</div>
 			</section>
 		`;
 	}
 
-	const bullets = normalizeDisplayList(preview.bullets, 8);
-	const steps = normalizeDisplayList(preview.steps, 8);
+	const structuredPreview = buildStructuredPreviewBlocks(preview);
 	const destination = routeLabel(preview.destinationRoute);
 
 	return `
 		<section class="aicmd-v2-preview">
 			<div class="aicmd-v2-preview-head">
 				<div>
-					<h3 class="aicmd-v2-preview-title">Specialist Output Preview</h3>
-					<p class="aicmd-v2-preview-subtitle">Draft preview only. Review before saving, routing, or executing in destination workspaces.</p>
+					<h3 class="aicmd-v2-preview-title">Preview</h3>
+					<p class="aicmd-v2-preview-subtitle">${escapeHtml(humanizeValue(preview.sourcePrompt, "Review the generated specialist output."))}</p>
 				</div>
 				<span class="aicmd-v2-preview-status">${escapeHtml(titleCase(preview.status || "draft_preview"))}</span>
 			</div>
@@ -2774,25 +3027,24 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			</div>
 
 			<div class="aicmd-v2-preview-body">
-				<p class="aicmd-v2-preview-what-heading">What the specialist prepared</p>
+				<p class="aicmd-v2-preview-what-heading">Prepared output</p>
 				<h4 class="aicmd-v2-preview-output-title">${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h4>
 				<p class="aicmd-v2-preview-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
 
-				${bullets.length ? `
-					<div class="aicmd-v2-preview-section">
-						<span class="aicmd-v2-preview-label">Preview content</span>
-						<ul class="aicmd-v2-preview-list">
-							${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-						</ul>
-					</div>
+				${structuredPreview.draftText ? `
+					<div class="aicmd-v2-preview-draft">${escapeHtml(structuredPreview.draftText)}</div>
 				` : ""}
 
-				${steps.length ? `
-					<div class="aicmd-v2-preview-section">
-						<span class="aicmd-v2-preview-label">Suggested steps</span>
-						<ol class="aicmd-v2-preview-steps">
-							${steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-						</ol>
+				${structuredPreview.blocks.length ? `
+					<div class="aicmd-v2-preview-structured-grid">
+						${structuredPreview.blocks.map((block) => `
+							<div class="aicmd-v2-preview-section">
+								<span class="aicmd-v2-preview-label">${escapeHtml(block.label)}</span>
+								<${block.ordered ? "ol" : "ul"} class="${block.ordered ? "aicmd-v2-preview-steps" : "aicmd-v2-preview-list"}">
+									${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+								</${block.ordered ? "ol" : "ul"}>
+							</div>
+						`).join("")}
 					</div>
 				` : ""}
 
@@ -2809,10 +3061,10 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			</div>
 
 			<div class="aicmd-v2-preview-actions">
-				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy preview</button>
-				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in composer</button>
-				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Send to destination</button>
-				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save local draft</button>
+				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Send to Destination</button>
+				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
 				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
 				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
 			</div>
@@ -2848,23 +3100,25 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 }
 
 function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+	const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
 	const latest = asArray(session.responseHistory)[0] || null;
-	const bridgeLabel = bridgeStatus.available ? "Connected" : "Guarded";
-	const safetyLine = bridgeStatus.available
-		? "Guidance only — no workflow/task/handoff was created."
+	const responses = asArray(session.responseHistory).slice(0, 4);
+	const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Guarded";
+	const safetyLine = safeBridgeStatus.available
+		? "Guidance only. No workflow, task, handoff, approval, or publish action was created."
 		: "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
-	const emptyBody = bridgeStatus.available
-		? "Ask a specialist to receive a generated response in this panel."
+	const emptyBody = safeBridgeStatus.available
+		? "Ask a specialist to start a focused conversation."
 		: "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
 
 	return `
 		<section class="aicmd-v2-chat">
 			<div class="aicmd-v2-chat-head">
 				<div>
-					<h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
-					<p class="aicmd-v2-chat-subtitle">Protected capability. Real specialist responses appear here after the guidance-only bridge is connected.</p>
+					<h3 class="aicmd-v2-chat-title">Chat</h3>
+					<p class="aicmd-v2-chat-subtitle">Specialist answers appear as review-ready conversation cards.</p>
 				</div>
-				<span class="aicmd-v2-chat-bridge ${bridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
 
 			<div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
@@ -2872,31 +3126,36 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist…</div>` : ""}
 			${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
 
-			${latest ? `
-				<div class="aicmd-v2-chat-card">
-					<div class="aicmd-v2-chat-meta">
-						<span><strong>Specialist:</strong> ${escapeHtml(latest.specialistLabel || "Specialist")}</span>
-						<span><strong>Time:</strong> ${escapeHtml(formatTime(latest.generatedAt))}</span>
-					</div>
-					<div class="aicmd-v2-chat-user">
-						<span class="aicmd-v2-chat-label">User request</span>
-						<p>${escapeHtml(latest.prompt || "")}</p>
-					</div>
-					<div class="aicmd-v2-chat-response">
-						<span class="aicmd-v2-chat-label">Generated response</span>
-						<p>${escapeHtml(latest.responseText || "")}</p>
-					</div>
+			${responses.length ? `
+				<div class="aicmd-v2-chat-stack">
+					${responses.map((item, index) => `
+						<article class="aicmd-v2-chat-card${index === 0 ? " is-latest" : ""}">
+							<div class="aicmd-v2-chat-meta">
+								<span><strong>${escapeHtml(item.specialistLabel || "Specialist")}</strong></span>
+								<span>${escapeHtml(formatTime(item.generatedAt))}</span>
+								${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
+							</div>
+							<div class="aicmd-v2-chat-user">
+								<span class="aicmd-v2-chat-label">Request</span>
+								<p>${escapeHtml(item.prompt || "")}</p>
+							</div>
+							<div class="aicmd-v2-chat-response">
+								<span class="aicmd-v2-chat-label">Generated response</span>
+								<p>${escapeHtml(item.responseText || "")}</p>
+							</div>
+						</article>
+					`).join("")}
 				</div>
 			` : `
 				<div class="aicmd-v2-chat-empty">${escapeHtml(emptyBody)}</div>
 			`}
 
 			<div class="aicmd-v2-chat-actions">
-				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy response</button>
-				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in composer</button>
-				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save local response</button>
-				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Convert to preview</button>
-				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Send to destination</button>
+				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
+				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
+				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Preview</button>
+				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Destination</button>
+				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
 				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read response</button>
 			</div>
 		</section>
@@ -2933,50 +3192,55 @@ function renderPhase1SuggestedPrompts(session, escapeHtml) {
 function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
 	const projectName = aiContext.projectName;
 	const readiness = aiContext.readinessScore;
-	const assetCount = aiContext.approvedAssets.length;
-	const hasIntegrations = aiContext.coveredCount > 0;
-	const hasOperations = Boolean(state.data.operations);
-	const hasDraft = Boolean(aiContext.recommendations.length || session.messages.length);
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));
+	const contextItems = [
+		{ label: "Project", value: projectName || "Not selected", present: Boolean(projectName) },
+		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+		{ label: "Market", value: languagePlan.market, present: true },
+		{ label: "Conversation language", value: languagePlan.conversationLanguage, present: true },
+		{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },
+		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+		{ label: "Destination", value: destination, present: Boolean(destination) },
+		{ label: "Session state", value: sessionState, present: true },
+		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
+		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+	];
+	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+		? [
+			{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },
+			{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },
+			{ label: "SLA", value: "Safe review only", present: true, scoped: true },
+			{ label: "Escalations", value: "Requires confirmation", present: false, scoped: true },
+			{ label: "Channels", value: "Managed in Integrations", present: true, scoped: true }
+		]
+		: session.teamMode === "solo" && session.modeId === "sales_crm"
+			? [
+				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+				{ label: "CRM", value: "Profile context", present: true, scoped: true },
+				{ label: "Outreach", value: "Draft only", present: true, scoped: true },
+				{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },
+				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+			]
+			: [];
+	const visibleContextItems = contextItems.concat(scopedContextItems);
 
 	return `
 		<div class="aicmd-v2-context">
 			<div class="aicmd-v2-context-head">
-				<span class="aicmd-v2-context-label">Context &amp; Knowledge</span>
-				<span class="aicmd-v2-context-hint">What the specialist can see</span>
+				<span class="aicmd-v2-context-label">Context</span>
 			</div>
 			<div class="aicmd-v2-context-grid">
-				<div class="aicmd-v2-context-item${projectName ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Project profile</span>
-					<span class="aicmd-v2-context-item-value">${projectName ? escapeHtml(projectName) : "Not selected yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${readiness != null ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Readiness</span>
-					<span class="aicmd-v2-context-item-value">${readiness != null ? `${readiness}/100` : "No readiness data yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${assetCount > 0 ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Approved assets</span>
-					<span class="aicmd-v2-context-item-value">${assetCount > 0 ? `${assetCount} asset${assetCount !== 1 ? "s" : ""} ready` : "No approved assets yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${hasIntegrations ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Integrations</span>
-					<span class="aicmd-v2-context-item-value">${hasIntegrations ? `${aiContext.coveredCount} of ${aiContext.coverageTotal} connected` : "No integrations connected yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${hasOperations ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Operations snapshot</span>
-					<span class="aicmd-v2-context-item-value">${hasOperations ? "Available" : "No operations snapshot yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${aiContext.hasLiveIntelligence ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">AI intelligence</span>
-					<span class="aicmd-v2-context-item-value">${aiContext.hasLiveIntelligence ? "Live intelligence loaded" : "No campaign brief attached yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${hasDraft ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Previous AI outputs</span>
-					<span class="aicmd-v2-context-item-value">${hasDraft ? `${session.messages.length} message${session.messages.length !== 1 ? "s" : ""} in session` : "No recent AI output yet"}</span>
-				</div>
-				<div class="aicmd-v2-context-item${aiContext.campaign && aiContext.campaign !== "Not selected" ? " is-present" : " is-empty"}">
-					<span class="aicmd-v2-context-item-label">Active campaign</span>
-					<span class="aicmd-v2-context-item-value">${aiContext.campaign && aiContext.campaign !== "Not selected" ? escapeHtml(aiContext.campaign) : "No campaign brief attached yet"}</span>
-				</div>
+				${visibleContextItems.map((item) => `
+					<div class="aicmd-v2-context-item${item.present ? " is-present" : " is-empty"}${item.scoped ? " is-scoped" : ""}">
+						<span class="aicmd-v2-context-item-label">${escapeHtml(item.label)}</span>
+						<span class="aicmd-v2-context-item-value">${escapeHtml(item.value)}</span>
+					</div>
+				`).join("")}
 			</div>
 		</div>
 	`;
@@ -3008,6 +3272,47 @@ function renderPhase1SafetyPanel(escapeHtml) {
 				</div>
 			</div>
 		</div>
+	`;
+}
+
+function renderPhase4HistoryPanel(session, escapeHtml) {
+	const responses = asArray(session.responseHistory);
+	const preview = asObject(session.outputPreview);
+	const items = [
+		...responses.map((item) => ({
+			type: "Chat",
+			title: item.responseTitle || item.specialistLabel || "Specialist response",
+			body: item.prompt || item.responseText || "",
+			time: item.generatedAt
+		})),
+		...(preview.outputType ? [{
+			type: "Preview",
+			title: preview.title || "Draft preview",
+			body: preview.sourcePrompt || preview.summary || "",
+			time: preview.generatedAt
+		}] : [])
+	].slice(0, 12);
+
+	return `
+		<section class="aicmd-v2-history">
+			<div class="aicmd-v2-history-head">
+				<h3 class="aicmd-v2-history-title">History</h3>
+				<span class="aicmd-v2-history-count">${items.length} item${items.length === 1 ? "" : "s"}</span>
+			</div>
+			${items.length ? `
+				<div class="aicmd-v2-history-list">
+					${items.map((item) => `
+						<article class="aicmd-v2-history-item">
+							<span class="aicmd-v2-history-type">${escapeHtml(item.type)} - ${escapeHtml(formatTime(item.time))}</span>
+							<strong>${escapeHtml(humanizeValue(item.title, "AI output"))}</strong>
+							<p>${escapeHtml(humanizeValue(item.body, "No prompt recorded."))}</p>
+						</article>
+					`).join("")}
+				</div>
+			` : `
+				<div class="aicmd-v2-chat-empty">Saved responses and previews appear here during this session.</div>
+			`}
+		</section>
 	`;
 }
 
@@ -3076,6 +3381,7 @@ export const aiCommandRoute = {
 
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+		const languagePlan = getWorkspaceLanguagePlan(aiContext);
 		const responseBridge = getAiResponseBridgeStatus(executeProjectAiGuidance);
 		if (!session.workspaceTabInitialized) {
 			session.workspaceTab = responseBridge.available ? "chat" : "preview";
@@ -3112,17 +3418,22 @@ export const aiCommandRoute = {
 					${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
 					${renderPhase1SafetyPanel(escapeHtml)}
 				</div>
+			`,
+			history: `
+				<div class="aicmd-v2-tab-panel is-history">
+					${renderPhase4HistoryPanel(session, escapeHtml)}
+				</div>
 			`
 		};
 
 		root.innerHTML = `
 			<div class="aicmd-v2-shell">
-				${renderPhase1Header(session, projectName, escapeHtml)}
+				${renderPhase1Header(session, projectName, aiContext, responseBridge, escapeHtml)}
 				<div class="aicmd-v2-body">
-					${renderPhase1TeamRail(session, escapeHtml)}
+					${renderPhase1TeamRail(session, responseBridge, escapeHtml)}
 					<main class="aicmd-v2-main">
-						${renderPhase1Profile(session, escapeHtml)}
 						${renderPhase1Composer(session, aiContext, escapeHtml)}
+						${renderPhase1Profile(session, escapeHtml)}
 						${renderPhase35WorkspaceTabs(session, responseBridge, escapeHtml)}
 						${tabContent[activeTab] || tabContent.preview}
 						${renderPhase35ReadinessStrip(aiContext, responseBridge, escapeHtml)}
@@ -3160,6 +3471,36 @@ export const aiCommandRoute = {
 			aiCommandRoute.render(context);
 			return session.outputPreview;
 		};
+
+		const newSessionBtn = $("aicmdV2NewSessionBtn");
+		if (newSessionBtn) {
+			newSessionBtn.onclick = () => {
+				session.draftMessage = "";
+				session.draftStatus = "New session started";
+				session.outputPreview = null;
+				session.responseHistory = [];
+				session.responseError = "";
+				session.responseLoading = false;
+				session.workspaceTab = responseBridge.available ? "chat" : "preview";
+				saveLocalOutput(sessionKey, {
+					preview: null,
+					responses: [],
+					modeId: session.modeId,
+					teamMode: session.teamMode
+				});
+				persistSessionDraft(sessionKey, session, "New session started");
+				showMessage?.("New AI session started.");
+				aiCommandRoute.render(context);
+			};
+		}
+
+		const settingsBtn = $("aicmdV2SettingsBtn");
+		if (settingsBtn) {
+			settingsBtn.onclick = () => {
+				showMessage?.("Opening Settings.");
+				navigateTo("settings");
+			};
+		}
 
 		Array.from(document.querySelectorAll("[data-aicmdv2-tab]")).forEach((btn) => {
 			btn.onclick = () => {
@@ -3209,6 +3550,18 @@ export const aiCommandRoute = {
 			};
 		});
 
+		Array.from(document.querySelectorAll("[data-aicmdv2-quick]")).forEach((btn) => {
+			btn.onclick = () => {
+				const text = asString(btn.getAttribute("data-aicmdv2-quick-template") || "");
+				if (!text) return;
+				session.draftMessage = text;
+				if (input) input.value = text;
+				persistSessionDraft(sessionKey, session, "Quick action loaded");
+				updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
+				input?.focus?.();
+			};
+		});
+
 		// ── INPUT HANDLING ───────────────────────────────────────────
 		if (input) {
 			input.oninput = () => {
@@ -3220,6 +3573,45 @@ export const aiCommandRoute = {
 				if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
 					event.preventDefault();
 					$("aicmdV2AskBtn")?.click?.();
+				}
+			};
+		}
+
+		const voiceBtn = $("aicmdV2VoiceBtn");
+		if (voiceBtn) {
+			voiceBtn.onclick = () => {
+				const SpeechRecognitionCtor = typeof window !== "undefined"
+					? (window.SpeechRecognition || window.webkitSpeechRecognition)
+					: null;
+				if (!SpeechRecognitionCtor) {
+					updateStatus("Voice input trigger is ready. Browser speech recognition is not available in this environment yet.");
+					showMessage?.("Voice input readiness is staged for compatible browsers.");
+					return;
+				}
+
+				try {
+					const recognition = new SpeechRecognitionCtor();
+					recognition.lang = "ar";
+					recognition.interimResults = false;
+					recognition.maxAlternatives = 1;
+					recognition.onresult = (event) => {
+						const transcript = asString(event?.results?.[0]?.[0]?.transcript || "").trim();
+						if (!transcript) return;
+						session.draftMessage = transcript;
+						if (input) {
+							input.value = transcript;
+							input.focus();
+						}
+						persistSessionDraft(sessionKey, session, "Voice input captured");
+						updateStatus("Voice input captured in composer.");
+					};
+					recognition.onerror = () => {
+						updateStatus("Voice input could not start. Microphone permission may be blocked.");
+					};
+					recognition.start();
+					updateStatus("Listening for Arabic voice input.");
+				} catch (_) {
+					updateStatus("Voice input could not start in this browser.");
 				}
 			};
 		}
@@ -3259,7 +3651,9 @@ export const aiCommandRoute = {
 					specialistLabel: specialist.label,
 					modeLabel,
 					projectName,
-					language: aiContext.language || "user language"
+					language: languagePlan.conversationLanguage,
+					outputLanguage: languagePlan.publishLanguage,
+					market: languagePlan.market
 				});
 
 				try {
@@ -3270,10 +3664,10 @@ export const aiCommandRoute = {
 						mode: session.teamMode === "team" ? "team" : "solo",
 						request: value,
 						prompt: packagedPrompt,
-						language: aiContext.language || "",
-						outputLanguage: aiContext.language || "",
-						market: aiContext.market || "",
-						marketLanguage: aiContext.language || "",
+						language: languagePlan.conversationLanguage,
+						outputLanguage: languagePlan.publishLanguage,
+						market: languagePlan.market,
+						marketLanguage: languagePlan.publishLanguage,
 						contextSummary: {
 							projectName,
 							campaign: aiContext.campaign,
@@ -3537,6 +3931,7 @@ export const aiCommandRoute = {
 					modeId: session.modeId,
 					teamMode: session.teamMode
 				});
+				session.workspaceTab = "preview";
 				aiCommandRoute.render(context);
 				showMessage?.("Generated response converted to preview.");
 			};

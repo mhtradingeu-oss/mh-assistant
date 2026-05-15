@@ -52,6 +52,21 @@
 .home-status-grid,
 .home-ai-team-grid,
 .library-overview-grid,
+.aicmd-v2-lang-chip {
+  font-size: 11px;
+  color: var(--color-text-1);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: rgba(34, 211, 238, 0.08);
+  transition: all 150ms ease;
+}
+
+.aicmd-v2-lang-chip:hover {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.14);
+  color: var(--color-primary);
+}
 .library-upload-grid,
 .library-required-grid,
 .setup-smart-overview-grid,
@@ -2311,6 +2326,13 @@
   align-items: center;
 }
 
+.aicmd-v2-spec-btn {
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.aicmd-v2-spec-status {
+  transition: all 150ms ease;
+}
 .aicmd-v2-meta-chip {
   display: flex;
   flex-direction: column;
@@ -3029,6 +3051,32 @@
   font-size: 11px;
   color: var(--color-success);
   line-height: 1.5;
+.aicmd-v2-chat-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px !important;
+  min-height: 140px;
+  text-align: center;
+  background: rgba(34, 211, 238, 0.04);
+  border: 1px solid rgba(34, 211, 238, 0.15);
+}
+
+.aicmd-v2-chat-empty p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.aicmd-v2-chat-empty span {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-2);
+  line-height: 1.4;
+}
 }
 
 .aicmd-v2-chat-loading,
@@ -3607,5 +3655,747 @@
   .aicmd-v2-media-status-list li {
     flex-direction: column;
     gap: 4px;
+  }
+}
+
+/* ============================================================
+   PHASE 4: AI TEAM CONTROLLER PREMIUM WORKSPACE
+   In-place refresh of the existing .aicmd-v2 route surface.
+   ============================================================ */
+
+[data-page="ai-command"] {
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(5, 11, 18, 0.96), rgba(8, 17, 27, 0.98));
+}
+
+[data-page="ai-command"] .aicmd-v2-shell {
+  min-height: calc(100vh - 92px);
+  border: 1px solid rgba(122, 169, 205, 0.16);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(6, 14, 22, 0.96);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+}
+
+[data-page="ai-command"] .aicmd-v2-header {
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
+  background: rgba(8, 18, 29, 0.96);
+  border-bottom: 1px solid rgba(122, 169, 205, 0.16);
+}
+
+[data-page="ai-command"] .aicmd-v2-header-meta,
+[data-page="ai-command"] .aicmd-v2-header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-v2-header-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+[data-page="ai-command"] .aicmd-v2-header-actions {
+  justify-content: flex-end;
+}
+
+[data-page="ai-command"] .aicmd-v2-meta-chip {
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(12, 26, 39, 0.92);
+  border-color: rgba(122, 169, 205, 0.18);
+}
+
+[data-page="ai-command"] .aicmd-v2-meta-chip.is-project {
+  max-width: 260px;
+}
+
+[data-page="ai-command"] .aicmd-v2-meta-chip span,
+[data-page="ai-command"] .aicmd-v2-meta-chip strong {
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+[data-page="ai-command"] .aicmd-v2-meta-chip span {
+  font-size: 11px;
+  text-transform: none;
+  color: rgba(173, 195, 215, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-meta-chip strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: rgba(241, 247, 252, 0.96);
+}
+
+[data-page="ai-command"] .aicmd-v2-body {
+  grid-template-columns: 276px minmax(0, 1fr);
+  min-height: 0;
+  background: rgba(7, 15, 24, 0.94);
+}
+
+[data-page="ai-command"] .aicmd-v2-left {
+  gap: 10px;
+  padding: 12px;
+  background: rgba(7, 16, 25, 0.98);
+  border-right-color: rgba(122, 169, 205, 0.14);
+}
+
+[data-page="ai-command"] .aicmd-v2-mode-toggle {
+  padding: 0;
+  border: 1px solid rgba(122, 169, 205, 0.16);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(11, 24, 36, 0.82);
+}
+
+[data-page="ai-command"] .aicmd-v2-toggle-btn {
+  min-height: 36px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(196, 214, 231, 0.76);
+}
+
+[data-page="ai-command"] .aicmd-v2-toggle-btn.is-active {
+  background: rgba(34, 211, 238, 0.16);
+  color: #dffbff;
+}
+
+[data-page="ai-command"] .aicmd-v2-team-mission {
+  padding: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.06);
+}
+
+[data-page="ai-command"] .aicmd-v2-team-mission-label,
+[data-page="ai-command"] .aicmd-v2-team-mission-text {
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-team-mission-label {
+  color: #83e7f3;
+}
+
+[data-page="ai-command"] .aicmd-v2-rail-head {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(173, 195, 215, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-team-rail {
+  gap: 6px;
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-btn {
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 1px solid rgba(122, 169, 205, 0.13);
+  border-radius: 8px;
+  background: rgba(12, 25, 38, 0.68);
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-btn:hover {
+  border-color: rgba(34, 211, 238, 0.32);
+  background: rgba(16, 34, 50, 0.88);
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-btn.is-active {
+  padding-left: 10px;
+  border-left-width: 1px;
+  border-color: rgba(34, 211, 238, 0.55);
+  background: linear-gradient(180deg, rgba(19, 46, 63, 0.94), rgba(12, 29, 44, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.08);
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.09);
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-name {
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-summary {
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-v2-main {
+  gap: 10px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(8, 18, 29, 0.86), rgba(6, 14, 22, 0.94));
+}
+
+[data-page="ai-command"] .aicmd-v2-composer,
+[data-page="ai-command"] .aicmd-v2-profile,
+[data-page="ai-command"] .aicmd-v2-tools,
+[data-page="ai-command"] .aicmd-v2-chat,
+[data-page="ai-command"] .aicmd-v2-preview,
+[data-page="ai-command"] .aicmd-v2-context,
+[data-page="ai-command"] .aicmd-v2-media-status,
+[data-page="ai-command"] .aicmd-v2-safety,
+[data-page="ai-command"] .aicmd-v2-history,
+[data-page="ai-command"] .aicmd-v2-prompts {
+  border-radius: 8px;
+  border: 1px solid rgba(122, 169, 205, 0.15);
+  background: rgba(11, 24, 36, 0.82);
+}
+
+[data-page="ai-command"] .aicmd-v2-composer {
+  padding: 14px;
+  gap: 10px;
+  border-color: rgba(34, 211, 238, 0.24);
+  background: linear-gradient(180deg, rgba(13, 32, 48, 0.94), rgba(10, 24, 37, 0.96));
+}
+
+[data-page="ai-command"] .aicmd-v2-composer-head,
+[data-page="ai-command"] .aicmd-v2-composer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-v2-composer-head {
+  justify-content: space-between;
+}
+
+[data-page="ai-command"] .aicmd-v2-composer-icon {
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.1);
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-composer-label {
+  font-size: 14px;
+}
+
+[data-page="ai-command"] .aicmd-v2-draft-state {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border: 1px solid rgba(52, 211, 153, 0.24);
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.06);
+  color: #b9f6d8;
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-v2-lang-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+[data-page="ai-command"] .aicmd-v2-planned-chip,
+[data-page="ai-command"] .aicmd-v2-readiness-chip,
+[data-page="ai-command"] .aicmd-v2-preview-chip {
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+[data-page="ai-command"] .aicmd-v2-textarea {
+  min-height: 128px;
+  border-radius: 8px;
+  border-color: rgba(122, 169, 205, 0.18);
+  background: rgba(5, 13, 21, 0.86);
+  color: rgba(245, 249, 252, 0.96);
+  font-size: 14px;
+}
+
+[data-page="ai-command"] .aicmd-v2-textarea:focus {
+  border-color: rgba(34, 211, 238, 0.62);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+}
+
+[data-page="ai-command"] .aicmd-v2-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-v2-quick-btn {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(8, 19, 29, 0.78);
+  color: rgba(230, 240, 248, 0.92);
+  cursor: pointer;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+[data-page="ai-command"] .aicmd-v2-quick-btn:hover {
+  border-color: rgba(34, 211, 238, 0.42);
+  background: rgba(19, 43, 58, 0.82);
+}
+
+[data-page="ai-command"] .aicmd-v2-quick-btn strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-page="ai-command"] .aicmd-v2-action-row {
+  gap: 7px;
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-primary,
+[data-page="ai-command"] .aicmd-v2-btn-secondary,
+[data-page="ai-command"] .aicmd-v2-btn-ghost {
+  min-height: 34px;
+  border-radius: 8px;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-primary {
+  background: linear-gradient(180deg, #6be7f5, #24c6dd);
+  color: #061119;
+  box-shadow: 0 10px 26px rgba(34, 211, 238, 0.16);
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-secondary {
+  background: rgba(13, 29, 42, 0.86);
+  border-color: rgba(122, 169, 205, 0.2);
+  color: rgba(230, 240, 248, 0.9);
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-ghost {
+  color: rgba(173, 195, 215, 0.78);
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-primary:hover,
+[data-page="ai-command"] .aicmd-v2-btn-secondary:hover,
+[data-page="ai-command"] .aicmd-v2-btn-ghost:hover {
+  border-color: rgba(34, 211, 238, 0.44);
+  color: #f4fbff;
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-primary:hover {
+  color: #061119;
+}
+
+[data-page="ai-command"] .aicmd-v2-composer-hint {
+  color: rgba(173, 195, 215, 0.76);
+}
+
+[data-page="ai-command"] .aicmd-v2-profile {
+  padding: 12px 14px;
+}
+
+[data-page="ai-command"] .aicmd-v2-profile-header {
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+[data-page="ai-command"] .aicmd-v2-profile-icon {
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.09);
+  font-size: 14px;
+  margin: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-profile-title {
+  font-size: 14px;
+}
+
+[data-page="ai-command"] .aicmd-v2-profile-purpose {
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-v2-strength-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+[data-page="ai-command"] .aicmd-v2-strength-chip {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 169, 205, 0.16);
+  background: rgba(8, 19, 29, 0.72);
+  color: rgba(213, 228, 239, 0.86);
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-v2-strength-chip.is-tool {
+  border-color: rgba(34, 211, 238, 0.24);
+  color: #c5f7ff;
+}
+
+[data-page="ai-command"] .aicmd-v2-tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-tab-btn {
+  min-height: 48px;
+  border-radius: 8px;
+  background: rgba(9, 20, 31, 0.8);
+  border-color: rgba(122, 169, 205, 0.14);
+}
+
+[data-page="ai-command"] .aicmd-v2-tab-btn span,
+[data-page="ai-command"] .aicmd-v2-tab-btn small {
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-tab-btn.is-active {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(22, 49, 64, 0.88);
+}
+
+[data-page="ai-command"] .aicmd-v2-chat,
+[data-page="ai-command"] .aicmd-v2-preview {
+  padding: 14px;
+  gap: 12px;
+  background: rgba(9, 21, 33, 0.86);
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-title,
+[data-page="ai-command"] .aicmd-v2-preview-title,
+[data-page="ai-command"] .aicmd-v2-tools-title,
+[data-page="ai-command"] .aicmd-v2-context-label,
+[data-page="ai-command"] .aicmd-v2-history-title {
+  font-size: 14px;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-subtitle,
+[data-page="ai-command"] .aicmd-v2-preview-subtitle {
+  max-width: 760px;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-stack {
+  display: grid;
+  gap: 10px;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-card {
+  border-radius: 8px;
+  border-color: rgba(122, 169, 205, 0.15);
+  background: rgba(5, 13, 21, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-card.is-latest {
+  border-color: rgba(34, 211, 238, 0.34);
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-meta,
+[data-page="ai-command"] .aicmd-v2-chat-label,
+[data-page="ai-command"] .aicmd-v2-preview-label,
+[data-page="ai-command"] .aicmd-v2-preview-what-heading,
+[data-page="ai-command"] .aicmd-v2-context-item-label {
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-latest {
+  color: #8af0bc;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-user,
+[data-page="ai-command"] .aicmd-v2-chat-response {
+  display: grid;
+  gap: 3px;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-response p {
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-actions,
+[data-page="ai-command"] .aicmd-v2-preview-actions {
+  gap: 7px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-empty-state {
+  min-height: 190px;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  border: 1px dashed rgba(122, 169, 205, 0.2);
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.5);
+  text-align: center;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-empty-state strong {
+  color: rgba(245, 249, 252, 0.95);
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-empty-state span {
+  color: rgba(173, 195, 215, 0.72);
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-body {
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.68);
+}
+[data-page="ai-command"] .aicmd-v2-preview-empty-state {
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.04) 0%, rgba(34, 211, 238, 0.02) 100%);
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-card {
+  transition: all 150ms ease;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-card:hover {
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(8, 22, 35, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-btn-primary:focus-visible,
+[data-page="ai-command"] .aicmd-v2-btn-secondary:focus-visible,
+[data-page="ai-command"] .aicmd-v2-btn-ghost:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.24);
+}
+
+[data-page="ai-command"] .aicmd-v2-tool-btn:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.16);
+}
+
+[data-page="ai-command"] .aicmd-v2-prompt-chip:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.16);
+}
+
+[data-page="ai-command"] .aicmd-v2-spec-btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(34, 211, 238, 0.32);
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-output-title {
+  font-size: 15px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-summary,
+[data-page="ai-command"] .aicmd-v2-preview-draft {
+  color: rgba(235, 244, 250, 0.92);
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-draft {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(7, 18, 28, 0.86);
+  white-space: pre-wrap;
+  line-height: 1.62;
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-structured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-section {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(8, 19, 29, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-section + .aicmd-v2-preview-section {
+  margin-top: 8px;
+}
+
+[data-page="ai-command"] .aicmd-v2-preview-list li,
+[data-page="ai-command"] .aicmd-v2-preview-steps li {
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-tools-head,
+[data-page="ai-command"] .aicmd-v2-history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+[data-page="ai-command"] .aicmd-v2-tools-subtitle,
+[data-page="ai-command"] .aicmd-v2-tools-count,
+[data-page="ai-command"] .aicmd-v2-history-count {
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(173, 195, 215, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-tools-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+[data-page="ai-command"] .aicmd-v2-tool-btn {
+  min-height: 72px;
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.62);
+  border-color: rgba(122, 169, 205, 0.14);
+}
+
+[data-page="ai-command"] .aicmd-v2-tool-label {
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-tool-meta {
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-v2-context-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+[data-page="ai-command"] .aicmd-v2-context-item {
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.62);
+  border-color: rgba(122, 169, 205, 0.14);
+}
+
+[data-page="ai-command"] .aicmd-v2-context-item.is-scoped {
+  border-color: rgba(34, 211, 238, 0.2);
+  background: rgba(12, 30, 42, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-v2-context-item.is-scoped .aicmd-v2-context-item-label {
+  color: rgba(139, 231, 243, 0.86);
+}
+
+[data-page="ai-command"] .aicmd-v2-media-status-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-page="ai-command"] .aicmd-v2-media-status-list li {
+  border-radius: 8px;
+}
+
+[data-page="ai-command"] .aicmd-v2-history-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+[data-page="ai-command"] .aicmd-v2-history-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.62);
+}
+
+[data-page="ai-command"] .aicmd-v2-history-type {
+  color: rgba(173, 195, 215, 0.7);
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-v2-history-item strong {
+  color: rgba(245, 249, 252, 0.95);
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-v2-history-item p {
+  margin: 0;
+  color: rgba(197, 216, 231, 0.78);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+[data-page="ai-command"] .aicmd-v2-readiness-strip {
+  padding-top: 0;
+}
+
+@media (max-width: 1180px) {
+  [data-page="ai-command"] .aicmd-v2-quick-actions,
+  [data-page="ai-command"] .aicmd-v2-context-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-v2-tools-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  [data-page="ai-command"] .aicmd-v2-shell {
+    min-height: 0;
+  }
+
+  [data-page="ai-command"] .aicmd-v2-body {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="ai-command"] .aicmd-v2-left {
+    border-right: 0;
+    border-bottom: 1px solid rgba(122, 169, 205, 0.14);
+  }
+
+  [data-page="ai-command"] .aicmd-v2-team-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-v2-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-v2-preview-structured-grid,
+  [data-page="ai-command"] .aicmd-v2-media-status-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-page="ai-command"] .aicmd-v2-header {
+    align-items: stretch;
+  }
+
+  [data-page="ai-command"] .aicmd-v2-header-actions,
+  [data-page="ai-command"] .aicmd-v2-header-actions button,
+  [data-page="ai-command"] .aicmd-v2-action-row button {
+    width: 100%;
+  }
+
+  [data-page="ai-command"] .aicmd-v2-quick-actions,
+  [data-page="ai-command"] .aicmd-v2-context-grid,
+  [data-page="ai-command"] .aicmd-v2-tools-grid,
+  [data-page="ai-command"] .aicmd-v2-team-rail {
+    grid-template-columns: 1fr;
   }
 }

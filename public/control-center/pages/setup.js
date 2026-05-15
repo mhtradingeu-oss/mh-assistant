@@ -588,6 +588,14 @@ function updateWizardDashboard({
   });
   const recommendedStep = getRecommendedStep(values);
 
+  // Compute status variables for statusMap
+  const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
+  const brandStatus = getSetupBrandStatus(values);
+  const localizationStatus = getSetupLocalizationStatus(values);
+  const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+  const contentTruthStatus = getSetupContentTruthStatus(values);
+  const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
+
   updateSetupFieldIndicators(form, values);
 
   const completionTextWide = document.getElementById("setupCompletionPercentValue");
