@@ -2982,11 +2982,14 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 			<div class="aicmd-v2-composer-head">
 				<div class="aicmd-v2-composer-title-row">
 					<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "Team" : spec.icon}</span>
-					<span class="aicmd-v2-composer-label">${specLabel} Composer</span>
+					<span class="aicmd-v2-composer-label">Write here — ${specLabel}</span>
 				</div>
 				<span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>
 			</div>
-			${renderLanguageMarketStrip(aiContext, escapeHtml)}
+			<div class="aicmd-v2-composer-primary-note">
+                                Start here: write your request, choose the specialist on the left, then ask the AI Team. Chat below is for reading responses.
+                        </div>
+                        ${renderLanguageMarketStrip(aiContext, escapeHtml)}
 			<textarea
 				id="aicmdV2Input"
 				class="aicmd-v2-textarea"
