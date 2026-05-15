@@ -280,6 +280,7 @@ const QUICK_ACTIONS = [
 ];
 
 const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
 
 const COMMAND_TYPES = [
 	{ id: "strategy", label: "Strategy" },
@@ -446,6 +447,24 @@ function buildAutoPlanFromCommand(commandText, session) {
 	return plan;
 }
 
+function detectSpecialistFromBridgePrompt(prompt) {
+	const text = asString(prompt);
+	if (/act as the strategist/i.test(text)) return "strategist";
+	if (/act as the content writer/i.test(text)) return "writer";
+	if (/act as the media director/i.test(text)) return "media";
+	if (/act as the video lead/i.test(text)) return "video_lead";
+	if (/act as the publisher/i.test(text)) return "publisher";
+	if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+	if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+	if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+	if (/act as the operations lead/i.test(text)) return "operations";
+	const classified = classifyIntent(text, null);
+	if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+		return classified.resolvedModeId;
+	}
+	return null;
+}
+
 // ============================================================
 //  HELPERS
 // ============================================================
@@ -602,6 +621,8 @@ function ensureSession(projectName) {
 				loadingPromise: null
 			},
 			lastAppliedHandoffId: ""
+			,
+			outputPreview: null
 		});
 	}
 	return aiSessions.get(key);
@@ -665,6 +686,342 @@ function persistSessionDraft(projectName, session, hint) {
 		targetValue: session.targetValue
 	});
 	session.draftStatus = hint || `Saved locally ${formatTime(saved.updatedAt)}`;
+}
+
+function readLocalOutputMap() {
+	if (typeof window === "undefined") return {};
+	try {
+		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";
+		const parsed = JSON.parse(raw);
+		return parsed && typeof parsed === "object" ? parsed : {};
+	} catch (_) {
+		return {};
+	}
+}
+
+function writeLocalOutputMap(map) {
+	if (typeof window === "undefined") return;
+	try {
+		window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));
+	} catch (_) {}
+}
+
+function loadLocalOutput(projectName) {
+	const key = projectName || "__default__";
+	return asObject(readLocalOutputMap()[key]);
+}
+
+function saveLocalOutput(projectName, outputPayload) {
+	const key = projectName || "__default__";
+	const map = readLocalOutputMap();
+	map[key] = {
+		...asObject(map[key]),
+		...asObject(outputPayload),
+		updatedAt: nowIso()
+	};
+	writeLocalOutputMap(map);
+	return map[key];
+}
+
+function destinationRouteForSpecialist(specialistId, outputType) {
+	const id = asString(specialistId || "operations");
+	if (outputType === "workflow") return "workflows";
+	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+	if (id === "writer") return "content-studio";
+	if (id === "media") return "media-studio";
+	if (id === "video_lead") return "media-studio";
+	if (id === "publisher") return "publishing";
+	if (id === "ads") return "ads-manager";
+	if (id === "analyst") return "insights";
+	if (id === "compliance_reviewer") return "governance";
+	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+	return "workflows";
+}
+
+function routeLabel(route) {
+	const labels = {
+		"campaign-studio": "Campaign Studio",
+		"content-studio": "Content Studio",
+		"media-studio": "Media Studio",
+		publishing: "Publishing",
+		"ads-manager": "Ads Manager",
+		insights: "Insights",
+		governance: "Governance",
+		"task-center": "Task Center",
+		workflows: "Workflows"
+	};
+	return labels[route] || titleCase(route);
+}
+
+function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+	const cleanPrompt = asString(prompt).trim();
+	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+	const specialistId = asString(specialist?.id || "operations");
+	const route = destinationRouteForSpecialist(specialistId, outputType);
+
+	const base = {
+		specialistId,
+		outputType,
+		title: "Draft output",
+		summary: "Guidance prepared for review.",
+		bullets: [],
+		steps: [],
+		destinationRoute: route,
+		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+		generatedAt: nowIso(),
+		sourcePrompt: promptSnippet,
+		status: "draft_preview",
+		safetyLabel: "Guidance and draft only. No backend execution.",
+		nextSafeAction: `Review in ${routeLabel(route)}`,
+		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in destination workspaces."
+	};
+
+	if (specialistId === "strategist") {
+		if (outputType === "task") {
+			return {
+				...base,
+				title: `Task Draft: Strategic plan for ${projectName || "current project"}`,
+				summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",
+				steps: [
+					"Define top 3 strategic priorities for this cycle",
+					"List blockers and dependency owners",
+					"Map next operating move by channel",
+					"Route execution draft to Campaign Studio or Workflows"
+				],
+				nextSafeAction: "Review and refine the task draft before creating durable tasks"
+			};
+		}
+		return {
+			...base,
+			title: `Strategist Guidance: Next operating move`,
+			summary: `Priority guidance prepared from: ${promptSnippet}`,
+			bullets: [
+				"Strategic priorities aligned to current readiness",
+				"Key blockers and risk dependencies identified",
+				"Next operating move drafted with destination routing"
+			]
+		};
+	}
+
+	if (specialistId === "writer") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task Draft: Draft campaign copy" : "Content Guidance: Messaging draft",
+			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+			steps: [
+				"Draft 3 hook variants",
+				"Draft captions with CTA",
+				"Prepare review notes and claims check",
+				"Route to Content Studio for refinement"
+			],
+			safetyLabel: "Claims require review before publishing. No direct publish action."
+		};
+	}
+
+	if (specialistId === "media") {
+		return {
+			...base,
+			outputType: outputType === "guidance" ? "media_brief" : outputType,
+			title: "Media Brief: Visual direction draft",
+			summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",
+			bullets: [
+				"Visual direction and brand constraints summarized",
+				"Prompt ideas prepared for image/video planning",
+				"Required assets and missing assets listed"
+			],
+			safetyLabel: "No media generation executed. Brief and routing only.",
+			nextSafeAction: "Open Media Studio to review and refine the brief"
+		};
+	}
+
+	if (specialistId === "video_lead") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task Draft: Video production plan" : "Video Brief: Hook, script, storyboard",
+			summary: "Video draft prepared with hook, script structure, and storyboard flow.",
+			steps: [
+				"Draft opening hook and audience angle",
+				"Write short-form script outline",
+				"Outline storyboard beats",
+				"Route to Media Studio for production planning"
+			],
+			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+		};
+	}
+
+	if (specialistId === "publisher") {
+		return {
+			...base,
+			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+			summary: "Publishing checklist and schedule draft prepared.",
+			steps: [
+				"Validate asset and copy readiness",
+				"Draft publish schedule by channel",
+				"Flag approval dependencies",
+				"Prepare handoff for publishing review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Confirmation required before publish. No publish action performed."
+		};
+	}
+
+	if (specialistId === "ads") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task Draft: Paid test plan" : "Ads Draft: Angles and tests",
+			summary: "Ad angle and audience testing draft prepared for review.",
+			bullets: [
+				"Primary ad angle draft",
+				"Audience/testing suggestions",
+				"Platform-specific copy recommendations"
+			],
+			safetyLabel: "No budget updates or ad launches executed."
+		};
+	}
+
+	if (specialistId === "analyst") {
+		return {
+			...base,
+			title: outputType === "task" ? "Task Draft: Analysis plan" : "Insights Guidance: Signal review",
+			summary: "Analysis plan prepared with key signals, coverage gaps, and next checks.",
+			bullets: [
+				"Signals to check: readiness, channel performance, data coverage",
+				"Coverage gaps mapped for follow-up",
+				"Recommendations prepared for Insights workspace"
+			],
+			safetyLabel: "No analytics mutation or fake metrics. Guidance only."
+		};
+	}
+
+	if (specialistId === "compliance_reviewer") {
+		return {
+			...base,
+			title: "Compliance Draft: Risk review checklist",
+			summary: "Risk review checklist prepared with claims and safety review points.",
+			steps: [
+				"Review key claims and evidence",
+				"Flag safety and policy risks",
+				"Prepare governance notes",
+				"Route to Governance for formal review"
+			],
+			confirmationRequired: true,
+			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+		};
+	}
+
+	if (specialistId === "operations") {
+		if (outputType === "workflow") {
+			return {
+				...base,
+				title: "Workflow Draft: Operating sequence",
+				summary: "Workflow draft prepared with stage owners and checkpoints.",
+				steps: [
+					"Stage 1: Intake and objective alignment",
+					"Stage 2: Specialist draft production",
+					"Stage 3: Compliance/review gate",
+					"Stage 4: Destination handoff and confirmation"
+				],
+				safetyLabel: "Workflow run is not started. This is a draft preview only."
+			};
+		}
+		return {
+			...base,
+			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+			summary: "Operational plan drafted with next tasks, owners, and route.",
+			steps: [
+				"Define immediate tasks",
+				"Assign suggested owners",
+				"Prepare destination handoff context",
+				"Review before creating durable records"
+			],
+			safetyLabel: "No workflow run and no backend task creation executed."
+		};
+	}
+
+	return base;
+}
+
+function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+	const teamMode = session.teamMode === "team";
+	const specialist = teamMode
+		? { id: "operations", label: "Full Team" }
+		: getPhase1SpecialistById(session.modeId);
+
+	const intentToType = {
+		guidance: "guidance",
+		task: "task",
+		workflow: "workflow",
+		handoff: "handoff"
+	};
+	const outputType = intentToType[intent] || "guidance";
+
+	const base = specialistTemplateForOutput({
+		specialist,
+		outputType,
+		prompt,
+		projectName
+	});
+
+	if (!teamMode) return base;
+
+	return {
+		...base,
+		specialistId: "team",
+		title: outputType === "workflow" ? "Team Workflow Draft" : `Team ${titleCase(outputType)} Preview`,
+		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+		bullets: [
+			"Strategist defines priorities and sequence",
+			"Writer and Media prepare production-ready drafts",
+			"Compliance and Publisher verify release safety"
+		],
+		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+		nextSafeAction: "Review team draft and route to destination workspace"
+	};
+}
+
+function formatOutputTypeLabel(outputType) {
+	const labels = {
+		guidance: "Guidance",
+		task: "Task Draft",
+		workflow: "Workflow Draft",
+		handoff: "Handoff Preview",
+		media_brief: "Media Brief"
+	};
+	return labels[outputType] || titleCase(outputType || "guidance");
+}
+
+function buildPreviewText(output, specialistLabel) {
+	if (!output) return "";
+	const lines = [
+		`Output Type: ${formatOutputTypeLabel(output.outputType)}`,
+		`Specialist: ${specialistLabel}`,
+		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+		`Title: ${humanizeValue(output.title)}`,
+		`Summary: ${humanizeValue(output.summary)}`,
+		"",
+		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+		""
+	];
+
+	normalizeDisplayList(output.bullets, 12).forEach((item) => lines.push(`- ${item}`));
+	normalizeDisplayList(output.steps, 12).forEach((item, idx) => lines.push(`${idx + 1}. ${item}`));
+
+	lines.push("");
+	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+	lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
+	lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+	return lines.join("\n");
+}
+
+function isProviderLikelyConfigured(aiContext) {
+	const records = asObject(aiContext?.controlCenter?.records);
+	return Object.values(records).some((record) => {
+		const integrationId = asString(record?.integration_id || record?.id).toLowerCase();
+		const status = asString(record?.status || record?.status_label).toLowerCase();
+		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+		const readyState = /connected|healthy|ready|active|ok/.test(status);
+		return providerMatch && readyState;
+	});
 }
 
 // ============================================================
@@ -2046,11 +2403,14 @@ function renderPhase1Composer(session, escapeHtml) {
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
 					Draft Task
 				</button>
+				<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">
+					Draft Workflow
+				</button>
 				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
 					Prepare Handoff
 				</button>
 				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
-					Save Draft
+					Save Local Draft
 				</button>
 				<button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost" type="button">
 					Clear
@@ -2060,6 +2420,117 @@ function renderPhase1Composer(session, escapeHtml) {
 				${escapeHtml(session.draftStatus || "Choose a specialist, fill in your request, and use Prepare Guidance to stage it for review. Ctrl / Cmd + Enter to prepare.")}
 			</div>
 		</div>
+	`;
+}
+
+function renderPhase2PreviewPanel(session, escapeHtml) {
+	const preview = asObject(session.outputPreview);
+	const hasPreview = Boolean(preview.outputType && preview.title);
+	const specialist = session.teamMode === "team"
+		? { id: "team", label: "Full Team" }
+		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+
+	if (!hasPreview) {
+		return `
+			<section class="aicmd-v2-preview">
+				<div class="aicmd-v2-preview-head">
+					<div>
+						<h3 class="aicmd-v2-preview-title">Specialist Output Preview</h3>
+						<p class="aicmd-v2-preview-subtitle">Choose a specialist, write a request, then prepare guidance, a task draft, a workflow draft, or a handoff preview.</p>
+					</div>
+					<span class="aicmd-v2-preview-status aicmd-v2-preview-status-empty">Waiting</span>
+				</div>
+			</section>
+		`;
+	}
+
+	const bullets = normalizeDisplayList(preview.bullets, 8);
+	const steps = normalizeDisplayList(preview.steps, 8);
+	const destination = routeLabel(preview.destinationRoute);
+
+	return `
+		<section class="aicmd-v2-preview">
+			<div class="aicmd-v2-preview-head">
+				<div>
+					<h3 class="aicmd-v2-preview-title">Specialist Output Preview</h3>
+					<p class="aicmd-v2-preview-subtitle">Draft preview only. Review before saving, routing, or executing in destination workspaces.</p>
+				</div>
+				<span class="aicmd-v2-preview-status">${escapeHtml(titleCase(preview.status || "draft_preview"))}</span>
+			</div>
+
+			<div class="aicmd-v2-preview-meta">
+				<span class="aicmd-v2-preview-chip"><strong>Type:</strong> ${escapeHtml(formatOutputTypeLabel(preview.outputType))}</span>
+				<span class="aicmd-v2-preview-chip"><strong>Specialist:</strong> ${escapeHtml(specialist.label || "Specialist")}</span>
+				<span class="aicmd-v2-preview-chip"><strong>Destination:</strong> ${escapeHtml(destination)}</span>
+				<span class="aicmd-v2-preview-chip"><strong>Generated:</strong> ${escapeHtml(formatTime(preview.generatedAt))}</span>
+			</div>
+
+			<div class="aicmd-v2-preview-body">
+				<h4 class="aicmd-v2-preview-output-title">${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h4>
+				<p class="aicmd-v2-preview-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+
+				${bullets.length ? `
+					<div class="aicmd-v2-preview-section">
+						<span class="aicmd-v2-preview-label">Preview content</span>
+						<ul class="aicmd-v2-preview-list">
+							${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+						</ul>
+					</div>
+				` : ""}
+
+				${steps.length ? `
+					<div class="aicmd-v2-preview-section">
+						<span class="aicmd-v2-preview-label">Suggested steps</span>
+						<ol class="aicmd-v2-preview-steps">
+							${steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+						</ol>
+					</div>
+				` : ""}
+
+				<div class="aicmd-v2-preview-section">
+					<span class="aicmd-v2-preview-label">Next safe action</span>
+					<p class="aicmd-v2-preview-note">${escapeHtml(humanizeValue(preview.nextSafeAction, "Review in destination workspace."))}</p>
+				</div>
+
+				<div class="aicmd-v2-preview-section">
+					<span class="aicmd-v2-preview-label">Confirmation note</span>
+					<p class="aicmd-v2-preview-note">${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation."))}</p>
+					<p class="aicmd-v2-preview-safety">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only."))}</p>
+				</div>
+			</div>
+
+			<div class="aicmd-v2-preview-actions">
+				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy preview</button>
+				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in composer</button>
+				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Send to destination</button>
+				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save local draft</button>
+				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
+				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
+			</div>
+		</section>
+	`;
+}
+
+function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
+	const providerConfigured = isProviderLikelyConfigured(aiContext);
+	const providerStatus = providerConfigured
+		? "Configured in integrations"
+		: "Status not connected yet";
+
+	return `
+		<section class="aicmd-v2-media-status">
+			<div class="aicmd-v2-media-status-head">
+				<h3 class="aicmd-v2-media-status-title">Media Capability Status</h3>
+				<span class="aicmd-v2-media-status-badge">Honest capability view</span>
+			</div>
+			<ul class="aicmd-v2-media-status-list">
+				<li><span>Image prompt / provider routing</span><strong>${escapeHtml(providerStatus)}</strong></li>
+				<li><span>Video brief generation</span><strong>Draft-ready</strong></li>
+				<li><span>Native GPU video rendering</span><strong>Requires connected GPU worker</strong></li>
+				<li><span>Voice script</span><strong>Draft-ready</strong></li>
+				<li><span>Realtime voice chat</span><strong>Future connection</strong></li>
+			</ul>
+		</section>
 	`;
 }
 
@@ -2203,6 +2674,11 @@ export const aiCommandRoute = {
 		const sessionKey = projectName || "__default__";
 		const session = ensureSession(sessionKey);
 		hydrateSessionDraft(sessionKey, session);
+		if (!session.outputPreview) {
+			const savedOutput = asObject(loadLocalOutput(sessionKey));
+			const preview = asObject(savedOutput.preview);
+			if (preview.outputType) session.outputPreview = preview;
+		}
 
 		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
 		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
@@ -2238,7 +2714,9 @@ export const aiCommandRoute = {
 					<main class="aicmd-v2-main">
 						${renderPhase1Profile(session, escapeHtml)}
 						${renderPhase1Composer(session, escapeHtml)}
+						${renderPhase2PreviewPanel(session, escapeHtml)}
 						${renderPhase1SuggestedPrompts(session, escapeHtml)}
+						${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
 						${renderPhase1ContextPanel(state, session, aiContext, escapeHtml)}
 						${renderPhase1SafetyPanel(escapeHtml)}
 					</main>
@@ -2251,6 +2729,26 @@ export const aiCommandRoute = {
 
 		const updateStatus = (msg) => {
 			if (statusEl) statusEl.textContent = msg;
+		};
+
+		const setPreviewFromIntent = (intent, fallbackPrompt = "") => {
+			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+			if (!value) {
+				updateStatus("Please write your request in the composer first.");
+				input?.focus?.();
+				return null;
+			}
+
+			session.draftMessage = value;
+			session.outputPreview = buildPhase2OutputPreview({
+				intent,
+				session,
+				prompt: value,
+				projectName
+			});
+			persistSessionDraft(sessionKey, session, "Draft saved locally");
+			aiCommandRoute.render(context);
+			return session.outputPreview;
 		};
 
 		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
@@ -2311,17 +2809,10 @@ export const aiCommandRoute = {
 		const prepareBtn = $("aicmdV2PrepareBtn");
 		if (prepareBtn) {
 			prepareBtn.onclick = () => {
-				const value = asString(input?.value || session.draftMessage || "").trim();
-				if (!value) {
-					updateStatus("Please write your request in the composer first.");
-					input?.focus?.();
-					return;
-				}
-				const spec = getPhase1SpecialistById(session.modeId);
-				session.draftMessage = value;
-				persistSessionDraft(sessionKey, session, "Guidance prepared — draft ready for review");
-				updateStatus("Guidance prepared. Review the draft, then route to the right workspace or save for later.");
-				showMessage?.(`${session.teamMode === "team" ? "Team" : spec.label} guidance prepared.`);
+				const preview = setPreviewFromIntent("guidance");
+				if (!preview) return;
+				const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+				showMessage?.(`${specLabel} guidance preview prepared.`);
 			};
 		}
 
@@ -2335,10 +2826,28 @@ export const aiCommandRoute = {
 				const taskPrompt = value
 					? `Draft a task plan for: ${value}`
 					: `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
-				session.draftMessage = taskPrompt;
 				if (input) input.value = taskPrompt;
-				persistSessionDraft(sessionKey, session, "Task draft framed — review before acting");
-				updateStatus("Task draft framed. Review and prepare guidance when ready.");
+				session.draftMessage = taskPrompt;
+				setPreviewFromIntent("task", taskPrompt);
+				updateStatus("Task draft preview prepared locally. Review before creating durable tasks.");
+				showMessage?.("Task draft preview prepared.");
+			};
+		}
+
+		// ── DRAFT WORKFLOW (secondary action) ────────────────────────
+		const draftWorkflowBtn = $("aicmdV2DraftWorkflowBtn");
+		if (draftWorkflowBtn) {
+			draftWorkflowBtn.onclick = () => {
+				const value = asString(input?.value || session.draftMessage || "").trim();
+				const spec = getPhase1SpecialistById(session.modeId);
+				const workflowPrompt = value
+					? `Draft a workflow sequence for: ${value}`
+					: `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
+				if (input) input.value = workflowPrompt;
+				session.draftMessage = workflowPrompt;
+				setPreviewFromIntent("workflow", workflowPrompt);
+				updateStatus("Workflow draft preview prepared locally. No workflow run started.");
+				showMessage?.("Workflow draft preview prepared.");
 			};
 		}
 
@@ -2352,10 +2861,11 @@ export const aiCommandRoute = {
 				const handoffPrompt = value
 					? `Prepare a handoff summary for: ${value}`
 					: `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
-				session.draftMessage = handoffPrompt;
 				if (input) input.value = handoffPrompt;
-				persistSessionDraft(sessionKey, session, "Handoff draft framed — review before acting");
-				updateStatus("Handoff draft framed. Review and prepare guidance when ready.");
+				session.draftMessage = handoffPrompt;
+				setPreviewFromIntent("handoff", handoffPrompt);
+				updateStatus("Handoff preview prepared locally. Review destination before sending.");
+				showMessage?.("Handoff preview prepared.");
 			};
 		}
 
@@ -2365,8 +2875,8 @@ export const aiCommandRoute = {
 			saveBtn.onclick = () => {
 				session.draftMessage = asString(input?.value || session.draftMessage || "");
 				persistSessionDraft(sessionKey, session, "Draft saved locally");
-				updateStatus("Draft saved locally.");
-				showMessage?.("Draft saved.");
+				updateStatus("Composer draft saved locally.");
+				showMessage?.("Composer draft saved locally.");
 			};
 		}
 
@@ -2377,8 +2887,131 @@ export const aiCommandRoute = {
 				session.draftMessage = "";
 				if (input) input.value = "";
 				persistSessionDraft(sessionKey, session, "Draft cleared");
-				updateStatus("Draft cleared.");
-				showMessage?.("Draft cleared.");
+				updateStatus("Composer draft cleared.");
+				showMessage?.("Composer draft cleared.");
+			};
+		}
+
+		// ── PREVIEW ACTIONS (Phase 2 safe actions) ───────────────────
+		const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+		if (previewCopyBtn) {
+			previewCopyBtn.onclick = async () => {
+				const output = asObject(session.outputPreview);
+				if (!output.outputType) return;
+				const specialistLabel = session.teamMode === "team"
+					? "Full Team"
+					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+				const text = buildPreviewText(output, specialistLabel);
+				if (!text) return;
+				try {
+					if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+						await navigator.clipboard.writeText(text);
+						updateStatus("Preview copied to clipboard.");
+						showMessage?.("Preview copied.");
+					} else {
+						updateStatus("Clipboard is not available in this browser context.");
+					}
+				} catch (_) {
+					updateStatus("Copy failed. Clipboard access may be blocked.");
+				}
+			};
+		}
+
+		const previewUseBtn = $("aicmdV2PreviewUseBtn");
+		if (previewUseBtn) {
+			previewUseBtn.onclick = () => {
+				const output = asObject(session.outputPreview);
+				if (!output.outputType) return;
+				const specialistLabel = session.teamMode === "team"
+					? "Full Team"
+					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+				const text = buildPreviewText(output, specialistLabel);
+				session.draftMessage = text;
+				if (input) {
+					input.value = text;
+					input.focus();
+				}
+				persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+				updateStatus("Preview inserted into composer for refinement.");
+			};
+		}
+
+		const previewSendBtn = $("aicmdV2PreviewSendBtn");
+		if (previewSendBtn) {
+			previewSendBtn.onclick = () => {
+				const output = asObject(session.outputPreview);
+				const destination = asString(output.destinationRoute || "").trim();
+				if (!destination) {
+					updateStatus("No destination route is available for this preview.");
+					return;
+				}
+
+				const handoffRecord = {
+					id: `aicmd-preview-${Date.now()}`,
+					source_page: "ai-command",
+					destination_page: destination,
+					status: "available",
+					created_at: nowIso(),
+					payload: {
+						prompt: output.sourcePrompt,
+						draft_context: {
+							projectName: projectName || "",
+							modeId: output.specialistId || session.modeId,
+							lastCommand: output.sourcePrompt || "",
+							lastResponseTitle: output.title || "",
+							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+							phase2_output_preview: output
+						}
+					}
+				};
+
+				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+				showMessage?.("Draft context prepared. Review before saving or executing.");
+				navigateTo(destination);
+			};
+		}
+
+		const previewSaveBtn = $("aicmdV2PreviewSaveBtn");
+		if (previewSaveBtn) {
+			previewSaveBtn.onclick = () => {
+				const output = asObject(session.outputPreview);
+				if (!output.outputType) return;
+				const saved = saveLocalOutput(sessionKey, {
+					preview: output,
+					modeId: session.modeId,
+					teamMode: session.teamMode
+				});
+				updateStatus(`Preview saved locally ${formatTime(saved.updatedAt)}.`);
+				showMessage?.("Preview saved locally.");
+			};
+		}
+
+		const previewReadBtn = $("aicmdV2PreviewReadBtn");
+		if (previewReadBtn) {
+			previewReadBtn.onclick = () => {
+				const output = asObject(session.outputPreview);
+				if (!output.outputType) return;
+				if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") {
+					updateStatus("Read preview is not supported in this browser.");
+					return;
+				}
+				const previewText = [humanizeValue(output.title), humanizeValue(output.summary)]
+					.filter(Boolean)
+					.join(". ");
+				const utterance = new SpeechSynthesisUtterance(previewText || "Draft preview ready.");
+				speechSynthesis.cancel();
+				speechSynthesis.speak(utterance);
+				updateStatus("Reading preview locally in browser.");
+			};
+		}
+
+		const previewClearBtn = $("aicmdV2PreviewClearBtn");
+		if (previewClearBtn) {
+			previewClearBtn.onclick = () => {
+				session.outputPreview = null;
+				aiCommandRoute.render(context);
+				showMessage?.("Preview cleared.");
 			};
 		}
 
