@@ -3172,7 +3172,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 			<div class="aicmd-v2-chat-head">
 				<div>
 					<h3 class="aicmd-v2-chat-title">Chat</h3>
-					<p class="aicmd-v2-chat-subtitle">Specialist answers appear as review-ready conversation cards.</p>
+					<p class="aicmd-v2-chat-subtitle">Specialist answers appear here. Continue from the main Composer above.</p>
 				</div>
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
@@ -3206,11 +3206,16 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 				<div class="aicmd-v2-chat-empty">${escapeHtml(emptyBody)}</div>
 			`}
 
+			<div class="aicmd-v2-chat-composer-note">
+			        Write new instructions in the Composer above, or use “Continue in Composer” to focus the workspace input.
+			</div>
+
 			<div class="aicmd-v2-chat-actions">
 				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
 				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
 				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Preview</button>
 				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
+				<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Continue in Composer</button>
 				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
 				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read response</button>
 			</div>
@@ -3910,6 +3915,14 @@ export const aiCommandRoute = {
 
 		// ── RESPONSE ACTIONS (Phase 3 safe actions) ──────────────────
 		const latestResponse = asArray(session.responseHistory)[0] || null;
+
+		const responseContinueBtn = $("aicmdV3ResponseContinueBtn");
+		if (responseContinueBtn) {
+		        responseContinueBtn.onclick = () => {
+		                input?.focus?.();
+		                updateStatus("Continue from the Composer above. The selected specialist is still active.");
+		        };
+		}
 
 		const responseCopyBtn = $("aicmdV3ResponseCopyBtn");
 		if (responseCopyBtn) {
