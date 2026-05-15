@@ -271,6 +271,74 @@ const TEAM_SUGGESTED_PROMPTS = [
 	{ label: "Review team readiness", sub: "Check all specialist areas" }
 ];
 
+const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context"];
+
+const PHASE35_SPECIALIST_TOOLS = {
+	strategist: [
+		{ id: "build-strategy-brief", label: "Build strategy brief", action: "preview", intent: "guidance", template: "Build a strategy brief for {project}. Include objective, audience, offer, channels, blockers, and next move." },
+		{ id: "prioritize-next-move", label: "Prioritize next move", action: "preview", intent: "guidance", template: "Prioritize the next move for {project}. Rank by impact, urgency, and dependencies." },
+		{ id: "map-blockers", label: "Map blockers", action: "preview", intent: "task", template: "Map blockers for {project}. List blocker, owner, severity, and first fix action." },
+		{ id: "prepare-campaign-direction", label: "Prepare campaign direction", action: "preview", intent: "guidance", template: "Prepare campaign direction for {project}. Include positioning, channel mix, and launch phases." },
+		{ id: "prepare-team-mission", label: "Prepare team mission", action: "preview", intent: "handoff", template: "Prepare a full-team mission brief for {project}. Define shared objective, role responsibilities, and handoff order." }
+	],
+	writer: [
+		{ id: "write-hooks", label: "Write hooks", action: "preview", intent: "guidance", template: "Write 5 hook variants for {project}. Keep each concise and testable." },
+		{ id: "draft-captions", label: "Draft captions", action: "preview", intent: "guidance", template: "Draft captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+		{ id: "improve-cta", label: "Improve CTA", action: "preview", intent: "task", template: "Improve CTA options for {project}. Provide conversion-focused variants for awareness, consideration, and action stages." },
+		{ id: "draft-landing-copy", label: "Draft landing copy", action: "preview", intent: "guidance", template: "Draft landing page copy for {project}. Include hero, proof points, objections, and CTA section." },
+		{ id: "prepare-publisher-handoff", label: "Prepare Publisher handoff", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include approved-ready copy package and remaining checks." }
+	],
+	media: [
+		{ id: "create-image-prompt", label: "Create image prompt", action: "preview", intent: "guidance", template: "Create image prompt directions for {project}. Include visual style, composition, subject, and brand constraints." },
+		{ id: "review-visual-direction", label: "Review visual direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+		{ id: "map-missing-assets", label: "Map missing assets", action: "preview", intent: "task", template: "Map missing assets for {project}. List must-have files, usage context, and priority." },
+		{ id: "prepare-media-brief", label: "Prepare media brief", action: "preview", intent: "media", template: "Prepare a media brief for {project}. Include concept, visual rules, needed assets, and production notes." },
+		{ id: "open-media-studio", label: "Send to Media Studio", action: "route", route: "media-studio" }
+	],
+	video_lead: [
+		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+	],
+	publisher: [
+		{ id: "build-publish-checklist", label: "Build publish checklist", action: "preview", intent: "handoff", template: "Build a publish checklist for {project}. Include assets, copy, legal checks, and channel readiness." },
+		{ id: "prepare-schedule-draft", label: "Prepare schedule draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence and dependencies." },
+		{ id: "review-channel-readiness", label: "Review channel readiness", action: "preview", intent: "guidance", template: "Review channel readiness for {project}. Flag blockers before any publish step." },
+		{ id: "prepare-publishing-handoff", label: "Prepare publishing handoff", action: "preview", intent: "handoff", template: "Prepare a publishing handoff package for {project}. Include checklist and required approvals." },
+		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+	],
+	ads: [
+		{ id: "draft-ad-angles", label: "Draft ad angles", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, and hook direction." },
+		{ id: "suggest-audience-tests", label: "Suggest audience tests", action: "preview", intent: "task", template: "Suggest audience tests for {project}. Provide hypotheses, segments, and measurement notes." },
+		{ id: "prepare-creative-variants", label: "Prepare creative variants", action: "preview", intent: "guidance", template: "Prepare creative variants for {project}. Include copy and visual variant matrix." },
+		{ id: "review-budget-notes", label: "Review budget notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+	],
+	analyst: [
+		{ id: "suggest-keywords", label: "Suggest keywords", action: "preview", intent: "guidance", template: "Suggest keyword opportunities for {project}. Include intent and content mapping." },
+		{ id: "review-signals", label: "Review signals", action: "preview", intent: "guidance", template: "Review current signals for {project}. Identify strongest and weakest lanes." },
+		{ id: "prepare-insight-questions", label: "Prepare insight questions", action: "preview", intent: "task", template: "Prepare insight questions for {project}. Focus on conversion, traffic quality, and content fit." },
+		{ id: "draft-analysis-plan", label: "Draft analysis plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+	],
+	compliance_reviewer: [
+		{ id: "review-claims", label: "Review claims", action: "preview", intent: "guidance", template: "Review claims for {project}. Flag unsupported or high-risk wording." },
+		{ id: "check-approval-risks", label: "Check approval risks", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, and mitigation." },
+		{ id: "prepare-safety-checklist", label: "Prepare safety checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks and evidence required." },
+		{ id: "review-publish-readiness", label: "Review publish readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+	],
+	operations: [
+		{ id: "draft-task", label: "Draft task", action: "preview", intent: "task", template: "Draft operational tasks for {project}. Include owner, dependencies, and due sequence." },
+		{ id: "draft-workflow", label: "Draft workflow", action: "preview", intent: "workflow", template: "Draft workflow sequence for {project}. Include stages, gates, and handoffs." },
+		{ id: "prepare-handoff-chain", label: "Prepare handoff chain", action: "preview", intent: "handoff", template: "Prepare a handoff chain for {project}. Include source, destination, and decision gates." },
+		{ id: "review-blockers", label: "Review blockers", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+	]
+};
+
 // 4 quick-action prompts shown in the composer
 const QUICK_ACTIONS = [
 	{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },
@@ -519,6 +587,16 @@ function humanizeValue(value, fallback = "") {
 	return fallback;
 }
 
+function applyTokenTemplate(template, context = {}) {
+	const tokenMap = {
+		project: asString(context.projectName || "this project") || "this project",
+		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+		campaign: asString(context.campaign || "active campaign") || "active campaign"
+	};
+
+	return asString(template).replace(/\{(project|specialist|campaign)\}/g, (_, token) => tokenMap[token] || "");
+}
+
 function normalizeDisplayList(value, limit = 8) {
 	return asArray(value)
 		.map((item) => humanizeValue(item))
@@ -597,6 +675,8 @@ function ensureSession(projectName) {
 		aiSessions.set(key, {
 			modeId: "operations",
 			teamMode: "solo",
+			workspaceTab: "preview",
+			workspaceTabInitialized: false,
 			draftMessage: "",
 			commandType: "strategy",
 			targetType: "current-project",
@@ -2298,7 +2378,7 @@ function renderPhase1Header(session, projectName, escapeHtml) {
 			<div class="aicmd-v2-header-main">
 				<p class="aicmd-v2-eyebrow">MH-OS · AI Team</p>
 				<h1 class="aicmd-v2-title">AI Team Command Center</h1>
-				<p class="aicmd-v2-subtitle">Work with one specialist or your full AI team to turn ideas into guidance, tasks, workflows, content, media, and handoffs.</p>
+				<p class="aicmd-v2-subtitle">Work with one specialist or the full team to turn ideas into guidance, drafts, workflows, and handoffs.</p>
 			</div>
 			<div class="aicmd-v2-header-meta">
 				<div class="aicmd-v2-meta-chip">
@@ -2344,6 +2424,7 @@ function renderPhase1TeamRail(session, escapeHtml) {
 			<div class="aicmd-v2-team-rail">
 				${SPECIALIST_DEFS.map((spec) => {
 					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+					const railSummary = asString(spec.summary).split(",")[0] || spec.summary;
 					return `
 						<button
 							class="aicmd-v2-spec-btn${isActive ? " is-active" : ""}"
@@ -2354,7 +2435,7 @@ function renderPhase1TeamRail(session, escapeHtml) {
 							<span class="aicmd-v2-spec-icon">${spec.icon}</span>
 							<div class="aicmd-v2-spec-info">
 								<span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
-								<span class="aicmd-v2-spec-summary">${escapeHtml(spec.summary)}</span>
+								<span class="aicmd-v2-spec-summary">${escapeHtml(railSummary)}</span>
 							</div>
 							<span class="aicmd-v2-spec-status${isActive ? " is-active" : ""}">${isActive ? "Active" : escapeHtml(spec.status)}</span>
 						</button>
@@ -2366,29 +2447,51 @@ function renderPhase1TeamRail(session, escapeHtml) {
 }
 
 function renderPhase1Profile(session, escapeHtml) {
+	const renderTopTools = (toolItems = []) => {
+		return asArray(toolItems)
+			.slice(0, 5)
+			.map((tool) => `<li class="aicmd-v2-profile-item">${escapeHtml(tool.label)}</li>`)
+			.join("");
+	};
+
+	const renderCompactDetails = (leftTitle, leftItems, rightTitle, rightItems) => `
+		<details class="aicmd-v2-profile-details">
+			<summary>View details</summary>
+			<div class="aicmd-v2-profile-grid">
+				<div class="aicmd-v2-profile-col">
+					<span class="aicmd-v2-profile-label">${leftTitle}</span>
+					<ul class="aicmd-v2-profile-list">
+						${leftItems.map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
+					</ul>
+				</div>
+				<div class="aicmd-v2-profile-col">
+					<span class="aicmd-v2-profile-label">${rightTitle}</span>
+					<ul class="aicmd-v2-profile-list">
+						${rightItems.map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
+					</ul>
+				</div>
+			</div>
+		</details>
+	`;
+
 	if (session.teamMode === "team") {
+		const teamTools = asArray(PHASE35_SPECIALIST_TOOLS.operations)
+			.concat(asArray(PHASE35_SPECIALIST_TOOLS.strategist))
+			.slice(0, 5);
 		return `
 			<div class="aicmd-v2-profile aicmd-v2-team-profile">
 				<div class="aicmd-v2-profile-header">
 					<span class="aicmd-v2-profile-icon">🤝</span>
 					<div>
 						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
-						<p class="aicmd-v2-profile-purpose">All specialists collaborate on the project together. Each specialist contributes their domain expertise toward the shared mission.</p>
+						<p class="aicmd-v2-profile-purpose">Coordinate specialists to prepare guidance, drafts, workflows, and safe handoffs.</p>
 					</div>
 				</div>
-				<div class="aicmd-v2-profile-grid">
-					<div class="aicmd-v2-profile-col">
-						<span class="aicmd-v2-profile-label">Team can help with</span>
-						<ul class="aicmd-v2-profile-list">
-							${["Strategy and campaign planning", "Content drafts and copy", "Media direction and briefs", "SEO and performance analysis", "Compliance and governance review", "Publishing readiness and handoffs", "Task planning and execution sequencing"].map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
-						</ul>
-					</div>
-					<div class="aicmd-v2-profile-col">
-						<span class="aicmd-v2-profile-label">Team cannot do</span>
-						<ul class="aicmd-v2-profile-list">
-							${["Publish without explicit approval", "Execute workflows automatically", "Grant approvals or override governance", "Run backend operations without confirmation"].map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
-						</ul>
-					</div>
+				<div class="aicmd-v2-profile-col">
+					<span class="aicmd-v2-profile-label">Top team tools</span>
+					<ul class="aicmd-v2-profile-list">
+						${renderTopTools(teamTools)}
+					</ul>
 				</div>
 				<div class="aicmd-v2-profile-destinations">
 					<span class="aicmd-v2-profile-label">Key destinations</span>
@@ -2396,11 +2499,22 @@ function renderPhase1Profile(session, escapeHtml) {
 						${["Campaign Studio", "Content Studio", "Publishing", "Workflows", "Insights"].map((d) => `<span class="aicmd-v2-dest-chip">${escapeHtml(d)}</span>`).join("")}
 					</div>
 				</div>
+				<div class="aicmd-v2-profile-safety">
+					<span class="aicmd-v2-profile-safety-icon">🔒</span>
+					<span>Guidance and draft workspace only. Team execution still requires explicit confirmation in destination pages.</span>
+				</div>
+				${renderCompactDetails(
+					"Team can help with",
+					["Strategy and campaign planning", "Content drafts and copy", "Media direction and briefs", "SEO and performance analysis", "Compliance and governance review", "Publishing readiness and handoffs", "Task planning and execution sequencing"],
+					"Team cannot do",
+					["Publish without explicit approval", "Execute workflows automatically", "Grant approvals or override governance", "Run backend operations without confirmation"]
+				)}
 			</div>
 		`;
 	}
 
 	const spec = getPhase1SpecialistById(session.modeId);
+	const specialistTools = asArray(PHASE35_SPECIALIST_TOOLS[spec.id] || PHASE35_SPECIALIST_TOOLS.operations);
 	return `
 		<div class="aicmd-v2-profile">
 			<div class="aicmd-v2-profile-header">
@@ -2410,19 +2524,11 @@ function renderPhase1Profile(session, escapeHtml) {
 					<p class="aicmd-v2-profile-purpose">${escapeHtml(spec.summary)}</p>
 				</div>
 			</div>
-			<div class="aicmd-v2-profile-grid">
-				<div class="aicmd-v2-profile-col">
-					<span class="aicmd-v2-profile-label">Can help with</span>
-					<ul class="aicmd-v2-profile-list">
-						${spec.canHelp.map((item) => `<li class="aicmd-v2-profile-item">${escapeHtml(item)}</li>`).join("")}
-					</ul>
-				</div>
-				<div class="aicmd-v2-profile-col">
-					<span class="aicmd-v2-profile-label">Cannot do</span>
-					<ul class="aicmd-v2-profile-list">
-						${spec.cannotDo.map((item) => `<li class="aicmd-v2-profile-item aicmd-v2-profile-denied">${escapeHtml(item)}</li>`).join("")}
-					</ul>
-				</div>
+			<div class="aicmd-v2-profile-col">
+				<span class="aicmd-v2-profile-label">Top tools</span>
+				<ul class="aicmd-v2-profile-list">
+					${renderTopTools(specialistTools)}
+				</ul>
 			</div>
 			<div class="aicmd-v2-profile-destinations">
 				<span class="aicmd-v2-profile-label">Destination pages</span>
@@ -2435,7 +2541,101 @@ function renderPhase1Profile(session, escapeHtml) {
 				<span class="aicmd-v2-profile-safety-icon">🔒</span>
 				<span>${escapeHtml(spec.safetyNote)}</span>
 			</div>` : ""}
+			${renderCompactDetails("Can help with", spec.canHelp, "Cannot do", spec.cannotDo)}
 		</div>
+	`;
+}
+
+function getPhase35ToolSet(session) {
+	if (session.teamMode === "team") {
+		return [
+			{ id: "team-mission", label: "Prepare team mission", action: "preview", intent: "handoff", template: "Prepare a team mission package for {project}. Include specialist ownership and handoff sequence." },
+			{ id: "team-workflow", label: "Draft full-team workflow", action: "preview", intent: "workflow", template: "Draft a full-team workflow for {project}. Include strategy, content, media, compliance, and publishing gates." },
+			{ id: "team-blockers", label: "Map cross-team blockers", action: "preview", intent: "task", template: "Map cross-team blockers for {project}. Include owner, dependency, and unblock sequence." },
+			{ id: "team-handoff", label: "Prepare handoff chain", action: "preview", intent: "handoff", template: "Prepare a cross-team handoff chain for {project}. Include required confirmations and destination pages." },
+			{ id: "team-open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+		];
+	}
+
+	return asArray(PHASE35_SPECIALIST_TOOLS[session.modeId] || PHASE35_SPECIALIST_TOOLS.operations);
+}
+
+function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
+	const tabs = [
+		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
+		{ id: "preview", label: "Preview", hint: "Draft output" },
+		{ id: "tools", label: "Tools", hint: "Role actions" },
+		{ id: "context", label: "Context", hint: "Safety + readiness" }
+	];
+
+	return `
+		<div class="aicmd-v2-tabs" role="tablist" aria-label="AI workspace tabs">
+			${tabs.map((tab) => `
+				<button
+					type="button"
+					class="aicmd-v2-tab-btn${session.workspaceTab === tab.id ? " is-active" : ""}"
+					data-aicmdv2-tab="${tab.id}"
+					role="tab"
+					aria-selected="${session.workspaceTab === tab.id ? "true" : "false"}"
+				>
+					<span>${escapeHtml(tab.label)}</span>
+					<small>${escapeHtml(tab.hint)}</small>
+				</button>
+			`).join("")}
+		</div>
+	`;
+}
+
+function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+	const tools = getPhase35ToolSet(session);
+
+	return `
+		<section class="aicmd-v2-tools">
+			<div class="aicmd-v2-tools-head">
+				<h3 class="aicmd-v2-tools-title">Specialist Tools</h3>
+				<span class="aicmd-v2-tools-subtitle">Tools fill composer or create local preview only.</span>
+			</div>
+			<div class="aicmd-v2-tools-grid">
+				${tools.map((tool) => {
+					const actionLabel = tool.action === "route"
+						? `Open ${routeLabel(tool.route || "workflows")}`
+						: `${titleCase(tool.intent || "guidance")} preview`;
+					return `
+						<button
+							type="button"
+							class="aicmd-v2-tool-btn"
+							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+						>
+							<span class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</span>
+							<span class="aicmd-v2-tool-meta">${escapeHtml(actionLabel)}</span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			<div class="aicmd-v2-tools-note">Project: ${escapeHtml(projectName || "Not selected")} · Campaign: ${escapeHtml(aiContext.campaign || "Not selected")}</div>
+		</section>
+	`;
+}
+
+function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+	const providerConfigured = isProviderLikelyConfigured(aiContext);
+	const readinessItems = [
+		{ label: "Read preview", value: "Available", className: "is-available" },
+		{ label: "Voice input", value: "Planned", className: "is-planned" },
+		{ label: "Team chat", value: bridgeStatus.available ? "Connected" : "Requires guidance-only bridge", className: bridgeStatus.available ? "is-available" : "is-planned" },
+		{ label: "Media generation", value: "Requires provider/worker", className: "is-planned" },
+		{ label: "GPU video", value: "Requires worker", className: "is-planned" },
+		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+	];
+
+	return `
+		<section class="aicmd-v2-readiness-strip">
+			${readinessItems.map((item) => `
+				<span class="aicmd-v2-readiness-chip ${item.className}">
+					<strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(item.value)}
+				</span>
+			`).join("")}
+		</section>
 	`;
 }
 
@@ -2612,17 +2812,17 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 
 function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 	const latest = asArray(session.responseHistory)[0] || null;
-	const bridgeLabel = bridgeStatus.available ? "Connected" : "Unavailable";
+	const bridgeLabel = bridgeStatus.available ? "Connected" : "Guarded";
 	const emptyBody = bridgeStatus.available
 		? "Ask a specialist to receive a generated response in this panel."
-		: humanizeValue(bridgeStatus.reason, "AI response bridge is not connected yet.");
+		: "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
 
 	return `
 		<section class="aicmd-v2-chat">
 			<div class="aicmd-v2-chat-head">
 				<div>
 					<h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
-					<p class="aicmd-v2-chat-subtitle">Real generated specialist responses appear here when the safe response bridge is connected.</p>
+					<p class="aicmd-v2-chat-subtitle">Protected capability. Real specialist responses appear here after the guidance-only bridge is connected.</p>
 				</div>
 				<span class="aicmd-v2-chat-bridge ${bridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
@@ -2837,9 +3037,43 @@ export const aiCommandRoute = {
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
 		const responseBridge = getAiResponseBridgeStatus(executeProjectAiCommand);
+		if (!session.workspaceTabInitialized) {
+			session.workspaceTab = responseBridge.available ? "chat" : "preview";
+			session.workspaceTabInitialized = true;
+		}
+		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
+			session.workspaceTab = responseBridge.available ? "chat" : "preview";
+		}
 
 		const root = $("ctrlRoomRoot");
 		if (!root) return;
+
+		const activeTab = session.workspaceTab;
+		const tabContent = {
+			chat: `
+				<div class="aicmd-v2-tab-panel is-chat">
+					${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
+				</div>
+			`,
+			preview: `
+				<div class="aicmd-v2-tab-panel is-preview">
+					${renderPhase2PreviewPanel(session, escapeHtml)}
+				</div>
+			`,
+			tools: `
+				<div class="aicmd-v2-tab-panel is-tools">
+					${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
+					${renderPhase1SuggestedPrompts(session, escapeHtml)}
+				</div>
+			`,
+			context: `
+				<div class="aicmd-v2-tab-panel is-context">
+					${renderPhase1ContextPanel(state, session, aiContext, escapeHtml)}
+					${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
+					${renderPhase1SafetyPanel(escapeHtml)}
+				</div>
+			`
+		};
 
 		root.innerHTML = `
 			<div class="aicmd-v2-shell">
@@ -2849,12 +3083,9 @@ export const aiCommandRoute = {
 					<main class="aicmd-v2-main">
 						${renderPhase1Profile(session, escapeHtml)}
 						${renderPhase1Composer(session, escapeHtml)}
-						${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
-						${renderPhase2PreviewPanel(session, escapeHtml)}
-						${renderPhase1SuggestedPrompts(session, escapeHtml)}
-						${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
-						${renderPhase1ContextPanel(state, session, aiContext, escapeHtml)}
-						${renderPhase1SafetyPanel(escapeHtml)}
+						${renderPhase35WorkspaceTabs(session, responseBridge, escapeHtml)}
+						${tabContent[activeTab] || tabContent.preview}
+						${renderPhase35ReadinessStrip(aiContext, responseBridge, escapeHtml)}
 					</main>
 				</div>
 			</div>
@@ -2867,7 +3098,7 @@ export const aiCommandRoute = {
 			if (statusEl) statusEl.textContent = msg;
 		};
 
-		const setPreviewFromIntent = (intent, fallbackPrompt = "") => {
+		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
 			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
 			if (!value) {
 				updateStatus("Please write your request in the composer first.");
@@ -2882,10 +3113,23 @@ export const aiCommandRoute = {
 				prompt: value,
 				projectName
 			});
+			if (PHASE35_WORKSPACE_TABS.includes(options.switchTab)) {
+				session.workspaceTab = options.switchTab;
+			}
 			persistSessionDraft(sessionKey, session, "Draft saved locally");
 			aiCommandRoute.render(context);
 			return session.outputPreview;
 		};
+
+		Array.from(document.querySelectorAll("[data-aicmdv2-tab]")).forEach((btn) => {
+			btn.onclick = () => {
+				const nextTab = asString(btn.getAttribute("data-aicmdv2-tab") || "preview").trim();
+				if (!PHASE35_WORKSPACE_TABS.includes(nextTab)) return;
+				session.workspaceTab = nextTab;
+				persistSessionDraft(sessionKey, session, `Workspace view: ${titleCase(nextTab)}`);
+				aiCommandRoute.render(context);
+			};
+		});
 
 		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
 		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
@@ -3030,7 +3274,7 @@ export const aiCommandRoute = {
 		const prepareBtn = $("aicmdV2PrepareBtn");
 		if (prepareBtn) {
 			prepareBtn.onclick = () => {
-				const preview = setPreviewFromIntent("guidance");
+				const preview = setPreviewFromIntent("guidance", "", { switchTab: "preview" });
 				if (!preview) return;
 				const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
 				showMessage?.(`${specLabel} guidance preview prepared.`);
@@ -3049,7 +3293,7 @@ export const aiCommandRoute = {
 					: `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
 				if (input) input.value = taskPrompt;
 				session.draftMessage = taskPrompt;
-				setPreviewFromIntent("task", taskPrompt);
+				setPreviewFromIntent("task", taskPrompt, { switchTab: "preview" });
 				updateStatus("Task draft preview prepared locally. Review before creating durable tasks.");
 				showMessage?.("Task draft preview prepared.");
 			};
@@ -3066,7 +3310,7 @@ export const aiCommandRoute = {
 					: `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
 				if (input) input.value = workflowPrompt;
 				session.draftMessage = workflowPrompt;
-				setPreviewFromIntent("workflow", workflowPrompt);
+				setPreviewFromIntent("workflow", workflowPrompt, { switchTab: "preview" });
 				updateStatus("Workflow draft preview prepared locally. No workflow run started.");
 				showMessage?.("Workflow draft preview prepared.");
 			};
@@ -3084,11 +3328,52 @@ export const aiCommandRoute = {
 					: `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
 				if (input) input.value = handoffPrompt;
 				session.draftMessage = handoffPrompt;
-				setPreviewFromIntent("handoff", handoffPrompt);
+				setPreviewFromIntent("handoff", handoffPrompt, { switchTab: "preview" });
 				updateStatus("Handoff preview prepared locally. Review destination before sending.");
 				showMessage?.("Handoff preview prepared.");
 			};
 		}
+
+		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+		toolButtons.forEach((btn) => {
+			btn.onclick = () => {
+				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+				if (!toolId) return;
+
+				const tool = getPhase35ToolSet(session).find((entry) => entry.id === toolId);
+				if (!tool) return;
+
+				if (tool.action === "route") {
+					const destination = asString(tool.route || "workflows");
+					showMessage?.(`Opening ${routeLabel(destination)}.`);
+					navigateTo(destination);
+					return;
+				}
+
+				const preparedPrompt = applyTokenTemplate(tool.template, {
+					projectName,
+					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+					campaign: aiContext.campaign
+				});
+
+				session.draftMessage = preparedPrompt;
+				if (input) {
+					input.value = preparedPrompt;
+				}
+
+				if (tool.intent === "task") {
+					setPreviewFromIntent("task", preparedPrompt, { switchTab: "preview" });
+				} else if (tool.intent === "workflow") {
+					setPreviewFromIntent("workflow", preparedPrompt, { switchTab: "preview" });
+				} else if (tool.intent === "handoff") {
+					setPreviewFromIntent("handoff", preparedPrompt, { switchTab: "preview" });
+				} else {
+					setPreviewFromIntent("guidance", preparedPrompt, { switchTab: "preview" });
+				}
+
+				showMessage?.(`${tool.label} prepared as local preview.`);
+			};
+		});
 
 		// ── SAVE DRAFT ───────────────────────────────────────────────
 		const saveBtn = $("aicmdV2SaveBtn");

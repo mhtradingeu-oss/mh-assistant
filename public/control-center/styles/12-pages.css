@@ -2546,10 +2546,78 @@
 .aicmd-v2-main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 20px 24px;
   min-width: 0;
   overflow-y: auto;
+}
+
+.aicmd-v2-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.aicmd-v2-tab-btn {
+  border: 1px solid var(--color-border-0);
+  background: var(--color-surface-0);
+  color: var(--color-text-2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color 140ms, background 140ms, color 140ms;
+}
+
+.aicmd-v2-tab-btn span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.aicmd-v2-tab-btn small {
+  font-size: 10px;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aicmd-v2-tab-btn:hover {
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+.aicmd-v2-tab-btn.is-active {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: linear-gradient(180deg, rgba(22, 44, 62, 0.9) 0%, rgba(14, 32, 46, 0.95) 100%);
+}
+
+.aicmd-v2-tab-btn.is-active span {
+  color: var(--color-primary);
+}
+
+.aicmd-v2-tab-panel {
+  border-radius: 8px;
+}
+
+.aicmd-v2-tab-panel.is-chat .aicmd-v2-chat {
+  border-color: rgba(122, 169, 205, 0.22);
+  background: linear-gradient(180deg, rgba(12, 30, 46, 0.7) 0%, rgba(9, 24, 37, 0.86) 100%);
+}
+
+.aicmd-v2-tab-panel.is-context {
+  display: grid;
+  gap: 10px;
+}
+
+.aicmd-v2-tab-panel.is-context .aicmd-v2-context,
+.aicmd-v2-tab-panel.is-context .aicmd-v2-safety,
+.aicmd-v2-tab-panel.is-context .aicmd-v2-media-status {
+  margin: 0;
 }
 
 /* ── SPECIALIST PROFILE PANEL ───────────────────────────── */
@@ -2621,6 +2689,33 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.aicmd-v2-profile-details {
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border-0);
+  padding-top: 8px;
+}
+
+.aicmd-v2-profile-details summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-text-2);
+  user-select: none;
+}
+
+.aicmd-v2-profile-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.aicmd-v2-profile-details[open] summary {
+  color: var(--color-primary);
+}
+
+.aicmd-v2-profile-details .aicmd-v2-profile-grid {
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 
 .aicmd-v2-profile-label {
@@ -2802,6 +2897,75 @@
   font-size: 11px;
   color: var(--color-text-2);
   line-height: 1.5;
+}
+
+.aicmd-v2-tools {
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: var(--color-surface-0);
+  border: 1px solid var(--color-border-0);
+}
+
+.aicmd-v2-tools-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.aicmd-v2-tools-title {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-0);
+}
+
+.aicmd-v2-tools-subtitle {
+  font-size: 10px;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aicmd-v2-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.aicmd-v2-tool-btn {
+  border: 1px solid var(--color-border-0);
+  border-radius: 7px;
+  background: var(--color-surface-1);
+  padding: 9px 10px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color 140ms, background 140ms;
+}
+
+.aicmd-v2-tool-btn:hover {
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+.aicmd-v2-tool-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-0);
+}
+
+.aicmd-v2-tool-meta {
+  font-size: 10px;
+  color: var(--color-text-2);
+}
+
+.aicmd-v2-tools-note {
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--color-text-2);
 }
 
 /* ── PHASE 3: SPECIALIST CONVERSATION ───────────────────── */
@@ -3374,6 +3538,39 @@
   color: var(--color-primary);
 }
 
+.aicmd-v2-readiness-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 8px 0 0;
+}
+
+.aicmd-v2-readiness-chip {
+  font-size: 10px;
+  color: var(--color-text-2);
+  border: 1px solid var(--color-border-0);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--color-surface-1);
+}
+
+.aicmd-v2-readiness-chip strong {
+  color: var(--color-text-1);
+}
+
+.aicmd-v2-readiness-chip.is-available {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.aicmd-v2-readiness-chip.is-available strong {
+  color: var(--color-success);
+}
+
+.aicmd-v2-readiness-chip.is-planned strong {
+  color: var(--color-text-2);
+}
+
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 
 @media (max-width: 900px) {
@@ -3397,6 +3594,10 @@
 
   .aicmd-v2-header {
     flex-direction: column;
+  }
+
+  .aicmd-v2-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .aicmd-v2-profile-grid {
