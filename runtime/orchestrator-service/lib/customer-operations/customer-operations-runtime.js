@@ -5,6 +5,9 @@ const ticketStore = require('./tickets/store/ticket-store');
 
 const messageStore = require('./conversations/messages/message-store');
 
+const customerProfileStore = require('./customers/store/customer-profile-store');
+
+
 const {
   registerDefaultChannels
 } = require('./channels/registry/default-channels');
@@ -27,6 +30,14 @@ function createCustomerOperationsRuntime() {
     },
 
 
+
+
+    customers: {
+      create: customerProfileStore.createCustomerProfile,
+      get: customerProfileStore.getCustomerProfile,
+      list: customerProfileStore.listCustomerProfiles,
+      update: customerProfileStore.updateCustomerProfile
+    },
 
     messages: {
       create: messageStore.createMessage,
@@ -56,6 +67,7 @@ function createCustomerOperationsRuntime() {
           tickets: true,
           channels: true,
           messages: true,
+          customers: true,
           voice: false,
           ivr: false,
           outreach: false,
