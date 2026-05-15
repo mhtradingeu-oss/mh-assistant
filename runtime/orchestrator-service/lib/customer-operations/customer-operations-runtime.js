@@ -11,6 +11,9 @@ const slaPolicyStore = require('./sla/store/sla-policy-store');
 
 const escalationStore = require('./escalation/store/escalation-store');
 
+const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
+
+
 
 
 
@@ -39,6 +42,14 @@ function createCustomerOperationsRuntime() {
 
 
 
+
+
+    unifiedInbox: {
+      create: unifiedInboxStore.createInboxEntry,
+      get: unifiedInboxStore.getInboxEntry,
+      list: unifiedInboxStore.listInboxEntries,
+      update: unifiedInboxStore.updateInboxEntry
+    },
 
     escalation: {
       create: escalationStore.createEscalation,
@@ -92,6 +103,7 @@ function createCustomerOperationsRuntime() {
           customers: true,
           sla: true,
           escalation: true,
+          unified_inbox: true,
           voice: false,
           ivr: false,
           outreach: false,
