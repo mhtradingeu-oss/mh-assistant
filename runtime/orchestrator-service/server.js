@@ -103,6 +103,11 @@ const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 const {
   createJobDispatchOrchestrator
 } = require('./lib/media/native/orchestrator/job-dispatch-orchestrator');
+
+const {
+  createCustomerOperationsRuntime
+} = require('./lib/customer-operations/customer-operations-runtime');
+
 const {
   registerDefaultModels
 } = require('./lib/media/native/models/default-models');
@@ -11815,6 +11820,10 @@ async function handleProjectIntegrationAction(req, res, actionType) {
     });
   }
 }
+
+
+const customerOperationsRuntime =
+  createCustomerOperationsRuntime();
 
 app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
 
