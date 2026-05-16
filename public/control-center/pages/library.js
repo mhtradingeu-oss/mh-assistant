@@ -2395,8 +2395,6 @@ viewToggleButtons.forEach((button) => {
         }
       });
 
-      const _fbCardKey = allAssets.find((a) => a.id === nextId);
-      if (_fbCardKey?.name) showMessage?.(`Selected ${_fbCardKey.name}. Review status and available actions.`);
       rerender();
     };
   });
