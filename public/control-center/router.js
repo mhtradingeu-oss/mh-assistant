@@ -14,7 +14,8 @@ import {
   taskCenterRoute,
   queueCenterRoute,
   jobMonitorRoute,
-  notificationCenterRoute
+  notificationCenterRoute,
+  operationsCentersRoute
 } from "./pages/operations-centers.js";
 import { setupRoute } from "./pages/setup.js";
 import { libraryRoute } from "./pages/library.js";
@@ -30,6 +31,7 @@ const routeRegistry = {
   [homeRoute.id]: homeRoute,
   [aiCommandRoute.id]: aiCommandRoute,
   [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
   [taskCenterRoute.id]: taskCenterRoute,
   [queueCenterRoute.id]: queueCenterRoute,
   [jobMonitorRoute.id]: jobMonitorRoute,
