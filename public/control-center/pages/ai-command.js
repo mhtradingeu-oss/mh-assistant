@@ -337,6 +337,39 @@ const TEAM_SUGGESTED_PROMPTS = [
 
 const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
 
+const AI_ROOM_FLOW_STEPS = [
+	{ id: "ask", title: "Ask", description: "Write the request and choose the team lane." },
+	{ id: "draft", title: "Draft", description: "Generate guidance, copy, task, or handoff material." },
+	{ id: "review", title: "Review", description: "Check safety, scope, language, and destination." },
+	{ id: "route", title: "Route", description: "Send context to the owning workspace." },
+	{ id: "execute", title: "Execute", description: "Execution stays gated in backend-owned surfaces." },
+	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+];
+
+const AI_ROOM_OUTPUT_TABS = [
+	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+	{ id: "task", label: "Task", helper: "Task-shaped output" },
+	{ id: "workflow", label: "Workflow", helper: "Operating sequence" },
+	{ id: "handoff", label: "Handoff", helper: "Destination package" },
+	{ id: "export", label: "Export", helper: "File-ready package" }
+];
+
+const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media", "Compliance", "Publisher", "Operations"];
+
+const AI_ROOM_ROLE_INITIALS = {
+	strategist: "ST",
+	writer: "CW",
+	media: "MD",
+	video_lead: "VL",
+	publisher: "PB",
+	ads: "AO",
+	analyst: "SI",
+	compliance_reviewer: "CR",
+	operations: "OL",
+	customer_ops: "CO",
+	sales_crm: "SC"
+};
+
 const PHASE35_SPECIALIST_TOOLS = {
 	strategist: [
 		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
@@ -844,6 +877,7 @@ function ensureSession(projectName) {
 			modeId: "operations",
 			teamMode: "solo",
 			workspaceTab: "preview",
+			outputWorkspaceTab: "draft",
 			workspaceTabInitialized: false,
 			draftMessage: "",
 			commandType: "strategy",
@@ -2731,94 +2765,214 @@ function getPhase1SpecialistById(value) {
   );
 }
 
-function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
-        const safeBridgeStatus = bridgeStatus || { available: false };
-        const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
-        const languagePlan = getWorkspaceLanguagePlan(aiContext);
+function getAiRoomRoleId(value) {
+	return asString(value || "operations")
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+}
 
-        return `
-                <header class="aicmd-v2-header">
-                        <div class="aicmd-v2-header-meta">
-                                <div class="aicmd-v2-meta-chip is-project">
-                                        <span>Project</span>
-                                        <strong>${escapeHtml(projectName || "Not selected")}</strong>
-                                </div>
-                                <div class="aicmd-v2-meta-chip">
-                                        <span>Mode</span>
-                                        <strong>${escapeHtml(modeLabel)}</strong>
-                                </div>
-                                <div class="aicmd-v2-meta-chip">
-                                        <span>You talk</span>
-                                        <strong>${escapeHtml(languagePlan.conversationLanguage)}</strong>
-                                </div>
-                                <div class="aicmd-v2-meta-chip">
-                                        <span>We publish</span>
-                                        <strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
-                                </div>
-                                <div class="aicmd-v2-meta-chip">
-                                        <span>Market</span>
-                                        <strong>${escapeHtml(languagePlan.market)}</strong>
-                                </div>
-                        </div>
-                        <div class="aicmd-v2-header-actions">
-                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
-                                        ${escapeHtml(safeBridgeStatus.available ? "Connected" : "Ready")}
-                                </span>
-                                <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
-                                <button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
-                        </div>
-                </header>
-        `;
+function getAiRoomInitials(specialist) {
+	const id = getAiRoomRoleId(specialist?.id);
+	if (AI_ROOM_ROLE_INITIALS[id]) return AI_ROOM_ROLE_INITIALS[id];
+	return asString(specialist?.label || "AI")
+		.split(/\s+/)
+		.map((part) => part[0])
+		.join("")
+		.slice(0, 2)
+		.toUpperCase() || "AI";
+}
+
+function getAiRoomFlowIndex(session) {
+	const preview = asObject(session.outputPreview);
+	if (session.responseLoading) return 0;
+	if (preview.outputType === "workflow") return 2;
+	if (preview.outputType === "handoff") return 3;
+	if (preview.outputType === "task") return 1;
+	if (preview.outputType) return 2;
+	if (asArray(session.responseHistory).length) return 2;
+	if (asString(session.draftMessage).trim()) return 0;
+	return 0;
+}
+
+function outputTabFromIntent(intent) {
+	const map = {
+		guidance: "draft",
+		preview: "draft",
+		task: "task",
+		workflow: "workflow",
+		handoff: "handoff",
+		export: "export"
+	};
+	return map[asString(intent)] || "draft";
+}
+
+function outputTabFromPreview(preview) {
+	const outputType = asString(preview?.outputType || "");
+	if (outputType === "task") return "task";
+	if (outputType === "workflow") return "workflow";
+	if (outputType === "handoff") return "handoff";
+	return "draft";
+}
+
+function getOutputWorkspaceTab(session) {
+	const requested = asString(session.outputWorkspaceTab || "");
+	if (AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === requested)) return requested;
+	return outputTabFromPreview(asObject(session.outputPreview));
+}
+
+function getToolOutputTypeLabel(tool) {
+	if (tool.action === "route") return "Handoff";
+	const labels = {
+		guidance: "Draft",
+		task: "Task",
+		workflow: "Workflow",
+		handoff: "Handoff",
+		media: "Draft"
+	};
+	return labels[asString(tool.intent)] || "Draft";
+}
+
+function getToolSafeActionLabel(tool) {
+	if (tool.action === "route") return "Route";
+	if (tool.intent === "task" || tool.intent === "workflow") return "Draft";
+	if (tool.intent === "handoff") return "Route";
+	if (/review|check|compliance|readiness/i.test(asString(tool.label))) return "Review";
+	return "Prepare";
+}
+
+function summarizeToolPurpose(tool) {
+	const template = asString(tool.template || "").replace(/\{project\}/g, "this project").replace(/\{campaign\}/g, "active campaign");
+	const firstSentence = template.split(/[.!?]/)[0]?.trim();
+	if (firstSentence) return firstSentence.replace(/^Prepare\s+/i, "Prepare ").slice(0, 120);
+	if (tool.action === "route") return `Open ${routeLabel(tool.route || "workflows")} with the current draft context.`;
+	return "Prepare a review-ready output for the selected specialist lane.";
+}
+
+function renderAiRoomTeamChain(escapeHtml) {
+	return `
+		<div class="aicmd-room-team-chain" aria-label="Full team orchestration chain">
+			${AI_ROOM_TEAM_CHAIN.map((item, index) => `
+				<span class="aicmd-room-chain-step">${escapeHtml(item)}</span>
+				${index < AI_ROOM_TEAM_CHAIN.length - 1 ? `<span class="aicmd-room-chain-arrow">-&gt;</span>` : ""}
+			`).join("")}
+		</div>
+	`;
+}
+
+function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+	const activeFlowIndex = getAiRoomFlowIndex(session);
+	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+
+	return `
+		<header class="aicmd-v2-header aicmd-room-header">
+			<div class="aicmd-room-title-block">
+				<div class="aicmd-room-eyebrow">AI Operating Room</div>
+				<h1 class="aicmd-room-title">AI Team Command Center</h1>
+				<p class="aicmd-room-subtitle">Work with one specialist or your full AI team to turn ideas into drafts, tasks, workflows, handoffs, and launch actions.</p>
+			</div>
+			<div class="aicmd-v2-header-actions aicmd-room-header-actions">
+				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
+				</span>
+				<button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
+				<button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
+			</div>
+
+			<div class="aicmd-v2-header-meta aicmd-room-meta">
+				<div class="aicmd-v2-meta-chip is-project">
+					<span>Project</span>
+					<strong>${escapeHtml(projectName || "Not selected")}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Mode</span>
+					<strong>${escapeHtml(modeLabel)}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Market</span>
+					<strong>${escapeHtml(languagePlan.market)}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Language</span>
+					<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip">
+					<span>Readiness</span>
+					<strong>${escapeHtml(readinessLabel)}</strong>
+				</div>
+			</div>
+
+			<div class="aicmd-room-flow" aria-label="AI operating flow">
+				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+					<div class="aicmd-room-flow-step${index === activeFlowIndex ? " is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+						<span class="aicmd-room-flow-number">${index + 1}</span>
+						<strong>${escapeHtml(step.title)}</strong>
+						<small>${escapeHtml(step.description)}</small>
+					</div>
+				`).join("")}
+			</div>
+		</header>
+	`;
 }
 
 function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
-        const safeBridgeStatus = bridgeStatus || { available: false };
-        const teamBanner = session.teamMode === "team" ? `
-                <div class="aicmd-v2-team-mission">
-                        <p class="aicmd-v2-team-mission-label">Full Team Mode</p>
-                        <div class="aicmd-v2-chat-empty">
-                                <p>No chat yet.</p>
-                                <span>${escapeHtml(safeBridgeStatus.available ? "Ask a specialist in the Composer." : "Use Preview tools to generate guidance.")}</span>
-                        </div>
-                </div>
-        ` : "";
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const teamBanner = session.teamMode === "team" ? `
+		<div class="aicmd-room-team-mode-card">
+			<strong>Full Team Mode</strong>
+			<span>${escapeHtml(safeBridgeStatus.available ? "Multiple roles contribute to one review-ready answer." : "Preview tools remain available while chat is guarded.")}</span>
+			${renderAiRoomTeamChain(escapeHtml)}
+		</div>
+	` : "";
 
-        return `
-                <aside class="aicmd-v2-left">
-                        <div class="aicmd-v2-team-toggle" role="group" aria-label="AI team mode">
-                                <button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
-                                        Solo Specialist
-                                </button>
-                                <button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
-                                        Full Team
-                                </button>
-                        </div>
-                        ${teamBanner}
-                        <div class="aicmd-v2-rail-head">
-                                <span>AI specialist team</span>
-                        </div>
-                        <div class="aicmd-v2-team-rail">
-                                ${SPECIALIST_DEFS.map((spec) => {
-                                        const isActive = spec.id === session.modeId && session.teamMode === "solo";
-                                        const railSummary = asString(spec.summary).split(",")[0] || spec.summary;
-                                        return `
-                                                <button
-                                                        class="aicmd-v2-spec-btn${isActive ? " is-active" : ""}"
-                                                        type="button"
-                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
-                                                        title="${escapeHtml(spec.summary)}"
-                                                >
-                                                        <span class="aicmd-v2-spec-icon">${escapeHtml(spec.icon)}</span>
-                                                        <div class="aicmd-v2-spec-info">
-                                                                <span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
-                                                                <span class="aicmd-v2-spec-summary">${escapeHtml(railSummary)}</span>
-                                                        </div>
-                                                </button>
-                                        `;
-                                }).join("")}
-                        </div>
-                </aside>
-        `;
+	return `
+		<aside class="aicmd-v2-left aicmd-room-team-panel">
+			<div class="aicmd-room-panel-head">
+				<div>
+					<span class="aicmd-room-panel-kicker">AI Team</span>
+					<strong>Specialists</strong>
+				</div>
+				<span class="aicmd-room-online-pill">Online</span>
+			</div>
+			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
+				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+					Solo Specialist
+				</button>
+				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+					Full Team
+				</button>
+			</div>
+			${teamBanner}
+			<div class="aicmd-v2-team-rail aicmd-room-member-list">
+				${SPECIALIST_DEFS.map((spec) => {
+					const roleId = getAiRoomRoleId(spec.id);
+					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+					const isTeamActive = session.teamMode === "team" && ["strategist", "writer", "media", "compliance_reviewer", "publisher", "operations"].includes(spec.id);
+					const specialization = asString(spec.summary).replace(/\.$/, "");
+					return `
+						<button
+							class="aicmd-v2-spec-btn aicmd-room-member${isActive ? " is-active" : ""}${isTeamActive ? " is-team-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(roleId)}"
+							title="${escapeHtml(spec.summary)}"
+						>
+							<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span class="aicmd-room-member-copy">
+								<span class="aicmd-v2-spec-name">${escapeHtml(spec.label)}</span>
+								<span class="aicmd-room-member-role">${escapeHtml(spec.status || "Ready")} specialist</span>
+								<span class="aicmd-v2-spec-summary">${escapeHtml(specialization)}</span>
+							</span>
+							<span class="aicmd-room-member-indicator" aria-hidden="true"></span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+		</aside>
+	`;
 }
 
 function renderPhase1Profile(session, escapeHtml) {
@@ -2855,6 +3009,35 @@ function renderPhase1Profile(session, escapeHtml) {
 			<div class="aicmd-v2-strength-row">
 				${strengths.map((item) => `<span class="aicmd-v2-strength-chip">${escapeHtml(item)}</span>`).join("")}
 				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+			</div>
+		</div>
+	`;
+}
+
+function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+	const spec = getPhase1SpecialistById(session.modeId);
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const isTeam = session.teamMode === "team";
+	const title = isTeam ? "Full AI Team" : spec.label;
+	const roleLine = isTeam
+		? "Team orchestration across strategy, content, media, compliance, publishing, and operations"
+		: spec.summary;
+	const avatarLabel = isTeam ? "Team" : getAiRoomInitials(spec);
+	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+
+	return `
+		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+			<div class="aicmd-room-active-avatar" aria-hidden="true">${escapeHtml(avatarLabel)}</div>
+			<div class="aicmd-room-active-copy">
+				<span class="aicmd-room-kicker">Conversation Room</span>
+				<strong>${escapeHtml(title)}</strong>
+				<p>${escapeHtml(roleLine)}</p>
+				${isTeam ? renderAiRoomTeamChain(escapeHtml) : ""}
+			</div>
+			<div class="aicmd-room-active-state">
+				<span class="aicmd-room-status-dot${safeBridgeStatus.available ? " is-live" : ""}"></span>
+				<strong>${escapeHtml(safeBridgeStatus.available ? "Available" : "Preview-safe")}</strong>
+				<span>${escapeHtml(modeLabel)}</span>
 			</div>
 		</div>
 	`;
@@ -2904,33 +3087,40 @@ function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
 function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 	const tools = getPhase35ToolSet(session);
 	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
 
 	return `
-		<section class="aicmd-v2-tools">
+		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
 			<div class="aicmd-v2-tools-head">
 				<div>
-					<h3 class="aicmd-v2-tools-title">Tools</h3>
-					<span class="aicmd-v2-tools-subtitle">${tools.length} specialist actions</span>
+					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tools</h3>
+					<span class="aicmd-v2-tools-subtitle">Compact actions prepare drafts only. They do not execute backend operations.</span>
 				</div>
+				<span class="aicmd-v2-tools-count">${tools.length} tools</span>
 			</div>
-			<div class="aicmd-v2-tools-grid">
+			<div class="aicmd-v2-tools-grid aicmd-room-tools-grid">
 				${tools.map((tool) => {
-					const actionLabel = tool.action === "route"
-						? `Open ${routeLabel(tool.route || "workflows")}`
-						: `${titleCase(tool.intent || "guidance")} preview`;
+					const outputLabel = getToolOutputTypeLabel(tool);
+					const actionLabel = getToolSafeActionLabel(tool);
+					const purpose = summarizeToolPurpose(tool);
 					return `
 						<button
 							type="button"
-							class="aicmd-v2-tool-btn"
+							class="aicmd-v2-tool-btn aicmd-room-tool-card"
 							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+							data-output-type="${escapeHtml(outputLabel.toLowerCase())}"
 						>
-							<span class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</span>
-							<span class="aicmd-v2-tool-meta">${escapeHtml(actionLabel)}</span>
+							<span class="aicmd-room-tool-topline">
+								<strong class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</strong>
+								<span class="aicmd-room-tool-action">${escapeHtml(actionLabel)}</span>
+							</span>
+							<span class="aicmd-room-tool-purpose">${escapeHtml(purpose)}</span>
+							<span class="aicmd-v2-tool-meta">Output: ${escapeHtml(outputLabel)}</span>
 						</button>
 					`;
 				}).join("")}
 			</div>
-			${projectName ? `<div class="aicmd-v2-tools-note">Project: ${escapeHtml(projectName)}</div>` : ""}
+			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}</div>` : ""}
 		</section>
 	`;
 }
@@ -2970,51 +3160,41 @@ function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 
 function renderPhase1Composer(session, aiContext, escapeHtml) {
 	const spec = getPhase1SpecialistById(session.modeId);
-	const placeholder = session.teamMode === "team"
-		? "Describe what you want the full AI team to work on — strategy, content, media, compliance, and handoffs together…"
-		: escapeHtml(spec.placeholder);
-	const specLabel = session.teamMode === "team" ? "Full Team" : escapeHtml(spec.label);
+	const placeholder = "Ask the AI team what you want to create, review, route, or prepare next...";
+	const specLabel = session.teamMode === "team" ? "Full Team" : spec.label;
 	const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
-	const projectLabel = aiContext.projectName || "this project";
 
 	return `
-		<div class="aicmd-v2-composer">
+		<div class="aicmd-v2-composer aicmd-room-composer" data-role="${escapeHtml(session.teamMode === "team" ? "team" : getAiRoomRoleId(spec.id))}">
 			<div class="aicmd-v2-composer-head">
 				<div class="aicmd-v2-composer-title-row">
-					<span class="aicmd-v2-composer-icon">${session.teamMode === "team" ? "Team" : spec.icon}</span>
-					<span class="aicmd-v2-composer-label">Write here — ${specLabel}</span>
+					<span class="aicmd-v2-composer-icon">${escapeHtml(session.teamMode === "team" ? "Team" : getAiRoomInitials(spec))}</span>
+					<span class="aicmd-v2-composer-label">Composer - ${escapeHtml(specLabel)}</span>
 				</div>
 				<span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>
 			</div>
 			<div class="aicmd-v2-composer-primary-note">
-                                Start here: write your request, choose the specialist on the left, then ask the AI Team. Chat below is for reading responses.
-                        </div>
-                        ${renderLanguageMarketStrip(aiContext, escapeHtml)}
+				Conversation stays here. Outputs and next-step actions appear on the right.
+			</div>
+			${renderLanguageMarketStrip(aiContext, escapeHtml)}
 			<textarea
 				id="aicmdV2Input"
 				class="aicmd-v2-textarea"
-				rows="4"
-				placeholder="${placeholder}"
+				rows="5"
+				placeholder="${escapeHtml(placeholder)}"
 			>${escapeHtml(session.draftMessage)}</textarea>
-			<div class="aicmd-v2-quick-actions" aria-label="Quick actions">
-				${QUICK_ACTIONS.map((action, index) => `
-					<button
-						class="aicmd-v2-quick-btn"
-						type="button"
-						data-aicmdv2-quick="${index}"
-						data-aicmdv2-quick-template="${escapeHtml(action.template.replace("{project}", projectLabel))}"
-					>
-						<span>${action.icon}</span>
-						<strong>${escapeHtml(action.label)}</strong>
-					</button>
-				`).join("")}
+			<div class="aicmd-room-composer-tools" aria-label="Composer utilities">
+				<button class="aicmd-room-mini-btn" type="button" disabled title="Attachment intake is planned for a later backend step.">Attach</button>
+				<button id="aicmdV2VoiceBtn" class="aicmd-room-mini-btn" type="button" title="Use browser speech recognition when available.">Voice</button>
+				<button class="aicmd-room-mini-btn" type="button" disabled title="Context picker is planned for a later step.">Add Context</button>
+				<button class="aicmd-room-mini-btn" type="button" disabled title="Template picker is planned for a later step.">Template</button>
 			</div>
 			<div class="aicmd-v2-action-row">
 				<button id="aicmdV2AskBtn" class="aicmd-v2-btn-primary" type="button">
 					Ask AI Team
 				</button>
 				<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">
-					Preview
+					Draft
 				</button>
 				<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">
 					Task
@@ -3024,9 +3204,6 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 				</button>
 				<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">
 					Handoff
-				</button>
-				<button id="aicmdV2VoiceBtn" class="aicmd-v2-btn-secondary" type="button">
-					Voice
 				</button>
 				<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">
 					Save
@@ -3120,14 +3297,142 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			</div>
 
 			<div class="aicmd-v2-preview-actions">
-				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
-				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use Above</button>
-				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
-				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
-				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
-				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
+				<button id="aicmdV2LegacyPreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+				<button id="aicmdV2LegacyPreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use Above</button>
+				<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
+				<button id="aicmdV2LegacyPreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
+				<button id="aicmdV2LegacyPreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis === "undefined" ? "disabled" : ""}>Read preview</button>
+				<button id="aicmdV2LegacyPreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
 			</div>
 		</section>
+	`;
+}
+
+function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+	const preview = asObject(session.outputPreview);
+	const hasPreview = Boolean(preview.outputType && preview.title);
+	const activeTab = getOutputWorkspaceTab(session);
+	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "" };
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+	const specialist = session.teamMode === "team"
+		? { id: "team", label: "Full Team" }
+		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : titleCase(activeTab);
+	const routeActionLabel = destination === "Content Studio"
+		? "Send to Content Studio"
+		: destination === "Publishing"
+			? "Route to Publishing"
+			: `Route to ${destination}`;
+	const confirmationLabel = hasPreview
+		? (preview.confirmationRequired ? "Confirmation required" : "Review before route")
+		: "Waiting for output";
+
+	return `
+		<section class="aicmd-room-output-workspace">
+			<div class="aicmd-room-output-head">
+				<div>
+					<span class="aicmd-room-kicker">Output Workspace</span>
+					<h2>Drafts, tasks, workflows, handoffs</h2>
+					<p>Review the result, then save, export, or route it to the next workspace.</p>
+				</div>
+				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
+			</div>
+
+			<div class="aicmd-room-output-tabs" role="tablist" aria-label="Output workspace tabs">
+				${AI_ROOM_OUTPUT_TABS.map((tab) => `
+					<button
+						type="button"
+						class="aicmd-room-output-tab${activeTab === tab.id ? " is-active" : ""}"
+						data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
+						role="tab"
+						aria-selected="${activeTab === tab.id ? "true" : "false"}"
+					>
+						<strong>${escapeHtml(tab.label)}</strong>
+						<span>${escapeHtml(tab.helper)}</span>
+					</button>
+				`).join("")}
+			</div>
+
+			<div class="aicmd-room-output-meta">
+				<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+				<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+				<span><strong>Channel</strong>${escapeHtml(destination)}</span>
+				<span><strong>Target</strong>${escapeHtml(aiContext.projectName || "Current project")}</span>
+			</div>
+
+			${hasPreview ? `
+				<div class="aicmd-room-output-body">
+					<div class="aicmd-room-output-title-row">
+						<span>${escapeHtml(outputLabel)}</span>
+						<span>${escapeHtml(specialist.label || "Specialist")}</span>
+					</div>
+					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
+					<p class="aicmd-room-output-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+
+					${structuredPreview.draftText ? `<div class="aicmd-v2-preview-draft">${escapeHtml(structuredPreview.draftText)}</div>` : ""}
+
+					${structuredPreview.blocks.length ? `
+						<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
+							${structuredPreview.blocks.map((block) => `
+								<div class="aicmd-v2-preview-section">
+									<span class="aicmd-v2-preview-label">${escapeHtml(block.label)}</span>
+									<${block.ordered ? "ol" : "ul"} class="${block.ordered ? "aicmd-v2-preview-steps" : "aicmd-v2-preview-list"}">
+										${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+									</${block.ordered ? "ol" : "ul"}>
+								</div>
+							`).join("")}
+						</div>
+					` : ""}
+
+					<div class="aicmd-room-output-next">
+						<span>Next step</span>
+						<strong>${escapeHtml(humanizeValue(preview.nextSafeAction, `Review in ${destination}.`))}</strong>
+					</div>
+					<div class="aicmd-room-output-confirmation">
+						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+					</div>
+				</div>
+			` : `
+				<div class="aicmd-room-output-empty">
+					<strong>No output yet</strong>
+					<span>Ask the AI Team or use Draft, Task, Workflow, or Handoff from the composer. The latest preview will appear here.</span>
+				</div>
+			`}
+
+			<div class="aicmd-room-output-actions">
+				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button" ${hasPreview ? "" : "disabled"}>${escapeHtml(routeActionLabel)}</button>
+				<button class="aicmd-v2-btn-secondary" type="button" disabled>Create Task</button>
+				<button class="aicmd-v2-btn-secondary" type="button" disabled>Export File</button>
+				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-secondary" type="button" ${hasPreview ? "" : "disabled"}>Save Draft</button>
+				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(hasPreview && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read Aloud</button>
+				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Copy</button>
+				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Use Above</button>
+				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Clear</button>
+			</div>
+			<div class="aicmd-room-planned-note">Create Task and Export File are shown as planned controls until durable task/export handlers are connected.</div>
+		</section>
+	`;
+}
+
+function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
+	const preview = asObject(session.outputPreview);
+	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+	const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");
+	const connectedTools = bridgeStatus.available ? "Guidance bridge" : "Preview tools";
+	const integrations = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "0 active";
+	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+	const recent = recentAt ? formatTime(recentAt) : (session.draftStatus || "No recent activity");
+
+	return `
+		<footer class="aicmd-room-status-strip">
+			<div><span>Readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+			<div><span>Approval</span><strong>${escapeHtml(approval)}</strong></div>
+			<div><span>Connected tools</span><strong>${escapeHtml(connectedTools)}</strong></div>
+			<div><span>Active integrations</span><strong>${escapeHtml(integrations)}</strong></div>
+			<div><span>Recent activity</span><strong>${escapeHtml(recent)}</strong></div>
+		</footer>
 	`;
 }
 
@@ -3162,66 +3467,71 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 	const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
 	const latest = asArray(session.responseHistory)[0] || null;
 	const responses = asArray(session.responseHistory).slice(0, 4);
-	const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Guarded";
+	const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
 	const safetyLine = safeBridgeStatus.available
 		? "Guidance only. No workflow, task, handoff, approval, or publish action was created."
 		: "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
 	const emptyBody = safeBridgeStatus.available
-		? "Ask a specialist to start a focused conversation."
+		? "Ask the selected specialist or full team to start the conversation."
 		: "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
 
 	return `
-		<section class="aicmd-v2-chat">
+		<section class="aicmd-v2-chat aicmd-room-chat">
 			<div class="aicmd-v2-chat-head">
 				<div>
-					<h3 class="aicmd-v2-chat-title">Chat</h3>
-					<p class="aicmd-v2-chat-subtitle">Chat shows specialist responses. Write or continue from the Composer above.</p>
+					<h3 class="aicmd-v2-chat-title">Conversation Stream</h3>
+					<p class="aicmd-v2-chat-subtitle">Conversation stays here. Outputs and next-step actions appear on the right.</p>
 				</div>
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 			</div>
 
 			<div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
 
-			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist…</div>` : ""}
+			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist...</div>` : ""}
 			${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
 
 			${responses.length ? `
-				<div class="aicmd-v2-chat-stack">
+				<div class="aicmd-v2-chat-stack aicmd-room-turns">
 					${responses.map((item, index) => `
-						<article class="aicmd-v2-chat-card${index === 0 ? " is-latest" : ""}">
-							<div class="aicmd-v2-chat-meta">
-								<span><strong>${escapeHtml(item.specialistLabel || "Specialist")}</strong></span>
-								<span>${escapeHtml(formatTime(item.generatedAt))}</span>
-								${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
+						<div class="aicmd-room-turn">
+							<div class="aicmd-room-user-message">
+								<div class="aicmd-room-bubble is-user">
+									<span class="aicmd-v2-chat-label">You</span>
+									<p>${escapeHtml(item.prompt || "")}</p>
+								</div>
 							</div>
-							<div class="aicmd-v2-chat-user">
-								<span class="aicmd-v2-chat-label">Request</span>
-								<p>${escapeHtml(item.prompt || "")}</p>
-							</div>
-							<div class="aicmd-v2-chat-response">
-								<span class="aicmd-v2-chat-label">Generated response</span>
-								<p>${escapeHtml(item.responseText || "")}</p>
-							</div>
-						</article>
+							<article class="aicmd-v2-chat-card aicmd-room-response-card${index === 0 ? " is-latest" : ""}" data-role="${escapeHtml(getAiRoomRoleId(item.specialistId || session.modeId))}">
+								<div class="aicmd-v2-chat-meta aicmd-room-response-meta">
+									<span class="aicmd-room-response-avatar">${escapeHtml(item.specialistId === "team" ? "Team" : getAiRoomInitials({ id: item.specialistId, label: item.specialistLabel }))}</span>
+									<span><strong>${escapeHtml(item.specialistLabel || "Specialist")}</strong></span>
+									<span>${escapeHtml(formatTime(item.generatedAt))}</span>
+									${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
+								</div>
+								<div class="aicmd-v2-chat-response aicmd-room-response-body">
+									<span class="aicmd-v2-chat-label">Specialist response</span>
+									<p>${escapeHtml(item.responseText || "")}</p>
+								</div>
+								${index === 0 ? `
+									<div class="aicmd-v2-chat-actions aicmd-room-response-actions">
+										<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
+										<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use Above</button>
+										<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Draft</button>
+										<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route</button>
+										<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
+										<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
+										<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
+									</div>
+								` : ""}
+							</article>
+						</div>
 					`).join("")}
 				</div>
 			` : `
-				<div class="aicmd-v2-chat-empty">${escapeHtml(emptyBody)}</div>
+				<div class="aicmd-v2-chat-empty aicmd-room-chat-empty">
+					<strong>No conversation yet</strong>
+					<span>${escapeHtml(emptyBody)}</span>
+				</div>
 			`}
-
-			<div class="aicmd-v2-chat-composer-note">
-			        This area is for reading responses. Use the Composer above to write the next instruction.
-			</div>
-
-			<div class="aicmd-v2-chat-actions">
-				<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
-				<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use Above</button>
-				<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Preview</button>
-				<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route</button>
-				<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Write Follow-up Above</button>
-				<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
-				<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
-			</div>
 		</section>
 	`;
 }
@@ -3416,7 +3726,10 @@ export const aiCommandRoute = {
 		const savedOutput = asObject(loadLocalOutput(sessionKey));
 		if (!session.outputPreview) {
 			const preview = asObject(savedOutput.preview);
-			if (preview.outputType) session.outputPreview = preview;
+			if (preview.outputType) {
+				session.outputPreview = preview;
+				session.outputWorkspaceTab = outputTabFromPreview(preview);
+			}
 		}
 		if (!session.responseHistoryLoaded) {
 			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
@@ -3431,7 +3744,7 @@ export const aiCommandRoute = {
 		if (bridgeValue) {
 			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
 			if (detectedSpecialist) session.modeId = detectedSpecialist;
-			setAiComposerValue(session, input, bridgeValue);
+			session.draftMessage = normalizeAiComposerPrompt(bridgeValue);
 			persistSessionDraft(sessionKey, session, "Specialist context loaded from workspace");
 			if (globalInput) globalInput.value = "";
 		}
@@ -3458,51 +3771,27 @@ export const aiCommandRoute = {
 		const root = $("ctrlRoomRoot");
 		if (!root) return;
 
-		const activeTab = session.workspaceTab;
-		const tabContent = {
-			chat: `
-				<div class="aicmd-v2-tab-panel is-chat">
-					${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
-				</div>
-			`,
-			preview: `
-				<div class="aicmd-v2-tab-panel is-preview">
-					${renderPhase2PreviewPanel(session, escapeHtml)}
-				</div>
-			`,
-			tools: `
-				<div class="aicmd-v2-tab-panel is-tools">
-					${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
-					${renderPhase1SuggestedPrompts(session, escapeHtml)}
-				</div>
-			`,
-			context: `
-				<div class="aicmd-v2-tab-panel is-context">
-					${renderPhase1ContextPanel(state, session, aiContext, escapeHtml)}
-					${renderPhase2MediaStatusPanel(aiContext, escapeHtml)}
-					${renderPhase1SafetyPanel(escapeHtml)}
-				</div>
-			`,
-			history: `
-				<div class="aicmd-v2-tab-panel is-history">
-					${renderPhase4HistoryPanel(session, escapeHtml)}
-				</div>
-			`
-		};
+		// Final Room v1 renders the conversation, composer, output workspace, and tools directly.
+		// Legacy workspace tabs remain as helper functions only and are not mounted in this shell.
 
 		root.innerHTML = `
-			<div class="aicmd-v2-shell">
+			<div class="aicmd-v2-shell aicmd-room-shell">
 				${renderPhase1Header(session, projectName, aiContext, responseBridge, escapeHtml)}
-				<div class="aicmd-v2-body">
+				<div class="aicmd-v2-body aicmd-room-grid">
 					${renderPhase1TeamRail(session, responseBridge, escapeHtml)}
-					<main class="aicmd-v2-main">
+
+					<main class="aicmd-v2-main aicmd-room-center">
+						${renderAiRoomConversationHeader(session, responseBridge, escapeHtml)}
+						${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
 						${renderPhase1Composer(session, aiContext, escapeHtml)}
-						${renderPhase1Profile(session, escapeHtml)}
-						${renderPhase35WorkspaceTabs(session, responseBridge, escapeHtml)}
-						${tabContent[activeTab] || tabContent.preview}
-						${renderPhase35ReadinessStrip(aiContext, responseBridge, escapeHtml)}
 					</main>
+
+					<aside class="aicmd-room-output">
+						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
+						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
+					</aside>
 				</div>
+				${renderAiRoomStatusStrip(aiContext, session, responseBridge, escapeHtml)}
 			</div>
 		`;
 
@@ -3531,6 +3820,7 @@ export const aiCommandRoute = {
 			if (PHASE35_WORKSPACE_TABS.includes(options.switchTab)) {
 				session.workspaceTab = options.switchTab;
 			}
+			session.outputWorkspaceTab = outputTabFromIntent(intent);
 			persistSessionDraft(sessionKey, session, "Draft saved locally");
 			aiCommandRoute.render(context);
 			return session.outputPreview;
@@ -3542,10 +3832,11 @@ export const aiCommandRoute = {
 				session.draftMessage = "";
 				session.draftStatus = "New session started";
 				session.outputPreview = null;
-				session.responseHistory = [];
-				session.responseError = "";
-				session.responseLoading = false;
-				session.workspaceTab = responseBridge.available ? "chat" : "preview";
+					session.responseHistory = [];
+					session.responseError = "";
+					session.responseLoading = false;
+					session.workspaceTab = responseBridge.available ? "chat" : "preview";
+					session.outputWorkspaceTab = "draft";
 				saveLocalOutput(sessionKey, {
 					preview: null,
 					responses: [],
@@ -3566,12 +3857,15 @@ export const aiCommandRoute = {
 			};
 		}
 
-		Array.from(document.querySelectorAll("[data-aicmdv2-tab]")).forEach((btn) => {
+		// Legacy workspace tab handler removed from Final Room v1 shell.
+
+
+		Array.from(document.querySelectorAll("[data-aicmdv2-output-tab]")).forEach((btn) => {
 			btn.onclick = () => {
-				const nextTab = asString(btn.getAttribute("data-aicmdv2-tab") || "preview").trim();
-				if (!PHASE35_WORKSPACE_TABS.includes(nextTab)) return;
-				session.workspaceTab = nextTab;
-				persistSessionDraft(sessionKey, session, `Workspace view: ${titleCase(nextTab)}`);
+				const nextTab = asString(btn.getAttribute("data-aicmdv2-output-tab") || "draft").trim();
+				if (!AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === nextTab)) return;
+				session.outputWorkspaceTab = nextTab;
+				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
 				aiCommandRoute.render(context);
 			};
 		});
@@ -3923,7 +4217,7 @@ export const aiCommandRoute = {
 		if (responseContinueBtn) {
 		        responseContinueBtn.onclick = () => {
 		                input?.focus?.();
-		                updateStatus("Continue from the Composer above. The selected specialist is still active.");
+		                updateStatus("Continue from the Composer. The selected specialist is still active.");
 		        };
 		}
 
@@ -3996,8 +4290,9 @@ export const aiCommandRoute = {
 					modeId: session.modeId,
 					teamMode: session.teamMode
 				});
-				session.workspaceTab = "preview";
-				aiCommandRoute.render(context);
+					session.workspaceTab = "preview";
+					session.outputWorkspaceTab = "draft";
+					aiCommandRoute.render(context);
 				showMessage?.("Generated response converted to preview.");
 			};
 		}

@@ -4687,3 +4687,1304 @@
 [data-page="ai-command"] .aicmd-v2-chat-composer-note {
   margin-top: 12px;
 }
+
+/* ============================================================
+   AI TEAM COMMAND CENTER FINAL ROOM V1
+   Page-scoped operating room layout for AI Command.
+   ============================================================ */
+
+[data-page="ai-command"] {
+  background:
+    linear-gradient(180deg, #030812 0%, #07101d 48%, #050a12 100%);
+}
+
+[data-page="ai-command"] [data-role="strategist"] { --role-accent: #22d3ee; --role-soft: rgba(34, 211, 238, 0.12); }
+[data-page="ai-command"] [data-role="writer"] { --role-accent: #a78bfa; --role-soft: rgba(167, 139, 250, 0.12); }
+[data-page="ai-command"] [data-role="media"] { --role-accent: #f472b6; --role-soft: rgba(244, 114, 182, 0.12); }
+[data-page="ai-command"] [data-role="video_lead"] { --role-accent: #fb7185; --role-soft: rgba(251, 113, 133, 0.12); }
+[data-page="ai-command"] [data-role="publisher"] { --role-accent: #38bdf8; --role-soft: rgba(56, 189, 248, 0.12); }
+[data-page="ai-command"] [data-role="ads"] { --role-accent: #f59e0b; --role-soft: rgba(245, 158, 11, 0.12); }
+[data-page="ai-command"] [data-role="analyst"] { --role-accent: #34d399; --role-soft: rgba(52, 211, 153, 0.12); }
+[data-page="ai-command"] [data-role="compliance_reviewer"] { --role-accent: #60a5fa; --role-soft: rgba(96, 165, 250, 0.12); }
+[data-page="ai-command"] [data-role="operations"] { --role-accent: #c084fc; --role-soft: rgba(192, 132, 252, 0.12); }
+[data-page="ai-command"] [data-role="customer_ops"] { --role-accent: #2dd4bf; --role-soft: rgba(45, 212, 191, 0.12); }
+[data-page="ai-command"] [data-role="sales_crm"] { --role-accent: #fbbf24; --role-soft: rgba(251, 191, 36, 0.12); }
+[data-page="ai-command"] [data-role="team"] { --role-accent: #22d3ee; --role-soft: rgba(34, 211, 238, 0.12); }
+
+[data-page="ai-command"] .aicmd-v2-composer-label,
+[data-page="ai-command"] .aicmd-v2-tool-label,
+[data-page="ai-command"] .aicmd-room-active-copy strong,
+[data-page="ai-command"] .aicmd-room-output-body h3,
+[data-page="ai-command"] .aicmd-room-panel-head strong {
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-v2-chat-card,
+[data-page="ai-command"] .aicmd-v2-chat-empty,
+[data-page="ai-command"] .aicmd-v2-composer-primary-note,
+[data-page="ai-command"] .aicmd-room-response-card {
+  border-radius: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-shell {
+  min-height: calc(100vh - 24px);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(7, 16, 28, 0.98), rgba(3, 8, 18, 0.98));
+}
+
+[data-page="ai-command"] .aicmd-room-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 14px;
+  background:
+    linear-gradient(135deg, rgba(8, 24, 38, 0.98), rgba(5, 13, 24, 0.98));
+  border-bottom: 1px solid rgba(122, 169, 205, 0.16);
+}
+
+[data-page="ai-command"] .aicmd-room-title-block {
+  min-width: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-eyebrow,
+[data-page="ai-command"] .aicmd-room-kicker,
+[data-page="ai-command"] .aicmd-room-panel-kicker {
+  display: block;
+  color: rgba(103, 232, 249, 0.9);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+[data-page="ai-command"] .aicmd-room-title {
+  margin: 2px 0 4px;
+  color: rgba(248, 250, 252, 0.98);
+  font-size: 28px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-subtitle {
+  max-width: 780px;
+  margin: 0;
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+[data-page="ai-command"] .aicmd-room-header-actions {
+  align-self: start;
+}
+
+[data-page="ai-command"] .aicmd-room-meta {
+  grid-column: 1 / -1;
+}
+
+[data-page="ai-command"] .aicmd-room-flow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 3px 8px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(6, 16, 28, 0.72);
+  color: rgba(203, 213, 225, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step.is-active {
+  border-color: rgba(34, 211, 238, 0.54);
+  background: rgba(14, 38, 55, 0.88);
+  color: rgba(241, 245, 249, 0.96);
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step.is-complete {
+  border-color: rgba(52, 211, 153, 0.26);
+}
+
+[data-page="ai-command"] .aicmd-room-flow-number {
+  grid-row: span 2;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.1);
+  color: rgba(165, 243, 252, 0.94);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step strong,
+[data-page="ai-command"] .aicmd-room-flow-step small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step strong {
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-flow-step small {
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-room-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 300px) minmax(420px, 1fr) minmax(330px, 410px);
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px;
+  background: transparent;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel,
+[data-page="ai-command"] .aicmd-room-center,
+[data-page="ai-command"] .aicmd-room-output {
+  min-width: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel,
+[data-page="ai-command"] .aicmd-room-output {
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 126px);
+  overflow: auto;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel {
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(7, 17, 29, 0.92);
+}
+
+[data-page="ai-command"] .aicmd-room-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-panel-head strong {
+  display: block;
+  color: rgba(248, 250, 252, 0.96);
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-online-pill,
+[data-page="ai-command"] .aicmd-room-output-state {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid rgba(52, 211, 153, 0.24);
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.08);
+  color: rgba(187, 247, 208, 0.94);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+[data-page="ai-command"] .aicmd-room-mode-switch {
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-team-mode-card {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.06);
+}
+
+[data-page="ai-command"] .aicmd-room-team-mode-card strong {
+  color: rgba(241, 245, 249, 0.96);
+  font-size: 13px;
+}
+
+[data-page="ai-command"] .aicmd-room-team-mode-card span {
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+[data-page="ai-command"] .aicmd-room-team-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+[data-page="ai-command"] .aicmd-room-chain-step {
+  padding: 3px 7px;
+  border: 1px solid rgba(122, 169, 205, 0.16);
+  border-radius: 999px;
+  background: rgba(5, 13, 21, 0.68);
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-room-chain-arrow {
+  color: rgba(125, 211, 252, 0.68);
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-room-member-list {
+  display: grid;
+  gap: 7px;
+}
+
+[data-page="ai-command"] .aicmd-room-member {
+  position: relative;
+  min-height: 74px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 10px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border-color: rgba(122, 169, 205, 0.13);
+  background: linear-gradient(90deg, var(--role-soft, rgba(34, 211, 238, 0.1)), rgba(8, 19, 31, 0.78));
+}
+
+[data-page="ai-command"] .aicmd-room-member.is-active,
+[data-page="ai-command"] .aicmd-room-member.is-team-active {
+  border-color: var(--role-accent, rgba(34, 211, 238, 0.64));
+}
+
+[data-page="ai-command"] .aicmd-room-member-avatar,
+[data-page="ai-command"] .aicmd-room-active-avatar,
+[data-page="ai-command"] .aicmd-room-response-avatar,
+[data-page="ai-command"] .aicmd-v2-composer-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--role-accent, #22d3ee), transparent 46%);
+  background: var(--role-soft, rgba(34, 211, 238, 0.1));
+  color: var(--role-accent, #67e8f9);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-member-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-member-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+[data-page="ai-command"] .aicmd-room-member-role,
+[data-page="ai-command"] .aicmd-v2-spec-summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-page="ai-command"] .aicmd-room-member-role {
+  color: var(--role-accent, #67e8f9);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+[data-page="ai-command"] .aicmd-room-member-indicator,
+[data-page="ai-command"] .aicmd-room-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+}
+
+[data-page="ai-command"] .aicmd-room-center {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+}
+
+[data-page="ai-command"] .aicmd-room-conversation-head,
+[data-page="ai-command"] .aicmd-room-chat,
+[data-page="ai-command"] .aicmd-room-composer,
+[data-page="ai-command"] .aicmd-room-output-workspace,
+[data-page="ai-command"] .aicmd-room-tools,
+[data-page="ai-command"] .aicmd-room-status-strip {
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(8, 19, 31, 0.84);
+}
+
+[data-page="ai-command"] .aicmd-room-conversation-head {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-color: color-mix(in srgb, var(--role-accent, #22d3ee), transparent 70%);
+  background: linear-gradient(135deg, var(--role-soft, rgba(34, 211, 238, 0.1)), rgba(8, 19, 31, 0.9));
+}
+
+[data-page="ai-command"] .aicmd-room-active-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-active-copy {
+  min-width: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-active-copy strong {
+  display: block;
+  color: rgba(248, 250, 252, 0.97);
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-active-copy p {
+  margin: 2px 0 0;
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+[data-page="ai-command"] .aicmd-room-active-state {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 7px;
+  align-items: center;
+  justify-content: end;
+  color: rgba(203, 213, 225, 0.76);
+  font-size: 11px;
+}
+
+[data-page="ai-command"] .aicmd-room-active-state strong {
+  color: rgba(248, 250, 252, 0.95);
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-active-state span:last-child {
+  grid-column: 2;
+}
+
+[data-page="ai-command"] .aicmd-room-chat {
+  flex: 1 1 auto;
+  min-height: 360px;
+  max-height: 46vh;
+  overflow: auto;
+  padding: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-turns {
+  gap: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-turn {
+  display: grid;
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-user-message {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-page="ai-command"] .aicmd-room-bubble {
+  max-width: min(620px, 86%);
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+}
+
+[data-page="ai-command"] .aicmd-room-bubble p,
+[data-page="ai-command"] .aicmd-room-response-body p {
+  margin: 3px 0 0;
+  color: rgba(241, 245, 249, 0.94);
+  line-height: 1.58;
+  white-space: pre-wrap;
+}
+
+[data-page="ai-command"] .aicmd-room-response-card {
+  padding: 11px;
+  border-color: color-mix(in srgb, var(--role-accent, #22d3ee), transparent 76%);
+  background: linear-gradient(180deg, rgba(6, 16, 28, 0.9), rgba(4, 10, 18, 0.92));
+}
+
+[data-page="ai-command"] .aicmd-room-response-card.is-latest {
+  border-color: color-mix(in srgb, var(--role-accent, #22d3ee), transparent 42%);
+}
+
+[data-page="ai-command"] .aicmd-room-response-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-response-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-response-actions,
+[data-page="ai-command"] .aicmd-room-output-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-chat-empty,
+[data-page="ai-command"] .aicmd-room-output-empty {
+  min-height: 190px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  border: 1px dashed rgba(122, 169, 205, 0.2);
+  border-radius: 8px;
+  background: rgba(4, 10, 18, 0.48);
+  text-align: center;
+}
+
+[data-page="ai-command"] .aicmd-room-chat-empty strong,
+[data-page="ai-command"] .aicmd-room-output-empty strong {
+  color: rgba(248, 250, 252, 0.95);
+}
+
+[data-page="ai-command"] .aicmd-room-chat-empty span,
+[data-page="ai-command"] .aicmd-room-output-empty span {
+  max-width: 360px;
+  color: rgba(203, 213, 225, 0.74);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+[data-page="ai-command"] .aicmd-room-composer {
+  flex: 0 0 auto;
+  padding: 12px;
+  border-color: color-mix(in srgb, var(--role-accent, #22d3ee), transparent 70%);
+  background: linear-gradient(180deg, rgba(10, 26, 40, 0.94), rgba(5, 13, 22, 0.95));
+}
+
+[data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+  min-height: 104px;
+}
+
+[data-page="ai-command"] .aicmd-room-composer-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+[data-page="ai-command"] .aicmd-room-mini-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(122, 169, 205, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.7);
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+[data-page="ai-command"] .aicmd-room-mini-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+[data-page="ai-command"] .aicmd-room-output {
+  display: grid;
+  gap: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-workspace,
+[data-page="ai-command"] .aicmd-room-tools {
+  padding: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-head,
+[data-page="ai-command"] .aicmd-room-output-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-head h2 {
+  margin: 2px 0 3px;
+  color: rgba(248, 250, 252, 0.96);
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-output-head p,
+[data-page="ai-command"] .aicmd-room-planned-note {
+  margin: 0;
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+[data-page="ai-command"] .aicmd-room-output-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-tab {
+  min-width: 0;
+  min-height: 50px;
+  display: grid;
+  gap: 2px;
+  padding: 7px;
+  border: 1px solid rgba(122, 169, 205, 0.14);
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.64);
+  color: rgba(203, 213, 225, 0.8);
+  cursor: pointer;
+}
+
+[data-page="ai-command"] .aicmd-room-output-tab.is-active {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(15, 43, 58, 0.84);
+  color: rgba(241, 245, 249, 0.96);
+}
+
+[data-page="ai-command"] .aicmd-room-output-tab strong,
+[data-page="ai-command"] .aicmd-room-output-tab span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-output-tab strong {
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-tab span {
+  font-size: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0;
+}
+
+[data-page="ai-command"] .aicmd-room-output-meta span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid rgba(122, 169, 205, 0.13);
+  border-radius: 8px;
+  background: rgba(5, 13, 21, 0.56);
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 12px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-meta strong {
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-output-body {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(122, 169, 205, 0.13);
+  border-radius: 8px;
+  background: rgba(4, 10, 18, 0.58);
+}
+
+[data-page="ai-command"] .aicmd-room-output-title-row span {
+  padding: 4px 7px;
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.06);
+  color: rgba(165, 243, 252, 0.94);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+[data-page="ai-command"] .aicmd-room-output-body h3 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.96);
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-output-summary {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+[data-page="ai-command"] .aicmd-room-output-blocks {
+  grid-template-columns: 1fr;
+}
+
+[data-page="ai-command"] .aicmd-room-output-next,
+[data-page="ai-command"] .aicmd-room-output-confirmation {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid rgba(122, 169, 205, 0.13);
+  border-radius: 8px;
+  background: rgba(7, 18, 30, 0.72);
+}
+
+[data-page="ai-command"] .aicmd-room-output-next span,
+[data-page="ai-command"] .aicmd-room-output-confirmation span {
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+[data-page="ai-command"] .aicmd-room-output-next strong,
+[data-page="ai-command"] .aicmd-room-output-confirmation strong {
+  color: rgba(241, 245, 249, 0.94);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+[data-page="ai-command"] .aicmd-room-tools-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+[data-page="ai-command"] .aicmd-room-tool-card {
+  min-height: 86px;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+  border-color: color-mix(in srgb, var(--role-accent, #22d3ee), transparent 76%);
+  background: linear-gradient(90deg, var(--role-soft, rgba(34, 211, 238, 0.1)), rgba(5, 13, 21, 0.68));
+}
+
+[data-page="ai-command"] .aicmd-room-tool-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-tool-action {
+  flex: 0 0 auto;
+  color: var(--role-accent, #67e8f9);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+[data-page="ai-command"] .aicmd-room-tool-purpose {
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+[data-page="ai-command"] .aicmd-room-status-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 12px 12px;
+  padding: 10px;
+}
+
+[data-page="ai-command"] .aicmd-room-status-strip div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid rgba(122, 169, 205, 0.12);
+  border-radius: 8px;
+  background: rgba(4, 10, 18, 0.44);
+}
+
+[data-page="ai-command"] .aicmd-room-status-strip span {
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-status-strip strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(241, 245, 249, 0.94);
+  font-size: 12px;
+}
+
+
+/* AI TEAM COMMAND CENTER FINAL ROOM V1 — Polish / Responsive Fix */
+[data-page="ai-command"] .aicmd-room-shell {
+  overflow: visible;
+  max-width: 100%;
+}
+
+[data-page="ai-command"] .aicmd-room-grid {
+  display: grid;
+  grid-template-columns: minmax(238px, 292px) minmax(500px, 1fr) minmax(318px, 390px);
+  gap: 14px;
+  align-items: start;
+  max-width: 100%;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel,
+[data-page="ai-command"] .aicmd-room-center,
+[data-page="ai-command"] .aicmd-room-output {
+  min-width: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel,
+[data-page="ai-command"] .aicmd-room-output {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  max-height: calc(100vh - 132px);
+  overflow: hidden;
+}
+
+[data-page="ai-command"] .aicmd-room-team-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+[data-page="ai-command"] .aicmd-room-panel-head,
+[data-page="ai-command"] .aicmd-room-mode-switch,
+[data-page="ai-command"] .aicmd-room-team-mode-card {
+  flex: 0 0 auto;
+}
+
+[data-page="ai-command"] .aicmd-room-center {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: min(760px, calc(100vh - 128px));
+}
+
+[data-page="ai-command"] .aicmd-room-chat {
+  flex: 1 1 auto;
+  min-height: 340px;
+  max-height: min(54vh, 640px);
+  overflow: auto;
+}
+
+[data-page="ai-command"] .aicmd-room-composer {
+  position: relative;
+  z-index: 2;
+}
+
+[data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+  min-height: 112px;
+  max-height: 180px;
+  resize: vertical;
+}
+
+[data-page="ai-command"] .aicmd-room-member-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+[data-page="ai-command"] .aicmd-room-output {
+  display: grid;
+  gap: 10px;
+  z-index: 1;
+  overflow-y: auto;
+  padding-bottom: 76px;
+  scroll-padding-bottom: 76px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-workspace {
+  max-height: none;
+  overflow: visible;
+}
+
+[data-page="ai-command"] .aicmd-room-tools {
+  max-height: none;
+  overflow: visible;
+}
+
+[data-page="ai-command"] .aicmd-room-output-head,
+[data-page="ai-command"] .aicmd-room-output-title-row,
+[data-page="ai-command"] .aicmd-v2-composer-head,
+[data-page="ai-command"] .aicmd-v2-chat-meta {
+  flex-wrap: wrap;
+}
+
+[data-page="ai-command"] .aicmd-room-output-empty {
+  min-height: 136px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-actions,
+[data-page="ai-command"] .aicmd-room-response-actions,
+[data-page="ai-command"] .aicmd-v2-action-row {
+  row-gap: 8px;
+}
+
+[data-page="ai-command"] .aicmd-room-output-actions button:disabled,
+[data-page="ai-command"] .aicmd-room-mini-btn:disabled {
+  border-style: dashed;
+  opacity: 0.48;
+}
+
+[data-page="ai-command"] .aicmd-room-bubble p,
+[data-page="ai-command"] .aicmd-room-response-body p,
+[data-page="ai-command"] .aicmd-room-output-summary,
+[data-page="ai-command"] .aicmd-v2-preview-draft,
+[data-page="ai-command"] .aicmd-room-output-next strong,
+[data-page="ai-command"] .aicmd-room-output-confirmation span {
+  overflow-wrap: anywhere;
+}
+
+/* Medium workspaces: keep chat central and move output below cleanly */
+@media (max-width: 1500px) {
+  [data-page="ai-command"] .aicmd-room-flow-step {
+    padding: 7px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-grid {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-team-panel {
+    max-height: calc(100vh - 116px);
+  }
+
+  [data-page="ai-command"] .aicmd-room-center {
+    min-height: 0;
+  }
+
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 360px;
+    max-height: min(52vh, 620px);
+  }
+
+  [data-page="ai-command"] .aicmd-room-output {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    gap: 12px;
+    margin-top: 0;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 0;
+    scroll-padding-bottom: 0;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace,
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: none;
+    overflow: visible;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-meta {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Tablet/narrow desktop: team becomes selector strip, chat remains first-class */
+@media (max-width: 1280px) {
+  [data-page="ai-command"] .aicmd-room-header {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="ai-command"] .aicmd-room-header-actions {
+    justify-content: flex-start;
+  }
+
+  [data-page="ai-command"] .aicmd-room-flow {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  [data-page="ai-command"] .aicmd-room-flow-step {
+    flex: 0 0 168px;
+    min-height: 46px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-flow-step small {
+    display: none;
+  }
+
+  [data-page="ai-command"] .aicmd-room-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-team-panel {
+    order: 1;
+    width: 100%;
+    max-width: none;
+    position: static;
+    max-height: none;
+    overflow: hidden;
+  }
+
+  [data-page="ai-command"] .aicmd-room-center {
+    order: 2;
+    width: 100%;
+    min-height: 0;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output {
+    order: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  [data-page="ai-command"] .aicmd-room-mode-switch {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-team-mode-card {
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-member-list {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 8px;
+    scrollbar-width: thin;
+  }
+
+  [data-page="ai-command"] .aicmd-room-member {
+    flex: 0 0 clamp(194px, 24vw, 230px);
+    min-height: 64px;
+    grid-template-columns: 34px minmax(0, 1fr) 8px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 360px;
+    max-height: 56vh;
+    overflow: auto;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace {
+    max-height: none;
+    overflow: visible;
+  }
+
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: none;
+    overflow: visible;
+  }
+
+  [data-page="ai-command"] .aicmd-room-tools-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-room-status-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phone / very narrow */
+@media (max-width: 760px) {
+  [data-page="ai-command"] .aicmd-room-header {
+    display: block;
+  }
+
+  [data-page="ai-command"] .aicmd-room-grid {
+    padding: 10px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-header-actions {
+    margin-top: 10px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  [data-page="ai-command"] .aicmd-room-title {
+    font-size: 20px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-flow-step {
+    flex-basis: 152px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-member {
+    flex-basis: 186px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-conversation-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-active-state {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 300px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  [data-page="ai-command"] .aicmd-room-bubble {
+    max-width: 100%;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-meta,
+  [data-page="ai-command"] .aicmd-room-tools-grid,
+  [data-page="ai-command"] .aicmd-room-status-strip {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="ai-command"] .aicmd-room-response-actions,
+  [data-page="ai-command"] .aicmd-room-output-actions,
+  [data-page="ai-command"] .aicmd-room-composer-tools,
+  [data-page="ai-command"] .aicmd-v2-action-row {
+    flex-wrap: wrap;
+  }
+
+  [data-page="ai-command"] .aicmd-v2-action-row button {
+    width: auto;
+    flex: 1 1 118px;
+  }
+
+  [data-page="ai-command"] #aicmdV2AskBtn {
+    flex-basis: 100%;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-actions button,
+  [data-page="ai-command"] .aicmd-room-composer-tools button {
+    flex: 1 1 120px;
+  }
+
+  [data-page="ai-command"] .aicmd-room-status-strip {
+    margin-bottom: 82px;
+  }
+}
+
+/* AI TEAM COMMAND CENTER FINAL ROOM V1 — Final Compact Composer / Output Polish */
+@media (max-width: 1700px) {
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 360px !important;
+    max-height: 48vh !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer {
+    padding: 12px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+    min-height: 92px !important;
+    max-height: 130px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer-tools {
+    margin-top: 8px !important;
+    gap: 6px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer .aicmd-v2-action-row {
+    margin-top: 8px !important;
+    gap: 8px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output {
+    margin-top: 2px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace {
+    max-height: 520px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: 520px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-tabs {
+    gap: 8px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-body {
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 320px !important;
+    max-height: none !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+    min-height: 110px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace,
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: none !important;
+  }
+}
+
+/* AI TEAM COMMAND CENTER FINAL ROOM V1 — Content Column Output Fix */
+@media (max-width: 1700px) {
+  [data-page="ai-command"] .aicmd-room-grid {
+    grid-template-columns: minmax(280px, 330px) minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: start !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-team-panel {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    position: sticky !important;
+    top: 12px !important;
+    z-index: 2 !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-center {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    z-index: 3 !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr) !important;
+    gap: 14px !important;
+    margin-top: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    z-index: 1 !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace {
+    max-height: 520px !important;
+    overflow: auto !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: 520px !important;
+    overflow: auto !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-chat {
+    min-height: 360px !important;
+    max-height: 48vh !important;
+    overflow: auto !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer {
+    padding: 12px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-composer .aicmd-v2-textarea {
+    min-height: 92px !important;
+    max-height: 130px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  [data-page="ai-command"] .aicmd-room-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-team-panel {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    position: static !important;
+    top: auto !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-center {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    display: block !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-member-list {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-height: none !important;
+    padding-bottom: 8px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-member {
+    flex: 0 0 220px !important;
+  }
+
+  [data-page="ai-command"] .aicmd-room-output-workspace,
+  [data-page="ai-command"] .aicmd-room-tools {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
