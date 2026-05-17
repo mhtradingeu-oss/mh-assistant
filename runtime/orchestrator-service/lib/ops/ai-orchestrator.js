@@ -229,6 +229,9 @@ function buildGuidancePrompt(input = {}) {
     `Safety instruction: ${safetyInstruction}`,
     'You are answering inside a live specialist chat.',
     'Answer the user directly as the selected specialist.',
+    'Language separation rule: explanations, notes, and next-step guidance must stay in the conversation language.',
+    'If publishable content uses a different output language, do not make the entire answer that output language.',
+    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
     conversationLanguage !== 'user language'
       ? `Always respond to the user, explain, and interact in ${conversationLanguage}.`
       : 'Match the language the user writes in for all explanations and interaction.',
@@ -249,6 +252,7 @@ function buildGuidancePrompt(input = {}) {
     'Do not answer with a generic summary.',
     'Give practical, ready-to-copy output.',
     'After delivering the requested output, add one short next-step suggestion.',
+    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
     'Provide practical guidance/content only.',
     specialistInstruction,
     'Do not claim task/workflow/handoff/approval/publish actions were executed.',
