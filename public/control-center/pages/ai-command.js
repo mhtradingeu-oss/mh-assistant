@@ -3998,17 +3998,17 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				</div>
 			`}
 
-			<div class="aicmd-room-output-actions">
-				<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button" ${hasPreview ? "" : "disabled"}>${escapeHtml(routeActionLabel)}</button>
-				<button class="aicmd-v2-btn-secondary" type="button" disabled>Planned: Create Task</button>
-				<button class="aicmd-v2-btn-secondary" type="button" disabled>Planned: Export File</button>
-				<button id="aicmdV2PreviewSaveBtn" class="aicmd-v2-btn-secondary" type="button" ${hasPreview ? "" : "disabled"}>Save Draft</button>
-				<button id="aicmdV2PreviewReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(hasPreview && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read Aloud</button>
-				<button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Copy</button>
-				<button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Use in Composer</button>
-				<button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button" ${hasPreview ? "" : "disabled"}>Clear</button>
-			</div>
-			<div class="aicmd-room-planned-note">Planned controls are disabled: no task record or export file is created from this page until durable handlers are connected.</div>
+                        ${hasPreview ? `
+                                <div class="aicmd-room-output-actions">
+                                        <button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>
+                                        <button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+                                        <button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+                                        <button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
+                                </div>
+                                <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, and workflow runs happen only in the destination workspace after confirmation.</div>
+                        ` : `
+                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Workflow, or Handoff from the conversation first.</div>
+                        `}
 		</section>
 	`;
 }
@@ -4199,13 +4199,10 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                                 <span class="aicmd-v2-chat-latest">Latest</span>
                                         </div>
                                         <div class="aicmd-v2-chat-actions aicmd-room-response-actions">
-                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
-                                                <button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
-                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button">Send to Draft</button>
-                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-primary" type="button">Create Preview</button>
+                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
                                                 <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
-                                                <button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
-                                                <button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis !== "undefined" ? "" : "disabled"}>Read</button>
+                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-ghost" type="button">Copy</button>
                                         </div>
                                 </article>
                         ` : ""}
