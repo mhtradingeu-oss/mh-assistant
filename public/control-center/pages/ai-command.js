@@ -3131,6 +3131,104 @@ function getLastAssistantMessage(session) {
 	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
 }
 
+function buildConversationWorkContext(session, fallbackPrompt = "") {
+        const messages = asArray(session.messages).slice(-12);
+        const latestUser = getLastUserMessage(session);
+        const latestAssistant = getLastAssistantMessage(session);
+        const latestResponse = asArray(session.responseHistory)[0] || null;
+        const specialist = session.teamMode === "team"
+                ? { id: "team", label: "Full Team" }
+                : getPhase1SpecialistById(session.modeId);
+
+        const conversationLines = messages
+                .map((message) => {
+                        const role = asString(message.role || "");
+                        const label = role === "user"
+                                ? "User"
+                                : asString(message.specialistLabel || specialist.label || "Specialist");
+                        const content = asString(message.content || message.text || message.responseText || "").trim();
+                        return content ? `${label}: ${content}` : "";
+                })
+                .filter(Boolean);
+
+        const prompt = asString(
+                fallbackPrompt ||
+                latestUser?.content ||
+                latestResponse?.prompt ||
+                session.draftMessage ||
+                ""
+        ).trim();
+
+        const assistantText = asString(
+                latestAssistant?.content ||
+                latestResponse?.responseText ||
+                ""
+        ).trim();
+
+        const summaryParts = [
+                prompt ? `User request: ${prompt}` : "",
+                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+                conversationLines.length ? `Conversation context:\n${conversationLines.join("\n")}` : ""
+        ].filter(Boolean);
+
+        return {
+                prompt,
+                assistantText,
+                conversationText: conversationLines.join("\n"),
+                summary: summaryParts.join("\n\n"),
+                specialistId: specialist.id || session.modeId,
+                specialistLabel: specialist.label || "Specialist",
+                teamMode: session.teamMode,
+                latestResponse
+        };
+}
+
+function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        const typeLabel = {
+                guidance: "review-ready draft",
+                task: "task plan",
+                workflow: "workflow sequence",
+                handoff: "handoff package"
+        }[outputType] || "work draft";
+
+        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+
+        return [
+                `Convert this AI Team conversation into a ${typeLabel}.`,
+                `Specialist: ${context.specialistLabel}`,
+                "Use the conversation context, not only the composer text.",
+                "Keep it review-ready and do not execute backend actions.",
+                "",
+                basePrompt
+        ].join("\n");
+}
+
+function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+        const preview = buildPhase2OutputPreview({
+                intent,
+                session,
+                prompt: workPrompt,
+                projectName
+        });
+
+        const context = buildConversationWorkContext(session, fallbackPrompt);
+        preview.sourcePrompt = context.prompt || workPrompt;
+        preview.conversationContext = context.conversationText;
+        preview.summary = context.assistantText || preview.summary;
+        preview.mainOutput = context.summary || preview.mainOutput;
+        preview.generatedAt = nowIso();
+        preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
+
+        session.outputPreview = preview;
+        session.outputWorkspaceTab = outputTabFromIntent(intent);
+        session.activeOutputTab = session.outputWorkspaceTab;
+        session.workspaceTab = "preview";
+        return preview;
+}
+
+
 function buildCommandEnvelope(session, prompt) {
 	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
 	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
@@ -4985,34 +5083,33 @@ export const aiCommandRoute = {
 
 		const responseConvertBtn = $("aicmdV3ResponseConvertBtn");
 		if (responseConvertBtn) {
-			responseConvertBtn.onclick = () => {
-				if (!latestResponse) return;
-				const preview = buildPhase2OutputPreview({
-					intent: "guidance",
-					session,
-					prompt: latestResponse.prompt,
-					projectName
-				});
-				session.outputPreview = {
-					...preview,
-					title: latestResponse.responseTitle || preview.title,
-					summary: latestResponse.responseText,
-					bullets: normalizeDisplayList(asArray(latestResponse.responseRaw?.recommendations), 8),
-					steps: normalizeDisplayList(asArray(latestResponse.responseRaw?.nextActions), 8),
-					generatedAt: latestResponse.generatedAt || nowIso(),
-					sourcePrompt: latestResponse.prompt
-				};
-				saveLocalOutput(sessionKey, {
-					preview: session.outputPreview,
-					responses: session.responseHistory,
-					modeId: session.modeId,
-					teamMode: session.teamMode
-				});
-					session.workspaceTab = "preview";
-					session.outputWorkspaceTab = "draft";
-					aiCommandRoute.render(context);
-				showMessage?.("Generated response converted to preview.");
-			};
+		        responseConvertBtn.onclick = () => {
+		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+		                const preview = setPreviewFromConversation({
+		                        session,
+		                        intent: "guidance",
+		                        fallbackPrompt: fallback,
+		                        projectName
+		                });
+
+		                if (latestResponse?.responseText) {
+		                        preview.title = latestResponse.responseTitle || preview.title;
+		                        preview.summary = latestResponse.responseText;
+		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+		                }
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                updateStatus("Conversation converted into a draft preview.");
+		                showMessage?.("Draft preview ready from conversation.");
+		                aiCommandRoute.render(context);
+		        };
 		}
 
 		const responseSendBtn = $("aicmdV3ResponseSendBtn");
