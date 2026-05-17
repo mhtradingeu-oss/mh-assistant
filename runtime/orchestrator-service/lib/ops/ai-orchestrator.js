@@ -442,6 +442,36 @@ function extractChatProviderText(providerOutput = {}) {
 }
 
 
+
+function containsArabicText(value = '') {
+  return /[\u0600-\u06FF]/.test(asString(value));
+}
+
+function enforceChatResponseLanguage(responseText = '', input = {}) {
+  const text = asString(responseText).trim();
+  if (!text) return text;
+
+  const conversationLanguage = inferConversationLanguage(input);
+  const outputLanguage = inferOutputLanguage(input);
+
+  const startsWithArabic = /^[\s\u200f\u200e]*[\u0600-\u06FF]/.test(text);
+  const needsArabicFrame = conversationLanguage === 'Arabic'
+    && outputLanguage
+    && outputLanguage !== 'Arabic'
+    && !startsWithArabic;
+
+  if (!needsArabicFrame) return text;
+
+  return [
+    'أكيد، هذا نص جاهز للنشر بالألمانية للسوق الألماني:',
+    '',
+    text,
+    '',
+    'الخطوة التالية: راجع النص داخل Content Studio قبل النشر.'
+  ].join('\n');
+}
+
+
 function extractGuidanceProviderText(providerOutput = {}, response = {}) {
   const provider = asObject(providerOutput);
   const raw = asObject(provider.raw);
@@ -1401,10 +1431,12 @@ function createAiOrchestrationService(deps) {
           config: providerConfig
         });
 
-        const responseText = extractChatProviderText(providerOutput);
+        let responseText = extractChatProviderText(providerOutput);
         if (!responseText) {
           throw new Error('AI chat provider returned no response text');
         }
+
+        responseText = enforceChatResponseLanguage(responseText, input);
 
         const chatPayload = {
           status: 'completed',
