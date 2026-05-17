@@ -658,17 +658,48 @@ function extractHandoffSummary(handoff) {
   const payload = asObject(handoff?.payload);
   const output = asObject(payload.output);
   const draftContext = asObject(payload.draft_context);
+  const contentVersion = asObject(payload.selected_content_version);
+  const sourcePage = asString(handoff?.source_page || "workflows");
+  const contentType = firstText(payload.content_type, contentVersion.mode, output.content_type);
+  const contentBody = firstText(
+    contentVersion.content_output,
+    payload.script_caption_copy,
+    payload.copy,
+    payload.content,
+    payload.draft
+  );
+
   return {
-    id: asString(handoff?.id || payload.workflow_id || payload.media_job_id || payload.prompt || payload.workflow_title),
-    sourcePage: asString(handoff?.source_page || "workflows"),
-    title: firstText(output.title, payload.workflow_title, payload.title, draftContext.lastResponseTitle, "Workflow media brief"),
+    id: asString(
+      handoff?.id ||
+      payload.workflow_id ||
+      payload.media_job_id ||
+      payload.prompt ||
+      payload.workflow_title ||
+      contentVersion.version_id ||
+      payload.content_item_id
+    ),
+    sourcePage,
+    title: firstText(
+      output.title,
+      payload.workflow_title,
+      payload.title,
+      contentVersion.title,
+      draftContext.lastResponseTitle,
+      contentType ? `${titleCase(contentType)} design brief` : "Inbound media brief"
+    ),
     project: firstText(draftContext.projectName, payload.project, payload.project_name, output.project),
-    campaign: firstText(payload.campaign_name, output.campaign, output.campaignName),
+    campaign: firstText(payload.campaign_name, payload.campaign, output.campaign, output.campaignName),
     product: firstText(output.product, payload.product, output.productName),
-    channel: firstText(output.channel, payload.channel),
-    objective: firstText(output.goal, output.objective, payload.goal, payload.prompt),
-    prompt: firstText(output.prompt, output.media_prompt, payload.prompt, draftContext.lastCommand),
-    brief: firstText(output.summary, output.brief, payload.brief, payload.draft),
+    channel: firstText(output.channel, payload.channel, contentVersion.channel),
+    objective: firstText(output.goal, output.objective, payload.goal, payload.suggested_media_brief, payload.prompt, contentVersion.prompt),
+    prompt: firstText(output.prompt, output.media_prompt, payload.suggested_media_brief, payload.prompt, contentVersion.prompt, draftContext.lastCommand),
+    brief: firstText(payload.suggested_media_brief, output.summary, output.brief, payload.brief, contentBody),
+    copy: contentBody,
+    contentType,
+    language: firstText(payload.language, contentVersion.language),
+    tone: firstText(payload.tone, contentVersion.tone),
+    readinessStatus: firstText(payload.readiness_status, contentVersion.readiness_status),
     output
   };
 }
@@ -1729,25 +1760,32 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
       <section class="card media-card">
         <div class="card-head">
           <div>
-            <div class="setup-kicker">Workflow Handoff</div>
-            <h3>No workflow media output available</h3>
+            <div class="setup-kicker">Inbound Media Brief</div>
+            <h3>No inbound media brief available</h3>
           </div>
           <span class="card-badge neutral">Empty</span>
         </div>
-        <div class="empty-box">Run or route a workflow into Media Studio to load a media brief here.</div>
+        <div class="empty-box">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>
       </section>
     `;
   }
 
   const summary = extractHandoffSummary(handoff);
   const loaded = summary.id && summary.id === session.loadedHandoffId;
+  const isContentBrief = summary.sourcePage === "content-studio";
+  const kicker = isContentBrief ? "Inbound Content Brief" : "Inbound Media Brief";
+  const buttonLabel = isContentBrief ? "Load Content Design Brief" : "Load Media Brief";
+  const fallbackCopy = isContentBrief
+    ? "Content Studio output is ready to become a design brief."
+    : "Handoff output is ready to become a media brief.";
+
   return `
     <section class="card media-card" id="mediaWorkflowHandoff">
       <div class="card-head">
         <div>
-          <div class="setup-kicker">Workflow Handoff</div>
+          <div class="setup-kicker">${escapeHtml(kicker)}</div>
           <h3>${escapeHtml(summary.title)}</h3>
-          <p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || "Workflow output is ready to become a media brief.")}</p>
+          <p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || fallbackCopy)}</p>
         </div>
         <span class="card-badge ${loaded ? "success" : "neutral"}">${escapeHtml(loaded ? "Loaded" : "Available")}</span>
       </div>
@@ -1756,9 +1794,12 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
         <div class="data-row"><span>Campaign</span><strong>${escapeHtml(summary.campaign || "Not specified")}</strong></div>
         <div class="data-row"><span>Product</span><strong>${escapeHtml(summary.product || "Not specified")}</strong></div>
         <div class="data-row"><span>Channel</span><strong>${escapeHtml(summary.channel || "Not specified")}</strong></div>
+        ${summary.contentType ? `<div class="data-row"><span>Content type</span><strong>${escapeHtml(titleCase(summary.contentType))}</strong></div>` : ""}
+        ${summary.language ? `<div class="data-row"><span>Language</span><strong>${escapeHtml(summary.language)}</strong></div>` : ""}
+        ${summary.tone ? `<div class="data-row"><span>Tone</span><strong>${escapeHtml(summary.tone)}</strong></div>` : ""}
       </div>
       <div class="media-action-row">
-        <button id="mediaLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Media Brief</button>
+        <button id="mediaLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(buttonLabel)}</button>
       </div>
     </section>
   `;
@@ -2706,14 +2747,16 @@ function bindMediaStudio({
         product: firstText(summary.product, session.form.product),
         channel: firstText(summary.channel, session.form.channel),
         objective: firstText(summary.objective, summary.brief, session.form.objective),
-        prompt: firstText(summary.prompt, summary.brief, session.form.prompt),
+        prompt: firstText(summary.prompt, summary.brief, summary.copy, session.form.prompt),
         title: firstText(summary.title, session.form.title)
       };
       session.loadedHandoffId = summary.id;
       session.isCreatingNew = true;
       session.selectedId = "";
       session.formSourceId = "";
-      session.draftMessage = "Workflow media brief loaded into generator.";
+      session.draftMessage = summary.sourcePage === "content-studio"
+        ? "Content design brief loaded into generator."
+        : "Media brief loaded into generator.";
       rerender();
     };
   }

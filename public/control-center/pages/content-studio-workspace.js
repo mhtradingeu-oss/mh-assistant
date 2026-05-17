@@ -1229,7 +1229,7 @@ function renderComposer(session, state, handoff, escapeHtml) {
         <button id="contentImproveBtn" class="btn btn-secondary" type="button">Improve</button>
         <button id="contentTranslateBtn" class="btn btn-secondary" type="button">Translate / Adapt</button>
         <button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send to Media Studio</button>
+        <button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>
         <button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>
         <button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
       </div>
@@ -2075,9 +2075,9 @@ function bindPage({
         handoff: handoffPayload,
         session,
         showMessage,
-        failMessage: "Media handoff kept locally because backend save is unavailable.",
-        successMessage: "Media Studio handoff created.",
-        localMessage: "Media Studio handoff created locally."
+        failMessage: "Design brief kept locally because backend handoff save is unavailable.",
+        successMessage: "Design brief sent to Media Studio.",
+        localMessage: "Design brief prepared for Media Studio locally."
       });
       if (ok) {
         const selectedVersion = selectedVersionEntry(session);
