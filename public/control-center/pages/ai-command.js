@@ -4900,68 +4900,97 @@ export const aiCommandRoute = {
 		        };
 		}
 
-		// ── PREPARE GUIDANCE (primary action) ───────────────────────
-		// Phase 1: stages draft locally, does NOT execute backend AI command.
-		const prepareBtn = $("aicmdV2PrepareBtn");
-		if (prepareBtn) {
-			prepareBtn.onclick = () => {
-				const preview = setPreviewFromIntent("guidance", "", { switchTab: "preview" });
-				if (!preview) return;
-				const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
-				showMessage?.(`${specLabel} guidance preview prepared.`);
-			};
-		}
+                // ── PREPARE GUIDANCE (primary action) ───────────────────────
+                // Phase 1: stages draft locally from conversation context. No backend execution.
+                const prepareBtn = $("aicmdV2PrepareBtn");
+                if (prepareBtn) {
+                        prepareBtn.onclick = () => {
+                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+                                const preview = setPreviewFromConversation({
+                                        session,
+                                        intent: "guidance",
+                                        fallbackPrompt: fallback,
+                                        projectName
+                                });
+                                if (!preview) return;
+                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+                                updateStatus("Guidance preview prepared from conversation context.");
+                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+                                aiCommandRoute.render(context);
+                        };
+                }
 
-		// ── DRAFT TASK (secondary action) ────────────────────────────
-		// Phase 1: prefills a task-framed version of the prompt. No backend execution.
-		const draftTaskBtn = $("aicmdV2DraftTaskBtn");
-		if (draftTaskBtn) {
-			draftTaskBtn.onclick = () => {
-				const value = asString(input?.value || session.draftMessage || "").trim();
-				const spec = getPhase1SpecialistById(session.modeId);
-				const taskPrompt = value
-					? `Draft a task plan for: ${value}`
-					: `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
-				setAiComposerValue(session, input, taskPrompt);
-				setPreviewFromIntent("task", taskPrompt, { switchTab: "preview" });
-				updateStatus("Task draft preview prepared locally. Review before creating durable tasks.");
-				showMessage?.("Task draft preview prepared.");
-			};
-		}
+                // ── DRAFT TASK (secondary action) ────────────────────────────
+                // Phase 1: converts the current conversation into a task preview. No backend execution.
+                const draftTaskBtn = $("aicmdV2DraftTaskBtn");
+                if (draftTaskBtn) {
+                        draftTaskBtn.onclick = () => {
+                                const value = asString(input?.value || session.draftMessage || "").trim();
+                                const spec = getPhase1SpecialistById(session.modeId);
+                                const fallback = value
+                                        ? `Draft a task plan for: ${value}`
+                                        : `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
+                                const preview = setPreviewFromConversation({
+                                        session,
+                                        intent: "task",
+                                        fallbackPrompt: fallback,
+                                        projectName
+                                });
+                                if (!preview) return;
+                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+                                showMessage?.("Task draft preview prepared from conversation.");
+                                aiCommandRoute.render(context);
+                        };
+                }
 
-		// ── DRAFT WORKFLOW (secondary action) ────────────────────────
-		const draftWorkflowBtn = $("aicmdV2DraftWorkflowBtn");
-		if (draftWorkflowBtn) {
-			draftWorkflowBtn.onclick = () => {
-				const value = asString(input?.value || session.draftMessage || "").trim();
-				const spec = getPhase1SpecialistById(session.modeId);
-				const workflowPrompt = value
-					? `Draft a workflow sequence for: ${value}`
-					: `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
-				setAiComposerValue(session, input, workflowPrompt);
-				setPreviewFromIntent("workflow", workflowPrompt, { switchTab: "preview" });
-				updateStatus("Workflow draft preview prepared locally. No workflow run started.");
-				showMessage?.("Workflow draft preview prepared.");
-			};
-		}
+                // ── DRAFT WORKFLOW (secondary action) ────────────────────────
+                const draftWorkflowBtn = $("aicmdV2DraftWorkflowBtn");
+                if (draftWorkflowBtn) {
+                        draftWorkflowBtn.onclick = () => {
+                                const value = asString(input?.value || session.draftMessage || "").trim();
+                                const spec = getPhase1SpecialistById(session.modeId);
+                                const fallback = value
+                                        ? `Draft a workflow sequence for: ${value}`
+                                        : `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
+                                const preview = setPreviewFromConversation({
+                                        session,
+                                        intent: "workflow",
+                                        fallbackPrompt: fallback,
+                                        projectName
+                                });
+                                if (!preview) return;
+                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+                                showMessage?.("Workflow draft preview prepared from conversation.");
+                                aiCommandRoute.render(context);
+                        };
+                }
 
-		// ── PREPARE HANDOFF (secondary action) ───────────────────────
-		// Phase 1: frames a handoff prompt in the composer. No backend write.
-		const handoffBtn = $("aicmdV2HandoffBtn");
-		if (handoffBtn) {
-			handoffBtn.onclick = () => {
-				const value = asString(input?.value || session.draftMessage || "").trim();
-				const spec = getPhase1SpecialistById(session.modeId);
-				const handoffPrompt = value
-					? `Prepare a handoff summary for: ${value}`
-					: `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
-				setAiComposerValue(session, input, handoffPrompt);
-				setPreviewFromIntent("handoff", handoffPrompt, { switchTab: "preview" });
-				updateStatus("Handoff preview prepared locally. Review destination before sending.");
-				showMessage?.("Handoff preview prepared.");
-			};
-		}
-
+                // ── PREPARE HANDOFF (secondary action) ───────────────────────
+                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+                const handoffBtn = $("aicmdV2HandoffBtn");
+                if (handoffBtn) {
+                        handoffBtn.onclick = () => {
+                                const value = asString(input?.value || session.draftMessage || "").trim();
+                                const spec = getPhase1SpecialistById(session.modeId);
+                                const fallback = value
+                                        ? `Prepare a handoff summary for: ${value}`
+                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+                                const preview = setPreviewFromConversation({
+                                        session,
+                                        intent: "handoff",
+                                        fallbackPrompt: fallback,
+                                        projectName
+                                });
+                                if (!preview) return;
+                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+                                updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");
+                                showMessage?.("Handoff preview prepared from conversation.");
+                                aiCommandRoute.render(context);
+                        };
+                }
 		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
 		toolButtons.forEach((btn) => {
 			btn.onclick = () => {
