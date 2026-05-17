@@ -1563,6 +1563,18 @@ export async function executeProjectAiCommand(projectName, payload = {}) {
   );
 }
 
+export async function executeProjectAiChat(projectName, payload = {}) {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  return postJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/ai/chat`,
+    payload,
+    "Failed to request AI chat"
+  );
+}
+
 export async function executeProjectAiGuidance(projectName, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");
