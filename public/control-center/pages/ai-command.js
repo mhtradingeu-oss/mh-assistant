@@ -3931,32 +3931,34 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				<div>
 					<span class="aicmd-room-kicker">Output Workspace</span>
 					<h2>Drafts, tasks, workflows, handoffs</h2>
-					<p>Review the result, then save, copy, or route draft context to the next workspace. Planned exports stay disabled until connected.</p>
+                                        <p>${hasPreview ? "Review the result, then route draft context to the next workspace." : "Create a preview from the conversation before routing work to another workspace."}</p>
 				</div>
 				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
 			</div>
 
-			<div class="aicmd-room-output-tabs" role="tablist" aria-label="Output workspace tabs">
-				${AI_ROOM_OUTPUT_TABS.map((tab) => `
-					<button
-						type="button"
-						class="aicmd-room-output-tab${activeTab === tab.id ? " is-active" : ""}"
-						data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
-						role="tab"
-						aria-selected="${activeTab === tab.id ? "true" : "false"}"
-					>
-						<strong>${escapeHtml(tab.label)}</strong>
-						<span>${escapeHtml(tab.helper)}</span>
-					</button>
-				`).join("")}
-			</div>
+                        ${hasPreview ? `
+                                <div class="aicmd-room-output-tabs" role="tablist" aria-label="Output workspace tabs">
+                                        ${AI_ROOM_OUTPUT_TABS.map((tab) => `
+                                                <button
+                                                        type="button"
+                                                        class="aicmd-room-output-tab${activeTab === tab.id ? " is-active" : ""}"
+                                                        data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
+                                                        role="tab"
+                                                        aria-selected="${activeTab === tab.id ? "true" : "false"}"
+                                                >
+                                                        <strong>${escapeHtml(tab.label)}</strong>
+                                                        <span>${escapeHtml(tab.helper)}</span>
+                                                </button>
+                                        `).join("")}
+                                </div>
 
-			<div class="aicmd-room-output-meta">
-				<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
-				<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
-				<span><strong>Channel</strong>${escapeHtml(destination)}</span>
-				<span><strong>Target</strong>${escapeHtml(aiContext.projectName || "Current project")}</span>
-			</div>
+                                <div class="aicmd-room-output-meta">
+                                        <span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+                                        <span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+                                        <span><strong>Channel</strong>${escapeHtml(destination)}</span>
+                                        <span><strong>Target</strong>${escapeHtml(aiContext.projectName || "Current project")}</span>
+                                </div>
+                        ` : ""}
 
 			${hasPreview ? `
 				<div class="aicmd-room-output-body">
@@ -3993,8 +3995,8 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				</div>
 			` : `
 				<div class="aicmd-room-output-empty">
-					<strong>No output yet</strong>
-					<span>Ask the AI Team or use Draft, Task, Workflow, or Handoff from the composer. The latest preview will appear here.</span>
+                                        <strong>No preview yet</strong>
+                                        <span>Choose Draft, Task, Workflow, or Handoff, then create a preview from the conversation.</span>
 				</div>
 			`}
 
