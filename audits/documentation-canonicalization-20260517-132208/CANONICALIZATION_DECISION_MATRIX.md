@@ -1,0 +1,19 @@
+# Canonicalization Decision Matrix
+
+Generated: 20260517-132208 UTC
+Mode: AUDIT-ONLY. No existing documentation or application source files were modified.
+Audit folder: audits/documentation-canonicalization-20260517-132208
+
+| Topic | Current best doc | Competing docs | Decision needed | Recommended action | Priority | Risk if not cleaned |
+| --- | --- | --- | --- | --- | --- | --- |
+| Operating model | audits/final-program/MH_OS_FINAL_EXECUTION_PROGRAM.md | docs/system/MASTER_SYSTEM_OVERVIEW.md; audits/final-system-audit/MH_OS_FULL_SYSTEM_AUDIT.md | Which six-layer MH-OS model is official wording? | Merge and create canonical doc later | P0 | Implementation may follow older marketing-only framing. |
+| Page relationship and workflow | audits/final-system-audit/MH_OS_PAGE_BY_PAGE_AUDIT.md | audits/final-program/MH_OS_FINAL_EXECUTION_PROGRAM.md; frontend route ownership audits | What is the official Observe -> Decide -> Draft -> Review -> Route -> Execute -> Monitor page map? | Create page registry/workflow map later | P0 | Page-by-page work may duplicate routes or misplace production actions. |
+| Page quality standard | audits/frontend/design-system/UX_OPERATING_SURFACE_STANDARD.md | audits/frontend-architecture/FRONTEND_ARCHITECTURE_TRUTH.md | Should this become the official completion definition? | Keep/promote | P0 | Pages may be called final without action/AI panel or safety states. |
+| Frontend architecture | audits/frontend-architecture/FRONTEND_ARCHITECTURE_TRUTH.md | frontend shell, CSS, runtime, component docs | How much shell/runtime map detail belongs in canonical docs? | Merge into concise architecture map | P0 | Frontend consolidation could drift into another duplicate architecture layer. |
+| AI Team model | audits/frontend/ai-command/AI_TEAM_V1_1_SPECIALIST_COVERAGE_TOOL_MAP_AUDIT.md | AI Command phase docs; AI Workspace notes; Final Room V1 | Which specialists, routes, and tool states are current? | Merge current final room docs; archive older phase docs later | P0 | AI Team may be treated as execution replacement instead of routing/thinking layer. |
+| Handoff contract | audits/runtime-governance/p1-4-backend-projection-contract/P1_4_BACKEND_PROJECTION_CONTRACT.md | AI Team V1.1; workflows behavior contracts; shared context docs | What is the official page-to-AI-Team contract? | Create missing canonical doc later | P0 | Handoffs can become ad hoc or page-local. |
+| Customer and voice ops | audits/customer-operations/AI_CUSTOMER_OPERATIONS_MASTER_ARCHITECTURE.md | Customer Ops snapshots; runtime readmes; stashed work unknown | When does customer ops become canonical and what remains planned? | Defer canonical write until phase approval; keep stashes untouched | P1 | Docs may imply support/CRM/voice execution that is not wired. |
+| Backend capability | audits/backend/route-inventory/BACKEND_ROUTE_INVENTORY_SUMMARY.md | runtime dependency graph; full system audit; capability maps | Which APIs are canonical vs compatibility/legacy? | Merge into runtime capability doc later | P1 | Frontend may call legacy or authority-adjacent APIs. |
+| Governance policy | audits/runtime-governance/P1_RUNTIME_GOVERNANCE_BASELINE.md | empty policies/*.md; UX standard safety rules | Where is official approval/permissions/task policy? | Create missing governance policy later | P0 | Safety doctrine remains scattered and easy to bypass. |
+| Production readiness | audits/release/release-readiness.md | runbooks; checkpoints; final system audit | What is actually production ready vs planned/disabled? | Rewrite readiness checklist later | P1 | Release confidence may be overstated. |
+| Backlog and sequence | audits/final-program/MH_OS_FINAL_EXECUTION_PROGRAM.md | next development plan; remaining problems; frontend status | Which order gates page finalization? | Merge into backlog/release sequence | P0 | Implementation could resume without canonical docs. |
