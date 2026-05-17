@@ -1568,12 +1568,15 @@ export async function executeProjectAiChat(projectName, payload = {}) {
     throw new Error("Missing project name");
   }
 
-  return postJson(
+  return sendRawJson(
     `/media-manager/project/${encodeURIComponent(projectName)}/ai/chat`,
+    "POST",
     payload,
-    "Failed to request AI chat"
+    "Failed to request AI chat",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
   );
 }
+
 
 export async function executeProjectAiGuidance(projectName, payload = {}) {
   if (!projectName) {

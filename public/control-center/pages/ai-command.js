@@ -1,21 +1,26 @@
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 
 import {
-  selectCurrentProject,
-  selectOperationsSnapshot,
-  selectProjectPayload
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
 } from "../state.js";
+
 import {
-	getSharedHandoff,
-	setSharedAiDraft,
-	setSharedHandoff
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
 } from "../shared-context.js";
+
 import {
-	getCategoryReadinessList
+        getCategoryReadinessList
 } from "../asset-library.js";
+
 import {
-	executeProjectAiGuidance
+        executeProjectAiChat,
+        executeProjectAiGuidance
 } from "../api.js";
+
 //  AI TEAM DEFINITIONS
 // ============================================================
 
@@ -4219,7 +4224,7 @@ export const aiCommandRoute = {
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
 		const languagePlan = getWorkspaceLanguagePlan(aiContext);
-		const responseBridge = getAiResponseBridgeStatus(executeProjectAiGuidance);
+		const responseBridge = getAiResponseBridgeStatus(executeProjectAiChat);
 		if (!session.workspaceTabInitialized) {
 			session.workspaceTab = responseBridge.available ? "chat" : "preview";
 			session.workspaceTabInitialized = true;
@@ -4438,117 +4443,171 @@ export const aiCommandRoute = {
 			};
 		}
 
-		// ── ASK SPECIALIST (Phase 3 response bridge) ────────────────
+		// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
 		const askBtn = $("aicmdV2AskBtn");
 		if (askBtn) {
-			askBtn.onclick = async () => {
-				const value = asString(input?.value || session.draftMessage || "").trim();
-				if (!value) {
-					updateStatus("Please write your request in the composer first.");
-					input?.focus?.();
-					return;
-				}
+		        askBtn.onclick = async () => {
+		                const value = asString(input?.value || session.draftMessage || "").trim();
+		                if (!value) {
+		                        updateStatus("Please write your message in the composer first.");
+		                        input?.focus?.();
+		                        return;
+		                }
 
-				session.draftMessage = value;
-				session.responseError = "";
+		                session.responseError = "";
 
-				if (!responseBridge.available) {
-					session.responseLoading = false;
-					session.responseError = responseBridge.reason;
-					aiCommandRoute.render(context);
-					updateStatus(responseBridge.reason);
-					showMessage?.("AI response bridge is not connected yet.");
-					return;
-				}
+		                if (!responseBridge.available) {
+		                        session.responseLoading = false;
+		                        session.responseError = responseBridge.reason;
+		                        aiCommandRoute.render(context);
+		                        updateStatus(responseBridge.reason);
+		                        showMessage?.("AI chat route is not connected yet.");
+		                        return;
+		                }
 
-				session.responseLoading = true;
-				aiCommandRoute.render(context);
+		                const specialist = session.teamMode === "team"
+		                        ? { id: "team", label: "Full Team" }
+		                        : getPhase1SpecialistById(session.modeId);
 
-				const specialist = session.teamMode === "team"
-					? { id: "team", label: "Full Team" }
-					: getPhase1SpecialistById(session.modeId);
-				const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
-				const packagedPrompt = buildSpecialistChatPrompt({
-					prompt: value,
-					specialistLabel: specialist.label,
-					modeLabel,
-					projectName,
-					language: languagePlan.conversationLanguage,
-					outputLanguage: languagePlan.publishLanguage,
-					market: languagePlan.market
-				});
+		                const userChatMessage = {
+		                        id: `chat-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                        role: "user",
+		                        modeId: specialist.id || session.modeId,
+		                        specialistId: specialist.id || session.modeId,
+		                        specialistLabel: "You",
+		                        teamMode: session.teamMode,
+		                        content: value,
+		                        createdAt: nowIso(),
+		                        source: "ai-command-chat"
+		                };
 
-				try {
-					const result = await executeProjectAiGuidance(projectName, {
-						project: projectName,
-						specialistId: specialist.id || session.modeId,
-						specialistName: specialist.label || "Specialist",
-						mode: session.teamMode === "team" ? "team" : "solo",
-						request: value,
-						prompt: packagedPrompt,
-						language: languagePlan.conversationLanguage,
-						outputLanguage: languagePlan.publishLanguage,
-						market: languagePlan.market,
-						marketLanguage: languagePlan.publishLanguage,
-						contextSummary: {
-							projectName,
-							campaign: aiContext.campaign,
-							readinessScore: aiContext.readinessScore,
-							readinessSummary: aiContext.summary
-						},
-						safetyInstruction: "Guidance only. No task/workflow/handoff/approval/publish execution.",
-						source: "ai-command-phase3b-specialist-guidance",
-						actor: "mh-assistant"
-					});
+		                session.messages.push(userChatMessage);
+		                session.messages = session.messages.slice(-40);
+		                session.draftMessage = "";
+		                session.composerText = "";
+		                session.responseLoading = true;
 
-					const response = asObject(result?.response);
-					const responseText = extractGeneratedResponseText({
-						...response,
-						chat_answer: result?.chat_answer,
-						response_text: result?.response_text,
-						sections: result?.sections,
-						bullets: result?.bullets
-					});
-					if (!responseText) {
-						throw new Error("Guidance bridge returned no response text.");
-					}
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
 
-					const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
-					const safetyLabel = asString(result?.safety_label || "guidance_only");
-					session.responseHistory.unshift({
-						id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-						prompt: value,
-						specialistId: specialist.id || session.modeId,
-						specialistLabel: specialist.label || "Specialist",
-						generatedAt: asString(result?.timestamp) || nowIso(),
-						responseTitle: humanizeValue(response.title, "Generated specialist response"),
-						responseText,
-						responseRaw: {
-							...response,
-							safety_label: safetyLabel,
-							provider: result?.provider
-						},
-						destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
-					});
-					session.responseHistory = session.responseHistory.slice(0, 12);
-					session.responseLoading = false;
-					session.responseError = "";
-					saveLocalOutput(sessionKey, {
-						preview: session.outputPreview,
-						responses: session.responseHistory,
-						modeId: session.modeId,
-						teamMode: session.teamMode
-					});
-					aiCommandRoute.render(context);
-					updateStatus("Specialist guidance generated (no workflow/task/handoff created).");
-					showMessage?.("Specialist guidance generated. Guidance only — no workflow/task/handoff was created.");
-				} catch (error) {
-					session.responseLoading = false;
-					session.responseError = asString(error?.message || "Failed to generate specialist response.");
-					aiCommandRoute.render(context);
-					updateStatus(session.responseError);
-				}
-			};
+		                aiCommandRoute.render(context);
+
+		                try {
+		                        const result = await executeProjectAiChat(projectName, {
+		                                project: projectName,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistName: specialist.label || "Specialist",
+		                                mode: session.teamMode === "team" ? "team" : "solo",
+		                                request: value,
+		                                message: value,
+		                                messages: session.messages.slice(-12),
+		                                language: languagePlan.conversationLanguage,
+		                                outputLanguage: languagePlan.publishLanguage,
+		                                market: languagePlan.market,
+		                                marketLanguage: languagePlan.publishLanguage,
+		                                contextSummary: {
+		                                        projectName,
+		                                        campaign: aiContext.campaign,
+		                                        readinessScore: aiContext.readinessScore,
+		                                        readinessSummary: aiContext.summary
+		                                },
+		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+		                                source: "ai-command-specialist-chat",
+		                                actor: "mh-assistant"
+		                        });
+
+		                        const response = asObject(result?.response);
+		                        const responseText = extractGeneratedResponseText({
+		                                ...response,
+		                                chat_answer: result?.chat_answer,
+		                                response_text: result?.response_text,
+		                                content: response?.content
+		                        });
+
+		                        if (!responseText) {
+		                                throw new Error("AI chat route returned no response text.");
+		                        }
+
+		                        const safetyLabel = asString(result?.safety_label || "chat_only");
+		                        const assistantChatMessage = {
+		                                id: `chat-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                                role: "assistant",
+		                                modeId: specialist.id || session.modeId,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistLabel: specialist.label || "Specialist",
+		                                teamMode: session.teamMode,
+		                                content: responseText,
+		                                createdAt: asString(result?.timestamp) || nowIso(),
+		                                source: "ai-chat-response",
+		                                safetyLabel,
+		                                response: {
+		                                        status: "completed",
+		                                        chat_answer: responseText,
+		                                        content: responseText,
+		                                        outputType: "chat",
+		                                        provider: result?.provider,
+		                                        safety_label: safetyLabel
+		                                }
+		                        };
+
+		                        session.messages.push(assistantChatMessage);
+		                        session.messages = session.messages.slice(-40);
+
+		                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+		                        session.responseHistory.unshift({
+		                                id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		                                prompt: value,
+		                                specialistId: specialist.id || session.modeId,
+		                                specialistLabel: specialist.label || "Specialist",
+		                                generatedAt: assistantChatMessage.createdAt,
+		                                responseTitle: "Chat reply",
+		                                responseText,
+		                                responseRaw: {
+		                                        ...response,
+		                                        safety_label: safetyLabel,
+		                                        provider: result?.provider
+		                                },
+		                                teamMode: session.teamMode,
+		                                outputType: "chat",
+		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+		                        });
+
+		                        session.responseHistory = session.responseHistory.slice(0, 12);
+		                        session.responseLoading = false;
+		                        session.responseError = "";
+
+		                        saveLocalOutput(sessionKey, {
+		                                preview: session.outputPreview,
+		                                messages: session.messages,
+		                                responses: session.responseHistory,
+		                                modeId: session.modeId,
+		                                teamMode: session.teamMode
+		                        });
+
+		                        aiCommandRoute.render(context);
+		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+		                        showMessage?.("Specialist reply generated.");
+		                } catch (error) {
+		                        session.responseLoading = false;
+		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+
+		                        saveLocalOutput(sessionKey, {
+		                                preview: session.outputPreview,
+		                                messages: session.messages,
+		                                responses: session.responseHistory,
+		                                modeId: session.modeId,
+		                                teamMode: session.teamMode
+		                        });
+
+		                        aiCommandRoute.render(context);
+		                        updateStatus(session.responseError);
+		                }
+		        };
 		}
 
 		// ── PREPARE GUIDANCE (primary action) ───────────────────────
