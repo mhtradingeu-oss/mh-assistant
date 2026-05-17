@@ -572,6 +572,7 @@ const AGENT_CARDS = [
 ];
 
 const aiSessions = new Map();
+const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
 const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
 let aiInboundHandoffCounter = 0;
 let lastRenderContext = null;
@@ -934,7 +935,10 @@ function ensureSession(projectName) {
 			responseHistory: [],
 			responseLoading: false,
 			responseError: "",
-			responseHistoryLoaded: false
+			responseHistoryLoaded: false,
+                        chatSessions: [],
+                        activeChatSessionId: "",
+                        activeChatSessionCreatedAt: ""
 		});
 	}
 	return aiSessions.get(key);
@@ -1051,6 +1055,91 @@ function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
 		reason: "Guidance bridge connected."
 	};
 }
+
+function readAiChatSessionsMap() {
+        if (typeof window === "undefined") return {};
+        try {
+                const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (_) {
+                return {};
+        }
+}
+
+function writeAiChatSessionsMap(map) {
+        if (typeof window === "undefined") return;
+        try {
+                window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));
+        } catch (_) {}
+}
+
+function getAiChatSessions(projectName) {
+        const key = projectName || "__default__";
+        return asArray(readAiChatSessionsMap()[key]).slice(0, 20);
+}
+
+function saveAiChatSession(projectName, session, options = {}) {
+        const key = projectName || "__default__";
+        const messages = asArray(session.messages);
+        const responses = asArray(session.responseHistory);
+        const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;
+        if (!hasContent) return null;
+
+        const map = readAiChatSessionsMap();
+        const sessions = asArray(map[key]);
+        const now = nowIso();
+        const firstUser = messages.find((message) => asString(message.role) === "user");
+        const titleSeed = asString(options.title || firstUser?.content || responses[0]?.prompt || "AI Team session").trim();
+        const sessionId = asString(options.sessionId || session.activeChatSessionId || `chat-session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+        const record = {
+                id: sessionId,
+                title: titleSeed.slice(0, 80) || "AI Team session",
+                modeId: session.modeId,
+                teamMode: session.teamMode,
+                messages: messages.slice(-40),
+                responses: responses.slice(0, 12),
+                preview: session.outputPreview || null,
+                createdAt: asString(options.createdAt || session.activeChatSessionCreatedAt || now),
+                updatedAt: now
+        };
+
+        const nextSessions = [record, ...sessions.filter((item) => asString(item.id) !== sessionId)].slice(0, 20);
+        map[key] = nextSessions;
+        writeAiChatSessionsMap(map);
+
+        session.activeChatSessionId = sessionId;
+        session.activeChatSessionCreatedAt = record.createdAt;
+        session.chatSessions = nextSessions;
+        return record;
+}
+
+function loadAiChatSessionIntoState(projectName, session, sessionId) {
+        const record = getAiChatSessions(projectName).find((item) => asString(item.id) === asString(sessionId));
+        if (!record) return null;
+
+        session.modeId = asString(record.modeId || session.modeId || "operations");
+        session.teamMode = asString(record.teamMode || "solo");
+        session.messages = asArray(record.messages).slice(-40);
+        session.responseHistory = asArray(record.responses).slice(0, 12);
+        session.outputPreview = asObject(record.preview);
+        session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
+        session.activeOutputTab = session.outputWorkspaceTab;
+        session.draftMessage = "";
+        session.composerText = "";
+        session.responseError = "";
+        session.responseLoading = false;
+        session.activeChatSessionId = asString(record.id);
+        session.activeChatSessionCreatedAt = asString(record.createdAt || record.updatedAt || nowIso());
+        session.chatSessions = getAiChatSessions(projectName);
+        return record;
+}
+
+function refreshAiChatSessions(projectName, session) {
+        session.chatSessions = getAiChatSessions(projectName);
+        return session.chatSessions;
+}
+
 
 function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
 	const cleanPrompt = asString(prompt).trim();
@@ -3269,7 +3358,15 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
 					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
 				</span>
-				<button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
+				<select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
+                                   <option value="">Recent chats</option>
+                                   ${asArray(session.chatSessions).slice(0, 8).map((item) => `
+                                           <option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
+                                                   ${escapeHtml(asString(item.title || "AI Team session").slice(0, 48))}
+                                           </option>
+                                   `).join("")}
+                           </select>
+                           <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
 				<button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
 			</div>
 
@@ -4233,7 +4330,11 @@ export const aiCommandRoute = {
 		hydrateSessionDraft(sessionKey, session);
 		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
 		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
-		const savedOutput = asObject(loadLocalOutput(sessionKey));
+		refreshAiChatSessions(sessionKey, session);
+           const savedOutput = asObject(loadLocalOutput(sessionKey));
+           if (asArray(savedOutput.messages).length && !asArray(session.messages).length) {
+                   session.messages = asArray(savedOutput.messages).slice(-40);
+           }
 		if (!session.outputPreview) {
 			const preview = asObject(savedOutput.preview);
 			if (preview.outputType) {
@@ -4337,30 +4438,65 @@ export const aiCommandRoute = {
 			return session.outputPreview;
 		};
 
+		const sessionSelect = $("aicmdV2SessionSelect");
+		if (sessionSelect) {
+		        sessionSelect.onchange = () => {
+		                const selectedSessionId = asString(sessionSelect.value || "");
+		                if (!selectedSessionId) return;
+
+		                const loaded = loadAiChatSessionIntoState(sessionKey, session, selectedSessionId);
+		                if (!loaded) {
+		                        updateStatus("Selected chat session could not be loaded.");
+		                        return;
+		                }
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+		                showMessage?.("AI chat session loaded.");
+		                aiCommandRoute.render(context);
+		        };
+		}
+
 		const newSessionBtn = $("aicmdV2NewSessionBtn");
 		if (newSessionBtn) {
-			newSessionBtn.onclick = () => {
-				session.draftMessage = "";
-				session.composerText = "";
-				session.routeSuggestions = [];
-				session.inboundHandoff = null;
-				session.draftStatus = "New session started";
-				session.outputPreview = null;
-					session.responseHistory = [];
-					session.responseError = "";
-					session.responseLoading = false;
-					session.workspaceTab = responseBridge.available ? "chat" : "preview";
-					session.outputWorkspaceTab = "draft";
-				saveLocalOutput(sessionKey, {
-					preview: null,
-					responses: [],
-					modeId: session.modeId,
-					teamMode: session.teamMode
-				});
-				persistSessionDraft(sessionKey, session, "New session started");
-				showMessage?.("New AI session started.");
-				aiCommandRoute.render(context);
-			};
+		        newSessionBtn.onclick = () => {
+		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
+
+		                session.draftMessage = "";
+		                session.composerText = "";
+		                session.routeSuggestions = [];
+		                session.inboundHandoff = null;
+		                session.draftStatus = "New session started";
+		                session.outputPreview = null;
+		                session.responseHistory = [];
+		                session.messages = [];
+		                session.responseError = "";
+		                session.responseLoading = false;
+		                session.workspaceTab = responseBridge.available ? "chat" : "preview";
+		                session.outputWorkspaceTab = "draft";
+		                session.activeChatSessionId = "";
+		                session.activeChatSessionCreatedAt = "";
+		                refreshAiChatSessions(sessionKey, session);
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: null,
+		                        messages: [],
+		                        responses: [],
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                persistSessionDraft(sessionKey, session, "New session started");
+		                showMessage?.("New AI session started. Previous chat saved to Recent chats.");
+		                aiCommandRoute.render(context);
+		        };
 		}
 
 		const settingsBtn = $("aicmdV2SettingsBtn");
@@ -4643,7 +4779,9 @@ export const aiCommandRoute = {
 		                                teamMode: session.teamMode
 		                        });
 
-		                        aiCommandRoute.render(context);
+		                        saveAiChatSession(sessionKey, session);
+
+                                aiCommandRoute.render(context);
 		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
 		                        showMessage?.("Specialist reply generated.");
 		                } catch (error) {
