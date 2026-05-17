@@ -11203,6 +11203,49 @@ async function handleExecuteAiCommand(req, res) {
   }
 }
 
+async function handleExecuteAiChat(req, res) {
+  const project = String(req.params.project || '').trim().toLowerCase();
+  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+
+  appLogger.info('ai_chat_http_received', {
+    route: 'ai-chat',
+    action: 'execute',
+    project,
+    specialist_id: specialistId
+  });
+
+  try {
+    const result = await getAiOrchestrator().executeChat(req.params.project, req.body || {});
+    appLogger.info('ai_chat_http_returned', {
+      route: 'ai-chat',
+      action: 'execute',
+      project,
+      status: result?.status || 'completed',
+      provider: result?.provider?.id || null,
+      specialist_id: result?.specialist?.id || specialistId
+    });
+    return res.json(result);
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error, 500);
+    const payload = error?.payload && typeof error.payload === 'object'
+      ? error.payload
+      : {
+        status: 'failed',
+        error: error.message || 'Failed to execute AI chat'
+      };
+
+    appLogger.error('ai_chat_http_error', {
+      route: 'ai-chat',
+      action: 'execute',
+      project,
+      status_code: statusCode,
+      error: serializeErrorForLog(error)
+    });
+
+    return res.status(statusCode).json(payload);
+  }
+}
+
 async function handleExecuteAiGuidance(req, res) {
   const project = String(req.params.project || '').trim().toLowerCase();
   const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
@@ -11347,6 +11390,8 @@ app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCom
 app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
 app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
 app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
 app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
 app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
 app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);

@@ -263,6 +263,96 @@ function buildGuidancePrompt(input = {}) {
   ].filter(Boolean).join('\n');
 }
 
+
+function buildChatPrompt(input = {}) {
+  const request = asString(input.request || input.prompt || input.message || input.command);
+  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+  const conversationLanguage = inferConversationLanguage(input);
+  const outputLanguage = inferOutputLanguage(input);
+  const market = asString(input.market || input.marketLanguage || '');
+  const contextSummary = humanizeValue(input.contextSummary || input.context_summary || '');
+  const messages = Array.isArray(input.messages) ? input.messages.slice(-8) : [];
+
+  const messageContext = messages.map((message, index) => {
+    const role = asString(message.role || message.type || 'message');
+    const author = asString(message.specialistLabel || message.author || message.name || role);
+    const content = humanizeValue(message.content || message.text || message.message || message.responseText || message.prompt);
+    return content ? `${index + 1}. ${author} (${role}): ${content}` : '';
+  }).filter(Boolean).join('\n');
+
+  const languagesDiffer = conversationLanguage && outputLanguage && conversationLanguage !== outputLanguage;
+  const specialistInstruction = buildSpecialistInstruction(specialistId, specialistName);
+
+  return [
+    'Chat-only live specialist conversation for MH Assistant OS.',
+    `Specialist ID: ${specialistId || 'specialist'}`,
+    `Specialist name: ${specialistName}`,
+    `Mode: ${teamMode}`,
+    `Conversation language: ${conversationLanguage}`,
+    `Publishable output language: ${outputLanguage}`,
+    market ? `Market: ${market}` : '',
+    '',
+    'Behavior:',
+    '- Be a natural chat partner first, like ChatGPT, but with your specialist expertise.',
+    '- Reply directly to the latest user message.',
+    '- If the user greets you, greet back naturally and offer relevant help. Do not create a report.',
+    '- If the user asks a normal question, answer normally.',
+    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+    '- Suggest the next best action only when helpful.',
+    '- You may suggest another specialist or page, but do not claim that anything was transferred automatically.',
+    '- Do not force a structured report unless the user asks for a structured output.',
+    conversationLanguage !== 'user language'
+      ? `Use ${conversationLanguage} for interaction and explanations.`
+      : 'Match the language the user writes in for normal interaction.',
+    languagesDiffer
+      ? `When producing publishable content, write the publishable content in ${outputLanguage}.`
+      : 'Use the conversation language for publishable content unless the user asks otherwise.',
+    '',
+    'Safety:',
+    '- This is chat only.',
+    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+    '- If the user asks to execute an action, explain that you can prepare a draft/plan and the user must use the safe UI controls or owning page.',
+    '- Never pretend to have used tools that are not connected in this chat route.',
+    '',
+    specialistInstruction,
+    contextSummary ? `Context summary: ${contextSummary}` : '',
+    messageContext ? `Recent chat context:\n${messageContext}` : '',
+    '',
+    'Latest user message:',
+    request
+  ].filter(Boolean).join('\n');
+}
+
+function extractChatProviderText(providerOutput = {}) {
+  const provider = asObject(providerOutput);
+  const raw = asObject(provider.raw);
+
+  const candidates = [
+    provider.chat_answer,
+    raw.chat_answer,
+    provider.content,
+    provider.text,
+    provider.output,
+    provider.message,
+    provider.summary,
+    raw.content,
+    raw.text,
+    raw.output,
+    raw.message,
+    raw.summary
+  ];
+
+  for (const candidate of candidates) {
+    const text = humanizeValue(candidate);
+    if (text) return text;
+  }
+
+  return '';
+}
+
+
 function extractGuidanceProviderText(providerOutput = {}, response = {}) {
   const provider = asObject(providerOutput);
   const raw = asObject(provider.raw);
@@ -1144,6 +1234,166 @@ function createAiOrchestrationService(deps) {
         });
         executionError.payload = structuredFailure;
         throw executionError;
+      }
+    },
+
+    async executeChat(projectName, input = {}) {
+      const request = asString(input.request || input.prompt || input.message || input.command);
+      if (!request) {
+        throw new Error('Missing chat request');
+      }
+
+      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+      const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+      const conversationLanguage = inferConversationLanguage(input);
+      const outputLanguage = inferOutputLanguage(input);
+      const market = asString(input.market || input.marketLanguage || '');
+      const modeId = resolveGuidanceModeId(input);
+      const chatCommand = buildChatPrompt(input);
+
+      let providerConfig = null;
+
+      try {
+        logger.info('ai_chat_received', {
+          route: 'ai-chat',
+          action: 'execute',
+          project: asString(projectName).toLowerCase(),
+          specialist_id: specialistId,
+          mode: teamMode
+        });
+
+        const context = buildServerContext(projectName, deps);
+        providerConfig = resolveAiProviderConfig(process.env);
+
+        if (!isAiProviderSupported(providerConfig.provider)) {
+          throw createProviderConfigError(
+            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+            {
+              code: 'AI_PROVIDER_UNSUPPORTED',
+              statusCode: 503,
+              provider: providerConfig.provider
+            }
+          );
+        }
+
+        assertAiProviderConfig(providerConfig);
+        const provider = getAiProvider(providerConfig.provider, { logger });
+        if (!provider) {
+          throw createProviderConfigError(`AI provider adapter is not registered for "${providerConfig.provider}"`, {
+            code: 'AI_PROVIDER_ADAPTER_MISSING',
+            statusCode: 503,
+            provider: providerConfig.provider
+          });
+        }
+
+        logger.info('ai_chat_provider_call_started', {
+          route: 'ai-chat',
+          provider: providerConfig.provider,
+          model: providerConfig.model,
+          project: asString(projectName).toLowerCase()
+        });
+
+        const providerOutput = await provider.execute({
+          command: chatCommand,
+          modeId,
+          outputType: 'chat',
+          contextSummary: {
+            ...asObject(context.summary),
+            request_context: humanizeValue(input.contextSummary || input.context_summary || ''),
+            specialist_id: specialistId,
+            specialist_name: specialistName,
+            conversation_language: conversationLanguage,
+            output_language: outputLanguage,
+            market,
+            chat_only: true
+          },
+          research: context.research,
+          config: providerConfig
+        });
+
+        const responseText = extractChatProviderText(providerOutput);
+        if (!responseText) {
+          throw new Error('AI chat provider returned no response text');
+        }
+
+        const chatPayload = {
+          status: 'completed',
+          timestamp: new Date().toISOString(),
+          specialist: {
+            id: specialistId,
+            name: specialistName,
+            mode: teamMode,
+            conversationLanguage,
+            outputLanguage,
+            market
+          },
+          safety_label: 'chat_only_no_operational_side_effects',
+          side_effects: {
+            created_task: false,
+            created_workflow: false,
+            created_handoff: false,
+            created_approval: false,
+            published: false,
+            persisted_memory: false,
+            persisted_artifact: false,
+            mutated_operations: false,
+            sent_customer_reply: false,
+            mutated_crm: false,
+            exported_file: false
+          },
+          provider: {
+            id: asString(providerOutput.provider || providerConfig.provider),
+            model: asString(providerOutput.model || providerConfig.model),
+            usage: asObject(providerOutput.usage)
+          },
+          chat_answer: responseText,
+          response_text: responseText,
+          response: {
+            status: 'completed',
+            chat_answer: responseText,
+            content: responseText,
+            outputType: 'chat',
+            routeSuggestions: []
+          }
+        };
+
+        logger.info('ai_chat_response_returned', {
+          route: 'ai-chat',
+          project: asString(projectName).toLowerCase(),
+          provider: chatPayload.provider.id,
+          model: chatPayload.provider.model,
+          specialist_id: specialistId
+        });
+
+        return chatPayload;
+      } catch (error) {
+        logger.error('ai_chat_error', {
+          route: 'ai-chat',
+          action: 'execute',
+          project: asString(projectName).toLowerCase(),
+          provider: providerConfig?.provider || null,
+          model: providerConfig?.model || null,
+          specialist_id: specialistId,
+          error: serializeErrorForLog(error)
+        });
+
+        const failureMessage = asString(error.message) || 'AI chat execution failed';
+        const statusCode = Number(error.statusCode) || 500;
+        const chatError = createAiCommandExecutionError(failureMessage, {
+          code: asString(error.code) || 'AI_CHAT_EXECUTION_FAILED',
+          statusCode
+        });
+
+        chatError.payload = {
+          status: 'failed',
+          error: failureMessage,
+          code: asString(error.code) || 'AI_CHAT_EXECUTION_FAILED',
+          provider: providerConfig?.provider || null,
+          safety_label: 'chat_only_no_operational_side_effects'
+        };
+
+        throw chatError;
       }
     },
 
