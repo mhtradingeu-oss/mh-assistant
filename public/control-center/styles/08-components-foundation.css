@@ -833,3 +833,148 @@ h4 {
     white-space: normal;
   }
 }
+
+/* =========================================================
+   MH-OS Tool Dock
+   Reusable icon-first quick tool launcher
+========================================================= */
+.mhos-tool-dock {
+  margin-top: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  padding: 12px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 36%),
+    rgba(15, 23, 42, 0.52);
+}
+
+.mhos-tool-dock-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mhos-tool-dock-kicker {
+  color: var(--color-text, #e5edf6);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mhos-tool-dock-copy {
+  color: var(--color-text-2, #9ca3af);
+  font-size: 0.72rem;
+}
+
+.mhos-tool-dock-list {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(64px, 1fr));
+  gap: 8px;
+}
+
+.mhos-tool-dock-item {
+  position: relative;
+  min-height: 76px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  padding: 9px 7px 8px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
+    rgba(2, 6, 23, 0.42);
+  color: var(--color-text, #e5edf6);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.mhos-tool-dock-item:hover,
+.mhos-tool-dock-item:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(94, 234, 212, 0.38);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(94, 234, 212, 0.16), transparent 58%),
+    rgba(15, 23, 42, 0.72);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(94, 234, 212, 0.08);
+  outline: none;
+}
+
+.mhos-tool-dock-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  display: inline-grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(139, 92, 246, 0.16)),
+    rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(94, 234, 212, 0.18);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.mhos-tool-dock-label {
+  max-width: 100%;
+  color: var(--color-text, #e5edf6);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mhos-tool-dock-badge {
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 2px 6px;
+  background: rgba(94, 234, 212, 0.10);
+  border: 1px solid rgba(94, 234, 212, 0.12);
+  color: var(--color-text-2, #9ca3af);
+  font-size: 0.61rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .mhos-tool-dock-list {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scroll-snap-type: x proximity;
+  }
+
+  .mhos-tool-dock-item {
+    min-width: 78px;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .mhos-tool-dock-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mhos-tool-dock-item {
+    min-height: 70px;
+    min-width: 72px;
+  }
+}

@@ -1,3 +1,4 @@
+import { bindAiToolDock, renderAiToolDock } from "./ai-command/tool-dock.js";
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 
 import {
@@ -3806,6 +3807,8 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
                                 </div>
                         </div>
 
+                        ${renderAiToolDock({ projectName: aiContext.projectName || "", escapeHtml })}
+
                         <div class="aicmd-chatgpt-action-row">
                                 <button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">Draft</button>
                                 <button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">Task</button>
@@ -4676,6 +4679,17 @@ export const aiCommandRoute = {
 				input?.focus?.();
 			};
 		});
+
+                bindAiToolDock({
+                        root: document,
+                        session,
+                        input,
+                        projectName,
+                        aiContext,
+                        persistSessionDraft,
+                        sessionKey,
+                        updateStatus
+                });
 
 		// ── INPUT HANDLING ───────────────────────────────────────────
 		if (input) {
