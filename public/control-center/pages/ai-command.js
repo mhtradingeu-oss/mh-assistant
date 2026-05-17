@@ -3220,8 +3220,14 @@ function setPreviewFromConversation({ session, intent, fallbackPrompt, projectNa
         const context = buildConversationWorkContext(session, fallbackPrompt);
         preview.sourcePrompt = context.prompt || workPrompt;
         preview.conversationContext = context.conversationText;
-        preview.summary = context.assistantText || preview.summary;
-        preview.mainOutput = context.summary || preview.mainOutput;
+
+        // Keep raw conversation context available internally, but do not show it as the main output.
+        // The visible preview should stay clean and user-facing.
+        if (context.assistantText) {
+                preview.summary = context.assistantText;
+                preview.mainOutput = context.assistantText;
+        }
+
         preview.generatedAt = nowIso();
         preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";
 
