@@ -567,6 +567,8 @@ const AGENT_CARDS = [
 ];
 
 const aiSessions = new Map();
+const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+let aiInboundHandoffCounter = 0;
 let lastRenderContext = null;
 let aiCommandBridgeRegistered = false;
 let aiAutoModeUnsubscribe = null;
@@ -779,6 +781,7 @@ function normalizeAiComposerPrompt(value) {
 function setAiComposerValue(session, input, value) {
   const cleanValue = normalizeAiComposerPrompt(value);
   session.draftMessage = cleanValue;
+  session.composerText = cleanValue;
   if (input) {
     input.value = cleanValue;
     input.focus?.();
@@ -917,9 +920,12 @@ function ensureSession(projectName) {
 				loadedAt: "",
 				loadingPromise: null
 			},
-			lastAppliedHandoffId: ""
-			,
+			lastAppliedHandoffId: "",
+			composerText: "",
+			routeSuggestions: [],
+			inboundHandoff: null,
 			outputPreview: null,
+			activeOutputTab: "draft",
 			responseHistory: [],
 			responseLoading: false,
 			responseError: "",
@@ -967,7 +973,10 @@ function saveLocalDraft(projectName, draftPayload) {
 function hydrateSessionDraft(projectName, session) {
 	if (session.localDraftLoaded) return;
 	const localDraft = loadLocalDraft(projectName);
-	if (localDraft.prompt) session.draftMessage = asString(localDraft.prompt);
+	if (localDraft.prompt) {
+		session.draftMessage = asString(localDraft.prompt);
+		session.composerText = session.draftMessage;
+	}
 	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
 	if (localDraft.commandType) session.commandType = asString(localDraft.commandType);
 	if (localDraft.targetType) session.targetType = asString(localDraft.targetType);
@@ -2089,32 +2098,353 @@ function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
 	});
 }
 
+
+const AI_INBOUND_SOURCE_LABELS = {
+	"content-studio": "Content Studio",
+	"media-studio": "Media Studio",
+	publishing: "Publishing",
+	"campaign-studio": "Campaign Studio",
+	workflows: "Workflows",
+	library: "Library",
+	insights: "Insights",
+	integrations: "Integrations",
+	settings: "Settings",
+	governance: "Governance",
+	"operations-centers": "Operations Centers",
+	"task-center": "Task Center",
+	"queue-center": "Queue Center",
+	"job-monitor": "Job Monitor",
+	"notification-center": "Notification Center",
+	research: "Research",
+	"ads-manager": "Ads Manager",
+	setup: "Setup",
+	workspace: "Workspace"
+};
+
+const AI_INBOUND_SPECIALIST_BY_SOURCE = {
+	"content-studio": "writer",
+	"media-studio": "media",
+	publishing: "publisher",
+	"campaign-studio": "strategist",
+	workflows: "operations",
+	library: "media",
+	insights: "seo",
+	integrations: "operations",
+	settings: "operations",
+	governance: "compliance_reviewer",
+	"operations-centers": "operations",
+	"task-center": "operations",
+	"queue-center": "operations",
+	"job-monitor": "operations",
+	"notification-center": "operations",
+	research: "seo",
+	"ads-manager": "ads",
+	setup: "operations",
+	workspace: "operations"
+};
+
+const AI_INBOUND_SPECIALIST_ALIASES = {
+	designer: "media",
+	researcher: "seo",
+	compliance: "compliance_reviewer",
+	"customer-ops": "customer_ops",
+	customer_ops: "customer_ops",
+	"sales-crm": "sales_crm",
+	sales_crm: "sales_crm"
+};
+
+const AI_INBOUND_SOURCE_ALIASES = {
+	content: "content-studio",
+	"content-studio-workspace": "content-studio",
+	media: "media-studio",
+	"media-studio-workspace": "media-studio",
+	publish: "publishing",
+	publisher: "publishing",
+	campaign: "campaign-studio",
+	campaigns: "campaign-studio",
+	workflow: "workflows",
+	asset: "library",
+	"asset-library": "library",
+	operation: "operations-centers",
+	operations: "operations-centers",
+	tasks: "task-center",
+	queue: "queue-center",
+	jobs: "job-monitor",
+	notifications: "notification-center",
+	integration: "integrations",
+	govern: "governance",
+	home: "workspace"
+};
+
+function firstAiInboundId(...values) {
+	for (const value of values) {
+		const text = asString(value).trim();
+		if (text) return text;
+	}
+	return "";
+}
+
+function firstAiInboundText(...values) {
+	for (const value of values) {
+		const text = humanizeValue(value, "").trim();
+		if (text) return text;
+	}
+	return "";
+}
+
+function firstAiInboundObject(...values) {
+	return values.map((value) => asObject(value)).find((item) => Object.keys(item).length) || {};
+}
+
+function asAiInboundList(value) {
+	if (Array.isArray(value)) return value;
+	if (value == null || value === "") return [];
+	if (typeof value === "object") {
+		const record = asObject(value);
+		if (Array.isArray(record.items)) return record.items;
+		return Object.keys(record).length ? [record] : [];
+	}
+	return [value];
+}
+
+function normalizeAiInboundSourcePage(value) {
+	const clean = asString(value)
+		.trim()
+		.toLowerCase()
+		.replace(/_/g, "-")
+		.replace(/\s+/g, "-")
+		.replace(/[^a-z0-9-]/g, "");
+	return AI_INBOUND_SOURCE_ALIASES[clean] || clean || "workspace";
+}
+
+function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+	const raw = getAiRoomRoleId(value || fallbackId);
+	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+}
+
+function normalizeAiInboundTeamMode(value) {
+	const clean = asString(value).trim().toLowerCase().replace(/[\s_]+/g, "-");
+	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+}
+
+function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+	const suggestions = asAiInboundList(rawSuggestions).map((item) => {
+		const record = asObject(item);
+		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+		const reason = firstAiInboundText(record.reason, record.summary, record.description) || `Return to ${label} after AI Team review.`;
+		return { route, label, reason };
+	}).filter((item) => item.route || item.label);
+
+	if (suggestions.length) return suggestions;
+	return [{
+		route: fallbackRoute,
+		label: fallbackLabel,
+		reason: `Return to ${fallbackLabel} after AI Team review.`
+	}];
+}
+
+function normalizeAiInboundOutputPreview(rawPreview, normalized) {
+	const preview = asObject(rawPreview);
+	if (!Object.keys(preview).length) return null;
+	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+	const destinationRoute = normalizeAiInboundSourcePage(
+		preview.destinationRoute ||
+		preview.destination_route ||
+		asArray(normalized.routeSuggestions)[0]?.route ||
+		normalized.sourcePage ||
+		"workflows"
+	);
+	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+
+	return {
+		...preview,
+		outputType,
+		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+		destinationRoute,
+		specialistId,
+		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+		status: asString(preview.status || "draft_preview"),
+		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+	};
+}
+
+function getAiInboundDurableHandoffId(handoff) {
+	const payload = asObject(handoff?.payload);
+	return firstAiInboundId(
+		handoff?.id,
+		handoff?.handoff_id,
+		handoff?.handoffId,
+		payload.handoff_id,
+		payload.handoffId
+	);
+}
+
+function getAiInboundHandoffId(handoff) {
+	const durableId = getAiInboundDurableHandoffId(handoff);
+	if (durableId) return durableId;
+	if (!handoff) return "";
+	const payload = asObject(handoff?.payload);
+	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+	if (stablePayloadId) return stablePayloadId;
+	if (aiInboundHandoffObjectIds) {
+		if (!aiInboundHandoffObjectIds.has(handoff)) {
+			aiInboundHandoffCounter += 1;
+			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+		}
+		return aiInboundHandoffObjectIds.get(handoff);
+	}
+	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+		.map((item) => asString(item).trim())
+		.filter(Boolean)
+		.join("::") || `cached-ai-handoff-${Date.now()}`;
+}
+
+function normalizeAiInboundHandoff(handoff, projectName) {
+	const payload = asObject(handoff?.payload);
+	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+		payload.source_page,
+		payload.sourcePage,
+		handoff?.source_page,
+		handoff?.sourcePage,
+		draftContext.source_page,
+		draftContext.sourcePage
+	));
+	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+	const suggestedSpecialist = normalizeAiInboundSpecialistId(
+		explicitSpecialist ||
+		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+		payload.modeId ||
+		payload.mode_id ||
+		draftContext.specialist ||
+		draftContext.specialist_id ||
+		draftContext.modeId ||
+		draftContext.mode_id ||
+		"operations",
+		"operations"
+	);
+	const projectLabel = projectName && projectName !== "__default__" ? projectName : "this project";
+	const prompt = normalizeAiComposerPrompt(firstAiInboundText(
+		payload.prompt,
+		payload.message,
+		payload.summary,
+		draftContext.prompt,
+		draftContext.message,
+		draftContext.request,
+		draftContext.summary
+	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+	const title = firstAiInboundText(
+		payload.title,
+		payload.name,
+		draftContext.title,
+		draftContext.lastResponseTitle,
+		handoff?.title,
+		`Inbound handoff from ${sourceLabel}`
+	);
+	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+		asAiInboundList(payload.routeSuggestions).length ? payload.routeSuggestions :
+		asAiInboundList(payload.route_suggestions).length ? payload.route_suggestions :
+		asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :
+		draftContext.route_suggestions,
+		sourcePage,
+		sourceLabel
+	);
+	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+	const rawOutputPreview = firstAiInboundObject(
+		draftContext.outputPreview,
+		draftContext.output_preview,
+		draftContext.phase2_output_preview,
+		payload.outputPreview,
+		payload.output_preview
+	);
+	const normalized = {
+		sourcePage,
+		sourceLabel,
+		title,
+		prompt,
+		suggestedSpecialist,
+		teamMode,
+		routeSuggestions,
+		outputPreview: null,
+		draftContext: {
+			...draftContext,
+			source_page: sourcePage,
+			sourcePage
+		},
+		status: asString(handoff?.status || payload.status || "available"),
+		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+	};
+	normalized.outputPreview = normalizeAiInboundOutputPreview(rawOutputPreview, normalized);
+	return normalized;
+}
+
 function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
 	const handoff = getSharedHandoff(projectName, "ai-command", operations);
-	const handoffId = asString(handoff?.id);
+	const handoffId = getAiInboundHandoffId(handoff);
 	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
 
-	const payload = asObject(handoff?.payload);
-	const draftContext = asObject(payload.draft_context);
-	const prompt = asString(payload.prompt);
-	if (draftContext.modeId) session.modeId = draftContext.modeId;
-	if (prompt) session.draftMessage = prompt;
+	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+	session.draftMessage = normalized.prompt;
+	session.composerText = normalized.prompt;
+	session.modeId = normalized.suggestedSpecialist;
+	session.teamMode = normalized.teamMode || "solo";
+	session.routeSuggestions = normalized.routeSuggestions;
+	session.inboundHandoff = {
+		id: handoffId,
+		sourcePage: normalized.sourcePage,
+		sourceLabel: normalized.sourceLabel,
+		title: normalized.title,
+		routeSuggestions: normalized.routeSuggestions
+	};
 
-	if (draftContext.projectName || prompt) {
-		setSharedAiDraft(projectName, {
-			projectName,
-			modeId: draftContext.modeId || session.modeId,
-			lastCommand: prompt || draftContext.lastCommand || "",
-			lastResponseTitle: draftContext.lastResponseTitle || "",
-			routeSuggestions: asArray(draftContext.routeSuggestions)
+	if (normalized.outputPreview) {
+		session.outputPreview = normalized.outputPreview;
+		session.outputWorkspaceTab = outputTabFromPreview(normalized.outputPreview);
+		session.activeOutputTab = session.outputWorkspaceTab;
+		saveLocalOutput(projectName, {
+			preview: session.outputPreview,
+			responses: session.responseHistory,
+			modeId: session.modeId,
+			teamMode: session.teamMode
 		});
 	}
 
-	session.lastAppliedHandoffId = handoffId;
-	consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
-		console.warn("Failed to consume AI handoff:", error.message);
+	setSharedAiDraft(projectName, {
+		...normalized.draftContext,
+		projectName,
+		modeId: normalized.suggestedSpecialist,
+		teamMode: normalized.teamMode,
+		lastCommand: normalized.prompt,
+		lastResponseTitle: normalized.title,
+		routeSuggestions: normalized.routeSuggestions,
+		inboundHandoff: session.inboundHandoff,
+		updatedAt: nowIso()
 	});
-	showMessage?.("AI Command restored context from the shared backbone.");
+
+	session.lastAppliedHandoffId = handoffId;
+	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+
+	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+	if (durableHandoffId) {
+		consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {
+			console.warn("Failed to consume AI handoff:", error.message);
+		});
+	}
+	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
 }
 
 async function submitDurableCommand({
@@ -3529,76 +3859,136 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 }
 
 function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
-	const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
-	const latest = asArray(session.responseHistory)[0] || null;
-	const responses = asArray(session.responseHistory).slice(0, 4);
-	const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
-	const safetyLine = safeBridgeStatus.available
-		? "Guidance only. No workflow, task, handoff, approval, or publish action was created."
-		: "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
-	const emptyBody = safeBridgeStatus.available
-		? "Ask the selected specialist or full team to start the conversation."
-		: "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
+        const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+        const latest = asArray(session.responseHistory)[0] || null;
+        const responses = asArray(session.responseHistory).slice(0, 4);
+        const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
+        const safetyLine = safeBridgeStatus.available
+                ? "Guidance only. No workflow, task, handoff, approval, or publish action was created."
+                : "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
+        const emptyBody = safeBridgeStatus.available
+                ? "Ask the selected specialist or full team to start the conversation."
+                : "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
 
-	return `
-		<section class="aicmd-v2-chat aicmd-room-chat">
-			<div class="aicmd-v2-chat-head">
-				<div>
-					<h3 class="aicmd-v2-chat-title">Conversation Stream</h3>
-					<p class="aicmd-v2-chat-subtitle">Conversation stays here. Outputs and next-step actions appear on the right.</p>
-				</div>
-				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
-			</div>
+        const isTeam = session.teamMode === "team";
+        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+        const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
+        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+        const latestProducerId = latest ? getAiRoomRoleId(latest.specialistId || "") : "";
+        const latestProducerLabel = latest
+                ? asString(latest.specialistLabel || (latestProducerId === "team" ? "Full Team" : "Specialist"))
+                : "";
+        const latestFromDifferentSpecialist = Boolean(
+                latest &&
+                !isTeam &&
+                latestProducerId &&
+                latestProducerId !== "team" &&
+                latestProducerId !== selectedRoleId
+        );
+        const hasSelectedReply = responses.some((item) => {
+                const producerId = getAiRoomRoleId(item.specialistId || "");
+                return isTeam ? producerId === "team" : producerId === selectedRoleId;
+        });
+        const inbound = asObject(session.inboundHandoff);
+        const inboundSourceLabel = asString(inbound.sourceLabel || "");
+        const inboundTitle = asString(inbound.title || "");
 
-			<div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
+        return `
+                <section class="aicmd-v2-chat aicmd-room-chat">
+                        <div class="aicmd-v2-chat-head">
+                                <div>
+                                        <h3 class="aicmd-v2-chat-title">Conversation Stream</h3>
+                                        <p class="aicmd-v2-chat-subtitle">Shared room context stays visible. Switching specialists changes the expert, tools, route, and output target.</p>
+                                </div>
+                                <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+                        </div>
 
-			${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist...</div>` : ""}
-			${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
+                        <div class="aicmd-v2-chat-safety">${escapeHtml(safetyLine)}</div>
 
-			${responses.length ? `
-				<div class="aicmd-v2-chat-stack aicmd-room-turns">
-					${responses.map((item, index) => `
-						<div class="aicmd-room-turn">
-							<div class="aicmd-room-user-message">
-								<div class="aicmd-room-bubble is-user">
-									<span class="aicmd-v2-chat-label">You</span>
-									<p>${escapeHtml(item.prompt || "")}</p>
-								</div>
-							</div>
-							<article class="aicmd-v2-chat-card aicmd-room-response-card${index === 0 ? " is-latest" : ""}" data-role="${escapeHtml(getAiRoomRoleId(item.specialistId || session.modeId))}">
-								<div class="aicmd-v2-chat-meta aicmd-room-response-meta">
-									<span class="aicmd-room-response-avatar">${escapeHtml(item.specialistId === "team" ? "Team" : getAiRoomInitials({ id: item.specialistId, label: item.specialistLabel }))}</span>
-									<span><strong>${escapeHtml(item.specialistLabel || "Specialist")}</strong></span>
-									<span>${escapeHtml(formatTime(item.generatedAt))}</span>
-									${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
-								</div>
-								<div class="aicmd-v2-chat-response aicmd-room-response-body">
-									<span class="aicmd-v2-chat-label">Specialist response</span>
-									<p>${escapeHtml(item.responseText || "")}</p>
-								</div>
-								${index === 0 ? `
-									<div class="aicmd-v2-chat-actions aicmd-room-response-actions">
-										<button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
-										<button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
-										<button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Draft</button>
-										<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
-										<button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
-										<button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
-										<button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
-									</div>
-								` : ""}
-							</article>
-						</div>
-					`).join("")}
-				</div>
-			` : `
-				<div class="aicmd-v2-chat-empty aicmd-room-chat-empty">
-					<strong>No conversation yet</strong>
-					<span>${escapeHtml(emptyBody)}</span>
-				</div>
-			`}
-		</section>
-	`;
+                        <div class="aicmd-room-context-strip">
+                                <div class="aicmd-room-context-item">
+                                        <span>Shared room context</span>
+                                        <strong>${escapeHtml(inboundSourceLabel ? `Inbound from ${inboundSourceLabel}` : "Project session")}</strong>
+                                        <small>${escapeHtml(inboundTitle || "Visible to every specialist for continuity.")}</small>
+                                </div>
+                                <div class="aicmd-room-context-item">
+                                        <span>Selected specialist</span>
+                                        <strong>${escapeHtml(selectedLabel)}</strong>
+                                        <small>${escapeHtml(selectedModeLabel)}</small>
+                                </div>
+                                <div class="aicmd-room-context-item">
+                                        <span>Latest reply from</span>
+                                        <strong>${escapeHtml(latestProducerLabel || "No reply yet")}</strong>
+                                        <small>${escapeHtml(latest ? formatTime(latest.generatedAt) : "Ask the selected specialist to begin.")}</small>
+                                </div>
+                        </div>
+
+                        ${latestFromDifferentSpecialist ? `
+                                <div class="aicmd-room-context-note">
+                                        This latest response was produced by ${escapeHtml(latestProducerLabel)}. Ask ${escapeHtml(selectedLabel)} for a specialist-specific answer.
+                                </div>
+                        ` : ""}
+
+                        ${responses.length && !hasSelectedReply ? `
+                                <div class="aicmd-room-context-note">
+                                        No replies from ${escapeHtml(selectedLabel)} yet. Existing room history remains visible for context.
+                                </div>
+                        ` : ""}
+
+                        ${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist...</div>` : ""}
+                        ${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
+
+                        ${responses.length ? `
+                                <div class="aicmd-v2-chat-stack aicmd-room-turns">
+                                        ${responses.map((item, index) => {
+                                                const producerId = getAiRoomRoleId(item.specialistId || session.modeId);
+                                                const producerLabel = item.specialistLabel || (producerId === "team" ? "Full Team" : "Specialist");
+                                                const isSelectedProducer = isTeam ? producerId === "team" : producerId === selectedRoleId;
+                                                return `
+                                                <div class="aicmd-room-turn${isSelectedProducer ? " is-selected-producer" : " is-shared-history"}">
+                                                        <div class="aicmd-room-user-message">
+                                                                <div class="aicmd-room-bubble is-user">
+                                                                        <span class="aicmd-v2-chat-label">You</span>
+                                                                        <p>${escapeHtml(item.prompt || "")}</p>
+                                                                </div>
+                                                        </div>
+                                                        <article class="aicmd-v2-chat-card aicmd-room-response-card${index === 0 ? " is-latest" : ""}" data-role="${escapeHtml(producerId)}">
+                                                                <div class="aicmd-v2-chat-meta aicmd-room-response-meta">
+                                                                        <span class="aicmd-room-response-avatar">${escapeHtml(producerId === "team" ? "Team" : getAiRoomInitials({ id: producerId, label: producerLabel }))}</span>
+                                                                        <span><strong>${escapeHtml(producerLabel)}</strong></span>
+                                                                        <span>${escapeHtml(formatTime(item.generatedAt))}</span>
+                                                                        <span class="aicmd-room-producer-chip">${escapeHtml(isSelectedProducer ? "Selected specialist" : "Shared history")}</span>
+                                                                        ${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
+                                                                </div>
+                                                                <div class="aicmd-v2-chat-response aicmd-room-response-body">
+                                                                        <span class="aicmd-v2-chat-label">Response from ${escapeHtml(producerLabel)}</span>
+                                                                        <p>${escapeHtml(item.responseText || "")}</p>
+                                                                </div>
+                                                                ${index === 0 ? `
+                                                                        <div class="aicmd-v2-chat-actions aicmd-room-response-actions">
+                                                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
+                                                                                <button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
+                                                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Draft</button>
+                                                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
+                                                                                <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
+                                                                                <button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
+                                                                                <button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
+                                                                        </div>
+                                                                ` : ""}
+                                                        </article>
+                                                </div>
+                                                `;
+                                        }).join("")}
+                                </div>
+                        ` : `
+                                <div class="aicmd-v2-chat-empty aicmd-room-chat-empty">
+                                        <strong>No conversation yet</strong>
+                                        <span>${escapeHtml(emptyBody)}</span>
+                                </div>
+                        `}
+                </section>
+        `;
 }
 
 function renderPhase1SuggestedPrompts(session, escapeHtml) {
@@ -3778,6 +4168,7 @@ export const aiCommandRoute = {
 			escapeHtml,
 			navigateTo,
 			showMessage,
+			consumeProjectHandoff,
 			executeProjectAiCommand,
 			fetchProjectInsights,
 			fetchProjectLearning,
@@ -3822,6 +4213,7 @@ export const aiCommandRoute = {
 		const overview = asObject(payload.overview?.overview || payload.overview);
 		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
 		const operations = asObject(selectOperationsSnapshot(state));
+		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
 		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
 
 		const intelligenceStatus = session.intelligence.status || "idle";
@@ -3898,6 +4290,9 @@ export const aiCommandRoute = {
 		if (newSessionBtn) {
 			newSessionBtn.onclick = () => {
 				session.draftMessage = "";
+				session.composerText = "";
+				session.routeSuggestions = [];
+				session.inboundHandoff = null;
 				session.draftStatus = "New session started";
 				session.outputPreview = null;
 					session.responseHistory = [];
@@ -3992,6 +4387,7 @@ export const aiCommandRoute = {
 		if (input) {
 			input.oninput = () => {
 				session.draftMessage = input.value || "";
+				session.composerText = session.draftMessage;
 				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
 			};
 
@@ -4271,6 +4667,9 @@ export const aiCommandRoute = {
 		if (clearBtn) {
 			clearBtn.onclick = () => {
 				session.draftMessage = "";
+				session.composerText = "";
+				session.routeSuggestions = [];
+				session.inboundHandoff = null;
 				if (input) input.value = "";
 				persistSessionDraft(sessionKey, session, "Draft cleared");
 				updateStatus("Composer draft cleared.");
