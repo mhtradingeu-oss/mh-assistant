@@ -3865,46 +3865,95 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 
 function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
         const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
-        const latest = asArray(session.responseHistory)[0] || null;
-        const responses = asArray(session.responseHistory).slice(0, 4);
-        const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
-        const safetyLine = safeBridgeStatus.available
-                ? "Guidance only. No workflow, task, handoff, approval, or publish action was created."
-                : "Guidance only. No workflow run, publish, approval, or authority mutation from this panel.";
-        const emptyBody = safeBridgeStatus.available
-                ? "Ask the selected specialist or full team to start the conversation."
-                : "AI response bridge requires a guidance-only backend mode. Preview tools are available now.";
-
         const isTeam = session.teamMode === "team";
         const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
         const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
         const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
         const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
-        const latestProducerId = latest ? getAiRoomRoleId(latest.specialistId || "") : "";
-        const latestProducerLabel = latest
-                ? asString(latest.specialistLabel || (latestProducerId === "team" ? "Full Team" : "Specialist"))
-                : "";
-        const latestFromDifferentSpecialist = Boolean(
-                latest &&
-                !isTeam &&
-                latestProducerId &&
-                latestProducerId !== "team" &&
-                latestProducerId !== selectedRoleId
-        );
-        const hasSelectedReply = responses.some((item) => {
+
+        const allMessages = asArray(session.messages);
+        const selectedMessages = allMessages.filter((message) => {
+                const role = asString(message.role || "");
+                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+                if (role === "user") {
+                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+                }
+                if (role === "assistant") {
+                        return isTeam ? messageRoleId === "team" : messageRoleId === selectedRoleId;
+                }
+                return false;
+        });
+
+        const selectedResponses = asArray(session.responseHistory).filter((item) => {
                 const producerId = getAiRoomRoleId(item.specialistId || "");
                 return isTeam ? producerId === "team" : producerId === selectedRoleId;
         });
+
+        const sharedResponses = asArray(session.responseHistory).filter((item) => {
+                const producerId = getAiRoomRoleId(item.specialistId || "");
+                return producerId && producerId !== selectedRoleId && producerId !== "team";
+        }).slice(0, 3);
+
+        const latestSelected = selectedResponses[0] || null;
+        const latestShared = sharedResponses[0] || null;
+        const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
+        const safetyLine = safeBridgeStatus.available
+                ? "Chat only. No workflow, task, handoff, approval, publish, CRM, or customer action was created."
+                : "Preview-safe. Chat tools require the protected AI chat route.";
+        const emptyBody = safeBridgeStatus.available
+                ? `Start a focused conversation with ${selectedLabel}.`
+                : "AI chat route is not connected yet. Preview tools remain available.";
+
         const inbound = asObject(session.inboundHandoff);
         const inboundSourceLabel = asString(inbound.sourceLabel || "");
         const inboundTitle = asString(inbound.title || "");
+
+        const renderMessage = (message) => {
+                const role = asString(message.role || "");
+                const isUser = role === "user";
+                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+                const createdAt = asString(message.createdAt || "");
+                const content = asString(message.content || message.text || message.responseText || "");
+                return `
+                        <div class="aicmd-room-chat-message ${isUser ? "is-user" : "is-assistant"}">
+                                <div class="aicmd-room-chat-bubble ${isUser ? "is-user" : "is-assistant"}">
+                                        <div class="aicmd-room-chat-message-meta">
+                                                <strong>${escapeHtml(label)}</strong>
+                                                ${createdAt ? `<span>${escapeHtml(formatTime(createdAt))}</span>` : ""}
+                                        </div>
+                                        <p>${escapeHtml(content)}</p>
+                                </div>
+                        </div>
+                `;
+        };
+
+        const fallbackSelectedResponses = !selectedMessages.length && selectedResponses.length
+                ? selectedResponses.slice(0, 2).flatMap((item) => ([
+                        {
+                                role: "user",
+                                specialistId: item.specialistId || selectedRoleId,
+                                specialistLabel: "You",
+                                content: item.prompt || "",
+                                createdAt: item.generatedAt || ""
+                        },
+                        {
+                                role: "assistant",
+                                specialistId: item.specialistId || selectedRoleId,
+                                specialistLabel: item.specialistLabel || selectedLabel,
+                                content: item.responseText || "",
+                                createdAt: item.generatedAt || ""
+                        }
+                ]))
+                : [];
+
+        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
 
         return `
                 <section class="aicmd-v2-chat aicmd-room-chat">
                         <div class="aicmd-v2-chat-head">
                                 <div>
-                                        <h3 class="aicmd-v2-chat-title">Conversation Stream</h3>
-                                        <p class="aicmd-v2-chat-subtitle">Shared room context stays visible. Switching specialists changes the expert, tools, route, and output target.</p>
+                                        <h3 class="aicmd-v2-chat-title">Conversation</h3>
+                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the selected specialist. Other specialist replies stay in shared room history.</p>
                                 </div>
                                 <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
                         </div>
@@ -3915,7 +3964,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                 <div class="aicmd-room-context-item">
                                         <span>Shared room context</span>
                                         <strong>${escapeHtml(inboundSourceLabel ? `Inbound from ${inboundSourceLabel}` : "Project session")}</strong>
-                                        <small>${escapeHtml(inboundTitle || "Visible to every specialist for continuity.")}</small>
+                                        <small>${escapeHtml(inboundTitle || "Available as background context, not mixed into this chat.")}</small>
                                 </div>
                                 <div class="aicmd-room-context-item">
                                         <span>Selected specialist</span>
@@ -3923,75 +3972,70 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                         <small>${escapeHtml(selectedModeLabel)}</small>
                                 </div>
                                 <div class="aicmd-room-context-item">
-                                        <span>Latest reply from</span>
-                                        <strong>${escapeHtml(latestProducerLabel || "No reply yet")}</strong>
-                                        <small>${escapeHtml(latest ? formatTime(latest.generatedAt) : "Ask the selected specialist to begin.")}</small>
+                                        <span>Latest selected reply</span>
+                                        <strong>${escapeHtml(latestSelected?.specialistLabel || selectedLabel)}</strong>
+                                        <small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>
                                 </div>
                         </div>
 
-                        ${latestFromDifferentSpecialist ? `
-                                <div class="aicmd-room-context-note">
-                                        This latest response was produced by ${escapeHtml(latestProducerLabel)}. Ask ${escapeHtml(selectedLabel)} for a specialist-specific answer.
-                                </div>
-                        ` : ""}
-
-                        ${responses.length && !hasSelectedReply ? `
-                                <div class="aicmd-room-context-note">
-                                        No replies from ${escapeHtml(selectedLabel)} yet. Existing room history remains visible for context.
-                                </div>
-                        ` : ""}
-
-                        ${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking specialist...</div>` : ""}
+                        ${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking ${escapeHtml(selectedLabel)}...</div>` : ""}
                         ${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
 
-                        ${responses.length ? `
-                                <div class="aicmd-v2-chat-stack aicmd-room-turns">
-                                        ${responses.map((item, index) => {
-                                                const producerId = getAiRoomRoleId(item.specialistId || session.modeId);
-                                                const producerLabel = item.specialistLabel || (producerId === "team" ? "Full Team" : "Specialist");
-                                                const isSelectedProducer = isTeam ? producerId === "team" : producerId === selectedRoleId;
-                                                return `
-                                                <div class="aicmd-room-turn${isSelectedProducer ? " is-selected-producer" : " is-shared-history"}">
-                                                        <div class="aicmd-room-user-message">
-                                                                <div class="aicmd-room-bubble is-user">
-                                                                        <span class="aicmd-v2-chat-label">You</span>
-                                                                        <p>${escapeHtml(item.prompt || "")}</p>
-                                                                </div>
-                                                        </div>
-                                                        <article class="aicmd-v2-chat-card aicmd-room-response-card${index === 0 ? " is-latest" : ""}" data-role="${escapeHtml(producerId)}">
-                                                                <div class="aicmd-v2-chat-meta aicmd-room-response-meta">
-                                                                        <span class="aicmd-room-response-avatar">${escapeHtml(producerId === "team" ? "Team" : getAiRoomInitials({ id: producerId, label: producerLabel }))}</span>
-                                                                        <span><strong>${escapeHtml(producerLabel)}</strong></span>
-                                                                        <span>${escapeHtml(formatTime(item.generatedAt))}</span>
-                                                                        <span class="aicmd-room-producer-chip">${escapeHtml(isSelectedProducer ? "Selected specialist" : "Shared history")}</span>
-                                                                        ${index === 0 ? `<span class="aicmd-v2-chat-latest">Latest</span>` : ""}
-                                                                </div>
-                                                                <div class="aicmd-v2-chat-response aicmd-room-response-body">
-                                                                        <span class="aicmd-v2-chat-label">Response from ${escapeHtml(producerLabel)}</span>
-                                                                        <p>${escapeHtml(item.responseText || "")}</p>
-                                                                </div>
-                                                                ${index === 0 ? `
-                                                                        <div class="aicmd-v2-chat-actions aicmd-room-response-actions">
-                                                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Copy</button>
-                                                                                <button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Use in Composer</button>
-                                                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Send to Draft</button>
-                                                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button" ${latest ? "" : "disabled"}>Route Draft</button>
-                                                                                <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
-                                                                                <button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button" ${latest ? "" : "disabled"}>Save</button>
-                                                                                <button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${(latest && typeof speechSynthesis !== "undefined") ? "" : "disabled"}>Read</button>
-                                                                        </div>
-                                                                ` : ""}
-                                                        </article>
-                                                </div>
-                                                `;
-                                        }).join("")}
+                        ${conversationMessages.length ? `
+                                <div class="aicmd-v2-chat-stack aicmd-room-focused-chat">
+                                        ${conversationMessages.map(renderMessage).join("")}
                                 </div>
                         ` : `
                                 <div class="aicmd-v2-chat-empty aicmd-room-chat-empty">
-                                        <strong>No conversation yet</strong>
+                                        <strong>No conversation with ${escapeHtml(selectedLabel)} yet</strong>
                                         <span>${escapeHtml(emptyBody)}</span>
                                 </div>
                         `}
+
+                        ${latestSelected ? `
+                                <article class="aicmd-v2-chat-card aicmd-room-response-card is-selected-output" data-role="${escapeHtml(selectedRoleId)}">
+                                        <div class="aicmd-v2-chat-meta aicmd-room-response-meta">
+                                                <span class="aicmd-room-response-avatar">${escapeHtml(selectedRoleId === "team" ? "Team" : getAiRoomInitials({ id: selectedRoleId, label: selectedLabel }))}</span>
+                                                <span><strong>${escapeHtml(latestSelected.specialistLabel || selectedLabel)}</strong></span>
+                                                <span>${escapeHtml(formatTime(latestSelected.generatedAt))}</span>
+                                                <span class="aicmd-room-producer-chip">Selected specialist output</span>
+                                                <span class="aicmd-v2-chat-latest">Latest</span>
+                                        </div>
+                                        <div class="aicmd-v2-chat-actions aicmd-room-response-actions">
+                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+                                                <button id="aicmdV3ResponseUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-secondary" type="button">Send to Draft</button>
+                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+                                                <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
+                                                <button id="aicmdV3ResponseSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
+                                                <button id="aicmdV3ResponseReadBtn" class="aicmd-v2-btn-ghost" type="button" ${typeof speechSynthesis !== "undefined" ? "" : "disabled"}>Read</button>
+                                        </div>
+                                </article>
+                        ` : ""}
+
+                        ${sharedResponses.length ? `
+                                <details class="aicmd-room-shared-history">
+                                        <summary>
+                                                Shared room history
+                                                <span>${sharedResponses.length} recent specialist repl${sharedResponses.length === 1 ? "y" : "ies"}</span>
+                                        </summary>
+                                        <div class="aicmd-room-shared-history-list">
+                                                ${sharedResponses.map((item) => {
+                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+                                                        const producerLabel = item.specialistLabel || "Specialist";
+                                                        return `
+                                                                <article class="aicmd-room-shared-history-item" data-role="${escapeHtml(producerId)}">
+                                                                        <div>
+                                                                                <strong>${escapeHtml(producerLabel)}</strong>
+                                                                                <span>${escapeHtml(formatTime(item.generatedAt))}</span>
+                                                                        </div>
+                                                                        <p>${escapeHtml(item.responseText || "")}</p>
+                                                                </article>
+                                                        `;
+                                                }).join("")}
+                                        </div>
+                                </details>
+                        ` : ""}
                 </section>
         `;
 }

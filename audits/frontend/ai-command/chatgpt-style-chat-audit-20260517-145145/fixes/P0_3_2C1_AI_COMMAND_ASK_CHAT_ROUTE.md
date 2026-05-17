@@ -38,3 +38,11 @@ Current smoke-test result:
 - `Protected write routes are disabled until MH_CONTROL_CENTER_WRITE_KEY is configured on the server.`
 
 This confirms the route is registered and protected. Full provider execution requires configuring `MH_CONTROL_CENTER_WRITE_KEY` on the server.
+
+## P0.3.2C2 Specialist Chat UI Isolation
+
+The AI Command conversation renderer was updated so the primary chat area shows only the selected specialist or Full Team conversation.
+
+Shared replies from other specialists are no longer mixed into the active chat stream. They are moved into a separate collapsed `Shared room history` section.
+
+This preserves room continuity while making each specialist conversation feel like a normal focused chat.
