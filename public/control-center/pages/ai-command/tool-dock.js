@@ -74,6 +74,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✍",
       label: "Write",
       badge: "Create",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "content-studio",
+      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
       template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
     },
     {
@@ -81,6 +87,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "♻",
       label: "Rewrite",
       badge: "Edit",
+      actionType: "prefill",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ai-command",
+      destinations: ["composer", "content-studio"],
+      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+      outputTypes: ["professional_rewrite", "shorter_rewrite", "simpler_rewrite", "persuasive_rewrite", "premium_rewrite", "platform_specific_rewrite"],
       template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
     },
     {
@@ -88,6 +100,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🌍",
       label: "Translate",
       badge: "Localize",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "content-studio",
+      destinations: ["composer", "content-studio"],
+      sourceTypes: ["composer_text", "selected_text", "current_chat"],
+      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
       template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
     },
     {
@@ -95,6 +113,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✨",
       label: "Improve",
       badge: "Quality",
+      actionType: "prefill",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ai-command",
+      destinations: ["composer", "content-studio"],
+      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+      outputTypes: ["clarity_improvement", "structure_improvement", "cta_improvement", "readability_improvement", "conversion_improvement"],
       template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."
     },
     {
@@ -102,6 +126,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✓",
       label: "Check",
       badge: "Review",
+      actionType: "preview",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ai-command",
+      destinations: ["preview", "content-studio", "compliance"],
+      sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],
+      outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],
       template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
     },
     {
@@ -109,6 +139,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "📚",
       label: "Sources",
       badge: "Context",
+      actionType: "source_required",
+      safetyLevel: "context_only",
+      frontendOwnerPage: "library",
+      destinations: ["library", "ai-command", "content-studio"],
+      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+      outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],
       template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
     },
     {
@@ -116,6 +152,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🔎",
       label: "SEO",
       badge: "Search",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "content-studio",
+      destinations: ["content-studio", "insights", "library"],
+      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
       template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
     },
     {
@@ -123,6 +165,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⇄",
       label: "Repurpose",
       badge: "Adapt",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "content-studio",
+      destinations: ["chat-preview", "content-studio", "publishing"],
+      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
       template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
     },
     {
@@ -130,10 +178,15 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "➜",
       label: "Send",
       badge: "Route",
+      actionType: "route",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "ai-command",
+      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+      sourceTypes: ["current_draft", "preview", "current_chat"],
+      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
       template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
     }
   ],
-
   media: [
     {
       id: "visual-brief",
