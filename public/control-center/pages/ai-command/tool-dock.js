@@ -647,8 +647,8 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <div class="mhos-tool-drawer-summary">
-          <span>Composer prompt preview</span>
-          <p data-aicmd-tool-drawer-summary>Choose options, then use the tool in composer.</p>
+          <span>Setup summary</span>
+          <p data-aicmd-tool-drawer-summary>Choose output, source, destination, language, and tone.</p>
         </div>
 
         <div class="mhos-tool-drawer-note">
@@ -656,6 +656,7 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <div class="mhos-tool-drawer-actions">
+          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Open Library</button>
           <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
           <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
         </div>
@@ -895,6 +896,8 @@ function updateDrawerPromptSummary(drawer) {
   ].filter(Boolean).join(" · ");
 }
 
+
+
 function setDrawerText(root, selector, value) {
   const node = root.querySelector(selector);
   if (node) node.textContent = value || "";
@@ -966,6 +969,16 @@ export function bindAiToolDock({
   Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
     btn.onclick = () => closeToolDrawer(drawer);
   });
+
+  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+  if (openLibraryBtn) {
+    openLibraryBtn.onclick = () => {
+      updateStatus?.("Open Library, select the source asset or folder, then return here and add the source details. Full source picker bridge is the next phase.");
+      if (typeof window !== "undefined") {
+        window.location.hash = "#library";
+      }
+    };
+  }
 
   const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
   if (useBtn) {
