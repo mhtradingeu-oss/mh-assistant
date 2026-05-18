@@ -550,6 +550,11 @@ function joinMetaList(value = []) {
   return Array.isArray(value) ? value.filter(Boolean).join("|") : "";
 }
 
+function getToolMetaList(tool = {}, key = "", fallback = []) {
+  const value = tool?.[key];
+  return Array.isArray(value) && value.length ? value : fallback;
+}
+
 function renderSmartToolDrawerShell(safe) {
   return `
     <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
@@ -572,24 +577,78 @@ function renderSmartToolDrawerShell(safe) {
 
         <div class="mhos-tool-drawer-grid">
           <div class="mhos-tool-drawer-section">
-            <span class="mhos-tool-drawer-section-label">Output types</span>
+            <span class="mhos-tool-drawer-section-label">1. Output type</span>
+            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
             <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-outputs></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
-            <span class="mhos-tool-drawer-section-label">Sources / inputs</span>
+            <span class="mhos-tool-drawer-section-label">2. Source / input</span>
+            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
             <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-sources></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
-            <span class="mhos-tool-drawer-section-label">Destinations</span>
+            <span class="mhos-tool-drawer-section-label">3. Destination</span>
+            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
             <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-destinations></div>
+          </div>
+
+          <div class="mhos-tool-drawer-section">
+            <span class="mhos-tool-drawer-section-label">4. Options</span>
+            <div class="mhos-tool-drawer-two-col">
+              <label>
+                <span>Language</span>
+                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+                  <option value="">Auto / project language</option>
+                  <option value="German">German</option>
+                  <option value="English">English</option>
+                  <option value="Arabic">Arabic</option>
+                </select>
+              </label>
+              <label>
+                <span>Tone</span>
+                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+                  <option value="">Auto / brand tone</option>
+                  <option value="Professional">Professional</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Friendly">Friendly</option>
+                  <option value="Persuasive">Persuasive</option>
+                  <option value="Simple and clear">Simple and clear</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="mhos-tool-drawer-field">
+              <span>Source details</span>
+              <input
+                class="mhos-tool-drawer-input"
+                data-aicmd-tool-drawer-source-details
+                type="text"
+                placeholder="Example: use current chat only, Brand Profile folder, product file, legal docs..."
+              />
+            </label>
+
+            <label class="mhos-tool-drawer-field">
+              <span>Extra brief</span>
+              <textarea
+                class="mhos-tool-drawer-textarea"
+                data-aicmd-tool-drawer-extra-brief
+                rows="3"
+                placeholder="Add audience, goal, keywords, offer, product, or any must-use information..."
+              ></textarea>
+            </label>
           </div>
 
           <div class="mhos-tool-drawer-section">
             <span class="mhos-tool-drawer-section-label">Safety</span>
             <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
           </div>
+        </div>
+
+        <div class="mhos-tool-drawer-summary">
+          <span>Composer prompt preview</span>
+          <p data-aicmd-tool-drawer-summary>Choose options, then use the tool in composer.</p>
         </div>
 
         <div class="mhos-tool-drawer-note">
@@ -627,12 +686,12 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
             data-aicmd-tool-dock-label="${safe(tool.label)}"
             data-aicmd-tool-dock-icon="${safe(tool.icon)}"
             data-aicmd-tool-dock-badge="${safe(tool.badge)}"
-            data-aicmd-tool-dock-action="${safe(tool.actionType || "prefill")}"
+            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
             data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
             data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
-            data-aicmd-tool-dock-destinations="${safe(joinMetaList(tool.destinations))}"
-            data-aicmd-tool-dock-sources="${safe(joinMetaList(tool.sourceTypes))}"
-            data-aicmd-tool-dock-outputs="${safe(joinMetaList(tool.outputTypes))}"
+            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
             data-aicmd-tool-dock-template="${safe(tool.template)}"
             title="${safe(tool.template)}"
           >
@@ -648,12 +707,32 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
 }
 
 function humanizeMeta(value = "") {
-  return String(value || "")
+  const raw = String(value || "").trim();
+  const normalized = raw.toLowerCase();
+
+  const exactLabels = {
+    ai: "AI",
+    seo: "SEO",
+    crm: "CRM",
+    cta: "CTA",
+    gdpr: "GDPR",
+    faq: "FAQ"
+  };
+
+  if (exactLabels[normalized]) return exactLabels[normalized];
+
+  return raw
     .split("_")
     .join(" ")
     .split("-")
     .join(" ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .replace(/\bSeo\b/g, "SEO")
+    .replace(/\bFaq\b/g, "FAQ")
+    .replace(/\bCta\b/g, "CTA")
+    .replace(/\bCrm\b/g, "CRM")
+    .replace(/\bGdpr\b/g, "GDPR")
+    .replace(/\bAi\b/g, "AI");
 }
 
 function renderDrawerChips(node, rawValue = "") {
@@ -666,6 +745,154 @@ function renderDrawerChips(node, rawValue = "") {
   node.innerHTML = values.length
     ? values.slice(0, 12).map((item) => `<span class="mhos-tool-drawer-chip">${humanizeMeta(item)}</span>`).join("")
     : `<span class="mhos-tool-drawer-chip is-muted">Not required</span>`;
+}
+
+function getMetaValues(rawValue = "") {
+  return String(rawValue || "")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+  if (!select) return;
+  const values = getMetaValues(rawValue);
+  select.innerHTML = "";
+
+  const fallback = document.createElement("option");
+  fallback.value = "";
+  fallback.textContent = fallbackLabel;
+  select.appendChild(fallback);
+
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = humanizeMeta(value);
+    select.appendChild(option);
+  });
+}
+
+function getSelectedLabel(drawer, selector, fallback = "Auto") {
+  const select = drawer?.querySelector?.(selector);
+  if (!select || !select.value) return fallback;
+  return humanizeMeta(select.value);
+}
+
+function getDrawerFieldValue(drawer, selector) {
+  const node = drawer?.querySelector?.(selector);
+  return String(node?.value || "").trim();
+}
+
+function isSeoRelevantOutput(output = "") {
+  const value = String(output || "").toLowerCase();
+  return value.includes("blog") ||
+    value.includes("seo") ||
+    value.includes("meta") ||
+    value.includes("landing page") ||
+    value.includes("article");
+}
+
+function buildOutputSpecificRules(output = "") {
+  if (!isSeoRelevantOutput(output)) return [];
+
+  return [
+    "SEO quality rules:",
+    "- Start with a clear SEO title/H1.",
+    "- Define search intent before writing.",
+    "- Suggest a primary keyword and 3-6 secondary keyword ideas if not provided.",
+    "- Use a clean H2/H3 structure.",
+    "- Include a meta title and meta description.",
+    "- Include FAQ ideas when useful.",
+    "- Mention internal link opportunities if relevant.",
+    "- Do not invent certifications, claims, ingredients, prices, guarantees, or statistics without source evidence."
+  ];
+}
+
+function buildSmartToolComposerPrompt({ drawer, baseTemplate, projectName }) {
+  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+
+  const sourceInstruction = sourceDetails
+    ? `${source}. Source details: ${sourceDetails}.`
+    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+
+  const lines = [
+    `Use the ${title} tool for the active project${projectName ? ` (${projectName})` : ""}.`,
+    "",
+    "Selected setup:",
+    `- Tool mode: ${action}.`,
+    `- Output type: ${output}.`,
+    `- Source/input: ${sourceInstruction}`,
+    `- Destination: ${destination}.`,
+    `- Language: ${language}.`,
+    `- Tone: ${tone}.`
+  ];
+
+  if (extraBrief) {
+    lines.push(`- Extra brief: ${extraBrief}.`);
+  }
+
+  lines.push(
+    "",
+    "Task:",
+    `Create the requested ${output.toLowerCase()} as review-ready content.`,
+    "Use only the available context and selected source details.",
+    "If required facts are missing, ask concise follow-up questions before writing the final version.",
+    "Do not repeat this setup back to the user unless useful; produce the best practical output.",
+    "",
+    "Language handling:",
+    "- If the selected language is auto, use the active project language when known.",
+    "- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",
+    "- Do not mix languages inside the publishable content unless the user asks for bilingual output."
+  );
+
+  const outputRules = buildOutputSpecificRules(output);
+  if (outputRules.length) {
+    lines.push("", ...outputRules);
+  }
+
+  lines.push(
+    "",
+    "Destination rule:",
+    `Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.`,
+    "",
+    "Safety:",
+    "- Prepare review-ready output only.",
+    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+    "- Do not make unsupported claims. Mark missing proof clearly."
+  );
+
+  return lines.join("\n");
+}
+
+function updateDrawerPromptSummary(drawer) {
+  if (!drawer) return;
+  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+  if (!summary) return;
+
+  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto output");
+  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat/source if needed");
+  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+
+  summary.textContent = [
+    output,
+    sourceDetails ? `${source}: ${sourceDetails}` : source,
+    destination,
+    language,
+    tone,
+    extraBrief ? "Extra brief added" : ""
+  ].filter(Boolean).join(" · ");
 }
 
 function setDrawerText(root, selector, value) {
@@ -689,12 +916,30 @@ function openToolDrawer({ drawer, btn, text, input, session, projectName, persis
   setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
   setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
   setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-action") || "guided")} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
-  setDrawerText(drawer, "[data-aicmd-tool-drawer-description]", btn.getAttribute("data-aicmd-tool-dock-template") || "Prepare this tool before using it.");
+  setDrawerText(
+    drawer,
+    "[data-aicmd-tool-drawer-description]",
+    `Prepare ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"} for the active project. Choose the output, source, destination, language, and tone before using it in the composer.`
+  );
   setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
 
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-outputs]"), btn.getAttribute("data-aicmd-tool-dock-outputs"));
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-sources]"), btn.getAttribute("data-aicmd-tool-dock-sources"));
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-destinations]"), btn.getAttribute("data-aicmd-tool-dock-destinations"));
+  const rawOutputs = btn.getAttribute("data-aicmd-tool-dock-outputs") || "";
+  const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
+  const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
+
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-outputs]"), rawOutputs);
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-sources]"), rawSources);
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-destinations]"), rawDestinations);
+
+  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination");
+
+  Array.from(drawer.querySelectorAll("select, input, textarea")).forEach((field) => {
+    field.oninput = () => updateDrawerPromptSummary(drawer);
+    field.onchange = () => updateDrawerPromptSummary(drawer);
+  });
+  updateDrawerPromptSummary(drawer);
 
   drawer.hidden = false;
   drawer.setAttribute("aria-hidden", "false");
@@ -729,11 +974,14 @@ export function bindAiToolDock({
       const label = drawer?.dataset?.pendingTool || "tool";
       if (!template) return;
 
-      const text = tokenReplace(template, {
-        projectName,
-        campaign: aiContext.campaign,
-        specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
-      });
+      const text = tokenReplace(
+        buildSmartToolComposerPrompt({ drawer, baseTemplate: template, projectName }),
+        {
+          projectName,
+          campaign: aiContext.campaign,
+          specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+        }
+      );
 
       session.draftMessage = text;
       session.composerText = text;
