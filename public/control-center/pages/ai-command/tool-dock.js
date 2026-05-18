@@ -87,7 +87,7 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "♻",
       label: "Rewrite",
       badge: "Edit",
-      actionType: "prefill",
+      actionType: "guided",
       safetyLevel: "review_only",
       frontendOwnerPage: "ai-command",
       destinations: ["composer", "content-studio"],
@@ -113,7 +113,7 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✨",
       label: "Improve",
       badge: "Quality",
-      actionType: "prefill",
+      actionType: "guided",
       safetyLevel: "review_only",
       frontendOwnerPage: "ai-command",
       destinations: ["composer", "content-studio"],
@@ -546,6 +546,65 @@ function tokenReplace(template = "", values = {}) {
     .replace(/\{specialistLabel\}/g, values.specialistLabel || "the active specialist");
 }
 
+function joinMetaList(value = []) {
+  return Array.isArray(value) ? value.filter(Boolean).join("|") : "";
+}
+
+function renderSmartToolDrawerShell(safe) {
+  return `
+    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="Smart tool setup">
+        <div class="mhos-tool-drawer-head">
+          <div class="mhos-tool-drawer-title-block">
+            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+            <div>
+              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Smart tool</p>
+              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+            </div>
+          </div>
+          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+        </div>
+
+        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+          Review the requirements before preparing the composer prompt.
+        </p>
+
+        <div class="mhos-tool-drawer-grid">
+          <div class="mhos-tool-drawer-section">
+            <span class="mhos-tool-drawer-section-label">Output types</span>
+            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-outputs></div>
+          </div>
+
+          <div class="mhos-tool-drawer-section">
+            <span class="mhos-tool-drawer-section-label">Sources / inputs</span>
+            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-sources></div>
+          </div>
+
+          <div class="mhos-tool-drawer-section">
+            <span class="mhos-tool-drawer-section-label">Destinations</span>
+            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-destinations></div>
+          </div>
+
+          <div class="mhos-tool-drawer-section">
+            <span class="mhos-tool-drawer-section-label">Safety</span>
+            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+          </div>
+        </div>
+
+        <div class="mhos-tool-drawer-note">
+          This drawer is preparation-only. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
+        </div>
+
+        <div class="mhos-tool-drawer-actions">
+          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+        </div>
+      </section>
+    </aside>
+  `;
+}
+
 export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
   const safe = typeof escapeHtml === "function"
     ? escapeHtml
@@ -557,7 +616,7 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
     <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
       <div class="mhos-tool-dock-head">
         <span class="mhos-tool-dock-kicker">${safe(label)}</span>
-        <span class="mhos-tool-dock-copy">Prefill only · review before sending</span>
+        <span class="mhos-tool-dock-copy">Smart tools · review before action</span>
       </div>
       <div class="mhos-tool-dock-list">
         ${tools.map((tool) => `
@@ -565,6 +624,15 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
             type="button"
             class="mhos-tool-dock-item"
             data-aicmd-tool-dock="${safe(tool.id)}"
+            data-aicmd-tool-dock-label="${safe(tool.label)}"
+            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+            data-aicmd-tool-dock-action="${safe(tool.actionType || "prefill")}"
+            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+            data-aicmd-tool-dock-destinations="${safe(joinMetaList(tool.destinations))}"
+            data-aicmd-tool-dock-sources="${safe(joinMetaList(tool.sourceTypes))}"
+            data-aicmd-tool-dock-outputs="${safe(joinMetaList(tool.outputTypes))}"
             data-aicmd-tool-dock-template="${safe(tool.template)}"
             title="${safe(tool.template)}"
           >
@@ -575,7 +643,64 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
         `).join("")}
       </div>
     </section>
+    ${renderSmartToolDrawerShell(safe)}
   `;
+}
+
+function humanizeMeta(value = "") {
+  return String(value || "")
+    .split("_")
+    .join(" ")
+    .split("-")
+    .join(" ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function renderDrawerChips(node, rawValue = "") {
+  if (!node) return;
+  const values = String(rawValue || "")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  node.innerHTML = values.length
+    ? values.slice(0, 12).map((item) => `<span class="mhos-tool-drawer-chip">${humanizeMeta(item)}</span>`).join("")
+    : `<span class="mhos-tool-drawer-chip is-muted">Not required</span>`;
+}
+
+function setDrawerText(root, selector, value) {
+  const node = root.querySelector(selector);
+  if (node) node.textContent = value || "";
+}
+
+function closeToolDrawer(drawer) {
+  if (!drawer) return;
+  drawer.hidden = true;
+  drawer.setAttribute("aria-hidden", "true");
+  drawer.classList.remove("is-open");
+}
+
+function openToolDrawer({ drawer, btn, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+  if (!drawer || !btn) return false;
+
+  drawer.dataset.pendingTemplate = text;
+  drawer.dataset.pendingTool = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+
+  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-action") || "guided")} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+  setDrawerText(drawer, "[data-aicmd-tool-drawer-description]", btn.getAttribute("data-aicmd-tool-dock-template") || "Prepare this tool before using it.");
+  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-outputs]"), btn.getAttribute("data-aicmd-tool-dock-outputs"));
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-sources]"), btn.getAttribute("data-aicmd-tool-dock-sources"));
+  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-destinations]"), btn.getAttribute("data-aicmd-tool-dock-destinations"));
+
+  drawer.hidden = false;
+  drawer.setAttribute("aria-hidden", "false");
+  drawer.classList.add("is-open");
+  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+  return true;
 }
 
 export function bindAiToolDock({
@@ -591,11 +716,64 @@ export function bindAiToolDock({
 }) {
   if (!root || !session) return;
 
+  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+
+  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+    btn.onclick = () => closeToolDrawer(drawer);
+  });
+
+  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+  if (useBtn) {
+    useBtn.onclick = () => {
+      const template = drawer?.dataset?.pendingTemplate || "";
+      const label = drawer?.dataset?.pendingTool || "tool";
+      if (!template) return;
+
+      const text = tokenReplace(template, {
+        projectName,
+        campaign: aiContext.campaign,
+        specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+      });
+
+      session.draftMessage = text;
+      session.composerText = text;
+      if (input) input.value = text;
+
+      if (typeof persistSessionDraft === "function") {
+        persistSessionDraft(sessionKey, session, `${label} drawer tool loaded`);
+      }
+
+      if (typeof updateStatus === "function") {
+        updateStatus(`${label} loaded into composer from smart drawer. Review it, then ask or preview.`);
+      }
+
+      closeToolDrawer(drawer);
+      input?.focus?.();
+    };
+  }
+
   Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
     btn.onclick = () => {
       const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
       const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";
       if (!template) return;
+
+      if (actionType !== "prefill") {
+        const opened = openToolDrawer({
+          drawer,
+          btn,
+          text: template,
+          input,
+          session,
+          projectName,
+          persistSessionDraft,
+          sessionKey,
+          updateStatus
+        });
+
+        if (opened) return;
+      }
 
       const text = tokenReplace(template, {
         projectName,
@@ -619,3 +797,4 @@ export function bindAiToolDock({
     };
   });
 }
+
