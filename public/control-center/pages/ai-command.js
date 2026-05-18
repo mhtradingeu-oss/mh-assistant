@@ -3807,7 +3807,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
                                 </div>
                         </div>
 
-                        ${renderAiToolDock({ projectName: aiContext.projectName || "", escapeHtml })}
+                        ${renderAiToolDock({ projectName: aiContext.projectName || "", specialistId: session.modeId, teamMode: session.teamMode, escapeHtml })}
 
                         <div class="aicmd-chatgpt-action-row">
                                 <button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">Draft</button>
@@ -4686,6 +4686,7 @@ export const aiCommandRoute = {
                         input,
                         projectName,
                         aiContext,
+                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
                         persistSessionDraft,
                         sessionKey,
                         updateStatus

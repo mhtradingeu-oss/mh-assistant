@@ -1,4 +1,4 @@
-const AI_TOOL_DOCK_TOOLS = [
+const BASE_TOOL_DOCK_TOOLS = [
   {
     id: "rewrite",
     icon: "✍",
@@ -19,50 +19,465 @@ const AI_TOOL_DOCK_TOOLS = [
     label: "Improve",
     badge: "AI",
     template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."
-  },
-  {
-    id: "summarize",
-    icon: "☷",
-    label: "Summarize",
-    badge: "Brief",
-    template: "Summarize the current content into clear bullet points, decisions, risks, and next actions for {projectName}."
-  },
-  {
-    id: "sources",
-    icon: "📚",
-    label: "Sources",
-    badge: "Library",
-    template: "Use selected Library or project sources for {projectName} to prepare a grounded draft. Mention what source context is needed before writing."
-  },
-  {
-    id: "templates",
-    icon: "▦",
-    label: "Templates",
-    badge: "Studio",
-    template: "Recommend the best Content Studio template for this request. Options may include company profile, contract draft, speech, presentation outline, blog article, product page, or campaign package."
-  },
-  {
-    id: "create",
-    icon: "＋",
-    label: "Create",
-    badge: "Draft",
-    template: "Create a structured draft for {projectName}. Ask which output is needed if unclear: company profile, contract draft, speech, presentation outline, blog article, campaign package, or landing page."
-  },
-  {
-    id: "media-brief",
-    icon: "◐",
-    label: "Media Brief",
-    badge: "Design",
-    template: "Prepare a design brief for Media Studio from the current content or conversation. Include objective, format, visual direction, required assets, copy summary, language, tone, and CTA."
-  },
-  {
-    id: "more",
-    icon: "⋯",
-    label: "More",
-    badge: "Tools",
-    template: "Show the most useful specialist tools for this request and recommend the next best action. Do not execute anything."
   }
 ];
+
+const TOOL_DOCK_BY_SPECIALIST = {
+  strategist: [
+    {
+      id: "campaign-plan",
+      icon: "🎯",
+      label: "Campaign",
+      badge: "Plan",
+      template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
+    },
+    {
+      id: "launch-plan",
+      icon: "🚀",
+      label: "Launch",
+      badge: "Plan",
+      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+    },
+    {
+      id: "audience",
+      icon: "◎",
+      label: "Audience",
+      badge: "Map",
+      template: "Map the target audience for {projectName}. Include segments, needs, objections, buying triggers, and message angles."
+    },
+    {
+      id: "offer",
+      icon: "◆",
+      label: "Offer",
+      badge: "Value",
+      template: "Create offer angles for {projectName}. Include value proposition, benefits, proof points, CTA ideas, and risk notes."
+    },
+    {
+      id: "funnel",
+      icon: "⌁",
+      label: "Funnel",
+      badge: "Flow",
+      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+    },
+    {
+      id: "priority",
+      icon: "✓",
+      label: "Priority",
+      badge: "Next",
+      template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
+    }
+  ],
+
+  writer: [
+    {
+      id: "hook",
+      icon: "🪝",
+      label: "Hook",
+      badge: "Copy",
+      template: "Write strong hook options for {projectName}. Include problem-aware, benefit-led, proof-led, and curiosity-led variants."
+    },
+    {
+      id: "caption",
+      icon: "✒",
+      label: "Caption",
+      badge: "Social",
+      template: "Write a social media caption for {projectName}. Include opening hook, value points, CTA, and hashtags if useful."
+    },
+    {
+      id: "cta",
+      icon: "➜",
+      label: "CTA",
+      badge: "Action",
+      template: "Create CTA options for {projectName}. Include soft, direct, premium, urgent, and partnership-focused versions."
+    },
+    {
+      id: "email",
+      icon: "✉",
+      label: "Email",
+      badge: "Draft",
+      template: "Draft an email for {projectName}. Include subject options, opening, body, CTA, and review notes."
+    },
+    {
+      id: "profile",
+      icon: "🏢",
+      label: "Profile",
+      badge: "Create",
+      template: "Create a company profile draft for {projectName} using selected sources if available. Include about, mission, services/products, quality, market, partnership value, and CTA."
+    },
+    {
+      id: "product-copy",
+      icon: "◈",
+      label: "Product",
+      badge: "Copy",
+      template: "Write product copy for {projectName}. Include headline, benefits, usage, proof points, audience fit, SEO keywords, and CTA."
+    },
+    {
+      id: "media-brief",
+      icon: "◐",
+      label: "Media Brief",
+      badge: "Design",
+      template: "Prepare a design brief for Media Studio from this content. Include objective, format, visual direction, required assets, copy summary, language, tone, and CTA."
+    }
+  ],
+
+  media: [
+    {
+      id: "visual-brief",
+      icon: "🎨",
+      label: "Visual Brief",
+      badge: "Design",
+      template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."
+    },
+    {
+      id: "moodboard",
+      icon: "▧",
+      label: "Moodboard",
+      badge: "Style",
+      template: "Define a moodboard direction for {projectName}. Include visual references, atmosphere, color feel, texture, layout mood, and brand alignment."
+    },
+    {
+      id: "image-prompt",
+      icon: "🖼",
+      label: "Image",
+      badge: "Prompt",
+      template: "Create image generation prompts for {projectName}. Include scene, subject, lighting, style, composition, negative constraints, and brand notes."
+    },
+    {
+      id: "asset-list",
+      icon: "▣",
+      label: "Assets",
+      badge: "List",
+      template: "Create an asset checklist for {projectName}. Include logos, product shots, lifestyle images, certificates, icons, testimonials, and missing assets."
+    },
+    {
+      id: "layout",
+      icon: "▤",
+      label: "Layout",
+      badge: "Plan",
+      template: "Create a layout plan for {projectName}. Include sections, hierarchy, visual blocks, CTA placement, and responsive notes."
+    },
+    {
+      id: "brand-check",
+      icon: "◆",
+      label: "Brand Check",
+      badge: "Review",
+      template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."
+    }
+  ],
+
+  video_lead: [
+    {
+      id: "reel-script",
+      icon: "🎬",
+      label: "Reel",
+      badge: "Script",
+      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+    },
+    {
+      id: "storyboard",
+      icon: "▥",
+      label: "Storyboard",
+      badge: "Video",
+      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+    },
+    {
+      id: "shot-list",
+      icon: "◫",
+      label: "Shot List",
+      badge: "Plan",
+      template: "Create a shot list for {projectName}. Include product shots, lifestyle shots, closeups, transitions, and required props."
+    },
+    {
+      id: "voiceover",
+      icon: "🎙",
+      label: "Voiceover",
+      badge: "Audio",
+      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+    },
+    {
+      id: "video-cta",
+      icon: "▶",
+      label: "Video CTA",
+      badge: "Action",
+      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+    }
+  ],
+
+  publisher: [
+    {
+      id: "publish-check",
+      icon: "📤",
+      label: "Publish Check",
+      badge: "Ready",
+      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+    },
+    {
+      id: "channel-pack",
+      icon: "▦",
+      label: "Channel Pack",
+      badge: "Prep",
+      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+    },
+    {
+      id: "schedule",
+      icon: "🗓",
+      label: "Schedule",
+      badge: "Plan",
+      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+    },
+    {
+      id: "hashtags",
+      icon: "#",
+      label: "Hashtags",
+      badge: "SEO",
+      template: "Suggest hashtags and discoverability tags for {projectName}. Group them by brand, product, audience, niche, and market."
+    },
+    {
+      id: "approval-pack",
+      icon: "✓",
+      label: "Approval",
+      badge: "Pack",
+      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+    }
+  ],
+
+  ads: [
+    {
+      id: "ad-angle",
+      icon: "📣",
+      label: "Ad Angle",
+      badge: "Paid",
+      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+    },
+    {
+      id: "ad-copy",
+      icon: "✦",
+      label: "Ad Copy",
+      badge: "Draft",
+      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+    },
+    {
+      id: "targeting",
+      icon: "◎",
+      label: "Targeting",
+      badge: "Map",
+      template: "Map targeting ideas for {projectName}. Include audience groups, interests, exclusions, funnel stage, and testing notes."
+    },
+    {
+      id: "creative-test",
+      icon: "A/B",
+      label: "Creative",
+      badge: "Test",
+      template: "Create a creative testing plan for {projectName}. Include hypotheses, variants, success signals, and next actions."
+    },
+    {
+      id: "landing-match",
+      icon: "↔",
+      label: "Landing",
+      badge: "Match",
+      template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."
+    }
+  ],
+
+  analyst: [
+    {
+      id: "seo-brief",
+      icon: "🔎",
+      label: "SEO Brief",
+      badge: "Search",
+      template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
+    },
+    {
+      id: "insights",
+      icon: "📊",
+      label: "Insights",
+      badge: "Data",
+      template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
+    },
+    {
+      id: "keywords",
+      icon: "⌕",
+      label: "Keywords",
+      badge: "SEO",
+      template: "Suggest keyword groups for {projectName}. Include commercial, informational, branded, product, and local intent clusters."
+    },
+    {
+      id: "performance",
+      icon: "↗",
+      label: "Performance",
+      badge: "Review",
+      template: "Review performance signals for {projectName}. Identify wins, risks, gaps, and recommended next experiments."
+    },
+    {
+      id: "content-gap",
+      icon: "▥",
+      label: "Gaps",
+      badge: "Plan",
+      template: "Identify content gaps for {projectName}. Include missing pages, missing topics, weak funnel stages, and priority actions."
+    }
+  ],
+
+  compliance_reviewer: [
+    {
+      id: "claims-check",
+      icon: "🛡",
+      label: "Claims",
+      badge: "Check",
+      template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
+    },
+    {
+      id: "safe-rewrite",
+      icon: "♻",
+      label: "Safe Rewrite",
+      badge: "Copy",
+      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+    },
+    {
+      id: "evidence",
+      icon: "📎",
+      label: "Evidence",
+      badge: "Need",
+      template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."
+    },
+    {
+      id: "gdpr",
+      icon: "🔒",
+      label: "GDPR",
+      badge: "Review",
+      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+    },
+    {
+      id: "approval-notes",
+      icon: "✓",
+      label: "Approval",
+      badge: "Notes",
+      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+    }
+  ],
+
+  operations: [
+    {
+      id: "task-plan",
+      icon: "☑",
+      label: "Task Plan",
+      badge: "Ops",
+      template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
+    },
+    {
+      id: "workflow",
+      icon: "⚙",
+      label: "Workflow",
+      badge: "Draft",
+      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+    },
+    {
+      id: "handoff",
+      icon: "⇄",
+      label: "Handoff",
+      badge: "Route",
+      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+    },
+    {
+      id: "timeline",
+      icon: "⏱",
+      label: "Timeline",
+      badge: "Plan",
+      template: "Create a timeline for {projectName}. Include milestones, blockers, dependencies, and safe sequencing."
+    },
+    {
+      id: "checklist",
+      icon: "☷",
+      label: "Checklist",
+      badge: "Ops",
+      template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
+    }
+  ],
+
+  customer_ops: [
+    {
+      id: "reply-draft",
+      icon: "💬",
+      label: "Reply",
+      badge: "Draft",
+      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+    },
+    {
+      id: "ticket",
+      icon: "🎫",
+      label: "Ticket",
+      badge: "Draft",
+      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+    },
+    {
+      id: "sla",
+      icon: "⏳",
+      label: "SLA",
+      badge: "Risk",
+      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+    },
+    {
+      id: "summary",
+      icon: "☷",
+      label: "Summary",
+      badge: "CX",
+      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+    }
+  ],
+
+  sales_crm: [
+    {
+      id: "sales-pitch",
+      icon: "💼",
+      label: "Pitch",
+      badge: "Sales",
+      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+    },
+    {
+      id: "follow-up",
+      icon: "↩",
+      label: "Follow-up",
+      badge: "Email",
+      template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
+    },
+    {
+      id: "objections",
+      icon: "❓",
+      label: "Objection",
+      badge: "Sales",
+      template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
+    },
+    {
+      id: "lead-brief",
+      icon: "◎",
+      label: "Lead Brief",
+      badge: "CRM",
+      template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
+    }
+  ]
+};
+
+function getSpecialistTools(specialistId = "") {
+  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+}
+
+function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {
+  if (teamMode === "team") {
+    return [
+      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+    ];
+  }
+
+  if (specialistId === "writer") {
+    return [
+      ...BASE_TOOL_DOCK_TOOLS,
+      ...getSpecialistTools(specialistId)
+    ].slice(0, 9);
+  }
+
+  return getSpecialistTools(specialistId).slice(0, 9);
+}
 
 function tokenReplace(template = "", values = {}) {
   return String(template)
@@ -71,19 +486,21 @@ function tokenReplace(template = "", values = {}) {
     .replace(/\{specialistLabel\}/g, values.specialistLabel || "the active specialist");
 }
 
-export function renderAiToolDock({ projectName = "", escapeHtml }) {
+export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
   const safe = typeof escapeHtml === "function"
     ? escapeHtml
     : (value) => String(value ?? "");
+  const tools = getDockTools({ specialistId, teamMode });
+  const label = teamMode === "team" ? "Team quick tools" : "Specialist quick tools";
 
   return `
-    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="AI quick tools">
+    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
       <div class="mhos-tool-dock-head">
-        <span class="mhos-tool-dock-kicker">Quick tools</span>
+        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
         <span class="mhos-tool-dock-copy">Prefill only · review before sending</span>
       </div>
       <div class="mhos-tool-dock-list">
-        ${AI_TOOL_DOCK_TOOLS.map((tool) => `
+        ${tools.map((tool) => `
           <button
             type="button"
             class="mhos-tool-dock-item"
@@ -107,6 +524,7 @@ export function bindAiToolDock({
   input,
   projectName = "",
   aiContext = {},
+  specialistLabel = "",
   persistSessionDraft,
   sessionKey,
   updateStatus
@@ -122,7 +540,7 @@ export function bindAiToolDock({
       const text = tokenReplace(template, {
         projectName,
         campaign: aiContext.campaign,
-        specialistLabel: session.teamMode === "team" ? "Full Team" : "active specialist"
+        specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
       });
 
       session.draftMessage = text;
