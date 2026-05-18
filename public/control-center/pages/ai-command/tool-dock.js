@@ -29,6 +29,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🎯",
       label: "Campaign",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "campaign-studio",
+      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+      outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
       template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."
     },
     {
@@ -36,6 +42,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🚀",
       label: "Launch",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "campaign-studio",
+      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
       template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
     },
     {
@@ -43,6 +55,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◎",
       label: "Audience",
       badge: "Map",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "campaign-studio",
+      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+      outputTypes: ["audience_map", "segment_notes", "objection_map", "message_angles"],
       template: "Map the target audience for {projectName}. Include segments, needs, objections, buying triggers, and message angles."
     },
     {
@@ -50,6 +68,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◆",
       label: "Offer",
       badge: "Value",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "campaign-studio",
+      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+      outputTypes: ["offer_brief", "value_proposition", "proof_points", "cta_options"],
       template: "Create offer angles for {projectName}. Include value proposition, benefits, proof points, CTA ideas, and risk notes."
     },
     {
@@ -57,6 +81,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⌁",
       label: "Funnel",
       badge: "Flow",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "campaign-studio",
+      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
       template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
     },
     {
@@ -64,6 +94,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✓",
       label: "Priority",
       badge: "Next",
+      actionType: "preview",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+      outputTypes: ["next_best_action", "priority_list", "blocker_map", "action_sequence"],
       template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."
     }
   ],
@@ -193,6 +229,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🎨",
       label: "Visual Brief",
       badge: "Design",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+      outputTypes: ["visual_brief", "creative_direction", "format_brief", "asset_requirements"],
       template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."
     },
     {
@@ -200,6 +242,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▧",
       label: "Moodboard",
       badge: "Style",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "library"],
+      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+      outputTypes: ["moodboard_direction", "style_notes", "reference_list", "brand_alignment_notes"],
       template: "Define a moodboard direction for {projectName}. Include visual references, atmosphere, color feel, texture, layout mood, and brand alignment."
     },
     {
@@ -207,6 +255,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🖼",
       label: "Image",
       badge: "Prompt",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "library"],
+      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+      outputTypes: ["image_prompt", "prompt_variants", "negative_prompt", "style_prompt"],
       template: "Create image generation prompts for {projectName}. Include scene, subject, lighting, style, composition, negative constraints, and brand notes."
     },
     {
@@ -214,6 +268,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▣",
       label: "Assets",
       badge: "List",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+      outputTypes: ["asset_checklist", "missing_assets", "asset_request_brief", "production_requirements"],
       template: "Create an asset checklist for {projectName}. Include logos, product shots, lifestyle images, certificates, icons, testimonials, and missing assets."
     },
     {
@@ -221,6 +281,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▤",
       label: "Layout",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+      outputTypes: ["layout_plan", "section_hierarchy", "responsive_notes", "cta_placement"],
       template: "Create a layout plan for {projectName}. Include sections, hierarchy, visual blocks, CTA placement, and responsive notes."
     },
     {
@@ -228,6 +294,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◆",
       label: "Brand Check",
       badge: "Review",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "governance", "library"],
+      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+      outputTypes: ["brand_check_report", "style_risks", "missing_assets", "improvement_actions"],
       template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."
     }
   ],
@@ -238,6 +310,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🎬",
       label: "Reel",
       badge: "Script",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+      outputTypes: ["reel_script", "short_video_script", "hook_variants", "overlay_copy"],
       template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
     },
     {
@@ -245,6 +323,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▥",
       label: "Storyboard",
       badge: "Video",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
       template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
     },
     {
@@ -252,6 +336,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◫",
       label: "Shot List",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+      outputTypes: ["shot_list", "b_roll_list", "prop_list", "production_checklist"],
       template: "Create a shot list for {projectName}. Include product shots, lifestyle shots, closeups, transitions, and required props."
     },
     {
@@ -259,6 +349,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🎙",
       label: "Voiceover",
       badge: "Audio",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "content-studio"],
+      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+      outputTypes: ["voiceover_script", "audio_direction", "pacing_notes", "tone_variants"],
       template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
     },
     {
@@ -266,6 +362,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▶",
       label: "Video CTA",
       badge: "Action",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "media-studio",
+      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+      outputTypes: ["video_cta_options", "soft_cta", "direct_cta", "urgency_cta", "brand_cta"],
       template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
     }
   ],
@@ -276,6 +378,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "📤",
       label: "Publish Check",
       badge: "Ready",
+      actionType: "preview",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "publishing",
+      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
       template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
     },
     {
@@ -283,6 +391,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▦",
       label: "Channel Pack",
       badge: "Prep",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "publishing",
+      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
       template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
     },
     {
@@ -290,6 +404,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🗓",
       label: "Schedule",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "publishing",
+      destinations: ["chat-preview", "publishing", "workflows"],
+      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+      outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],
       template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
     },
     {
@@ -297,6 +417,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "#",
       label: "Hashtags",
       badge: "SEO",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "publishing",
+      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+      outputTypes: ["hashtag_pack", "discoverability_tags", "platform_tag_groups", "market_tags"],
       template: "Suggest hashtags and discoverability tags for {projectName}. Group them by brand, product, audience, niche, and market."
     },
     {
@@ -304,6 +430,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✓",
       label: "Approval",
       badge: "Pack",
+      actionType: "source_required",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
       template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
     }
   ],
@@ -314,6 +446,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "📣",
       label: "Ad Angle",
       badge: "Paid",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ads-manager",
+      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+      outputTypes: ["ad_angle", "angle_variants", "pain_benefit_map", "compliance_risks"],
       template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
     },
     {
@@ -321,6 +459,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✦",
       label: "Ad Copy",
       badge: "Draft",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ads-manager",
+      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+      outputTypes: ["ad_copy", "headline_variants", "primary_text_variants", "cta_variants"],
       template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
     },
     {
@@ -328,6 +472,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◎",
       label: "Targeting",
       badge: "Map",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ads-manager",
+      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+      outputTypes: ["audience_map", "targeting_ideas", "exclusions", "funnel_stage_map"],
       template: "Map targeting ideas for {projectName}. Include audience groups, interests, exclusions, funnel stage, and testing notes."
     },
     {
@@ -335,6 +485,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "A/B",
       label: "Creative",
       badge: "Test",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ads-manager",
+      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+      outputTypes: ["ab_test_plan", "creative_test_matrix", "hypotheses", "success_signals"],
       template: "Create a creative testing plan for {projectName}. Include hypotheses, variants, success signals, and next actions."
     },
     {
@@ -342,6 +498,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "↔",
       label: "Landing",
       badge: "Match",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "ads-manager",
+      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+      outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],
       template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."
     }
   ],
@@ -352,6 +514,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🔎",
       label: "SEO Brief",
       badge: "Search",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "insights",
+      destinations: ["chat-preview", "insights", "content-studio", "library"],
+      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+      outputTypes: ["seo_brief", "search_intent_map", "content_structure", "meta_ideas", "internal_links"],
       template: "Create an SEO brief for {projectName}. Include keywords, search intent, content structure, meta ideas, internal links, and risks."
     },
     {
@@ -359,6 +527,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "📊",
       label: "Insights",
       badge: "Data",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "insights",
+      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
       template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
     },
     {
@@ -366,6 +540,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⌕",
       label: "Keywords",
       badge: "SEO",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "insights",
+      destinations: ["chat-preview", "insights", "content-studio", "library"],
+      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+      outputTypes: ["keyword_groups", "commercial_keywords", "informational_keywords", "branded_keywords", "local_keywords"],
       template: "Suggest keyword groups for {projectName}. Include commercial, informational, branded, product, and local intent clusters."
     },
     {
@@ -373,6 +553,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "↗",
       label: "Performance",
       badge: "Review",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "insights",
+      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+      outputTypes: ["performance_review", "wins", "risks", "experiment_recommendations"],
       template: "Review performance signals for {projectName}. Identify wins, risks, gaps, and recommended next experiments."
     },
     {
@@ -380,6 +566,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "▥",
       label: "Gaps",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "insights",
+      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+      outputTypes: ["content_gap_report", "missing_topics", "missing_pages", "priority_actions"],
       template: "Identify content gaps for {projectName}. Include missing pages, missing topics, weak funnel stages, and priority actions."
     }
   ],
@@ -390,6 +582,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🛡",
       label: "Claims",
       badge: "Check",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+      sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],
+      outputTypes: ["claims_check", "risk_flags", "proof_requirements", "safe_wording_notes"],
       template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."
     },
     {
@@ -397,6 +595,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "♻",
       label: "Safe Rewrite",
       badge: "Copy",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "content-studio"],
+      sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],
+      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
       template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
     },
     {
@@ -404,6 +608,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "📎",
       label: "Evidence",
       badge: "Need",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "library", "workflows"],
+      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+      outputTypes: ["evidence_needed", "required_proof", "recommended_proof", "optional_proof"],
       template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."
     },
     {
@@ -411,6 +621,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🔒",
       label: "GDPR",
       badge: "Review",
+      actionType: "source_required",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+      outputTypes: ["gdpr_review", "consent_risks", "tracking_notes", "disclosure_requirements"],
       template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
     },
     {
@@ -418,6 +634,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "✓",
       label: "Approval",
       badge: "Notes",
+      actionType: "source_required",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "governance",
+      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
       template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
     }
   ],
@@ -428,6 +650,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "☑",
       label: "Task Plan",
       badge: "Ops",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+      outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],
       template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
     },
     {
@@ -435,6 +663,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⚙",
       label: "Workflow",
       badge: "Draft",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "task", "handoff"],
+      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
       template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
     },
     {
@@ -442,6 +676,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⇄",
       label: "Handoff",
       badge: "Route",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
       template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
     },
     {
@@ -449,6 +689,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⏱",
       label: "Timeline",
       badge: "Plan",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+      outputTypes: ["timeline", "milestones", "blockers", "safe_sequence"],
       template: "Create a timeline for {projectName}. Include milestones, blockers, dependencies, and safe sequencing."
     },
     {
@@ -456,6 +702,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "☷",
       label: "Checklist",
       badge: "Ops",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+      outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],
       template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."
     }
   ],
@@ -466,6 +718,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "💬",
       label: "Reply",
       badge: "Draft",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "operations-centers",
+      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+      outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],
       template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
     },
     {
@@ -473,6 +731,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "🎫",
       label: "Ticket",
       badge: "Draft",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "operations-centers",
+      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+      outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],
       template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
     },
     {
@@ -480,6 +744,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "⏳",
       label: "SLA",
       badge: "Risk",
+      actionType: "preview",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "operations-centers",
+      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
       template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
     },
     {
@@ -487,6 +757,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "☷",
       label: "Summary",
       badge: "CX",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "operations-centers",
+      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+      outputTypes: ["thread_summary", "sentiment_review", "open_questions", "response_context"],
       template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
     }
   ],
@@ -497,6 +773,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "💼",
       label: "Pitch",
       badge: "Sales",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+      outputTypes: ["sales_pitch", "value_proposition", "pain_solution_map", "cta_note"],
       template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
     },
     {
@@ -504,6 +786,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "↩",
       label: "Follow-up",
       badge: "Email",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+      outputTypes: ["follow_up_email", "follow_up_sequence", "value_reminder", "next_step_prompt"],
       template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
     },
     {
@@ -511,6 +799,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "❓",
       label: "Objection",
       badge: "Sales",
+      actionType: "guided",
+      safetyLevel: "review_only",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+      sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],
+      outputTypes: ["objection_handling", "proof_needed", "safe_answers", "next_action"],
       template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
     },
     {
@@ -518,6 +812,12 @@ const TOOL_DOCK_BY_SPECIALIST = {
       icon: "◎",
       label: "Lead Brief",
       badge: "CRM",
+      actionType: "guided",
+      safetyLevel: "confirmation_required",
+      frontendOwnerPage: "workflows",
+      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+      outputTypes: ["lead_brief", "fit_summary", "opportunity_notes", "risk_notes", "outreach_recommendation"],
       template: "Create a lead brief for {projectName}. Include profile, need, fit, opportunity, risks, and recommended outreach."
     }
   ]
