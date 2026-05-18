@@ -879,19 +879,19 @@ function renderSmartToolDrawerShell(safe) {
           <div class="mhos-tool-drawer-section">
             <span class="mhos-tool-drawer-section-label">1. Output type</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
-            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-outputs></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
             <span class="mhos-tool-drawer-section-label">2. Source / input</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
-            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-sources></div>
+            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source>
+              No Library source selected yet.
+            </div>
           </div>
 
           <div class="mhos-tool-drawer-section">
             <span class="mhos-tool-drawer-section-label">3. Destination</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
-            <div class="mhos-tool-drawer-chips" data-aicmd-tool-drawer-destinations></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
@@ -1036,17 +1036,7 @@ function humanizeMeta(value = "") {
     .replace(/\bAi\b/g, "AI");
 }
 
-function renderDrawerChips(node, rawValue = "") {
-  if (!node) return;
-  const values = String(rawValue || "")
-    .split("|")
-    .map((item) => item.trim())
-    .filter(Boolean);
 
-  node.innerHTML = values.length
-    ? values.slice(0, 12).map((item) => `<span class="mhos-tool-drawer-chip">${humanizeMeta(item)}</span>`).join("")
-    : `<span class="mhos-tool-drawer-chip is-muted">Not required</span>`;
-}
 
 function getMetaValues(rawValue = "") {
   return String(rawValue || "")
@@ -1178,24 +1168,24 @@ function updateDrawerPromptSummary(drawer) {
   const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
   if (!summary) return;
 
-  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto output");
-  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat/source if needed");
-  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
-  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
-  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Output");
+  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Source");
+  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Destination");
+  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Language");
+  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Tone");
   const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
   const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
 
-  summary.textContent = [
-    output,
-    sourceDetails ? `${source}: ${sourceDetails}` : source,
-    destination,
-    language,
-    tone,
-    extraBrief ? "Extra brief added" : ""
-  ].filter(Boolean).join(" · ");
-}
+  let summaryParts = [];
+  summaryParts.push(`Output: ${output}`);
+  summaryParts.push(`Source: ${sourceDetails ? source + ": " + sourceDetails : source}`);
+  summaryParts.push(`Destination: ${destination}`);
+  summaryParts.push(`Language: ${language}`);
+  summaryParts.push(`Tone: ${tone}`);
+  if (extraBrief) summaryParts.push("Extra brief added");
 
+  summary.textContent = summaryParts.filter(Boolean).join(" · ");
+}
 
 
 function setDrawerText(root, selector, value) {
@@ -1230,9 +1220,6 @@ function openToolDrawer({ drawer, btn, text, input, session, projectName, persis
   const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
   const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
 
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-outputs]"), rawOutputs);
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-sources]"), rawSources);
-  renderDrawerChips(drawer.querySelector("[data-aicmd-tool-drawer-destinations]"), rawDestinations);
 
   populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
   populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");

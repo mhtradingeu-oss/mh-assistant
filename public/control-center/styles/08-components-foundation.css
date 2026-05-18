@@ -1115,26 +1115,15 @@ h4 {
   text-transform: uppercase;
 }
 
-.mhos-tool-drawer-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
 
-.mhos-tool-drawer-chip,
-.mhos-tool-drawer-safety {
-  border-radius: 999px;
-  padding: 5px 8px;
-  background: rgba(94, 234, 212, 0.1);
-  border: 1px solid rgba(94, 234, 212, 0.14);
-  color: var(--color-text-2, #9ca3af);
-  font-size: 0.7rem;
-  font-weight: 800;
-}
-
-.mhos-tool-drawer-chip.is-muted {
-  background: rgba(148, 163, 184, 0.08);
-  border-color: rgba(148, 163, 184, 0.12);
+.mhos-tool-drawer-selected-source {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px dashed #9ca3af;
+  border-radius: 10px;
+  background: rgba(15,23,42,0.13);
+  color: #9ca3af;
+  font-size: 0.85em;
 }
 
 .mhos-tool-drawer-note {
@@ -1148,10 +1137,19 @@ h4 {
   line-height: 1.45;
 }
 
+
 .mhos-tool-drawer-actions {
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-top: 14px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-top: 12px;
+  padding-bottom: 2px;
+  background:
+    linear-gradient(0deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92) 72%, transparent);
+  backdrop-filter: blur(10px);
 }
 
 @media (max-width: 720px) {
@@ -1368,11 +1366,6 @@ h4 {
   box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.09);
 }
 
-/* MH-OS Smart Tool Drawer — reduce duplication */
-.mhos-tool-drawer .mhos-tool-drawer-chips {
-  display: none;
-}
-
 .mhos-tool-drawer-description {
   font-size: 0.82rem;
 }
@@ -1429,4 +1422,16 @@ h4 {
 
 .mhos-tool-drawer-actions [data-aicmd-tool-drawer-open-library] {
   border-color: rgba(139, 92, 246, 0.28);
+}
+
+/* MH-OS Smart Tool Drawer — static source placeholder */
+.mhos-tool-drawer-selected-source[data-aicmd-tool-drawer-selected-source] {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px dashed rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.22);
+  color: var(--color-text-2, #9ca3af);
+  font-size: 0.74rem;
+  line-height: 1.35;
 }
