@@ -70,53 +70,67 @@ const TOOL_DOCK_BY_SPECIALIST = {
 
   writer: [
     {
-      id: "hook",
-      icon: "🪝",
-      label: "Hook",
-      badge: "Copy",
-      template: "Write strong hook options for {projectName}. Include problem-aware, benefit-led, proof-led, and curiosity-led variants."
-    },
-    {
-      id: "caption",
-      icon: "✒",
-      label: "Caption",
-      badge: "Social",
-      template: "Write a social media caption for {projectName}. Include opening hook, value points, CTA, and hashtags if useful."
-    },
-    {
-      id: "cta",
-      icon: "➜",
-      label: "CTA",
-      badge: "Action",
-      template: "Create CTA options for {projectName}. Include soft, direct, premium, urgent, and partnership-focused versions."
-    },
-    {
-      id: "email",
-      icon: "✉",
-      label: "Email",
-      badge: "Draft",
-      template: "Draft an email for {projectName}. Include subject options, opening, body, CTA, and review notes."
-    },
-    {
-      id: "profile",
-      icon: "🏢",
-      label: "Profile",
+      id: "write",
+      icon: "✍",
+      label: "Write",
       badge: "Create",
-      template: "Create a company profile draft for {projectName} using selected sources if available. Include about, mission, services/products, quality, market, partnership value, and CTA."
+      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
     },
     {
-      id: "product-copy",
-      icon: "◈",
-      label: "Product",
-      badge: "Copy",
-      template: "Write product copy for {projectName}. Include headline, benefits, usage, proof points, audience fit, SEO keywords, and CTA."
+      id: "rewrite",
+      icon: "♻",
+      label: "Rewrite",
+      badge: "Edit",
+      template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
     },
     {
-      id: "media-brief",
-      icon: "◐",
-      label: "Media Brief",
-      badge: "Design",
-      template: "Prepare a design brief for Media Studio from this content. Include objective, format, visual direction, required assets, copy summary, language, tone, and CTA."
+      id: "translate",
+      icon: "🌍",
+      label: "Translate",
+      badge: "Localize",
+      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+    },
+    {
+      id: "improve",
+      icon: "✨",
+      label: "Improve",
+      badge: "Quality",
+      template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."
+    },
+    {
+      id: "check",
+      icon: "✓",
+      label: "Check",
+      badge: "Review",
+      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+    },
+    {
+      id: "sources",
+      icon: "📚",
+      label: "Sources",
+      badge: "Context",
+      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+    },
+    {
+      id: "seo",
+      icon: "🔎",
+      label: "SEO",
+      badge: "Search",
+      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+    },
+    {
+      id: "repurpose",
+      icon: "⇄",
+      label: "Repurpose",
+      badge: "Adapt",
+      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+    },
+    {
+      id: "send",
+      icon: "➜",
+      label: "Send",
+      badge: "Route",
+      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
     }
   ],
 
@@ -467,13 +481,6 @@ function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {
       ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
       ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
     ];
-  }
-
-  if (specialistId === "writer") {
-    return [
-      ...BASE_TOOL_DOCK_TOOLS,
-      ...getSpecialistTools(specialistId)
-    ].slice(0, 9);
   }
 
   return getSpecialistTools(specialistId).slice(0, 9);
