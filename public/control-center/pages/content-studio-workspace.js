@@ -2298,11 +2298,78 @@ export const contentStudioRoute = {
     const inbound = getInboundHandoff(projectName, session);
     const inboundSummary = inbound ? buildInboundSummary(inbound) : null;
 
+
+    // --- Source/Provenance Panel ---
+    function renderSourcePanel() {
+      let sourceLines = [];
+      let ariaLabel = "Source context panel";
+      // Prefer inbound handoff, then selectedItem, then session.form
+      const handoff = inboundSummary;
+      const item = selectedItem;
+      if (handoff) {
+        sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(handoff.sourcePage || "-"))}</div>`);
+        if (handoff.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(handoff.project)}</div>`);
+        if (handoff.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(handoff.campaign)}</div>`);
+        if (handoff.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(handoff.channel)}</div>`);
+        if (handoff.brief) sourceLines.push(`<div><strong>Brief:</strong> ${escapeHtml(handoff.brief.slice(0, 120))}</div>`);
+        sourceLines.push(`<div><strong>Handoff type:</strong> ${handoff.id ? "AI/Workflow" : "Unknown"}</div>`);
+      } else if (item) {
+        sourceLines.push(`<div><strong>Source:</strong> ${escapeHtml(item.source || "-")}</div>`);
+        if (item.project) sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(item.project)}</div>`);
+        if (item.campaign) sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(item.campaign)}</div>`);
+        if (item.channel) sourceLines.push(`<div><strong>Channel:</strong> ${escapeHtml(item.channel)}</div>`);
+      }
+      // Library asset/provenance
+      if (item && item.library_asset_ref) {
+        sourceLines.push(`<div><strong>Library asset ref:</strong> ${escapeHtml(item.library_asset_ref.source_signature || "-")}</div>`);
+      }
+      if (!sourceLines.length) {
+        sourceLines.push(`<div>No source context attached yet. Use AI Command or Library to attach source-backed content.</div>`);
+      }
+      sourceLines.push(`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>`);
+      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+    }
+
+    // --- SEO Checklist Panel ---
+    function renderSeoChecklistPanel() {
+      const ariaLabel = "SEO Checklist panel";
+      // Visual checklist only, not interactive
+      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+        <li><strong>Meta title</strong> present and clear</li>
+        <li><strong>Meta description</strong> summarizes value</li>
+        <li><strong>Primary keyword</strong> included</li>
+        <li><strong>Headings / structure</strong> logical</li>
+        <li><strong>CTA</strong> is actionable</li>
+        <li><strong>Internal link idea</strong> noted</li>
+        <li><strong>Brand tone</strong> consistent</li>
+        <li><strong>Readability</strong> is high</li>
+      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+    }
+
+    // --- Governance Risk / Approval Readiness Panel ---
+    function renderGovernancePanel() {
+      const ariaLabel = "Governance risk and approval readiness panel";
+      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+        <li>Claims or proof needed?</li>
+        <li>Legal/compliance sensitivity?</li>
+        <li>Pricing/offer sensitivity?</li>
+        <li>GDPR/privacy sensitivity?</li>
+        <li><strong>Approval recommended before routing</strong></li>
+        <li>Route to Governance Review if needed</li>
+      </ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>`;
+    }
+
+    // --- Patch: Soften routing labels if needed (button text is already safe, but check for clarity) ---
+    // No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.
+
     root.innerHTML = `
       ${renderScopedStyles()}
       <div class="content-smart-root">
         ${renderOverview(metrics, escapeHtml)}
         ${renderRecommendation(recommendation, selectedItem, escapeHtml)}
+        ${renderSourcePanel()}
+        ${renderSeoChecklistPanel()}
+        ${renderGovernancePanel()}
         ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
         ${session.loading ? `<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>` : ""}
 
