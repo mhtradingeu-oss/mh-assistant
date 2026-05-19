@@ -1,3 +1,212 @@
+
+import {
+  setSharedLibrarySourceBridge,
+  getSharedAiSource,
+  getSourceTypeMapping,
+  setSharedAiDrawerReturn,
+  getSharedAiDrawerReturn,
+  clearSharedAiDrawerReturn
+} from "../../shared-context.js";
+
+
+
+function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+  if (!drawer || typeof document === "undefined") return;
+
+  const active = document.activeElement;
+  if (active && drawer.contains(active)) {
+    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+      fallbackTarget.focus({ preventScroll: true });
+      return;
+    }
+
+    const composer = document.querySelector("[data-aicmd-composer-input], textarea, input");
+    if (composer && typeof composer.focus === "function") {
+      composer.focus({ preventScroll: true });
+      return;
+    }
+
+    if (typeof active.blur === "function") {
+      active.blur();
+    }
+  }
+}
+
+function escapeHtml(value = "") {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char] || char);
+}
+
+function tryAutoOpenDrawerAfterLibrary(projectName) {
+  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+  if (!returnContext?.drawerOpen) return;
+
+  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+  const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;
+
+  let targetButton = null;
+  if (returnContext.toolId) {
+    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+  }
+
+  if (!targetButton) {
+    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+      || root.querySelector("[data-aicmd-tool-dock]");
+  }
+
+  if (targetButton && typeof targetButton.click === "function") {
+    targetButton.click();
+  }
+
+  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+  if (activeDrawer) {
+    applySharedAiSourceToDrawer(activeDrawer, projectName);
+  }
+
+  const msg = document.querySelector("[data-aicmd-tool-drawer-status]");
+  if (msg) {
+    msg.textContent = "Source added to drawer.";
+  }
+
+  clearSharedAiDrawerReturn(projectName);
+  clearSharedAiDrawerReturn("__default__");
+}
+
+// --- Helper to build AI Drawer Return Context ---
+function buildAiDrawerReturnContext({
+  projectName = "",
+  origin = "ai-command",
+  drawerOpen = true,
+  specialistId = "",
+  modeId = "",
+  toolId = "",
+  teamMode = "solo",
+  sourceType = "",
+  outputType = "",
+  created_at = null,
+  extra = {}
+} = {}) {
+  return {
+    type: "ai_drawer_return",
+    origin,
+    drawerOpen,
+    specialistId,
+    modeId,
+    toolId,
+    teamMode,
+    sourceType,
+    outputType,
+    created_at: created_at || new Date().toISOString(),
+    ...extra
+  };
+}
+
+// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+function handleOpenLibraryFromDrawer({
+  projectName = "",
+  specialistId = "",
+  modeId = "",
+  toolId = "",
+  teamMode = "solo",
+  sourceType = "",
+  outputType = ""
+} = {}) {
+  // Build and store drawer return context
+  const payload = buildAiDrawerReturnContext({
+    projectName,
+    origin: "ai-command",
+    drawerOpen: true,
+    specialistId,
+    modeId,
+    toolId,
+    teamMode,
+    sourceType,
+    outputType
+  });
+  setSharedAiDrawerReturn(projectName || "__default__", payload);
+  // Also set library source bridge context if needed (existing logic)
+  // ...existing bridge logic...
+}
+
+function formatSharedAiSource(source = {}) {
+  if (!source || !source.name) return null;
+  const name = source.name || "(no name)";
+  const type = source.asset_type || source.type || "asset";
+  const path = source.file_path || source.filename || source.fileName || "";
+  return { name, type, path };
+}
+
+export function applySharedAiSourceToDrawer(drawer, projectName = "") {
+  if (!drawer) return;
+  const source = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+
+  if (!source || !source.name) {
+    if (selectedNode) {
+      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No Library source selected yet.</span>`;
+    }
+    if (sourceInput && !sourceInput.value) {
+      sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+    }
+    return;
+  }
+
+  // Render compact selected source card
+  const { name, type, path } = formatSharedAiSource(source);
+  if (selectedNode) {
+    selectedNode.innerHTML = `
+      <div class=\"mhos-tool-drawer-source-card\">
+        <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
+        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library</div>
+        ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
+        <div class=\"mhos-tool-drawer-source-actions\">
+          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change Source</button>
+          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Set placeholder for Source Details if empty
+  if (sourceInput && !sourceInput.value) {
+    sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+  }
+
+  // Set select value if possible
+  if (sourceSelect) {
+    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+      const value = `${option.value || ""} ${option.textContent || ""}`;
+      return /library|source|asset|brand|product/i.test(value);
+    });
+    if (libraryOption) sourceSelect.value = libraryOption.value;
+  }
+
+  // Attach actions
+  if (selectedNode) {
+    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+    if (changeBtn) {
+      changeBtn.onclick = () => {
+        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+      };
+    }
+    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+    if (removeBtn) {
+      removeBtn.onclick = () => {
+        // Clear only UI, do not mutate backend
+        if (selectedNode) selectedNode.innerHTML = `<span class=\\"mhos-tool-drawer-selected-source-empty\\">No Library source selected yet.</span>`;
+        if (sourceInput) sourceInput.value = "";
+        if (sourceInput) sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+      };
+    }
+  }
+}
 const BASE_TOOL_DOCK_TOOLS = [
   {
     id: "rewrite",
@@ -884,9 +1093,7 @@ function renderSmartToolDrawerShell(safe) {
           <div class="mhos-tool-drawer-section">
             <span class="mhos-tool-drawer-section-label">2. Source / input</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
-            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source>
-              No Library source selected yet.
-            </div>
+            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
@@ -956,7 +1163,7 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <div class="mhos-tool-drawer-actions">
-          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Open Library</button>
+          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
           <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
           <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
         </div>
@@ -1168,20 +1375,20 @@ function updateDrawerPromptSummary(drawer) {
   const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
   if (!summary) return;
 
-  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Output");
-  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Source");
-  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Destination");
-  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Language");
-  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Tone");
+  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
   const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
   const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
 
   let summaryParts = [];
-  summaryParts.push(`Output: ${output}`);
-  summaryParts.push(`Source: ${sourceDetails ? source + ": " + sourceDetails : source}`);
-  summaryParts.push(`Destination: ${destination}`);
-  summaryParts.push(`Language: ${language}`);
-  summaryParts.push(`Tone: ${tone}`);
+  if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Library source selected");
+  summaryParts.push(output);
+  summaryParts.push(destination);
+  summaryParts.push(language);
+  summaryParts.push(tone);
   if (extraBrief) summaryParts.push("Extra brief added");
 
   summary.textContent = summaryParts.filter(Boolean).join(" · ");
@@ -1193,7 +1400,8 @@ function setDrawerText(root, selector, value) {
   if (node) node.textContent = value || "";
 }
 
-function closeToolDrawer(drawer) {
+function closeToolDrawer(drawer, fallbackTarget = null) {
+  moveFocusOutOfDrawer(drawer, fallbackTarget);
   if (!drawer) return;
   drawer.hidden = true;
   drawer.setAttribute("aria-hidden", "true");
@@ -1260,11 +1468,46 @@ export function bindAiToolDock({
   const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
   if (openLibraryBtn) {
     openLibraryBtn.onclick = () => {
-      updateStatus?.("Open Library, select the source asset or folder, then return here and add the source details. Full source picker bridge is the next phase.");
+      // Library Source Bridge workflow
+      const project = projectName || "__default__";
+      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+      const selectedSourceType = drawerSourceSelect?.value || "auto";
+      const mapping = getSourceTypeMapping(selectedSourceType);
+      const payload = {
+        type: "library_source_selection",
+        origin: "ai-command",
+        returnTarget: "ai-command",
+        sourceType: selectedSourceType,
+        libraryFilter: mapping.libraryFilter,
+        targetSection: "asset-workspace",
+        created_at: new Date().toISOString()
+      };
+      setSharedLibrarySourceBridge(project, payload);
+      setSharedLibrarySourceBridge("__default__", payload);
+
+      const drawerReturnContext = buildAiDrawerReturnContext({
+        projectName: project,
+        origin: "ai-command",
+        drawerOpen: true,
+        specialistId: drawer?.dataset?.specialistId || "",
+        modeId: drawer?.dataset?.modeId || "",
+        toolId: drawer?.dataset?.pendingTool || "",
+        teamMode: session?.teamMode || "solo",
+        sourceType: selectedSourceType,
+        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+      });
+      setSharedAiDrawerReturn(project, drawerReturnContext);
+      setSharedAiDrawerReturn("__default__", drawerReturnContext);
+      updateStatus?.("Library guide opened. Select an asset, click Use as Source in Drawer, then return to AI Command.");
       if (typeof window !== "undefined") {
         window.location.hash = "#library";
       }
     };
+  }
+
+  // Patch drawer population to apply source
+  if (drawer) {
+    applySharedAiSourceToDrawer(drawer, projectName);
   }
 
   const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
@@ -1295,10 +1538,11 @@ export function bindAiToolDock({
         updateStatus(`${label} loaded into composer from smart drawer. Review it, then ask or preview.`);
       }
 
-      closeToolDrawer(drawer);
+      closeToolDrawer(drawer, input);
       input?.focus?.();
     };
   }
+
 
   Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
     btn.onclick = () => {
@@ -1319,7 +1563,6 @@ export function bindAiToolDock({
           sessionKey,
           updateStatus
         });
-
         if (opened) return;
       }
 
@@ -1344,5 +1587,9 @@ export function bindAiToolDock({
       input?.focus?.();
     };
   });
+
+  // --- Ensure drawer is restored after navigation from Library ---
+  setTimeout(() => tryAutoOpenDrawerAfterLibrary(projectName || "__default__"), 0);
+
 }
 

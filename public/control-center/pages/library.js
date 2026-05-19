@@ -1,3 +1,32 @@
+import { renderGuideBox } from "../components/guide-box.js";
+import { getSourceTypeMapping } from "../shared-context.js";
+import {
+  setSharedAiSource,
+  getSharedLibrarySourceBridge,
+  clearSharedLibrarySourceBridge,
+  setSharedAiDrawerReturn,
+  getSharedAiDrawerReturn
+} from "../shared-context.js";
+
+function buildAiSourcePayloadFromAsset(asset = {}) {
+  if (!asset) return null;
+  return {
+    id: asset.id,
+    asset_id: asset.asset_id,
+    name: asset.name,
+    filename: asset.filename,
+    file_path: asset.file_path,
+    asset_type: asset.asset_type,
+    source_label: asset.source_label || asset.name || "Library asset",
+    source_of_truth: asset.source_of_truth,
+    text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),
+    selected_at: new Date().toISOString()
+  };
+}
+
+// --- Library Source Bridge Guide Box ---
+// This must be run inside the render() function, after projectName is defined.
+
 import { renderLibraryActionPanel } from "./library/action-panel.js";
 import { renderLibraryAiPanel } from "./library/ai-panel.js";
 import { normalizeLibraryAsset } from "./library/projection-adapter.js";
@@ -1846,6 +1875,8 @@ function bindLibraryWorkspace({
 
         <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
 
+        <button type="button" class="btn btn-secondary btn-sm" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as AI Source</button>
+
         <details class="library-inspector-more">
           <summary>Technical details</summary>
           <div class="data-stack">
@@ -1860,6 +1891,45 @@ function bindLibraryWorkspace({
         </details>
       `
       : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
+    // Bind Use as AI Source button
+    const useBtn = previewMeta.querySelector("[data-library-use-ai-source]");
+    if (useBtn && selectedAsset) {
+      useBtn.classList.remove("btn-secondary", "btn-sm");
+      useBtn.classList.add("btn-primary", "std-ai-btn");
+      useBtn.textContent = "Use as Source in AI Command";
+      // Add helper text below button
+      let helper = previewMeta.querySelector(".library-inspector-ai-source");
+      if (!helper) {
+        helper = document.createElement("div");
+        helper.className = "library-inspector-ai-source";
+        helper.textContent = "This will attach the selected Library item to your AI drawer context.";
+        useBtn.insertAdjacentElement("afterend", helper);
+      }
+      useBtn.onclick = () => {
+        const asset = allAssets.find((a) => a.id === selectedAsset.id || a.asset_id === selectedAsset.id);
+        if (!asset) {
+          showError?.("Asset not found.");
+          return;
+        }
+        const payload = buildAiSourcePayloadFromAsset(asset);
+        const activeProjectName = resolveActiveProjectName();
+        const sourceProjectName = resolveActiveProjectName?.() || asString(projectName || "").trim().toLowerCase() || "__default__";
+        setSharedAiSource(sourceProjectName, payload);
+        setSharedAiSource("__default__", payload);
+
+        // Preserve/set drawer return context
+        const bridgeReturn = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");
+        if (bridgeReturn && bridgeReturn.drawerReturnContext) {
+          setSharedAiDrawerReturn(activeProjectName || "__default__", bridgeReturn.drawerReturnContext);
+          setSharedAiDrawerReturn("__default__", bridgeReturn.drawerReturnContext);
+        }
+
+        clearSharedLibrarySourceBridge(sourceProjectName);
+        clearSharedLibrarySourceBridge("__default__");
+        showMessage?.("Source added to drawer.");
+        navigateTo("ai-command");
+      };
+    }
   }
 
   const actionPanelMount = $("libraryActionPanelMount");
@@ -2756,6 +2826,61 @@ export const libraryRoute = {
   }) {
     const state = getState();
     const projectName = state.context.currentProject || "";
+
+    // --- Library Source Bridge Contextual Guide Strip ---
+    const activeProjectName = asString(projectName || "").trim().toLowerCase();
+    const activeSourceBridge = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");
+    const activeSourceMapping = activeSourceBridge?.type === "library_source_selection"
+      ? getSourceTypeMapping(activeSourceBridge.sourceType || "auto")
+      : null;
+    const sourceGuideHtml = activeSourceMapping
+      ? renderGuideBox({
+          title: "Choose source for AI Command",
+          instructions: `Select one item, then click Use as Source in Drawer.${activeSourceMapping.label ? `<br/><small>Source type: ${activeSourceMapping.label}</small>` : ""}`,
+          actions: [
+            { id: "back-to-ai-command", label: "Back to Drawer" },
+            { id: "dismiss-guide", label: "Dismiss" }
+          ],
+          tone: "info"
+        })
+      : "";
+
+    // Guide button binding
+    setTimeout(() => {
+      const guideBox = document.getElementById("librarySourceBridgeGuideBox");
+      if (guideBox) {
+        const backBtn = guideBox.querySelector('[data-guide-action="back-to-ai-command"]');
+        const dismissBtn = guideBox.querySelector('[data-guide-action="dismiss-guide"]');
+        if (backBtn) {
+          backBtn.onclick = () => {
+            const guideProjectName = activeProjectName || "__default__";
+            clearSharedLibrarySourceBridge(guideProjectName);
+            clearSharedLibrarySourceBridge("__default__");
+            navigateTo("ai-command");
+          };
+        }
+        if (dismissBtn) {
+          dismissBtn.onclick = () => {
+            const guideProjectName = activeProjectName || "__default__";
+            clearSharedLibrarySourceBridge(guideProjectName);
+            clearSharedLibrarySourceBridge("__default__");
+            guideBox.remove();
+          };
+        }
+      }
+    }, 0);
+
+    setTimeout(() => {
+      if (activeSourceBridge && activeSourceBridge.type === "library_source_selection") {
+        const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+        if (assetWorkspace) {
+          assetWorkspace.classList.add("is-source-target");
+          assetWorkspace.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => assetWorkspace.classList.remove("is-source-target"), 2000);
+        }
+      }
+    }, 0);
+
     const registry = asObject(state.data.registry);
     const baseAssetsData = Array.isArray(state.data.assets) ? { assets: state.data.assets } : asObject(state.data.assets);
     const registryAssets = asArray(registry.assets || registry.items || registry.records);
@@ -2838,12 +2963,13 @@ export const libraryRoute = {
           <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
         </section>
 
-        <section class="card">
-          <div class="card-head">
-            <h3>Asset Workspace</h3>
+        <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
+            <div class="card-head">
+              <h3>Asset Workspace</h3>
             <span class="card-badge neutral">Selected asset workspace</span>
           </div>
-          <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+          ${sourceGuideHtml ? `<div id="librarySourceBridgeGuideBox" class="library-source-guide-inline">${sourceGuideHtml}</div>` : ""}
+            <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
             <div class="library-workspace-main">
               <div class="library-finder-topbar">
                 <div class="library-finder-sidebar-title"></div>
