@@ -5,63 +5,63 @@ const SHARED_SOURCE_TYPE_MAP = {
     libraryFilter: "product_images",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a product photo",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   video: {
     label: "Video Asset",
     libraryFilter: "videos",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a video source",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   document: {
     label: "Document",
     libraryFilter: "documents",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a document source",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   product_data: {
     label: "Product Data (CSV)",
     libraryFilter: "product_data",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a product data file",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   brand_asset: {
     label: "Brand Asset",
     libraryFilter: "logos",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a brand asset",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   legal_pricing: {
     label: "Legal/Pricing Document",
     libraryFilter: "legal_pricing",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a legal or pricing document",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   research_proof: {
     label: "Research/Proof Document",
     libraryFilter: "research_certificates",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a research/proof document",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   folder_collection: {
     label: "Folder/Collection",
     libraryFilter: "all_assets",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a folder or collection",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   },
   auto: {
     label: "Any Asset",
     libraryFilter: "all_assets",
     targetSection: "asset-workspace",
     shortGuideTitle: "Choose a source",
-    shortGuideText: "Select one item, then click Use as Source in Drawer."
+    shortGuideText: "Select one item, then click Use as Source in AI Command."
   }
 };
 

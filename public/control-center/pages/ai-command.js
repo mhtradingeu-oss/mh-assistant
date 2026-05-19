@@ -1,4 +1,4 @@
-import { bindAiToolDock, renderAiToolDock } from "./ai-command/tool-dock.js";
+import { bindAiToolDock, getAiToolDockTools, renderAiToolDock } from "./ai-command/tool-dock.js";
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 
 import {
@@ -9,6 +9,7 @@ import {
 
 import {
         getSharedHandoff,
+        getSharedAiSource,
         setSharedAiDraft,
         setSharedHandoff
 } from "../shared-context.js";
@@ -369,8 +370,8 @@ const AI_ROOM_FLOW_STEPS = [
 const AI_ROOM_OUTPUT_TABS = [
 	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
 	{ id: "task", label: "Task", helper: "Task-shaped output" },
-	{ id: "workflow", label: "Workflow", helper: "Operating sequence" },
-	{ id: "handoff", label: "Handoff", helper: "Destination package" },
+	{ id: "workflow", label: "Draft Workflow", helper: "Operating sequence" },
+	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
 	{ id: "export", label: "Export", helper: "File-ready package" }
 ];
 
@@ -390,6 +391,33 @@ const AI_ROOM_ROLE_INITIALS = {
 	customer_ops: "CO",
 	sales_crm: "SC"
 };
+
+const AI_ROOM_BACKEND_ROLE_ALIASES = {
+	ads: "ads_operator",
+	media: "designer",
+	compliance_reviewer: "compliance_reviewer"
+};
+
+const AI_ROOM_PLANNED_SPECIALISTS = [
+	{
+		label: "Admin / Governance",
+		initials: "AG",
+		status: "Planned",
+		summary: "Policy, approvals, roles, and audit controls stay destination-owned."
+	},
+	{
+		label: "Researcher",
+		initials: "RS",
+		status: "Planned",
+		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+	},
+	{
+		label: "Automation Architect",
+		initials: "AA",
+		status: "Planned",
+		summary: "Workflow blueprints and trigger maps will route to Workflows before execution."
+	}
+];
 
 const PHASE35_SPECIALIST_TOOLS = {
 	strategist: [
@@ -733,11 +761,13 @@ function humanizeValue(value, fallback = "") {
 function applyTokenTemplate(template, context = {}) {
 	const tokenMap = {
 		project: asString(context.projectName || "this project") || "this project",
+		projectName: asString(context.projectName || "this project") || "this project",
 		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+		specialistLabel: asString(context.specialistLabel || "Specialist") || "Specialist",
 		campaign: asString(context.campaign || "active campaign") || "active campaign"
 	};
 
-	return asString(template).replace(/\{(project|specialist|campaign)\}/g, (_, token) => tokenMap[token] || "");
+	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
 }
 
 
@@ -3394,39 +3424,44 @@ function getOutputWorkspaceTab(session) {
 }
 
 function getToolOutputTypeLabel(tool) {
-	if (tool.action === "route") return "Handoff";
 	const labels = {
 		guidance: "Draft",
-		task: "Task",
-		workflow: "Workflow",
-		handoff: "Handoff",
+		task: "Task Draft",
+		workflow: "Draft Workflow",
+		handoff: "Prepare Handoff",
 		media: "Draft"
 	};
-	return labels[asString(tool.intent)] || "Draft";
+	if (labels[asString(tool.intent)]) return labels[asString(tool.intent)];
+	const firstOutput = asArray(tool.outputTypes)[0];
+	return firstOutput ? titleCase(asString(firstOutput).replace(/[_-]+/g, " ")) : "Draft";
 }
 
 function getToolDestinationRoute(tool, session) {
-	if (tool.action === "route") return asString(tool.route || "workflows");
+	if (tool.route) return asString(tool.route || "workflows");
 	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
 	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
 	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
 }
 
 function getToolExecutionStatusLabel(tool) {
-	return tool.action === "route" ? "Real route" : "Real local preview";
+	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+	if (tool.actionType === "source_required") return "Source required";
+	return "Local preview only";
 }
 
 function getToolSafeActionLabel(tool) {
-	if (tool.action === "route") return "Open";
-	if (tool.intent === "task" || tool.intent === "workflow") return "Draft";
-	if (tool.intent === "handoff") return "Route";
-	if (/review|check|compliance|readiness/i.test(asString(tool.label))) return "Review";
+	if (tool.intent === "workflow") return "Draft";
+	if (tool.intent === "handoff") return "Prepare";
+	if (tool.intent === "task") return "Draft";
+	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
 	return "Prepare";
 }
 
 function summarizeToolPurpose(tool) {
-	const template = asString(tool.template || "").replace(/\{project\}/g, "this project").replace(/\{campaign\}/g, "active campaign");
-	if (tool.action === "route") return `Open ${routeLabel(tool.route || "workflows")} with the current draft context.`;
+	const template = asString(tool.template || "")
+		.replace(/\{projectName\}/g, "this project")
+		.replace(/\{project\}/g, "this project")
+		.replace(/\{campaign\}/g, "active campaign");
 	const firstSentence = template.split(/[.!?]/)[0]?.trim();
 	if (firstSentence) return firstSentence.replace(/^Prepare\s+/i, "Prepare ").slice(0, 120);
 	return "Prepare a review-ready output for the selected specialist lane.";
@@ -3517,6 +3552,17 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 
 function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 	const safeBridgeStatus = bridgeStatus || { available: false };
+	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+			<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+			<span class="aicmd-room-member-copy">
+				<span class="aicmd-v2-spec-name">${escapeHtml(item.label)}</span>
+				<span class="aicmd-room-member-role">${escapeHtml(item.status)} - destination-owned authority</span>
+				<span class="aicmd-v2-spec-summary">${escapeHtml(item.summary)}</span>
+			</span>
+			<span class="aicmd-room-member-indicator" aria-hidden="true"></span>
+		</div>
+	`).join("");
 	const teamBanner = session.teamMode === "team" ? `
 		<div class="aicmd-room-team-mode-card">
 			<strong>Full Team Mode</strong>
@@ -3549,7 +3595,8 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 					const isActive = spec.id === session.modeId && session.teamMode === "solo";
 					const isTeamActive = session.teamMode === "team";
 					const specialization = asString(spec.summary).replace(/\.$/, "");
-					const roleLine = `${spec.status || "Ready"} - ${spec.position || "Specialist"}`;
+					const backendAlias = AI_ROOM_BACKEND_ROLE_ALIASES[roleId];
+					const roleLine = `${spec.status || "Ready"} - ${spec.position || "Specialist"}${backendAlias ? ` - Backend: ${backendAlias}` : ""}`;
 					return `
 						<button
 							class="aicmd-v2-spec-btn aicmd-room-member${isActive ? " is-active" : ""}${isTeamActive ? " is-team-active" : ""}"
@@ -3568,6 +3615,10 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 						</button>
 					`;
 				}).join("")}
+			</div>
+			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+				<span class="aicmd-room-planned-title">Additional specialists planned</span>
+				${plannedSpecialists}
 			</div>
 		</aside>
 	`;
@@ -3593,7 +3644,7 @@ function renderPhase1Profile(session, escapeHtml) {
 	}
 
 	const spec = getPhase1SpecialistById(session.modeId);
-	const specialistTools = asArray(PHASE35_SPECIALIST_TOOLS[spec.id] || PHASE35_SPECIALIST_TOOLS.operations);
+	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
 	const strengths = asArray(spec.canHelp).slice(0, 3);
 	return `
 		<div class="aicmd-v2-profile">
@@ -3641,20 +3692,46 @@ function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
 	`;
 }
 
-function getPhase35ToolSet(session) {
-	if (session.teamMode === "team") {
-		return [
-			{ id: "team-mission", label: "Team Mission Brief", action: "preview", intent: "handoff", template: "Prepare a team mission package for {project}. Include Strategist, Writer, Media/Video, Compliance, Publisher, Customer Ops, Sales / CRM, and Operations ownership." },
-			{ id: "team-workflow", label: "Full-Team Workflow", action: "preview", intent: "workflow", template: "Draft a full-team workflow for {project}. Sequence Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations, and add Customer Ops -> Sales/CRM -> Operations when relevant." },
-			{ id: "team-blockers", label: "Cross-Team Blockers", action: "preview", intent: "task", template: "Map cross-team blockers for {project}. Include specialist owner, dependency, risk, unblock sequence, and safest first action." },
-			{ id: "team-handoff", label: "Handoff Chain", action: "preview", intent: "handoff", template: "Prepare a cross-team handoff chain for {project}. Include confirmations, destination pages, customer/sales branch when relevant, and final Operations owner." },
-			{ id: "team-customer-sales-branch", label: "Customer + Sales Branch", action: "preview", intent: "handoff", template: "Prepare the Customer Ops -> Sales / CRM -> Operations branch for {project}. Include reply drafts, ticket or lead context, outreach handoff, and confirmation gates without executing actions." },
-			{ id: "team-open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
-		];
-	}
+function getCanonicalToolIntent(tool = {}) {
+	const id = asString(tool.id);
+	const outputs = asArray(tool.outputTypes).join(" ");
+	const haystack = `${id} ${outputs} ${asString(tool.label)}`.toLowerCase();
+	if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";
+	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+	return "guidance";
+}
 
+function getCanonicalToolRoute(tool = {}, session) {
+	const destinations = asArray(tool.destinations).filter(Boolean);
+	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+	if (preferred) return preferred;
+	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+}
+
+function canonicalToolNeedsSelectedSource(tool = {}) {
+	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+}
+
+function normalizeCanonicalToolForPanel(tool = {}, session) {
+	return {
+		...tool,
+		action: "preview",
+		intent: getCanonicalToolIntent(tool),
+		route: getCanonicalToolRoute(tool, session),
+		requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+		template: asString(tool.template || "Prepare a review-ready draft for {projectName}.")
+	};
+}
+
+function getPhase35ToolSet(session) {
 	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
-	return asArray(PHASE35_SPECIALIST_TOOLS[toolModeId] || PHASE35_SPECIALIST_TOOLS.operations);
+	return getAiToolDockTools({
+		specialistId: toolModeId,
+		teamMode: session.teamMode,
+		limit: 6
+	}).map((tool) => normalizeCanonicalToolForPanel(tool, session));
 }
 
 function renderPhase35WorkspaceTabs(session, bridgeStatus, escapeHtml) {
@@ -3693,8 +3770,8 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
 			<div class="aicmd-v2-tools-head">
 				<div>
-					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tools</h3>
-					<span class="aicmd-v2-tools-subtitle">Compact actions prepare drafts only. They do not execute backend operations.</span>
+					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Canonical Tools</h3>
+					<span class="aicmd-v2-tools-subtitle">Same tool model as the Smart Dock. These prepare drafts only and do not execute backend operations.</span>
 				</div>
 				<span class="aicmd-v2-tools-count">${tools.length} tools</span>
 			</div>
@@ -3812,8 +3889,8 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
                         <div class="aicmd-chatgpt-action-row">
                                 <button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">Draft</button>
                                 <button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">Task</button>
-                                <button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">Workflow</button>
-                                <button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">Handoff</button>
+                                <button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">Draft Workflow</button>
+                                <button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">Prepare Handoff</button>
                                 <button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
                                 <button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
                         </div>
@@ -4009,7 +4086,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 			` : `
 				<div class="aicmd-room-output-empty">
                                         <strong>No preview yet</strong>
-                                        <span>Choose Draft, Task, Workflow, or Handoff, then create a preview from the conversation.</span>
+                                        <span>Choose Draft, Task, Draft Workflow, or Prepare Handoff, then create a preview from the conversation.</span>
 				</div>
 			`}
 
@@ -4022,7 +4099,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
                                 </div>
                                 <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, and workflow runs happen only in the destination workspace after confirmation.</div>
                         ` : `
-                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Workflow, or Handoff from the conversation first.</div>
+                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Draft Workflow, or Prepare Handoff from the conversation first.</div>
                         `}
 		</section>
 	`;
@@ -5028,6 +5105,14 @@ export const aiCommandRoute = {
 					const destination = asString(tool.route || "workflows");
 					showMessage?.(`Opening ${routeLabel(destination)}.`);
 					navigateTo(destination);
+					return;
+				}
+
+				const selectedLibrarySource = getSharedAiSource(projectName || "__default__") || getSharedAiSource("__default__");
+				if (tool.requiresSelectedSource && !selectedLibrarySource?.name) {
+					const message = "This tool needs a source. Choose from Library or change the source type before continuing.";
+					updateStatus(message);
+					showMessage?.(message);
 					return;
 				}
 

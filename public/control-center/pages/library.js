@@ -2836,7 +2836,10 @@ export const libraryRoute = {
     const sourceGuideHtml = activeSourceMapping
       ? renderGuideBox({
           title: "Choose source for AI Command",
-          instructions: `Select one item, then click Use as Source in Drawer.${activeSourceMapping.label ? `<br/><small>Source type: ${activeSourceMapping.label}</small>` : ""}`,
+          instructions: [
+            "Select one Library item, then click Use as Source in AI Command.",
+            activeSourceMapping.label ? `Source type: ${activeSourceMapping.label}` : "Source type: Auto"
+          ],
           actions: [
             { id: "back-to-ai-command", label: "Back to Drawer" },
             { id: "dismiss-guide", label: "Dismiss" }
