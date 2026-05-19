@@ -1,3 +1,106 @@
+/* Library Explainer and Taxonomy Chips */
+.library-explainer {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  color: #0f172a;
+  border-radius: 10px;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(14, 33, 50, 0.08);
+}
+.library-explainer strong {
+  display: block;
+  font-size: 1.08em;
+  margin-bottom: 7px;
+}
+.library-explainer-steps {
+  margin: 0 0 0 18px;
+  padding: 0;
+  font-size: 14px;
+}
+.explainer-chip {
+  display: inline-block;
+  background: #22d3ee;
+  color: #0f172a;
+  border-radius: 6px;
+  padding: 1px 8px;
+  font-size: 13px;
+  margin: 0 2px;
+}
+.library-taxonomy-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.taxonomy-chip {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 999px;
+  padding: 3px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #bae6fd;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.taxonomy-chip:focus, .taxonomy-chip:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  outline: 2px solid #0ea5e9;
+}
+.taxonomy-chip.source-of-truth {
+  background: #22d3ee;
+  color: #0f172a;
+  border-color: #06b6d4;
+}
+
+/* Selected asset state in grid/list */
+.library-grid-card.is-active {
+  border: 2px solid #38bdf8;
+  box-shadow: 0 0 0 2px #bae6fd;
+  background: linear-gradient(90deg, #e0f2fe 0%, #f0f9ff 100%);
+  color: #0f172a;
+}
+.library-grid-card[aria-selected="true"] {
+  outline: 2px solid #0ea5e9;
+}
+
+/* Quick AI Source action in grid */
+.quick-ai-source-btn {
+  margin-left: 8px;
+  margin-top: 0;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #22d3ee 0%, #38bdf8 100%);
+  color: #0f172a;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(34, 211, 238, 0.08);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.quick-ai-source-btn:focus, .quick-ai-source-btn:hover {
+  background: #0ea5e9;
+  color: #fff;
+  outline: 2px solid #0ea5e9;
+}
+
+/* Inspector AI source guide */
+.library-inspector-ai-source-guide {
+  margin-top: 8px;
+  padding: 7px 12px;
+  border: 1px dashed #38bdf8;
+  border-radius: 8px;
+  background: rgba(16,39,58,0.13);
+  color: #0369a1;
+  font-size: 0.97em;
+}
+.library-inspector-ai-source-guide-text {
+  font-weight: 600;
+}
 /*
   Control Center Page Styles
   Scope: page-specific layouts for Home, Setup, Library, and AI Workspace.
@@ -6220,6 +6323,7 @@
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -6395,4 +6499,24 @@
     max-width: 100%;
     width: 100%;
   }
+}
+
+/* Library readiness patch: remove inline styles */
+.library-preview-audio {
+  width: 100%;
+  max-width: 100%;
+}
+
+.library-preview-text-fallback {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.library-inspector-ai-source-guide.is-hidden {
+  display: none;
+}
+
+.library-upload-summary {
+  margin-top: 12px;
 }

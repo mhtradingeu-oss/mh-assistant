@@ -1127,7 +1127,7 @@ function renderPreview(asset, escapeHtml) {
   if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {
     return `
       <div class="library-preview-frame">
-        <audio style="width:100%;max-width:100%;" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
+        <audio class="library-preview-audio" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>
       </div>
     `;
   }
@@ -1207,12 +1207,12 @@ function renderPreview(asset, escapeHtml) {
 
 
   if (asset.text_preview) {
-    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(asset.text_preview)}</div>`;
+    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(asset.text_preview)}</div>`;
   }
 
   const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);
   if (jsonFallback && jsonFallback !== "{}") {
-    return `<div class="library-preview-fallback" style="white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;">${escapeHtml(jsonFallback)}</div>`;
+    return `<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(jsonFallback)}</div>`;
   }
 
   return `
@@ -1576,35 +1576,39 @@ function bindLibraryWorkspace({
 
   const folderCounts = computeFolderCounts(allAssets, session);
 
-  const overviewBox = $("libraryOverviewCards");
-  if (overviewBox) {
-    overviewBox.innerHTML = `
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Total assets</span>
-        <strong>${escapeHtml(formatCount(overview.totalAssets))}</strong>
-      </article>
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Approved assets</span>
-        <strong>${escapeHtml(formatCount(overview.approvedAssets))}</strong>
-      </article>
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Needs review</span>
-        <strong>${escapeHtml(formatCount(overview.needsReviewAssets))}</strong>
-      </article>
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Missing required assets</span>
-        <strong>${escapeHtml(formatCount(overview.missingRequiredAssets))}</strong>
-      </article>
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Source-of-truth coverage</span>
-        <strong>${escapeHtml(`${formatCount(overview.sourceCoverage)}%`)}</strong>
-      </article>
-      <article class="data-card smart-overview-card">
-        <span class="data-label">Next action</span>
-        <strong class="library-overview-next-action">${escapeHtml(overview.nextAction)}</strong>
-      </article>
+  // --- Library Explainer/Onboarding Block ---
+  const explainerBox = $("libraryExplainerBox");
+  if (explainerBox) {
+    explainerBox.innerHTML = `
+      <section class="library-explainer" aria-label="Library source-of-truth workspace explainer">
+        <strong>Library is the source-of-truth workspace for assets, documents, brand files, product files, proof/legal files, and AI source context.</strong>
+        <ol class="library-explainer-steps">
+          <li>Upload or select an asset.</li>
+          <li>Mark important files as <span class="explainer-chip">Source of Truth</span> when needed.</li>
+          <li>Use selected assets in AI Team, Content, Media, Publishing, Governance, and Insights.</li>
+        </ol>
+      </section>
     `;
   }
+
+  // --- Taxonomy Chips/Cards ---
+  const taxonomyBox = $("libraryTaxonomyBox");
+  if (taxonomyBox) {
+    taxonomyBox.innerHTML = `
+      <div class="library-taxonomy-chips" aria-label="Library taxonomy">
+        <span class="taxonomy-chip" tabindex="0">Images</span>
+        <span class="taxonomy-chip" tabindex="0">Videos</span>
+        <span class="taxonomy-chip" tabindex="0">Documents</span>
+        <span class="taxonomy-chip" tabindex="0">Brand Assets</span>
+        <span class="taxonomy-chip" tabindex="0">Product Files</span>
+        <span class="taxonomy-chip" tabindex="0">Proof / Legal / Pricing</span>
+        <span class="taxonomy-chip" tabindex="0">Generated Assets</span>
+        <span class="taxonomy-chip source-of-truth" tabindex="0">Source of Truth</span>
+      </div>
+    `;
+  }
+
+  // ...existing code...
 
   const requiredBox = $("libraryRequiredAssetsGrid");
   if (requiredBox) {
@@ -1784,15 +1788,17 @@ function bindLibraryWorkspace({
             ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
             : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
-
+        // Add selected state and aria-selected
+        const isSelected = session.selectedAssetId === asset.id;
         return `
-          <article class="library-grid-card ${session.selectedAssetId === asset.id ? "is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}">
+          <article class="library-grid-card${isSelected ? " is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}" aria-selected="${isSelected ? "true" : "false"}">
             <div class="library-grid-preview">${previewNode}</div>
             <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(titleName)}</div>
             <div class="library-grid-meta" title="${escapeHtml(asset.filename || "-")}">${escapeHtml(fileName)}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+              ${isSelected ? `<button class="btn btn-primary btn-sm quick-ai-source-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(asset.id)}">Use as Source in AI Command</button>` : ""}
             </div>
           </article>
         `;
@@ -1875,7 +1881,11 @@ function bindLibraryWorkspace({
 
         <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
 
-        <button type="button" class="btn btn-secondary btn-sm" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as AI Source</button>
+        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Source in AI Command</button>
+
+        <div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">
+          <span class="library-inspector-ai-source-guide-text">Select one Library item, then click Use as Source in AI Command.</span>
+        </div>
 
         <details class="library-inspector-more">
           <summary>Technical details</summary>
@@ -1891,20 +1901,17 @@ function bindLibraryWorkspace({
         </details>
       `
       : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
-    // Bind Use as AI Source button
-    const useBtn = previewMeta.querySelector("[data-library-use-ai-source]");
-    if (useBtn && selectedAsset) {
-      useBtn.classList.remove("btn-secondary", "btn-sm");
+    // Bind Use as AI Source button (inspector and grid quick action)
+    const useBtns = previewMeta.querySelectorAll("[data-library-use-ai-source]");
+    if (useBtns.length === 0 && gridBody) {
+      // fallback: try to find in grid
+      const gridBtn = gridBody.querySelector("[data-library-use-ai-source]");
+      if (gridBtn && selectedAsset) useBtns = [gridBtn];
+    }
+    useBtns.forEach((useBtn) => {
       useBtn.classList.add("btn-primary", "std-ai-btn");
       useBtn.textContent = "Use as Source in AI Command";
-      // Add helper text below button
-      let helper = previewMeta.querySelector(".library-inspector-ai-source");
-      if (!helper) {
-        helper = document.createElement("div");
-        helper.className = "library-inspector-ai-source";
-        helper.textContent = "This will attach the selected Library item to your AI drawer context.";
-        useBtn.insertAdjacentElement("afterend", helper);
-      }
+      useBtn.setAttribute("aria-label", "Use as Source in AI Command");
       useBtn.onclick = () => {
         const asset = allAssets.find((a) => a.id === selectedAsset.id || a.asset_id === selectedAsset.id);
         if (!asset) {
@@ -1929,7 +1936,7 @@ function bindLibraryWorkspace({
         showMessage?.("Source added to drawer.");
         navigateTo("ai-command");
       };
-    }
+    });
   }
 
   const actionPanelMount = $("libraryActionPanelMount");
@@ -2963,7 +2970,7 @@ export const libraryRoute = {
               <button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload asset to Library</button>
             </div>
           </div>
-          <div id="libraryUploadSummary" style="margin-top: 12px;"></div>
+          <div id="libraryUploadSummary" class="library-upload-summary"></div>
         </section>
 
         <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
