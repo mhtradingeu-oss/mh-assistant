@@ -12,8 +12,6 @@ Final pushed commit:
 
 AI Command / AI Team is the operating surface for working with the MH-OS AI team.
 
-It is not only a chat page.
-
 It helps the user:
 
 - ask the AI team for guidance
@@ -83,188 +81,69 @@ Confirmed execution belongs to backend-owned destination workspaces.
 
 ### Strategist
 
-Purpose:
+Purpose: campaign planning, launch planning, audience mapping, offer building, funnel thinking, priority planning.
 
-- campaign planning
-- launch planning
-- audience mapping
-- offer building
-- funnel thinking
-- priority planning
-
-Connected pages:
-
-- Workflows
-- Publishing
-- Insights
-- Governance when needed
+Connected pages: Workflows, Publishing, Insights, Governance when needed.
 
 ### Content Writer
 
-Purpose:
+Purpose: writing, rewriting, translating, improving, SEO, repurposing.
 
-- writing
-- rewriting
-- translating
-- improving
-- SEO
-- repurposing
-
-Connected pages:
-
-- Content Studio
-- Library
-- Publishing
-- Governance for claims/legal copy
+Connected pages: Content Studio, Library, Publishing, Governance for claims/legal copy.
 
 ### Media Director / Designer
 
-Purpose:
+Purpose: visual briefs, moodboards, image prompts, asset planning, brand checks.
 
-- visual briefs
-- moodboards
-- image prompts
-- asset planning
-- brand checks
-
-Connected pages:
-
-- Media Studio
-- Library
-- Brand Assets
-- Publishing
+Connected pages: Media Studio, Library, Brand Assets, Publishing.
 
 ### Video Lead
 
-Purpose:
+Purpose: reel scripts, storyboards, shot lists, voiceovers, video CTAs.
 
-- reel scripts
-- storyboards
-- shot lists
-- voiceovers
-- video CTAs
-
-Connected pages:
-
-- Media Studio
-- Publishing
-- Library
+Connected pages: Media Studio, Publishing, Library.
 
 ### Publisher
 
-Purpose:
+Purpose: publishing readiness, channel packs, draft schedules, hashtag packs, governance review packages.
 
-- publishing readiness
-- channel packs
-- draft schedules
-- hashtag packs
-- governance review packages
-
-Connected pages:
-
-- Publishing
-- Governance
-- Library
+Connected pages: Publishing, Governance, Library.
 
 ### Ads Operator
 
-Purpose:
+Purpose: ad angles, ad copy, targeting drafts, creative testing, landing match review.
 
-- ad angles
-- ad copy
-- targeting drafts
-- creative testing
-- landing match review
-
-Connected pages:
-
-- Ads / Paid Media
-- Insights
-- Publishing
-- Content Studio
+Connected pages: Ads / Paid Media, Insights, Publishing, Content Studio.
 
 ### Analyst / Insights
 
-Purpose:
+Purpose: SEO briefs, keyword research, performance review, content gaps, insights.
 
-- SEO briefs
-- keyword research
-- performance review
-- content gaps
-- insights
-
-Connected pages:
-
-- Insights
-- Library
-- Publishing
-- Content Studio
+Connected pages: Insights, Library, Publishing, Content Studio.
 
 ### Compliance Reviewer
 
-Purpose:
+Purpose: claims check, safe rewrite, evidence review, GDPR review, governance notes.
 
-- claims check
-- safe rewrite
-- evidence review
-- GDPR review
-- governance notes
-
-Connected pages:
-
-- Governance
-- Library
-- Publishing
-- Content Studio
+Connected pages: Governance, Library, Publishing, Content Studio.
 
 ### Operations
 
-Purpose:
+Purpose: task plans, draft workflows, prepare handoffs, timelines, checklists.
 
-- task plans
-- draft workflows
-- prepare handoffs
-- timelines
-- checklists
-
-Connected pages:
-
-- Workflows
-- Operations Centers
-- Task Center
-- Governance when approvals are required
+Connected pages: Workflows, Operations Centers, Task Center, Governance when approvals are required.
 
 ### Customer Operations
 
-Purpose:
+Purpose: reply drafts, draft tickets, SLA review, customer summaries.
 
-- reply drafts
-- draft tickets
-- SLA review
-- customer summaries
-
-Connected pages:
-
-- Operations Centers
-- Customer Operations
-- Library
-- Governance for sensitive replies
+Connected pages: Operations Centers, Customer Operations, Library, Governance for sensitive replies.
 
 ### Sales / CRM
 
-Purpose:
+Purpose: sales pitch, follow-up, objection handling, lead brief.
 
-- sales pitch
-- follow-up
-- objection handling
-- lead brief
-
-Connected pages:
-
-- CRM
-- Sales
-- Workflows
-- Operations
+Connected pages: CRM, Sales, Workflows, Operations.
 
 ## Planned Specialists
 
@@ -285,9 +164,7 @@ The page uses preparation-safe labels:
 - Draft Schedule
 - Governance Review Pack
 
-These labels mean preparation only.
-
-They do not mean execution.
+These labels mean preparation only. They do not mean execution.
 
 ## Current Completion State
 
@@ -319,7 +196,4 @@ The page is ready to move to the next page as a completed readiness patch.
 
 It is not the final full AI automation system yet.
 
-Current practical readiness:
-
-88-92/100
-
+Current practical readiness: 88-92/100.
