@@ -3217,9 +3217,122 @@ export const mediaStudioRoute = {
     const metrics = getMetrics(session);
     const recommendation = buildRecommendation(metrics, handoff, selectedItem);
 
+
+    // Onboarding / Next Action Guidance Panel
+    function renderOnboardingPanel() {
+      return `
+        <section class="card media-card" id="mediaOnboardingPanel" aria-label="Media Studio Onboarding and Next Actions">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Welcome to Media Studio</div>
+              <h3>Creative Preparation, Review, and Routing Workspace</h3>
+              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // Source / Provenance Panel
+    function renderSourceProvenancePanel() {
+      // Try to extract source context from selectedItem, handoff, or session
+      let sourceLines = [];
+      let hasSource = false;
+      if (selectedItem) {
+        if (selectedItem.source) {
+          sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(selectedItem.source))}</div>`);
+          hasSource = true;
+        }
+        if (selectedItem.library_asset_ref && selectedItem.library_asset_ref.handoff_id) {
+          sourceLines.push(`<div><strong>Library asset:</strong> ${escapeHtml(selectedItem.library_asset_ref.handoff_id)}</div>`);
+          hasSource = true;
+        }
+        if (selectedItem.project) {
+          sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(selectedItem.project)}</div>`);
+          hasSource = true;
+        }
+        if (selectedItem.campaign) {
+          sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(selectedItem.campaign)}</div>`);
+          hasSource = true;
+        }
+      }
+      if (!hasSource && handoff) {
+        sourceLines.push(`<div><strong>Inbound handoff source:</strong> ${escapeHtml(titleCase(handoff.source_page || ""))}</div>`);
+        hasSource = true;
+      }
+      if (!hasSource) {
+        sourceLines.push(`<div>No source context attached yet. Use AI Command, Content Studio, or Library to attach source-backed media context.</div>`);
+      }
+      return `
+        <section class="card media-card" id="mediaSourceProvenancePanel" aria-label="Source Context Panel">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Source Context</div>
+              <h3>Media Provenance & Workflow</h3>
+              <p class="media-section-copy">Source context helps the reviewer verify visual claims, asset ownership, and publishing readiness before routing.</p>
+            </div>
+          </div>
+          <div class="media-provenance-list">
+            ${sourceLines.join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    // Creative Readiness Checklist Panel
+    function renderCreativeReadinessPanel() {
+      return `
+        <section class="card media-card" id="mediaCreativeReadinessPanel" aria-label="Creative Readiness Checklist">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Creative Readiness</div>
+              <h3>Checklist for Review</h3>
+            </div>
+          </div>
+          <ul class="media-readiness-checklist" role="list">
+            <li><span>Creative brief</span></li>
+            <li><span>Target platform</span></li>
+            <li><span>Aspect ratio / size</span></li>
+            <li><span>Primary visual message</span></li>
+            <li><span>CTA / overlay text</span></li>
+            <li><span>Required assets</span></li>
+            <li><span>Export / handoff target</span></li>
+          </ul>
+        </section>
+      `;
+    }
+
+    // Brand Compliance Checklist Panel
+    function renderBrandCompliancePanel() {
+      return `
+        <section class="card media-card" id="mediaBrandCompliancePanel" aria-label="Brand Compliance Checklist">
+          <div class="card-head">
+            <div>
+              <div class="setup-kicker">Brand Compliance</div>
+              <h3>Checklist for Brand Safety</h3>
+            </div>
+          </div>
+          <ul class="media-brand-checklist" role="list">
+            <li><span>Logo / brand consistency</span></li>
+            <li><span>Color / style fit</span></li>
+            <li><span>Product representation</span></li>
+            <li><span>Claims / proof needed</span></li>
+            <li><span>Legal/compliance sensitivity</span></li>
+            <li><span>Alt text / accessibility</span></li>
+            <li><span>Governance review recommended if risk exists</span></li>
+          </ul>
+          <div class="media-hint media-readiness-hint" aria-label="Governance review guidance">Prepare Governance Review if any risk or compliance concern exists.</div>
+        </section>
+      `;
+    }
+
     root.innerHTML = `
       ${renderScopedStyles()}
       <div class="media-production-center">
+        ${renderOnboardingPanel()}
+        ${renderSourceProvenancePanel()}
+        ${renderCreativeReadinessPanel()}
+        ${renderBrandCompliancePanel()}
         ${renderOverview(metrics, escapeHtml)}
         ${renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml)}
         ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
