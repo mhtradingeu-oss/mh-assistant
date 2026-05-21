@@ -2325,7 +2325,7 @@ function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
           <div class="media-check-item"><span>Pacing</span><strong>${escapeHtml(pacing)}</strong></div>
           <div class="media-check-item"><span>Duration</span><strong>${escapeHtml(duration)}</strong></div>
         </div>
-        <div class="media-prompt-box" style="margin-top: 12px;">${escapeHtml(voiceScript || asString(payload.message) || "Voice script is not available yet for this version.")}</div>
+        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "Voice script is not available yet for this version.")}</div>
       `;
     }
   }
@@ -2338,7 +2338,7 @@ function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
         <div class="media-check-item"><span>Voice script</span><strong>${escapeHtml(firstText(campaignPack.voice_script, "Missing"))}</strong></div>
         <div class="media-check-item"><span>Captions/notes</span><strong>${escapeHtml(firstText(campaignPack.channel_notes, campaignPack.publishing_notes, "Missing"))}</strong></div>
       </div>
-      <div class="media-prompt-box" style="margin-top: 12px;">${escapeHtml(JSON.stringify(campaignPack, null, 2) || "Campaign pack payload is not available yet.")}</div>
+      <div class="media-prompt-box media-block-gap">${escapeHtml(JSON.stringify(campaignPack, null, 2) || "Campaign pack payload is not available yet.")}</div>
     `;
   }
 
@@ -2379,7 +2379,7 @@ function renderVersioningPanel(session, escapeHtml) {
           <button class="media-version-tab${selected?.id === entry.id ? " is-active" : ""}" type="button" data-media-version="${escapeHtml(entry.id)}">${escapeHtml(titleCase(entry.id))}</button>
         `).join("")}
       </div>
-      <div class="media-version-grid" style="margin-top: 12px;">
+      <div class="media-version-grid media-block-gap">
         <div class="media-check-item">
           <span>Selected version</span>
           <strong>${escapeHtml(selected?.id ? titleCase(selected.id) : "None")}</strong>
@@ -2413,7 +2413,7 @@ function renderVersioningPanel(session, escapeHtml) {
           <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
         </div>
       </div>
-      <div class="setup-field-group" style="margin-top: 12px;">
+      <div class="setup-field-group media-block-gap">
         <div class="setup-field-head">
           <label class="setup-label" for="mediaVersionCompareNotes">Compare notes</label>
         </div>
@@ -2423,7 +2423,7 @@ function renderVersioningPanel(session, escapeHtml) {
         <button class="btn btn-secondary" type="button" data-media-version-action="compare-toggle">${escapeHtml(versioning.compareMode ? "Hide Compare" : "Compare with previous")}</button>
       </div>
       ${versioning.compareMode ? `
-        <div class="media-version-grid" style="margin-top: 12px;">
+        <div class="media-version-grid media-block-gap">
           <div class="media-check-item">
             <span>Current version</span>
             <strong>${escapeHtml(selected?.id ? `${titleCase(selected.id)} (${titleCase(selected.readiness_status || "draft")})` : "None")}</strong>
@@ -2486,7 +2486,7 @@ function renderReviewPanel(session, selectedItem, escapeHtml) {
       </div>
       <span class="media-preview-title">${escapeHtml(selectedItem ? `${titleCase(selectedItem.mode)} preview / prompt` : "Preview")}</span>
       <div class="media-prompt-box">${escapeHtml(prompt)}</div>
-      <div class="media-check-grid" style="margin-top: 12px;">
+      <div class="media-check-grid media-block-gap">
         ${checklist.map(([key, label]) => `
           <div class="media-check-item">
             <span>${escapeHtml(label)}</span>
@@ -2494,7 +2494,7 @@ function renderReviewPanel(session, selectedItem, escapeHtml) {
           </div>
         `).join("")}
       </div>
-      <div class="media-prompt-box" style="margin-top: 12px;">${escapeHtml(notesText)}</div>
+      <div class="media-prompt-box media-block-gap">${escapeHtml(notesText)}</div>
       <div class="media-action-row">
         <button id="mediaApproveBtn" class="btn btn-secondary" type="button">Mark Review Ready</button>
         <button id="mediaRequestApprovalBtn" class="btn btn-secondary" type="button">Request Approval</button>
@@ -2505,33 +2505,63 @@ function renderReviewPanel(session, selectedItem, escapeHtml) {
   `;
 }
 
-function renderSpecialists(escapeHtml) {
+function getRecommendedSpecialistId(session = {}, selectedItem = null) {
+  const mode = String(session?.mode || session?.selectedMode || selectedItem?.mode || "").toLowerCase();
+  const status = String(selectedItem?.status || selectedItem?.review_status || "").toLowerCase();
+
+  if (mode.includes("video") || mode.includes("reel") || mode.includes("storyboard")) return "video-strategist";
+  if (mode.includes("voice") || mode.includes("audio")) return "voice-director";
+  if (mode.includes("campaign") || mode.includes("pack")) return "prompt-engineer";
+  if (status.includes("ready") || status.includes("review")) return "brand-guardian";
+  if (mode.includes("publish") || mode.includes("handoff")) return "publishing-assistant";
+  return "visual-director";
+}
+
+function renderSpecialistCard(specialist, escapeHtml, { primary = false } = {}) {
+  if (!specialist) return "";
+
   return `
-    <section class="card media-card">
+    <article class="media-specialist-card ${primary ? "media-specialist-primary" : "media-specialist-secondary"}">
+      <div>
+        <p class="card-label">${primary ? "Recommended specialist" : "Specialist"}</p>
+        <h4>${escapeHtml(specialist.label || specialist.name || "Media specialist")}</h4>
+        <p>${escapeHtml(specialist.description || specialist.summary || "Use this specialist to improve the media brief.")}</p>
+      </div>
+      <div class="media-specialist-actions">
+        <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Apply to Brief</button>
+        <button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>
+        <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Open AI Command Review</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSpecialists(session = {}, selectedItem = null, escapeHtml) {
+  const specialists = Array.isArray(SPECIALISTS) ? SPECIALISTS : [];
+  if (!specialists.length) return "";
+
+  const recommendedId = getRecommendedSpecialistId(session, selectedItem);
+  const recommended = specialists.find((specialist) => specialist.id === recommendedId) || specialists[0];
+  const others = specialists.filter((specialist) => specialist.id !== recommended.id);
+
+  return `
+    <section class="card media-card media-specialists-compact" aria-label="AI media specialists">
       <div class="card-head">
         <div>
-          <div class="setup-kicker">AI Agent Support</div>
-          <h3>Specialist guidance and prompt actions</h3>
+          <p class="card-label">AI Agent Support</p>
+          <h3>Specialist guidance</h3>
         </div>
-        <span class="card-badge neutral">In-page</span>
+        <span class="status-pill is-info">Contextual</span>
       </div>
-      <div class="media-specialist-grid">
-        ${SPECIALISTS.map((specialist) => `
-          <article class="media-specialist-card">
-            <div>
-              <strong>${escapeHtml(specialist.title)}</strong>
-              <p class="media-section-copy"><strong>Purpose:</strong> ${escapeHtml(specialist.purpose)}</p>
-              <p class="media-section-copy"><strong>Best use:</strong> ${escapeHtml(specialist.bestUse)}</p>
-            </div>
-            <div class="media-prompt-box">${escapeHtml(specialist.suggestedPrompt)}</div>
-            <div class="media-action-row">
-              <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Apply to Brief</button>
-              <button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>
-              <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Open AI Command Review</button>
-            </div>
-          </article>
-        `).join("")}
-      </div>
+      ${renderSpecialistCard(recommended, escapeHtml, { primary: true })}
+      ${others.length ? `
+        <details class="media-specialists-more">
+          <summary>More specialists</summary>
+          <div class="media-specialists-secondary-list">
+            ${others.map((specialist) => renderSpecialistCard(specialist, escapeHtml, { primary: false })).join("")}
+          </div>
+        </details>
+      ` : ""}
     </section>
   `;
 }
@@ -2548,7 +2578,7 @@ function renderAssetGate(state, escapeHtml) {
         <span class="card-badge neutral">Source assets</span>
       </div>
       ${renderAssetDependencyRows(assetData, MEDIA_ASSET_KEYS, escapeHtml, "Media library inputs are covered.")}
-      <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(getAssetNextAction(assetData, MEDIA_ASSET_KEYS))}</div>
+      <div class="simple-banner media-block-gap">${escapeHtml(getAssetNextAction(assetData, MEDIA_ASSET_KEYS))}</div>
     </section>
   `;
 }
@@ -2579,7 +2609,7 @@ function renderApiReadiness(session, backendProjectName, escapeHtml) {
           </div>
         `).join("")}
       </div>
-      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner" style="margin-top: 12px;">${escapeHtml("Generator backend not connected yet — prompt/job is ready.")}</div>` : ""}
+      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — prompt/job is ready.")}</div>` : ""}
     </section>
   `;
 }
@@ -3601,7 +3631,7 @@ export const mediaStudioRoute = {
             ${renderSourceProvenancePanel()}
             ${renderCreativeReadinessPanel()}
             ${renderBrandCompliancePanel()}
-            ${renderSpecialists(escapeHtml)}
+            ${renderSpecialists(session, selectedItem, escapeHtml)}
             ${renderAssetGate(state, escapeHtml)}
             ${renderApiReadiness(session, backendProjectName, escapeHtml)}
           </aside>
