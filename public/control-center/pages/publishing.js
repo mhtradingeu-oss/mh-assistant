@@ -539,7 +539,16 @@ function fieldError(session, key, escapeHtml) {
 }
 
 function renderStatusPill(status, escapeHtml) {
-  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}">${escapeHtml(titleCase(status))}</span>`;
+  // Add governance/approval hints for status pills
+  let hint = "";
+  if (status === "needs approval") {
+    hint = "title=\"Request Approval Review. Confirmation required before execution.\" aria-label=\"Request Approval Review. Confirmation required before execution.\"";
+  } else if (status === "ready") {
+    hint = "title=\"Prepare Governance Review. Backend approval rules apply.\" aria-label=\"Prepare Governance Review. Backend approval rules apply.\"";
+  } else if (status === "scheduled") {
+    hint = "title=\"Confirmation required before execution.\" aria-label=\"Confirmation required before execution.\"";
+  }
+  return `<span class="publishing-status-pill is-${escapeHtml(statusClass(status))}" ${hint}>${escapeHtml(titleCase(status))}</span>`;
 }
 
 function renderScopedStyles() {
@@ -929,7 +938,7 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
         <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
         <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
       </div>
-      <div class="simple-banner">Opens AI with this context only. No approval, publishing, or backend execution is performed.</div>
+      <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
       <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
       ${asArray(recommendation.externalBlockers).length ? `
         <div class="simple-banner" style="margin-top:12px;">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
@@ -1477,7 +1486,9 @@ function bindPublishingWorkspace({
       }
 
       if (action === "publish") {
-        const confirmed = window.confirm("Confirm publish action\n\nAction: Publish this item to configured channels now.\nRisk: This can create an external live effect and may be difficult to reverse.\nPolicy: Publish should proceed only when approval and readiness checks are satisfied.\n\nSelect Cancel to keep this item in queue.");
+        const confirmed = window.confirm(
+          "Final Confirmation Required\n\nAction: Publish this item to configured channels.\n\nThis is a high-risk, final step. Please verify channel, source, schedule, and approval status.\n\nPublishing is always confirmation-gated and governed by backend approval rules.\nApproval and governance gates must be satisfied before execution.\n\nSelect Cancel to keep this item in the queue."
+        );
         if (!confirmed) {
           rerender();
           return;
@@ -1490,13 +1501,13 @@ function bindPublishingWorkspace({
       if (action === "pause") {
         await runAndRefresh(
           () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
-          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft." }
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }
         );
       }
       if (action === "retry") {
         await runAndRefresh(
           () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
-          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue." }
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }
         );
       }
       rerender();
@@ -1739,8 +1750,19 @@ export const publishingRoute = {
     const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
     const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
 
+    // --- Compact Safety/Authority Banner ---
+    const safetyBanner = `
+      <div class="publishing-safety-banner" role="note" aria-label="Publishing Safety and Authority Notice">
+        <span class="publishing-safety-icon" aria-hidden="true">&#128274;</span>
+        <span class="publishing-safety-text">
+          Publishing prepares channel packages, schedules, and approval-ready handoffs. Final publishing remains <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>. High-risk items should go to <strong>Governance Review</strong> first.
+        </span>
+      </div>
+    `;
+
     root.innerHTML = `
       ${renderScopedStyles()}
+      ${safetyBanner}
       <div class="publishing-execution-center">
         ${renderOverview(counts, queue, escapeHtml)}
         ${renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml)}
@@ -1758,8 +1780,8 @@ export const publishingRoute = {
                 <span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>
               </div>
               <div class="publishing-action-row">
-                <button id="publishingApproveBtn" class="btn btn-secondary" type="button">Mark item ready for publishing</button>
-                <button id="publishingFailBtn" class="btn btn-secondary" type="button">Mark publishing item as failed</button>
+                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare Governance Review. Confirmation required before execution. Backend approval rules apply.">Mark item ready for publishing</button>
+                <button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>
               </div>
             </section>
           </div>
