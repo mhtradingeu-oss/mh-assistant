@@ -82,7 +82,7 @@ const SPECIALISTS = [
     id: "publishing-assistant",
     title: "Publishing Assistant",
     purpose: "Finalize readiness signals and handoff payload quality before publishing.",
-    bestUse: "Right before sending approved media into Publishing operations.",
+    bestUse: "Right before preparing a Publishing package for downstream review.",
     suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
   }
 ];
@@ -1190,27 +1190,27 @@ function buildRecommendation(metrics, handoff, selectedItem) {
   if (failed) {
     return {
       action: "Regenerate or repair the failed media job",
-      why: `${failed.title} is blocked. Review the prompt and reference asset before sending downstream.`
+      why: `${failed.title} is blocked. Review the prompt and reference asset before routing downstream.`
     };
   }
   const needsReview = selectedItem?.status === "needs_review" ? selectedItem : null;
   if (needsReview) {
     return {
-      action: "Review and approve selected media",
-      why: `${needsReview.title} needs brand and format review before it can become publishing-ready.`
+      action: "Review selected media package",
+      why: `${needsReview.title} needs brand and format review before it can become package-ready.`
     };
   }
   const ready = selectedItem?.status === "publishing_ready" ? selectedItem : null;
   if (ready) {
     return {
-      action: "Send the publishing-ready media handoff",
-      why: `${ready.title} is ready for Publishing with a safe handoff payload.`
+      action: "Prepare Publishing Package",
+      why: `${ready.title} is ready for a safe Publishing package handoff.`
     };
   }
   if (handoff) {
     return {
       action: "Load workflow media brief",
-      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> Publishing flow."
+      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
     };
   }
   if (metrics.draftJobs) {
@@ -1221,7 +1221,7 @@ function buildRecommendation(metrics, handoff, selectedItem) {
   }
   return {
     action: "Start a media job",
-    why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and hand off to Publishing."
+    why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."
   };
 }
 
@@ -1588,7 +1588,253 @@ function renderScopedStyles() {
 }
 
 function renderStatusPill(status, escapeHtml) {
-  return `<span class="media-status-pill is-${escapeHtml(statusClass(status))}">${escapeHtml(titleCase(status))}</span>`;
+  return `<span class="media-status-pill is-${escapeHtml(statusClass(status))}">${escapeHtml(displayMediaStatusLabel(status))}</span>`;
+}
+
+function displayMediaStatusLabel(status) {
+  const normalized = normalizeStatus(status || "draft", "draft");
+  if (normalized === "approved") return "Review Ready";
+  if (normalized === "publishing_ready") return "Package Ready";
+  if (normalized === "sent_to_publishing") return "Handoff Prepared";
+  return titleCase(normalized);
+}
+
+function hasSelectedVersionOutput(version) {
+  const payload = asObject(version?.output_payload);
+  return Boolean(
+    clean(payload.url) ||
+    clean(payload.image_url) ||
+    clean(payload.video_url) ||
+    clean(payload.audio_url) ||
+    asArray(payload.images).length ||
+    asArray(payload.videos).length ||
+    clean(payload.video_brief) ||
+    clean(payload.voice_script) ||
+    asObject(payload.campaign_pack).image_prompt ||
+    asObject(payload.campaign_pack).video_brief ||
+    asObject(payload.campaign_pack).voice_script ||
+    clean(payload.message)
+  );
+}
+
+function getMediaSourceReadiness(session, selectedItem, handoff) {
+  const hasLibraryRef = Boolean(
+    selectedItem?.library_asset_ref?.handoff_id ||
+    selectedVersionEntry(session)?.library_asset_ref?.handoff_id
+  );
+  const hasReference = Boolean(clean(session.form?.referenceAsset || selectedItem?.referenceAsset));
+  const hasItemSource = Boolean(clean(selectedItem?.source));
+  const hasHandoff = Boolean(handoff);
+
+  if (hasLibraryRef) {
+    return {
+      state: "ready",
+      status: "Library source",
+      detail: "Linked Library provenance is available for this package."
+    };
+  }
+  if (hasReference) {
+    return {
+      state: "warning",
+      status: "Reference attached",
+      detail: "A reference asset is named, but source-of-truth status still needs review."
+    };
+  }
+  if (hasHandoff || hasItemSource) {
+    return {
+      state: "warning",
+      status: "Workflow context",
+      detail: "Inbound or job context exists; attach Library source when claims or product truth matter."
+    };
+  }
+  return {
+    state: "missing",
+    status: "Missing source",
+    detail: "Attach a Library asset or load a source-backed handoff before final package routing."
+  };
+}
+
+function getMediaReadinessItems(session, selectedItem, handoff) {
+  const version = selectedVersionEntry(session);
+  const readiness = getVersionReadiness(version, session, selectedItem);
+  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+  const form = session.form || {};
+  const promptText = firstText(version?.prompt, form.prompt, selectedItem?.prompt, selectedItem?.brief);
+  const hasBrief = Boolean(promptText || clean(form.objective || selectedItem?.objective));
+  const hasOutput = hasSelectedVersionOutput(version);
+  const hasFormat = Boolean(clean(form.channel || selectedItem?.channel) && clean(form.format || selectedItem?.format));
+  const hasBrandCue = Boolean(clean(form.brandStyle || selectedItem?.brandStyle || selectedItem?.referenceAsset || form.referenceAsset));
+  const isBrandSafe = !readiness.missingItems.includes("brand safe");
+  const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;
+  const needsGovernance = source.state === "missing" || /claim|proof|medical|guarantee|legal|privacy|gdpr|discount|pricing/i.test(promptText);
+
+  return [
+    {
+      key: "source",
+      label: "Source",
+      state: source.state,
+      status: source.status,
+      detail: source.detail
+    },
+    {
+      key: "creative",
+      label: "Creative",
+      state: hasBrief && hasFormat ? "ready" : hasBrief ? "warning" : "missing",
+      status: hasBrief && hasFormat ? "Brief ready" : hasBrief ? "Needs format" : "Needs brief",
+      detail: hasBrief && hasFormat
+        ? "Brief, channel, and format are present."
+        : "Complete the objective, prompt, channel, and format before review."
+    },
+    {
+      key: "brand",
+      label: "Brand",
+      state: isBrandSafe && hasBrandCue ? "ready" : promptText ? "warning" : "missing",
+      status: isBrandSafe && hasBrandCue ? "Brand guided" : promptText ? "Review brand fit" : "Needs prompt",
+      detail: isBrandSafe && hasBrandCue
+        ? "Brand style or reference cues are present."
+        : "Review brand style, logo fit, product truth, and safe claims."
+    },
+    {
+      key: "publishing",
+      label: "Publishing",
+      state: packageReady ? "ready" : hasOutput ? "active" : hasBrief ? "warning" : "missing",
+      status: packageReady ? "Package ready" : hasOutput ? "Review package" : hasBrief ? "Prepare output" : "Needs brief",
+      detail: packageReady
+        ? "Selected version can be prepared as a Publishing package."
+        : "Output, selected version, and review notes should be checked before handoff."
+    },
+    {
+      key: "governance",
+      label: "Governance",
+      state: needsGovernance ? "warning" : "ready",
+      status: needsGovernance ? "Review risk" : "No obvious risk",
+      detail: needsGovernance
+        ? "Prepare Governance Review if source, claim, legal, privacy, or pricing risk exists."
+        : "No obvious governance escalation signal in current prompt context."
+    }
+  ];
+}
+
+function renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml }) {
+  const items = getMediaReadinessItems(session, selectedItem, handoff);
+  return `
+    <section class="media-readiness-summary" aria-label="Media Studio compact readiness summary">
+      ${items.map((item) => `
+        <article class="media-readiness-chip is-${escapeHtml(item.state)}">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${escapeHtml(item.status)}</strong>
+          <small>${escapeHtml(titleCase(item.state))}</small>
+        </article>
+      `).join("")}
+    </section>
+  `;
+}
+
+function renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml }) {
+  const form = session.form || {};
+  const mode = form.mode || session.mode || selectedItem?.mode || "image";
+  const campaign = firstText(form.campaign, selectedItem?.campaign, "No campaign");
+  const status = displayMediaStatusLabel(selectedVersionEntry(session)?.readiness_status || selectedItem?.status || form.status || "draft");
+  const packageCount = `${formatCount(metrics.total)} jobs/assets`;
+  const readyCount = `${formatCount(metrics.readyAssets)} ready`;
+  const handoffLabel = handoff ? "Brief available" : "No inbound brief";
+
+  return `
+    <header class="media-command-header" id="mediaCommandHeader" aria-label="Media Studio command header">
+      <div class="media-command-main">
+        <div>
+          <div class="setup-kicker">Media Studio</div>
+          <h2>Creative preparation, review, and routing workspace</h2>
+          <p class="media-section-copy">Prepare media briefs, prompts, outputs, Library saves, and review handoffs without live publishing authority.</p>
+        </div>
+        <div class="media-command-next">
+          <span>Next action</span>
+          <strong>${escapeHtml(recommendation.action)}</strong>
+          <small>${escapeHtml(recommendation.why)}</small>
+        </div>
+      </div>
+      <div class="media-command-meta" aria-label="Media Studio context">
+        <span><strong>Project</strong>${escapeHtml(projectName || form.project || "Workspace")}</span>
+        <span><strong>Campaign</strong>${escapeHtml(campaign)}</span>
+        <span><strong>Mode</strong>${escapeHtml(mode === "campaign-pack" ? "Campaign Pack" : titleCase(mode))}</span>
+        <span><strong>Package</strong>${escapeHtml(status)}</span>
+        <span><strong>Workspace</strong>${escapeHtml(packageCount)} · ${escapeHtml(readyCount)}</span>
+        <span><strong>Brief</strong>${escapeHtml(handoffLabel)}</span>
+      </div>
+      <div class="media-command-actions" aria-label="Media Studio safe actions">
+        <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
+        <button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+        <button id="mediaHeaderSaveLibraryBtn" class="btn btn-secondary" type="button">Save to Library</button>
+        <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>
+        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>
+      </div>
+    </header>
+  `;
+}
+
+function getMediaWorkflowSteps(session, selectedItem, handoff) {
+  const version = selectedVersionEntry(session);
+  const readiness = getVersionReadiness(version, session, selectedItem);
+  const source = getMediaSourceReadiness(session, selectedItem, handoff);
+  const form = session.form || {};
+  const hasBrief = Boolean(firstText(version?.prompt, form.prompt, form.objective, selectedItem?.prompt, selectedItem?.brief));
+  const hasOutput = hasSelectedVersionOutput(version);
+  const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);
+  const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";
+  const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;
+
+  return [
+    {
+      label: "Brief",
+      state: hasBrief ? "ready" : "active",
+      detail: hasBrief ? "Brief present" : "Start here"
+    },
+    {
+      label: "Source",
+      state: source.state,
+      detail: source.status
+    },
+    {
+      label: "Generate/Prepare",
+      state: hasOutput ? "ready" : hasBrief ? "active" : "missing",
+      detail: hasOutput ? "Output captured" : hasBrief ? "Prompt ready" : "Needs brief"
+    },
+    {
+      label: "Review",
+      state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",
+      detail: hasOutput ? displayMediaStatusLabel(readiness.readinessStatus) : "Needs output"
+    },
+    {
+      label: "Save to Library",
+      state: savedToLibrary ? "ready" : hasOutput || hasBrief ? "active" : "missing",
+      detail: savedToLibrary ? "Library linked" : "Available after draft"
+    },
+    {
+      label: "Handoff",
+      state: handoffPrepared ? "ready" : packageReady ? "active" : "missing",
+      detail: handoffPrepared ? "Prepared" : packageReady ? "Package ready" : "Needs review"
+    }
+  ];
+}
+
+function renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml }) {
+  const steps = getMediaWorkflowSteps(session, selectedItem, handoff);
+  return `
+    <nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">
+      <div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>
+      <ol class="media-workflow-list" role="list">
+        ${steps.map((step, index) => `
+          <li class="media-workflow-step is-${escapeHtml(step.state)}" role="listitem">
+            <span class="media-workflow-index">${escapeHtml(String(index + 1))}</span>
+            <span class="media-workflow-copy">
+              <strong>${escapeHtml(step.label)}</strong>
+              <small>${escapeHtml(step.detail)} · ${escapeHtml(titleCase(step.state))}</small>
+            </span>
+          </li>
+        `).join("")}
+      </ol>
+    </nav>
+  `;
 }
 
 function renderOverview(metrics, escapeHtml) {
@@ -1644,8 +1890,8 @@ function renderRecommendation(recommendation, metrics, selectedItem, handoff, es
       <div class="media-action-row">
         <button id="mediaStartJobBtn" class="btn btn-secondary" type="button" data-new-media-job="image">Start Media Job</button>
         <button id="mediaSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
-        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>
-        <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Send to Publishing if ready</button>
+        <button id="mediaSendAiCommandBtn" class="btn btn-secondary" type="button">Open AI Command Review</button>
+        <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Publishing Package</button>
       </div>
     </section>
   `;
@@ -1686,7 +1932,7 @@ function renderGenerator(session, state, backendProjectName, escapeHtml) {
       <div class="card-head">
         <div>
           <div class="setup-kicker">Media Generator</div>
-          <h3>Brief -> Generate/Prepare -> Review -> Approve -> Send to Publishing</h3>
+          <h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>
         </div>
         <span class="card-badge neutral">${escapeHtml(modeLabel)}</span>
       </div>
@@ -1841,9 +2087,9 @@ function renderQueue(session, escapeHtml) {
             <div class="media-queue-actions">
               <button type="button" data-media-action="preview" data-media-id="${escapeHtml(item.id)}">Preview</button>
               <button type="button" data-media-action="edit-prompt" data-media-id="${escapeHtml(item.id)}">Edit prompt</button>
-              <button type="button" data-media-action="approve" data-media-id="${escapeHtml(item.id)}">Approve</button>
+              <button type="button" data-media-action="approve" data-media-id="${escapeHtml(item.id)}">Mark Review Ready</button>
               <button type="button" data-media-action="regenerate" data-media-id="${escapeHtml(item.id)}">Regenerate</button>
-              <button type="button" data-media-action="send-publishing" data-media-id="${escapeHtml(item.id)}">Send to publishing</button>
+              <button type="button" data-media-action="send-publishing" data-media-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>
               <button type="button" data-media-action="save-draft" data-media-id="${escapeHtml(item.id)}">Save draft</button>
             </div>
           </article>
@@ -1882,8 +2128,8 @@ function getVersionReadiness(version, session, selectedItem) {
     ["brand safe", isBrandSafe],
     ["channel fit", hasChannelFit],
     ["format fit", hasFormatFit],
-    ["publishing ready", publishingReady],
-    ["approval status", approvalStatus === "approved"]
+    ["package ready", publishingReady],
+    ["review state", approvalStatus === "approved"]
   ];
 
   const missingItems = checklist.filter(([, value]) => !value).map(([label]) => label);
@@ -1916,9 +2162,9 @@ function renderOutputReadinessPanel(session, selectedItem, escapeHtml) {
       <div class="card-head">
         <div>
           <div class="setup-kicker">Output Readiness State</div>
-          <h3>Generation and publishing lifecycle</h3>
+          <h3>Generation and package readiness lifecycle</h3>
         </div>
-        <span class="card-badge ${statusTone(activeStatus)}">${escapeHtml(titleCase(activeStatus))}</span>
+        <span class="card-badge ${statusTone(activeStatus)}">${escapeHtml(displayMediaStatusLabel(activeStatus))}</span>
       </div>
       <div class="media-readiness-grid">
         ${readiness.checklist.map(([label, ready]) => `
@@ -1928,8 +2174,8 @@ function renderOutputReadinessPanel(session, selectedItem, escapeHtml) {
           </div>
         `).join("")}
         <div class="media-check-item">
-          <span>Approval</span>
-          <strong>${escapeHtml(titleCase(readiness.approvalStatus))}</strong>
+          <span>Review state</span>
+          <strong>${escapeHtml(readiness.approvalStatus === "approved" ? "Review Ready" : "Pending")}</strong>
         </div>
         <div class="media-check-item">
           <span>Missing items</span>
@@ -1938,7 +2184,7 @@ function renderOutputReadinessPanel(session, selectedItem, escapeHtml) {
         ${MEDIA_PREVIEW_STATES.map((status) => `
           <div class="media-check-item">
             <span>${escapeHtml(status === activeStatus ? "Selected version state" : "Available state")}</span>
-            <strong>${escapeHtml(titleCase(status))}</strong>
+            <strong>${escapeHtml(displayMediaStatusLabel(status))}</strong>
           </div>
         `).join("")}
       </div>
@@ -2201,12 +2447,12 @@ function renderVersioningPanel(session, escapeHtml) {
         </div>
       ` : ""}
       <div class="media-action-row">
-        <button class="btn btn-secondary" type="button" data-media-version-action="approve">Approve</button>
+        <button class="btn btn-secondary" type="button" data-media-version-action="approve">Mark Review Ready</button>
         <button class="btn btn-secondary" type="button" data-media-version-action="reject">Reject</button>
         <button class="btn btn-secondary" type="button" data-media-version-action="regenerate">Regenerate</button>
         <button class="btn btn-secondary" type="button" data-media-version-action="save-draft">Save as draft</button>
         <button class="btn btn-secondary" type="button" data-media-version-action="save-library">Save to Library</button>
-        <button class="btn btn-primary" type="button" data-media-version-action="send-publishing">Send to Publishing</button>
+        <button class="btn btn-primary" type="button" data-media-version-action="send-publishing">Prepare Publishing Package</button>
       </div>
       ${fieldError(session, "librarySave", escapeHtml)}
     </section>
@@ -2236,7 +2482,7 @@ function renderReviewPanel(session, selectedItem, escapeHtml) {
           <div class="setup-kicker">Asset Preview / Brand Safety Checklist</div>
           <h3>${escapeHtml(selectedItem?.title || "No selected media job")}</h3>
         </div>
-        <span class="card-badge ${statusTone(normalizeStatus(version?.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(version?.readiness_status || selectedItem?.status || "draft"))}</span>
+        <span class="card-badge ${statusTone(normalizeStatus(version?.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(displayMediaStatusLabel(version?.readiness_status || selectedItem?.status || "draft"))}</span>
       </div>
       <span class="media-preview-title">${escapeHtml(selectedItem ? `${titleCase(selectedItem.mode)} preview / prompt` : "Preview")}</span>
       <div class="media-prompt-box">${escapeHtml(prompt)}</div>
@@ -2250,7 +2496,7 @@ function renderReviewPanel(session, selectedItem, escapeHtml) {
       </div>
       <div class="media-prompt-box" style="margin-top: 12px;">${escapeHtml(notesText)}</div>
       <div class="media-action-row">
-        <button id="mediaApproveBtn" class="btn btn-secondary" type="button">Approve</button>
+        <button id="mediaApproveBtn" class="btn btn-secondary" type="button">Mark Review Ready</button>
         <button id="mediaRequestApprovalBtn" class="btn btn-secondary" type="button">Request Approval</button>
         <button id="mediaRejectBtn" class="btn btn-secondary" type="button">Reject</button>
         <button id="mediaCreateTaskBtn" class="btn btn-secondary" type="button">Create Task</button>
@@ -2279,9 +2525,9 @@ function renderSpecialists(escapeHtml) {
             </div>
             <div class="media-prompt-box">${escapeHtml(specialist.suggestedPrompt)}</div>
             <div class="media-action-row">
-              <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Use Prompt</button>
+              <button class="btn btn-secondary" type="button" data-media-specialist-use="${escapeHtml(specialist.id)}">Apply to Brief</button>
               <button class="btn btn-secondary" type="button" data-media-specialist-save="${escapeHtml(specialist.id)}">Save Draft</button>
-              <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Send to AI Workspace</button>
+              <button class="btn btn-secondary" type="button" data-media-specialist-ai="${escapeHtml(specialist.id)}">Open AI Command Review</button>
             </div>
           </article>
         `).join("")}
@@ -2793,7 +3039,7 @@ function bindMediaStudio({
         if (currentVersion) currentVersion.readiness_status = "approved";
         syncOutputsFromVersioning(session);
         saveDraftToSession(projectName, state, session, "approved");
-        showMessage?.("Media job approved locally.");
+        showMessage?.("Media job marked review-ready locally.");
       }
 
       if (action === "send-publishing") {
@@ -2833,13 +3079,13 @@ function bindMediaStudio({
           try {
             await decideProjectApproval(backendProjectName, pendingApproval.id, {
               decision: "approved",
-              note: session.form.reviewNotes || "Approved in Media Studio.",
+              note: session.form.reviewNotes || "Marked review-ready in Media Studio.",
               actor: "media-studio"
             });
           } catch (_) {}
         }
       }
-      showMessage?.("Media approval recorded.");
+      showMessage?.("Media review state recorded.");
       rerender();
     };
   }
@@ -2854,7 +3100,7 @@ function bindMediaStudio({
       if (backendProjectName && item && !item.localOnly) {
         try {
           await createProjectApproval(backendProjectName, {
-            title: `Approve ${item.title || session.form.title || "media job"}`,
+            title: `Review ${item.title || session.form.title || "media job"}`,
             entity_type: "media_job",
             entity_id: item.id,
             summary: session.form.reviewNotes || "Review media output before publishing handoff.",
@@ -2869,9 +3115,9 @@ function bindMediaStudio({
             },
             actor: "media-studio"
           });
-          showMessage?.("Approval request created.");
+          showMessage?.("Review request created.");
         } catch (_) {
-          showMessage?.("Approval request kept as local review state.");
+          showMessage?.("Review request kept as local review state.");
         }
       } else {
         showMessage?.("Media draft moved to needs review locally.");
@@ -2996,6 +3242,23 @@ function bindMediaStudio({
     };
   }
 
+  const headerSaveLibraryBtn = document.getElementById("mediaHeaderSaveLibraryBtn");
+  if (headerSaveLibraryBtn) {
+    headerSaveLibraryBtn.onclick = async () => {
+      sync();
+      await saveVersionToLibrary({
+        projectName,
+        backendProjectName,
+        state,
+        session,
+        selectedItem: selected(),
+        showMessage,
+        rerender
+      });
+      rerender();
+    };
+  }
+
   const versionNotes = document.getElementById("mediaVersionCompareNotes");
   if (versionNotes) {
     versionNotes.oninput = () => {
@@ -3033,7 +3296,7 @@ function bindMediaStudio({
         currentVersion.provider_status = currentVersion.provider_status || "generated";
         saveDraftToSession(projectName, state, session, "approved");
         syncOutputsFromVersioning(session);
-        showMessage?.("Selected version approved.");
+        showMessage?.("Selected version marked review-ready.");
       }
       if (action === "reject") {
         session.form.status = "draft";
@@ -3127,7 +3390,7 @@ function bindMediaStudio({
           status: "available"
         });
         navigateTo("ai-command");
-        showMessage?.(`${specialist.title} prompt sent to AI Command.`);
+        showMessage?.(`${specialist.title} prompt opened in AI Command.`);
       }
       rerender();
     };
@@ -3147,12 +3410,12 @@ async function sendPublishingHandoff({ projectName, backendProjectName, session,
   if (backendProjectName && selectedItem && !selectedItem.localOnly) {
     try {
       await createProjectHandoff(backendProjectName, handoff);
-      showMessage?.("Publishing handoff created from Media Studio.");
+      showMessage?.("Publishing package handoff prepared from Media Studio.");
     } catch (error) {
-      showMessage?.("Publishing handoff kept locally because backend handoff save is unavailable.");
+      showMessage?.("Publishing package handoff kept locally because backend handoff save is unavailable.");
     }
   } else {
-    showMessage?.("Publishing handoff created locally.");
+    showMessage?.("Publishing package handoff prepared locally.");
   }
 
   try {
@@ -3168,7 +3431,7 @@ export const mediaStudioRoute = {
   meta: {
     eyebrow: "Operations",
     title: "Media Studio",
-    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review, approvals, and publishing routing."
+    description: "Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing."
   },
   template: `
     <section class="page is-active" data-page="media-studio">
@@ -3235,92 +3498,81 @@ export const mediaStudioRoute = {
 
     // Source / Provenance Panel
     function renderSourceProvenancePanel() {
-      // Try to extract source context from selectedItem, handoff, or session
-      let sourceLines = [];
-      let hasSource = false;
-      if (selectedItem) {
-        if (selectedItem.source) {
-          sourceLines.push(`<div><strong>Source page:</strong> ${escapeHtml(titleCase(selectedItem.source))}</div>`);
-          hasSource = true;
-        }
-        if (selectedItem.library_asset_ref && selectedItem.library_asset_ref.handoff_id) {
-          sourceLines.push(`<div><strong>Library asset:</strong> ${escapeHtml(selectedItem.library_asset_ref.handoff_id)}</div>`);
-          hasSource = true;
-        }
-        if (selectedItem.project) {
-          sourceLines.push(`<div><strong>Project:</strong> ${escapeHtml(selectedItem.project)}</div>`);
-          hasSource = true;
-        }
-        if (selectedItem.campaign) {
-          sourceLines.push(`<div><strong>Campaign:</strong> ${escapeHtml(selectedItem.campaign)}</div>`);
-          hasSource = true;
-        }
-      }
-      if (!hasSource && handoff) {
-        sourceLines.push(`<div><strong>Inbound handoff source:</strong> ${escapeHtml(titleCase(handoff.source_page || ""))}</div>`);
-        hasSource = true;
-      }
-      if (!hasSource) {
-        sourceLines.push(`<div>No source context attached yet. Use AI Command, Content Studio, or Library to attach source-backed media context.</div>`);
-      }
+      const sourceState = getMediaSourceReadiness(session, selectedItem, handoff);
+      const rows = [];
+      if (selectedItem?.source) rows.push(["Source page", titleCase(selectedItem.source)]);
+      if (selectedItem?.library_asset_ref?.handoff_id) rows.push(["Library asset", selectedItem.library_asset_ref.handoff_id]);
+      if (selectedItem?.project) rows.push(["Project", selectedItem.project]);
+      if (selectedItem?.campaign) rows.push(["Campaign", selectedItem.campaign]);
+      if (session.form?.referenceAsset) rows.push(["Reference", session.form.referenceAsset]);
+      if (!rows.length && handoff) rows.push(["Inbound handoff", titleCase(handoff.source_page || "Workflow")]);
+      if (!rows.length) rows.push(["Source", "No trusted source attached yet"]);
+
       return `
-        <section class="card media-card" id="mediaSourceProvenancePanel" aria-label="Source Context Panel">
-          <div class="card-head">
+        <section class="card media-card media-rail-card" id="mediaSourceProvenancePanel" aria-label="Source Context Panel">
+          <div class="card-head media-compact-head">
             <div>
               <div class="setup-kicker">Source Context</div>
-              <h3>Media Provenance & Workflow</h3>
-              <p class="media-section-copy">Source context helps the reviewer verify visual claims, asset ownership, and publishing readiness before routing.</p>
+              <h3>Provenance</h3>
             </div>
+            <span class="media-state-badge is-${escapeHtml(sourceState.state)}">${escapeHtml(sourceState.status)}</span>
           </div>
-          <div class="media-provenance-list">
-            ${sourceLines.join("")}
+          <div class="media-compact-list media-provenance-list">
+            ${rows.map(([label, value]) => `
+              <div class="media-compact-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>
+            `).join("")}
           </div>
+          <p class="media-rail-note">${escapeHtml(sourceState.detail)}</p>
         </section>
       `;
     }
 
     // Creative Readiness Checklist Panel
     function renderCreativeReadinessPanel() {
+      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+        .filter((item) => ["creative", "publishing"].includes(item.key));
       return `
-        <section class="card media-card" id="mediaCreativeReadinessPanel" aria-label="Creative Readiness Checklist">
-          <div class="card-head">
+        <section class="card media-card media-rail-card" id="mediaCreativeReadinessPanel" aria-label="Creative Readiness Checklist">
+          <div class="card-head media-compact-head">
             <div>
               <div class="setup-kicker">Creative Readiness</div>
-              <h3>Checklist for Review</h3>
+              <h3>Package inputs</h3>
             </div>
           </div>
-          <ul class="media-readiness-checklist" role="list">
-            <li><span>Creative brief</span></li>
-            <li><span>Target platform</span></li>
-            <li><span>Aspect ratio / size</span></li>
-            <li><span>Primary visual message</span></li>
-            <li><span>CTA / overlay text</span></li>
-            <li><span>Required assets</span></li>
-            <li><span>Export / handoff target</span></li>
-          </ul>
+          <div class="media-compact-list" role="list">
+            ${readinessItems.map((item) => `
+              <div class="media-compact-row is-${escapeHtml(item.state)}" role="listitem">
+                <span>${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.status)}</strong>
+                <small>${escapeHtml(item.detail)}</small>
+              </div>
+            `).join("")}
+          </div>
         </section>
       `;
     }
 
     // Brand Compliance Checklist Panel
     function renderBrandCompliancePanel() {
+      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+        .filter((item) => ["brand", "governance"].includes(item.key));
       return `
-        <section class="card media-card" id="mediaBrandCompliancePanel" aria-label="Brand Compliance Checklist">
-          <div class="card-head">
+        <section class="card media-card media-rail-card" id="mediaBrandCompliancePanel" aria-label="Brand Compliance Checklist">
+          <div class="card-head media-compact-head">
             <div>
               <div class="setup-kicker">Brand Compliance</div>
-              <h3>Checklist for Brand Safety</h3>
+              <h3>Brand and governance</h3>
             </div>
           </div>
-          <ul class="media-brand-checklist" role="list">
-            <li><span>Logo / brand consistency</span></li>
-            <li><span>Color / style fit</span></li>
-            <li><span>Product representation</span></li>
-            <li><span>Claims / proof needed</span></li>
-            <li><span>Legal/compliance sensitivity</span></li>
-            <li><span>Alt text / accessibility</span></li>
-            <li><span>Governance review recommended if risk exists</span></li>
-          </ul>
+          <div class="media-compact-list" role="list">
+            ${readinessItems.map((item) => `
+              <div class="media-compact-row is-${escapeHtml(item.state)}" role="listitem">
+                <span>${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.status)}</strong>
+                <small>${escapeHtml(item.detail)}</small>
+              </div>
+            `).join("")}
+          </div>
           <div class="media-hint media-readiness-hint" aria-label="Governance review guidance">Prepare Governance Review if any risk or compliance concern exists.</div>
         </section>
       `;
@@ -3329,26 +3581,26 @@ export const mediaStudioRoute = {
     root.innerHTML = `
       ${renderScopedStyles()}
       <div class="media-production-center">
-        ${renderOnboardingPanel()}
-        ${renderSourceProvenancePanel()}
-        ${renderCreativeReadinessPanel()}
-        ${renderBrandCompliancePanel()}
-        ${renderOverview(metrics, escapeHtml)}
-        ${renderRecommendation(recommendation, metrics, selectedItem, handoff, escapeHtml)}
+        ${renderMediaCommandHeader({ projectName, session, metrics, selectedItem, handoff, recommendation, escapeHtml })}
+        ${renderMediaWorkflowStrip({ session, selectedItem, handoff, escapeHtml })}
+        ${renderMediaReadinessSummary({ session, selectedItem, handoff, escapeHtml })}
         ${session.error ? `<div class="simple-banner">${escapeHtml(session.error)}</div>` : ""}
         ${session.loading ? `<div class="empty-box">Loading media jobs, handoffs, approvals, tasks, and event history...</div>` : ""}
         <div class="media-production-grid">
           <div class="media-main-column">
             ${renderGenerator(session, state, backendProjectName, escapeHtml)}
             ${renderPromptBuilder(session, handoff, escapeHtml)}
-            ${renderQueue(session, escapeHtml)}
             ${renderOutputPreviewPanel(session, selectedItem, escapeHtml)}
+            ${renderQueue(session, escapeHtml)}
             ${renderReviewPanel(session, selectedItem, escapeHtml)}
             ${renderOutputReadinessPanel(session, selectedItem, escapeHtml)}
             ${renderVersioningPanel(session, escapeHtml)}
           </div>
           <aside class="media-side-column">
             ${renderWorkflowHandoff(handoff, session, escapeHtml)}
+            ${renderSourceProvenancePanel()}
+            ${renderCreativeReadinessPanel()}
+            ${renderBrandCompliancePanel()}
             ${renderSpecialists(escapeHtml)}
             ${renderAssetGate(state, escapeHtml)}
             ${renderApiReadiness(session, backendProjectName, escapeHtml)}
