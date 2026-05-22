@@ -328,6 +328,30 @@ function buildExecutiveData(state) {
     return !text || text.includes("pending") || text.includes("requested");
   });
 
+  const urgencyLabel = criticalGaps.length
+    ? "Urgent"
+    : failedExecutions.length
+      ? "Attention"
+      : "Normal";
+
+  const workflowImpact = criticalGaps.length
+    ? `Unblocks ${formatCount(criticalGaps.length)} critical path${criticalGaps.length === 1 ? "" : "s"}`
+    : failedExecutions.length
+      ? `Stabilizes ${formatCount(failedExecutions.length)} failed job${failedExecutions.length === 1 ? "" : "s"}`
+      : "Maintains operational flow";
+
+  const continuationSummary = nextScheduled
+    ? `Next: ${humanizeStatus(nextScheduled.status, "Scheduled")} — ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+    : "No scheduled action yet";
+
+  const confidenceSummary = intelligenceScore > 0
+    ? `Signals: ${formatCount(intelligenceScore)}`
+    : "Needs input";
+
+  const escalationSummary = pendingApprovals.length
+    ? `${formatCount(pendingApprovals.length)} approval${pendingApprovals.length === 1 ? "" : "s"} required`
+    : "No escalations";
+
   const mediaJobs = asArray(operations.media_jobs?.items);
   const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
 
@@ -467,7 +491,12 @@ function buildExecutiveData(state) {
       recommendation: nextAction,
       whyItMatters,
       route: nextActionRoute,
-      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`
+      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+      urgencyLabel,
+      workflowImpact,
+      continuationSummary,
+      confidenceSummary,
+      escalationSummary
     },
 
     capabilities: [
@@ -675,6 +704,32 @@ export const homeRoute = {
           </div>
         </section>
 
+        <!-- 2. NEXT BEST ACTION SURFACE (MH-OS) -->
+        <section class="mhos-next-action" aria-label="Next Best Action">
+          <div class="mhos-next-action-title-row">
+            <span class="mhos-next-action-urgency">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+            <span class="mhos-next-action-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</span>
+          </div>
+          <div class="mhos-next-action-reason">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</div>
+          <div class="mhos-next-action-impact">${escapeHtml(dashboard.nextBestAction.workflowImpact)}</div>
+          <div class="mhos-next-action-flow">
+            <span class="mhos-next-action-continuation">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+            <span class="mhos-next-action-destination">Destination: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
+          </div>
+          <div class="mhos-next-action-meta-row">
+            <span class="mhos-next-action-confidence">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+            <span class="mhos-next-action-escalation">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+          </div>
+          <div class="mhos-next-action-actions">
+            <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
+              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+            </button>
+            <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+              Ask AI: Explain this action
+            </button>
+          </div>
+        </section>
+
         <!-- 2. EXECUTIVE SNAPSHOT / KEY INDICATORS -->
         <div class="home-snapshot-grid">
           ${capabilityCards.map((item) => `
@@ -687,29 +742,6 @@ export const homeRoute = {
           `).join("")}
         </div>
 
-        <!-- 3. NEXT BEST ACTION -->
-        <section class="card home-next-action-panel">
-          <div class="home-action-panel-head">
-            <div>
-              <p class="card-label">Recommended Next Action</p>
-              <h3>${escapeHtml(dashboard.nextBestAction.recommendation)}</h3>
-            </div>
-            <button id="homeNextActionBtn" class="btn btn-primary" type="button">
-              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
-            </button>
-          </div>
-
-          <div class="home-action-explanation">
-            <p><strong>Why it matters:</strong> ${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
-            <p class="home-action-destination"><em>Destination: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</em></p>
-          </div>
-
-          <div class="home-action-buttons">
-            <button id="homeAskNextActionBtn" class="btn btn-ghost btn-sm" type="button">
-              Ask AI: Explain this action
-            </button>
-          </div>
-        </section>
 
         <!-- 4. MAIN EXECUTIVE WORKSPACE -->
         <div class="home-workspace-main">
