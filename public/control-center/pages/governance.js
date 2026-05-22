@@ -45,6 +45,29 @@ function severityClass(value) {
   return "neutral";
 }
 
+function getDecisionConfirmationMessage(decision) {
+  const normalized = asString(decision).toLowerCase().replace(/\s+/g, "_");
+
+  if (["approval", "approved", "approve"].includes(normalized)) {
+    return "Submit Approval Decision? This records a governance decision and may affect downstream readiness. It does not publish or execute directly.";
+  }
+
+  if (["override", "overridden"].includes(normalized)) {
+    return "Record Override Decision? This is a high-risk governance action. Backend authority rules remain active, but this can unblock downstream operations. Continue only after verifying source, risk, and owner.";
+  }
+
+  if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {
+    return "Submit Governance Decision? This records the reviewed decision and may update linked queues or review state.";
+  }
+
+  return "Submit Governance Decision? This records the reviewed decision and may update linked queues or review state.";
+}
+
+function confirmGovernanceDecision(decision) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(getDecisionConfirmationMessage(decision));
+}
+
 function ensureSession(projectName) {
   const key = projectName || "__default__";
   if (!governanceSessions.has(key)) {
@@ -222,11 +245,11 @@ function renderApprovalCard(item, escapeHtml) {
       ${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}
       <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
       <div class="governance-actions">
-        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Approve</button>
-        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Reject</button>
-        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes</button>
-        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate</button>
-        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Override</button>
+        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Approval Decision</button>
+        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
+        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
+        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
+        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record Override Decision</button>
       </div>
       ${history.length ? `
         <div class="governance-history">
@@ -280,7 +303,7 @@ function renderReviewCard(item, type, escapeHtml, approval) {
             data-risk="${escapeHtml(flags[0]?.severity || "medium")}"
             data-summary="${escapeHtml(flags.map((flag) => flag.message).join(" | ") || "Governance review requested.")}"
           >
-            Request Approval
+            Request Approval Review
           </button>
         </div>
       `}
@@ -937,24 +960,25 @@ function renderPage(projectName, session, escapeHtml) {
               <div>
                 <div class="panel-kicker">Governance actions</div>
                 <h3>Review, decide, and maintain policy controls</h3>
-                <p>Execute backend-authoritative actions only. Approval decisions appear only for real queued approvals.</p>
+                <p>Submit backend-authoritative reviewed decisions only. Approval decisions appear only for real queued approvals.</p>
               </div>
             </div>
             <div class="governance-action-stack">
-              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, add rationale, execute one action, then refresh and validate queue impact.</div>
+              <div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation and backend authority remains enforced.</div>
+              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, add rationale, submit one reviewed governance decision, then refresh and validate queue impact.</div>
               <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
               <div class="governance-actions std-action-row">
                 <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
                 <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
-                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Sync Settings Rules</button>
+                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings Rules</button>
                 ${
                   selectedItem?.queue_kind === "approval"
                     ? `
-                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Approve</button>
-                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Reject</button>
-                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes</button>
-                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate</button>
-                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Override</button>
+                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Approval Decision</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record Override Decision</button>
                     `
                     : ""
                 }
@@ -971,7 +995,7 @@ function renderPage(projectName, session, escapeHtml) {
                         data-risk="${escapeHtml(selectedItem.queue_risk || "medium")}"
                         data-summary="${escapeHtml(selectedItem.queue_summary || "Governance review requested.")}"
                       >
-                        Request Approval
+                        Request Approval Review
                       </button>
                     `
                     : ""
@@ -1050,6 +1074,10 @@ function bindGovernance(context, projectName, session) {
       const note = root.querySelector("#governanceDecisionNote")?.value?.trim() || `${titleCase(decision)} from Governance console.`;
       const escalationChain = asObject(session.summary?.review_model?.escalation_chain);
       const escalateTo = asArray(escalationChain.high)[1] || asArray(escalationChain.high)[0] || "admin";
+
+      if (!confirmGovernanceDecision(decision)) {
+        return;
+      }
 
       try {
         await decideProjectApproval(projectName, approvalId, {
@@ -1148,6 +1176,11 @@ function bindGovernance(context, projectName, session) {
         const settingsDraft = getSettingsDraftFromPolicy(session.summary);
         if (!Object.keys(settingsDraft).length) {
           context.showError("No durable Settings snapshot was found in the governance bridge for this project.");
+          return;
+        }
+
+        const confirmed = window.confirm("Sync Settings Rules to Governance Policy? This updates enforceable governance rules including approval-before-publish, claim review, escalation, owners, and policy behavior. Continue only if these settings are reviewed.");
+        if (!confirmed) {
           return;
         }
 
