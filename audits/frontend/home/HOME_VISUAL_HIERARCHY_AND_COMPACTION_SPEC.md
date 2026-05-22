@@ -212,3 +212,10 @@ Executive silence means:
 - no unnecessary color alerts
 - no visual clutter
 - no attention competition between surfaces
+
+AI trust visibility requires:
+- AI recommendations remain explainable
+- escalation states remain understandable
+- workflow continuity remains visible
+- orchestration never appears random
+- users always understand why the system suggests action

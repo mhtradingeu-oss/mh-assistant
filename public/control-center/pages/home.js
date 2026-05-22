@@ -935,26 +935,19 @@ export const homeRoute = {
               <span class="mhos-workforce-focus">AI Workforce Room</span>
             </div>
             <div class="mhos-workforce-flow">
-              ${(() => {
-                const primary = aiTeamCards.find(card => card.status === "Active role") || aiTeamCards[0] || null;
-                const secondary = aiTeamCards.filter(card => card !== primary);
-                return `
-                  <div class="mhos-workforce-primary">
-                    ${primary ? `
-                      <div class="mhos-specialist mhos-specialist--primary" data-role-id="${escapeHtml(primary.id)}">
-                        <div class="mhos-specialist-row">
-                          <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(primary.tone)}">${escapeHtml(primary.status)}</div>
-                          <div class="mhos-specialist-summary">
-                            <strong>${escapeHtml(primary.name)}</strong>
-                            <span>${escapeHtml(primary.summary)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ` : ""}
-                  </div>
-                  <div class="mhos-workforce-secondary">
-                    ${secondary.map(card => `
-                      <div class="mhos-specialist mhos-specialist--secondary" data-role-id="${escapeHtml(card.id)}">
+              <!-- Workflow Chain -->
+              <div class="mhos-workflow-chain">
+                ${(() => {
+                  // Projection-only workflow chain
+                  // Use aiTeamCards as workflow steps for now
+                  const workflowChain = aiTeamCards;
+                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+                  return workflowChain.map((card, idx) => {
+                    const isActive = idx === activeIdx;
+                    const isBlocked = idx === blockedIdx && blockedIdx !== -1;
+                    return `
+                      <div class="mhos-workflow-step${isActive ? ' mhos-workflow-active' : ''}${isBlocked ? ' mhos-workflow-blocked' : ''}" data-role-id="${escapeHtml(card.id)}">
                         <div class="mhos-specialist-row">
                           <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
                           <div class="mhos-specialist-summary">
@@ -962,11 +955,45 @@ export const homeRoute = {
                             <span>${escapeHtml(card.summary)}</span>
                           </div>
                         </div>
+                        ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
+                        ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
                       </div>
-                    `).join("")}
-                  </div>
-                `;
-              })()}
+                    `;
+                  }).join("")
+                })()}
+              </div>
+              <!-- Orchestration Pressure Indicator -->
+              <div class="mhos-orchestration-pressure">
+                <span class="mhos-orchestration-pressure-label">Orchestration Pressure</span>
+                <span class="mhos-orchestration-pressure-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</span>
+              </div>
+              <!-- Escalation Lane -->
+              <div class="mhos-escalation-lane">
+                ${(() => {
+                  // Projection-only escalation lane
+                  const escalationItems = (dashboard.advanced?.pendingApprovals > 0 ? [{
+                    id: "pending-approvals",
+                    type: "approval",
+                    severity: "warning",
+                    message: `${dashboard.advanced.pendingApprovals} approval${dashboard.advanced.pendingApprovals === 1 ? "" : "s"} required`,
+                    persistent: true
+                  }] : []).concat(
+                    dashboard.blockers.failedJobs.map((msg, i) => ({
+                      id: `failed-job-${i}`,
+                      type: "execution",
+                      severity: "danger",
+                      message: msg,
+                      persistent: true
+                    }))
+                  );
+                  return escalationItems.length ? escalationItems.map(item => `
+                    <div class="mhos-escalation-item mhos-escalation-severity--${escapeHtml(item.severity)}" data-escalation-id="${escapeHtml(item.id)}">
+                      <span class="mhos-escalation-severity">${escapeHtml(item.severity)}</span>
+                      <span class="mhos-escalation-message">${escapeHtml(item.message)}</span>
+                    </div>
+                  `).join("") : `<div class="mhos-escalation-item mhos-escalation-severity--neutral"><span class="mhos-escalation-message">No escalations</span></div>`;
+                })()}
+              </div>
             </div>
           </div>
         </section>
