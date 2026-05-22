@@ -930,9 +930,41 @@ export const homeRoute = {
             </button>
           </div>
 
-          <div class="home-ai-team-area">
-            <p class="card-label">AI Team Status</p>
-            ${renderAiTeamCards(aiTeamCards, escapeHtml)}
+          <div class="mhos-workforce-room">
+            <div class="mhos-workforce-head">
+              <span class="mhos-workforce-focus">AI Workforce Room</span>
+            </div>
+            <div class="mhos-workforce-flow">
+              ${(() => {
+                // Partition team into primary (active) and secondary (supporting)
+                const primary = aiTeamCards.find(card => card.status === "Active role") || aiTeamCards[0] || null;
+                const secondary = aiTeamCards.filter(card => card !== primary);
+                return `
+                  <div class="mhos-workforce-primary">
+                    ${primary ? `
+                      <div class="mhos-specialist" data-role-id="${escapeHtml(primary.id)}">
+                        <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(primary.tone)}">${escapeHtml(primary.status)}</div>
+                        <div class="mhos-specialist-summary">
+                          <strong>${escapeHtml(primary.name)}</strong>
+                          <span>${escapeHtml(primary.summary)}</span>
+                        </div>
+                      </div>
+                    ` : ""}
+                  </div>
+                  <div class="mhos-workforce-secondary">
+                    ${secondary.map(card => `
+                      <div class="mhos-specialist" data-role-id="${escapeHtml(card.id)}">
+                        <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
+                        <div class="mhos-specialist-summary">
+                          <strong>${escapeHtml(card.name)}</strong>
+                          <span>${escapeHtml(card.summary)}</span>
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                `;
+              })()}
+            </div>
           </div>
         </section>
 
@@ -1039,7 +1071,7 @@ export const homeRoute = {
       promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
     }
 
-    const aiRoleCards = document.querySelectorAll(".home-ai-team-card");
+    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist");
     aiRoleCards.forEach((card) => {
       const roleId = card.getAttribute("data-role-id");
       const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
