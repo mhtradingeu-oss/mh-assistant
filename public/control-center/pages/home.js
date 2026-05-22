@@ -428,6 +428,15 @@ function buildExecutiveData(state) {
   const campaignReadinessTone = totalBlockers ? "warning" : "success";
 
   return {
+        executiveHealthStrip: {
+          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+          confidenceLabel: intelligenceTone === "success" ? `Signals: ${formatCount(intelligenceScore)}` : "Needs Input",
+          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : "None",
+          approvals: formatCount(pendingApprovals.length),
+          confidence: formatPercent(systemScore),
+          escalations: formatCount(failedExecutions.length),
+          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+        },
     projectName,
     headerStatus: humanizeStatus(
       readinessData.readiness_status || overviewData.readiness_status || overviewData.status,
@@ -642,6 +651,27 @@ export const homeRoute = {
               <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
               <span class="home-header-score-label">System Health</span>
             </div>
+          </div>
+        </section>
+
+        <!-- 1.1 EXECUTIVE HEALTH STRIP (Ribbon) -->
+        <section class="mhos-executive-strip mhos-clean-surface" aria-label="Executive Health Strip">
+          <div class="mhos-executive-strip-head mhos-clean-header-head">
+            <div>
+              <span class="mhos-clean-eyebrow">Executive Health</span>
+              <span class="mhos-clean-title">${escapeHtml(dashboard.executiveHealthStrip.statusLabel)}</span>
+            </div>
+            <div class="mhos-executive-strip-meta mhos-clean-actions">
+              <span class="mhos-clean-pill is-info">${escapeHtml(dashboard.executiveHealthStrip.statusLabel)}</span>
+              <span class="mhos-clean-pill is-success">${escapeHtml(dashboard.executiveHealthStrip.confidenceLabel)}</span>
+              <span class="mhos-clean-pill is-warning">${escapeHtml(dashboard.executiveHealthStrip.escalationLabel)}</span>
+            </div>
+          </div>
+          <div class="mhos-executive-strip-body mhos-clean-stack">
+            <span class="mhos-clean-meta">Approvals: <strong>${escapeHtml(dashboard.executiveHealthStrip.approvals)}</strong></span>
+            <span class="mhos-clean-meta">Confidence: <strong>${escapeHtml(dashboard.executiveHealthStrip.confidence)}</strong></span>
+            <span class="mhos-clean-meta">Escalations: <strong>${escapeHtml(dashboard.executiveHealthStrip.escalations)}</strong></span>
+            <span class="mhos-executive-strip-summary mhos-clean-copy">${escapeHtml(dashboard.executiveHealthStrip.summary)}</span>
           </div>
         </section>
 
