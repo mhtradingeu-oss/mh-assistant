@@ -550,3 +550,76 @@ The result should feel beyond:
 
 The platform should feel like:
 a real AI-powered business operating environment.
+
+### 13.13 Shared Operational Memory
+
+The AI Workforce should maintain visible shared operational memory.
+
+The system should visually communicate:
+- active context
+- related workflows
+- linked campaigns
+- customer history
+- approvals
+- previous decisions
+- related evidence
+- unresolved blockers
+
+Users should understand:
+- what the team knows
+- what context is active
+- what information is shared across specialists
+
+### 13.14 AI Confidence & Trust Layer
+
+AI specialists should communicate confidence and certainty levels.
+
+The interface may indicate:
+- confidence score
+- risk level
+- approval sensitivity
+- evidence strength
+- recommendation certainty
+
+The goal is to increase:
+- trust
+- transparency
+- operational confidence
+
+without overwhelming the user with technical metrics.
+
+### 13.15 Executive Override Experience
+
+Users must always retain final operational control.
+
+The interface should clearly support:
+- manual override
+- escalation
+- approval reassignment
+- execution cancellation
+- rollback
+- emergency stop actions
+
+The AI Workforce supports operations,
+but human leadership remains authoritative.
+
+### 13.16 Emotional UX Tone
+
+The emotional tone of MH-OS should feel:
+- calm
+- focused
+- intelligent
+- premium
+- trustworthy
+- operationally confident
+
+Avoid:
+- noisy dashboards
+- excessive alerts
+- flashy gaming behavior
+- chaotic motion
+- overwhelming interfaces
+
+The interface should reduce stress,
+increase clarity,
+and improve operational confidence.
