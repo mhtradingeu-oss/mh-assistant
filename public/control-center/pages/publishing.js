@@ -1,3 +1,84 @@
+// --- UI/UX Consolidation Helpers ---
+function renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary, queue, blockers, escapeHtml }) {
+  const context = [
+    projectName && `<span>Project: <strong>${escapeHtml(projectName)}</strong></span>`,
+    selectedItem?.campaign && `<span>Campaign: <strong>${escapeHtml(selectedItem.campaign)}</strong></span>`,
+    selectedItem?.channel && `<span>Channel: <strong>${escapeHtml(titleCase(selectedItem.channel))}</strong></span>`
+  ].filter(Boolean).join(' &middot; ');
+  const status = selectedItem ? titleCase(selectedItem.status) : "No item selected";
+  const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";
+  const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";
+  const safety = `Publishing prepares channel packages, schedules, and approval-ready handoffs. Final execution remains <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+  const actions = [
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
+    `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingHandoffPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Review Approval Gate</button>`,
+    `<button type="button" class="btn btn-primary" onclick="document.getElementById('publishingPushAiBtn')?.scrollIntoView({behavior:'smooth',block:'start'})">Open AI Review</button>`
+  ].join(' ');
+  return `
+    <section class="publishing-command-header" role="region" aria-label="Publishing Command Header">
+      <div class="publishing-command-header-title">Publishing Control Workspace</div>
+      <div class="publishing-command-header-context">${context}</div>
+      <div class="publishing-command-header-status">Status: <strong>${escapeHtml(status)}</strong> &middot; Approval: <strong>${escapeHtml(approval)}</strong></div>
+      <div class="publishing-command-header-status">Next: <span>${nextAction}</span></div>
+      <div class="publishing-command-header-safety">${safety}</div>
+      <div class="publishing-command-header-actions">${actions}</div>
+    </section>
+  `;
+}
+
+function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers, approvalState, escapeHtml }) {
+  const steps = [
+    { key: "draft", label: "Draft" },
+    { key: "source", label: "Source" },
+    { key: "package", label: "Package" },
+    { key: "approval", label: "Approval" },
+    { key: "schedule", label: "Schedule" },
+    { key: "handoff", label: "Execution Handoff" }
+  ];
+  const statusMap = {
+    draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",
+    source: selectedItem?.source ? "ready" : "missing",
+    package: selectedItem ? "ready" : "missing",
+    approval: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing",
+    schedule: selectedItem?.status === "scheduled" ? "ready" : "missing",
+    handoff: selectedItem?.status === "published" ? "ready" : "missing"
+  };
+  return `
+    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+      ${steps.map(step => `
+        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+          <span>${escapeHtml(step.label)}</span>
+          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+        </div>
+      `).join('')}
+    </nav>
+  `;
+}
+
+function renderPublishingReadinessSummary({ selectedItem, recommendation, blockers, assetData, escapeHtml }) {
+  const readiness = [
+    { key: "source", label: "Source", state: selectedItem?.source ? "ready" : "missing" },
+    { key: "copy", label: "Copy", state: selectedItem?.contentItem ? "ready" : "missing" },
+    { key: "media", label: "Media", state: assetData?.some(a => a.type === "media" && a.status === "Ready") ? "ready" : "missing" },
+    { key: "channel", label: "Channel", state: selectedItem?.channel ? "ready" : "missing" },
+    { key: "schedule", label: "Schedule", state: selectedItem?.scheduledFor ? "ready" : "missing" },
+    { key: "governance", label: "Governance", state: selectedItem?.governanceStatus === "approved" ? "ready" : "missing" },
+    { key: "approval", label: "Approval", state: selectedItem?.approvalStatus === "approved" ? "ready" : selectedItem?.approvalStatus === "needs approval" ? "warning" : "missing" }
+  ];
+  const blockersSummary = blockers && blockers.length ? `<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>` : "";
+  return `
+    <section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">
+      ${readiness.map(r => `
+        <div class="publishing-readiness-card is-${r.state}">
+          <span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>
+          <span>${r.state}</span>
+        </div>
+      `).join('')}
+      ${blockersSummary}
+    </section>
+  `;
+}
 import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";
 import {
   filterAssetCategories,
@@ -654,6 +735,7 @@ function renderScopedStyles() {
         background: rgba(37, 99, 235, 0.08);
       }
 
+      /* Publishing queue dark contrast correction */
       .publishing-queue-list,
       .publishing-calendar-list,
       .publishing-blocker-list {
@@ -667,14 +749,16 @@ function renderScopedStyles() {
         display: grid;
         gap: 10px;
         min-width: 0;
-        border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
-        border-radius: 8px;
         padding: 12px;
-        background: var(--surface, #fff);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.74);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        color: #e5eef8;
       }
 
       .publishing-queue-row.is-active {
-        border-color: var(--accent, #2563eb);
+        background: rgba(15, 23, 42, 0.88);
+        border-color: rgba(34, 211, 238, 0.34);
       }
 
       .publishing-queue-main,
@@ -684,21 +768,22 @@ function renderScopedStyles() {
         border: 0;
         padding: 0;
         background: transparent;
-        color: inherit;
+        color: #e5eef8;
         text-align: left;
         cursor: pointer;
       }
 
       .publishing-queue-title {
         display: block;
-        font-weight: 700;
+        font-weight: 800;
+        color: #f8fafc;
         overflow-wrap: anywhere;
       }
 
       .publishing-queue-meta {
         display: block;
         margin-top: 4px;
-        color: var(--text-muted, #64748b);
+        color: rgba(226, 232, 240, 0.72);
         font-size: 0.82rem;
         line-height: 1.35;
         overflow-wrap: anywhere;
@@ -711,12 +796,21 @@ function renderScopedStyles() {
       }
 
       .publishing-queue-actions button {
-        border: 1px solid var(--border, rgba(148, 163, 184, 0.28));
+        border: 1px solid rgba(148, 163, 184, 0.22);
         border-radius: 999px;
         padding: 6px 9px;
-        background: transparent;
-        color: inherit;
+        background: rgba(15, 23, 42, 0.72);
+        color: #e5eef8;
         cursor: pointer;
+      }
+
+      .publishing-queue-actions button:disabled,
+      .publishing-queue-actions button[disabled] {
+        background: rgba(15, 23, 42, 0.44);
+        border-color: rgba(148, 163, 184, 0.14);
+        color: rgba(226, 232, 240, 0.44);
+        opacity: 1;
+        cursor: not-allowed;
       }
 
       .publishing-status-pill {
@@ -938,20 +1032,24 @@ function renderRecommendation(recommendation, counts, assetBlockers, checks, esc
         <button id="publishingAutoPrepareBtn" class="btn btn-secondary" type="button">Auto-prepare publishing plan</button>
         <button id="publishingAutoStopBtn" class="btn btn-secondary" type="button">Stop Auto Mode</button>
       </div>
+      <details class="publishing-automation-preview publishing-block-gap">
+        <summary>Automation Preview</summary>
+        <div class="publishing-automation-preview-copy">Automation cannot publish without manual review, confirmation, and backend approval gates.</div>
+        <div class="simple-banner publishing-inline-gap">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
+        ${asArray(recommendation.externalBlockers).length ? `
+          <div class="simple-banner publishing-block-gap">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
+        ` : ""}
+        ${publishingAutomationState.progress ? `<div class="simple-banner publishing-block-gap">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
+        ${publishingAutomationState.result ? `<div class="simple-banner publishing-inline-gap">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
+        ${getAutoModeState().status === "waiting_approval" ? `
+          <div class="simple-banner publishing-inline-gap"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
+          <div class="publishing-action-row publishing-inline-gap">
+            <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
+            <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
+          </div>
+        ` : ""}
+      </details>
       <div class="simple-banner">Opens AI with this context only. <strong>No approval, publishing, or backend execution is performed.</strong></div>
-      <div class="simple-banner" style="margin-top:8px;">Auto Mode status: ${escapeHtml(getAutoModeState().status || "idle")}</div>
-      ${asArray(recommendation.externalBlockers).length ? `
-        <div class="simple-banner" style="margin-top:12px;">Cross-system blockers: ${escapeHtml(asArray(recommendation.externalBlockers).map((item) => item.title).join("; "))}</div>
-      ` : ""}
-      ${publishingAutomationState.progress ? `<div class="simple-banner" style="margin-top:12px;">${escapeHtml(publishingAutomationState.progress)}</div>` : ""}
-      ${publishingAutomationState.result ? `<div class="simple-banner" style="margin-top:8px;">${escapeHtml(publishingAutomationState.result)}</div>` : ""}
-      ${getAutoModeState().status === "waiting_approval" ? `
-        <div class="simple-banner" style="margin-top:8px;"><strong>Approval needed:</strong> ${escapeHtml(asObject(getAutoModeState().approvalRequiredStep).reason || "Manual approval required.")}</div>
-        <div class="publishing-action-row" style="margin-top:8px;">
-          <button id="publishingAutoApproveBtn" class="btn btn-secondary" type="button">Approve automation step</button>
-          <button id="publishingAutoSkipBtn" class="btn btn-secondary" type="button">Skip automation step</button>
-        </div>
-      ` : ""}
     </section>
   `;
 }
@@ -986,9 +1084,9 @@ function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
         </button>
         <div class="publishing-queue-state">${renderStatusPill(item.status, escapeHtml)}</div>
         <div class="publishing-queue-actions">
-          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review item</button>
-          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Schedule item</button>
-          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Publish to configured channels</button>
+          <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>
+          <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>
+          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>
           <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
           <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
         </div>
@@ -1069,7 +1167,7 @@ function renderBuilder(session, channels, checks, escapeHtml) {
           <div class="setup-field-group">
             <div class="setup-field-head">
               <label class="setup-label" for="publishingDateInput">Publish date</label>
-              <span class="setup-field-state is-optional">Schedule item</span>
+              <span class="setup-field-state is-optional">Queue for Manual Publishing</span>
             </div>
             <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
             ${fieldError(session, "publishDate", escapeHtml)}
@@ -1114,7 +1212,7 @@ function renderBuilder(session, channels, checks, escapeHtml) {
       <div class="publishing-form-actions">
         <button id="publishingNewItemBtn" class="btn btn-secondary" type="button">New Draft</button>
         <button id="publishingBuilderSaveBtn" class="btn btn-secondary" type="button">Save publishing draft</button>
-        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Schedule item</button>
+        <button id="publishingScheduleBtn" class="btn btn-primary" type="button">Queue for Manual Publishing</button>
       </div>
       ${session.draftMessage ? `<div class="simple-banner">${escapeHtml(session.draftMessage)}</div>` : ""}
     </section>
@@ -1163,18 +1261,18 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
 }
 
 function renderCalendar(queue, escapeHtml) {
-  const scheduled = queue
-    .filter((item) => item.scheduledFor)
-    .sort((a, b) => (toDate(a.scheduledFor)?.getTime() || 0) - (toDate(b.scheduledFor)?.getTime() || 0))
-    .slice(0, 8);
+  const now = Date.now();
+  const scheduled = queue.filter((item) => item.scheduledFor);
+  const future = scheduled.filter((item) => toDate(item.scheduledFor)?.getTime() > now);
+  const past = scheduled.filter((item) => toDate(item.scheduledFor)?.getTime() <= now);
 
-  if (!scheduled.length) {
+  if (!future.length && !past.length) {
     return `
       <section class="card publishing-card">
         <div class="card-head">
           <div>
             <div class="setup-kicker">Calendar / Timeline Snapshot</div>
-            <h3>No upcoming scheduled items</h3>
+            <h3>No scheduled window</h3>
           </div>
           <span class="card-badge neutral">Empty</span>
         </div>
@@ -1183,17 +1281,11 @@ function renderCalendar(queue, escapeHtml) {
     `;
   }
 
-  return `
-    <section class="card publishing-card">
-      <div class="card-head">
-        <div>
-          <div class="setup-kicker">Calendar / Timeline Snapshot</div>
-          <h3>Upcoming scheduled items</h3>
-        </div>
-        <span class="card-badge neutral">${escapeHtml(String(scheduled.length))} upcoming</span>
-      </div>
+  let panels = "";
+  if (future.length) {
+    panels += `
       <div class="publishing-calendar-list">
-        ${scheduled.map((item) => `
+        ${future.slice(0, 8).map((item) => `
           <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
             <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
             <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
@@ -1202,6 +1294,34 @@ function renderCalendar(queue, escapeHtml) {
           </button>
         `).join("")}
       </div>
+    `;
+  }
+  if (past.length) {
+    panels += `
+      <div class="publishing-calendar-list publishing-block-gap">
+        <div class="simple-banner publishing-block-gap publishing-past-schedule-warning">Past scheduled items — reschedule required</div>
+        ${past.slice(0, 8).map((item) => `
+          <button class="publishing-calendar-row" type="button" data-publishing-select="${escapeHtml(item.id)}">
+            <span>${escapeHtml(formatDate(item.scheduledFor))}</span>
+            <strong>${escapeHtml(formatTime(item.scheduledFor))}</strong>
+            <em>${escapeHtml(item.title)}</em>
+            ${renderStatusPill(item.status, escapeHtml)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  return `
+    <section class="card publishing-card">
+      <div class="card-head">
+        <div>
+          <div class="setup-kicker">Calendar / Timeline Snapshot</div>
+          <h3>${future.length ? "Upcoming scheduled items" : "Past scheduled items — reschedule required"}</h3>
+        </div>
+        <span class="card-badge neutral">${escapeHtml(String(future.length || past.length))} ${future.length ? "upcoming" : "past"}</span>
+      </div>
+      ${panels}
     </section>
   `;
 }
@@ -1268,7 +1388,7 @@ function renderAssetGate(state, escapeHtml) {
         <span class="card-badge ${blockers.length ? "danger" : "success"}">${escapeHtml(blockers.length ? `${blockers.length} blockers` : "Ready")}</span>
       </div>
       ${renderAssetDependencyRows(assetData, PUBLISHING_ASSET_KEYS, escapeHtml, "Publishing library inputs are covered.")}
-      <div class="simple-banner" style="margin-top: 12px;">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
+      <div class="simple-banner publishing-block-gap">${escapeHtml(getAssetNextAction(assetData, PUBLISHING_ASSET_KEYS))}</div>
     </section>
   `;
 }
@@ -1750,19 +1870,12 @@ export const publishingRoute = {
     const assetBlockers = publishingAssets.filter((item) => ["Missing", "Needs Review"].includes(item.status));
     const recommendation = buildRecommendation({ queue, counts, assetBlockers, checks, handoff, globalBlockers });
 
-    // --- Compact Safety/Authority Banner ---
-    const safetyBanner = `
-      <div class="publishing-safety-banner" role="note" aria-label="Publishing Safety and Authority Notice">
-        <span class="publishing-safety-icon" aria-hidden="true">&#128274;</span>
-        <span class="publishing-safety-text">
-          Publishing prepares channel packages, schedules, and approval-ready handoffs. Final publishing remains <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>. High-risk items should go to <strong>Governance Review</strong> first.
-        </span>
-      </div>
-    `;
 
     root.innerHTML = `
       ${renderScopedStyles()}
-      ${safetyBanner}
+      ${renderPublishingCommandHeader({ projectName, recommendation, selectedItem, summary: null, queue, blockers: assetBlockers, escapeHtml })}
+      ${renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers: assetBlockers, approvalState: selectedItem?.approvalStatus, escapeHtml })}
+      ${renderPublishingReadinessSummary({ selectedItem, recommendation, blockers: assetBlockers, assetData: publishingAssets, escapeHtml })}
       <div class="publishing-execution-center">
         ${renderOverview(counts, queue, escapeHtml)}
         ${renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml)}
