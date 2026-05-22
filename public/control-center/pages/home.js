@@ -936,28 +936,31 @@ export const homeRoute = {
             </div>
             <div class="mhos-workforce-flow">
               ${(() => {
-                // Partition team into primary (active) and secondary (supporting)
                 const primary = aiTeamCards.find(card => card.status === "Active role") || aiTeamCards[0] || null;
                 const secondary = aiTeamCards.filter(card => card !== primary);
                 return `
                   <div class="mhos-workforce-primary">
                     ${primary ? `
-                      <div class="mhos-specialist" data-role-id="${escapeHtml(primary.id)}">
-                        <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(primary.tone)}">${escapeHtml(primary.status)}</div>
-                        <div class="mhos-specialist-summary">
-                          <strong>${escapeHtml(primary.name)}</strong>
-                          <span>${escapeHtml(primary.summary)}</span>
+                      <div class="mhos-specialist mhos-specialist--primary" data-role-id="${escapeHtml(primary.id)}">
+                        <div class="mhos-specialist-row">
+                          <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(primary.tone)}">${escapeHtml(primary.status)}</div>
+                          <div class="mhos-specialist-summary">
+                            <strong>${escapeHtml(primary.name)}</strong>
+                            <span>${escapeHtml(primary.summary)}</span>
+                          </div>
                         </div>
                       </div>
                     ` : ""}
                   </div>
                   <div class="mhos-workforce-secondary">
                     ${secondary.map(card => `
-                      <div class="mhos-specialist" data-role-id="${escapeHtml(card.id)}">
-                        <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
-                        <div class="mhos-specialist-summary">
-                          <strong>${escapeHtml(card.name)}</strong>
-                          <span>${escapeHtml(card.summary)}</span>
+                      <div class="mhos-specialist mhos-specialist--secondary" data-role-id="${escapeHtml(card.id)}">
+                        <div class="mhos-specialist-row">
+                          <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
+                          <div class="mhos-specialist-summary">
+                            <strong>${escapeHtml(card.name)}</strong>
+                            <span>${escapeHtml(card.summary)}</span>
+                          </div>
                         </div>
                       </div>
                     `).join("")}
