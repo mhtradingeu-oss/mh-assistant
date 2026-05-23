@@ -1570,9 +1570,9 @@ export const campaignStudioRoute = {
             </div>
           </div>
 
-          <aside class="mhos-campaign-strategist-panel mhos-context-actions" aria-label="Campaign strategist recommendation">
+          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
             <span class="mhos-campaign-panel-label">Strategist next move</span>
-            <strong class="mhos-campaign-panel-action">${escapeHtml(strategistNextAction)}</strong>
+            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
             <p class="mhos-campaign-panel-copy">${escapeHtml(strategistMode)}</p>
           </aside>
 
@@ -1582,26 +1582,26 @@ export const campaignStudioRoute = {
             <button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>
           </div>
 
-          <div class="mhos-campaign-operating-summary" aria-label="Campaign operating summary">
-            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone}">
-              <span class="mhos-campaign-metric-label">Readiness</span>
-              <strong class="mhos-campaign-metric-value">${escapeHtml(executionReadiness.status)}</strong>
-              <small class="mhos-campaign-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+          <div class="mhos-campaign-operating-summary mhos-executive-summary-grid" aria-label="Campaign operating summary">
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Readiness</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
             </article>
-            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone}">
-              <span class="mhos-campaign-metric-label">Intelligence</span>
-              <strong class="mhos-campaign-metric-value">${escapeHtml(intelligenceLabel)}</strong>
-              <small class="mhos-campaign-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Intelligence</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(intelligenceLabel)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
             </article>
-            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone}">
-              <span class="mhos-campaign-metric-label">Blockers</span>
-              <strong class="mhos-campaign-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
-              <small class="mhos-campaign-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Blockers</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
             </article>
-            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone}">
-              <span class="mhos-campaign-metric-label">Channels</span>
-              <strong class="mhos-campaign-metric-value">${escapeHtml(channelStateLabel)}</strong>
-              <small class="mhos-campaign-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone} mhos-executive-summary-item">
+              <span class="mhos-campaign-metric-label mhos-executive-metric-label">Channels</span>
+              <strong class="mhos-campaign-metric-value mhos-executive-metric-value">${escapeHtml(channelStateLabel)}</strong>
+              <small class="mhos-campaign-metric-note mhos-executive-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
             </article>
           </div>
         </section>
