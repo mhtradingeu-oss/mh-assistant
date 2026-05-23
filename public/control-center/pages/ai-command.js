@@ -3492,17 +3492,17 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
 
 	return `
-		<header class="aicmd-v2-header aicmd-room-header">
-			<div class="aicmd-room-title-block">
-				<div class="aicmd-room-eyebrow">AI Operating Room</div>
-				<h1 class="aicmd-room-title">AI Team Command Center</h1>
-				<p class="aicmd-room-subtitle">Run MH-OS as an AI Business Operating System: one specialist or the full team turns requests into review-ready drafts, tasks, workflows, and handoffs.</p>
+		<header class="aicmd-v2-header aicmd-room-header mhos-executive-surface">
+			<div class="aicmd-room-title-block mhos-context-ribbon">
+				<div class="aicmd-room-eyebrow mhos-context-kicker">AI Operating Room</div>
+				<h1 class="aicmd-room-title mhos-context-title">AI Team Command Center</h1>
+				<p class="aicmd-room-subtitle mhos-context-description">Run MH-OS as an AI Business Operating System: one specialist or the full team turns requests into review-ready drafts, tasks, workflows, and handoffs.</p>
 			</div>
-			<div class="aicmd-v2-header-actions aicmd-room-header-actions">
-				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+			<div class="aicmd-v2-header-actions aicmd-room-header-actions mhos-executive-panel">
+				   <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
 					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
 				</span>
-				<select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
+				   <select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
                                    <option value="">Recent chats</option>
                                    ${asArray(session.chatSessions).slice(0, 8).map((item) => `
                                            <option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
@@ -3510,36 +3510,36 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
                                            </option>
                                    `).join("")}
                            </select>
-                           <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
-				<button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
+						   <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
+				   <button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
 			</div>
 
-			<div class="aicmd-v2-header-meta aicmd-room-meta">
-				<div class="aicmd-v2-meta-chip is-project">
-					<span>Project</span>
+			<div class="aicmd-v2-header-meta aicmd-room-meta mhos-executive-summary-grid">
+				<div class="aicmd-v2-meta-chip is-project mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Project</span>
 					<strong>${escapeHtml(projectName || "Not selected")}</strong>
 				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Mode</span>
+				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Mode</span>
 					<strong>${escapeHtml(modeLabel)}</strong>
 				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Market</span>
+				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Market</span>
 					<strong>${escapeHtml(languagePlan.market)}</strong>
 				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Language</span>
+				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Language</span>
 					<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>
 				</div>
-				<div class="aicmd-v2-meta-chip">
-					<span>Readiness</span>
+				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Readiness</span>
 					<strong>${escapeHtml(readinessLabel)}</strong>
 				</div>
 			</div>
 
-			<div class="aicmd-room-flow" aria-label="AI operating flow">
+			<div class="aicmd-room-flow mhos-workflow-chain" aria-label="AI operating flow">
 				${AI_ROOM_FLOW_STEPS.map((step, index) => `
-					<div class="aicmd-room-flow-step${index === activeFlowIndex ? " is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+					<div class="aicmd-room-flow-step mhos-workflow-step${index === activeFlowIndex ? " mhos-workflow-active is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
 						<span class="aicmd-room-flow-number">${index + 1}</span>
 						<strong>${escapeHtml(step.title)}</strong>
 						<small>${escapeHtml(step.description)}</small>
@@ -3886,14 +3886,14 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 
                         ${renderAiToolDock({ projectName: aiContext.projectName || "", specialistId: session.modeId, teamMode: session.teamMode, escapeHtml })}
 
-                        <div class="aicmd-chatgpt-action-row">
-                                <button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary" type="button">Draft</button>
-                                <button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary" type="button">Task</button>
-                                <button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary" type="button">Draft Workflow</button>
-                                <button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary" type="button">Prepare Handoff</button>
-                                <button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>
-                                <button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
-                        </div>
+						<div class="aicmd-chatgpt-action-row mhos-workflow-chain">
+							<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Draft</button>
+							<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Task</button>
+							<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Draft Workflow</button>
+							<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Prepare Handoff</button>
+							<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost mhos-workflow-step" type="button">Save</button>
+							<button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost mhos-workflow-step" type="button">Clear</button>
+						</div>
 
                         <div class="aicmd-chatgpt-context-row">
                                 ${renderLanguageMarketStrip(aiContext, escapeHtml)}
@@ -4026,21 +4026,21 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
 			</div>
 
-                        ${hasPreview ? `
-                                <div class="aicmd-room-output-tabs" role="tablist" aria-label="Output workspace tabs">
-                                        ${AI_ROOM_OUTPUT_TABS.map((tab) => `
-                                                <button
-                                                        type="button"
-                                                        class="aicmd-room-output-tab${activeTab === tab.id ? " is-active" : ""}"
-                                                        data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
-                                                        role="tab"
-                                                        aria-selected="${activeTab === tab.id ? "true" : "false"}"
-                                                >
-                                                        <strong>${escapeHtml(tab.label)}</strong>
-                                                        <span>${escapeHtml(tab.helper)}</span>
-                                                </button>
-                                        `).join("")}
-                                </div>
+						${hasPreview ? `
+							<div class="aicmd-room-output-tabs mhos-workflow-chain" role="tablist" aria-label="Output workspace tabs">
+								${AI_ROOM_OUTPUT_TABS.map((tab) => `
+									<button
+										type="button"
+										class="aicmd-room-output-tab mhos-workflow-step${activeTab === tab.id ? " mhos-workflow-active is-active" : ""}"
+										data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
+										role="tab"
+										aria-selected="${activeTab === tab.id ? "true" : "false"}"
+									>
+										<strong>${escapeHtml(tab.label)}</strong>
+										<span>${escapeHtml(tab.helper)}</span>
+									</button>
+								`).join("")}
+							</div>
 
                                 <div class="aicmd-room-output-meta">
                                         <span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
@@ -4395,14 +4395,14 @@ function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
 	const visibleContextItems = contextItems.concat(scopedContextItems);
 
 	return `
-		<div class="aicmd-v2-context">
-			<div class="aicmd-v2-context-head">
-				<span class="aicmd-v2-context-label">Context</span>
+		<div class="aicmd-v2-context mhos-context-ribbon">
+			<div class="aicmd-v2-context-head mhos-context-main">
+				<span class="aicmd-v2-context-label mhos-context-kicker">Context</span>
 			</div>
-			<div class="aicmd-v2-context-grid">
+			<div class="aicmd-v2-context-grid mhos-executive-summary-grid">
 				${visibleContextItems.map((item) => `
-					<div class="aicmd-v2-context-item${item.present ? " is-present" : " is-empty"}${item.scoped ? " is-scoped" : ""}">
-						<span class="aicmd-v2-context-item-label">${escapeHtml(item.label)}</span>
+					<div class="aicmd-v2-context-item mhos-executive-summary-item${item.present ? " is-present" : " is-empty"}${item.scoped ? " is-scoped" : ""}">
+						<span class="aicmd-v2-context-item-label mhos-executive-metric-label">${escapeHtml(item.label)}</span>
 						<span class="aicmd-v2-context-item-value">${escapeHtml(item.value)}</span>
 					</div>
 				`).join("")}
