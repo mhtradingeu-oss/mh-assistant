@@ -560,6 +560,7 @@
   gap: var(--density-compact);
 }
 
+
 :where(.mhos-clean-surface) {
   min-width: 0;
   padding: var(--mhos-clean-space-3);
@@ -568,9 +569,10 @@
   background: linear-gradient(160deg, var(--mhos-clean-surface-bg), var(--mhos-clean-surface-bg-strong));
   box-shadow: var(--mhos-clean-shadow-sm);
   transition:
+    opacity var(--mhos-clean-transition-fast),
     border-color var(--mhos-clean-transition-fast),
-    box-shadow var(--mhos-clean-transition-base),
     background var(--mhos-clean-transition-base),
+    box-shadow var(--mhos-clean-transition-base),
     transform var(--mhos-clean-transition-fast);
 }
 
@@ -580,10 +582,12 @@
   box-shadow: var(--mhos-clean-shadow-md);
 }
 
+
 :where(.mhos-clean-surface.is-interactive:hover, .mhos-clean-surface.is-interactive:focus-within) {
   border-color: var(--mhos-clean-surface-border-strong);
   box-shadow: var(--mhos-clean-shadow-md);
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
+  opacity: 0.98;
 }
 
 :where(.mhos-clean-surface.is-selected, .mhos-clean-surface[aria-selected="true"], .mhos-clean-state.is-selected, .mhos-clean-readiness-item.is-selected, .mhos-clean-blocker.is-selected, .mhos-clean-next-step.is-selected) {
@@ -721,6 +725,7 @@
   gap: var(--mhos-clean-space-2);
 }
 
+
 :where(.mhos-clean-btn) {
   display: inline-flex;
   align-items: center;
@@ -735,18 +740,24 @@
   line-height: 1.1;
   cursor: pointer;
   transition:
+    opacity var(--mhos-clean-transition-fast),
     transform var(--mhos-clean-transition-fast),
     border-color var(--mhos-clean-transition-fast),
     background var(--mhos-clean-transition-base),
     box-shadow var(--mhos-clean-transition-base);
 }
 
+
 :where(.mhos-clean-btn:hover) {
   transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(1, 8, 15, 0.13);
+  opacity: 0.98;
 }
+
 
 :where(.mhos-clean-btn:active) {
   transform: translateY(0);
+  opacity: 1;
 }
 
 :where(.mhos-clean-btn:focus-visible) {
@@ -808,6 +819,7 @@
   list-style: none;
 }
 
+
 :where(.mhos-clean-readiness-item, .mhos-clean-blocker, .mhos-clean-next-step) {
   display: grid;
   gap: 4px;
@@ -816,14 +828,17 @@
   border: 1px solid var(--mhos-clean-surface-border);
   background: var(--mhos-clean-surface-overlay);
   transition:
+    opacity var(--mhos-clean-transition-fast),
     border-color var(--mhos-clean-transition-fast),
     background var(--mhos-clean-transition-fast),
     box-shadow var(--mhos-clean-transition-base);
 }
 
+
 :where(.mhos-clean-readiness-item:hover, .mhos-clean-blocker:hover, .mhos-clean-next-step:hover) {
   border-color: var(--mhos-clean-surface-border-strong);
   background: rgba(30, 58, 84, 0.36);
+  opacity: 0.98;
 }
 
 :where(.mhos-clean-state) {
