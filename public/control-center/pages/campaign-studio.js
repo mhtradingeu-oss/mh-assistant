@@ -1553,32 +1553,33 @@ export const campaignStudioRoute = {
 
     root.innerHTML = `
       <div class="campaign-studio-wrapper">
-        <section class="mhos-campaign-command-header" aria-label="Campaign command board">
-          <div class="mhos-campaign-command-main">
-            <div class="mhos-campaign-kicker-row">
-              <span class="mhos-campaign-kicker">Campaign Command Board</span>
+
+        <section class="mhos-campaign-command-header mhos-context-ribbon" aria-label="Campaign command board">
+          <div class="mhos-campaign-command-main mhos-context-main">
+            <div class="mhos-campaign-kicker-row mhos-context-kicker">
+              <span class="mhos-campaign-kicker mhos-context-kicker">Campaign Command Board</span>
               <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
             </div>
-            <h2 class="mhos-campaign-title">${escapeHtml(activeCampaignLabel)}</h2>
-            <p class="mhos-campaign-summary">${escapeHtml(goalLabel)}</p>
-            <div class="mhos-campaign-context-row" aria-label="Campaign context">
-              <span class="mhos-campaign-context-item">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
-              <span class="mhos-campaign-context-item">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
-              <span class="mhos-campaign-context-item">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
-              <span class="mhos-campaign-context-item">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
+            <h2 class="mhos-campaign-title mhos-context-title">${escapeHtml(activeCampaignLabel)}</h2>
+            <p class="mhos-campaign-summary mhos-context-description">${escapeHtml(goalLabel)}</p>
+            <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Campaign context">
+              <span class="mhos-campaign-context-item mhos-context-chip">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+              <span class="mhos-campaign-context-item mhos-context-chip">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
             </div>
           </div>
 
-          <aside class="mhos-campaign-strategist-panel" aria-label="Campaign strategist recommendation">
+          <aside class="mhos-campaign-strategist-panel mhos-context-actions" aria-label="Campaign strategist recommendation">
             <span class="mhos-campaign-panel-label">Strategist next move</span>
             <strong class="mhos-campaign-panel-action">${escapeHtml(strategistNextAction)}</strong>
             <p class="mhos-campaign-panel-copy">${escapeHtml(strategistMode)}</p>
           </aside>
 
-          <div class="mhos-campaign-actions" aria-label="Campaign command actions">
-            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh campaign intelligence</button>
-            <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save campaign draft</button>
-            <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Save campaign plan</button>
+          <div class="mhos-campaign-actions mhos-context-actions" aria-label="Campaign command actions">
+            <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary mhos-context-action" type="button">Refresh campaign intelligence</button>
+            <button id="campaignSaveDraftBtn" class="btn btn-secondary mhos-context-action" type="button">Save campaign draft</button>
+            <button id="campaignBuildPlanBtn" class="btn btn-primary mhos-context-action" type="button">Save campaign plan</button>
           </div>
 
           <div class="mhos-campaign-operating-summary" aria-label="Campaign operating summary">
