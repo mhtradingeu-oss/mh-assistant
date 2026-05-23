@@ -627,7 +627,7 @@ function buildAutoPlanFromCommand(commandText, session) {
 		if (/act as the media director/i.test(text)) return "media";
 		if (/act as the video lead/i.test(text)) return "video_lead";
 		if (/act as the publisher/i.test(text)) return "publisher";
-		if (/act as the ads optimizer/i.test(text)) return "ads";
+		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
 		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
 		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
 		if (/act as the operations lead/i.test(text)) return "operations";
@@ -1305,7 +1305,7 @@ function specialistTemplateForOutput({ specialist, outputType, prompt, projectNa
 		status: "draft_preview",
 		safetyLabel: "Guidance and draft only. No backend execution.",
 		nextSafeAction: `Review in ${routeLabel(route)}`,
-		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in destination workspaces."
+		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
 	};
 
 	if (specialistId === "strategist") {
@@ -3596,7 +3596,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 					const isTeamActive = session.teamMode === "team";
 					const specialization = asString(spec.summary).replace(/\.$/, "");
 					const backendAlias = AI_ROOM_BACKEND_ROLE_ALIASES[roleId];
-					const roleLine = `${spec.status || "Ready"} - ${spec.position || "Specialist"}${backendAlias ? ` - Backend: ${backendAlias}` : ""}`;
+					const roleLine = `${spec.status || "Ready"} - ${spec.position || spec.label || "Specialist"}${backendAlias ? ` - Backend: ${backendAlias}` : ""}`;
 					return `
 						<button
 							class="aicmd-v2-spec-btn aicmd-room-member${isActive ? " is-active" : ""}${isTeamActive ? " is-team-active" : ""}"
@@ -3907,10 +3907,6 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 function renderPhase2PreviewPanel(session, escapeHtml) {
 	const preview = asObject(session.outputPreview);
 	const hasPreview = Boolean(preview.outputType && preview.title);
-	const specialist = session.teamMode === "team"
-		? { id: "team", label: "Full Team" }
-		: getPhase1SpecialistById(preview.specialistId || session.modeId);
-
 	if (!hasPreview) {
 		return `
 			<section class="aicmd-v2-preview">
@@ -3930,7 +3926,19 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 	}
 
 	const structuredPreview = buildStructuredPreviewBlocks(preview);
-	const destination = routeLabel(preview.destinationRoute);
+	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+	const specialist = session.teamMode === "team"
+		? { id: "team", label: "Full Team" }
+		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : titleCase(activeTab);
+	const routeActionLabel = destination === "Content Studio"
+		? "Send Draft to Content Studio"
+		: destination === "Publishing"
+			? "Route Draft to Publishing"
+			: `Route Draft to ${destination}`;
+	const confirmationLabel = hasPreview
+		? (preview.confirmationRequired ? "Confirmation required" : "Review before route")
+		: "Waiting for output";
 
 	return `
 		<section class="aicmd-v2-preview">
@@ -3959,7 +3967,7 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 				` : ""}
 
 				${structuredPreview.blocks.length ? `
-					<div class="aicmd-v2-preview-structured-grid">
+					<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
 						${structuredPreview.blocks.map((block) => `
 							<div class="aicmd-v2-preview-section">
 								<span class="aicmd-v2-preview-label">${escapeHtml(block.label)}</span>
@@ -3973,13 +3981,13 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 
 				<div class="aicmd-v2-preview-section">
 					<span class="aicmd-v2-preview-label">What you can do next</span>
-					<p class="aicmd-v2-preview-next-action">${escapeHtml(humanizeValue(preview.nextSafeAction, "Review in destination workspace."))}</p>
+					<p class="aicmd-v2-preview-next-action">${escapeHtml(humanizeValue(preview.nextSafeAction, `Review in ${destination}.`))}</p>
 				</div>
 
 				<div class="aicmd-v2-preview-section">
 					<span class="aicmd-v2-preview-label">What requires confirmation</span>
-					<p class="aicmd-v2-preview-confirmation">${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation."))}</p>
-					<p class="aicmd-v2-preview-safety">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</p>
+					<p class="aicmd-v2-preview-confirmation">${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</p>
+					<p class="aicmd-v2-preview-safety">${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</p>
 				</div>
 			</div>
 
@@ -4557,14 +4565,13 @@ export const aiCommandRoute = {
 
 		const intelligenceStatus = session.intelligence.status || "idle";
 		const aiContext = buildUnifiedAiContext(state, session.intelligence);
-		const languagePlan = getWorkspaceLanguagePlan(aiContext);
-		const responseBridge = getAiResponseBridgeStatus(executeProjectAiChat);
+		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
 		if (!session.workspaceTabInitialized) {
-			session.workspaceTab = responseBridge.available ? "chat" : "preview";
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
 			session.workspaceTabInitialized = true;
 		}
 		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
-			session.workspaceTab = responseBridge.available ? "chat" : "preview";
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
 		}
 
 		const root = $("ctrlRoomRoot");
@@ -4575,13 +4582,13 @@ export const aiCommandRoute = {
 
 		root.innerHTML = `
 			<div class="aicmd-v2-shell aicmd-room-shell">
-				${renderPhase1Header(session, projectName, aiContext, responseBridge, escapeHtml)}
+				${renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml)}
 				<div class="aicmd-v2-body aicmd-room-grid">
-					${renderPhase1TeamRail(session, responseBridge, escapeHtml)}
+					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
 
 					<main class="aicmd-v2-main aicmd-room-center">
-						${renderAiRoomConversationHeader(session, responseBridge, escapeHtml)}
-						${renderPhase3SpecialistConversation(session, responseBridge, escapeHtml)}
+						${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
+						${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
 						${renderPhase1Composer(session, aiContext, escapeHtml)}
 					</main>
 
@@ -4590,7 +4597,7 @@ export const aiCommandRoute = {
 						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
 					</aside>
 				</div>
-				${renderAiRoomStatusStrip(aiContext, session, responseBridge, escapeHtml)}
+				${renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml)}
 			</div>
 		`;
 
@@ -4610,6 +4617,12 @@ export const aiCommandRoute = {
 			}
 
 			session.draftMessage = value;
+			session.composerText = session.draftMessage;
+			session.modeId = normalizedSessionModeId;
+			session.teamMode = "solo";
+			session.routeSuggestions = [];
+			session.inboundHandoff = null;
+			session.draftStatus = "New session started";
 			session.outputPreview = buildPhase2OutputPreview({
 				intent,
 				session,
@@ -4666,7 +4679,7 @@ export const aiCommandRoute = {
 		                session.messages = [];
 		                session.responseError = "";
 		                session.responseLoading = false;
-		                session.workspaceTab = responseBridge.available ? "chat" : "preview";
+		                session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
 		                session.outputWorkspaceTab = "draft";
 		                session.activeChatSessionId = "";
 		                session.activeChatSessionCreatedAt = "";
@@ -4845,11 +4858,11 @@ export const aiCommandRoute = {
 
 		                session.responseError = "";
 
-		                if (!responseBridge.available) {
+		                if (!bridgeStatus.available) {
 		                        session.responseLoading = false;
-		                        session.responseError = responseBridge.reason;
+		                        session.responseError = bridgeStatus.reason;
 		                        aiCommandRoute.render(context);
-		                        updateStatus(responseBridge.reason);
+		                        updateStatus(bridgeStatus.reason);
 		                        showMessage?.("AI chat route is not connected yet.");
 		                        return;
 		                }
@@ -4976,7 +4989,7 @@ export const aiCommandRoute = {
 		                                responses: session.responseHistory,
 		                                modeId: session.modeId,
 		                                teamMode: session.teamMode
-		                        });
+		                });
 
 		                        saveAiChatSession(sessionKey, session);
 
@@ -4993,7 +5006,7 @@ export const aiCommandRoute = {
 		                                responses: session.responseHistory,
 		                                modeId: session.modeId,
 		                                teamMode: session.teamMode
-		                        });
+		                });
 
 		                        aiCommandRoute.render(context);
 		                        updateStatus(session.responseError);
@@ -5184,6 +5197,8 @@ export const aiCommandRoute = {
 						await navigator.clipboard.writeText(latestResponse.responseText);
 						updateStatus("Response copied to clipboard.");
 						showMessage?.("Response copied.");
+					} else {
+						updateStatus("Clipboard is not available in this browser context.");
 					}
 				} catch (_) {
 					updateStatus("Copy failed. Clipboard access may be blocked.");
