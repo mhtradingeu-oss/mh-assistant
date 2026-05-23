@@ -1528,40 +1528,80 @@ export const campaignStudioRoute = {
       intelligenceError,
       hasLiveIntelligence
     } = model;
+    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+    const intelligenceLabel = intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live intelligence" : "Draft-assisted";
+    const intelligenceTone = intelligenceStatus === "loading" ? "warning" : hasLiveIntelligence ? "success" : "neutral";
+    const readinessTone = executionReadiness.total ? "warning" : "success";
+    const blockerTone = executionReadiness.total ? "warning" : "success";
+    const recommendedChannelCount = channelMix.organic.length + channelMix.paid.length + channelMix.support.length;
+    const channelStateLabel = connectedChannels.length
+      ? `${connectedChannels.length} connected`
+      : recommendedChannelCount
+        ? `${recommendedChannelCount} recommended`
+        : "Needs signal";
+    const channelTone = connectedChannels.length ? "success" : recommendedChannelCount ? "warning" : "neutral";
+    const budgetValue = formatCurrency(values.budget, overviewData.currency || "USD");
+    const budgetLabel = budgetValue === "-" ? "Budget pending" : budgetValue;
+    const launchWindowLabel = [values.startDate, values.endDate].filter(Boolean).join(" to ") || "Window pending";
+    const marketLabel = safeText(firstNonEmpty(values.market, overviewData.market), "Market pending");
+    const productLabel = safeText(firstNonEmpty(values.productFocus, overviewData.project_name, projectName), "Product pending");
+    const goalLabel = safeText(values.campaignGoal, "Goal pending");
+    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+    const strategistMode = hasLiveIntelligence
+      ? "Current intelligence is shaping campaign direction and readiness."
+      : "Current draft data is projecting direction until live intelligence arrives.";
 
     root.innerHTML = `
       <div class="campaign-studio-wrapper">
-        <section class="card">
-          <div class="card-head">
-            <div>
-              <div class="setup-kicker">Campaign Planning Workspace</div>
-              <h3>Campaign Overview</h3>
-              <p class="campaign-section-copy">Define the campaign, choose products, audience, and channels, plan the waves, then review readiness before sending the plan downstream or to AI.</p>
+        <section class="mhos-campaign-command-header" aria-label="Campaign command board">
+          <div class="mhos-campaign-command-main">
+            <div class="mhos-campaign-kicker-row">
+              <span class="mhos-campaign-kicker">Campaign Command Board</span>
+              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
             </div>
-            <span class="card-badge neutral">${escapeHtml(safeText(state.context.activeCampaign, projectName || "Campaign Studio"))}</span>
-          </div>
-          <div class="campaign-overview-grid">
-            <div class="campaign-overview-item">
-              <span>Active campaign</span>
-              <strong>${escapeHtml(safeText(state.context.activeCampaign, "Not selected"))}</strong>
-            </div>
-            <div class="campaign-overview-item">
-              <span>Intelligence</span>
-              <strong>${escapeHtml(intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live" : "Partial")}</strong>
-            </div>
-            <div class="campaign-overview-item">
-              <span>Readiness</span>
-              <strong>${escapeHtml(executionReadiness.status)}</strong>
-            </div>
-            <div class="campaign-overview-item">
-              <span>Open blockers</span>
-              <strong>${escapeHtml(String(executionReadiness.total))}</strong>
+            <h2 class="mhos-campaign-title">${escapeHtml(activeCampaignLabel)}</h2>
+            <p class="mhos-campaign-summary">${escapeHtml(goalLabel)}</p>
+            <div class="mhos-campaign-context-row" aria-label="Campaign context">
+              <span class="mhos-campaign-context-item">Market <strong class="mhos-campaign-context-value">${escapeHtml(marketLabel)}</strong></span>
+              <span class="mhos-campaign-context-item">Product <strong class="mhos-campaign-context-value">${escapeHtml(productLabel)}</strong></span>
+              <span class="mhos-campaign-context-item">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+              <span class="mhos-campaign-context-item">Window <strong class="mhos-campaign-context-value">${escapeHtml(launchWindowLabel)}</strong></span>
             </div>
           </div>
-          <div class="campaign-toolbar">
+
+          <aside class="mhos-campaign-strategist-panel" aria-label="Campaign strategist recommendation">
+            <span class="mhos-campaign-panel-label">Strategist next move</span>
+            <strong class="mhos-campaign-panel-action">${escapeHtml(strategistNextAction)}</strong>
+            <p class="mhos-campaign-panel-copy">${escapeHtml(strategistMode)}</p>
+          </aside>
+
+          <div class="mhos-campaign-actions" aria-label="Campaign command actions">
             <button id="campaignRefreshIntelligenceBtn" class="btn btn-secondary" type="button">Refresh campaign intelligence</button>
             <button id="campaignSaveDraftBtn" class="btn btn-secondary" type="button">Save campaign draft</button>
             <button id="campaignBuildPlanBtn" class="btn btn-primary" type="button">Save campaign plan</button>
+          </div>
+
+          <div class="mhos-campaign-operating-summary" aria-label="Campaign operating summary">
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone}">
+              <span class="mhos-campaign-metric-label">Readiness</span>
+              <strong class="mhos-campaign-metric-value">${escapeHtml(executionReadiness.status)}</strong>
+              <small class="mhos-campaign-metric-note">${escapeHtml(executionReadiness.total ? `${executionReadiness.total} open gate${executionReadiness.total === 1 ? "" : "s"}` : "Launch gates clear")}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${intelligenceTone}">
+              <span class="mhos-campaign-metric-label">Intelligence</span>
+              <strong class="mhos-campaign-metric-value">${escapeHtml(intelligenceLabel)}</strong>
+              <small class="mhos-campaign-metric-note">${escapeHtml(intelligenceError || (hasLiveIntelligence ? "Signals active" : "Projection mode"))}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${blockerTone}">
+              <span class="mhos-campaign-metric-label">Blockers</span>
+              <strong class="mhos-campaign-metric-value">${escapeHtml(String(executionReadiness.total))}</strong>
+              <small class="mhos-campaign-metric-note">${escapeHtml(executionReadiness.total ? "Needs operator attention" : "No open launch blockers")}</small>
+            </article>
+            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${channelTone}">
+              <span class="mhos-campaign-metric-label">Channels</span>
+              <strong class="mhos-campaign-metric-value">${escapeHtml(channelStateLabel)}</strong>
+              <small class="mhos-campaign-metric-note">${escapeHtml(recommendedChannelCount ? `${recommendedChannelCount} AI recommendations` : "Awaiting channel mix")}</small>
+            </article>
           </div>
         </section>
 
