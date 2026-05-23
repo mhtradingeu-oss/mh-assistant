@@ -1,0 +1,146 @@
+/* MH-OS Workflow & Orchestration Primitives (EXTRACTED PHASE 2B) */
+.mhos-workflow-chain {
+  display: flex;
+  flex-direction: row;
+  gap: var(--density-medium);
+  margin-bottom: var(--density-compact);
+  align-items: stretch;
+  min-width: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+.mhos-workflow-step {
+  background: var(--surface-gradient-1);
+  border-radius: var(--mhos-clean-radius-md);
+  border: 1px solid var(--surface-border-soft);
+  box-shadow: var(--surface-depth-soft);
+  padding: var(--density-compact) var(--density-medium);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  max-width: 180px;
+  flex: 1 1 120px;
+  opacity: 0.82;
+  position: relative;
+  transition: border-color 0.18s, box-shadow 0.18s, opacity 0.18s;
+  font-size: var(--font-size-meta);
+  line-height: var(--line-height-tight);
+}
+.mhos-workflow-step:not(:last-child)::after {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: var(--mhos-clean-surface-border);
+  margin-left: var(--density-compact);
+  margin-right: calc(-1 * var(--density-compact));
+  border-radius: 2px;
+  align-self: center;
+  opacity: 0.32;
+}
+.mhos-workflow-active {
+  border: 2px solid var(--mhos-clean-accent-ai);
+  background: linear-gradient(90deg, rgba(45,212,191,0.09), rgba(16,39,58,0.98));
+  opacity: 1;
+  z-index: 1;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+.mhos-workflow-blocked {
+  border: 2px solid var(--mhos-clean-accent-blocked);
+  background: linear-gradient(90deg, rgba(244,114,182,0.09), rgba(16,39,58,0.98));
+  opacity: 1;
+  z-index: 2;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+.mhos-workflow-handoff {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: var(--mhos-clean-radius-md);
+  border: 1px dashed var(--mhos-clean-accent-ai);
+  pointer-events: none;
+  opacity: 0.14;
+}
+.mhos-escalation-lane {
+  display: flex;
+  flex-direction: row;
+  gap: var(--density-medium);
+  margin: var(--density-compact) 0 0 0;
+  padding: 0;
+  min-width: 0;
+  align-items: stretch;
+  font-size: var(--font-size-meta);
+  line-height: var(--line-height-tight);
+}
+.mhos-escalation-item {
+  background: var(--surface-gradient-2);
+  border-radius: var(--mhos-clean-radius-md);
+  border: 1px solid var(--surface-border-quiet);
+  box-shadow: var(--surface-depth-soft);
+  padding: 0 var(--density-medium);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--density-compact);
+  font-size: var(--font-size-meta);
+  color: var(--mhos-clean-copy-secondary);
+  opacity: 0.92;
+  max-width: 220px;
+  height: var(--compact-chip-height);
+  line-height: var(--line-height-tight);
+}
+.mhos-escalation-severity {
+  font-weight: var(--font-weight-strong);
+  text-transform: capitalize;
+  border-radius: var(--mhos-clean-radius-pill);
+  padding: 0 var(--compact-chip-padding);
+  margin-right: var(--density-compact);
+  background: var(--mhos-clean-surface-overlay);
+  border: 1px solid var(--mhos-clean-surface-border);
+  opacity: 0.82;
+  font-size: var(--font-size-small);
+  height: var(--compact-chip-height);
+  line-height: var(--line-height-tight);
+}
+.mhos-escalation-severity--danger .mhos-escalation-severity {
+  color: var(--mhos-clean-accent-danger);
+  border-color: var(--mhos-clean-accent-danger);
+}
+.mhos-escalation-severity--warning .mhos-escalation-severity {
+  color: var(--mhos-clean-accent-warning);
+  border-color: var(--mhos-clean-accent-warning);
+}
+.mhos-escalation-severity--neutral .mhos-escalation-severity {
+  color: var(--mhos-clean-copy-muted);
+  border-color: var(--mhos-clean-surface-border);
+}
+.mhos-orchestration-pressure {
+  display: flex;
+  align-items: center;
+  gap: var(--density-compact);
+  margin: var(--density-medium) 0;
+  font-size: var(--font-size-meta);
+  color: var(--mhos-clean-accent-info);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-tight);
+}
+.mhos-orchestration-pressure-label {
+  opacity: 0.7;
+}
+.mhos-orchestration-pressure-value {
+  font-size: 1.1em;
+  color: var(--mhos-clean-accent-ai);
+  margin-left: 4px;
+}
+@media (max-width: 900px) {
+  .mhos-workflow-chain, .mhos-escalation-lane {
+    flex-direction: column;
+    gap: var(--mhos-clean-space-2);
+    align-items: stretch;
+  }
+  .mhos-workflow-step {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
