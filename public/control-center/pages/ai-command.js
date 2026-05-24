@@ -1,4 +1,4 @@
-import { bindAiToolDock, getAiToolDockTools, renderAiToolDock } from "./ai-command/tool-dock.js";
+import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 
 import {
@@ -3845,66 +3845,56 @@ function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 }
 
 function renderPhase1Composer(session, aiContext, escapeHtml) {
-        const spec = getPhase1SpecialistById(session.modeId);
-        const placeholder = "Message the AI specialist...";
-        const specLabel = session.teamMode === "team" ? "Full Team" : spec.label;
-        const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
-        const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(spec.id);
-        const isGenerating = Boolean(session.responseLoading);
+		const spec = getPhase1SpecialistById(session.modeId);
+		const placeholder = "Message the AI specialist...";
+		const isTeam = session.teamMode === "team";
+		const specLabel = isTeam ? "Team Meeting Room" : spec.label;
+		const headerText = isTeam
+			? "Coordinated Team Review — Guidance Only"
+			: `Chat with ${spec.label}`;
+		const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+		const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+		const isGenerating = Boolean(session.responseLoading);
 
-        return `
-                <div class="aicmd-v2-composer aicmd-room-composer aicmd-chatgpt-composer" data-role="${escapeHtml(roleId)}">
-                        <div class="aicmd-v2-composer-head aicmd-chatgpt-composer-head">
-                                <div class="aicmd-v2-composer-title-row">
-                                        <span class="aicmd-v2-composer-icon">${escapeHtml(session.teamMode === "team" ? "Team" : getAiRoomInitials(spec))}</span>
-                                        <span class="aicmd-v2-composer-label">Chat with ${escapeHtml(specLabel)}</span>
-                                </div>
-                                <span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>
-                        </div>
+		return `
+			<div class="aicmd-v2-composer aicmd-room-composer aicmd-chatgpt-composer" data-role="${escapeHtml(roleId)}">
+				<div class="aicmd-v2-composer-head aicmd-chatgpt-composer-head">
+					<div class="aicmd-v2-composer-title-row">
+						<span class="aicmd-v2-composer-icon">${escapeHtml(isTeam ? "Team" : getAiRoomInitials(spec))}</span>
+						<span class="aicmd-v2-composer-label">${escapeHtml(headerText)}</span>
+					</div>
+					<span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>
+				</div>
 
-                        <div class="aicmd-chatgpt-input-shell">
-                                <textarea
-                                        id="aicmdV2Input"
-                                        class="aicmd-v2-textarea aicmd-chatgpt-textarea"
-                                        rows="3"
-                                        placeholder="${escapeHtml(placeholder)}"
-                                        aria-label="Message ${escapeHtml(specLabel)}"
-                                >${escapeHtml(session.draftMessage)}</textarea>
+				<div class="aicmd-chatgpt-input-shell">
+					<textarea
+						id="aicmdV2Input"
+						class="aicmd-v2-textarea aicmd-chatgpt-textarea"
+						rows="3"
+						placeholder="${escapeHtml(placeholder)}"
+						aria-label="Message ${escapeHtml(specLabel)}"
+					>${escapeHtml(session.draftMessage)}</textarea>
 
-                                <div class="aicmd-chatgpt-toolbar" aria-label="Composer controls">
-                                        <div class="aicmd-chatgpt-tools-left">
-                                                <button class="aicmd-chatgpt-icon-btn" type="button" disabled title="Attach files is planned for the next backend-safe step.">＋</button>
-                                                <button class="aicmd-chatgpt-pill-btn" type="button" disabled title="Context picker is planned for the next step.">Context</button>
-                                                <button class="aicmd-chatgpt-pill-btn" type="button" disabled title="Template picker is planned for the next step.">Template</button>
-                                                <button id="aicmdV2VoiceBtn" class="aicmd-chatgpt-icon-btn" type="button" title="Use browser speech recognition when available.">🎙</button>
-                                        </div>
-                                        <div class="aicmd-chatgpt-tools-right">
-                                                <span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>
-                                                <button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Send message">
-                                                        ${isGenerating ? "…" : "➤"}
-                                                </button>
-                                        </div>
-                                </div>
-                        </div>
-
-                        ${renderAiToolDock({ projectName: aiContext.projectName || "", specialistId: session.modeId, teamMode: session.teamMode, escapeHtml })}
-
-						<div class="aicmd-chatgpt-action-row mhos-workflow-chain">
-							<button id="aicmdV2PrepareBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Draft</button>
-							<button id="aicmdV2DraftTaskBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Task</button>
-							<button id="aicmdV2DraftWorkflowBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Draft Workflow</button>
-							<button id="aicmdV2HandoffBtn" class="aicmd-v2-btn-secondary mhos-workflow-step" type="button">Prepare Handoff</button>
-							<button id="aicmdV2SaveBtn" class="aicmd-v2-btn-ghost mhos-workflow-step" type="button">Save</button>
-							<button id="aicmdV2ClearBtn" class="aicmd-v2-btn-ghost mhos-workflow-step" type="button">Clear</button>
+					<div class="aicmd-chatgpt-toolbar" aria-label="Composer controls">
+						<div class="aicmd-chatgpt-tools-left">
+							<button id="aicmdV2VoiceBtn" class="aicmd-chatgpt-icon-btn" type="button" disabled title="Voice input coming soon">🎙</button>
 						</div>
+						<div class="aicmd-chatgpt-tools-right">
+							<span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>
+							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Send message">
+								${isGenerating ? "…" : "➤"}
+							</button>
+						</div>
+					</div>
+				</div>
 
-                        <div class="aicmd-chatgpt-context-row">
-                                ${renderLanguageMarketStrip(aiContext, escapeHtml)}
-                        </div>
+				<div class="aicmd-chatgpt-context-row">
+					${renderLanguageMarketStrip(aiContext, escapeHtml)}
+				</div>
 
-                        <div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
-                </div>
-        `;
+				<div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
+			</div>
+		`;
 }
 
 function renderPhase2PreviewPanel(session, escapeHtml) {
@@ -4630,11 +4620,15 @@ export const aiCommandRoute = {
 				<div class="aicmd-v2-body aicmd-room-grid">
 					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
 
-					<main class="aicmd-v2-main aicmd-room-center">
-						${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
-						${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
-						${renderPhase1Composer(session, aiContext, escapeHtml)}
-					</main>
+										<main class="aicmd-v2-main aicmd-room-center">
+											<div class="aicmd-unified-chat-surface">
+												${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
+												<div class="aicmd-room-specialist-conversation">
+													${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
+												</div>
+												${renderPhase1Composer(session, aiContext, escapeHtml)}
+											</div>
+										</main>
 
 					<aside class="aicmd-room-output">
 						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
