@@ -859,46 +859,46 @@ function renderPage(projectName, session, escapeHtml) {
   return `
     <section class="page is-active" data-page="governance">
       <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
-        <section class="panel mhos-executive-surface mhos-context-ribbon" aria-label="Executive governance command band">
-          <div class="panel-header mhos-context-main">
+        <section class="panel mhos-executive-surface mhos-context-ribbon governance-operating-header" aria-label="Executive governance command band">
+          <div class="panel-header mhos-context-main governance-operating-header-main">
             <div>
-              <div class="panel-kicker mhos-context-kicker">Governance command</div>
-              <h3 class="mhos-context-title">Governance command center for ${escapeHtml(projectName)}</h3>
-              <p class="mhos-context-description">Policy authority, approval pressure, escalation, and safe decision routing.</p>
+              <div class="panel-kicker mhos-context-kicker governance-operating-eyebrow">Governance Operating Surface</div>
+              <h3 class="mhos-context-title governance-operating-title">Governance Command Center for ${escapeHtml(projectName)}</h3>
+              <p class="mhos-context-description governance-operating-desc">Canonical executive surface for policy authority, approval pressure, escalation, and safe decision routing.</p>
             </div>
-            <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
+            <span class="card-badge neutral governance-operating-status">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
           </div>
 
-          <div class="mhos-executive-summary-grid" aria-label="Governance executive anchors">
-            <article class="mhos-executive-summary-item">
+          <div class="mhos-executive-summary-grid governance-executive-summary-grid" aria-label="Governance executive anchors">
+            <article class="mhos-executive-summary-item governance-summary-readiness">
               <span class="mhos-executive-metric-label">Readiness</span>
               <strong class="mhos-executive-metric-value">${escapeHtml(readiness.state)}</strong>
               <small class="mhos-executive-metric-note">${escapeHtml(`${readiness.totalQueue} open decision${readiness.totalQueue === 1 ? "" : "s"}`)}</small>
             </article>
-            <article class="mhos-executive-summary-item">
+            <article class="mhos-executive-summary-item governance-summary-approval">
               <span class="mhos-executive-metric-label">Approval Pressure</span>
               <strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>
               <small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>
             </article>
-            <article class="mhos-executive-summary-item">
+            <article class="mhos-executive-summary-item governance-summary-escalation">
               <span class="mhos-executive-metric-label">Escalation State</span>
               <strong class="mhos-executive-metric-value">${escapeHtml(readiness.escalations ? `${readiness.escalations} active` : "Clear")}</strong>
               <small class="mhos-executive-metric-note">${escapeHtml(escalationRoute)}</small>
             </article>
-            <article class="mhos-executive-summary-item">
+            <article class="mhos-executive-summary-item governance-summary-owner">
               <span class="mhos-executive-metric-label">Authority Owner</span>
               <strong class="mhos-executive-metric-value">${escapeHtml(authorityOwner)}</strong>
               <small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionKind)} focus</small>
             </article>
-            <article class="mhos-executive-summary-item">
+            <article class="mhos-executive-summary-item governance-summary-risk">
               <span class="mhos-executive-metric-label">Highest Risk</span>
               <strong class="mhos-executive-metric-value">${escapeHtml(highestRiskLabel)}</strong>
               <small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionLabel)}</small>
             </article>
-            <article class="mhos-executive-summary-item">
+            <article class="mhos-executive-summary-item governance-summary-ai-boundary">
               <span class="mhos-executive-metric-label">AI Role</span>
-              <strong class="mhos-executive-metric-value">Prepare only</strong>
-              <small class="mhos-executive-metric-note">Explain risk and evidence. Decisions stay here.</small>
+              <strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>
+              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve. Human approval required.</small>
             </article>
           </div>
 
