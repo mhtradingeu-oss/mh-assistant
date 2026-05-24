@@ -4767,22 +4767,31 @@ export const aiCommandRoute = {
 
 		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
 		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
-			btn.onclick = () => {
-				const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
-				session.modeId = specId;
-				session.teamMode = "solo";
-				session.bridgeContext = null;
-				const spec = getPhase1SpecialistById(specId);
-				if (!session.draftMessage) {
-					session.draftMessage = "";
-				}
-				persistSessionDraft(sessionKey, session, `${spec.label} selected`);
-				aiCommandRoute.render(context);
-			};
-		});
+                        btn.onclick = () => {
+                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+                                const previousBridgeContext = asObject(session.bridgeContext);
+                                const existingDraft = asString(session.draftMessage).trim();
+                                const shouldReplaceRoleDraft = Boolean(previousBridgeContext.source) ||
+                                        /^Act as the\s+/i.test(existingDraft);
 
-		// ── SOLO / TEAM TOGGLE ───────────────────────────────────────
-		Array.from(document.querySelectorAll("[data-aicmdv2-team-mode]")).forEach((btn) => {
+                                session.modeId = specId;
+                                session.teamMode = "solo";
+                                session.bridgeContext = null;
+
+                                const spec = getPhase1SpecialistById(specId);
+                                if (shouldReplaceRoleDraft) {
+                                        session.draftMessage = `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`;
+                                } else if (!session.draftMessage) {
+                                        session.draftMessage = "";
+                                }
+
+                                persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
+                                aiCommandRoute.render(context);
+                        };
+                });
+
+                // ── SOLO / TEAM TOGGLE ───────────────────────────────────────
+                Array.from(document.querySelectorAll("[data-aicmdv2-team-mode]")).forEach((btn) => {
 			btn.onclick = () => {
 				const mode = btn.getAttribute("data-aicmdv2-team-mode") || "solo";
 				session.teamMode = mode;
