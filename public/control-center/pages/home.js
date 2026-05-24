@@ -663,6 +663,13 @@ export const homeRoute = {
     const capabilityCards = asArray(dashboard.capabilities).slice(0, 4);
     const statusItems = asArray(dashboard.statusBoard).slice(0, 6);
     const campaignChannels = asArray(dashboard.campaign.channels);
+    const blockerColumns = [
+      { title: "Integrations", items: dashboard.blockers.integrations, tone: "warning" },
+      { title: "Assets", items: dashboard.blockers.assets, tone: "warning" },
+      { title: "Failed Jobs", items: dashboard.blockers.failedJobs, tone: "danger" },
+      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+    ];
+    const activeBlockerColumns = blockerColumns.filter((column) => asArray(column.items).length).slice(0, 4);
 
     root.innerHTML = `
       <div class="home-command-center">
@@ -680,27 +687,6 @@ export const homeRoute = {
               <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
               <span class="home-header-score-label">System Health</span>
             </div>
-          </div>
-        </section>
-
-        <!-- 1.1 EXECUTIVE HEALTH STRIP (Ribbon) -->
-        <section class="mhos-executive-strip mhos-clean-surface" aria-label="Executive Health Strip">
-          <div class="mhos-executive-strip-head mhos-clean-header-head">
-            <div>
-              <span class="mhos-clean-eyebrow">Executive Health</span>
-              <span class="mhos-clean-title">${escapeHtml(dashboard.executiveHealthStrip.statusLabel)}</span>
-            </div>
-            <div class="mhos-executive-strip-meta mhos-clean-actions">
-              <span class="mhos-clean-pill is-info">${escapeHtml(dashboard.executiveHealthStrip.statusLabel)}</span>
-              <span class="mhos-clean-pill is-success">${escapeHtml(dashboard.executiveHealthStrip.confidenceLabel)}</span>
-              <span class="mhos-clean-pill is-warning">${escapeHtml(dashboard.executiveHealthStrip.escalationLabel)}</span>
-            </div>
-          </div>
-          <div class="mhos-executive-strip-body mhos-clean-stack">
-            <span class="mhos-clean-meta">Approvals: <strong>${escapeHtml(dashboard.executiveHealthStrip.approvals)}</strong></span>
-            <span class="mhos-clean-meta">Confidence: <strong>${escapeHtml(dashboard.executiveHealthStrip.confidence)}</strong></span>
-            <span class="mhos-clean-meta">Escalations: <strong>${escapeHtml(dashboard.executiveHealthStrip.escalations)}</strong></span>
-            <span class="mhos-executive-strip-summary mhos-clean-copy">${escapeHtml(dashboard.executiveHealthStrip.summary)}</span>
           </div>
         </section>
 
@@ -738,7 +724,6 @@ export const homeRoute = {
 
         <!-- 2. EXECUTIVE SNAPSHOT / KEY INDICATORS -->
         <div class="home-snapshot-grid executive-signal-grid">
-          <p class="executive-signal-grid-note">Executive signals highlight operational impact, not generic metrics.</p>
           ${capabilityCards.map((item) => `
             <article class="card home-snapshot-card executive-signal-card">
               <span class="executive-signal-label">${escapeHtml(item.title)}</span>
@@ -749,6 +734,29 @@ export const homeRoute = {
             </article>
           `).join("")}
         </div>
+        <!-- 3. CONCISE EXCEPTIONS -->
+        <article class="card home-workspace-section home-exception-section">
+          <div class="home-section-head">
+            <div>
+              <p class="card-label">Exceptions</p>
+              <h3>${dashboard.totalBlockers ? "Needs executive attention" : "No critical blockers"}</h3>
+              <span class="section-helper">${dashboard.totalBlockers ? "Top blockers only; deeper operational context stays below." : "The system is clear to execute on the next best action."}</span>
+            </div>
+            ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
+          </div>
+
+          ${dashboard.totalBlockers ? `
+            <div class="home-blocker-grid home-exception-grid">
+              ${activeBlockerColumns.map((column) =>
+                renderBlockerColumn(column.title, column.items, column.tone, escapeHtml)
+              ).join("")}
+            </div>
+          ` : `
+            <div class="home-empty-state home-exception-clear">
+              <p>No critical blockers detected. The next best action can move without an exception review.</p>
+            </div>
+          `}
+        </article>
 
 
         <!-- 4. MAIN EXECUTIVE WORKSPACE -->
@@ -815,29 +823,6 @@ export const homeRoute = {
             </article>
           </div>
 
-          <article class="card home-workspace-section">
-            <div class="home-section-head">
-              <div>
-                <p class="card-label">Critical Gaps & Blockers</p>
-                <h3>What is blocking operational flow?</h3>
-                <span class="section-helper">Resolve blockers to restore executive flow.</span>
-              </div>
-              ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
-            </div>
-
-            ${dashboard.totalBlockers ? `
-              <div class="home-blocker-grid">
-                ${renderBlockerColumn("Integrations", dashboard.blockers.integrations, "warning", escapeHtml)}
-                ${renderBlockerColumn("Assets", dashboard.blockers.assets, "warning", escapeHtml)}
-                ${renderBlockerColumn("Failed Jobs", dashboard.blockers.failedJobs, "danger", escapeHtml)}
-                ${renderBlockerColumn("Readiness Gaps", dashboard.blockers.readinessGaps, "warning", escapeHtml)}
-              </div>
-            ` : `
-              <div class="home-empty-state">
-                <p>No critical blockers detected. The system is clear to execute on the next best action.</p>
-              </div>
-            `}
-          </article>
 
           <article class="card home-workspace-section">
             <div class="home-section-head">
