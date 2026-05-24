@@ -696,10 +696,10 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
 
       <div class="wfexec-action-row">
         <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
-          Run Full Automation
+          Simulate Full Automation
         </button>
         <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
-          Run Step-by-Step
+          Simulate Next Step
         </button>
       </div>
 
@@ -721,7 +721,7 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
 
       <div class="wfexec-action-row">
         <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
-          Start Auto Mode From Plan
+          Start Guided Mode
         </button>
         <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
           Pause
@@ -811,8 +811,8 @@ function renderBuilderSection(session, workflow, inputs, validationMessage, draf
       </div>
       <div id="wfexecValidation" class="wfexec-validation${validationMessage ? " is-visible" : ""}">${escapeHtml(validationMessage || "")}</div>
       <div class="wfexec-action-row">
-        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Run Workflow</button>
-        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Run</button>
+        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow Package</button>
+        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>
         <button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
         <button id="wfexecLoadAiStateBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Load AI Command State</button>
         <button id="wfexecClearDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Clear</button>
@@ -842,7 +842,7 @@ function renderCatalogSection(session, context, escapeHtml) {
               <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
               <div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to run" : blocked[0])}</div>
               <div class="wfexec-action-row">
-                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Run</button>
+                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>
                 <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
                 <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
               </div>
@@ -861,7 +861,7 @@ function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) 
     return `
       <section class="wfexec-section">
         <div class="wfexec-head"><h3>Execution Status / Result</h3></div>
-        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+        <div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>
       </section>
     `;
   }
@@ -888,7 +888,7 @@ function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) 
       <div class="wfexec-action-row">
         <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
         <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
-        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Handoff</button>
         <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
         <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
       </div>
@@ -1526,7 +1526,7 @@ function bindWorkflowExecutionLoop({
   if (saveTaskBtn) {
     saveTaskBtn.onclick = async () => {
       if (!run.output) {
-        showError?.("Run the workflow before saving a task.");
+        showError?.("Prepare the workflow package before creating a task handoff.");
         return;
       }
       try {
@@ -1632,7 +1632,7 @@ function bindWorkflowExecutionLoop({
         render();
         return;
       }
-      const confirmed = window.confirm(`Confirm automation run\n\nAction: Run ${plan.length} safe automation steps.\nRisk: This can execute workflow actions that create downstream tasks or handoffs.\n\nSelect Cancel to stop automation.`);
+      const confirmed = window.confirm(`Confirm automation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream task or handoff state.\n\nSelect Cancel to stop.`);
       if (!confirmed) return;
 
       workflowAutomationState.lastPlan = plan;
@@ -1646,7 +1646,7 @@ function bindWorkflowExecutionLoop({
         }
       });
       workflowAutomationState.lastResults = asArray(result.results);
-      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+      workflowAutomationState.result = result.status === "success" ? "Automation simulation completed." : "Automation simulation stopped before completion.";
       showMessage?.(workflowAutomationState.result);
       render();
     };
@@ -1662,7 +1662,7 @@ function bindWorkflowExecutionLoop({
         return;
       }
 
-      const confirmed = window.confirm("Confirm single automation step\n\nAction: Run the next safe automation step.\nRisk: This can execute a workflow action and change downstream state.\n\nSelect Cancel to keep the current state.");
+      const confirmed = window.confirm("Confirm guided simulation step\n\nAction: Simulate the next guided step.\nRisk: This can prepare downstream task or handoff state.\n\nSelect Cancel to keep the current state.");
       if (!confirmed) return;
 
       const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
@@ -1678,8 +1678,8 @@ function bindWorkflowExecutionLoop({
       workflowAutomationState.lastPlan = plan;
       workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
       workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
-        ? "Step-by-step automation completed."
-        : "Step executed. Run again for next step.";
+        ? "Step-by-step simulation completed."
+        : "Step simulated. Continue for the next step.";
       showMessage?.(workflowAutomationState.result);
       render();
     };
@@ -1700,7 +1700,7 @@ function bindWorkflowExecutionLoop({
         mode: "auto_until_approval",
         context: { getState, navigateTo, createProjectHandoff, projectName }
       });
-      showMessage?.("Workflow Auto Mode started.");
+      showMessage?.("Workflow Guided Mode started.");
     };
   }
 
@@ -1708,7 +1708,7 @@ function bindWorkflowExecutionLoop({
   if (autoPauseBtn) {
     autoPauseBtn.onclick = () => {
       pauseAutoMode();
-      showMessage?.("Auto Mode paused.");
+      showMessage?.("Guided Mode paused.");
     };
   }
 
@@ -1716,7 +1716,7 @@ function bindWorkflowExecutionLoop({
   if (autoResumeBtn) {
     autoResumeBtn.onclick = async () => {
       await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
-      showMessage?.("Auto Mode resumed.");
+      showMessage?.("Guided Mode resumed.");
     };
   }
 
@@ -1724,7 +1724,7 @@ function bindWorkflowExecutionLoop({
   if (autoStopBtn) {
     autoStopBtn.onclick = () => {
       stopAutoMode();
-      showMessage?.("Auto Mode stopped.");
+      showMessage?.("Guided Mode stopped.");
     };
   }
 
@@ -1740,7 +1740,7 @@ function bindWorkflowExecutionLoop({
   if (autoSkipBtn) {
     autoSkipBtn.onclick = async () => {
       await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
-      showMessage?.("Auto Mode skipped gated step.");
+      showMessage?.("Guided Mode skipped gated step.");
     };
   }
 }
@@ -1751,7 +1751,7 @@ export const workflowsRoute = {
   meta: {
     eyebrow: "AI & Build",
     title: "Workflows",
-    description: "Run structured, repeatable workflows for common marketing and execution operations."
+    description: "Prepare structured, repeatable workflow packages for common marketing and execution operations."
   },
   template: `
     <section class="page is-active" data-page="workflows">
@@ -2149,7 +2149,7 @@ export const workflowsRoute = {
                     </ul>`
                   : `<div class="empty-state">No recent workflow sessions yet. Prepare a workflow package to start continuity tracking.</div>`}
                 <div class="wfloop-ops-strip">
-                  <span>Runs ${escapeHtml(String(workflowsTotal))}</span>
+                  <span>Prepared ${escapeHtml(String(workflowsTotal))}</span>
                   <span>Tasks ${escapeHtml(String(tasksTotal))}</span>
                   <span>Approvals ${escapeHtml(String(approvalsTotal))}</span>
                   <span>Mode ${escapeHtml(executionMode || "manual")}</span>
