@@ -1,0 +1,179 @@
+617:  return IMPACT_CHIPS.map((label) => `<span class="wfexec-chip${set.has(label) ? " is-active" : ""}">${escapeHtml(label)}</span>`).join("");
+622:    <section class="wfexec-section wfexec-overview">
+623:      <div class="wfexec-head"><h3>Workflow Overview</h3></div>
+624:      <div class="wfexec-overview-grid">
+625:        <article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>
+626:        <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
+627:        <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
+628:        <article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>
+629:        <article class="wfexec-stat wfexec-stat-wide"><span>Last execution</span><strong>${escapeHtml(metrics.lastExecutionAt ? formatDateTime(metrics.lastExecutionAt) : "No execution yet")}</strong></article>
+630:        <article class="wfexec-stat wfexec-stat-wide"><span>Readiness</span><strong>${escapeHtml(Number.isFinite(context.readinessScore) ? `${context.readinessScore}/100` : "Unknown")} · ${escapeHtml(context.readinessStatus || "unclassified")}</strong></article>
+638:    <section class="wfexec-section">
+639:      <div class="wfexec-head"><h3>Smart Recommendation</h3></div>
+640:      <div class="wfexec-rec-title">${escapeHtml(recommendation.title)}</div>
+641:      <p class="wfexec-rec-reason">${escapeHtml(recommendation.reason)}</p>
+642:      <div class="wfexec-chip-row">${renderImpactChips(recommendation.chips, escapeHtml)}</div>
+643:      <div class="wfexec-action-row">
+644:        <button id="wfexecStartRecommendedBtn" class="wfexec-btn wfexec-btn-primary" type="button">Start Workflow</button>
+645:        <button id="wfexecSaveRecommendedBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
+646:        <button id="wfexecSendRecommendedAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI Workspace</button>
+666:    <section class="wfexec-section">
+667:      <div class="wfexec-head"><h3>Automation Layer</h3></div>
+668:      <p class="wfexec-rec-reason">
+672:      <div class="wfexec-overview-grid">
+673:        <article class="wfexec-stat">
+677:        <article class="wfexec-stat">
+694:          : `<div class="wfexec-empty">No safe automation steps are available.</div>`
+697:      <div class="wfexec-action-row">
+698:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+701:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+706:      <div id="workflowAutomationProgress" class="wfexec-meta">
+710:      <div id="workflowAutomationResult" class="wfexec-meta">
+714:      <div class="wfexec-head" style="margin-top:10px;">
+718:      <p class="wfexec-rec-reason">
+722:      <div class="wfexec-action-row">
+723:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+726:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+729:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+732:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+737:      <div class="wfexec-meta">
+741:      <div class="wfexec-meta">
+750:            <div class="wfexec-meta">
+753:            <div class="wfexec-meta">
+756:            <div class="wfexec-action-row">
+757:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+760:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+768:      <div class="wfexec-meta">
+782:    <section class="wfexec-section">
+783:      <div class="wfexec-head"><h3>Workflow Builder / Launcher</h3></div>
+784:      <div class="wfexec-field-grid">
+786:          <label class="wfexec-label" for="wfexecWorkflowType">Workflow type</label>
+787:          <select id="wfexecWorkflowType" class="wfexec-select">
+792:          <label class="wfexec-label" for="wfexecInputProject">Project</label>
+793:          <input id="wfexecInputProject" class="wfexec-input" data-wf-input="project" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+796:          <label class="wfexec-label" for="wfexecInputCampaign">Campaign</label>
+797:          <input id="wfexecInputCampaign" class="wfexec-input" data-wf-input="campaign" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+800:          <label class="wfexec-label" for="wfexecInputProduct">Product</label>
+801:          <input id="wfexecInputProduct" class="wfexec-input" data-wf-input="product" type="text" value="${escapeHtml(inputs.product || "")}" placeholder="Product or offer">
+804:          <label class="wfexec-label" for="wfexecInputChannel">Channel</label>
+805:          <input id="wfexecInputChannel" class="wfexec-input" data-wf-input="channel" type="text" value="${escapeHtml(inputs.channel || "")}" placeholder="Channel or channel set">
+808:          <label class="wfexec-label" for="wfexecInputGoal">Goal</label>
+809:          <input id="wfexecInputGoal" class="wfexec-input" data-wf-input="goal" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Outcome goal">
+812:      <div id="wfexecValidation" class="wfexec-validation${validationMessage ? " is-visible" : ""}">${escapeHtml(validationMessage || "")}</div>
+813:      <div class="wfexec-action-row">
+814:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow Package</button>
+815:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>
+816:        <button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
+817:        <button id="wfexecLoadAiStateBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Load AI Command State</button>
+818:        <button id="wfexecClearDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Clear</button>
+820:      <div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>
+827:    <section class="wfexec-section">
+828:      <div class="wfexec-head"><h3>Workflow Catalog</h3></div>
+829:      <div class="wfexec-catalog-grid">
+836:            <article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">
+837:              <div class="wfexec-catalog-top">
+842:              <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
+843:              <div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to run" : blocked[0])}</div>
+844:              <div class="wfexec-action-row">
+845:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>
+846:                <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
+847:                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+849:              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last run ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
+862:      <section class="wfexec-section">
+863:        <div class="wfexec-head"><h3>Execution Status / Result</h3></div>
+864:        <div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>
+870:    <section class="wfexec-section">
+871:      <div class="wfexec-head">
+873:        <span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>
+875:      <div class="wfexec-result-summary">${escapeHtml(output.summary)}</div>
+877:        <div class="wfexec-blockers">
+882:      <div class="wfexec-result-list">
+888:      <div class="wfexec-action-row">
+889:        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
+890:        <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
+891:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Handoff</button>
+892:        <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
+893:        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
+895:      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+914:    <div class="wfexec-shell">
+916:      <div class="wfexec-grid">
+917:        <div class="wfexec-left">
+922:        <div class="wfexec-right">
+1925:        <div class="wfloop-shell">
+1926:          <section class="wfloop-hero card">
+1927:            <div class="wfloop-hero-head">
+1928:              <p class="wfloop-kicker">Workflow control</p>
+1930:              <p class="wfloop-mission">Start a session, prepare the package, and continue it across MH-OS destinations.</p>
+1931:              <div class="wfloop-hero-meta">
+1932:                <span class="wfloop-chip is-session">Active session: ${escapeHtml(workflow.title)}</span>
+1933:                <span class="wfloop-chip is-${escapeHtml(readinessTone)}">Readiness: ${escapeHtml(readinessValue == null ? "Unknown" : `${readinessValue}/100`)} · ${escapeHtml(readinessStatus || "Unknown")}</span>
+1936:            <div class="wfloop-chip-row">
+1941:            <div class="wfloop-hero-actions">
+1947:          <section class="wfloop-strip card">
+1948:            <ol class="mhos-stepper wfloop-stepper" aria-label="Workflow operating loop steps">
+1961:          <section class="wfloop-workbench">
+1962:            <article class="wfloop-zone wfloop-catalog card">
+1967:              <div class="wfloop-catalog-list">
+1973:                    <article class="wfloop-catalog-card${item.id === workflow.id ? " is-active" : ""}">
+1974:                      <div class="wfloop-catalog-head">
+1978:                      <p class="wfloop-catalog-purpose">${escapeHtml(compactText(item.purpose, 74))}</p>
+1979:                      <div class="wfloop-catalog-chip-row">
+1980:                        <span class="wfloop-mini-chip">Destination ${escapeHtml(getDestinationLabel(item.routeHint))}</span>
+1981:                        <span class="wfloop-mini-chip">Required ${escapeHtml(String(requiredCount))}</span>
+1982:                        <span class="wfloop-mini-chip ${itemMissing.length ? "is-warning" : "is-success"}">Missing ${escapeHtml(String(itemMissing.length))}</span>
+1991:            <article class="wfloop-zone wfloop-session mhos-action-panel">
+1992:              <div class="mhos-action-panel-head">
+1993:                <h3 class="mhos-action-panel-title">Active Workflow Session</h3>
+1997:              <div class="wfloop-session-priority ${missing.length ? "is-warning" : "is-ready"}">
+2003:              <div class="wfloop-field-grid">
+2024:              <div class="wfloop-session-grid">
+2026:                  <p class="wfloop-session-label">Output to prepare</p>
+2027:                  <p class="wfloop-session-value">${escapeHtml(workflow.title)} package for ${escapeHtml(destinationName)}</p>
+2030:                  <p class="wfloop-session-label">Required context</p>
+2031:                  <p class="wfloop-session-value">${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</p>
+2034:                  <p class="wfloop-session-label">Available context</p>
+2035:                  <p class="wfloop-session-value">${escapeHtml(workflow.requiredInputs.filter((field) => asString(inputs[field]).trim()).map(titleCase).join(", ") || "None")}</p>
+2038:                  <p class="wfloop-session-label">Missing inputs</p>
+2039:                  <p class="wfloop-session-value">${escapeHtml(missing.map(titleCase).join(", ") || "None")}</p>
+2043:              <div class="mhos-action-panel-actions wfloop-safe-actions">
+2055:              <div class="wfloop-preview card">
+2060:                <p class="wfloop-preview-meta">${escapeHtml(preparedForSelected ? `Prepared ${formatDateTime(preparedForSelected.createdAt)} · ${workflow.title} session package` : "Prepare to generate a compact session package preview.")}</p>
+2064:              <details class="wfloop-tech-details">
+2071:            <aside class="wfloop-zone wfloop-assist">
+2072:              <section class="mhos-ai-guidance">
+2073:                <h3 class="mhos-ai-guidance-title">AI Guidance</h3>
+2074:                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, and missing-context prompts for ${escapeHtml(workflow.title)}.</p>
+2075:                <p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>
+2076:                <div class="mhos-ai-guidance-actions">
+2085:                <div class="mhos-destination-map">
+2086:                  <article class="mhos-destination-item is-active">
+2087:                    <div class="mhos-destination-copy">
+2088:                      <p class="mhos-destination-title">Review in AI Workspace</p>
+2089:                      <p class="mhos-destination-meta"><strong>Type</strong> AI review</p>
+2090:                      <p class="mhos-destination-meta"><strong>Context carried</strong> workflow package prompt, selected workflow, and input state</p>
+2091:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+2093:                    <div class="mhos-destination-actions">
+2098:                  <article class="mhos-destination-item">
+2099:                    <div class="mhos-destination-copy">
+2100:                      <p class="mhos-destination-title">Create/Draft Task</p>
+2101:                      <p class="mhos-destination-meta"><strong>Type</strong> task handoff</p>
+2102:                      <p class="mhos-destination-meta"><strong>Context carried</strong> selected workflow session title and handoff intent</p>
+2103:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+2105:                    <div class="mhos-destination-actions">
+2110:                  <article class="mhos-destination-item">
+2111:                    <div class="mhos-destination-copy">
+2112:                      <p class="mhos-destination-title">Open Owning Destination</p>
+2113:                      <p class="mhos-destination-meta"><strong>Type</strong> destination navigation</p>
+2114:                      <p class="mhos-destination-meta"><strong>Context carried</strong> route hint and prepared package context</p>
+2115:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
+2117:                    <div class="mhos-destination-actions">
+2122:                  <article class="mhos-destination-item">
+2123:                    <div class="mhos-destination-copy">
+2124:                      <p class="mhos-destination-title">Technical Details</p>
+2125:                      <p class="mhos-destination-meta"><strong>Type</strong> technical disclosure</p>
+2126:                      <p class="mhos-destination-meta"><strong>Context carried</strong> preparation boundary and preserved helper notes</p>
+2127:                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now · Future-gated execution authority remains in destination tools</p>
+2129:                    <div class="mhos-destination-actions">
+2141:                  ? `<ul class="wfloop-recent-list">
+2151:                <div class="wfloop-ops-strip">
+2301:          const details = root.querySelector(".wfloop-tech-details");
