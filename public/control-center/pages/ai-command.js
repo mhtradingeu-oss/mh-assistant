@@ -3499,22 +3499,22 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 			<div class="aicmd-room-title-block mhos-context-ribbon">
 				<div class="aicmd-room-eyebrow mhos-context-kicker">AI Operating Room</div>
 				<h1 class="aicmd-room-title mhos-context-title">AI Team Command Center</h1>
-				<p class="aicmd-room-subtitle mhos-context-description">Run MH-OS as an AI Business Operating System: one specialist or the full team turns requests into review-ready drafts, tasks, workflows, and handoffs.</p>
+				<p class="aicmd-room-subtitle mhos-context-description">One specialist or the full team turns requests into review-ready drafts, tasks, and handoffs.</p>
 			</div>
 			<div class="aicmd-v2-header-actions aicmd-room-header-actions mhos-executive-panel">
-				   <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
+				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
 					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
 				</span>
-				   <select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
-                                   <option value="">Recent chats</option>
-                                   ${asArray(session.chatSessions).slice(0, 8).map((item) => `
-                                           <option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
-                                                   ${escapeHtml(asString(item.title || "AI Team session").slice(0, 48))}
-                                           </option>
-                                   `).join("")}
-                           </select>
-						   <button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New Session</button>
-				   <button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button">Settings</button>
+				<select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
+					<option value="">Recent chats</option>
+					${asArray(session.chatSessions).slice(0, 8).map((item) => `
+						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
+							${escapeHtml(asString(item.title || "AI Team session").slice(0, 48))}
+						</option>
+					`).join("")}
+				</select>
+				<button id="aicmdV2NewSessionBtn" class="aicmd-v2-btn-secondary" type="button">New</button>
+				<button id="aicmdV2SettingsBtn" class="aicmd-v2-btn-ghost" type="button" title="Settings">⚙️</button>
 			</div>
 
 			<div class="aicmd-v2-header-meta aicmd-room-meta mhos-executive-summary-grid">
