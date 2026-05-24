@@ -961,6 +961,7 @@ function ensureSession(projectName) {
 			composerText: "",
 			routeSuggestions: [],
 			inboundHandoff: null,
+			bridgeContext: null,
 			outputPreview: null,
 			activeOutputTab: "draft",
 			responseHistory: [],
@@ -1162,6 +1163,7 @@ function loadAiChatSessionIntoState(projectName, session, sessionId) {
         session.responseLoading = false;
         session.activeChatSessionId = asString(record.id);
         session.activeChatSessionCreatedAt = asString(record.createdAt || record.updatedAt || nowIso());
+        session.bridgeContext = null;
         session.chatSessions = getAiChatSessions(projectName);
         return record;
 }
@@ -2539,6 +2541,7 @@ function applyDurableAiHandoff(projectName, operations, session, consumeProjectH
 		title: normalized.title,
 		routeSuggestions: normalized.routeSuggestions
 	};
+	session.bridgeContext = null;
 
 	if (normalized.outputPreview) {
 		session.outputPreview = normalized.outputPreview;
@@ -4200,6 +4203,24 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
         const emptyBody = safeBridgeStatus.available
                 ? `Start a focused conversation with ${selectedLabel}.`
                 : "AI chat route is not connected yet. Preview tools remain available.";
+        const bridgeContext = asObject(session.bridgeContext);
+        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+        const showBridgeContext = Boolean(
+                bridgeContext.source &&
+                bridgeContext.specialistLabel &&
+                (isTeam || !bridgeSpecialistId || bridgeSpecialistId === selectedRoleId)
+        );
+        const selectedToolHints = getAiToolDockTools({
+                specialistId: session.modeId,
+                teamMode: session.teamMode,
+                limit: 2
+        }).map((tool) => asString(tool.label)).filter(Boolean);
+        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+        const nextPrompts = session.teamMode === "team"
+                ? TEAM_SUGGESTED_PROMPTS
+                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+        const nextAction = asString(nextPrompts[0]?.label || "Prepare guidance");
+        const toolHint = selectedToolHints.length ? selectedToolHints.join(", ") : "Draft and route guidance";
 
         const inbound = asObject(session.inboundHandoff);
         const inboundSourceLabel = asString(inbound.sourceLabel || "");
@@ -4263,10 +4284,22 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                         <strong>${escapeHtml(inboundSourceLabel ? `Inbound from ${inboundSourceLabel}` : "Project session")}</strong>
                                         <small>${escapeHtml(inboundTitle || "Available as background context, not mixed into this chat.")}</small>
                                 </div>
+                                ${showBridgeContext ? `
+                                        <div class="aicmd-room-context-item">
+                                                <span>Home handoff</span>
+                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+                                                <small>Prompt bridge; guidance only.</small>
+                                        </div>
+                                ` : ""}
                                 <div class="aicmd-room-context-item">
                                         <span>Selected specialist</span>
                                         <strong>${escapeHtml(selectedLabel)}</strong>
                                         <small>${escapeHtml(selectedModeLabel)}</small>
+                                </div>
+                                <div class="aicmd-room-context-item">
+                                        <span>Tools / next action</span>
+                                        <strong>${escapeHtml(toolHint)}</strong>
+                                        <small>${escapeHtml("Next: " + nextAction)}</small>
                                 </div>
                                 <div class="aicmd-room-context-item">
                                         <span>Latest selected reply</span>
@@ -4549,9 +4582,20 @@ export const aiCommandRoute = {
 		const bridgeValue = asString(globalInput?.value || "").trim();
 		if (bridgeValue) {
 			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
-			if (detectedSpecialist) session.modeId = detectedSpecialist;
+			if (detectedSpecialist) {
+				session.modeId = detectedSpecialist;
+				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+				session.bridgeContext = {
+					source: "Home",
+					specialistId: detectedSpecialist,
+					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+					loadedAt: nowIso()
+				};
+			} else {
+				session.bridgeContext = null;
+			}
 			session.draftMessage = normalizeAiComposerPrompt(bridgeValue);
-			persistSessionDraft(sessionKey, session, "Specialist context loaded from workspace");
+			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
 			if (globalInput) globalInput.value = "";
 		}
 		// ─────────────────────────────────────────────────────────────
@@ -4673,6 +4717,7 @@ export const aiCommandRoute = {
 		                session.composerText = "";
 		                session.routeSuggestions = [];
 		                session.inboundHandoff = null;
+		                session.bridgeContext = null;
 		                session.draftStatus = "New session started";
 		                session.outputPreview = null;
 		                session.responseHistory = [];
@@ -4726,6 +4771,7 @@ export const aiCommandRoute = {
 				const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
 				session.modeId = specId;
 				session.teamMode = "solo";
+				session.bridgeContext = null;
 				const spec = getPhase1SpecialistById(specId);
 				if (!session.draftMessage) {
 					session.draftMessage = "";
@@ -4740,6 +4786,7 @@ export const aiCommandRoute = {
 			btn.onclick = () => {
 				const mode = btn.getAttribute("data-aicmdv2-team-mode") || "solo";
 				session.teamMode = mode;
+				session.bridgeContext = null;
 				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
 				aiCommandRoute.render(context);
 			};
@@ -5170,6 +5217,7 @@ export const aiCommandRoute = {
 				session.composerText = "";
 				session.routeSuggestions = [];
 				session.inboundHandoff = null;
+				session.bridgeContext = null;
 				if (input) input.value = "";
 				persistSessionDraft(sessionKey, session, "Draft cleared");
 				updateStatus("Composer draft cleared.");

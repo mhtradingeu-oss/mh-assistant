@@ -1101,7 +1101,7 @@ export const homeRoute = {
       promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
     }
 
-    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist");
+    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
     aiRoleCards.forEach((card) => {
       const roleId = card.getAttribute("data-role-id");
       const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
