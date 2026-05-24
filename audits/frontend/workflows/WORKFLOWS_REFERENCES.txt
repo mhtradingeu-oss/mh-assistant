@@ -1,0 +1,360 @@
+public/control-center/app.js:1999:    ["workflowsCatalog", "No data is available yet."],
+public/control-center/app.js:3038:    Workflows: "workflows",
+public/control-center/app.js:3811:  modal.setAttribute("aria-label", "Create new workflow");
+public/control-center/app.js:3820:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3896:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3902:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3908:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3920:        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+public/control-center/app.js:3923:          <span>Multi-step AI workflow and execution routing.</span>
+public/control-center/app.js:4025:        showMessage("Started guided workflow.");
+public/control-center/router.js:12:import { workflowsRoute } from "./pages/workflows.js";
+public/control-center/router.js:33:  [workflowsRoute.id]: workflowsRoute,
+public/control-center/index.html:23:  <link rel="stylesheet" href="./styles/mhos-workflow-primitives.css?v=20260523-workflow-primitives-1">
+public/control-center/index.html:120:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+public/control-center/index.html:224:              placeholder="Search pages, assets, campaigns, workflows..."
+public/control-center/index.html:402:              data-ai-suggestion="Build a smart workflow for the current project."
+public/control-center/index.html:404:              Build AI workflow
+public/control-center/pages/publishing.js:48:    <nav class="publishing-workflow-strip" aria-label="Publishing Workflow">
+public/control-center/pages/publishing.js:50:        <div class="publishing-workflow-step is-${statusMap[step.key]}" aria-label="${escapeHtml(step.label)}: ${statusMap[step.key]}">
+public/control-center/pages/publishing.js:52:          <span class="publishing-workflow-step-label">${statusMap[step.key]}</span>
+public/control-center/pages/publishing.js:897:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing.js:898:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing.js:899:    workflowId: asString(payload.workflow_id),
+public/control-center/pages/publishing.js:900:    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
+public/control-center/pages/publishing.js:912:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:941:      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+public/control-center/pages/publishing.js:955:      action: "Load workflow output into a draft",
+public/control-center/pages/publishing.js:956:      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+public/control-center/pages/publishing.js:1004:    ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
+public/control-center/pages/publishing.js:1161:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+public/control-center/pages/publishing.js:1229:            <h3>No workflow output available</h3>
+public/control-center/pages/publishing.js:1233:        <div class="empty-box">Run or route a workflow into Publishing to load execution-ready output here.</div>
+public/control-center/pages/publishing.js:1252:        <div class="data-row"><span>Workflow</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
+public/control-center/pages/operations-centers.js:235:        preview: "Assess execution health across workflows, media, and publishing jobs.",
+public/control-center/pages/operations-centers.js:236:        prompt: `Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.`
+public/control-center/pages/operations-centers.js:1100:            <p class="std-context-description">Track running, completed, and failed execution across workflows, media, and publishing for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1142:                ${["all", "workflow", "media", "publishing"].map((value) => `<option value="${escapeHtml(value)}"${value === session.kind ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>`).join("")}
+public/control-center/pages/operations-centers.js:1375:  const workflowAlerts = asArray(notificationCenter.workflow_completion_alerts).map((item) => ({ ...item, item_type: "workflow" }));
+public/control-center/pages/operations-centers.js:1382:    ...workflowAlerts
+public/control-center/pages/operations-centers.js:1455:            <p class="std-context-description">Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+public/control-center/pages/operations-centers.js:1701:    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+public/control-center/pages/operations-centers.js:1749:    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+public/control-center/pages/operations-centers.js:1797:    description: "Review sync failures, pending approvals, publish events, provider disconnects, claim risks, and workflow completion alerts."
+public/control-center/pages/operations-centers.js:1907:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:1918:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:1951:                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+public/control-center/pages/operations-centers.js:1960:                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>
+public/control-center/pages/operations-centers.js:1965:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: execute workflow</button>
+public/control-center/pages/ai-command/tool-dock.js:336:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:349:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:388:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:400:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:401:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:575:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:643:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:711:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:737:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:792:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:834:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:860:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:915:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:928:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:929:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:931:      template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."
+public/control-center/pages/ai-command/tool-dock.js:941:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:956:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:957:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:963:      id: "workflow",
+public/control-center/pages/ai-command/tool-dock.js:969:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:970:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:972:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+public/control-center/pages/ai-command/tool-dock.js:973:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:982:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:983:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:995:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:996:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1008:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1009:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1038:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1051:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1064:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1080:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1092:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1093:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1105:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1106:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1118:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1119:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1267:          This drawer is preparation-only. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
+public/control-center/pages/ai-command/tool-dock.js:1480:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+public/control-center/pages/ai-command/tool-dock.js:1598:      // Library Source Bridge workflow
+public/control-center/pages/home.js:337:  const workflowImpact = criticalGaps.length
+public/control-center/pages/home.js:496:      workflowImpact,
+public/control-center/pages/home.js:704:            ${escapeHtml(dashboard.nextBestAction.workflowImpact)}
+public/control-center/pages/home.js:937:              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas.</p>
+public/control-center/pages/home.js:938:              <div class="mhos-workflow-chain">
+public/control-center/pages/home.js:940:                  // Projection-only workflow chain
+public/control-center/pages/home.js:941:                  // Use aiTeamCards as workflow steps for now
+public/control-center/pages/home.js:942:                  const workflowChain = aiTeamCards;
+public/control-center/pages/home.js:943:                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+public/control-center/pages/home.js:944:                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+public/control-center/pages/home.js:945:                  return workflowChain.map((card, idx) => {
+public/control-center/pages/home.js:949:                      <div class="mhos-workflow-step${isActive ? ' mhos-workflow-active' : ''}${isBlocked ? ' mhos-workflow-blocked' : ''}" data-role-id="${escapeHtml(card.id)}">
+public/control-center/pages/home.js:957:                        ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
+public/control-center/pages/home.js:958:                        ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
+public/control-center/pages/home.js:1104:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+public/control-center/pages/ai-command.js:91:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:105:                routeHint: "workflows"
+public/control-center/pages/ai-command.js:144:		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+public/control-center/pages/ai-command.js:157:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:246:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:247:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:248:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:333:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:373:	{ id: "workflow", label: "Draft Workflow", helper: "Operating sequence" },
+public/control-center/pages/ai-command.js:425:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+public/control-center/pages/ai-command.js:445:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+public/control-center/pages/ai-command.js:453:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:467:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+public/control-center/pages/ai-command.js:478:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:497:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:501:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:597:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:644:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+public/control-center/pages/ai-command.js:658:			id: `auto-workflow-${Date.now()}`,
+public/control-center/pages/ai-command.js:659:			type: "prepare_workflow",
+public/control-center/pages/ai-command.js:660:			targetPage: "workflows",
+public/control-center/pages/ai-command.js:661:			action: "Prepare workflow from AI command",
+public/control-center/pages/ai-command.js:664:				reason: "AI command prepared for workflow execution."
+public/control-center/pages/ai-command.js:781:    "Draft a workflow sequence for:",
+public/control-center/pages/ai-command.js:1187:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1257:	if (outputType === "workflow") return "workflows";
+public/control-center/pages/ai-command.js:1258:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1268:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1269:	return "workflows";
+public/control-center/pages/ai-command.js:1285:		workflows: "Workflows"
+public/control-center/pages/ai-command.js:1556:		if (outputType === "workflow") {
+public/control-center/pages/ai-command.js:1580:			safetyLabel: "No workflow run and no backend task creation executed."
+public/control-center/pages/ai-command.js:1596:		workflow: "workflow",
+public/control-center/pages/ai-command.js:1613:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+public/control-center/pages/ai-command.js:1628:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1632:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1641:		workflow: "Workflow",
+public/control-center/pages/ai-command.js:1858:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:1968:			weak ? `Move ${extractTopMessage(weak)} into a rewrite workflow.` : "Audit current content for posts not converting attention to clicks.",
+public/control-center/pages/ai-command.js:2111:	if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));
+public/control-center/pages/ai-command.js:2114:		summary: "This request is best handled as a structured workflow — moving into the right workspace gets results faster than chat alone.",
+public/control-center/pages/ai-command.js:2238:	workflows: "Workflows",
+public/control-center/pages/ai-command.js:2260:	workflows: "operations",
+public/control-center/pages/ai-command.js:2296:	workflow: "workflows",
+public/control-center/pages/ai-command.js:2366:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2395:		"workflows"
+public/control-center/pages/ai-command.js:2410:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2480:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2520:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:3229:                workflow: "workflow sequence",
+public/control-center/pages/ai-command.js:3394:	if (preview.outputType === "workflow") return 2;
+public/control-center/pages/ai-command.js:3408:		workflow: "workflow",
+public/control-center/pages/ai-command.js:3418:	if (outputType === "workflow") return "workflow";
+public/control-center/pages/ai-command.js:3433:		workflow: "Draft Workflow",
+public/control-center/pages/ai-command.js:3443:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3456:	if (tool.intent === "workflow") return "Draft";
+public/control-center/pages/ai-command.js:3543:			<div class="aicmd-room-flow mhos-workflow-chain" aria-label="AI operating flow">
+public/control-center/pages/ai-command.js:3545:					<div class="aicmd-room-flow-step mhos-workflow-step${index === activeFlowIndex ? " mhos-workflow-active is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+public/control-center/pages/ai-command.js:3572:			<span>${escapeHtml(safeBridgeStatus.available ? "Executive workflow: strategy, creative, compliance, publishing, customer/sales, then operations." : "Preview tools remain available while chat is guarded.")}</span>
+public/control-center/pages/ai-command.js:3639:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3702:	if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";
+public/control-center/pages/ai-command.js:4024:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4031:							<div class="aicmd-room-output-tabs mhos-workflow-chain" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:4035:										class="aicmd-room-output-tab mhos-workflow-step${activeTab === tab.id ? " mhos-workflow-active is-active" : ""}"
+public/control-center/pages/ai-command.js:4101:                                <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, and workflow runs happen only in the destination workspace after confirmation.</div>
+public/control-center/pages/ai-command.js:4159:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4162:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:4191:                ? "Chat only. No workflow, task, handoff, approval, publish, CRM, or customer action was created."
+public/control-center/pages/ai-command.js:4463:					<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>
+public/control-center/pages/ai-command.js:4971:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:5047:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:5119:                                        ? `Draft a workflow sequence for: ${value}`
+public/control-center/pages/ai-command.js:5120:                                        : `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
+public/control-center/pages/ai-command.js:5123:                                        intent: "workflow",
+public/control-center/pages/ai-command.js:5129:                                updateStatus("Workflow draft preview prepared from conversation context. No workflow run started.");
+public/control-center/pages/ai-command.js:5168:					const destination = asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:5192:				} else if (tool.intent === "workflow") {
+public/control-center/pages/ai-command.js:5193:					setPreviewFromIntent("workflow", preparedPrompt, { switchTab: "preview" });
+public/control-center/pages/media-studio-workspace.js:650:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:662:  const sourcePage = asString(handoff?.source_page || "workflows");
+public/control-center/pages/media-studio-workspace.js:675:      payload.workflow_id ||
+public/control-center/pages/media-studio-workspace.js:678:      payload.workflow_title ||
+public/control-center/pages/media-studio-workspace.js:685:      payload.workflow_title,
+public/control-center/pages/media-studio-workspace.js:1212:      action: "Load workflow media brief",
+public/control-center/pages/media-studio-workspace.js:1213:      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
+public/control-center/pages/media-studio-workspace.js:1823:    <nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">
+public/control-center/pages/media-studio-workspace.js:1824:      <div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>
+public/control-center/pages/media-studio-workspace.js:1825:      <ol class="media-workflow-list" role="list">
+public/control-center/pages/media-studio-workspace.js:1827:          <li class="media-workflow-step is-${escapeHtml(step.state)}" role="listitem">
+public/control-center/pages/media-studio-workspace.js:1828:            <span class="media-workflow-index">${escapeHtml(String(index + 1))}</span>
+public/control-center/pages/media-studio-workspace.js:1829:            <span class="media-workflow-copy">
+public/control-center/pages/media-studio-workspace.js:1990:        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>
+public/control-center/pages/media-studio-workspace.js:2014:        <div class="empty-box">Route content, workflow, or AI context into Media Studio to load a media brief here.</div>
+public/control-center/pages/media-studio-workspace.js:2065:        <div class="empty-box">Start a media job or load a workflow handoff to create the first prompt-ready draft.</div>
+public/control-center/pages/media-studio-workspace.js:2600:          <h3>Generation and workflow connectivity</h3>
+public/control-center/pages/media-studio-workspace.js:2920:        session.draftMessage = "No workflow handoff is available.";
+public/control-center/pages/media-studio-workspace.js:2929:      session.draftMessage = "Prompt generated from workflow handoff.";
+public/control-center/pages/publishing/publishing-payloads.js:60:    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+public/control-center/pages/publishing/publishing-payloads.js:61:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/publishing/publishing-payloads.js:62:    workflowId: asString(payload.workflow_id),
+public/control-center/pages/publishing/publishing-payloads.js:63:    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
+public/control-center/pages/research.js:8:  seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },
+public/control-center/pages/research.js:959:              ? `Build an SEO workflow for ${projectName || "this project"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.`
+public/control-center/pages/content-studio-workspace.js:739:    id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),
+public/control-center/pages/content-studio-workspace.js:740:    sourcePage: asString(handoff?.source_page || "workflows"),
+public/control-center/pages/content-studio-workspace.js:760:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:1237:      ${handoff ? `<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>` : ""}
+public/control-center/pages/content-studio-workspace.js:1463:          <p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>
+public/control-center/pages/setup.js:76:  project_type: "Improves AI defaults and recommended workflow strategies.",
+public/control-center/pages/setup.js:85:  social_channels: "Defines where campaign and publishing workflows should execute."
+public/control-center/pages/setup.js:90:  project_type: "Helps AI choose better defaults for workflows, campaigns, and recommendations.",
+public/control-center/pages/setup.js:99:  social_channels: "Defines where campaigns and publishing workflows should prepare content."
+public/control-center/pages/integrations.js:357:        enables: "Campaign sending, lifecycle messages, and email workflow execution.",
+public/control-center/pages/integrations.js:375:        purpose: "Provider-specific email platform integration for campaigns and audience workflows.",
+public/control-center/pages/integrations.js:488:    description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",
+public/control-center/pages/integrations.js:512:        purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",
+public/control-center/pages/integrations.js:514:        enables: "Alerts, approvals, sync notifications, and workflow coordination.",
+public/control-center/pages/integrations.js:529:        purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",
+public/control-center/pages/integrations.js:563:        purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",
+public/control-center/pages/integrations.js:580:        purpose: "Internal system-to-system webhook integration for custom workflows and events.",
+public/control-center/pages/integrations.js:1055:    read: [...new Set(["workflow events", "shared files", ...scopeKeys])],
+public/control-center/pages/settings.js:44:  "Suggest workflows when campaign is ready",
+public/control-center/pages/settings.js:70:    description: "Shapes priorities, campaign structures, and workflow sequencing."
+public/control-center/pages/settings.js:573:        placeholder: "Use immediate alerts for provider disconnects and claim safety issues; batch lower-priority workflow completions."
+public/control-center/pages/settings.js:920:        "Suggest workflows when campaign is ready",
+public/control-center/pages/settings.js:927:      routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."
+public/control-center/pages/governance.js:116:  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+public/control-center/pages/governance.js:122:  if (intakeContext?.workflows) items.push({ label: "Workflows", value: asString(intakeContext.workflows) });
+public/control-center/pages/governance.js:326:      <div class="workflow-history-list">
+public/control-center/pages/governance.js:328:          <div class="workflow-history-item">
+public/control-center/pages/governance.js:1132:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/library/ai-panel.js:103:    description: "This selected asset looks ready for downstream campaign, media, and publishing workflows.",
+public/control-center/pages/library/ai-panel.js:104:    suggestedMove: "Use Open asset to verify final quality, then proceed to downstream workflows."
+public/control-center/pages/workflows.js:104:const WORKFLOW_LOCAL_DRAFTS_KEY = "mh-workflow-local-drafts-v1";
+public/control-center/pages/workflows.js:106:const workflowSessions = new Map();
+public/control-center/pages/workflows.js:108:let workflowBridgeRegistered = false;
+public/control-center/pages/workflows.js:109:let workflowAutoModeUnsubscribe = null;
+public/control-center/pages/workflows.js:110:let workflowAutomationEnabled = false;
+public/control-center/pages/workflows.js:111:const workflowAutomationState = {
+public/control-center/pages/workflows.js:224:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+public/control-center/pages/workflows.js:225:    acc[workflow.id] = createEmptyRunState();
+public/control-center/pages/workflows.js:231:  return WORKFLOW_CATALOG.reduce((acc, workflow) => {
+public/control-center/pages/workflows.js:232:    acc[workflow.id] = {
+public/control-center/pages/workflows.js:243:    String(operations?.workflows?.total_runs || 0),
+public/control-center/pages/workflows.js:271:function saveLocalDraft(projectName, workflowId, payload) {
+public/control-center/pages/workflows.js:275:  projectDrafts[workflowId] = {
+public/control-center/pages/workflows.js:276:    ...asObject(projectDrafts[workflowId]),
+public/control-center/pages/workflows.js:282:  return projectDrafts[workflowId];
+public/control-center/pages/workflows.js:288:  WORKFLOW_CATALOG.forEach((workflow) => {
+public/control-center/pages/workflows.js:289:    const draft = asObject(local[workflow.id]);
+public/control-center/pages/workflows.js:291:    session.inputsByWorkflow[workflow.id] = {
+public/control-center/pages/workflows.js:292:      ...session.inputsByWorkflow[workflow.id],
+public/control-center/pages/workflows.js:296:      session.selectedWorkflowId = workflow.id;
+public/control-center/pages/workflows.js:305:function persistWorkflowDraft(projectName, session, workflowId, hint, selected) {
+public/control-center/pages/workflows.js:306:  const saved = saveLocalDraft(projectName, workflowId, {
+public/control-center/pages/workflows.js:307:    inputs: asObject(session.inputsByWorkflow[workflowId]),
+public/control-center/pages/workflows.js:308:    workflowId,
+public/control-center/pages/workflows.js:316:  if (!workflowSessions.has(key)) {
+public/control-center/pages/workflows.js:317:    workflowSessions.set(key, {
+public/control-center/pages/workflows.js:338:    const session = workflowSessions.get(key);
+public/control-center/pages/workflows.js:339:    session.inputsByWorkflow = WORKFLOW_CATALOG.reduce((acc, workflow) => {
+public/control-center/pages/workflows.js:340:      acc[workflow.id] = {
+public/control-center/pages/workflows.js:342:        ...asObject(session.inputsByWorkflow?.[workflow.id])
+public/control-center/pages/workflows.js:363:  const session = workflowSessions.get(key);
+public/control-center/pages/workflows.js:374:  asArray(operations?.workflows?.items).forEach((item) => {
+public/control-center/pages/workflows.js:375:    const sourceId = asString(item.workflow_id);
+public/control-center/pages/workflows.js:485:function getBlockedRequirements(workflow, inputs, context) {
+public/control-center/pages/workflows.js:487:  const missingRequired = workflow.requiredInputs.filter((field) => !asString(inputs[field]).trim());
+public/control-center/pages/workflows.js:492:  if (workflow.id === "prepare-publishing-package" && context.missingAssets.length) {
+public/control-center/pages/workflows.js:496:  if (workflow.id === "generate-report" && context.missingIntegrations.length) {
+public/control-center/pages/workflows.js:500:  if (workflow.id === "fix-integrations" && !context.missingIntegrations.length) {
+public/control-center/pages/workflows.js:501:    blocked.push("No integration gaps detected. Use this workflow only if connectors are unstable.");
+public/control-center/pages/workflows.js:507:function buildWorkflowPrompt(workflow, inputs, context) {
+public/control-center/pages/workflows.js:509:    `Workflow: ${workflow.title}`,
+public/control-center/pages/workflows.js:510:    `Purpose: ${workflow.purpose}`,
+public/control-center/pages/workflows.js:522:function buildFallbackOutput(workflow, inputs, context) {
+public/control-center/pages/workflows.js:525:  const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
+public/control-center/pages/workflows.js:528:    title: `${workflow.title} execution package`,
+public/control-center/pages/workflows.js:529:    summary: `Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.`,
+public/control-center/pages/workflows.js:532:      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
+public/control-center/pages/workflows.js:536:    requiredInputs: workflow.requiredInputs.map(titleCase),
+public/control-center/pages/workflows.js:539:        label: `Open ${titleCase(workflow.routeHint)}`,
+public/control-center/pages/workflows.js:540:        route: workflow.routeHint,
+public/control-center/pages/workflows.js:541:        reason: `Continue execution in ${titleCase(workflow.routeHint)}.`
+public/control-center/pages/workflows.js:546:        reason: "Refine this workflow package with AI reasoning."
+public/control-center/pages/workflows.js:567:      workflowId: mapped.id,
+public/control-center/pages/workflows.js:577:      workflowId: "fix-integrations",
+public/control-center/pages/workflows.js:581:      prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."
+public/control-center/pages/workflows.js:587:      workflowId: "prepare-publishing-package",
+public/control-center/pages/workflows.js:597:      workflowId: "launch-campaign",
+public/control-center/pages/workflows.js:598:      title: "Define launch campaign workflow",
+public/control-center/pages/workflows.js:601:      prompt: "Create a launch campaign workflow with owner sequence and execution gates."
+public/control-center/pages/workflows.js:607:    workflowId: selected.id,
+public/control-center/pages/workflows.js:609:    reason: "Current context is sufficient to run the selected execution workflow now.",
+public/control-center/pages/workflows.js:625:        <article class="wfexec-stat"><span>Total workflows</span><strong>${escapeHtml(String(metrics.total))}</strong></article>
+public/control-center/pages/workflows.js:626:        <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
+public/control-center/pages/workflows.js:627:        <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
+public/control-center/pages/workflows.js:698:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+public/control-center/pages/workflows.js:701:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:706:      <div id="workflowAutomationProgress" class="wfexec-meta">
+public/control-center/pages/workflows.js:707:        ${esc(workflowAutomationState.progress || "")}
+public/control-center/pages/workflows.js:710:      <div id="workflowAutomationResult" class="wfexec-meta">
+public/control-center/pages/workflows.js:711:        ${esc(workflowAutomationState.result || "")}
+public/control-center/pages/workflows.js:723:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+public/control-center/pages/workflows.js:726:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:729:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:732:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+public/control-center/pages/workflows.js:757:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:760:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+public/control-center/pages/workflows.js:780:function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {
+public/control-center/pages/workflows.js:788:            ${WORKFLOW_CATALOG.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === workflow.id ? " selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}
+public/control-center/pages/workflows.js:814:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Run Workflow</button>
+public/control-center/pages/workflows.js:815:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Run</button>
+public/control-center/pages/workflows.js:820:      <div class="wfexec-draft-status">${escapeHtml(draftStatus || "Drafts auto-save locally per workflow.")}</div>
+public/control-center/pages/workflows.js:830:        ${WORKFLOW_CATALOG.map((workflow) => {
+public/control-center/pages/workflows.js:831:          const inputs = asObject(session.inputsByWorkflow[workflow.id]);
+public/control-center/pages/workflows.js:832:          const run = asObject(session.runsByWorkflow[workflow.id]);
+public/control-center/pages/workflows.js:833:          const blocked = getBlockedRequirements(workflow, inputs, context);
+public/control-center/pages/workflows.js:836:            <article class="wfexec-catalog-card${workflow.id === session.selectedWorkflowId ? " is-active" : ""}">
+public/control-center/pages/workflows.js:838:                <h4>${escapeHtml(workflow.title)}</h4>
+public/control-center/pages/workflows.js:841:              <p>${escapeHtml(workflow.purpose)}</p>
+public/control-center/pages/workflows.js:842:              <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
+public/control-center/pages/workflows.js:845:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Run</button>
+public/control-center/pages/workflows.js:846:                <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
+public/control-center/pages/workflows.js:847:                <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
+public/control-center/pages/workflows.js:858:function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) {
+public/control-center/pages/workflows.js:864:        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+public/control-center/pages/workflows.js:889:        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
+public/control-center/pages/workflows.js:890:        <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
+public/control-center/pages/workflows.js:891:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+public/control-center/pages/workflows.js:892:        <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
+public/control-center/pages/workflows.js:893:        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
+public/control-center/pages/workflows.js:895:      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+public/control-center/pages/workflows.js:907:  workflow,
+public/control-center/pages/workflows.js:920:          ${renderBuilderSection(session, workflow, inputs, session.validationMessage, session.draftStatus, escapeHtml)}
+public/control-center/pages/workflows.js:924:          ${renderExecutionSection(run, workflow, blockedRequirements, escapeHtml)}
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:937:  const fromWorkflowId = asString(payload.workflow_id);
+public/control-center/pages/workflows.js:940:  const workflowId = getWorkflowDef(fromWorkflowId || modeMapped || session.selectedWorkflowId).id;
+public/control-center/pages/workflows.js:942:  session.selectedWorkflowId = workflowId;
+public/control-center/pages/workflows.js:943:  session.inputsByWorkflow[workflowId] = {
+public/control-center/pages/workflows.js:944:    ...session.inputsByWorkflow[workflowId],
+public/control-center/pages/workflows.js:945:    project: firstNonEmpty(payload?.draft_context?.projectName, session.inputsByWorkflow[workflowId].project),
+public/control-center/pages/workflows.js:946:    campaign: firstNonEmpty(payload?.campaign_name, session.inputsByWorkflow[workflowId].campaign),
+public/control-center/pages/workflows.js:947:    goal: firstNonEmpty(payload?.draft_context?.lastResponseTitle, payload?.workflow_title, session.inputsByWorkflow[workflowId].goal),
+public/control-center/pages/workflows.js:948:    product: firstNonEmpty(payload?.output?.product, session.inputsByWorkflow[workflowId].product),
+public/control-center/pages/workflows.js:949:    channel: firstNonEmpty(payload?.output?.channel, session.inputsByWorkflow[workflowId].channel)
+public/control-center/pages/workflows.js:953:    const run = session.runsByWorkflow[workflowId];
+public/control-center/pages/workflows.js:964:    console.warn("Failed to consume workflow handoff:", error.message);
