@@ -1,0 +1,82 @@
+172:function normalizeRunStatus(status) {
+181:  const runStatus = normalizeRunStatus(status);
+211:function createEmptyRunState() {
+216:    lastRunAt: "",
+223:function createRunsMap() {
+225:    acc[workflow.id] = createEmptyRunState();
+320:      runsByWorkflow: createRunsMap(),
+346:    session.runsByWorkflow = session.runsByWorkflow || createRunsMap();
+373:  const nextRuns = createRunsMap();
+377:    if (!nextRuns[resolvedId]) return;
+380:    nextRuns[resolvedId] = {
+381:      ...nextRuns[resolvedId],
+385:      lastRunAt: asString(item.created_at),
+398:  session.runsByWorkflow = nextRuns;
+453:  const allRuns = Object.values(asObject(session.runsByWorkflow));
+463:  allRuns.forEach((run) => {
+464:    const normalized = normalizeRunStatus(run.status);
+470:    if (asString(run.lastRunAt) && (!counts.lastExecutionAt || Date.parse(run.lastRunAt) > Date.parse(counts.lastExecutionAt))) {
+471:      counts.lastExecutionAt = run.lastRunAt;
+578:      title: "Run Fix Integrations next",
+698:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+699:          Run Full Automation
+701:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+702:          Run Step-by-Step
+723:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+726:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+727:          Pause
+729:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+730:          Resume
+732:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+733:          Stop
+814:        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Run Workflow</button>
+815:        <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Run</button>
+845:                <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Run</button>
+849:              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last run ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
+864:        <div class="wfexec-empty">No execution result yet. Run a workflow to generate output.</div>
+873:        <span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>
+891:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+895:      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+956:    run.lastRunAt = nowIso();
+958:    run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output: run.output });
+1151:    if (!meta.autoRun) {
+1186:      run.lastRunAt = asString(result?.run?.created_at) || createdAt;
+1191:      run.history.unshift({ createdAt: run.lastRunAt, source: run.source, output });
+1353:    const activeRun = session.runsByWorkflow[activeWorkflow.id];
+1354:    activeRun.status = "running";
+1355:    activeRun.source = "manual-run";
+1389:      activeRun.status = "completed";
+1390:      activeRun.lastRunAt = asString(result?.run?.created_at) || createdAt;
+1391:      activeRun.runId = asString(result?.run?.id);
+1392:      activeRun.output = safeOutput;
+1393:      activeRun.blockedRequirements = asArray(safeOutput.blockedRequirements || safeOutput.blocked_requirements);
+1394:      activeRun.history.unshift({ createdAt: activeRun.lastRunAt, source: "manual-run", output: safeOutput });
+1395:      activeRun.history = activeRun.history.slice(0, 8);
+1402:          run_id: activeRun.runId,
+1405:          createdAt: activeRun.lastRunAt
+1413:      activeRun.status = "failed";
+1414:      activeRun.output = {
+1420:      activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
+1427:  const runBtn = $("workflowRunBtn");
+1429:  const runBtnMain = $("workflowRunBtnMain");
+1525:  const saveTaskBtn = $("workflowSaveTaskBtn");
+1529:        showError?.("Run the workflow before saving a task.");
+1538:          source_id: run.runId || run.lastRunAt || "",
+1626:  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+1635:      const confirmed = window.confirm(`Confirm automation run\n\nAction: Run ${plan.length} safe automation steps.\nRisk: This can execute workflow actions that create downstream tasks or handoffs.\n\nSelect Cancel to stop automation.`);
+1655:  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+1665:      const confirmed = window.confirm("Confirm single automation step\n\nAction: Run the next safe automation step.\nRisk: This can execute a workflow action and change downstream state.\n\nSelect Cancel to keep the current state.");
+1682:        : "Step executed. Run again for next step.";
+1688:  const autoStartBtn = $("workflowAutoStartBtn");
+1707:  const autoPauseBtn = $("workflowAutoPauseBtn");
+1708:  if (autoPauseBtn) {
+1709:    autoPauseBtn.onclick = () => {
+1715:  const autoResumeBtn = $("workflowAutoResumeBtn");
+1716:  if (autoResumeBtn) {
+1717:    autoResumeBtn.onclick = async () => {
+1723:  const autoStopBtn = $("workflowAutoStopBtn");
+1724:  if (autoStopBtn) {
+1725:    autoStopBtn.onclick = () => {
+1754:    description: "Run structured, repeatable workflows for common marketing and execution operations."
+2145:                          <span>${escapeHtml(titleCase(normalizeRunStatus(item.status || "draft")))}</span>
+2152:                  <span>Runs ${escapeHtml(String(workflowsTotal))}</span>

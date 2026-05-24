@@ -1,0 +1,49 @@
+9:  getSharedHandoff,
+11:  setSharedHandoff
+891:        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save as Task</button>
+932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+1067:  navigateTo,
+1084:    source_page: "workflows",
+1085:    destination_page: "ai-command",
+1096:  setSharedHandoff(projectName, "ai-command", handoff);
+1104:  navigateTo("ai-command");
+1209:  navigateTo,
+1222:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1298:        setSharedHandoff(projectName, "workflows", {
+1299:          source_page: "workflows",
+1300:          destination_page: "workflows",
+1377:        route_target: activeWorkflow.routeHint,
+1397:      setSharedHandoff(projectName, "workflows", {
+1398:        source_page: "workflows",
+1399:        destination_page: "workflows",
+1464:        navigateTo,
+1497:        navigateTo,
+1514:        navigateTo,
+1525:  const saveTaskBtn = $("workflowSaveTaskBtn");
+1542:          route_target: "workflows",
+1572:      setSharedHandoff(projectName, "ai-command", {
+1573:        source_page: "workflows",
+1574:        destination_page: "ai-command",
+1586:      navigateTo("ai-command");
+1608:      setSharedHandoff(projectName, "ai-command", {
+1609:        source_page: "workflows",
+1610:        destination_page: "ai-command",
+1622:      navigateTo("ai-command");
+1642:        context: { getState, navigateTo, createProjectHandoff, projectName },
+1671:        context: { getState, navigateTo, createProjectHandoff, projectName },
+1693:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1701:        context: { getState, navigateTo, createProjectHandoff, projectName }
+1718:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1734:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1742:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1765:    navigateTo,
+2106:                      <button class="btn btn-ghost btn-sm" type="button" data-wf-open="task-center">Open Task Center</button>
+2118:                      <button class="btn btn-ghost btn-sm" type="button" data-wf-open="${escapeHtml(destinationRoute)}">Open ${escapeHtml(destinationName)}</button>
+2251:        navigateTo("ai-command");
+2273:          navigateTo("campaign-studio");
+2283:          navigateTo("task-center");
+2287:      Array.from(root.querySelectorAll("[data-wf-open]")).forEach((button) => {
+2289:          const route = button.getAttribute("data-wf-open") || "workflows";
+2290:          if (route === "task-center") stateModel.openedTaskCenter = true;
+2291:          if (route !== "task-center") stateModel.openedDestination = true;
+2294:          navigateTo(route);

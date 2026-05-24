@@ -1,0 +1,103 @@
+15:  buildAutomationPlan,
+16:  createAutoModeController,
+17:  getAutoModeState,
+18:  startAutoMode,
+19:  pauseAutoMode,
+20:  resumeAutoMode,
+21:  stopAutoMode,
+22:  approveCurrentGate,
+23:  skipCurrentStep,
+24:  subscribeAutoMode,
+25:  getAutoFixPlan,
+26:  runAutomationPlan
+27:} from "../automation-engine.js";
+81:    purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",
+93:  "Automation",
+109:let workflowAutoModeUnsubscribe = null;
+110:let workflowAutomationEnabled = false;
+111:const workflowAutomationState = {
+570:      chips: ["Launch readiness", "Automation", "Campaign"],
+579:      reason: `${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.`,
+580:      chips: ["Launch readiness", "Automation", "Reports"],
+600:      chips: ["Campaign", "Launch readiness", "Automation"],
+652:function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
+663:  const gate = asObject(autoMode?.approvalRequiredStep);
+667:      <div class="wfexec-head"><h3>Automation Layer</h3></div>
+694:          : `<div class="wfexec-empty">No safe automation steps are available.</div>`
+698:        <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+699:          Run Full Automation
+701:        <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+706:      <div id="workflowAutomationProgress" class="wfexec-meta">
+707:        ${esc(workflowAutomationState.progress || "")}
+710:      <div id="workflowAutomationResult" class="wfexec-meta">
+711:        ${esc(workflowAutomationState.result || "")}
+715:        <h3>Auto Mode</h3>
+723:        <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
+724:          Start Auto Mode From Plan
+726:        <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+729:        <button id="workflowAutoResumeBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+732:        <button id="workflowAutoStopBtn" class="wfexec-btn wfexec-btn-ghost" type="button">
+738:        Status: ${esc(autoMode?.status || "idle")}
+743:          asArray(autoMode?.currentPlan)[autoMode?.currentStepIndex]?.action || "None"
+748:        autoMode?.status === "waiting_approval"
+754:              ${esc(gate.whatWillHappen || "Auto Mode is paused.")}
+757:              <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+760:              <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
+770:          asArray(autoMode?.logs)
+904:  automationPlan,
+919:          ${renderAutomationSection(automationPlan, autoFixPlan, escapeHtml)}
+1221:  if (workflowAutomationEnabled) {
+1222:    createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1223:    if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1224:    workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1626:  const fullAutomationBtn = $("workflowRunFullAutomationBtn");
+1627:  if (fullAutomationBtn) {
+1628:    fullAutomationBtn.onclick = async () => {
+1629:      const plan = buildAutomationPlan(getState());
+1631:        workflowAutomationState.result = "No safe automation steps available.";
+1635:      const confirmed = window.confirm(`Confirm automation run\n\nAction: Run ${plan.length} safe automation steps.\nRisk: This can execute workflow actions that create downstream tasks or handoffs.\n\nSelect Cancel to stop automation.`);
+1638:      workflowAutomationState.lastPlan = plan;
+1639:      workflowAutomationState.cursor = 0;
+1640:      workflowAutomationState.result = "";
+1641:      const result = await runAutomationPlan(plan, {
+1644:          workflowAutomationState.progress = `Step ${index} / ${total}: ${step.action} (${stepResult.status})`;
+1648:      workflowAutomationState.lastResults = asArray(result.results);
+1649:      workflowAutomationState.result = result.status === "success" ? "Automation run completed." : "Automation stopped before completion.";
+1650:      showMessage?.(workflowAutomationState.result);
+1655:  const stepAutomationBtn = $("workflowRunStepAutomationBtn");
+1656:  if (stepAutomationBtn) {
+1657:    stepAutomationBtn.onclick = async () => {
+1658:      const plan = buildAutomationPlan(getState());
+1660:        workflowAutomationState.result = "No safe automation steps available.";
+1665:      const confirmed = window.confirm("Confirm single automation step\n\nAction: Run the next safe automation step.\nRisk: This can execute a workflow action and change downstream state.\n\nSelect Cancel to keep the current state.");
+1668:      const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
+1670:      const stepResult = await runAutomationPlan(singleStep, {
+1673:          workflowAutomationState.progress = `Step ${nextIndex + index} / ${plan.length}: ${step.action} (${runResult.status})`;
+1677:      workflowAutomationState.cursor = Math.min(nextIndex + 1, plan.length);
+1678:      workflowAutomationState.lastPlan = plan;
+1679:      workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
+1680:      workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
+1681:        ? "Step-by-step automation completed."
+1683:      showMessage?.(workflowAutomationState.result);
+1688:  const autoStartBtn = $("workflowAutoStartBtn");
+1691:      const plan = buildAutomationPlan(getState());
+1692:      workflowAutomationEnabled = true;
+1693:      createAutoModeController(getState, { getState, navigateTo, createProjectHandoff });
+1694:      if (workflowAutoModeUnsubscribe) workflowAutoModeUnsubscribe();
+1695:      workflowAutoModeUnsubscribe = subscribeAutoMode(() => {
+1699:      await startAutoMode(plan, {
+1703:      showMessage?.("Workflow Auto Mode started.");
+1707:  const autoPauseBtn = $("workflowAutoPauseBtn");
+1710:      pauseAutoMode();
+1711:      showMessage?.("Auto Mode paused.");
+1715:  const autoResumeBtn = $("workflowAutoResumeBtn");
+1718:      await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1719:      showMessage?.("Auto Mode resumed.");
+1723:  const autoStopBtn = $("workflowAutoStopBtn");
+1726:      stopAutoMode();
+1727:      showMessage?.("Auto Mode stopped.");
+1731:  const autoApproveBtn = $("workflowAutoApproveBtn");
+1734:      await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1739:  const autoSkipBtn = $("workflowAutoSkipBtn");
+1742:      await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
+1743:      showMessage?.("Auto Mode skipped gated step.");
