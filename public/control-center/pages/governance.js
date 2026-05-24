@@ -694,6 +694,38 @@ function buildReadinessSnapshot(summary, queueItems, selectedItem) {
   };
 }
 
+
+function governanceRiskRank(value) {
+  const normalized = asString(value).toLowerCase();
+  if (normalized === "critical") return 4;
+  if (normalized === "high") return 3;
+  if (normalized === "medium" || normalized === "warning") return 2;
+  if (normalized === "low") return 1;
+  return 0;
+}
+
+function findHighestRiskQueueItem(queueItems) {
+  return asArray(queueItems).reduce((highest, item) => {
+    if (!highest) return item;
+    return governanceRiskRank(item.queue_risk) > governanceRiskRank(highest.queue_risk) ? item : highest;
+  }, null);
+}
+
+function firstConfiguredOwner(owners) {
+  return Object.values(asObject(owners)).map(asString).find((value) => value.trim()) || "";
+}
+
+function getGovernanceEscalationRoute(summary, risk) {
+  const escalationChain = asObject(summary?.review_model?.escalation_chain);
+  const normalizedRisk = asString(risk).toLowerCase();
+  const roles = asArray(
+    escalationChain[normalizedRisk] ||
+    escalationChain.high ||
+    escalationChain.critical
+  );
+  return roles.length ? roles.map(titleCase).join(" -> ") : "No escalation path";
+}
+
 function renderPage(projectName, session, escapeHtml) {
   if (!projectName) {
     return `
@@ -811,32 +843,126 @@ function renderPage(projectName, session, escapeHtml) {
   const settingsBridge = asObject(policy.settings_bridge);
   const recentTimeline = asArray(sections.audit_timeline).slice(0, 4);
   const readiness = buildReadinessSnapshot(summary, queueItems, selectedItem);
+  const highestRiskItem = findHighestRiskQueueItem(queueItems);
+  const executiveFocusItem = selectedItem || highestRiskItem;
+  const authorityOwner =
+    asString(executiveFocusItem?.queue_owner) ||
+    firstConfiguredOwner(owners) ||
+    "Governance owner";
+  const highestRiskValue = asString(highestRiskItem?.queue_risk || executiveFocusItem?.queue_risk);
+  const highestRiskLabel = highestRiskValue ? titleCase(highestRiskValue) : "No open risk";
+  const highestRiskTone = highestRiskValue ? severityClass(highestRiskValue) : "success";
+  const escalationRoute = getGovernanceEscalationRoute(summary, highestRiskValue || "high");
+  const selectedDecisionLabel = asString(executiveFocusItem?.queue_title || "No selected decision");
+  const selectedDecisionKind = titleCase(executiveFocusItem?.queue_kind || "governance");
 
   return `
     <section class="page is-active" data-page="governance">
       <div class="governance-shell governance-workspace mhos-clean-root mhos-clean-shell">
-        <section class="panel">
-          <div class="panel-header">
+        <section class="panel mhos-executive-surface mhos-context-ribbon" aria-label="Executive governance command band">
+          <div class="panel-header mhos-context-main">
             <div>
-              <div class="panel-kicker">Command surface</div>
-              <h3>Governance command center for ${escapeHtml(projectName)}</h3>
-              <p>Operating surface for policy authority, approval flow, and safe execution routing.</p>
+              <div class="panel-kicker mhos-context-kicker">Governance command</div>
+              <h3 class="mhos-context-title">Governance command center for ${escapeHtml(projectName)}</h3>
+              <p class="mhos-context-description">Policy authority, approval pressure, escalation, and safe decision routing.</p>
             </div>
             <span class="card-badge neutral">${escapeHtml(session.loading ? "Refreshing" : "Active")}</span>
           </div>
-          <div class="governance-actions std-action-row">
+
+          <div class="mhos-executive-summary-grid" aria-label="Governance executive anchors">
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">Readiness</span>
+              <strong class="mhos-executive-metric-value">${escapeHtml(readiness.state)}</strong>
+              <small class="mhos-executive-metric-note">${escapeHtml(`${readiness.totalQueue} open decision${readiness.totalQueue === 1 ? "" : "s"}`)}</small>
+            </article>
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">Approval Pressure</span>
+              <strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>
+              <small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>
+            </article>
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">Escalation State</span>
+              <strong class="mhos-executive-metric-value">${escapeHtml(readiness.escalations ? `${readiness.escalations} active` : "Clear")}</strong>
+              <small class="mhos-executive-metric-note">${escapeHtml(escalationRoute)}</small>
+            </article>
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">Authority Owner</span>
+              <strong class="mhos-executive-metric-value">${escapeHtml(authorityOwner)}</strong>
+              <small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionKind)} focus</small>
+            </article>
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">Highest Risk</span>
+              <strong class="mhos-executive-metric-value">${escapeHtml(highestRiskLabel)}</strong>
+              <small class="mhos-executive-metric-note">${escapeHtml(selectedDecisionLabel)}</small>
+            </article>
+            <article class="mhos-executive-summary-item">
+              <span class="mhos-executive-metric-label">AI Role</span>
+              <strong class="mhos-executive-metric-value">Prepare only</strong>
+              <small class="mhos-executive-metric-note">Explain risk and evidence. Decisions stay here.</small>
+            </article>
+          </div>
+
+          <div class="governance-policy-summary-grid">
+            <div class="governance-policy-block mhos-executive-panel">
+              <h4>Next best governance action</h4>
+              <p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>
+              <div class="governance-rule-list">
+                <div class="governance-rule-item">
+                  <strong>Owner</strong>
+                  <span>${escapeHtml(authorityOwner)}</span>
+                </div>
+                <div class="governance-rule-item">
+                  <strong>Risk</strong>
+                  <span><span class="card-badge ${highestRiskTone}">${escapeHtml(highestRiskLabel)}</span></span>
+                </div>
+              </div>
+              <div class="governance-actions std-action-row">
+                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
+                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
+                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
+              </div>
+            </div>
+            <div class="governance-policy-block">
+              <h4>Current blockers</h4>
+              <div class="governance-activity-list">
+                ${readiness.blockers.length
+                  ? readiness.blockers.map((item) => `
+                    <div class="governance-activity-item">
+                      <strong>Action needed</strong>
+                      <span>${escapeHtml(item)}</span>
+                    </div>
+                  `).join("")
+                  : `<div class="empty-box">No active governance blockers detected.</div>`}
+              </div>
+            </div>
+            <div class="governance-policy-block">
+              <h4>Safe execution path</h4>
+              <div class="governance-rule-list">
+                <div class="governance-rule-item">
+                  <strong>Approval route</strong>
+                  <span>${escapeHtml(readiness.approvals ? "Review queued approvals" : "No queued approvals")}</span>
+                </div>
+                <div class="governance-rule-item">
+                  <strong>Escalation route</strong>
+                  <span>${escapeHtml(escalationRoute)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="governance-actions std-action-row mhos-executive-action-row">
             <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
             <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
             <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel mhos-clean-surface" aria-label="Supporting governance signals">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">System signals</div>
-              <h3>Current system signals</h3>
-              <p>Live governance pressure across approvals, policy, publishing, and escalations.</p>
+              <div class="panel-kicker">Supporting signals</div>
+              <h3>Governance signal inventory</h3>
+              <p>Counts remain visible below the executive action band.</p>
             </div>
           </div>
           <div class="governance-overview-grid">
@@ -859,58 +985,6 @@ function renderPage(projectName, session, escapeHtml) {
           </div>
         </section>
 
-        <section class="panel std-detail-card mhos-clean-surface">
-          <div class="panel-header">
-            <div>
-              <div class="panel-kicker">Readiness and blockers</div>
-              <h3>Launch readiness and next best governance action</h3>
-              <p>Use this to understand whether Governance is clear to operate and what to do next.</p>
-            </div>
-            <span class="card-badge ${readiness.state === "Blocked" ? "danger" : readiness.state === "Attention required" ? "warning" : "success"}">${escapeHtml(readiness.state)}</span>
-          </div>
-          <div class="governance-policy-summary-grid">
-            <div class="governance-policy-block">
-              <h4>Readiness status</h4>
-              <div class="governance-rule-list">
-                <div class="governance-rule-item">
-                  <strong>Decision queue</strong>
-                  <span>${escapeHtml(asString(readiness.totalQueue))} open items</span>
-                </div>
-                <div class="governance-rule-item">
-                  <strong>Approval owners assigned</strong>
-                  <span>${escapeHtml(`${readiness.ownerCoverage} configured`)}</span>
-                </div>
-                <div class="governance-rule-item">
-                  <strong>Escalations</strong>
-                  <span>${escapeHtml(asString(readiness.escalations))} active</span>
-                </div>
-              </div>
-            </div>
-            <div class="governance-policy-block">
-              <h4>Current blockers</h4>
-              <div class="governance-activity-list">
-                ${readiness.blockers.length
-                  ? readiness.blockers.map((item) => `
-                    <div class="governance-activity-item">
-                      <strong>Action needed</strong>
-                      <span>${escapeHtml(item)}</span>
-                    </div>
-                  `).join("")
-                  : `<div class="empty-box">No active blockers were detected from current governance signals.</div>`}
-              </div>
-            </div>
-            <div class="governance-policy-block">
-              <h4>Next best action</h4>
-              <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
-              <div class="governance-actions std-action-row">
-                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
-                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
-                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <div class="governance-workspace-grid">
           <div class="governance-action-stack std-main-column mhos-clean-stack">
             <section class="panel std-detail-card mhos-clean-surface">
@@ -918,7 +992,7 @@ function renderPage(projectName, session, escapeHtml) {
                 <div>
                   <div class="panel-kicker">Policy and rule summary</div>
                   <h3>Policy visibility</h3>
-                  <p>Track enforceable rules, owner accountability, and Settings bridge state in one view.</p>
+                  <p>Rules, owners, and Settings bridge state.</p>
                 </div>
               </div>
               <div class="governance-policy-summary-grid">
@@ -963,7 +1037,7 @@ function renderPage(projectName, session, escapeHtml) {
                 <div>
                   <div class="panel-kicker">Decision queue</div>
                   <h3>Pending approvals and governance decisions</h3>
-                  <p>Prioritize high-risk governance work, then open one item for safe decisioning.</p>
+                  <p>Inspect risk, owner, status, and decision focus.</p>
                 </div>
                 <span class="card-badge neutral">${escapeHtml(`${visibleQueue.length} visible`)}</span>
               </div>
@@ -1024,7 +1098,7 @@ function renderPage(projectName, session, escapeHtml) {
               <div>
                 <div class="panel-kicker">Selected decision</div>
                 <h3>${escapeHtml(selectedItem?.queue_title || "Select a governance item")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Review risk, policy implications, and linked approval history before committing a decision." : "Choose a governance item from the queue to inspect it.")}</p>
+                  <p>${escapeHtml(selectedItem ? "Review risk, owner, evidence, and linked approval before decision." : "Choose a governance item from the queue to inspect it.")}</p>
               </div>
             </div>
             ${
@@ -1034,6 +1108,7 @@ function renderPage(projectName, session, escapeHtml) {
                     <strong>${escapeHtml(selectedItem.queue_title)}</strong>
                     <p>${escapeHtml(selectedItem.queue_summary)}</p>
                   </div>
+                  <div class="simple-banner"><strong>Authority focus:</strong> ${escapeHtml(selectedItem.queue_owner || authorityOwner)} owns this ${escapeHtml(titleCase(selectedItem.queue_risk || "medium"))} ${escapeHtml(titleCase(selectedItem.queue_kind || "governance"))} review.</div>
                   <!-- Evidence Summary & Intake Panel -->
                   ${renderGovernanceEvidenceSummary({
                     selectedItem,
@@ -1124,7 +1199,7 @@ function renderPage(projectName, session, escapeHtml) {
               <div>
                 <div class="panel-kicker">Governance actions</div>
                 <h3>Review, decide, and maintain policy controls</h3>
-                <p>Submit backend-authoritative reviewed decisions only. Approval decisions appear only for real queued approvals.</p>
+                <p>Backend-authoritative decisions only. Approval actions appear only for real queued approvals.</p>
               </div>
             </div>
             <div class="governance-action-stack">
@@ -1196,15 +1271,15 @@ function renderPage(projectName, session, escapeHtml) {
           </div>
         </div>
 
-        <section class="panel std-ai-panel mhos-clean-surface">
+        <section class="panel std-ai-panel mhos-clean-surface mhos-executive-ai-panel">
           <div class="panel-header">
             <div>
-              <div class="panel-kicker">Governance AI assistant</div>
+              <div class="panel-kicker">AI preparation</div>
               <h3>Governance AI assistant</h3>
-              <p>Context-only intelligence handoff. AI helps with analysis and recommendations; execution stays in governed controls.</p>
+              <p>Explanation-only guidance. Decisions and policy changes stay in governed controls.</p>
             </div>
           </div>
-          <div class="simple-banner"><strong>AI context scope:</strong> Policy pressure, approval readiness, ownership coverage, and next best governance move.</div>
+          <div class="simple-banner"><strong>AI context scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
           <div class="governance-ai-toolbar">
             <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
           </div>
