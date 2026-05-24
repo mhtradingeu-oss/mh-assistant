@@ -712,11 +712,11 @@ export const homeRoute = {
           </div>
           <div class="mhos-next-action-reason">
             ${escapeHtml(dashboard.nextBestAction.whyItMatters)}
-            <span class="mhos-next-action-helper">This is the current executive priority. All operational focus should converge here before moving forward.</span>
+            <span class="mhos-next-action-helper">Current executive priority.</span>
           </div>
           <div class="mhos-next-action-impact">
             ${escapeHtml(dashboard.nextBestAction.workflowImpact)}
-            <span class="mhos-next-action-helper">Execution continues here. Review blockers and readiness before proceeding.</span>
+            <span class="mhos-next-action-helper">Execution continues here.</span>
           </div>
           <div class="mhos-next-action-flow">
             <span class="mhos-next-action-continuation">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
@@ -738,13 +738,14 @@ export const homeRoute = {
 
         <!-- 2. EXECUTIVE SNAPSHOT / KEY INDICATORS -->
         <div class="home-snapshot-grid executive-signal-grid">
+          <p class="executive-signal-grid-note">Executive signals highlight operational impact, not generic metrics.</p>
           ${capabilityCards.map((item) => `
             <article class="card home-snapshot-card executive-signal-card">
               <span class="executive-signal-label">${escapeHtml(item.title)}</span>
               <strong class="executive-signal-value">${escapeHtml(item.value)}</strong>
               <p class="executive-signal-detail">${escapeHtml(item.detail)}</p>
               ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
-              <span class="executive-signal-helper">Executive signal: Review for operational impact, not just metrics.</span>
+
             </article>
           `).join("")}
         </div>
@@ -758,7 +759,7 @@ export const homeRoute = {
                 <div>
                   <p class="card-label">Operational Readiness</p>
                   <h3>What is ready to move?</h3>
-                  <span class="section-helper">This section shows what is ready for executive action. Review before launching or escalating.</span>
+                  <span class="section-helper">Shows what is ready for executive action.</span>
                 </div>
                 ${renderBadge(
                   dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
@@ -819,7 +820,7 @@ export const homeRoute = {
               <div>
                 <p class="card-label">Critical Gaps & Blockers</p>
                 <h3>What is blocking operational flow?</h3>
-                <span class="section-helper">Review and resolve blockers to restore executive flow. AI can explain and help resolve these.</span>
+                <span class="section-helper">Resolve blockers to restore executive flow.</span>
               </div>
               ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
             </div>
@@ -842,7 +843,7 @@ export const homeRoute = {
             <div class="home-section-head">
               <p class="card-label">Operating State Overview</p>
               <h3>Executive System State</h3>
-              <span class="section-helper">Signals the current operational health and movement of the system.</span>
+              <span class="section-helper">Shows operational health and movement.</span>
             </div>
 
             <div class="home-status-board">
@@ -913,7 +914,7 @@ export const homeRoute = {
             <div>
               <p class="card-label">AI Guidance for Operations</p>
               <h3>AI explains, plans, and clarifies operational flow</h3>
-              <span class="section-helper">AI guidance is contextual: it explains blockers, converts next actions into plans, clarifies launch risk, and routes guidance to the right workflow or page.</span>
+              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
             </div>
             <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
               Open Workspace
@@ -948,6 +949,7 @@ export const homeRoute = {
             </div>
             <div class="mhos-workforce-flow">
               <!-- Workflow Chain -->
+              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas.</p>
               <div class="mhos-workflow-chain">
                 ${(() => {
                   // Projection-only workflow chain
@@ -969,7 +971,7 @@ export const homeRoute = {
                         </div>
                         ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
                         ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
-                        <span class="workflow-helper">This role is part of the operational flow, not a persona. Handoffs represent movement, not just assignment.</span>
+
                       </div>
                     `;
                   }).join("")
