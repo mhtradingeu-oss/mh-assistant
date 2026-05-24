@@ -38,6 +38,20 @@ GOVERNANCE FINAL OPERATING SURFACE PASS
 - Lower report-like sections have a prepared page-scoped secondary style; applying it broadly should be confirmed in a follow-up browser QA pass.
 - The first viewport is calmer, less dense, and more decision-focused.
 
+
+## Browser QA visual tuning notes
+
+After browser QA, the first Governance pass was directionally correct but the summary cards were too tall and some metric values wrapped poorly, especially Authority Owner and AI Role.
+
+A follow-up CSS-only tuning pass was applied to:
+- reduce oversized metric typography
+- improve wrapping inside summary cards
+- soften the AI boundary emphasis
+- reduce header heaviness
+- improve responsive summary grid behavior
+
+This tuning remains scoped to `[data-page="governance"]` and does not change handlers, APIs, backend behavior, routes, or data.
+
 ## Remaining risks
 - Some lower report sections may still be visually dense if project data is large.
 - If new features are added outside this pattern, cross-page rhythm may diverge.
