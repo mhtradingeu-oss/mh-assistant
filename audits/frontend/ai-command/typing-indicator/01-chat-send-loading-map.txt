@@ -1,0 +1,56 @@
+22:        executeProjectAiChat,
+958:				loadingPromise: null
+1031:function persistSessionDraft(projectName, session, hint) {
+2233:	if (current.loadingPromise) return current.loadingPromise;
+2241:		status: "loading",
+2243:		loadingPromise: (async () => {
+2264:					loadingPromise: null
+2267:				session.intelligence = { ...session.intelligence, project: projectName, status: "error", error: error.message || "Failed to load live intelligence", loadingPromise: null };
+2275:	return session.intelligence.loadingPromise;
+2632:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+2771:	const intelDotClass = { ready: "ready", loading: "loading", error: "error", idle: "idle" }[intelligenceStatus] || "idle";
+2772:	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+3916:		const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+3956:				<div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
+4362:                        ${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking ${escapeHtml(selectedLabel)}...</div>` : ""}
+4591:	render(context) {
+4649:			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+4663:		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+4704:		const statusEl = $("aicmdV2Status");
+4735:			persistSessionDraft(sessionKey, session, "Draft saved locally");
+4736:			aiCommandRoute.render(context);
+4760:		                persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+4762:		                aiCommandRoute.render(context);
+4796:		                persistSessionDraft(sessionKey, session, "New session started");
+4798:		                aiCommandRoute.render(context);
+4818:				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
+4819:				aiCommandRoute.render(context);
+4843:                                persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
+4844:                                aiCommandRoute.render(context);
+4854:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+4855:				aiCommandRoute.render(context);
+4866:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+4878:				persistSessionDraft(sessionKey, session, "Quick action loaded");
+4891:                        persistSessionDraft,
+4901:				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+4945:						persistSessionDraft(sessionKey, session, "Voice input captured");
+4975:		                        aiCommandRoute.render(context);
+5011:		                aiCommandRoute.render(context);
+5015:		                        const result = await executeProjectAiChat(projectName, {
+5117:                                aiCommandRoute.render(context);
+5132:		                        aiCommandRoute.render(context);
+5151:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+5155:                                aiCommandRoute.render(context);
+5176:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+5179:                                aiCommandRoute.render(context);
+5199:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+5202:                                aiCommandRoute.render(context);
+5223:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+5226:                                aiCommandRoute.render(context);
+5280:				persistSessionDraft(sessionKey, session, "Draft saved locally");
+5296:				persistSessionDraft(sessionKey, session, "Draft cleared");
+5339:				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");
+5386:		                aiCommandRoute.render(context);
+5479:				persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+5558:				aiCommandRoute.render(context);
+5572:				rerender: () => aiCommandRoute.render(context)

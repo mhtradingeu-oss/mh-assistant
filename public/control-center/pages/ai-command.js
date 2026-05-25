@@ -3727,6 +3727,29 @@ function renderPhase1Profile(session, escapeHtml) {
 	`;
 }
 
+
+function getAiSpecialistWorkingMessage(session = {}) {
+        const isTeam = session.teamMode === "team";
+        const spec = isTeam
+                ? { label: "Full AI Team" }
+                : getPhase1SpecialistById(session.modeId);
+
+        const label = asString(spec?.label || "AI specialist");
+
+        if (isTeam) return `${label} is reviewing your request...`;
+
+        const roleId = getAiRoomRoleId(session.modeId);
+        if (roleId === "content_writer") return `${label} is drafting your content...`;
+        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+        if (roleId === "seo") return `${label} is reviewing insights and signals...`;
+        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+
+        return `${label} is preparing your response...`;
+}
+
+
 function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
 	const spec = getPhase1SpecialistById(session.modeId);
 	const safeBridgeStatus = bridgeStatus || { available: false };
@@ -4359,7 +4382,15 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                 </div>
                         </div>
 
-                        ${session.responseLoading ? `<div class="aicmd-v2-chat-loading">Asking ${escapeHtml(selectedLabel)}...</div>` : ""}
+                        ${session.responseLoading ? `
+                                                <div class="aicmd-v2-chat-loading aicmd-room-typing-indicator" role="status" aria-live="polite">
+                                                        <span class="aicmd-room-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                                                        <div>
+                                                                <strong>${escapeHtml(getAiSpecialistWorkingMessage(session))}</strong>
+                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+                                                        </div>
+                                                </div>
+                                        ` : ""}
                         ${session.responseError ? `<div class="aicmd-v2-chat-error">${escapeHtml(session.responseError)}</div>` : ""}
 
                         ${conversationMessages.length ? `
