@@ -1,0 +1,146 @@
+  4890			// ── SUGGESTED PROMPTS: PREFILL ONLY ─────────────────────────
+  4891			Array.from(document.querySelectorAll("[data-aicmdv2-prompt]")).forEach((btn) => {
+  4892				btn.onclick = () => {
+  4893					const text = asString(btn.getAttribute("data-aicmdv2-prompt-text") || "");
+  4894					if (!text) return;
+  4895					session.draftMessage = text;
+  4896					if (input) input.value = text;
+  4897					persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+  4898					updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
+  4899					input?.focus?.();
+  4900				};
+  4901			});
+  4902	
+  4903			Array.from(document.querySelectorAll("[data-aicmdv2-quick]")).forEach((btn) => {
+  4904				btn.onclick = () => {
+  4905					const text = asString(btn.getAttribute("data-aicmdv2-quick-template") || "");
+  4906					if (!text) return;
+  4907					session.draftMessage = text;
+  4908					if (input) input.value = text;
+  4909					persistSessionDraft(sessionKey, session, "Quick action loaded");
+  4910					updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
+  4911					input?.focus?.();
+  4912				};
+  4913			});
+  4914	
+  4915	                bindAiToolDock({
+  4916	                        root: document,
+  4917	                        session,
+  4918	                        input,
+  4919	                        projectName,
+  4920	                        aiContext,
+  4921	                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+  4922	                        persistSessionDraft,
+  4923	                        sessionKey,
+  4924	                        updateStatus
+  4925	                });
+  4926	
+  4927			// ── INPUT HANDLING ───────────────────────────────────────────
+  4928			if (input) {
+  4929				input.oninput = () => {
+  4930					session.draftMessage = input.value || "";
+  4931					session.composerText = session.draftMessage;
+  4932					persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+  4933				};
+  4934	
+  4935				input.onkeydown = (event) => {
+  4936				        if (event.key !== "Enter") return;
+  4937	
+  4938				        if (event.shiftKey) {
+  4939				                return;
+  4940				        }
+  4941	
+  4942				        event.preventDefault();
+  4943	
+  4944				        const sendBtn = $("aicmdV2AskBtn");
+  4945				        if (sendBtn && !sendBtn.disabled) {
+  4946				                sendBtn.click?.();
+  4947				        }
+  4948				};
+  4949			}
+  4950	
+  4951			const voiceBtn = $("aicmdV2VoiceBtn");
+  4952			if (voiceBtn) {
+  4953				voiceBtn.onclick = () => {
+  4954					const SpeechRecognitionCtor = typeof window !== "undefined"
+  4955						? (window.SpeechRecognition || window.webkitSpeechRecognition)
+  4956						: null;
+  4957					if (!SpeechRecognitionCtor) {
+  4958						updateStatus("Voice input trigger is ready. Browser speech recognition is not available in this environment yet.");
+  4959						showMessage?.("Voice input readiness is staged for compatible browsers.");
+  4960						return;
+  4961					}
+  4962	
+  4963					try {
+  4964						const recognition = new SpeechRecognitionCtor();
+  4965						recognition.lang = "ar";
+  4966						recognition.interimResults = false;
+  4967						recognition.maxAlternatives = 1;
+  4968						recognition.onresult = (event) => {
+  4969							const transcript = asString(event?.results?.[0]?.[0]?.transcript || "").trim();
+  4970							if (!transcript) return;
+  4971							setAiComposerValue(session, input, transcript);
+  4972							if (input) {
+  4973								input.value = transcript;
+  4974								input.focus();
+  4975							}
+  4976							persistSessionDraft(sessionKey, session, "Voice input captured");
+  4977							updateStatus("Voice input captured in composer.");
+  4978						};
+  4979						recognition.onerror = () => {
+  4980							updateStatus("Voice input could not start. Microphone permission may be blocked.");
+  4981						};
+  4982						recognition.start();
+  4983						updateStatus("Listening for Arabic voice input.");
+  4984					} catch (_) {
+  4985						updateStatus("Voice input could not start in this browser.");
+  4986					}
+  4987				};
+  4988			}
+  4989	
+  4990			// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
+  4991			const askBtn = $("aicmdV2AskBtn");
+  4992			if (askBtn) {
+  4993			        askBtn.onclick = async () => {
+  4994			                const value = asString(input?.value || session.draftMessage || "").trim();
+  4995			                if (!value) {
+  4996			                        updateStatus("Please write your message in the composer first.");
+  4997			                        input?.focus?.();
+  4998			                        return;
+  4999			                }
+  5000	
+  5001			                session.responseError = "";
+  5002	
+  5003			                if (!bridgeStatus.available) {
+  5004			                        session.responseLoading = false;
+  5005			                        session.responseError = bridgeStatus.reason;
+  5006			                        aiCommandRoute.render(context);
+  5007			                        updateStatus(bridgeStatus.reason);
+  5008			                        showMessage?.("AI chat route is not connected yet.");
+  5009			                        return;
+  5010			                }
+  5011	
+  5012			                const specialist = session.teamMode === "team"
+  5013			                        ? { id: "team", label: "Full Team" }
+  5014			                        : getPhase1SpecialistById(session.modeId);
+  5015	
+  5016			                const userChatMessage = {
+  5017			                        id: `chat-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  5018			                        role: "user",
+  5019			                        modeId: specialist.id || session.modeId,
+  5020			                        specialistId: specialist.id || session.modeId,
+  5021			                        specialistLabel: "You",
+  5022			                        teamMode: session.teamMode,
+  5023			                        content: value,
+  5024			                        createdAt: nowIso(),
+  5025			                        source: "ai-command-chat"
+  5026			                };
+  5027	
+  5028			                session.messages.push(userChatMessage);
+  5029			                session.messages = session.messages.slice(-40);
+  5030			                session.draftMessage = "";
+  5031			                session.composerText = "";
+  5032			                session.responseLoading = true;
+  5033	
+  5034			                saveLocalOutput(sessionKey, {
+  5035			                        preview: session.outputPreview,
