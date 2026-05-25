@@ -1,0 +1,96 @@
+  1660	
+  1661		normalizeDisplayList(output.bullets, 12).forEach((item) => lines.push(`- ${item}`));
+  1662		normalizeDisplayList(output.steps, 12).forEach((item, idx) => lines.push(`${idx + 1}. ${item}`));
+  1663	
+  1664		lines.push("");
+  1665		lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+  1666		lines.push(`Safety: ${humanizeValue(output.safetyLabel)}`);
+  1667		lines.push(`Confirmation: ${output.confirmationRequired ? "Required before execution" : "Required for execution actions"}`);
+  1668		return lines.join("\n");
+  1669	}
+  1670	
+  1671	function buildStructuredPreviewBlocks(preview = {}) {
+  1672		const mainOutputItems = normalizeDisplayList(
+  1673			[
+  1674				preview.mainOutput,
+  1675				preview.output,
+  1676				preview.generatedOutput,
+  1677				preview.summary
+  1678			].filter(Boolean),
+  1679			3
+  1680		);
+  1681		const fieldDefs = [
+  1682			{ key: "hooks", label: "Hooks" },
+  1683			{ key: "captions", label: "Captions" },
+  1684			{ key: "replyDraft", label: "Reply Draft" },
+  1685			{ key: "ticketDraft", label: "Ticket Draft" },
+  1686			{ key: "outreachDraft", label: "Outreach Draft" },
+  1687			{ key: "followUps", label: "Follow-ups" },
+  1688			{ key: "ctas", label: "CTA" },
+  1689			{ key: "notes", label: "Notes" }
+  1690		];
+  1691		const blocks = mainOutputItems.length
+  1692			? [{ label: "Main output", items: mainOutputItems }]
+  1693			: [];
+  1694	
+  1695		blocks.push(...fieldDefs
+  1696			.map((field) => ({
+  1697				label: field.label,
+  1698				items: normalizeDisplayList(preview[field.key], 8)
+  1699			}))
+  1700			.filter((field) => field.items.length));
+  1701	
+  1702		const bullets = normalizeDisplayList(preview.bullets, 8);
+  1703		const steps = normalizeDisplayList(preview.steps, 8);
+  1704		const summary = humanizeValue(preview.summary, "");
+  1705	
+  1706		if (bullets.length) {
+  1707			blocks.push({ label: mainOutputItems.length ? "Details" : "Main output", items: bullets });
+  1708		}
+  1709	
+  1710		if (steps.length) {
+  1711			blocks.push({ label: "Next step", items: steps, ordered: true });
+  1712		}
+  1713	
+  1714		if (preview.nextStep) {
+  1715			blocks.push({ label: "Next step", items: [humanizeValue(preview.nextStep)] });
+  1716		}
+  1717	
+  1718		return {
+  1719			blocks,
+  1720			draftText: summary && (summary.length > 160 || summary.includes("\n")) ? summary : ""
+  1721		};
+  1722	}
+  1723	
+  1724	function isProviderLikelyConfigured(aiContext) {
+  1725		const records = asObject(aiContext?.controlCenter?.records);
+  1726		return Object.values(records).some((record) => {
+  1727			const integrationId = asString(record?.integration_id || record?.id).toLowerCase();
+  1728			const status = asString(record?.status || record?.status_label).toLowerCase();
+  1729			const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+  1730			const readyState = /connected|healthy|ready|active|ok/.test(status);
+  1731			return providerMatch && readyState;
+  1732		});
+  1733	}
+  1734	
+  1735	// ============================================================
+  1736	//  UNIFIED AI CONTEXT
+  1737	// ============================================================
+  1738	
+  1739	function buildUnifiedAiContext(state, intelligence) {
+  1740		const overviewBlock = asObject(state.data.overview);
+  1741		const overview = asObject(overviewBlock.overview);
+  1742		const readiness = asObject(state.data.readiness);
+  1743		const readinessDashboard = asObject(readiness.dashboard);
+  1744		const connectors = asObject(state.data.integrations);
+  1745		const controlCenter = asObject(connectors.control_center);
+  1746		const activity = asObject(state.data.activity);
+  1747		const assets = asObject(state.data.assets);
+  1748		const assetCategories = getCategoryReadinessList(assets);
+  1749	
+  1750		const insights =
+  1751			asObject(intelligence?.insights) ||
+  1752			asObject(activity.insights) ||
+  1753			asObject(activity.marketing_insights) ||
+  1754			asObject(activity.performance_insights);
+  1755		const learning =

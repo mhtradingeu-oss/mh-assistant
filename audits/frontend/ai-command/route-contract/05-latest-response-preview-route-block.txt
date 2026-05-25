@@ -1,0 +1,79 @@
+  5280						responses: session.responseHistory,
+  5281						modeId: session.modeId,
+  5282						teamMode: session.teamMode
+  5283					});
+  5284					updateStatus(`Response saved locally ${formatTime(saved.updatedAt)}.`);
+  5285					showMessage?.("Response saved locally.");
+  5286				};
+  5287			}
+  5288	
+  5289			const responseConvertBtn = $("aicmdV3ResponseConvertBtn");
+  5290			if (responseConvertBtn) {
+  5291			        responseConvertBtn.onclick = () => {
+  5292			                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+  5293			                const preview = setPreviewFromConversation({
+  5294			                        session,
+  5295			                        intent: "guidance",
+  5296			                        fallbackPrompt: fallback,
+  5297			                        projectName
+  5298			                });
+  5299	
+  5300			                if (latestResponse?.responseText) {
+  5301			                        preview.title = latestResponse.responseTitle || preview.title;
+  5302			                        preview.summary = latestResponse.responseText;
+  5303			                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+  5304			                }
+  5305	
+  5306			                saveLocalOutput(sessionKey, {
+  5307			                        preview: session.outputPreview,
+  5308			                        messages: session.messages,
+  5309			                        responses: session.responseHistory,
+  5310			                        modeId: session.modeId,
+  5311			                        teamMode: session.teamMode
+  5312			                });
+  5313	
+  5314			                updateStatus("Conversation converted into a draft preview.");
+  5315			                showMessage?.("Draft preview ready from conversation.");
+  5316			                aiCommandRoute.render(context);
+  5317			        };
+  5318			}
+  5319	
+  5320			const responseSendBtn = $("aicmdV3ResponseSendBtn");
+  5321			if (responseSendBtn) {
+  5322				responseSendBtn.onclick = () => {
+  5323					if (!latestResponse) return;
+  5324					const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+  5325					const draftContext = {
+  5326						projectName: projectName || "",
+  5327						modeId: latestResponse.specialistId || session.modeId,
+  5328						lastCommand: latestResponse.prompt || "",
+  5329						lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+  5330						routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+  5331						phase3_response: latestResponse
+  5332					};
+  5333					setSharedAiDraft(projectName || "__default__", draftContext);
+  5334					setSharedHandoff(projectName || "__default__", destination, {
+  5335						id: `aicmd-response-${Date.now()}`,
+  5336						source_page: "ai-command",
+  5337						destination_page: destination,
+  5338						status: "available",
+  5339						created_at: nowIso(),
+  5340						payload: {
+  5341							prompt: latestResponse.prompt,
+  5342							draft_context: draftContext,
+  5343							output: latestResponse.responseRaw || {
+  5344								title: latestResponse.responseTitle,
+  5345								summary: latestResponse.responseText
+  5346							}
+  5347						}
+  5348					});
+  5349					showMessage?.("Response draft context prepared. Review before saving or executing.");
+  5350					navigateTo(destination);
+  5351				};
+  5352			}
+  5353	
+  5354			const responseReadBtn = $("aicmdV3ResponseReadBtn");
+  5355			if (responseReadBtn) {
+  5356				responseReadBtn.onclick = () => {
+  5357					if (!latestResponse?.responseText) return;
+  5358					if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") {

@@ -1269,6 +1269,43 @@ function destinationRouteForSpecialist(specialistId, outputType) {
 	return "workflows";
 }
 
+
+function resolveAiResponseOutputRoute(session, response = {}) {
+        const activeTab = getOutputWorkspaceTab(session);
+        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+        const text = [
+                activeTab,
+                response.outputType,
+                response.destinationRoute,
+                response.responseTitle,
+                response.responseText,
+                response.prompt
+        ].map((value) => asString(value).toLowerCase()).join(" ");
+
+        let outputType = asString(response.outputType || "");
+        if (!outputType || outputType === "chat") {
+                outputType = activeTab === "task" ? "task" : activeTab === "workflow" ? "workflow" : activeTab === "handoff" ? "handoff" : "guidance";
+        }
+
+        const looksTaskLike = /\b(task|handoff|ticket|follow-up|owner|timeline|approval|checklist|next task|assigned|priorities|dependencies|risk)\b/.test(text);
+
+        if (
+                outputType === "handoff" ||
+                outputType === "task" ||
+                (["operations", "customer_ops"].includes(specialistId) && looksTaskLike) ||
+                (session?.teamMode === "team" && looksTaskLike)
+        ) {
+                outputType = "task";
+        }
+
+        const destinationRoute = outputType === "task"
+                ? "task-center"
+                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+
+        return { outputType, destinationRoute };
+}
+
+
 function routeLabel(route) {
 	const labels = {
 		"campaign-studio": "Campaign Studio",
@@ -5012,6 +5049,14 @@ export const aiCommandRoute = {
 		                        session.messages = session.messages.slice(-40);
 
 		                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+                                                ...response,
+                                                prompt: value,
+                                                responseTitle: "Chat reply",
+                                                responseText,
+                                                outputType: response.outputType,
+                                                destinationRoute: asString(routeSuggestion?.route)
+                                        });
 		                        session.responseHistory.unshift({
 		                                id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
 		                                prompt: value,
@@ -5026,8 +5071,9 @@ export const aiCommandRoute = {
 		                                        provider: result?.provider
 		                                },
 		                                teamMode: session.teamMode,
-		                                outputType: "chat",
-		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+		                                outputType: responseRoute.outputType,
+
+		                                destinationRoute: responseRoute.destinationRoute
 		                        });
 
 		                        session.responseHistory = session.responseHistory.slice(0, 12);
@@ -5321,7 +5367,8 @@ export const aiCommandRoute = {
 		if (responseSendBtn) {
 			responseSendBtn.onclick = () => {
 				if (!latestResponse) return;
-				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
 				const draftContext = {
 					projectName: projectName || "",
 					modeId: latestResponse.specialistId || session.modeId,

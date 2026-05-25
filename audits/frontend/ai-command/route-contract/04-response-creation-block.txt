@@ -1,0 +1,76 @@
+  4970			                                        readinessSummary: aiContext.summary
+  4971			                                },
+  4972			                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+  4973			                                source: "ai-command-specialist-chat",
+  4974			                                actor: "mh-assistant"
+  4975			                        });
+  4976	
+  4977			                        const response = asObject(result?.response);
+  4978			                        const responseText = extractGeneratedResponseText({
+  4979			                                ...response,
+  4980			                                chat_answer: result?.chat_answer,
+  4981			                                response_text: result?.response_text,
+  4982			                                content: response?.content
+  4983			                        });
+  4984	
+  4985			                        if (!responseText) {
+  4986			                                throw new Error("AI chat route returned no response text.");
+  4987			                        }
+  4988	
+  4989			                        const safetyLabel = asString(result?.safety_label || "chat_only");
+  4990			                        const assistantChatMessage = {
+  4991			                                id: `chat-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  4992			                                role: "assistant",
+  4993			                                modeId: specialist.id || session.modeId,
+  4994			                                specialistId: specialist.id || session.modeId,
+  4995			                                specialistLabel: specialist.label || "Specialist",
+  4996			                                teamMode: session.teamMode,
+  4997			                                content: responseText,
+  4998			                                createdAt: asString(result?.timestamp) || nowIso(),
+  4999			                                source: "ai-chat-response",
+  5000			                                safetyLabel,
+  5001			                                response: {
+  5002			                                        status: "completed",
+  5003			                                        chat_answer: responseText,
+  5004			                                        content: responseText,
+  5005			                                        outputType: "chat",
+  5006			                                        provider: result?.provider,
+  5007			                                        safety_label: safetyLabel
+  5008			                                }
+  5009			                        };
+  5010	
+  5011			                        session.messages.push(assistantChatMessage);
+  5012			                        session.messages = session.messages.slice(-40);
+  5013	
+  5014			                        const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];
+  5015			                        session.responseHistory.unshift({
+  5016			                                id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  5017			                                prompt: value,
+  5018			                                specialistId: specialist.id || session.modeId,
+  5019			                                specialistLabel: specialist.label || "Specialist",
+  5020			                                generatedAt: assistantChatMessage.createdAt,
+  5021			                                responseTitle: "Chat reply",
+  5022			                                responseText,
+  5023			                                responseRaw: {
+  5024			                                        ...response,
+  5025			                                        safety_label: safetyLabel,
+  5026			                                        provider: result?.provider
+  5027			                                },
+  5028			                                teamMode: session.teamMode,
+  5029			                                outputType: "chat",
+  5030			                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+  5031			                        });
+  5032	
+  5033			                        session.responseHistory = session.responseHistory.slice(0, 12);
+  5034			                        session.responseLoading = false;
+  5035			                        session.responseError = "";
+  5036	
+  5037			                        saveLocalOutput(sessionKey, {
+  5038			                                preview: session.outputPreview,
+  5039			                                messages: session.messages,
+  5040			                                responses: session.responseHistory,
+  5041			                                modeId: session.modeId,
+  5042			                                teamMode: session.teamMode
+  5043			                });
+  5044	
+  5045			                        saveAiChatSession(sessionKey, session);

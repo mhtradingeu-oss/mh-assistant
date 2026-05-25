@@ -1,0 +1,36 @@
+  3700		const outputs = asArray(tool.outputTypes).join(" ");
+  3701		const haystack = `${id} ${outputs} ${asString(tool.label)}`.toLowerCase();
+  3702		if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";
+  3703		if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+  3704		if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+  3705		return "guidance";
+  3706	}
+  3707	
+  3708	function getCanonicalToolRoute(tool = {}, session) {
+  3709		const destinations = asArray(tool.destinations).filter(Boolean);
+  3710		const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+  3711		if (preferred) return preferred;
+  3712		return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+  3713	}
+  3714	
+  3715	function canonicalToolNeedsSelectedSource(tool = {}) {
+  3716		const sourceMeta = asArray(tool.sourceTypes).join(" ");
+  3717		return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+  3718	}
+  3719	
+  3720	function normalizeCanonicalToolForPanel(tool = {}, session) {
+  3721		return {
+  3722			...tool,
+  3723			action: "preview",
+  3724			intent: getCanonicalToolIntent(tool),
+  3725			route: getCanonicalToolRoute(tool, session),
+  3726			requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+  3727			template: asString(tool.template || "Prepare a review-ready draft for {projectName}.")
+  3728		};
+  3729	}
+  3730	
+  3731	function getPhase35ToolSet(session) {
+  3732		const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+  3733		return getAiToolDockTools({
+  3734			specialistId: toolModeId,
+  3735			teamMode: session.teamMode,

@@ -1,0 +1,61 @@
+  5400						? "Full Team"
+  5401						: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+  5402					const text = buildPreviewText(output, specialistLabel);
+  5403					session.draftMessage = text;
+  5404					if (input) {
+  5405						input.value = text;
+  5406						input.focus();
+  5407					}
+  5408					persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+  5409					updateStatus("Preview inserted into composer for refinement.");
+  5410				};
+  5411			}
+  5412	
+  5413			const previewSendBtn = $("aicmdV2PreviewSendBtn");
+  5414			if (previewSendBtn) {
+  5415				previewSendBtn.onclick = () => {
+  5416					const output = asObject(session.outputPreview);
+  5417					const destination = asString(output.destinationRoute || "").trim();
+  5418					if (!destination) {
+  5419						updateStatus("No destination route is available for this preview.");
+  5420						return;
+  5421					}
+  5422	
+  5423					const handoffRecord = {
+  5424						id: `aicmd-preview-${Date.now()}`,
+  5425						source_page: "ai-command",
+  5426						destination_page: destination,
+  5427						status: "available",
+  5428						created_at: nowIso(),
+  5429						payload: {
+  5430							prompt: output.sourcePrompt,
+  5431							draft_context: {
+  5432								projectName: projectName || "",
+  5433								modeId: output.specialistId || session.modeId,
+  5434								lastCommand: output.sourcePrompt || "",
+  5435								lastResponseTitle: output.title || "",
+  5436								routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+  5437								phase2_output_preview: output
+  5438							}
+  5439						}
+  5440					};
+  5441	
+  5442					setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+  5443					setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+  5444					showMessage?.("Draft context prepared for routing. Review before saving or executing.");
+  5445					navigateTo(destination);
+  5446				};
+  5447			}
+  5448	
+  5449			const previewSaveBtn = $("aicmdV2PreviewSaveBtn");
+  5450			if (previewSaveBtn) {
+  5451				previewSaveBtn.onclick = () => {
+  5452					const output = asObject(session.outputPreview);
+  5453					if (!output.outputType) return;
+  5454					const saved = saveLocalOutput(sessionKey, {
+  5455						preview: output,
+  5456						modeId: session.modeId,
+  5457						teamMode: session.teamMode
+  5458					});
+  5459					updateStatus(`Preview saved locally ${formatTime(saved.updatedAt)}.`);
+  5460					showMessage?.("Preview saved locally.");
