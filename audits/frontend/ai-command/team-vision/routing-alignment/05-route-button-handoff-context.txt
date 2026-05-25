@@ -1,0 +1,141 @@
+  5415			                updateStatus("Conversation converted into a draft preview.");
+  5416			                showMessage?.("Draft preview ready from conversation.");
+  5417			                aiCommandRoute.render(context);
+  5418			        };
+  5419			}
+  5420	
+  5421			const responseSendBtn = $("aicmdV3ResponseSendBtn");
+  5422			if (responseSendBtn) {
+  5423				responseSendBtn.onclick = () => {
+  5424					if (!latestResponse) return;
+  5425					const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+  5426					const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+  5427					const draftContext = {
+  5428						projectName: projectName || "",
+  5429						modeId: latestResponse.specialistId || session.modeId,
+  5430						lastCommand: latestResponse.prompt || "",
+  5431						lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+  5432						routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+  5433						phase3_response: latestResponse
+  5434					};
+  5435					setSharedAiDraft(projectName || "__default__", draftContext);
+  5436					setSharedHandoff(projectName || "__default__", destination, {
+  5437						id: `aicmd-response-${Date.now()}`,
+  5438						source_page: "ai-command",
+  5439						destination_page: destination,
+  5440						status: "available",
+  5441						created_at: nowIso(),
+  5442						payload: {
+  5443							prompt: latestResponse.prompt,
+  5444							draft_context: draftContext,
+  5445							output: latestResponse.responseRaw || {
+  5446								title: latestResponse.responseTitle,
+  5447								summary: latestResponse.responseText
+  5448							}
+  5449						}
+  5450					});
+  5451					showMessage?.("Response draft context prepared. Review before saving or executing.");
+  5452					navigateTo(destination);
+  5453				};
+  5454			}
+  5455	
+  5456			const responseReadBtn = $("aicmdV3ResponseReadBtn");
+  5457			if (responseReadBtn) {
+  5458				responseReadBtn.onclick = () => {
+  5459					if (!latestResponse?.responseText) return;
+  5460					if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") {
+  5461						updateStatus("Read is not supported in this browser.");
+  5462						return;
+  5463					}
+  5464					const utterance = new SpeechSynthesisUtterance(latestResponse.responseText);
+  5465					speechSynthesis.cancel();
+  5466					speechSynthesis.speak(utterance);
+  5467					updateStatus("Reading response locally in browser.");
+  5468				};
+  5469			}
+  5470	
+  5471			// ── PREVIEW ACTIONS (Phase 2 safe actions) ───────────────────
+  5472			const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+  5473			if (previewCopyBtn) {
+  5474				previewCopyBtn.onclick = async () => {
+  5475					const output = asObject(session.outputPreview);
+  5476					if (!output.outputType) return;
+  5477					const specialistLabel = session.teamMode === "team"
+  5478						? "Full Team"
+  5479						: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+  5480					const text = buildPreviewText(output, specialistLabel);
+  5481					if (!text) return;
+  5482					try {
+  5483						if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+  5484							await navigator.clipboard.writeText(text);
+  5485							updateStatus("Preview copied to clipboard.");
+  5486							showMessage?.("Preview copied.");
+  5487						} else {
+  5488							updateStatus("Clipboard is not available in this browser context.");
+  5489						}
+  5490					} catch (_) {
+  5491						updateStatus("Copy failed. Clipboard access may be blocked.");
+  5492					}
+  5493				};
+  5494			}
+  5495	
+  5496			const previewUseBtn = $("aicmdV2PreviewUseBtn");
+  5497			if (previewUseBtn) {
+  5498				previewUseBtn.onclick = () => {
+  5499					const output = asObject(session.outputPreview);
+  5500					if (!output.outputType) return;
+  5501					const specialistLabel = session.teamMode === "team"
+  5502						? "Full Team"
+  5503						: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+  5504					const text = buildPreviewText(output, specialistLabel);
+  5505					session.draftMessage = text;
+  5506					if (input) {
+  5507						input.value = text;
+  5508						input.focus();
+  5509					}
+  5510					persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+  5511					updateStatus("Preview inserted into composer for refinement.");
+  5512				};
+  5513			}
+  5514	
+  5515			const previewSendBtn = $("aicmdV2PreviewSendBtn");
+  5516			if (previewSendBtn) {
+  5517				previewSendBtn.onclick = () => {
+  5518					const output = asObject(session.outputPreview);
+  5519					const destination = asString(output.destinationRoute || "").trim();
+  5520					if (!destination) {
+  5521						updateStatus("No destination route is available for this preview.");
+  5522						return;
+  5523					}
+  5524	
+  5525					const handoffRecord = {
+  5526						id: `aicmd-preview-${Date.now()}`,
+  5527						source_page: "ai-command",
+  5528						destination_page: destination,
+  5529						status: "available",
+  5530						created_at: nowIso(),
+  5531						payload: {
+  5532							prompt: output.sourcePrompt,
+  5533							draft_context: {
+  5534								projectName: projectName || "",
+  5535								modeId: output.specialistId || session.modeId,
+  5536								lastCommand: output.sourcePrompt || "",
+  5537								lastResponseTitle: output.title || "",
+  5538								routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+  5539								phase2_output_preview: output
+  5540							}
+  5541						}
+  5542					};
+  5543	
+  5544					setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+  5545					setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+  5546					showMessage?.("Draft context prepared for routing. Review before saving or executing.");
+  5547					navigateTo(destination);
+  5548				};
+  5549			}
+  5550	
+  5551			const previewSaveBtn = $("aicmdV2PreviewSaveBtn");
+  5552			if (previewSaveBtn) {
+  5553				previewSaveBtn.onclick = () => {
+  5554					const output = asObject(session.outputPreview);
+  5555					if (!output.outputType) return;

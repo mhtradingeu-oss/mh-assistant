@@ -1273,6 +1273,8 @@ function destinationRouteForSpecialist(specialistId, outputType) {
 function resolveAiResponseOutputRoute(session, response = {}) {
         const activeTab = getOutputWorkspaceTab(session);
         const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+        const explicitDestination = asString(response.destinationRoute || "").trim();
+
         const text = [
                 activeTab,
                 response.outputType,
@@ -1282,26 +1284,70 @@ function resolveAiResponseOutputRoute(session, response = {}) {
                 response.prompt
         ].map((value) => asString(value).toLowerCase()).join(" ");
 
-        let outputType = asString(response.outputType || "");
+        let outputType = asString(response.outputType || "").toLowerCase();
         if (!outputType || outputType === "chat") {
-                outputType = activeTab === "task" ? "task" : activeTab === "workflow" ? "workflow" : activeTab === "handoff" ? "handoff" : "guidance";
+                outputType = activeTab === "task"
+                        ? "task"
+                        : activeTab === "workflow"
+                                ? "workflow"
+                                : activeTab === "handoff"
+                                        ? "handoff"
+                                        : "guidance";
         }
 
-        const looksTaskLike = /\b(task|handoff|ticket|follow-up|owner|timeline|approval|checklist|next task|assigned|priorities|dependencies|risk)\b/.test(text);
+        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
 
-        if (
-                outputType === "handoff" ||
-                outputType === "task" ||
-                (["operations", "customer_ops"].includes(specialistId) && looksTaskLike) ||
-                (session?.teamMode === "team" && looksTaskLike)
-        ) {
+        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
                 outputType = "task";
+                return { outputType, destinationRoute: "task-center" };
         }
 
-        const destinationRoute = outputType === "task"
-                ? "task-center"
-                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+        if (outputType === "workflow" || looksWorkflowLike) {
+                outputType = "workflow";
+                return { outputType, destinationRoute: explicitDestination || "workflows" };
+        }
 
+        if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {
+                outputType = "content";
+                return { outputType, destinationRoute: explicitDestination || "content-studio" };
+        }
+
+        if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {
+                outputType = "media";
+                return { outputType, destinationRoute: explicitDestination || "media-studio" };
+        }
+
+        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+                outputType = "publishing";
+                return { outputType, destinationRoute: explicitDestination || "publishing" };
+        }
+
+        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+                outputType = "governance";
+                return { outputType, destinationRoute: explicitDestination || "governance" };
+        }
+
+        if (/insight|research|seo|analytics/.test(outputType) || looksInsightLike) {
+                outputType = "insight";
+                return { outputType, destinationRoute: explicitDestination || "insights" };
+        }
+
+        if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {
+                outputType = "campaign";
+                return {
+                        outputType,
+                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+                };
+        }
+
+        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
         return { outputType, destinationRoute };
 }
 
