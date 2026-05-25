@@ -1,0 +1,37 @@
+14:        setSharedHandoff
+1254:function destinationRouteForSpecialist(specialistId, outputType) {
+1258:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+1283:		"task-center": "Task Center",
+1294:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1303:		destinationRoute: route,
+1314:		if (outputType === "task") {
+1343:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+1397:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+1432:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+1460:			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+1490:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+1665:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+2245:	"task-center": "Task Center",
+2267:	"task-center": "operations",
+2301:	tasks: "task-center",
+2390:	const destinationRoute = normalizeAiInboundSourcePage(
+2391:		preview.destinationRoute ||
+2404:		destinationRoute,
+3396:	if (preview.outputType === "task") return 1;
+3417:	if (outputType === "task") return "task";
+3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3446:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3458:	if (tool.intent === "task") return "Draft";
+3712:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3922:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4005:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4393:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5029:		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+5190:				if (tool.intent === "task") {
+5323:				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+5333:				setSharedHandoff(projectName || "__default__", destination, {
+5416:				const destination = asString(output.destinationRoute || "").trim();
+5442:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);

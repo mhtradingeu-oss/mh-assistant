@@ -1,0 +1,150 @@
+43:  if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";
+44:  if (["high", "warning", "pending", "queued", "running", "due_soon", "ready"].includes(normalized)) return "warning";
+167:function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel) {
+169:  const itemLabel = asString(selectedItem?.title || selectedItem?.name || selectedItem?.message || "the selected item");
+176:        prompt: `Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.`
+185:        preview: "Highlight where task load or due-state suggests operational risk.",
+186:        prompt: `Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.`
+189:        label: "Explain owner workload",
+190:        preview: "Explain workload concentration by owner and likely bottlenecks.",
+191:        prompt: `Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.`
+194:        label: "Identify overdue risk",
+195:        preview: "Identify highest-risk overdue items and likely downstream impact.",
+196:        prompt: `Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.`
+268:  const taskCenter = asObject(ops.task_center);
+273:  const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);
+317:      helper: "Highest priority notifications",
+429:  taskCenter,
+432:  selectedItem,
+441:    session.priority !== "all" ||
+442:    session.owner !== "all" ||
+449:  const selectedSummary = selectedItem
+451:      selectedItem.title || "Task",
+452:      selectedItem.description || "No description.",
+453:      `Assignee: ${selectedItem.assignee || selectedItem.owner || "-"}`,
+454:      `Due: ${formatDateTime(selectedItem.due_at)}`,
+455:      `Priority: ${titleCase(selectedItem.priority || "normal")}`,
+456:      `Status: ${titleCase(selectedItem.status || "open")}`
+471:            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+473:              <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
+474:              <span class="std-context-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
+475:              <span class="std-context-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+476:              <span class="std-context-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>
+477:              <span class="std-context-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>
+482:            <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
+499:                <p>Filter by focus, owner, source, and priority to inspect task risk quickly.</p>
+505:              { value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },
+506:              { value: "open", label: "Open", count: formatCount(taskCenter.open_count) },
+507:              { value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },
+508:              { value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },
+509:              { value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }
+513:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+514:              <select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>
+515:              <select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>
+516:              <select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>
+524:                <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+532:                    <strong>${escapeHtml(item.assignee || item.owner || "-")}</strong>
+533:                    <span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>
+536:                    <strong>${escapeHtml(formatDateTime(item.due_at))}</strong>
+537:                    <span class="card-badge ${badgeTone(item.due_state)}">${escapeHtml(titleCase(item.due_state || "unscheduled"))}</span>
+539:                  <td><span class="card-badge ${badgeTone(item.priority)}">${escapeHtml(titleCase(item.priority || "normal"))}</span></td>
+556:                  <h3>${escapeHtml(selectedItem?.title || "Select a task")}</h3>
+557:                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and execution context." : "Choose a task in the table to inspect details.")}</p>
+560:              ${selectedItem ? `
+563:                    <strong>${escapeHtml(selectedItem.title || "Task")}</strong>
+564:                    <p>${escapeHtml(selectedItem.description || "No task description available.")}</p>
+567:                    { label: "Assignee", value: selectedItem.assignee || selectedItem.owner || "-" },
+568:                    { label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },
+569:                    { label: "Due", value: formatDateTime(selectedItem.due_at) },
+570:                    { label: "Due state", value: titleCase(selectedItem.due_state || "unscheduled") },
+571:                    { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
+572:                    { label: "Source", value: titleCase(selectedItem.source_page || "-") },
+573:                    { label: "Domain", value: titleCase(selectedItem.service_domain || "-") },
+574:                    { label: "Linked entity", value: selectedItem.linked_entity?.label || selectedItem.linked_entity?.entity_type || "-" }
+589:                <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
+590:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Linked Work") : ""}
+591:                <button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>
+595:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (deferred: mutation safety pass)</button>
+596:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (deferred: mutation safety pass)</button>
+597:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (deferred: mutation safety pass)</button>
+626:    <textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>
+635:  const taskCenter = asObject(ops.task_center);
+636:  const filters = asObject(taskCenter.filters);
+639:    priority: "all",
+640:    owner: "all",
+648:  let items = asArray(taskCenter.items).map((item, index) => ({
+652:  items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);
+655:  if (session.focus === "overdue") items = items.filter((item) => asString(item.due_state) === "overdue");
+656:  if (session.focus === "due_soon") items = items.filter((item) => asString(item.due_state) === "due_soon");
+657:  if (session.priority !== "all") items = items.filter((item) => asString(item.priority) === session.priority);
+658:  if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);
+660:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+661:  session.selectedKey = selectedItem?._opsKey || "";
+662:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+667:    taskCenter,
+670:    selectedItem,
+700:  root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);
+701:  root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);
+702:  root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {
+703:    const buffer = root.querySelector("#taskCenterSummaryBuffer");
+726:  root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {
+730:  [["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {
+746:  selectedItem,
+784:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+793:          <td><span class="card-badge ${badgeTone(item.priority)}">${escapeHtml(titleCase(item.priority || "normal"))}</span></td>
+873:                  <h3>${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>
+874:                  <p>${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before acting." : "Choose a queue item from the table to inspect details.")}</p>
+877:              ${selectedItem ? `
+880:                    <strong>${escapeHtml(selectedItem.title || "Queue item")}</strong>
+881:                    <p>${escapeHtml(selectedItem.details?.summary || selectedItem.entity_type || "No queue summary available.")}</p>
+884:                    { label: "Queue type", value: titleCase(selectedItem.queue_type || "queue") },
+885:                    { label: "Assignee", value: selectedItem.assignee || "-" },
+886:                    { label: "Priority", value: titleCase(selectedItem.priority || "normal") },
+887:                    { label: "Status", value: titleCase(selectedItem.status || "queued") },
+888:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) },
+889:                    { label: "Entity", value: selectedItem.entity_type || "-" }
+905:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owner Page") : ""}
+971:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+972:  session.selectedKey = selectedItem?._opsKey || "";
+974:  const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));
+982:    selectedItem,
+1042:  selectedItem,
+1074:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+1082:          <td>${escapeHtml(item.owner || "-")}</td>
+1140:              <input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">
+1163:                  <h3>${escapeHtml(selectedItem?.title || "Select a job")}</h3>
+1164:                  <p>${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context." : "Choose a job from the table to inspect details.")}</p>
+1167:              ${selectedItem ? `
+1170:                    <strong>${escapeHtml(selectedItem.title || "Job")}</strong>
+1171:                    <p>${escapeHtml(`Kind: ${titleCase(selectedItem.kind || "job")} • Status: ${titleCase(selectedItem.status || "unknown")}`)}</p>
+1174:                    { label: "Owner", value: selectedItem.owner || "-" },
+1175:                    { label: "Kind", value: titleCase(selectedItem.kind || "job") },
+1176:                    { label: "Retries", value: formatCount(selectedItem.retry_count) },
+1177:                    { label: "Health", value: titleCase(selectedItem.health_state || "unknown") },
+1178:                    { label: "Status", value: titleCase(selectedItem.status || "unknown") },
+1179:                    { label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) }
+1195:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Job Context") : ""}
+1263:  items = filterBySearch(items, session.search, ["title", "kind", "status", "owner"]);
+1266:  const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
+1267:  session.selectedKey = selectedItem?._opsKey || "";
+1268:  const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));
+1276:    selectedItem,
+1400:  const selectedItem = listItems.find((item) => item._opsKey === session.selectedKey) || listItems[0] || null;
+1401:  session.selectedKey = selectedItem?._opsKey || "";
+1402:  const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
+1432:        <tr class="${selectedItem?._opsKey === item._opsKey ? "is-selected" : ""}">
+1519:                  <h3>${escapeHtml(selectedItem?.title || "Select a notification")}</h3>
+1520:                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+1523:              ${selectedItem ? `
+1526:                    <strong>${escapeHtml(selectedItem.title || "Notification")}</strong>
+1527:                    <p>${escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>
+1530:                    { label: "Severity", value: titleCase(selectedItem.severity || "info") },
+1531:                    { label: "Source", value: titleCase(selectedItem.source || selectedItem.item_type || "system") },
+1532:                    { label: "Created", value: formatDateTime(selectedItem.created_at) },
+1533:                    { label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }
+1549:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Source Page") : ""}
+1550:                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}">Mark Read</button>` : ""}
+1660:export const taskCenterRoute = {
+1666:    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+1847:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+1858:      description: "Review generated tasks, owners, priorities, and execution readiness.",
