@@ -1,0 +1,63 @@
+# Safe Migration Options Analysis
+
+canonical_path: data/projects/hairoticmen/source-of-truth-registry.json
+legacy_path: data/projects/hairoticmen/sources-registry.json
+canonical_keys: ['required_sources', 'sources', 'statuses', 'updated_at']
+legacy_keys: ['email', 'facebook', 'instagram', 'tiktok', 'website', 'youtube']
+canonical_sources_type: dict
+canonical_statuses_type: list
+legacy_channel_count: 6
+legacy_channels: ['email', 'facebook', 'instagram', 'tiktok', 'website', 'youtube']
+
+canonical_required_sources: {'website': {'status': 'connected', 'value': 'website', 'updated_at': '2026-05-14T20:57:39.831Z', 'verified_at': '', 'source': 'setup'}, 'social_links': {'status': 'connected', 'value': 'instagram', 'updated_at': '2026-05-14T20:57:39.831Z', 'verified_at': '', 'source': 'setup'}, 'product_files': {'status': 'missing', 'value': '', 'updated_at': '', 'verified_at': '', 'source': ''}, 'brand_assets': {'status': 'missing', 'value': '', 'updated_at': '', 'verified_at': '', 'source': ''}, 'legal_docs': {'status': 'missing', 'value': '', 'updated_at': '', 'verified_at': '', 'source': ''}, 'pricing_docs': {'status': 'missing', 'value': '', 'updated_at': '', 'verified_at': '', 'source': ''}, 'campaign_docs': {'status': 'missing', 'value': '', 'updated_at': '', 'verified_at': '', 'source': ''}}
+canonical_sources_keys: ['email', 'facebook', 'instagram', 'tiktok', 'website', 'youtube']
+canonical_statuses_keys: not-dict
+
+legacy_as_canonical_sources_preview:
+{
+  "instagram": {
+    "status": "connected",
+    "value": "instagram",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  },
+  "facebook": {
+    "status": "connected",
+    "value": "facebook",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  },
+  "youtube": {
+    "status": "connected",
+    "value": "youtube",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  },
+  "tiktok": {
+    "status": "connected",
+    "value": "tiktok",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  },
+  "website": {
+    "status": "connected",
+    "value": "website",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  },
+  "email": {
+    "status": "connected",
+    "value": "email",
+    "updated_at": "2026-05-06T12:39:17.952Z",
+    "verified_at": "",
+    "source": "setup"
+  }
+}
+
+recommended_default:
+Plan A: preserve canonical file as authority, migrate/merge legacy social channel entries into canonical.sources if missing, then either regenerate legacy from canonical for backward compatibility or stop parity warning for known schema-version transition.
