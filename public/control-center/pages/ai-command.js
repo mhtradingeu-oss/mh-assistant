@@ -4950,6 +4950,7 @@ export const aiCommandRoute = {
 		                aiCommandRoute.render(context);
 
 		                try {
+		                        const languagePlan = getWorkspaceLanguagePlan(aiContext);
 		                        const result = await executeProjectAiChat(projectName, {
 		                                project: projectName,
 		                                specialistId: specialist.id || session.modeId,

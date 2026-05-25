@@ -1,0 +1,76 @@
+87:                id: "operations",
+94:                id: "customer_ops",
+241:		id: "operations",
+254:		id: "customer_ops",
+595:		id: "operations",
+933:			teamMode: "solo",
+1131:                teamMode: session.teamMode,
+1154:        session.teamMode = asString(record.teamMode || "solo");
+1254:function destinationRouteForSpecialist(specialistId, outputType) {
+1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+1294:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1588:	const teamMode = session.teamMode === "team";
+1589:	const specialist = teamMode
+1590:		? { id: "operations", label: "Full Team" }
+1608:	if (!teamMode) return base;
+2497:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+2511:		teamMode,
+2535:	session.teamMode = normalized.teamMode || "solo";
+2554:			teamMode: session.teamMode
+2562:		teamMode: normalized.teamMode,
+3177:        const specialist = session.teamMode === "team"
+3219:                teamMode: session.teamMode,
+3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3446:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3492:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3569:	const teamBanner = session.teamMode === "team" ? `
+3587:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+3590:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+3598:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3599:					const isTeamActive = session.teamMode === "team";
+3631:	if (session.teamMode === "team") {
+3650:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3672:	const isTeam = session.teamMode === "team";
+3712:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3735:		teamMode: session.teamMode,
+3769:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3770:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3850:		const isTeam = session.teamMode === "team";
+3922:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+3923:	const specialist = session.teamMode === "team"
+4005:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4006:	const specialist = session.teamMode === "team"
+4158:        const isTeam = session.teamMode === "team";
+4169:                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+4205:                teamMode: session.teamMode,
+4209:        const nextPrompts = session.teamMode === "team"
+4362:	const prompts = session.teamMode === "team"
+4392:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4393:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+4401:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+4409:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+4417:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+4660:			session.teamMode = "solo";
+4696:		                        teamMode: session.teamMode
+4732:		                        teamMode: session.teamMode
+4772:                                session.teamMode = "solo";
+4791:				session.teamMode = mode;
+4829:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+4920:		                const specialist = session.teamMode === "team"
+4930:		                        teamMode: session.teamMode,
+4947:		                        teamMode: session.teamMode
+4957:		                                mode: session.teamMode === "team" ? "team" : "solo",
+4995:		                                teamMode: session.teamMode,
+5027:		                                teamMode: session.teamMode,
+5029:		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+5041:		                                teamMode: session.teamMode
+5058:		                                teamMode: session.teamMode
+5081:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+5184:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+5281:					teamMode: session.teamMode
+5310:		                        teamMode: session.teamMode
+5323:				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+5374:				const specialistLabel = session.teamMode === "team"
+5398:				const specialistLabel = session.teamMode === "team"
+5456:					teamMode: session.teamMode
