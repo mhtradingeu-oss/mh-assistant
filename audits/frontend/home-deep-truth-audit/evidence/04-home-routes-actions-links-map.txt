@@ -1,0 +1,86 @@
+# Home Routes / Actions / Links Map
+
+130:function routeForAction(action) {
+133:  if (/(asset|library|upload|brand file)/.test(text)) return "library";
+135:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+138:  return "ai-command";
+142:  const operations = asObject(selectOperationsSnapshot(state));
+143:  const notifications = asArray(operations.notifications?.items);
+144:  const tasks = asArray(operations.tasks?.items);
+145:  const approvals = asArray(operations.approvals?.items);
+172:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+208:  const operations = asObject(selectOperationsSnapshot(state));
+222:  const notifications = asArray(operations.notifications?.items);
+273:  const tasks = asArray(operations.tasks?.items);
+274:  const approvals = asArray(operations.approvals?.items);
+293:  const nextActionRoute = routeForAction(nextAction);
+355:  const mediaJobs = asArray(operations.media_jobs?.items);
+358:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+359:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+361:  const publishReadyCount = publishingQueue.filter((item) => {
+473:    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
+474:    primaryActionRoute: nextActionRoute,
+476:    secondaryActionRoute: "setup",
+493:      route: nextActionRoute,
+494:      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+545:        hint: "Critical setup or assets",
+612:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+636:  const input = $("quickCommandInput");
+709:            <span class="mhos-next-action-destination">Next: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
+716:            <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
+717:              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+718:            </button>
+719:            <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+721:            </button>
+858:            <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+860:              <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
+861:            </button>
+866:            <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+869:            </button>
+870:            <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
+873:            </button>
+878:            <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
+881:            </button>
+882:            <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+884:            </button>
+889:            <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+892:            </button>
+902:              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
+904:            <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+906:            </button>
+910:            <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+913:            </button>
+915:            <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+918:            </button>
+920:            <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+923:            </button>
+925:            <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+928:            </button>
+1015:    const openRoute = (route, message = "") => {
+1016:      navigateTo(route);
+1022:      navigateTo("ai-command");
+1034:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1037:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1048:      nextBtn.onclick = () => {
+1049:        if (dashboard.nextBestAction.route === "ai-command") {
+1052:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1058:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+1061:    const operationsBtn = $("homeOpenOperationsBtn");
+1062:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1065:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1067:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1068:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1070:    const quickAssetBtn = $("homeQuickUploadAssetBtn");
+1071:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1073:    const quickConnectBtn = $("homeQuickConnectPlatformBtn");
+1074:    if (quickConnectBtn) quickConnectBtn.onclick = () => openRoute("integrations");
+1076:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+1077:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1079:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1080:    if (quickAiBtn) {
+1081:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1086:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+1091:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+1096:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1101:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1108:      card.onclick = () => handleAiRoleClick(roleId, roleName);
