@@ -1,0 +1,139 @@
+public/control-center/pages/ai-command.js:341:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:347:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:365:	{ id: "route", title: "Route", description: "Send context to the owning workspace." },
+public/control-center/pages/ai-command.js:458:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:492:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:1254:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1273:function resolveAiResponseOutputRoute(session, response = {}) {
+public/control-center/pages/ai-command.js:1279:                response.destinationRoute,
+public/control-center/pages/ai-command.js:1301:        const destinationRoute = outputType === "task"
+public/control-center/pages/ai-command.js:1303:                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+public/control-center/pages/ai-command.js:1305:        return { outputType, destinationRoute };
+public/control-center/pages/ai-command.js:1331:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1340:		destinationRoute: route,
+public/control-center/pages/ai-command.js:1360:					"Route execution draft to Campaign Studio or Workflows"
+public/control-center/pages/ai-command.js:1405:				"Route to Content Studio for refinement"
+public/control-center/pages/ai-command.js:1440:				"Route to Media Studio for production planning"
+public/control-center/pages/ai-command.js:1517:				"Route to Governance for formal review"
+public/control-center/pages/ai-command.js:1585:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1667:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1702:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+public/control-center/pages/ai-command.js:2150:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2426:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+public/control-center/pages/ai-command.js:2427:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2428:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2431:		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+public/control-center/pages/ai-command.js:2432:		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+public/control-center/pages/ai-command.js:2433:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2441:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2451:	const destinationRoute = normalizeAiInboundSourcePage(
+public/control-center/pages/ai-command.js:2452:		preview.destinationRoute ||
+public/control-center/pages/ai-command.js:2465:		destinationRoute,
+public/control-center/pages/ai-command.js:2550:	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+public/control-center/pages/ai-command.js:2921:					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
+public/control-center/pages/ai-command.js:2922:					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
+public/control-center/pages/ai-command.js:3503:function getToolDestinationRoute(tool, session) {
+public/control-center/pages/ai-command.js:3507:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3792:function getCanonicalToolRoute(tool = {}, session) {
+public/control-center/pages/ai-command.js:3796:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3809:		route: getCanonicalToolRoute(tool, session),
+public/control-center/pages/ai-command.js:3870:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+public/control-center/pages/ai-command.js:3876:							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+public/control-center/pages/ai-command.js:3886:								<span>Route: ${escapeHtml(destination)}</span>
+public/control-center/pages/ai-command.js:3968:							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Send message">
+public/control-center/pages/ai-command.js:4006:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4014:			? "Route Draft to Publishing"
+public/control-center/pages/ai-command.js:4015:			: `Route Draft to ${destination}`;
+public/control-center/pages/ai-command.js:4072:				<button id="aicmdV2LegacyPreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4073:				<button id="aicmdV2LegacyPreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+public/control-center/pages/ai-command.js:4074:				<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+public/control-center/pages/ai-command.js:4077:				<button id="aicmdV2LegacyPreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
+public/control-center/pages/ai-command.js:4089:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4097:			? "Route Draft to Publishing"
+public/control-center/pages/ai-command.js:4098:			: `Route Draft to ${destination}`;
+public/control-center/pages/ai-command.js:4181:                                        <button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4182:                                        <button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+public/control-center/pages/ai-command.js:4183:                                        <button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
+public/control-center/pages/ai-command.js:4417:                                                <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-primary" type="button">Create Preview</button>
+public/control-center/pages/ai-command.js:4418:                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
+public/control-center/pages/ai-command.js:4419:                                                <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
+public/control-center/pages/ai-command.js:4420:                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-ghost" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4485:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:4609:export const aiCommandRoute = {
+public/control-center/pages/ai-command.js:4767:			aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4793:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4799:		        newSessionBtn.onclick = () => {
+public/control-center/pages/ai-command.js:4829:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4835:			settingsBtn.onclick = () => {
+public/control-center/pages/ai-command.js:4845:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:4850:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4856:                        btn.onclick = () => {
+public/control-center/pages/ai-command.js:4875:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4881:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:4886:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4892:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:4904:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:4944:			        const sendBtn = $("aicmdV2AskBtn");
+public/control-center/pages/ai-command.js:4953:			voiceBtn.onclick = () => {
+public/control-center/pages/ai-command.js:4991:		const askBtn = $("aicmdV2AskBtn");
+public/control-center/pages/ai-command.js:4993:		        askBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:5006:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5042:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5107:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+public/control-center/pages/ai-command.js:5113:                                                destinationRoute: asString(routeSuggestion?.route)
+public/control-center/pages/ai-command.js:5129:		                                outputType: responseRoute.outputType,
+public/control-center/pages/ai-command.js:5131:		                                destinationRoute: responseRoute.destinationRoute
+public/control-center/pages/ai-command.js:5148:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5163:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5173:                        prepareBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5186:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5194:                        draftTaskBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5210:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5217:                        draftWorkflowBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5233:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5241:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5257:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5260:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+public/control-center/pages/ai-command.js:5262:			btn.onclick = () => {
+public/control-center/pages/ai-command.js:5263:				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+public/control-center/pages/ai-command.js:5309:			saveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5318:		const clearBtn = $("aicmdV2ClearBtn");
+public/control-center/pages/ai-command.js:5320:			clearBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5338:		        responseContinueBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5344:		const responseCopyBtn = $("aicmdV3ResponseCopyBtn");
+public/control-center/pages/ai-command.js:5345:		if (responseCopyBtn) {
+public/control-center/pages/ai-command.js:5346:			responseCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:5357:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:5364:			responseUseBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5377:			responseSaveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5392:		        responseConvertBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5417:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5423:			responseSendBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5425:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+public/control-center/pages/ai-command.js:5426:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:5458:			responseReadBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5472:		const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+public/control-center/pages/ai-command.js:5473:		if (previewCopyBtn) {
+public/control-center/pages/ai-command.js:5474:			previewCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:5491:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:5498:			previewUseBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5517:			previewSendBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5519:				const destination = asString(output.destinationRoute || "").trim();
+public/control-center/pages/ai-command.js:5553:			previewSaveBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5568:			previewReadBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5585:		const previewClearBtn = $("aicmdV2PreviewClearBtn");
+public/control-center/pages/ai-command.js:5586:		if (previewClearBtn) {
+public/control-center/pages/ai-command.js:5587:			previewClearBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5589:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5603:				rerender: () => aiCommandRoute.render(context)
+public/control-center/pages/ai-command/tool-dock.js:283:      changeBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:289:      removeBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:517:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:761:      label: "Ad Copy",
+public/control-center/pages/ai-command/tool-dock.js:898:      badge: "Copy",
+public/control-center/pages/ai-command/tool-dock.js:979:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:1272:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+public/control-center/pages/ai-command/tool-dock.js:1592:    btn.onclick = () => closeToolDrawer(drawer);
+public/control-center/pages/ai-command/tool-dock.js:1597:    openLibraryBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1642:    useBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1679:    btn.onclick = () => {

@@ -1,0 +1,84 @@
+351:// Full Team mode suggested prompts
+352:const TEAM_SUGGESTED_PROMPTS = [
+933:			teamMode: "solo",
+1131:                teamMode: session.teamMode,
+1154:        session.teamMode = asString(record.teamMode || "solo");
+1181:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+1185:	const teamWorkflowLines = safeMode === "Full Team"
+1187:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1296:                (session?.teamMode === "team" && looksTaskLike)
+1625:	const teamMode = session.teamMode === "team";
+1626:	const specialist = teamMode
+1627:		? { id: "operations", label: "Full Team" }
+1645:	if (!teamMode) return base;
+1669:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1670:		safetyLabel: "Full Team output is a coordinated draft preview only."
+2558:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+2572:		teamMode,
+2596:	session.teamMode = normalized.teamMode || "solo";
+2615:			teamMode: session.teamMode
+2623:		teamMode: normalized.teamMode,
+3238:        const specialist = session.teamMode === "team"
+3239:                ? { id: "team", label: "Full Team" }
+3280:                teamMode: session.teamMode,
+3505:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3553:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3630:	const teamBanner = session.teamMode === "team" ? `
+3632:			<strong>Full Team Mode</strong>
+3648:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+3649:					Solo Specialist
+3651:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+3652:					Full Team
+3659:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3660:					const isTeamActive = session.teamMode === "team";
+3692:	if (session.teamMode === "team") {
+3711:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3732:        const isTeam = session.teamMode === "team";
+3756:	const isTeam = session.teamMode === "team";
+3762:	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+3819:		teamMode: session.teamMode,
+3853:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3854:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3934:		const isTeam = session.teamMode === "team";
+4007:	const specialist = session.teamMode === "team"
+4008:		? { id: "team", label: "Full Team" }
+4090:	const specialist = session.teamMode === "team"
+4091:		? { id: "team", label: "Full Team" }
+4242:        const isTeam = session.teamMode === "team";
+4243:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+4245:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+4253:                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+4289:                teamMode: session.teamMode,
+4293:        const nextPrompts = session.teamMode === "team"
+4294:                ? TEAM_SUGGESTED_PROMPTS
+4454:	const prompts = session.teamMode === "team"
+4455:		? TEAM_SUGGESTED_PROMPTS
+4484:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4493:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+4501:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+4509:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+4752:			session.teamMode = "solo";
+4788:		                        teamMode: session.teamMode
+4824:		                        teamMode: session.teamMode
+4864:                                session.teamMode = "solo";
+4883:				session.teamMode = mode;
+4885:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+4921:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+5012:		                const specialist = session.teamMode === "team"
+5013:		                        ? { id: "team", label: "Full Team" }
+5022:		                        teamMode: session.teamMode,
+5039:		                        teamMode: session.teamMode
+5050:		                                mode: session.teamMode === "team" ? "team" : "solo",
+5088:		                                teamMode: session.teamMode,
+5128:		                                teamMode: session.teamMode,
+5143:		                                teamMode: session.teamMode
+5160:		                                teamMode: session.teamMode
+5183:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+5286:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+5383:					teamMode: session.teamMode
+5412:		                        teamMode: session.teamMode
+5477:				const specialistLabel = session.teamMode === "team"
+5478:					? "Full Team"
+5501:				const specialistLabel = session.teamMode === "team"
+5502:					? "Full Team"
+5559:					teamMode: session.teamMode
