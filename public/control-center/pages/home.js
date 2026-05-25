@@ -799,9 +799,9 @@ export const homeRoute = {
             <article class="card home-workspace-section">
               <div class="home-section-head">
                 <div>
-                  <p class="card-label">Active Campaign</p>
+                  <p class="card-label">Launch Readiness Snapshot</p>
                   <h3>${escapeHtml(compact(dashboard.campaign.name, "No active campaign"))}</h3>
-                  <span class="section-helper">Tracks the current campaign's operational state and next scheduled actions.</span>
+                  <span class="section-helper">Tracks campaign, publishing, and media readiness. Shows current campaign state and next scheduled actions.</span>
                 </div>
                 ${renderBadge(dashboard.campaign.name ? "success" : "warning", dashboard.campaign.currentStage, escapeHtml)}
               </div>
@@ -893,11 +893,11 @@ export const homeRoute = {
           </div>
         </section>
 
-        <!-- 6. AI GUIDANCE PANEL -->
+        <!-- 6. EXECUTIVE AI GUIDANCE PANEL -->
         <section class="card home-ai-guidance-panel">
           <div class="home-panel-head">
             <div>
-              <p class="card-label">AI Guidance for Operations</p>
+              <p class="card-label">Executive AI Guidance</p>
               <h3>AI explains, plans, and clarifies operational flow</h3>
               <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
             </div>
@@ -930,16 +930,15 @@ export const homeRoute = {
 
           <div class="mhos-workforce-room">
             <div class="mhos-workforce-head">
-              <span class="mhos-workforce-focus">AI Workforce Room</span>
+              <span class="mhos-workforce-focus">AI Team Command Center</span>
             </div>
             <div class="mhos-workforce-flow">
-              <!-- Workflow Chain -->
-              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas.</p>
+              <!-- Workflow Chain: show only 3–5 roles, summary + handoff only -->
+              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas. Only key roles shown.</p>
               <div class="mhos-workflow-chain">
                 ${(() => {
-                  // Projection-only workflow chain
-                  // Use aiTeamCards as workflow steps for now
-                  const workflowChain = aiTeamCards;
+                  // Show only 3–5 roles, summary + handoff only
+                  const workflowChain = aiTeamCards.slice(0, 5);
                   const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
                   const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
                   return workflowChain.map((card, idx) => {
@@ -956,11 +955,13 @@ export const homeRoute = {
                         </div>
                         ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
                         ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
-
                       </div>
                     `;
                   }).join("")
                 })()}
+              </div>
+              <div class="mhos-ai-team-handoff-row">
+                <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">Open Full Team</button>
               </div>
               <!-- Orchestration Pressure Indicator -->
               <div class="mhos-orchestration-pressure">
@@ -995,6 +996,25 @@ export const homeRoute = {
                 })()}
               </div>
             </div>
+          </div>
+
+        </section>
+
+        <!-- 7. CUSTOMER OPERATIONS PULSE & COMMUNICATION READINESS (Independent Card, sibling to AI Guidance) -->
+        <section class="card home-customer-ops-panel">
+          <div class="home-panel-head">
+            <div>
+              <p class="card-label">Customer Operations Pulse</p>
+              <h3>Customer Operations Readiness</h3>
+              <span class="section-helper">Status and handoff only. No live CRM/IVR claims.</span>
+            </div>
+          </div>
+          <div class="home-customer-ops-body">
+            <span class="home-customer-ops-badge">${dashboard.health?.customerOpsStatus || "Planned/Partial"}</span>
+            <span class="home-comm-readiness-badge">Communication Readiness: <strong>${dashboard.health?.commReadiness || "Planned/Not Ready"}</strong></span>
+            <p>
+              <em>All advanced actions require handoff to Operations Centers or AI Command.</em>
+            </p>
           </div>
         </section>
 
@@ -1063,6 +1083,8 @@ export const homeRoute = {
 
     const aiTeamBtn = $("homeOpenAiTeamBtn");
     if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
 
     const quickCampaignBtn = $("homeQuickStartCampaignBtn");
     if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
