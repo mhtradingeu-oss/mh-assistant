@@ -55,6 +55,27 @@ import {
 const librarySessionStore = new Map();
 let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+const LIBRARY_UPLOAD_TYPE_LABELS = {
+  logo: "Logo",
+  brand_guidelines: "Brand Guidelines",
+  product_csv: "Product Data",
+  pricing_offers: "Pricing & Offers",
+  legal_documents: "Legal Documents",
+  product_photos: "Product Photos",
+  product_videos: "Product Videos",
+  social_assets: "Social Assets",
+  campaign_assets: "Campaign Assets",
+  packaging_images: "Packaging Images",
+  testimonials_reviews: "Testimonials & Reviews",
+  certificates: "Certificates",
+  partner_documents: "Partner Documents"
+};
+
+function getLibraryUploadTypeLabel(assetType = "") {
+  const key = String(assetType || "").trim().toLowerCase();
+  return LIBRARY_UPLOAD_TYPE_LABELS[key] || titleCase(key || "asset");
+}
+
 const libraryProtectedUrlCache = new Map();
 const LIBRARY_PAGE_SIZE = 10;
 const libraryProtectedUrlPromiseCache = new Map();
@@ -1798,7 +1819,6 @@ function bindLibraryWorkspace({
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
               <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
-              ${isSelected ? `<button class="btn btn-primary btn-sm quick-ai-source-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(asset.id)}">Use as Source in AI Command</button>` : ""}
             </div>
           </article>
         `;
@@ -1993,11 +2013,57 @@ function bindLibraryWorkspace({
     button.onclick = () => {
       const action = button.getAttribute("data-library-required-action") || "review";
       const uploadType = button.getAttribute("data-library-upload-type") || "logo";
+      const requiredKey = button.getAttribute("data-library-required-key") || "";
+
+      // Always set upload type
+      session.uploadType = uploadType;
+      const uploadTypeSelect = $("libraryUploadTypeSelect");
+      if (uploadTypeSelect) uploadTypeSelect.value = uploadType;
+
+      // Try to find a matching folder/filter for the required asset group
+      let mappedFolder = null;
+      for (const folder of LIBRARY_FOLDERS) {
+        if (folder.key === requiredKey || (folder.types && folder.types.includes(uploadType))) {
+          mappedFolder = folder;
+          break;
+        }
+      }
+
+      if (mappedFolder) {
+        session.folderKey = mappedFolder.key;
+        session.selectedType = uploadType;
+        session.page = 1;
+        // Focus/scroll asset workspace
+        setTimeout(() => {
+          const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+          if (assetWorkspace) {
+            assetWorkspace.classList.add("is-required-action-target");
+            assetWorkspace.scrollIntoView({ behavior: "smooth", block: "start" });
+            setTimeout(() => assetWorkspace.classList.remove("is-required-action-target"), 2000);
+          }
+        }, 0);
+        showMessage?.(`Showing ${mappedFolder.label} assets. Upload category set to ${getLibraryUploadTypeLabel(uploadType)}.`);
+        bindLibraryWorkspace({
+          $,
+          projectName,
+          session,
+          assetsData,
+          operations,
+          registry,
+          categoryReadiness,
+          missingRequiredAssets,
+          navigateTo,
+          reloadProjectData,
+          showMessage,
+          showError,
+          escapeHtml
+        });
+        return;
+      } else {
+        showMessage?.(`Upload category set to ${getLibraryUploadTypeLabel(uploadType)}. Matching workspace filter is not available yet.`);
+      }
 
       if (action === "upload") {
-        session.uploadType = uploadType;
-        const uploadTypeSelect = $("libraryUploadTypeSelect");
-        if (uploadTypeSelect) uploadTypeSelect.value = uploadType;
         const uploadInput = $("libraryUploadInput");
         uploadInput?.click();
         return;
@@ -2502,6 +2568,12 @@ viewToggleButtons.forEach((button) => {
 
   const uploadTypeSelect = $("libraryUploadTypeSelect");
   if (uploadTypeSelect) {
+    const catalog = getAssetCatalog(assetsData);
+    uploadTypeSelect.innerHTML = catalog.map((item) => {
+      const assetType = item.asset_type;
+      const label = getLibraryUploadTypeLabel(assetType);
+      return `<option value="${escapeHtml(assetType)}"${session.uploadType === assetType ? " selected" : ""}>${escapeHtml(label)}</option>`;
+    }).join("");
     uploadTypeSelect.value = session.uploadType;
     uploadTypeSelect.onchange = (event) => {
       const uploadType = getSafeAssetType(event.target.value || "logo") || "logo";
@@ -2916,6 +2988,11 @@ export const libraryRoute = {
       ...normalizeAssets(projectName, renderWorkspaceAssetsData, registry, renderCategoryByType, renderCatalog)
     ];
     const folderCounts = computeFolderCounts(renderAllAssets, session);
+    // Compute overview before render for KPI chips
+    const overview = buildAssetOverview({
+      assets: renderAllAssets,
+      requiredGroups: buildRequiredAssetGroups(categoryReadiness)
+    });
     const root = $("libraryRoot");
     if (!root) return;
 
@@ -2928,6 +3005,9 @@ export const libraryRoute = {
             <div>
               <div class="setup-kicker">Asset Control System</div>
               <h3>${escapeHtml(projectName ? `${projectName} Asset Overview` : "Asset Overview")}</h3>
+              <p class="setup-helper">
+                ${escapeHtml(`${formatCount(overview.totalAssets || 0)} assets · ${formatCount(overview.sourceOfTruthAssets || 0)} source-of-truth · ${formatCount(overview.needsReviewAssets || 0)} need review · ${formatCount(overview.approvedAssets || 0)} approved · ${String(overview.sourceCoverage || 0)}% source coverage`)}
+              </p>
             </div>
             <button id="libraryRefreshScanBtn" class="btn btn-secondary" type="button">Refresh Library scan</button>
           </div>
