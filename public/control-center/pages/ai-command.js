@@ -1705,58 +1705,82 @@ function buildPreviewText(output, specialistLabel) {
 	return lines.join("\n");
 }
 
-function buildStructuredPreviewBlocks(preview = {}) {
-	const mainOutputItems = normalizeDisplayList(
-		[
-			preview.mainOutput,
-			preview.output,
-			preview.generatedOutput,
-			preview.summary
-		].filter(Boolean),
-		3
-	);
-	const fieldDefs = [
-		{ key: "hooks", label: "Hooks" },
-		{ key: "captions", label: "Captions" },
-		{ key: "replyDraft", label: "Reply Draft" },
-		{ key: "ticketDraft", label: "Ticket Draft" },
-		{ key: "outreachDraft", label: "Outreach Draft" },
-		{ key: "followUps", label: "Follow-ups" },
-		{ key: "ctas", label: "CTA" },
-		{ key: "notes", label: "Notes" }
-	];
-	const blocks = mainOutputItems.length
-		? [{ label: "Main output", items: mainOutputItems }]
-		: [];
 
-	blocks.push(...fieldDefs
-		.map((field) => ({
-			label: field.label,
-			items: normalizeDisplayList(preview[field.key], 8)
-		}))
-		.filter((field) => field.items.length));
-
-	const bullets = normalizeDisplayList(preview.bullets, 8);
-	const steps = normalizeDisplayList(preview.steps, 8);
-	const summary = humanizeValue(preview.summary, "");
-
-	if (bullets.length) {
-		blocks.push({ label: mainOutputItems.length ? "Details" : "Main output", items: bullets });
-	}
-
-	if (steps.length) {
-		blocks.push({ label: "Next step", items: steps, ordered: true });
-	}
-
-	if (preview.nextStep) {
-		blocks.push({ label: "Next step", items: [humanizeValue(preview.nextStep)] });
-	}
-
-	return {
-		blocks,
-		draftText: summary && (summary.length > 160 || summary.includes("\n")) ? summary : ""
-	};
+function compactPreviewText(value, maxLength = 360) {
+        const text = humanizeValue(value, "").replace(/\s+/g, " ").trim();
+        if (!text) return "";
+        if (text.length <= maxLength) return text;
+        return `${text.slice(0, maxLength).trim()}...`;
 }
+
+function splitPreviewLines(value, limit = 6) {
+        const text = humanizeValue(value, "");
+        if (!text) return [];
+        return text
+                .split(/\n+|(?=\d+\.\s+)/)
+                .map((line) => line.replace(/^\s*[-•]\s*/, "").trim())
+                .filter(Boolean)
+                .slice(0, limit);
+}
+
+function normalizeUniqueDisplayList(items, limit = 6) {
+        const seen = new Set();
+        return normalizeDisplayList(items, limit * 2)
+                .map((item) => humanizeValue(item, ""))
+                .filter((item) => {
+                        const key = item.replace(/\s+/g, " ").trim().toLowerCase();
+                        if (!key || seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                })
+                .slice(0, limit);
+}
+
+
+function buildStructuredPreviewBlocks(preview = {}) {
+        const summary = humanizeValue(preview.summary, "");
+        const sourceText = humanizeValue(
+                preview.mainOutput ||
+                preview.output ||
+                preview.generatedOutput ||
+                preview.result ||
+                summary,
+                ""
+        );
+
+        const compactSummary = compactPreviewText(sourceText || summary, 420);
+        const blocks = [];
+
+        const mainLines = splitPreviewLines(sourceText || summary, 14)
+                .map((item) => compactPreviewText(item, 360));
+
+        if (mainLines.length) {
+                blocks.push({ label: "Main output", items: mainLines });
+        }
+
+        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+                .map((item) => compactPreviewText(item, 300));
+
+        if (bullets.length) {
+                blocks.push({ label: "Details", items: bullets });
+        }
+
+        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+                .map((item) => compactPreviewText(item, 280));
+
+        if (steps.length) {
+                blocks.push({ label: "Next steps", items: steps, ordered: true });
+        } else if (preview.nextStep) {
+                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+        }
+
+        return {
+                blocks,
+                draftText: "",
+                compactSummary
+        };
+}
+
 
 function isProviderLikelyConfigured(aiContext) {
 	const records = asObject(aiContext?.controlCenter?.records);
@@ -4037,7 +4061,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 	const preview = asObject(session.outputPreview);
 	const hasPreview = Boolean(preview.outputType && preview.title);
 	const activeTab = getOutputWorkspaceTab(session);
-	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "" };
+	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "", compactSummary: "" };
 	const languagePlan = getWorkspaceLanguagePlan(aiContext);
 	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
 	const specialist = session.teamMode === "team"
@@ -4094,10 +4118,10 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 						<span>${escapeHtml(outputLabel)}</span>
 						<span>${escapeHtml(specialist.label || "Specialist")}</span>
 					</div>
-					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
-					<p class="aicmd-room-output-summary">${escapeHtml(humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+					<h3>${escapeHtml(!humanizeValue(preview.title, "") || humanizeValue(preview.title, "").toLowerCase() === "chat reply" ? `${outputLabel} result` : humanizeValue(preview.title, "Draft output"))}</h3>
+					<p class="aicmd-room-output-summary">${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
 
-					${structuredPreview.draftText ? `<div class="aicmd-v2-preview-draft">${escapeHtml(structuredPreview.draftText)}</div>` : ""}
+					
 
 					${structuredPreview.blocks.length ? `
 						<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
