@@ -1,0 +1,375 @@
+# Setup Data References
+
+6:  { name: "project_name", label: "Project name" },
+7:  { name: "project_type", label: "Project type" },
+9:  { name: "brand_promise", label: "Brand promise" },
+10:  { name: "market", label: "Market" },
+13:  { name: "audience_primary", label: "Primary audience" },
+16:  { name: "social_channels", label: "Channels" }
+23:    description: "Define the project identity, type, website, and launch window.",
+24:    fields: ["project_name", "project_type", "website_url", "launch_window"]
+27:    id: "brand-identity",
+30:    fields: ["brand_name", "brand_promise", "brand_voice", "offer_positioning", "visual_identity"]
+33:    id: "market-language",
+36:    fields: ["market", "language", "currency"]
+39:    id: "audience",
+42:    fields: ["audience_primary", "audience_problem", "audience_geography"]
+45:    id: "goals",
+47:    description: "Clarify outcomes this project should optimize for.",
+57:    id: "channels",
+59:    description: "Map go-live channels and operator guidance.",
+60:    fields: ["social_channels", "operator_notes"]
+66:  "brand-identity": "🎯",
+67:  "market-language": "🌍",
+68:  audience: "👥",
+69:  goals: "📈",
+71:  channels: "📣"
+75:  project_name: "Used across routing, saves, and system context labels.",
+76:  project_type: "Improves AI defaults and recommended workflow strategies.",
+78:  brand_promise: "Guides positioning quality and channel consistency.",
+79:  market: "Controls localization and market-specific execution assumptions.",
+82:  audience_primary: "Improves message relevance and audience-specific tactics.",
+83:  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+85:  social_channels: "Defines where campaign and publishing workflows should execute."
+89:  project_name: "This name is used as the main project identity across the Control Center.",
+90:  project_type: "Helps AI choose better defaults for workflows, campaigns, and recommendations.",
+92:  brand_promise: "Defines the core value AI should protect in every output.",
+93:  market: "Controls regional assumptions, audience context, and localization.",
+96:  audience_primary: "Defines the main customer group the system should optimize messages for.",
+97:  primary_goal: "Tells the system what success means for this project.",
+99:  social_channels: "Defines where campaigns and publishing workflows should prepare content."
+152:function getValidationSummary({ missingFields, readinessStatus, readinessScore, criticalGaps, failedCount }) {
+153:  const normalizedReadiness = asString(readinessStatus).toLowerCase();
+154:  const score = Number(readinessScore);
+156:  const hasBlockers = missingFields.length > 0 || criticalGaps.length > 0 || failedCount > 0;
+162:  if (missingFields.length > 0 || criticalGaps.length > 0) {
+169:function getMissingFieldInsights(missingFields) {
+170:  return missingFields.map((field) => ({
+178:function getSetupDraftKey(projectName) {
+179:  return `mh-control-center:setup-draft:${projectName || "default"}`;
+182:function loadSetupDraft(projectName) {
+186:    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
+195:function saveSetupDraft(projectName, data) {
+199:    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
+206:function clearSetupDraft(projectName) {
+210:    window.localStorage.removeItem(getSetupDraftKey(projectName));
+218:  const overviewData = asObject(state.data.overview?.overview);
+219:  const readinessDashboard = asObject(state.data.readiness?.dashboard);
+221:  const projectName = context.currentProject || overviewData.project_name || "";
+224:    project_name: projectName,
+225:    project_type: overviewData.project_type || "",
+226:    website_url: overviewData.website_url || "",
+227:    project_status: overviewData.project_status || overviewData.status || "",
+228:    execution_mode: context.executionMode || overviewData.execution_mode || "",
+229:    brand_name: overviewData.brand_name || projectName,
+230:    brand_promise: overviewData.brand_promise || overviewData.brand_positioning || overviewData.value_prop || "",
+231:    brand_voice: overviewData.brand_voice || "",
+232:    visual_identity: overviewData.visual_identity || "",
+233:    offer_positioning: overviewData.offer_positioning || overviewData.positioning || "",
+234:    market: context.currentMarket || overviewData.market || "",
+235:    language: context.currentLanguage || overviewData.language || "",
+236:    currency: overviewData.currency || "",
+237:    primary_goal: overviewData.primary_goal || overviewData.goal || "",
+238:    secondary_goal: overviewData.secondary_goal || "",
+239:    launch_window: overviewData.launch_window || context.activeCampaign || "",
+240:    audience_primary: overviewData.audience_primary || overviewData.target_audience || "",
+241:    audience_problem: overviewData.audience_problem || overviewData.customer_problem || "",
+242:    audience_geography: overviewData.audience_geography || context.currentMarket || "",
+243:    competitors: toListText(overviewData.competitors),
+244:    differentiation: overviewData.differentiation || "",
+245:    social_channels: toListText(
+246:      overviewData.social_channels ||
+247:      overviewData.channels ||
+248:      overviewData.social_links ||
+249:      overviewData.setup_payload?.social_channels ||
+250:      overviewData.setup_payload?.channels ||
+251:      overviewData.setup_payload?.social_links
+253:    operator_notes: toListText(readinessDashboard.operator_notes)
+262:  const missing = getMissingRequiredFields(values).length;
+263:  return Math.round(((REQUIRED_FIELDS.length - missing) / REQUIRED_FIELDS.length) * 100);
+272:  const requiredInStep = step.fields.filter((name) => REQUIRED_FIELDS.some((field) => field.name === name));
+273:  const total = requiredInStep.length;
+283:  const complete = requiredInStep.filter((name) => Boolean(asString(values[name]).trim())).length;
+300:function getWizardReadinessStatus(values, readinessScore, readinessStatus) {
+302:  const score = Number(readinessScore);
+304:  const backendReady = asString(readinessStatus).toLowerCase() === "strong";
+309:  const fields = ["brand_name", "brand_promise", "brand_voice", "offer_positioning"];
+317:  const fields = ["market", "language", "currency"];
+325:  const fields = ["project_name", "project_type", "website_url"];
+333:  const fields = ["brand_promise", "offer_positioning", "competitors", "differentiation"];
+340:function getSetupChannelsStatus(values, missingConnectors) {
+341:  const hasChannels = Boolean(asString(values.social_channels).trim());
+343:  if (asArray(missingConnectors).length > 0) return "In progress";
+348:  const fields = ["primary_goal", "audience_primary", "brand_voice", "operator_notes"];
+361:function getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }) {
+362:  const fieldGapCount = asArray(missingFields).length;
+363:  const assetGapCount = asArray(missingAssets).length;
+364:  const connectorGapCount = asArray(missingConnectors).length;
+371:      label: "Launch readiness: strong"
+378:      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+384:    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+388:function getNextSetupActionText(missingFields, missingAssets, missingConnectors) {
+389:  if (missingFields.length) {
+390:    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
+393:  if (missingAssets.length) {
+394:    return `Upload ${missingAssets.length} missing required asset${missingAssets.length === 1 ? "" : "s"} in Library.`;
+397:  if (missingConnectors.length) {
+398:    return `Connect ${missingConnectors.length} missing integration${missingConnectors.length === 1 ? "" : "s"}.`;
+420:  required = false
+423:  const indicatorClass = required ? (filled ? "is-ready" : "is-missing") : (filled ? "is-ready" : "is-optional");
+424:  const indicatorText = required ? (filled ? "Ready" : "Missing") : (filled ? "Loaded" : "Optional");
+429:    <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
+467:    project_name: values.project_name,
+468:    project_type: values.project_type,
+470:    project_status: values.project_status,
+472:    brand_name: values.brand_name,
+473:    brand_promise: values.brand_promise,
+474:    brand_voice: values.brand_voice,
+477:    market: values.market,
+483:    audience_primary: values.audience_primary,
+484:    audience_problem: values.audience_problem,
+485:    audience_geography: values.audience_geography,
+488:    social_channels: toList(values.social_channels),
+497:    const required = group.getAttribute("data-required") === "true";
+501:    group.classList.toggle("is-missing", required && !filled);
+504:      indicator.classList.remove("is-ready", "is-missing", "is-optional");
+505:      indicator.classList.add(required ? (filled ? "is-ready" : "is-missing") : (filled ? "is-ready" : "is-optional"));
+506:      indicator.textContent = required ? (filled ? "Ready" : "Missing") : (filled ? "Loaded" : "Optional");
+512:  const brand = asString(values.brand_name || values.project_name || "your brand").trim() || "your brand";
+513:  const promise = asString(values.brand_promise).trim() || "a clear practical benefit";
+514:  const audience = asString(values.audience_primary).trim() || "a focused customer segment";
+517:  return `${brand} helps ${audience} achieve ${goal} through ${promise}.`;
+521:  const geo = asString(values.audience_geography || values.market).trim();
+522:  const problem = asString(values.audience_problem).trim() || "a high-priority pain point";
+528:  if (asString(values.brand_voice).trim()) {
+529:    return asString(values.brand_voice).trim();
+532:  const type = asString(values.project_type).toLowerCase();
+548:  const audience = document.getElementById("setupAiAudienceText");
+549:  if (audience) audience.textContent = compactListText([buildAudienceSuggestion(values)], "Identify missing launch inputs for audience targeting.");
+559:  missingAssets,
+560:  missingConnectors,
+562:  readinessScore,
+563:  readinessStatus,
+567:  const missingFields = getMissingRequiredFields(values);
+568:  const missingInsights = getMissingFieldInsights(missingFields);
+571:  const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+572:  const requiredCompleted = countCompleted(requiredNames, values);
+573:  const dependencyGapCount = missingAssets.length + missingConnectors.length + criticalGaps.length;
+574:  const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+576:    missingFields,
+577:    missingAssets,
+578:    missingConnectors,
+583:    missingFields,
+584:    readinessStatus,
+585:    readinessScore,
+593:  const brandStatus = getSetupBrandStatus(values);
+595:  const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+616:  const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
+617:  if (requiredCompleteEl) requiredCompleteEl.textContent = String(requiredCompleted);
+619:  const requiredTotalEl = document.getElementById("setupRequiredTotal");
+620:  if (requiredTotalEl) requiredTotalEl.textContent = String(requiredNames.length);
+635:  const missingCount = document.getElementById("setupMissingCount");
+636:  if (missingCount) missingCount.textContent = String(missingFields.length);
+643:  const readinessMissingFieldsEl = document.getElementById("setupReadinessMissingFields");
+644:  if (readinessMissingFieldsEl) {
+645:    readinessMissingFieldsEl.textContent = String(missingFields.length);
+648:  const readinessMissingAssetsEl = document.getElementById("setupReadinessMissingAssets");
+649:  if (readinessMissingAssetsEl) {
+650:    readinessMissingAssetsEl.textContent = String(missingAssets.length);
+653:  const readinessMissingConnectorsEl = document.getElementById("setupReadinessMissingConnectors");
+654:  if (readinessMissingConnectorsEl) {
+655:    readinessMissingConnectorsEl.textContent = String(missingConnectors.length);
+665:    { id: "setupBrandStatus", value: brandStatus },
+667:    { id: "setupChannelsStatus", value: channelsStatus },
+680:  const readinessBadge = document.getElementById("setupReadinessBadge");
+681:  if (readinessBadge) {
+682:    const label = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+683:    readinessBadge.className = `card-badge ${label === "Ready" ? "success" : "warning"}`;
+684:    readinessBadge.textContent = label;
+693:  const missingActionList = document.getElementById("setupMissingActions");
+694:  if (missingActionList) {
+695:    missingActionList.innerHTML = missingInsights.length
+696:      ? `<div class="setup-smart-gap-list">${missingInsights.map((item) => `
+705:      : `<div class="empty-box">No required field gaps detected.</div>`;
+712:        ...missingConnectors.map((item) => `Connect ${item}`),
+713:        ...missingAssets.map((item) => `Provide ${item}`),
+717:      "No operational blockers detected from readiness signals."
+723:    completeNowBtn.disabled = missingFields.length === 0;
+725:      if (!missingFields.length) return;
+726:      const first = missingFields[0];
+759:        ? "Needs required data"
+781:  const missingFieldCount = missingFields.length;
+782:  const hasMissing = missingFieldCount > 0;
+783:  const warningText = `${missingFieldCount} required field${missingFieldCount === 1 ? "" : "s"} still missing`;
+815:  projectName,
+817:  saveProjectSetup,
+818:  missingAssets,
+819:  missingConnectors,
+820:  readinessScore,
+821:  readinessStatus,
+830:  const draftKeyName = projectName || "current project";
+852:      missingAssets,
+853:      missingConnectors,
+855:      readinessScore,
+856:      readinessStatus,
+897:      missingAssets,
+898:      missingConnectors,
+900:      readinessScore,
+901:      readinessStatus,
+910:    const saved = saveSetupDraft(projectName, values);
+912:      showMessage(saved ? message : "Local draft storage is not available in this browser.");
+916:  let draftAutoSaveTimer = null;
+925:          project: projectName || "",
+933:    if (draftAutoSaveTimer) {
+934:      clearTimeout(draftAutoSaveTimer);
+937:    draftAutoSaveTimer = setTimeout(() => {
+938:      saveSetupDraft(projectName, values);
+995:      saveLocal(`Draft saved locally for ${draftKeyName}.`);
+1002:      if (!projectName) {
+1003:        showError?.("Select a project before saving Setup changes.");
+1008:      const requestedProjectName = asString(values.project_name).trim().toLowerCase();
+1014:      showMessage?.(`Saving setup for ${draftKeyName}...`);
+1017:        await saveProjectSetup?.(projectName, payload);
+1018:        clearSetupDraft(projectName);
+1019:        await reloadProjectData?.(projectName);
+1022:          requestedProjectName && requestedProjectName !== asString(projectName).trim().toLowerCase()
+1023:            ? " Project name remains local-only until project rename support exists."
+1026:        showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
+1029:        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
+1041:  const resetBtn = $("setupResetDraftBtn");
+1042:  if (resetBtn) {
+1043:    resetBtn.onclick = () => {
+1044:      clearSetupDraft(projectName);
+1047:        showMessage(`Local setup draft cleared for ${draftKeyName}.`);
+1061:      showMessage?.("AI draft applied to Offer positioning.");
+1069:      const field = form.querySelector('[name="audience_primary"]');
+1074:      showMessage?.("AI draft applied to Primary audience.");
+1082:      const field = form.querySelector('[name="brand_voice"]');
+1087:      showMessage?.("AI draft applied to Brand voice.");
+1102:      const inferredBrand = asString(values.brand_name || values.project_name || "Brand").trim() || "Brand";
+1103:      setIfEmpty("brand_promise", `${inferredBrand} delivers clear and trustworthy value with consistent quality.`);
+1105:      setIfEmpty("audience_primary", buildAudienceSuggestion(values));
+1106:      setIfEmpty("brand_voice", buildToneSuggestion(values));
+1107:      setIfEmpty("social_channels", "instagram, facebook, email");
+1110:      setIfEmpty("market", asString(values.audience_geography || values.market || "US"));
+1115:      showMessage?.("AI drafted missing fields. Review and save when ready.");
+1123:      const missingFields = getMissingRequiredFields(values).map((field) => field.label);
+1126:        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
+1133:  const validateNowBtn = $("setupValidateNowBtn");
+1134:  if (validateNowBtn) {
+1135:    validateNowBtn.onclick = () => {
+1153:      navigateTo("integrations");
+1168:      const missing = getMissingRequiredFields(values);
+1169:      if (!missing.length) {
+1170:        showMessage?.("No required setup gaps found.");
+1173:      const first = missing[0];
+1180:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+1195:      const missing = getMissingRequiredFields(values);
+1196:      if (missing.length) {
+1197:        const first = missing[0];
+1237:function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
+1239:    overviewData.business_type ||
+1240:    overviewData.project_type ||
+1241:    values.project_type ||
+1245:  const currentLabel = overviewData.business_template?.label || getBusinessTemplateLabel(currentType);
+1246:  const requiredAssets = Array.isArray(overviewData.required_assets) ? overviewData.required_assets : [];
+1247:  const starterChecklist = Array.isArray(overviewData.starter_checklist) ? overviewData.starter_checklist : [];
+1248:  const requirementsText = requiredAssets.length
+1249:    ? compactListText(requiredAssets, "")
+1278:        <div class="setup-template-preview${requiredAssets.length ? "" : " is-empty"}">
+1280:          <span class="${requiredAssets.length ? "" : "setup-template-empty"}">${escapeHtml(requirementsText)}</span>
+1306:    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
+1321:    saveProjectSetup
+1324:    const overviewData = asObject(state.data.overview?.overview);
+1325:    const readiness = asObject(state.data.readiness);
+1326:    const readinessDashboard = asObject(readiness.dashboard);
+1327:    const integrations = asObject(state.data.integrations);
+1328:    const assets = asObject(state.data.assets);
+1330:    const projectName = state.context.currentProject || overviewData.project_name || "";
+1331:    const draft = loadSetupDraft(projectName);
+1332:    const values = { ...buildSetupValues(state), ...(draft || {}) };
+1334:    const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
+1335:    const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "needs_work";
+1336:    const missingAssets = getMissingAssetLabels(assets);
+1337:    const missingConnectors = asArray(integrations.readiness?.missing);
+1338:    const criticalGaps = asArray(readinessDashboard.priorities?.critical);
+1339:    const missingFields = getMissingRequiredFields(values);
+1340:    const missingFieldInsights = getMissingFieldInsights(missingFields);
+1342:    const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+1344:    const brandStatus = getSetupBrandStatus(values);
+1346:    const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+1349:    const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+1350:    const failedCount = asArray(integrations.readiness?.failed).length;
+1352:      missingFields,
+1353:      readinessStatus,
+1354:      readinessScore,
+1359:    const requiredNames = REQUIRED_FIELDS.map((field) => field.name);
+1360:    const optionalNames = allFields.filter((name) => !requiredNames.includes(name));
+1361:    const requiredCompleted = countCompleted(requiredNames, values);
+1362:    const dependencyGapCount = missingAssets.length + missingConnectors.length + criticalGaps.length;
+1364:      readinessDashboard.updated_at ||
+1365:      readinessDashboard.last_saved_at ||
+1366:      overviewData.updated_at ||
+1367:      overviewData.last_updated_at
+1375:        <section class="card setup-smart-overview">
+1379:              <p class="setup-v2-subtitle">Configure the project source of truth used by AI, campaigns, and launch execution.</p>
+1380:              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+1383:                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+1388:              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
+1404:              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+1405:              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
+1410:              <span class="setup-helper">Assets and connectors pending</span>
+1414:              <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
+1427:              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+1428:              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
+1429:              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
+1454:                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+1477:                  ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
+1478:                  ${renderField({ name: "project_type", label: "Project type", value: values.project_type, helper: "Broad business model.", placeholder: "e.g. Ecommerce", escapeHtml, required: true })}
+1479:                  ${renderField({ name: "website_url", label: "Website URL", value: values.website_url, helper: "Primary destination.", placeholder: "https://example.com", type: "url", escapeHtml, required: true })}
+1484:              <section class="setup-wizard-step-panel" data-setup-step-panel="brand-identity" hidden>
+1488:                  ${renderField({ name: "brand_name", label: "Brand / display name", value: values.brand_name, helper: "Public-facing brand name.", placeholder: "Brand name", escapeHtml })}
+1489:                  ${renderField({ name: "brand_promise", label: "Brand promise", value: values.brand_promise, helper: "What value this brand consistently delivers.", placeholder: "Promise in one sentence", escapeHtml, multiline: true, rows: 3, required: true })}
+1490:                  ${renderField({ name: "brand_voice", label: "Brand voice", value: values.brand_voice, helper: "Tone rules for AI and content teams.", placeholder: "Confident, clear, practical", escapeHtml, multiline: true, rows: 3 })}
+1496:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+1500:                  ${renderField({ name: "market", label: "Market", value: values.market, helper: "Primary region.", placeholder: "e.g. US", escapeHtml, required: true })}
+1501:                  ${renderField({ name: "language", label: "Language", value: values.language, helper: "Primary content language.", placeholder: "e.g. English", escapeHtml, required: true })}
+1502:                  ${renderField({ name: "currency", label: "Currency", value: values.currency, helper: "Commercial currency.", placeholder: "e.g. USD", escapeHtml, required: true })}
+1506:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+1508:                <p class="home-section-copy">Define audience profile and top pain points.</p>
+1510:                  ${renderField({ name: "audience_primary", label: "Primary audience", value: values.audience_primary, helper: "Main customer segment.", placeholder: "Who are we targeting?", escapeHtml, multiline: true, rows: 3, required: true })}
+1511:                  ${renderField({ name: "audience_problem", label: "Audience problem", value: values.audience_problem, helper: "What problem they want solved.", placeholder: "Core pain point", escapeHtml, multiline: true, rows: 3 })}
+1512:                  ${renderField({ name: "audience_geography", label: "Audience geography", value: values.audience_geography, helper: "Geography details for this audience.", placeholder: "Countries or regions", escapeHtml })}
+1516:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+1518:                <p class="home-section-copy">Business outcomes this project should drive.</p>
+1520:                  ${renderField({ name: "primary_goal", label: "Primary goal", value: values.primary_goal, helper: "Main measurable objective.", placeholder: "Increase qualified sales", escapeHtml, multiline: true, rows: 3, required: true })}
+1529:                  ${renderField({ name: "competitors", label: "Competitors", value: values.competitors, helper: "Comma-separated list.", placeholder: "Competitor A, Competitor B", escapeHtml, multiline: true, rows: 3, required: true })}
+1530:                  ${renderField({ name: "differentiation", label: "Differentiation", value: values.differentiation, helper: "How this brand stands out.", placeholder: "Why customers choose us", escapeHtml, multiline: true, rows: 3 })}
+1534:              <section class="setup-wizard-step-panel" data-setup-step-panel="channels" hidden>
+1536:                <p class="home-section-copy">Distribution channels and operator handoff notes.</p>
+1538:                  ${renderField({ name: "social_channels", label: "Channels", value: values.social_channels, helper: "Comma-separated channels (e.g. Instagram, Email).", placeholder: "instagram, facebook, email", escapeHtml, multiline: true, rows: 3, required: true })}
+1547:          <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
+1553:              ${missingFieldInsights.length
+1554:                ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
+1563:                : `<div class="empty-box">All required setup fields are complete.</div>`
+1566:            <div class="setup-wizard-missing-divider"></div>
+1571:                  ...missingConnectors.map((item) => `Connect ${item}`),
+1572:                  ...missingAssets.map((item) => `Provide ${item}`),
+1576:                "No operational blockers detected from readiness signals."
+1590:                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
+1595:                <p>Critical readiness gaps reported by diagnostics.</p>
+1599:                <strong>${escapeHtml(String(missingConnectors.length + failedCount))}</strong>
+1625:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+1628:              <span class="setup-action-group-label">Local draft</span>
+1635:        ${renderBusinessTemplatePanel({ values, overviewData, escapeHtml })}
+1642:          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+1645:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+1659:      projectName,
+1661:      saveProjectSetup,
+1662:      missingAssets,
+1663:      missingConnectors,
+1664:      readinessScore,
+1665:      readinessStatus,
+1694:          await applyProjectBusinessTemplate(projectName, selectedType);
+1697:            templateStatus.textContent = "Template applied. Reloading project...";
+1702:          await reloadProjectData?.(projectName);
