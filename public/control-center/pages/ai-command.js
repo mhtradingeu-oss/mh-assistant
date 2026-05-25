@@ -3680,7 +3680,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 	const teamBanner = session.teamMode === "team" ? `
 		<div class="aicmd-room-team-mode-card">
 			<strong>Full Team Mode</strong>
-			<span>${escapeHtml(safeBridgeStatus.available ? "Executive workflow: strategy, creative, compliance, publishing, customer/sales, then operations." : "Preview tools remain available while chat is guarded.")}</span>
+			<span>Full Team prepares a coordinated, review-ready plan. It does <b>not</b> execute workflows or publish anything.</span>
 			${renderAiRoomTeamChain(escapeHtml)}
 		</div>
 	` : "";
@@ -3696,7 +3696,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 			</div>
 			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
 				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
-					Solo Specialist
+					Ask Specialist
 				</button>
 				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
 					Full Team
