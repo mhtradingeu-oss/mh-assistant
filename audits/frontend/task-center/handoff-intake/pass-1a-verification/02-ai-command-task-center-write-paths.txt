@@ -1,0 +1,67 @@
+public/control-center/pages/ai-command.js:14:        setSharedHandoff
+public/control-center/pages/ai-command.js:90:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:245:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:250:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:372:	{ id: "task", label: "Task", helper: "Task-shaped output" },
+public/control-center/pages/ai-command.js:374:	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+public/control-center/pages/ai-command.js:1254:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1258:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1266:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1267:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1283:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1294:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1303:		destinationRoute: route,
+public/control-center/pages/ai-command.js:1314:		if (outputType === "task") {
+public/control-center/pages/ai-command.js:1317:				title: `Task: Strategic plan for ${projectName || "current project"}`,
+public/control-center/pages/ai-command.js:1343:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1397:			title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",
+public/control-center/pages/ai-command.js:1432:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+public/control-center/pages/ai-command.js:1460:			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+public/control-center/pages/ai-command.js:1490:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1572:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1630:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1640:		task: "Task",
+public/control-center/pages/ai-command.js:1665:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+public/control-center/pages/ai-command.js:2083:function buildOperationsTaskBlock(aiContext, message) {
+public/control-center/pages/ai-command.js:2102:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+public/control-center/pages/ai-command.js:2245:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2267:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2301:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2390:	const destinationRoute = normalizeAiInboundSourcePage(
+public/control-center/pages/ai-command.js:2391:		preview.destinationRoute ||
+public/control-center/pages/ai-command.js:2404:		destinationRoute,
+public/control-center/pages/ai-command.js:2819:					<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>
+public/control-center/pages/ai-command.js:2830:				<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">
+public/control-center/pages/ai-command.js:2833:						<label for="ctrlTaskType">Task type</label>
+public/control-center/pages/ai-command.js:2834:						<select id="ctrlTaskType" class="ctrl-task-select">
+public/control-center/pages/ai-command.js:2855:					<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>
+public/control-center/pages/ai-command.js:2970:					<div class="ctrl-response-section-label">Task block — ${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>
+public/control-center/pages/ai-command.js:3396:	if (preview.outputType === "task") return 1;
+public/control-center/pages/ai-command.js:3417:	if (outputType === "task") return "task";
+public/control-center/pages/ai-command.js:3432:		task: "Task Draft",
+public/control-center/pages/ai-command.js:3434:		handoff: "Prepare Handoff",
+public/control-center/pages/ai-command.js:3444:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3446:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3712:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3922:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4005:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4090:                                        <span>Choose Draft, Task, Draft Workflow, or Prepare Handoff, then create a preview from the conversation.</span>
+public/control-center/pages/ai-command.js:4103:                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Draft Workflow, or Prepare Handoff from the conversation first.</div>
+public/control-center/pages/ai-command.js:4393:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:5029:		                                destinationRoute: asString(routeSuggestion?.route) || destinationRouteForSpecialist(session.modeId, "guidance")
+public/control-center/pages/ai-command.js:5090:                const draftTaskBtn = $("aicmdV2DraftTaskBtn");
+public/control-center/pages/ai-command.js:5091:                if (draftTaskBtn) {
+public/control-center/pages/ai-command.js:5092:                        draftTaskBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5105:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+public/control-center/pages/ai-command.js:5106:                                updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");
+public/control-center/pages/ai-command.js:5107:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5323:				const destination = asString(latestResponse.destinationRoute || destinationRouteForSpecialist(session.modeId, "guidance"));
+public/control-center/pages/ai-command.js:5333:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:5416:				const destination = asString(output.destinationRoute || "").trim();
+public/control-center/pages/ai-command.js:5442:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/ai-command/tool-dock.js:523:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:524:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:952:      label: "Task Plan",
+public/control-center/pages/ai-command/tool-dock.js:959:      outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],
+public/control-center/pages/ai-command/tool-dock.js:978:      label: "Prepare Handoff",
+public/control-center/pages/ai-command/tool-dock.js:1456:    "Task:",

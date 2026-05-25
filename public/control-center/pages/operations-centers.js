@@ -1,3 +1,4 @@
+import { getSharedHandoff } from "../shared-context.js";
 const taskSessions = new Map();
 const queueSessions = new Map();
 const jobSessions = new Map();
@@ -423,6 +424,58 @@ function renderOpsTable(columns, rows, emptyText, escapeHtml) {
   `;
 }
 
+
+function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {
+  if (!incomingHandoff) return "";
+
+  const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");
+  const title = asString(
+    incomingHandoff.title ||
+    incomingHandoff.summary ||
+    incomingHandoff.payload?.title ||
+    incomingHandoff.payload?.summary ||
+    "Incoming task handoff"
+  );
+  const description = asString(
+    incomingHandoff.description ||
+    incomingHandoff.payload?.description ||
+    incomingHandoff.payload?.handoff_intent ||
+    incomingHandoff.payload?.prompt ||
+    "Review-only handoff prepared by another MH-OS surface."
+  );
+  const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");
+
+  return `
+    <section class="panel ops-incoming-handoff mhos-clean-surface">
+      <div class="panel-header">
+        <div>
+          <div class="panel-kicker">Incoming Handoff</div>
+          <h3>Incoming Task Handoff</h3>
+          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically.</p>
+        </div>
+        <span class="card-badge warning">Review-only</span>
+      </div>
+      <div class="ops-detail-stack">
+        <div class="ops-detail-summary">
+          <strong>${escapeHtml(title)}</strong>
+          <p>${escapeHtml(description)}</p>
+        </div>
+        ${renderOpsDetailRows([
+          { label: "Source", value: titleCase(source) },
+          { label: "Destination", value: "Task Center" },
+          { label: "Status", value: "Review-only intake" },
+          { label: "Created", value: createdAt ? formatDateTime(createdAt) : "Not set" }
+        ], escapeHtml)}
+      </div>
+      <div class="ops-action-row">
+        <button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>
+        <button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace</button>
+      </div>
+    </section>
+  `;
+}
+
+
 function renderTaskCenterLayout({
   context,
   projectName,
@@ -431,7 +484,8 @@ function renderTaskCenterLayout({
   items,
   selectedItem,
   filters,
-  prompts
+  prompts,
+  incomingHandoff
 }) {
   const escapeHtml = context.escapeHtml;
   const projectLabel = projectName || "No project selected";
@@ -549,6 +603,7 @@ function renderTaskCenterLayout({
           </article>
 
           <aside class="ops-right-rail mhos-clean-stack">
+            ${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}
             <section class="panel ops-detail-card mhos-clean-surface">
               <div class="panel-header">
                 <div>
@@ -660,6 +715,8 @@ function renderTaskCenter(context, state, projectName) {
   const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;
   session.selectedKey = selectedItem?._opsKey || "";
   const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+
 
   root.innerHTML = renderTaskCenterLayout({
     context,
@@ -669,7 +726,8 @@ function renderTaskCenter(context, state, projectName) {
     items,
     selectedItem,
     filters,
-    prompts
+    prompts,
+    incomingHandoff
   });
 
   const rerender = () => renderTaskCenter(context, context.getState(), projectName);
@@ -713,6 +771,35 @@ function renderTaskCenter(context, state, projectName) {
       context.showMessage?.("Task summary copied.");
     } catch (_error) {
       context.showError?.("Failed to copy task summary.");
+    }
+  });
+
+  root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {
+    const text = incomingHandoff
+      ? [
+          "Incoming Task Handoff",
+          `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
+          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+          "Status: Review-only intake"
+        ].join("\n")
+      : "No incoming task handoff.";
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const buffer = root.querySelector("#taskCenterSummaryBuffer");
+        if (buffer) {
+          buffer.value = text;
+          buffer.focus();
+          buffer.select();
+          document.execCommand("copy");
+        }
+      }
+      context.showMessage?.("Incoming handoff summary copied.");
+    } catch (_error) {
+      context.showError?.("Failed to copy incoming handoff summary.");
     }
   });
   bindOpsFocusButtons(root, (focus) => {

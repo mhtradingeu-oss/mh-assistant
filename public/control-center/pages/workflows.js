@@ -1524,16 +1524,21 @@ function bindWorkflowExecutionLoop({
 
   const saveTaskBtn = $("workflowSaveTaskBtn");
   if (saveTaskBtn) {
-    saveTaskBtn.onclick = async () => {
+    saveTaskBtn.onclick = () => {
       if (!run.output) {
         showError?.("Prepare the workflow package before creating a task handoff.");
         return;
       }
-      try {
-        await createProjectTask?.(projectName, {
-          title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
-          description: asString(run.output.summary),
+
+      const handoff = {
+        source_page: "workflows",
+        destination_page: "task-center",
+        title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
+        summary: asString(run.output.summary || "Review-only task handoff prepared from Workflows."),
+        description: asString(run.output.summary || "Review-only task handoff prepared from Workflows."),
+        payload: {
           workflow_id: workflow.id,
+          workflow_title: workflow.title,
           source_type: "workflow_run",
           source_id: run.runId || run.lastRunAt || "",
           owner_role: "admin",
@@ -1541,13 +1546,15 @@ function bindWorkflowExecutionLoop({
           service_domain: workflow.id === "generate-report" || workflow.id === "research-competitors" ? "research" : "campaign",
           route_target: "workflows",
           output: asObject(run.output),
-          notes: asArray(run.output.nextActions || [])
-        });
-        await reloadProjectData?.(projectName);
-        showMessage?.("Structured workflow task saved.");
-      } catch (error) {
-        showError?.(error.message || "Failed to save workflow task.");
-      }
+          notes: asArray(run.output.nextActions || []),
+          status: "review_only"
+        },
+        created_at: new Date().toISOString()
+      };
+
+      setSharedHandoff(projectName, "task-center", handoff);
+      showMessage?.("Task handoff prepared for review in Task Center.");
+      navigateTo("task-center");
     };
   }
 
@@ -2277,6 +2284,21 @@ export const workflowsRoute = {
       const tasksBtn = $("wfLightTasksBtn");
       if (tasksBtn) {
         tasksBtn.onclick = () => {
+          const handoff = {
+            source_page: "workflows",
+            destination_page: "task-center",
+            title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
+            summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+            description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+            payload: {
+              workflow_id: asString(stateModel.selectedWorkflow?.id || ""),
+              workflow_title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow"),
+              handoff_intent: "Prepare task handoff from workflow package.",
+              status: "review_only"
+            },
+            created_at: new Date().toISOString()
+          };
+          setSharedHandoff(projectName, "task-center", handoff);
           stateModel.openedTaskCenter = true;
           stateModel.lastStatusTone = "is-info";
           stateModel.lastStatusText = "Task Center opened for workflow handoff and tracking.";
@@ -2287,7 +2309,24 @@ export const workflowsRoute = {
       Array.from(root.querySelectorAll("[data-wf-open]")).forEach((button) => {
         button.onclick = () => {
           const route = button.getAttribute("data-wf-open") || "workflows";
-          if (route === "task-center") stateModel.openedTaskCenter = true;
+          if (route === "task-center") {
+            const handoff = {
+              source_page: "workflows",
+              destination_page: "task-center",
+              title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
+              summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+              description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+              payload: {
+                workflow_id: asString(stateModel.selectedWorkflow?.id || ""),
+                workflow_title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow"),
+                handoff_intent: "Prepare task handoff from workflow package.",
+                status: "review_only"
+              },
+              created_at: new Date().toISOString()
+            };
+            setSharedHandoff(projectName, "task-center", handoff);
+            stateModel.openedTaskCenter = true;
+          }
           if (route !== "task-center") stateModel.openedDestination = true;
           stateModel.lastStatusTone = "is-info";
           stateModel.lastStatusText = `Opened ${titleCase(route)} for session continuity.`;
