@@ -1,3 +1,16 @@
+// Deterministic source registry extraction for canonical/legacy compatibility
+function extractSourceRegistryEntries(value) {
+  if (!value || typeof value !== 'object') return {};
+  if (value.sources && typeof value.sources === 'object' && !Array.isArray(value.sources)) {
+    return value.sources;
+  }
+  // Defensive: skip wrapper keys if present
+  const omitKeys = new Set(['updated_at', 'statuses', 'required_sources', 'sources']);
+  return Object.fromEntries(
+    Object.entries(value).filter(([k]) => !omitKeys.has(k))
+  );
+}
+
 const axios = require('axios');
 const crypto = require('crypto');
 const {
@@ -6369,8 +6382,17 @@ function buildSourceOfTruthRegistry(sources = {}) {
     return acc;
   }, {});
 
+  // Deterministic: allow explicit updated_at, do not generate new timestamp unless not provided
+  let updatedAt = arguments.length > 1 && typeof arguments[1] === 'string' && arguments[1] ? arguments[1] : null;
+  if (!updatedAt && sources && typeof sources === 'object' && sources.updated_at) {
+    updatedAt = sources.updated_at;
+  }
+  if (!updatedAt) {
+    updatedAt = new Date().toISOString();
+  }
+
   return {
-    updated_at: new Date().toISOString(),
+    updated_at: updatedAt,
     statuses: ['missing', 'connected', 'verified', 'outdated'],
     sources: normalizedSources,
     required_sources: requiredSources
@@ -7029,12 +7051,15 @@ function reviewProjectCanonicalParity(projectName) {
     const legacyExists = fs.existsSync(item.legacy_path);
     const canonicalRaw = canonicalExists ? readJsonFile(item.canonical_path, null) : null;
     const legacyRaw = legacyExists ? readJsonFile(item.legacy_path, null) : null;
-    const canonicalValue = item.domain === 'source_of_truth_registry'
-      ? normalizeSourceRegistry(canonicalRaw)
-      : canonicalRaw;
-    const legacyValue = item.domain === 'source_of_truth_registry'
-      ? normalizeSourceRegistry(legacyRaw)
-      : legacyRaw;
+    let canonicalValue, legacyValue;
+    if (item.domain === 'source_of_truth_registry') {
+      // Deterministic: compare only flat sources map, ignore wrapper metadata
+      canonicalValue = extractSourceRegistryEntries(canonicalRaw);
+      legacyValue = extractSourceRegistryEntries(legacyRaw);
+    } else {
+      canonicalValue = canonicalRaw;
+      legacyValue = legacyRaw;
+    }
     const parity = canonicalExists && legacyExists
       ? stableJsonHash(canonicalValue) === stableJsonHash(legacyValue)
       : canonicalExists;
