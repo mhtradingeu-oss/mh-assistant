@@ -1,0 +1,81 @@
+# Current Setup P1 Patch Diff Baseline
+
+ M public/control-center/pages/setup.js
+?? audits/frontend/setup-deep-truth-audit/p1-ux-info-coverage/
+
+ public/control-center/pages/setup.js | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/public/control-center/pages/setup.js b/public/control-center/pages/setup.js
+index 24390e9..a69f4e1 100644
+--- a/public/control-center/pages/setup.js
++++ b/public/control-center/pages/setup.js
+@@ -1376,7 +1376,7 @@ export const setupRoute = {
+           <div class="setup-wizard-header-top">
+             <div>
+               <h3 class="setup-v2-title">Smart Guided Setup</h3>
+-              <p class="setup-v2-subtitle">Configure the project source of truth used by AI, campaigns, and launch execution.</p>
++              <p class="setup-v2-subtitle">Setup is the starting point. <strong>Source of Truth is managed in <span class=\"setup-handoff-label\">Library</span></strong>. <strong>Connectors are managed in <span class=\"setup-handoff-label\">Integrations</span></strong>. <span class=\"setup-handoff-label\">Governance/Publishing</span> are handoff-only from Setup. <span class=\"setup-handoff-label\">CRM/IVR/Voice</span> are planned/not live unless shown below. Complete required fields, then hand off to the next area.</p>
+               <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+               <div class="setup-operating-chips">
+                 <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+@@ -1385,7 +1385,7 @@ export const setupRoute = {
+             </div>
+             <div class="setup-v2-toolbar">
+               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+-              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
++              <span class="setup-save-note">Draft = local browser only. <strong>Save</strong> = protected project update. <span class=\"setup-handoff-label\">Continue</span> = handoff to Library, Integrations, or Campaign Studio. No changes are live until saved.</span>
+             </div>
+           </div>
+ 
+@@ -1421,12 +1421,12 @@ export const setupRoute = {
+           </div>
+ 
+           <div class="setup-guidance-strip">
+-            <strong>Next best action</strong>
++            <strong>Next required step</strong>
+             <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+             <div class="setup-config-intel-metrics">
+               <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+-              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
+-              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
++              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
++              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
+             </div>
+           </div>
+         </section>
+@@ -1605,19 +1605,19 @@ export const setupRoute = {
+ 
+         <section class="card setup-smart-handoff-panel">
+           <div class="card-head">
+-            <h4>Next Actions</h4>
++            <h4>Handoff & Next Actions</h4>
+             <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+           </div>
+-          <p class="setup-v2-subtitle">Safe actions only: save, navigate, or open AI context.</p>
++          <p class="setup-v2-subtitle">Setup only: <span class=\"setup-handoff-label\">Source of Truth → Library</span>, <span class=\"setup-handoff-label\">Connectors → Integrations</span>, <span class=\"setup-handoff-label\">Governance/Publishing → handoff only</span>, <span class=\"setup-handoff-label\">CRM/IVR/Voice → planned/not live unless shown</span>.</p>
+           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
+-            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save before continuing</button>
+-            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+-            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
++            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup (protected)</button>
++            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library <span class=\"setup-handoff-label\">(manage Source of Truth)</span></button>
++            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations <span class=\"setup-handoff-label\">(manage Connectors)</span></button>
+           </div>
+           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
+             <div class="setup-action-group">
+               <span class="setup-action-group-label">Continue</span>
+-              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
++              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio <span class=\"setup-handoff-label\">(handoff only)</span></button>
+             </div>
+             <div class="setup-action-group">
+               <span class="setup-action-group-label">AI and review</span>
+@@ -1626,7 +1626,7 @@ export const setupRoute = {
+             </div>
+             <div class="setup-action-group">
+               <span class="setup-action-group-label">Local draft</span>
+-              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
++              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
+               <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+             </div>
+           </div>

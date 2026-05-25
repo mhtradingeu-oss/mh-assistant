@@ -447,8 +447,33 @@ function renderIndicatorList(items, escapeHtml, emptyText) {
   if (!items.length) {
     return `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
   }
+  return `<ul class="simple-list">${items.map((item) => `<li>${escapeHtml(formatBlockerLabel(item))}</li>`).join("")}</ul>`;
+}
 
-  return `<ul class="simple-list">${items.map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("")}</ul>`;
+// Helper to format system blocker labels for display only
+function formatBlockerLabel(label) {
+  if (!label) return "";
+  // connector:ecommerce → Ecommerce connector, connector:analytics → Analytics connector, etc
+  if (label.startsWith("Connect connector:")) {
+    const name = label.slice("Connect connector:".length);
+    return `Connect ${toTitleCase(name)} connector`;
+  }
+  if (label.startsWith("connector:")) {
+    const name = label.slice("connector:".length);
+    return `${toTitleCase(name)} connector`;
+  }
+  if (label === "social_assets") {
+    return "Social assets";
+  }
+  // snake_case → Title Case
+  return toTitleCase(label);
+}
+
+function toTitleCase(str) {
+  return asString(str)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
 }
 
 function readSetupFormValues(form) {
@@ -709,8 +734,8 @@ function updateWizardDashboard({
   if (blockerList) {
     blockerList.innerHTML = renderIndicatorList(
       [
-        ...missingConnectors.map((item) => `Connect ${item}`),
-        ...missingAssets.map((item) => `Provide ${item}`),
+        ...missingConnectors.map((item) => `connector:${item}`),
+        ...missingAssets,
         ...criticalGaps
       ],
       escapeHtml,
@@ -1112,7 +1137,7 @@ function bindSetupActions({
       setIfEmpty("currency", "USD");
 
       refreshSummary();
-      showMessage?.("AI drafted missing fields. Review and save when ready.");
+      // Suppress non-critical AI drafted toast; inline guidance is sufficient.
     };
   }
 
@@ -1376,7 +1401,7 @@ export const setupRoute = {
           <div class="setup-wizard-header-top">
             <div>
               <h3 class="setup-v2-title">Smart Guided Setup</h3>
-              <p class="setup-v2-subtitle">Configure the project source of truth used by AI, campaigns, and launch execution.</p>
+              <p class="setup-v2-subtitle">Setup configures your project foundation and hands off assets, connectors, and publishing to the right workspace.</p>
               <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
               <div class="setup-operating-chips">
                 <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
@@ -1385,7 +1410,6 @@ export const setupRoute = {
             </div>
             <div class="setup-v2-toolbar">
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
-              <span class="setup-save-note">Draft is local browser state. Save writes setup to project data.</span>
             </div>
           </div>
 
@@ -1421,12 +1445,12 @@ export const setupRoute = {
           </div>
 
           <div class="setup-guidance-strip">
-            <strong>Next best action</strong>
+            <strong>Next required step</strong>
             <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
             <div class="setup-config-intel-metrics">
               <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
-              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong></span>
-              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong></span>
+              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
+              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
             </div>
           </div>
         </section>
@@ -1444,11 +1468,10 @@ export const setupRoute = {
             <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
               ${STEP_DEFINITIONS.map((step, index) => {
                 const status = getStepStatus(step, values);
-                const icon = STEP_ICONS[step.id] || "•";
                 return `
                   <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
                     <span class="setup-wizard-step-meta">Step ${index + 1}</span>
-                    <span class="setup-wizard-step-title"><span class="setup-step-icon" aria-hidden="true">${escapeHtml(icon)}</span>${escapeHtml(step.title)}</span>
+                    <span class="setup-wizard-step-title">${escapeHtml(step.title)}</span>
                     <span class="setup-wizard-step-purpose">${escapeHtml(step.description)}</span>
                     <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
                     <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
@@ -1605,12 +1628,12 @@ export const setupRoute = {
 
         <section class="card setup-smart-handoff-panel">
           <div class="card-head">
-            <h4>Next Actions</h4>
+            <h4>Handoff & Next Actions</h4>
             <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
           </div>
-          <p class="setup-v2-subtitle">Safe actions only: save, navigate, or open AI context.</p>
+          <div class="setup-handoff-note">Brand evidence and product files belong in <strong>Library</strong> or <strong>Governance</strong>.</div>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
-            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save before continuing</button>
+            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup</button>
             <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
             <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
           </div>
@@ -1626,7 +1649,7 @@ export const setupRoute = {
             </div>
             <div class="setup-action-group">
               <span class="setup-action-group-label">Local draft</span>
-              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (Local)</button>
+              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
               <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
             </div>
           </div>
