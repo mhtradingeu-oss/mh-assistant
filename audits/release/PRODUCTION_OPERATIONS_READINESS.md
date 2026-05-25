@@ -144,7 +144,11 @@ Current known service commands:
 ```bash
 systemctl status mh-orchestrator.service --no-pager
 journalctl -u mh-orchestrator.service --since "2 hours ago" --no-pager
-Production Readiness Matrix
+```
+
+---
+
+## Production Readiness Matrix
 Area	Status	Notes
 Service running	Ready	Active systemd service
 Health endpoint	Ready	HTTP 200
@@ -158,7 +162,7 @@ Source-of-truth consistency	Blocked	P1 mismatch
 Backup/restore runbook	Needs final proof	Must be verified
 Browser QA	Pending	Needed before launch
 Final release approval	Blocked	Await mismatch decision
-Final Operations Decision
+## Final Operations Decision
 
 The system is operational, but not fully production-release approved.
 
