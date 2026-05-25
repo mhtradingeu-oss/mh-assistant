@@ -1,0 +1,181 @@
+public/control-center/pages/ai-command.js:462:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:971:			responseHistory: [],
+public/control-center/pages/ai-command.js:972:			responseLoading: false,
+public/control-center/pages/ai-command.js:974:			responseHistoryLoaded: false,
+public/control-center/pages/ai-command.js:1120:        const messages = asArray(session.messages);
+public/control-center/pages/ai-command.js:1121:        const responses = asArray(session.responseHistory);
+public/control-center/pages/ai-command.js:1159:        session.messages = asArray(record.messages).slice(-40);
+public/control-center/pages/ai-command.js:1160:        session.responseHistory = asArray(record.responses).slice(0, 12);
+public/control-center/pages/ai-command.js:1167:        session.responseLoading = false;
+public/control-center/pages/ai-command.js:1808:                blocks.push({ label: "Main output", items: mainLines });
+public/control-center/pages/ai-command.js:2663:			responses: session.responseHistory,
+public/control-center/pages/ai-command.js:2750:	session.messages.push({
+public/control-center/pages/ai-command.js:2759:	session.messages.push({
+public/control-center/pages/ai-command.js:2971:					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
+public/control-center/pages/ai-command.js:2972:					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
+public/control-center/pages/ai-command.js:3153:				<span style="font-size:11px;color:var(--color-text-2);">${session.messages.length} message${session.messages.length !== 1 ? "s" : ""}</span>
+public/control-center/pages/ai-command.js:3156:				${renderMessageStream(session.messages, escapeHtml)}
+public/control-center/pages/ai-command.js:3212:	const artifacts = session.messages
+public/control-center/pages/ai-command.js:3276:	return asArray(session.messages).slice().reverse().find((item) => item.role === "user") || null;
+public/control-center/pages/ai-command.js:3280:	return asArray(session.messages).slice().reverse().find((item) => item.role === "assistant") || null;
+public/control-center/pages/ai-command.js:3284:        const messages = asArray(session.messages).slice(-12);
+public/control-center/pages/ai-command.js:3287:        const latestResponse = asArray(session.responseHistory)[0] || null;
+public/control-center/pages/ai-command.js:3306:                latestResponse?.prompt ||
+public/control-center/pages/ai-command.js:3313:                latestResponse?.responseText ||
+public/control-center/pages/ai-command.js:3331:                latestResponse
+public/control-center/pages/ai-command.js:3504:	if (session.responseLoading) return 0;
+public/control-center/pages/ai-command.js:3509:	if (asArray(session.responseHistory).length) return 2;
+public/control-center/pages/ai-command.js:3781:function getAiSpecialistWorkingMessage(session = {}) {
+public/control-center/pages/ai-command.js:3991:		const isGenerating = Boolean(session.responseLoading);
+public/control-center/pages/ai-command.js:3994:			<div class="aicmd-v2-composer aicmd-room-composer aicmd-chatgpt-composer" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:3995:				<div class="aicmd-v2-composer-head aicmd-chatgpt-composer-head">
+public/control-center/pages/ai-command.js:3996:					<div class="aicmd-v2-composer-title-row">
+public/control-center/pages/ai-command.js:3997:						<span class="aicmd-v2-composer-icon">${escapeHtml(isTeam ? "Team" : getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:3998:						<span class="aicmd-v2-composer-label">${escapeHtml(headerText)}</span>
+public/control-center/pages/ai-command.js:4018:							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Send message">
+public/control-center/pages/ai-command.js:4029:				<div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
+public/control-center/pages/ai-command.js:4122:				<button id="aicmdV2LegacyPreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4123:				<button id="aicmdV2LegacyPreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+public/control-center/pages/ai-command.js:4127:				<button id="aicmdV2LegacyPreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear preview</button>
+public/control-center/pages/ai-command.js:4157:					<span class="aicmd-room-kicker">Output Workspace</span>
+public/control-center/pages/ai-command.js:4231:                                        <button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4232:                                        <button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+public/control-center/pages/ai-command.js:4233:                                        <button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
+public/control-center/pages/ai-command.js:4249:	const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";
+public/control-center/pages/ai-command.js:4298:        const allMessages = asArray(session.messages);
+public/control-center/pages/ai-command.js:4311:        const selectedResponses = asArray(session.responseHistory).filter((item) => {
+public/control-center/pages/ai-command.js:4316:        const sharedResponses = asArray(session.responseHistory).filter((item) => {
+public/control-center/pages/ai-command.js:4435:                        ${session.responseLoading ? `
+public/control-center/pages/ai-command.js:4436:                                                <div class="aicmd-v2-chat-loading aicmd-room-typing-indicator" role="status" aria-live="polite">
+public/control-center/pages/ai-command.js:4437:                                                        <span class="aicmd-room-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+public/control-center/pages/ai-command.js:4439:                                                                <strong>${escapeHtml(getAiSpecialistWorkingMessage(session))}</strong>
+public/control-center/pages/ai-command.js:4469:                                                <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
+public/control-center/pages/ai-command.js:4470:                                                <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-ghost" type="button">Copy</button>
+public/control-center/pages/ai-command.js:4536:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));
+public/control-center/pages/ai-command.js:4617:	const responses = asArray(session.responseHistory);
+public/control-center/pages/ai-command.js:4695:           if (asArray(savedOutput.messages).length && !asArray(session.messages).length) {
+public/control-center/pages/ai-command.js:4696:                   session.messages = asArray(savedOutput.messages).slice(-40);
+public/control-center/pages/ai-command.js:4705:		if (!session.responseHistoryLoaded) {
+public/control-center/pages/ai-command.js:4706:			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+public/control-center/pages/ai-command.js:4707:			session.responseHistoryLoaded = true;
+public/control-center/pages/ai-command.js:4836:		                        messages: session.messages,
+public/control-center/pages/ai-command.js:4837:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:4860:		                session.responseHistory = [];
+public/control-center/pages/ai-command.js:4861:		                session.messages = [];
+public/control-center/pages/ai-command.js:4863:		                session.responseLoading = false;
+public/control-center/pages/ai-command.js:4995:			        const sendBtn = $("aicmdV2AskBtn");
+public/control-center/pages/ai-command.js:5042:		const askBtn = $("aicmdV2AskBtn");
+public/control-center/pages/ai-command.js:5055:		                        session.responseLoading = false;
+public/control-center/pages/ai-command.js:5079:		                session.messages.push(userChatMessage);
+public/control-center/pages/ai-command.js:5080:		                session.messages = session.messages.slice(-40);
+public/control-center/pages/ai-command.js:5083:		                session.responseLoading = true;
+public/control-center/pages/ai-command.js:5087:		                        messages: session.messages,
+public/control-center/pages/ai-command.js:5088:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5104:		                                messages: session.messages.slice(-12),
+public/control-center/pages/ai-command.js:5154:		                        session.messages.push(assistantChatMessage);
+public/control-center/pages/ai-command.js:5155:		                        session.messages = session.messages.slice(-40);
+public/control-center/pages/ai-command.js:5166:		                        session.responseHistory.unshift({
+public/control-center/pages/ai-command.js:5185:		                        session.responseHistory = session.responseHistory.slice(0, 12);
+public/control-center/pages/ai-command.js:5186:		                        session.responseLoading = false;
+public/control-center/pages/ai-command.js:5191:		                                messages: session.messages,
+public/control-center/pages/ai-command.js:5192:		                                responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5203:		                        session.responseLoading = false;
+public/control-center/pages/ai-command.js:5208:		                                messages: session.messages,
+public/control-center/pages/ai-command.js:5209:		                                responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5364:		const clearBtn = $("aicmdV2ClearBtn");
+public/control-center/pages/ai-command.js:5380:		const latestResponse = asArray(session.responseHistory)[0] || null;
+public/control-center/pages/ai-command.js:5390:		const responseCopyBtn = $("aicmdV3ResponseCopyBtn");
+public/control-center/pages/ai-command.js:5391:		if (responseCopyBtn) {
+public/control-center/pages/ai-command.js:5392:			responseCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:5393:				if (!latestResponse?.responseText) return;
+public/control-center/pages/ai-command.js:5396:						await navigator.clipboard.writeText(latestResponse.responseText);
+public/control-center/pages/ai-command.js:5403:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:5411:				if (!latestResponse?.responseText) return;
+public/control-center/pages/ai-command.js:5412:				setAiComposerValue(session, input, latestResponse.responseText);
+public/control-center/pages/ai-command.js:5424:				if (!latestResponse) return;
+public/control-center/pages/ai-command.js:5427:					responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5439:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+public/control-center/pages/ai-command.js:5447:		                if (latestResponse?.responseText) {
+public/control-center/pages/ai-command.js:5448:		                        preview.title = latestResponse.responseTitle || preview.title;
+public/control-center/pages/ai-command.js:5449:		                        preview.summary = latestResponse.responseText;
+public/control-center/pages/ai-command.js:5450:		                        preview.generatedAt = latestResponse.generatedAt || nowIso();
+public/control-center/pages/ai-command.js:5455:		                        messages: session.messages,
+public/control-center/pages/ai-command.js:5456:		                        responses: session.responseHistory,
+public/control-center/pages/ai-command.js:5470:				if (!latestResponse) return;
+public/control-center/pages/ai-command.js:5471:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+public/control-center/pages/ai-command.js:5472:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:5475:					modeId: latestResponse.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:5476:					lastCommand: latestResponse.prompt || "",
+public/control-center/pages/ai-command.js:5477:					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+public/control-center/pages/ai-command.js:5479:					phase3_response: latestResponse
+public/control-center/pages/ai-command.js:5489:						prompt: latestResponse.prompt,
+public/control-center/pages/ai-command.js:5491:						output: latestResponse.responseRaw || {
+public/control-center/pages/ai-command.js:5492:							title: latestResponse.responseTitle,
+public/control-center/pages/ai-command.js:5493:							summary: latestResponse.responseText
+public/control-center/pages/ai-command.js:5505:				if (!latestResponse?.responseText) return;
+public/control-center/pages/ai-command.js:5510:				const utterance = new SpeechSynthesisUtterance(latestResponse.responseText);
+public/control-center/pages/ai-command.js:5518:		const previewCopyBtn = $("aicmdV2PreviewCopyBtn");
+public/control-center/pages/ai-command.js:5519:		if (previewCopyBtn) {
+public/control-center/pages/ai-command.js:5520:			previewCopyBtn.onclick = async () => {
+public/control-center/pages/ai-command.js:5537:					updateStatus("Copy failed. Clipboard access may be blocked.");
+public/control-center/pages/ai-command.js:5631:		const previewClearBtn = $("aicmdV2PreviewClearBtn");
+public/control-center/pages/ai-command.js:5632:		if (previewClearBtn) {
+public/control-center/pages/ai-command.js:5633:			previewClearBtn.onclick = () => {
+public/control-center/styles/12-pages.css:109:[data-page="ai-command"] .aicmd-v2-composer.aicmd-room-composer.aicmd-chatgpt-composer {
+public/control-center/styles/12-pages.css:118:[data-page="ai-command"] .aicmd-v2-composer-head {
+public/control-center/styles/12-pages.css:126:[data-page="ai-command"] .aicmd-v2-composer-title-row {
+public/control-center/styles/12-pages.css:133:[data-page="ai-command"] .aicmd-v2-composer-icon {
+public/control-center/styles/12-pages.css:148:[data-page="ai-command"] .aicmd-v2-composer-label {
+public/control-center/styles/12-pages.css:3794:.aicmd-v2-composer {
+public/control-center/styles/12-pages.css:3804:.aicmd-v2-composer-head {
+public/control-center/styles/12-pages.css:3810:.aicmd-v2-composer-icon {
+public/control-center/styles/12-pages.css:3814:.aicmd-v2-composer-label {
+public/control-center/styles/12-pages.css:3903:.aicmd-v2-composer-hint {
+public/control-center/styles/12-pages.css:4834:[data-page="ai-command"] .aicmd-v2-composer,
+public/control-center/styles/12-pages.css:4849:[data-page="ai-command"] .aicmd-v2-composer {
+public/control-center/styles/12-pages.css:4856:[data-page="ai-command"] .aicmd-v2-composer-head,
+public/control-center/styles/12-pages.css:4857:[data-page="ai-command"] .aicmd-v2-composer-title-row {
+public/control-center/styles/12-pages.css:4863:[data-page="ai-command"] .aicmd-v2-composer-head {
+public/control-center/styles/12-pages.css:4867:[data-page="ai-command"] .aicmd-v2-composer-icon {
+public/control-center/styles/12-pages.css:4877:[data-page="ai-command"] .aicmd-v2-composer-label {
+public/control-center/styles/12-pages.css:4987:[data-page="ai-command"] .aicmd-v2-composer-hint {
+public/control-center/styles/12-pages.css:5407:.aicmd-v2-composer,
+public/control-center/styles/12-pages.css:5424:.aicmd-v2-composer textarea,
+public/control-center/styles/12-pages.css:5425:.aicmd-v2-composer-input,
+public/control-center/styles/12-pages.css:5431:.aicmd-v2-composer textarea:focus,
+public/control-center/styles/12-pages.css:5517:  .aicmd-v2-composer textarea,
+public/control-center/styles/12-pages.css:5613:.aicmd-v2-composer textarea:focus,
+public/control-center/styles/12-pages.css:5614:.aicmd-v2-composer-input:focus {
+public/control-center/styles/12-pages.css:5620:[data-page="ai-command"] .aicmd-v2-composer {
+public/control-center/styles/12-pages.css:5627:[data-page="ai-command"] .aicmd-v2-composer-label {
+public/control-center/styles/12-pages.css:5632:.aicmd-v2-composer-primary-note {
+public/control-center/styles/12-pages.css:5648:[data-page="ai-command"] #aicmdV2AskBtn {
+public/control-center/styles/12-pages.css:5712:[data-page="ai-command"] .aicmd-v2-composer-label,
+public/control-center/styles/12-pages.css:5722:[data-page="ai-command"] .aicmd-v2-composer-primary-note,
+public/control-center/styles/12-pages.css:6005:[data-page="ai-command"] .aicmd-v2-composer-icon {
+public/control-center/styles/12-pages.css:6580:[data-page="ai-command"] .aicmd-v2-composer-head,
+public/control-center/styles/12-pages.css:6843:  [data-page="ai-command"] #aicmdV2AskBtn {
+public/control-center/styles/12-pages.css:7214:.aicmd-chatgpt-composer {
+public/control-center/styles/12-pages.css:7223:.aicmd-chatgpt-composer-head {
+public/control-center/styles/12-pages.css:8319:/* --- AI Command Pass 4B-1 Output Workspace Readability --- */
+public/control-center/styles/12-pages.css:8365:[data-page="ai-command"] .aicmd-room-typing-indicator {
+public/control-center/styles/12-pages.css:8379:[data-page="ai-command"] .aicmd-room-typing-indicator strong {
+public/control-center/styles/12-pages.css:8385:[data-page="ai-command"] .aicmd-room-typing-indicator small {
+public/control-center/styles/12-pages.css:8393:[data-page="ai-command"] .aicmd-room-typing-dots {
+public/control-center/styles/12-pages.css:8406:[data-page="ai-command"] .aicmd-room-typing-dots i {
+public/control-center/styles/12-pages.css:8414:[data-page="ai-command"] .aicmd-room-typing-dots i:nth-child(2) {
+public/control-center/styles/12-pages.css:8418:[data-page="ai-command"] .aicmd-room-typing-dots i:nth-child(3) {
+public/control-center/styles/12-pages.css:8434:[data-page="ai-command"] .aicmd-v2-composer.aicmd-room-composer.aicmd-chatgpt-composer {
+public/control-center/styles/12-pages.css:8444:[data-page="ai-command"] .aicmd-chatgpt-composer-head,
+public/control-center/styles/12-pages.css:8445:[data-page="ai-command"] .aicmd-v2-composer-head {
+public/control-center/styles/12-pages.css:8453:[data-page="ai-command"] .aicmd-v2-composer-title-row {
+public/control-center/styles/12-pages.css:8458:[data-page="ai-command"] .aicmd-v2-composer-icon {
+public/control-center/styles/12-pages.css:8465:[data-page="ai-command"] .aicmd-v2-composer-label {
+public/control-center/styles/12-pages.css:8472:[data-page="ai-command"] .aicmd-v2-composer-label::after {
+public/control-center/styles/12-pages.css:8483:[data-page="ai-command"] .aicmd-v2-composer-hint {
+public/control-center/styles/12-pages.css:8526:[data-page="ai-command"] #aicmdV2AskBtn {
+public/control-center/styles/12-pages.css:8534:[data-page="ai-command"] .aicmd-room-composer-tools button:not(#aicmdV2AskBtn),
+public/control-center/styles/12-pages.css:8535:[data-page="ai-command"] .aicmd-room-composer .aicmd-v2-action-row button:not(#aicmdV2AskBtn) {
+public/control-center/styles/12-pages.css:8541:[data-page="ai-command"] .aicmd-room-composer-tools button:not(#aicmdV2AskBtn):hover,
+public/control-center/styles/12-pages.css:8542:[data-page="ai-command"] .aicmd-room-composer .aicmd-v2-action-row button:not(#aicmdV2AskBtn):hover {
+public/control-center/styles/12-pages.css:8547:  [data-page="ai-command"] .aicmd-v2-composer.aicmd-room-composer.aicmd-chatgpt-composer {

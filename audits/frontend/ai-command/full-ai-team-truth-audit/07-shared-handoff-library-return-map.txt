@@ -1,0 +1,86 @@
+public/control-center/shared-context.js:8:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:15:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:22:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:29:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:36:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:43:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:50:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:57:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:64:    shortGuideText: "Select one item, then click Use as Source in AI Command."
+public/control-center/shared-context.js:84:export function setSharedAiDrawerReturn(projectName, payload) {
+public/control-center/shared-context.js:89:export function getSharedAiDrawerReturn(projectName) {
+public/control-center/shared-context.js:99:export function setSharedLibrarySourceBridge(projectName, bridge) {
+public/control-center/shared-context.js:104:export function getSharedLibrarySourceBridge(projectName) {
+public/control-center/shared-context.js:114:export function setSharedAiSource(projectName, source) {
+public/control-center/shared-context.js:119:export function getSharedAiSource(projectName) {
+public/control-center/shared-context.js:192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/pages/ai-command/tool-dock.js:3:  setSharedLibrarySourceBridge,
+public/control-center/pages/ai-command/tool-dock.js:4:  getSharedAiSource,
+public/control-center/pages/ai-command/tool-dock.js:7:  setSharedAiDrawerReturn,
+public/control-center/pages/ai-command/tool-dock.js:8:  getSharedAiDrawerReturn,
+public/control-center/pages/ai-command/tool-dock.js:47:  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+public/control-center/pages/ai-command/tool-dock.js:72:  const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:99:    type: "ai_drawer_return",
+public/control-center/pages/ai-command/tool-dock.js:135:  setSharedAiDrawerReturn(projectName || "__default__", payload);
+public/control-center/pages/ai-command/tool-dock.js:149:  return getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:1655:        type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:1663:      setSharedLibrarySourceBridge(project, payload);
+public/control-center/pages/ai-command/tool-dock.js:1664:      setSharedLibrarySourceBridge("__default__", payload);
+public/control-center/pages/ai-command/tool-dock.js:1677:      setSharedAiDrawerReturn(project, drawerReturnContext);
+public/control-center/pages/ai-command/tool-dock.js:1678:      setSharedAiDrawerReturn("__default__", drawerReturnContext);
+public/control-center/pages/ai-command/tool-dock.js:1679:      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command.js:16:        getSharedHandoff,
+public/control-center/pages/ai-command.js:18:        setSharedHandoff
+public/control-center/pages/ai-command.js:2638:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:5482:				setSharedHandoff(projectName || "__default__", destination, {
+public/control-center/pages/ai-command.js:5591:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/library.js:4:  setSharedAiSource,
+public/control-center/pages/library.js:5:  getSharedLibrarySourceBridge,
+public/control-center/pages/library.js:7:  setSharedAiDrawerReturn,
+public/control-center/pages/library.js:8:  getSharedAiDrawerReturn
+public/control-center/pages/library.js:1801:              ${isSelected ? `<button class="btn btn-primary btn-sm quick-ai-source-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(asset.id)}">Use as Source in AI Command</button>` : ""}
+public/control-center/pages/library.js:1884:        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Source in AI Command</button>
+public/control-center/pages/library.js:1886:        <div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">
+public/control-center/pages/library.js:1887:          <span class="library-inspector-ai-source-guide-text">Select one Library item, then click Use as Source in AI Command.</span>
+public/control-center/pages/library.js:1913:      useBtn.textContent = "Use as Source in AI Command";
+public/control-center/pages/library.js:1914:      useBtn.setAttribute("aria-label", "Use as Source in AI Command");
+public/control-center/pages/library.js:1924:        setSharedAiSource(sourceProjectName, payload);
+public/control-center/pages/library.js:1925:        setSharedAiSource("__default__", payload);
+public/control-center/pages/library.js:1928:        const bridgeReturn = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");
+public/control-center/pages/library.js:1930:          setSharedAiDrawerReturn(activeProjectName || "__default__", bridgeReturn.drawerReturnContext);
+public/control-center/pages/library.js:1931:          setSharedAiDrawerReturn("__default__", bridgeReturn.drawerReturnContext);
+public/control-center/pages/library.js:1937:        navigateTo("ai-command");
+public/control-center/pages/library.js:2028:      navigateTo("ai-command");
+public/control-center/pages/library.js:2752:      navigateTo("ai-command");
+public/control-center/pages/library.js:2762:      navigateTo("ai-command");
+public/control-center/pages/library.js:2777:      navigateTo("ai-command");
+public/control-center/pages/library.js:2791:      navigateTo("ai-command");
+public/control-center/pages/library.js:2807:      navigateTo("ai-command");
+public/control-center/pages/library.js:2839:    const activeSourceBridge = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");
+public/control-center/pages/library.js:2840:    const activeSourceMapping = activeSourceBridge?.type === "library_source_selection"
+public/control-center/pages/library.js:2847:            "Select one Library item, then click Use as Source in AI Command.",
+public/control-center/pages/library.js:2851:            { id: "back-to-ai-command", label: "Back to Drawer" },
+public/control-center/pages/library.js:2869:            navigateTo("ai-command");
+public/control-center/pages/library.js:2884:      if (activeSourceBridge && activeSourceBridge.type === "library_source_selection") {
+public/control-center/pages/workflows.js:9:  getSharedHandoff,
+public/control-center/pages/workflows.js:11:  setSharedHandoff
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:1096:  setSharedHandoff(projectName, "ai-command", handoff);
+public/control-center/pages/workflows.js:1104:  navigateTo("ai-command");
+public/control-center/pages/workflows.js:1298:        setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1397:      setSharedHandoff(projectName, "workflows", {
+public/control-center/pages/workflows.js:1555:      setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:1557:      navigateTo("task-center");
+public/control-center/pages/workflows.js:1579:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1593:      navigateTo("ai-command");
+public/control-center/pages/workflows.js:1615:      setSharedHandoff(projectName, "ai-command", {
+public/control-center/pages/workflows.js:1629:      navigateTo("ai-command");
+public/control-center/pages/workflows.js:2258:        navigateTo("ai-command");
+public/control-center/pages/workflows.js:2301:          setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/workflows.js:2305:          navigateTo("task-center");
+public/control-center/pages/workflows.js:2327:            setSharedHandoff(projectName, "task-center", handoff);
+public/control-center/pages/operations-centers.js:1:import { getSharedHandoff } from "../shared-context.js";
+public/control-center/pages/operations-centers.js:121:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:132:      context.navigateTo("ai-command");
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
