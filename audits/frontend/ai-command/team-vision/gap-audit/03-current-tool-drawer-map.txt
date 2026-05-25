@@ -1,0 +1,794 @@
+public/control-center/pages/ai-command.js:1:import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
+public/control-center/pages/ai-command.js:13:        setSharedAiDraft,
+public/control-center/pages/ai-command.js:143:		canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],
+public/control-center/pages/ai-command.js:156:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:159:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+public/control-center/pages/ai-command.js:169:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:182:		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+public/control-center/pages/ai-command.js:195:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:208:		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+public/control-center/pages/ai-command.js:234:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:247:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:260:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:273:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:285:		{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },
+public/control-center/pages/ai-command.js:290:		{ label: "Draft campaign captions", sub: "For the active campaign" },
+public/control-center/pages/ai-command.js:292:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:308:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:310:		{ label: "Check scheduled jobs", sub: "Review the current queue" },
+public/control-center/pages/ai-command.js:311:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:314:		{ label: "Draft ad concepts", sub: "For the current campaign" },
+public/control-center/pages/ai-command.js:326:		{ label: "Check claims for approval", sub: "Review all marketing claims" },
+public/control-center/pages/ai-command.js:328:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:333:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:334:		{ label: "Review execution health", sub: "Check blockers and failed jobs" },
+public/control-center/pages/ai-command.js:339:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:340:		{ label: "Check SLA risk", sub: "Flag urgency and escalation path" },
+public/control-center/pages/ai-command.js:341:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:345:		{ label: "Draft outreach", sub: "Personalized message for review" },
+public/control-center/pages/ai-command.js:347:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:355:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:359:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+public/control-center/pages/ai-command.js:363:	{ id: "draft", title: "Draft", description: "Generate guidance, copy, task, or handoff material." },
+public/control-center/pages/ai-command.js:364:	{ id: "review", title: "Review", description: "Check safety, scope, language, and destination." },
+public/control-center/pages/ai-command.js:365:	{ id: "route", title: "Route", description: "Send context to the owning workspace." },
+public/control-center/pages/ai-command.js:371:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+public/control-center/pages/ai-command.js:373:	{ id: "workflow", label: "Draft Workflow", helper: "Operating sequence" },
+public/control-center/pages/ai-command.js:374:	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+public/control-center/pages/ai-command.js:375:	{ id: "export", label: "Export", helper: "File-ready package" }
+public/control-center/pages/ai-command.js:412:		summary: "Market, evidence, competitor, and proof research will prepare source packs only."
+public/control-center/pages/ai-command.js:431:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:433:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:436:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+public/control-center/pages/ai-command.js:438:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:444:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:446:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:447:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:450:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:451:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:453:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:457:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+public/control-center/pages/ai-command.js:458:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:465:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+public/control-center/pages/ai-command.js:467:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+public/control-center/pages/ai-command.js:471:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:472:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:473:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:478:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:479:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:480:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+public/control-center/pages/ai-command.js:487:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:488:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:489:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:490:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:491:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:492:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:496:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+public/control-center/pages/ai-command.js:500:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+public/control-center/pages/ai-command.js:501:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:502:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:597:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:644:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+public/control-center/pages/ai-command.js:661:			action: "Prepare workflow from AI command",
+public/control-center/pages/ai-command.js:780:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:781:    "Draft a workflow sequence for:",
+public/control-center/pages/ai-command.js:782:    "Draft a task plan for:",
+public/control-center/pages/ai-command.js:943:			localDraftLoaded: false,
+public/control-center/pages/ai-command.js:979:function readLocalDraftMap() {
+public/control-center/pages/ai-command.js:990:function writeLocalDraftMap(map) {
+public/control-center/pages/ai-command.js:997:function loadLocalDraft(projectName) {
+public/control-center/pages/ai-command.js:999:	return asObject(readLocalDraftMap()[key]);
+public/control-center/pages/ai-command.js:1002:function saveLocalDraft(projectName, draftPayload) {
+public/control-center/pages/ai-command.js:1004:	const map = readLocalDraftMap();
+public/control-center/pages/ai-command.js:1010:	writeLocalDraftMap(map);
+public/control-center/pages/ai-command.js:1014:function hydrateSessionDraft(projectName, session) {
+public/control-center/pages/ai-command.js:1015:	if (session.localDraftLoaded) return;
+public/control-center/pages/ai-command.js:1016:	const localDraft = loadLocalDraft(projectName);
+public/control-center/pages/ai-command.js:1017:	if (localDraft.prompt) {
+public/control-center/pages/ai-command.js:1018:		session.draftMessage = asString(localDraft.prompt);
+public/control-center/pages/ai-command.js:1021:	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+public/control-center/pages/ai-command.js:1022:	if (localDraft.commandType) session.commandType = asString(localDraft.commandType);
+public/control-center/pages/ai-command.js:1023:	if (localDraft.targetType) session.targetType = asString(localDraft.targetType);
+public/control-center/pages/ai-command.js:1024:	if (localDraft.targetValue) session.targetValue = asString(localDraft.targetValue);
+public/control-center/pages/ai-command.js:1025:	if (localDraft.prompt || localDraft.updatedAt) {
+public/control-center/pages/ai-command.js:1026:		session.draftStatus = `Draft restored ${formatTime(localDraft.updatedAt)}`;
+public/control-center/pages/ai-command.js:1028:	session.localDraftLoaded = true;
+public/control-center/pages/ai-command.js:1031:function persistSessionDraft(projectName, session, hint) {
+public/control-center/pages/ai-command.js:1032:	const saved = saveLocalDraft(projectName, {
+public/control-center/pages/ai-command.js:1254:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1273:function resolveAiResponseOutputRoute(session, response = {}) {
+public/control-center/pages/ai-command.js:1279:                response.destinationRoute,
+public/control-center/pages/ai-command.js:1301:        const destinationRoute = outputType === "task"
+public/control-center/pages/ai-command.js:1303:                : asString(response.destinationRoute || destinationRouteForSpecialist(session?.modeId || "operations", outputType));
+public/control-center/pages/ai-command.js:1305:        return { outputType, destinationRoute };
+public/control-center/pages/ai-command.js:1331:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1336:		title: "Draft output",
+public/control-center/pages/ai-command.js:1340:		destinationRoute: route,
+public/control-center/pages/ai-command.js:1343:		sourcePrompt: promptSnippet,
+public/control-center/pages/ai-command.js:1360:					"Route execution draft to Campaign Studio or Workflows"
+public/control-center/pages/ai-command.js:1380:			title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",
+public/control-center/pages/ai-command.js:1402:				"Draft 3 hook variants",
+public/control-center/pages/ai-command.js:1403:				"Draft captions with CTA",
+public/control-center/pages/ai-command.js:1404:				"Prepare review notes and claims check",
+public/control-center/pages/ai-command.js:1405:				"Route to Content Studio for refinement"
+public/control-center/pages/ai-command.js:1437:				"Draft opening hook and audience angle",
+public/control-center/pages/ai-command.js:1440:				"Route to Media Studio for production planning"
+public/control-center/pages/ai-command.js:1449:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1457:				"Draft publish schedule by channel",
+public/control-center/pages/ai-command.js:1459:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1469:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+public/control-center/pages/ai-command.js:1511:			title: "Compliance Draft: Risk review checklist",
+public/control-center/pages/ai-command.js:1516:				"Prepare governance notes",
+public/control-center/pages/ai-command.js:1517:				"Route to Governance for formal review"
+public/control-center/pages/ai-command.js:1527:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1530:			replyDraft: [
+public/control-center/pages/ai-command.js:1534:			ticketDraft: [
+public/control-center/pages/ai-command.js:1546:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1558:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1561:			outreachDraft: [
+public/control-center/pages/ai-command.js:1583:				"Draft outreach for review",
+public/control-center/pages/ai-command.js:1584:				"Prepare follow-up sequence",
+public/control-center/pages/ai-command.js:1585:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1609:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1614:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1667:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1694:		`Source Prompt: ${humanizeValue(output.sourcePrompt)}`,
+public/control-center/pages/ai-command.js:1702:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+public/control-center/pages/ai-command.js:1742:        const sourceText = humanizeValue(
+public/control-center/pages/ai-command.js:1751:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+public/control-center/pages/ai-command.js:1754:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+public/control-center/pages/ai-command.js:1898:		sourceSummary: asObject(insights.source_summary || learning.source_summary),
+public/control-center/pages/ai-command.js:1999:			routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),
+public/control-center/pages/ai-command.js:2024:			weak ? `Rewrite ${extractTopMessage(weak)} with a stronger hook and better platform fit.` : null,
+public/control-center/pages/ai-command.js:2030:			"Prepare next batch with performance-led hooks instead of generic posting volume."
+public/control-center/pages/ai-command.js:2033:			routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),
+public/control-center/pages/ai-command.js:2059:			lowCtr ? `Improve title and SERP message for ${extractTopMessage(lowCtr)}.` : "Connect Search Console to unlock CTR analysis.",
+public/control-center/pages/ai-command.js:2065:			lowCtr ? `Rewrite metadata for ${extractTopMessage(lowCtr)}.` : "Audit page titles on highest-priority pages.",
+public/control-center/pages/ai-command.js:2150:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+public/control-center/pages/ai-command.js:2153:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+public/control-center/pages/ai-command.js:2155:	if (/reconnect|missing tools|missing integrations/.test(query)) {
+public/control-center/pages/ai-command.js:2167:		routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));
+public/control-center/pages/ai-command.js:2170:	if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));
+public/control-center/pages/ai-command.js:2283:	setSharedAiDraft(projectName, {
+public/control-center/pages/ai-command.js:2426:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+public/control-center/pages/ai-command.js:2427:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+public/control-center/pages/ai-command.js:2428:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+public/control-center/pages/ai-command.js:2431:		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+public/control-center/pages/ai-command.js:2432:		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+public/control-center/pages/ai-command.js:2433:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+public/control-center/pages/ai-command.js:2441:		route: fallbackRoute,
+public/control-center/pages/ai-command.js:2451:	const destinationRoute = normalizeAiInboundSourcePage(
+public/control-center/pages/ai-command.js:2452:		preview.destinationRoute ||
+public/control-center/pages/ai-command.js:2455:		normalized.sourcePage ||
+public/control-center/pages/ai-command.js:2463:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2465:		destinationRoute,
+public/control-center/pages/ai-command.js:2468:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+public/control-center/pages/ai-command.js:2501:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2510:	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+public/control-center/pages/ai-command.js:2511:		payload.source_page,
+public/control-center/pages/ai-command.js:2512:		payload.sourcePage,
+public/control-center/pages/ai-command.js:2513:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2514:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2515:		draftContext.source_page,
+public/control-center/pages/ai-command.js:2516:		draftContext.sourcePage
+public/control-center/pages/ai-command.js:2518:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+public/control-center/pages/ai-command.js:2522:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+public/control-center/pages/ai-command.js:2541:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2548:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2550:	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+public/control-center/pages/ai-command.js:2555:		sourcePage,
+public/control-center/pages/ai-command.js:2556:		sourceLabel
+public/control-center/pages/ai-command.js:2567:		sourcePage,
+public/control-center/pages/ai-command.js:2568:		sourceLabel,
+public/control-center/pages/ai-command.js:2577:			source_page: sourcePage,
+public/control-center/pages/ai-command.js:2578:			sourcePage
+public/control-center/pages/ai-command.js:2600:		sourcePage: normalized.sourcePage,
+public/control-center/pages/ai-command.js:2601:		sourceLabel: normalized.sourceLabel,
+public/control-center/pages/ai-command.js:2619:	setSharedAiDraft(projectName, {
+public/control-center/pages/ai-command.js:2632:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2640:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:2649:	source,
+public/control-center/pages/ai-command.js:2666:			source,
+public/control-center/pages/ai-command.js:2690:			nextActions: ["Check AI provider configuration and retry."],
+public/control-center/pages/ai-command.js:2706:		source
+public/control-center/pages/ai-command.js:2714:		source: "durable-ai-response",
+public/control-center/pages/ai-command.js:2723:		source,
+public/control-center/pages/ai-command.js:2924:				<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>
+public/control-center/pages/ai-command.js:3294:        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+public/control-center/pages/ai-command.js:3316:        preview.sourcePrompt = context.prompt || workPrompt;
+public/control-center/pages/ai-command.js:3490:function getToolOutputTypeLabel(tool) {
+public/control-center/pages/ai-command.js:3492:		guidance: "Draft",
+public/control-center/pages/ai-command.js:3493:		task: "Task Draft",
+public/control-center/pages/ai-command.js:3494:		workflow: "Draft Workflow",
+public/control-center/pages/ai-command.js:3495:		handoff: "Prepare Handoff",
+public/control-center/pages/ai-command.js:3496:		media: "Draft"
+public/control-center/pages/ai-command.js:3498:	if (labels[asString(tool.intent)]) return labels[asString(tool.intent)];
+public/control-center/pages/ai-command.js:3499:	const firstOutput = asArray(tool.outputTypes)[0];
+public/control-center/pages/ai-command.js:3500:	return firstOutput ? titleCase(asString(firstOutput).replace(/[_-]+/g, " ")) : "Draft";
+public/control-center/pages/ai-command.js:3503:function getToolDestinationRoute(tool, session) {
+public/control-center/pages/ai-command.js:3504:	if (tool.route) return asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:3505:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3506:	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+public/control-center/pages/ai-command.js:3507:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3510:function getToolExecutionStatusLabel(tool) {
+public/control-center/pages/ai-command.js:3511:	if (tool.safetyLevel === "confirmation_required") return "Destination confirmation required";
+public/control-center/pages/ai-command.js:3512:	if (tool.actionType === "source_required") return "Source required";
+public/control-center/pages/ai-command.js:3516:function getToolSafeActionLabel(tool) {
+public/control-center/pages/ai-command.js:3517:	if (tool.intent === "workflow") return "Draft";
+public/control-center/pages/ai-command.js:3518:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3519:	if (tool.intent === "task") return "Draft";
+public/control-center/pages/ai-command.js:3520:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3521:	return "Prepare";
+public/control-center/pages/ai-command.js:3524:function summarizeToolPurpose(tool) {
+public/control-center/pages/ai-command.js:3525:	const template = asString(tool.template || "")
+public/control-center/pages/ai-command.js:3530:	if (firstSentence) return firstSentence.replace(/^Prepare\s+/i, "Prepare ").slice(0, 120);
+public/control-center/pages/ai-command.js:3531:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3633:			<span>${escapeHtml(safeBridgeStatus.available ? "Executive workflow: strategy, creative, compliance, publishing, customer/sales, then operations." : "Preview tools remain available while chat is guarded.")}</span>
+public/control-center/pages/ai-command.js:3724:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+public/control-center/pages/ai-command.js:3782:function getCanonicalToolIntent(tool = {}) {
+public/control-center/pages/ai-command.js:3783:	const id = asString(tool.id);
+public/control-center/pages/ai-command.js:3784:	const outputs = asArray(tool.outputTypes).join(" ");
+public/control-center/pages/ai-command.js:3785:	const haystack = `${id} ${outputs} ${asString(tool.label)}`.toLowerCase();
+public/control-center/pages/ai-command.js:3792:function getCanonicalToolRoute(tool = {}, session) {
+public/control-center/pages/ai-command.js:3793:	const destinations = asArray(tool.destinations).filter(Boolean);
+public/control-center/pages/ai-command.js:3796:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3799:function canonicalToolNeedsSelectedSource(tool = {}) {
+public/control-center/pages/ai-command.js:3800:	const sourceMeta = asArray(tool.sourceTypes).join(" ");
+public/control-center/pages/ai-command.js:3801:	return tool.actionType === "source_required" || /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(sourceMeta);
+public/control-center/pages/ai-command.js:3804:function normalizeCanonicalToolForPanel(tool = {}, session) {
+public/control-center/pages/ai-command.js:3806:		...tool,
+public/control-center/pages/ai-command.js:3808:		intent: getCanonicalToolIntent(tool),
+public/control-center/pages/ai-command.js:3809:		route: getCanonicalToolRoute(tool, session),
+public/control-center/pages/ai-command.js:3810:		requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+public/control-center/pages/ai-command.js:3811:		template: asString(tool.template || "Prepare a review-ready draft for {projectName}.")
+public/control-center/pages/ai-command.js:3816:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3818:		specialistId: toolModeId,
+public/control-center/pages/ai-command.js:3821:	}).map((tool) => normalizeCanonicalToolForPanel(tool, session));
+public/control-center/pages/ai-command.js:3827:		{ id: "preview", label: "Preview", hint: "Draft output" },
+public/control-center/pages/ai-command.js:3828:		{ id: "tools", label: "Tools", hint: "Role actions" },
+public/control-center/pages/ai-command.js:3852:	const tools = getPhase35ToolSet(session);
+public/control-center/pages/ai-command.js:3857:		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
+public/control-center/pages/ai-command.js:3858:			<div class="aicmd-v2-tools-head">
+public/control-center/pages/ai-command.js:3860:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Canonical Tools</h3>
+public/control-center/pages/ai-command.js:3861:					<span class="aicmd-v2-tools-subtitle">Same tool model as the Smart Dock. These prepare drafts only and do not execute backend operations.</span>
+public/control-center/pages/ai-command.js:3863:				<span class="aicmd-v2-tools-count">${tools.length} tools</span>
+public/control-center/pages/ai-command.js:3865:			<div class="aicmd-v2-tools-grid aicmd-room-tools-grid">
+public/control-center/pages/ai-command.js:3866:				${tools.map((tool) => {
+public/control-center/pages/ai-command.js:3867:					const outputLabel = getToolOutputTypeLabel(tool);
+public/control-center/pages/ai-command.js:3868:					const actionLabel = getToolSafeActionLabel(tool);
+public/control-center/pages/ai-command.js:3869:					const purpose = summarizeToolPurpose(tool);
+public/control-center/pages/ai-command.js:3870:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+public/control-center/pages/ai-command.js:3871:					const status = getToolExecutionStatusLabel(tool);
+public/control-center/pages/ai-command.js:3875:							class="aicmd-v2-tool-btn aicmd-room-tool-card"
+public/control-center/pages/ai-command.js:3876:							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+public/control-center/pages/ai-command.js:3879:							<span class="aicmd-room-tool-topline">
+public/control-center/pages/ai-command.js:3880:								<strong class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</strong>
+public/control-center/pages/ai-command.js:3881:								<span class="aicmd-room-tool-action">${escapeHtml(actionLabel)}</span>
+public/control-center/pages/ai-command.js:3883:							<span class="aicmd-room-tool-purpose">${escapeHtml(purpose)}</span>
+public/control-center/pages/ai-command.js:3884:							<span class="aicmd-v2-tool-meta">
+public/control-center/pages/ai-command.js:3886:								<span>Route: ${escapeHtml(destination)}</span>
+public/control-center/pages/ai-command.js:3893:			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}</div>` : ""}
+public/control-center/pages/ai-command.js:3939:		const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
+public/control-center/pages/ai-command.js:3962:					<div class="aicmd-chatgpt-toolbar" aria-label="Composer controls">
+public/control-center/pages/ai-command.js:3963:						<div class="aicmd-chatgpt-tools-left">
+public/control-center/pages/ai-command.js:3966:						<div class="aicmd-chatgpt-tools-right">
+public/control-center/pages/ai-command.js:4006:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4012:		? "Send Draft to Content Studio"
+public/control-center/pages/ai-command.js:4014:			? "Route Draft to Publishing"
+public/control-center/pages/ai-command.js:4015:			: `Route Draft to ${destination}`;
+public/control-center/pages/ai-command.js:4025:					<p class="aicmd-v2-preview-subtitle">${escapeHtml(humanizeValue(preview.sourcePrompt, "Review the generated specialist output."))}</p>
+public/control-center/pages/ai-command.js:4038:				<p class="aicmd-v2-preview-what-heading">Prepared output</p>
+public/control-center/pages/ai-command.js:4039:				<h4 class="aicmd-v2-preview-output-title">${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h4>
+public/control-center/pages/ai-command.js:4074:				<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>
+public/control-center/pages/ai-command.js:4089:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4095:		? "Send Draft to Content Studio"
+public/control-center/pages/ai-command.js:4097:			? "Route Draft to Publishing"
+public/control-center/pages/ai-command.js:4098:			: `Route Draft to ${destination}`;
+public/control-center/pages/ai-command.js:4108:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4144:					<h3>${escapeHtml(!humanizeValue(preview.title, "") || humanizeValue(preview.title, "").toLowerCase() === "chat reply" ? `${outputLabel} result` : humanizeValue(preview.title, "Draft output"))}</h3>
+public/control-center/pages/ai-command.js:4174:                                        <span>Choose Draft, Task, Draft Workflow, or Prepare Handoff, then create a preview from the conversation.</span>
+public/control-center/pages/ai-command.js:4187:                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Draft Workflow, or Prepare Handoff from the conversation first.</div>
+public/control-center/pages/ai-command.js:4197:	const connectedTools = bridgeStatus.available ? "Guidance bridge" : "Preview tools";
+public/control-center/pages/ai-command.js:4206:			<div><span>Connected tools</span><strong>${escapeHtml(connectedTools)}</strong></div>
+public/control-center/pages/ai-command.js:4228:				<li><span>Video brief / script draft</span><strong class="is-draft-ready">Draft-ready — no generation executed</strong></li>
+public/control-center/pages/ai-command.js:4230:				<li><span>Voice script preparation</span><strong class="is-draft-ready">Draft-ready — script only, no audio</strong></li>
+public/control-center/pages/ai-command.js:4276:                : "Preview-safe. Chat tools require the protected AI chat route.";
+public/control-center/pages/ai-command.js:4279:                : "AI chat route is not connected yet. Preview tools remain available.";
+public/control-center/pages/ai-command.js:4283:                bridgeContext.source &&
+public/control-center/pages/ai-command.js:4291:        }).map((tool) => asString(tool.label)).filter(Boolean);
+public/control-center/pages/ai-command.js:4296:        const nextAction = asString(nextPrompts[0]?.label || "Prepare guidance");
+public/control-center/pages/ai-command.js:4297:        const toolHint = selectedToolHints.length ? selectedToolHints.join(", ") : "Draft and route guidance";
+public/control-center/pages/ai-command.js:4300:        const inboundSourceLabel = asString(inbound.sourceLabel || "");
+public/control-center/pages/ai-command.js:4375:                                        <strong>${escapeHtml(toolHint)}</strong>
+public/control-center/pages/ai-command.js:4418:                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
+public/control-center/pages/ai-command.js:4485:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:4486:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));
+public/control-center/pages/ai-command.js:4504:			{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },
+public/control-center/pages/ai-command.js:4513:				{ label: "Outreach", value: "Draft only", present: true, scoped: true },
+public/control-center/pages/ai-command.js:4551:					<span>Drafts are not execution — prepared content stays local until you act on it.</span>
+public/control-center/pages/ai-command.js:4578:			title: preview.title || "Draft preview",
+public/control-center/pages/ai-command.js:4579:			body: preview.sourcePrompt || preview.summary || "",
+public/control-center/pages/ai-command.js:4609:export const aiCommandRoute = {
+public/control-center/pages/ai-command.js:4640:		hydrateSessionDraft(sessionKey, session);
+public/control-center/pages/ai-command.js:4671:					source: "Home",
+public/control-center/pages/ai-command.js:4680:			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+public/control-center/pages/ai-command.js:4706:		// Final Room v1 renders the conversation, composer, output workspace, and tools directly.
+public/control-center/pages/ai-command.js:4766:			persistSessionDraft(sessionKey, session, "Draft saved locally");
+public/control-center/pages/ai-command.js:4767:			aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4791:		                persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+public/control-center/pages/ai-command.js:4793:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4827:		                persistSessionDraft(sessionKey, session, "New session started");
+public/control-center/pages/ai-command.js:4829:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4849:				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
+public/control-center/pages/ai-command.js:4850:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4859:                                const existingDraft = asString(session.draftMessage).trim();
+public/control-center/pages/ai-command.js:4860:                                const shouldReplaceRoleDraft = Boolean(previousBridgeContext.source) ||
+public/control-center/pages/ai-command.js:4861:                                        /^Act as the\s+/i.test(existingDraft);
+public/control-center/pages/ai-command.js:4868:                                if (shouldReplaceRoleDraft) {
+public/control-center/pages/ai-command.js:4874:                                persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
+public/control-center/pages/ai-command.js:4875:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4885:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+public/control-center/pages/ai-command.js:4886:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4897:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+public/control-center/pages/ai-command.js:4898:				updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
+public/control-center/pages/ai-command.js:4909:				persistSessionDraft(sessionKey, session, "Quick action loaded");
+public/control-center/pages/ai-command.js:4922:                        persistSessionDraft,
+public/control-center/pages/ai-command.js:4932:				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+public/control-center/pages/ai-command.js:4976:						persistSessionDraft(sessionKey, session, "Voice input captured");
+public/control-center/pages/ai-command.js:5006:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5025:		                        source: "ai-command-chat"
+public/control-center/pages/ai-command.js:5042:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5065:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:5091:		                                source: "ai-chat-response",
+public/control-center/pages/ai-command.js:5107:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+public/control-center/pages/ai-command.js:5113:                                                destinationRoute: asString(routeSuggestion?.route)
+public/control-center/pages/ai-command.js:5129:		                                outputType: responseRoute.outputType,
+public/control-center/pages/ai-command.js:5131:		                                destinationRoute: responseRoute.destinationRoute
+public/control-center/pages/ai-command.js:5148:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5163:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5171:                const prepareBtn = $("aicmdV2PrepareBtn");
+public/control-center/pages/ai-command.js:5182:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+public/control-center/pages/ai-command.js:5186:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5192:                const draftTaskBtn = $("aicmdV2DraftTaskBtn");
+public/control-center/pages/ai-command.js:5198:                                        ? `Draft a task plan for: ${value}`
+public/control-center/pages/ai-command.js:5199:                                        : `Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.`;
+public/control-center/pages/ai-command.js:5207:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+public/control-center/pages/ai-command.js:5210:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5215:                const draftWorkflowBtn = $("aicmdV2DraftWorkflowBtn");
+public/control-center/pages/ai-command.js:5221:                                        ? `Draft a workflow sequence for: ${value}`
+public/control-center/pages/ai-command.js:5222:                                        : `Draft a workflow sequence for ${projectName || "this project"} with ${spec.label}.`;
+public/control-center/pages/ai-command.js:5230:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+public/control-center/pages/ai-command.js:5233:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5245:                                        ? `Prepare a handoff summary for: ${value}`
+public/control-center/pages/ai-command.js:5246:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+public/control-center/pages/ai-command.js:5254:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+public/control-center/pages/ai-command.js:5257:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5260:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+public/control-center/pages/ai-command.js:5261:		toolButtons.forEach((btn) => {
+public/control-center/pages/ai-command.js:5263:				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+public/control-center/pages/ai-command.js:5264:				if (!toolId) return;
+public/control-center/pages/ai-command.js:5266:				const tool = getPhase35ToolSet(session).find((entry) => entry.id === toolId);
+public/control-center/pages/ai-command.js:5267:				if (!tool) return;
+public/control-center/pages/ai-command.js:5269:				if (tool.action === "route") {
+public/control-center/pages/ai-command.js:5270:					const destination = asString(tool.route || "workflows");
+public/control-center/pages/ai-command.js:5277:				if (tool.requiresSelectedSource && !selectedLibrarySource?.name) {
+public/control-center/pages/ai-command.js:5278:					const message = "This tool needs a source. Choose from Library or change the source type before continuing.";
+public/control-center/pages/ai-command.js:5284:				const preparedPrompt = applyTokenTemplate(tool.template, {
+public/control-center/pages/ai-command.js:5292:				if (tool.intent === "task") {
+public/control-center/pages/ai-command.js:5294:				} else if (tool.intent === "workflow") {
+public/control-center/pages/ai-command.js:5296:				} else if (tool.intent === "handoff") {
+public/control-center/pages/ai-command.js:5302:				showMessage?.(`${tool.label} prepared as local preview.`);
+public/control-center/pages/ai-command.js:5311:				persistSessionDraft(sessionKey, session, "Draft saved locally");
+public/control-center/pages/ai-command.js:5327:				persistSessionDraft(sessionKey, session, "Draft cleared");
+public/control-center/pages/ai-command.js:5370:				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");
+public/control-center/pages/ai-command.js:5416:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:5417:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5425:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+public/control-center/pages/ai-command.js:5426:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:5435:				setSharedAiDraft(projectName || "__default__", draftContext);
+public/control-center/pages/ai-command.js:5438:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5510:				persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+public/control-center/pages/ai-command.js:5519:				const destination = asString(output.destinationRoute || "").trim();
+public/control-center/pages/ai-command.js:5527:					source_page: "ai-command",
+public/control-center/pages/ai-command.js:5532:						prompt: output.sourcePrompt,
+public/control-center/pages/ai-command.js:5536:							lastCommand: output.sourcePrompt || "",
+public/control-center/pages/ai-command.js:5544:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:5546:				showMessage?.("Draft context prepared for routing. Review before saving or executing.");
+public/control-center/pages/ai-command.js:5578:				const utterance = new SpeechSynthesisUtterance(previewText || "Draft preview ready.");
+public/control-center/pages/ai-command.js:5589:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5603:				rerender: () => aiCommandRoute.render(context)
+public/control-center/pages/ai-command/tool-dock.js:50:  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:54:  if (returnContext.toolId) {
+public/control-center/pages/ai-command/tool-dock.js:55:    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+public/control-center/pages/ai-command/tool-dock.js:59:    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+public/control-center/pages/ai-command/tool-dock.js:60:      || root.querySelector("[data-aicmd-tool-dock]");
+public/control-center/pages/ai-command/tool-dock.js:67:  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:73:  const msg = document.querySelector("[data-aicmd-tool-drawer-status]");
+public/control-center/pages/ai-command/tool-dock.js:77:      : "Returned to drawer. No source selected.";
+public/control-center/pages/ai-command/tool-dock.js:91:  toolId = "",
+public/control-center/pages/ai-command/tool-dock.js:93:  sourceType = "",
+public/control-center/pages/ai-command/tool-dock.js:104:    toolId,
+public/control-center/pages/ai-command/tool-dock.js:106:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:113:// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+public/control-center/pages/ai-command/tool-dock.js:118:  toolId = "",
+public/control-center/pages/ai-command/tool-dock.js:120:  sourceType = "",
+public/control-center/pages/ai-command/tool-dock.js:130:    toolId,
+public/control-center/pages/ai-command/tool-dock.js:132:    sourceType,
+public/control-center/pages/ai-command/tool-dock.js:136:  // Also set library source bridge context if needed (existing logic)
+public/control-center/pages/ai-command/tool-dock.js:140:function formatSharedAiSource(source = {}) {
+public/control-center/pages/ai-command/tool-dock.js:141:  if (!source || !source.name) return null;
+public/control-center/pages/ai-command/tool-dock.js:142:  const name = source.name || "(no name)";
+public/control-center/pages/ai-command/tool-dock.js:143:  const type = source.asset_type || source.type || "asset";
+public/control-center/pages/ai-command/tool-dock.js:144:  const path = source.file_path || source.filename || source.fileName || "";
+public/control-center/pages/ai-command/tool-dock.js:168:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:169:  if (!source?.name) return "";
+public/control-center/pages/ai-command/tool-dock.js:171:  const name = source.name || source.filename || source.fileName || "Selected Library source";
+public/control-center/pages/ai-command/tool-dock.js:172:  const type = source.asset_type || source.type || source.source_type || "Library asset";
+public/control-center/pages/ai-command/tool-dock.js:173:  const sourceId = source.asset_id || source.id || source.mutation_id || "";
+public/control-center/pages/ai-command/tool-dock.js:174:  const path = source.file_path || source.path || source.filename || source.fileName || "";
+public/control-center/pages/ai-command/tool-dock.js:175:  const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");
+public/control-center/pages/ai-command/tool-dock.js:176:  const sourceOfTruth = typeof source.source_of_truth === "boolean"
+public/control-center/pages/ai-command/tool-dock.js:177:    ? (source.source_of_truth ? "yes" : "no")
+public/control-center/pages/ai-command/tool-dock.js:178:    : (source.source_of_truth || "");
+public/control-center/pages/ai-command/tool-dock.js:181:    "Selected Library source context:",
+public/control-center/pages/ai-command/tool-dock.js:186:  if (sourceId) lines.push(`- Source id: ${compactSourceReference(sourceId, 80)}.`);
+public/control-center/pages/ai-command/tool-dock.js:188:  if (sourceOfTruth) lines.push(`- Source-of-truth flag: ${sourceOfTruth}.`);
+public/control-center/pages/ai-command/tool-dock.js:191:  lines.push("Use the selected Library source as context. Do not invent unsupported claims.");
+public/control-center/pages/ai-command/tool-dock.js:196:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+public/control-center/pages/ai-command/tool-dock.js:203:function sourceMetadataNeedsLibrarySource(rawValue = "") {
+public/control-center/pages/ai-command/tool-dock.js:204:  return /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(String(rawValue || ""));
+public/control-center/pages/ai-command/tool-dock.js:208:  return drawer?.dataset?.sourceRequired === "true";
+public/control-center/pages/ai-command/tool-dock.js:217:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:218:  if (source?.name) {
+public/control-center/pages/ai-command/tool-dock.js:225:    "This tool needs a source. Choose from Library or change the source type before continuing."
+public/control-center/pages/ai-command/tool-dock.js:232:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:233:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+public/control-center/pages/ai-command/tool-dock.js:234:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:235:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:237:  if (!source || !source.name) {
+public/control-center/pages/ai-command/tool-dock.js:239:      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:241:    if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:242:      sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+public/control-center/pages/ai-command/tool-dock.js:248:  // Render compact selected source card
+public/control-center/pages/ai-command/tool-dock.js:249:  const { name, type, path } = formatSharedAiSource(source);
+public/control-center/pages/ai-command/tool-dock.js:252:      <div class=\"mhos-tool-drawer-source-card\">
+public/control-center/pages/ai-command/tool-dock.js:253:        <div class=\"mhos-tool-drawer-source-eyebrow\">Selected Source</div>
+public/control-center/pages/ai-command/tool-dock.js:254:        <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
+public/control-center/pages/ai-command/tool-dock.js:255:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library</div>
+public/control-center/pages/ai-command/tool-dock.js:256:        ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
+public/control-center/pages/ai-command/tool-dock.js:257:        <div class=\"mhos-tool-drawer-source-actions\">
+public/control-center/pages/ai-command/tool-dock.js:258:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change Source</button>
+public/control-center/pages/ai-command/tool-dock.js:259:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove</button>
+public/control-center/pages/ai-command/tool-dock.js:266:  if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:267:    sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+public/control-center/pages/ai-command/tool-dock.js:271:  if (sourceSelect) {
+public/control-center/pages/ai-command/tool-dock.js:272:    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+public/control-center/pages/ai-command/tool-dock.js:274:      return /library|source|asset|brand|product/i.test(value);
+public/control-center/pages/ai-command/tool-dock.js:276:    if (libraryOption) sourceSelect.value = libraryOption.value;
+public/control-center/pages/ai-command/tool-dock.js:281:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+public/control-center/pages/ai-command/tool-dock.js:284:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+public/control-center/pages/ai-command/tool-dock.js:287:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+public/control-center/pages/ai-command/tool-dock.js:292:        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:293:        if (sourceInput) sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+public/control-center/pages/ai-command/tool-dock.js:294:        if (sourceSelect) sourceSelect.value = "";
+public/control-center/pages/ai-command/tool-dock.js:306:    label: "Rewrite",
+public/control-center/pages/ai-command/tool-dock.js:308:    template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."
+public/control-center/pages/ai-command/tool-dock.js:313:    label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:315:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:320:    label: "Improve",
+public/control-center/pages/ai-command/tool-dock.js:322:    template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."
+public/control-center/pages/ai-command/tool-dock.js:335:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:337:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:348:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:350:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:361:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:363:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:374:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:376:      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:387:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:389:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:400:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:402:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:416:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:418:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:420:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:425:      label: "Rewrite",
+public/control-center/pages/ai-command/tool-dock.js:429:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:431:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:433:      template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
+public/control-center/pages/ai-command/tool-dock.js:438:      label: "Translate",
+public/control-center/pages/ai-command/tool-dock.js:442:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:444:      sourceTypes: ["composer_text", "selected_text", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:446:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:451:      label: "Improve",
+public/control-center/pages/ai-command/tool-dock.js:455:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:457:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:459:      template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."
+public/control-center/pages/ai-command/tool-dock.js:464:      label: "Check",
+public/control-center/pages/ai-command/tool-dock.js:468:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:470:      sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:472:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:475:      id: "sources",
+public/control-center/pages/ai-command/tool-dock.js:479:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:481:      frontendOwnerPage: "library",
+public/control-center/pages/ai-command/tool-dock.js:483:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:484:      outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],
+public/control-center/pages/ai-command/tool-dock.js:485:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:494:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:496:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:498:      template: "Prepare SEO support for {projectName}. Ask for topic, market, language, and audience if missing. Create keyword ideas, search intent, meta title/description, blog outline, FAQ ideas, internal link ideas, and content gap notes."
+public/control-center/pages/ai-command/tool-dock.js:507:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:509:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:511:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:516:      label: "Prepare Send-Off",
+public/control-center/pages/ai-command/tool-dock.js:517:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:520:      frontendOwnerPage: "ai-command",
+public/control-center/pages/ai-command/tool-dock.js:522:      sourceTypes: ["current_draft", "preview", "current_chat"],
+public/control-center/pages/ai-command/tool-dock.js:524:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:535:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:537:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:539:      template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:548:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:550:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:561:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:563:      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:572:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:574:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:576:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:587:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:589:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:596:      label: "Brand Check",
+public/control-center/pages/ai-command/tool-dock.js:598:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:600:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:602:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:616:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:618:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:629:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:631:      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:642:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:644:      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:655:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:657:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:659:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:668:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:670:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:680:      label: "Publish Check",
+public/control-center/pages/ai-command/tool-dock.js:684:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:686:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:688:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:697:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:699:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:701:      template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."
+public/control-center/pages/ai-command/tool-dock.js:706:      label: "Draft Schedule",
+public/control-center/pages/ai-command/tool-dock.js:710:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:712:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:714:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:723:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:725:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:734:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:736:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:738:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:740:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+public/control-center/pages/ai-command/tool-dock.js:752:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:754:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:762:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:765:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:767:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:769:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:778:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:780:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:791:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:793:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:802:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:804:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:806:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:820:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:822:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:831:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:833:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:835:      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:846:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:848:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:857:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:859:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:861:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:872:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:874:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:885:      badge: "Check",
+public/control-center/pages/ai-command/tool-dock.js:886:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:888:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:890:      sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:897:      label: "Safe Rewrite",
+public/control-center/pages/ai-command/tool-dock.js:901:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:903:      sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:905:      template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."
+public/control-center/pages/ai-command/tool-dock.js:912:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:914:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:916:      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:925:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:927:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:929:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:938:      actionType: "source_required",
+public/control-center/pages/ai-command/tool-dock.js:940:      frontendOwnerPage: "governance",
+public/control-center/pages/ai-command/tool-dock.js:942:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:944:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:952:      label: "Task Plan",
+public/control-center/pages/ai-command/tool-dock.js:956:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:958:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:965:      label: "Draft Workflow",
+public/control-center/pages/ai-command/tool-dock.js:966:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:969:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:971:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:973:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+public/control-center/pages/ai-command/tool-dock.js:978:      label: "Prepare Handoff",
+public/control-center/pages/ai-command/tool-dock.js:979:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:982:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:984:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:986:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+public/control-center/pages/ai-command/tool-dock.js:995:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:997:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1004:      label: "Checklist",
+public/control-center/pages/ai-command/tool-dock.js:1008:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1010:      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1021:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:1024:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1026:      sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1028:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1033:      label: "Draft Ticket",
+public/control-center/pages/ai-command/tool-dock.js:1034:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:1037:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1039:      sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1041:      template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."
+public/control-center/pages/ai-command/tool-dock.js:1050:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1052:      sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1063:      frontendOwnerPage: "operations-centers",
+public/control-center/pages/ai-command/tool-dock.js:1065:      sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1081:      sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1092:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1094:      sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1096:      template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
+public/control-center/pages/ai-command/tool-dock.js:1105:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1107:      sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1109:      template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
+public/control-center/pages/ai-command/tool-dock.js:1118:      frontendOwnerPage: "workflows",
+public/control-center/pages/ai-command/tool-dock.js:1120:      sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1132:  const tools = teamMode === "team"
+public/control-center/pages/ai-command/tool-dock.js:1140:  return Number.isFinite(limit) ? tools.slice(0, limit) : tools.slice();
+public/control-center/pages/ai-command/tool-dock.js:1166:function getToolMetaList(tool = {}, key = "", fallback = []) {
+public/control-center/pages/ai-command/tool-dock.js:1167:  const value = tool?.[key];
+public/control-center/pages/ai-command/tool-dock.js:1173:    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+public/control-center/pages/ai-command/tool-dock.js:1174:      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+public/control-center/pages/ai-command/tool-dock.js:1175:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="Smart tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1176:        <div class="mhos-tool-drawer-head">
+public/control-center/pages/ai-command/tool-dock.js:1177:          <div class="mhos-tool-drawer-title-block">
+public/control-center/pages/ai-command/tool-dock.js:1178:            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+public/control-center/pages/ai-command/tool-dock.js:1180:              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Smart tool</p>
+public/control-center/pages/ai-command/tool-dock.js:1181:              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+public/control-center/pages/ai-command/tool-dock.js:1184:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+public/control-center/pages/ai-command/tool-dock.js:1187:        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+public/control-center/pages/ai-command/tool-dock.js:1191:        <div class="mhos-tool-drawer-grid">
+public/control-center/pages/ai-command/tool-dock.js:1192:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1193:            <span class="mhos-tool-drawer-section-label">1. Output type</span>
+public/control-center/pages/ai-command/tool-dock.js:1194:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1197:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1198:            <span class="mhos-tool-drawer-section-label">2. Source / input</span>
+public/control-center/pages/ai-command/tool-dock.js:1199:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1200:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+public/control-center/pages/ai-command/tool-dock.js:1201:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+public/control-center/pages/ai-command/tool-dock.js:1204:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1205:            <span class="mhos-tool-drawer-section-label">3. Destination</span>
+public/control-center/pages/ai-command/tool-dock.js:1206:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1209:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1210:            <span class="mhos-tool-drawer-section-label">4. Options</span>
+public/control-center/pages/ai-command/tool-dock.js:1211:            <div class="mhos-tool-drawer-two-col">
+public/control-center/pages/ai-command/tool-dock.js:1214:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+public/control-center/pages/ai-command/tool-dock.js:1223:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+public/control-center/pages/ai-command/tool-dock.js:1234:            <label class="mhos-tool-drawer-field">
+public/control-center/pages/ai-command/tool-dock.js:1237:                class="mhos-tool-drawer-input"
+public/control-center/pages/ai-command/tool-dock.js:1238:                data-aicmd-tool-drawer-source-details
+public/control-center/pages/ai-command/tool-dock.js:1244:            <label class="mhos-tool-drawer-field">
+public/control-center/pages/ai-command/tool-dock.js:1247:                class="mhos-tool-drawer-textarea"
+public/control-center/pages/ai-command/tool-dock.js:1248:                data-aicmd-tool-drawer-extra-brief
+public/control-center/pages/ai-command/tool-dock.js:1255:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1256:            <span class="mhos-tool-drawer-section-label">Safety</span>
+public/control-center/pages/ai-command/tool-dock.js:1257:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+public/control-center/pages/ai-command/tool-dock.js:1261:        <div class="mhos-tool-drawer-summary">
+public/control-center/pages/ai-command/tool-dock.js:1263:          <p data-aicmd-tool-drawer-summary>Choose output, source, destination, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1266:        <div class="mhos-tool-drawer-note">
+public/control-center/pages/ai-command/tool-dock.js:1270:        <div class="mhos-tool-drawer-actions">
+public/control-center/pages/ai-command/tool-dock.js:1271:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
+public/control-center/pages/ai-command/tool-dock.js:1272:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+public/control-center/pages/ai-command/tool-dock.js:1273:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+public/control-center/pages/ai-command/tool-dock.js:1284:  const tools = getDockTools({ specialistId, teamMode });
+public/control-center/pages/ai-command/tool-dock.js:1285:  const label = teamMode === "team" ? "Team quick tools" : "Specialist quick tools";
+public/control-center/pages/ai-command/tool-dock.js:1288:    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+public/control-center/pages/ai-command/tool-dock.js:1289:      <div class="mhos-tool-dock-head">
+public/control-center/pages/ai-command/tool-dock.js:1290:        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1291:        <span class="mhos-tool-dock-copy">Smart tools · review before action</span>
+public/control-center/pages/ai-command/tool-dock.js:1293:      <div class="mhos-tool-dock-list">
+public/control-center/pages/ai-command/tool-dock.js:1294:        ${tools.map((tool) => `
+public/control-center/pages/ai-command/tool-dock.js:1297:            class="mhos-tool-dock-item"
+public/control-center/pages/ai-command/tool-dock.js:1298:            data-aicmd-tool-dock="${safe(tool.id)}"
+public/control-center/pages/ai-command/tool-dock.js:1299:            data-aicmd-tool-dock-label="${safe(tool.label)}"
+public/control-center/pages/ai-command/tool-dock.js:1300:            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+public/control-center/pages/ai-command/tool-dock.js:1301:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+public/control-center/pages/ai-command/tool-dock.js:1302:            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+public/control-center/pages/ai-command/tool-dock.js:1303:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1304:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1305:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1306:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1307:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1308:            data-aicmd-tool-dock-template="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1309:            title="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1311:            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1312:            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1313:            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1410:    "- Do not invent certifications, claims, ingredients, prices, guarantees, or statistics without source evidence."
+public/control-center/pages/ai-command/tool-dock.js:1415:  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+public/control-center/pages/ai-command/tool-dock.js:1416:  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+public/control-center/pages/ai-command/tool-dock.js:1417:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+public/control-center/pages/ai-command/tool-dock.js:1418:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+public/control-center/pages/ai-command/tool-dock.js:1419:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+public/control-center/pages/ai-command/tool-dock.js:1420:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+public/control-center/pages/ai-command/tool-dock.js:1421:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+public/control-center/pages/ai-command/tool-dock.js:1422:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1423:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+public/control-center/pages/ai-command/tool-dock.js:1425:  const sourceInstruction = sourceDetails
+public/control-center/pages/ai-command/tool-dock.js:1426:    ? `${source}. Source details: ${sourceDetails}.`
+public/control-center/pages/ai-command/tool-dock.js:1427:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+public/control-center/pages/ai-command/tool-dock.js:1431:    `Use the ${title} tool for the active project${projectName ? ` (${projectName})` : ""}.`,
+public/control-center/pages/ai-command/tool-dock.js:1436:    `- Source/input: ${sourceInstruction}`,
+public/control-center/pages/ai-command/tool-dock.js:1458:    "Use only the available context and selected source details.",
+public/control-center/pages/ai-command/tool-dock.js:1476:    `Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.`,
+public/control-center/pages/ai-command/tool-dock.js:1479:    "- Prepare review-ready output only.",
+public/control-center/pages/ai-command/tool-dock.js:1489:  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+public/control-center/pages/ai-command/tool-dock.js:1492:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1493:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1494:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+public/control-center/pages/ai-command/tool-dock.js:1495:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+public/control-center/pages/ai-command/tool-dock.js:1496:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+public/control-center/pages/ai-command/tool-dock.js:1497:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1498:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+public/control-center/pages/ai-command/tool-dock.js:1501:  if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Library source selected");
+public/control-center/pages/ai-command/tool-dock.js:1525:function openToolDrawer({ drawer, btn, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+public/control-center/pages/ai-command/tool-dock.js:1529:  drawer.dataset.pendingTool = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1530:  const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "guided";
+public/control-center/pages/ai-command/tool-dock.js:1535:  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+public/control-center/pages/ai-command/tool-dock.js:1536:  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+public/control-center/pages/ai-command/tool-dock.js:1537:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1540:    "[data-aicmd-tool-drawer-description]",
+public/control-center/pages/ai-command/tool-dock.js:1541:    `Prepare ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"} for the active project. Choose the output, source, destination, language, and tone before using it in the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1543:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/ai-command/tool-dock.js:1545:  const rawOutputs = btn.getAttribute("data-aicmd-tool-dock-outputs") || "";
+public/control-center/pages/ai-command/tool-dock.js:1546:  const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
+public/control-center/pages/ai-command/tool-dock.js:1547:  const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
+public/control-center/pages/ai-command/tool-dock.js:1548:  drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";
+public/control-center/pages/ai-command/tool-dock.js:1551:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+public/control-center/pages/ai-command/tool-dock.js:1552:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+public/control-center/pages/ai-command/tool-dock.js:1553:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination");
+public/control-center/pages/ai-command/tool-dock.js:1572:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+public/control-center/pages/ai-command/tool-dock.js:1583:  persistSessionDraft,
+public/control-center/pages/ai-command/tool-dock.js:1589:  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:1591:  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+public/control-center/pages/ai-command/tool-dock.js:1595:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+public/control-center/pages/ai-command/tool-dock.js:1600:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:1604:        type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:1607:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1621:        toolId: drawer?.dataset?.pendingTool || "",
+public/control-center/pages/ai-command/tool-dock.js:1623:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1624:        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+public/control-center/pages/ai-command/tool-dock.js:1635:  // Patch drawer population to apply source
+public/control-center/pages/ai-command/tool-dock.js:1640:  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+public/control-center/pages/ai-command/tool-dock.js:1644:      const label = drawer?.dataset?.pendingTool || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1647:        updateStatus?.("This tool needs a source. Choose from Library or change the source type before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1664:      if (typeof persistSessionDraft === "function") {
+public/control-center/pages/ai-command/tool-dock.js:1665:        persistSessionDraft(sessionKey, session, `${label} drawer tool loaded`);
+public/control-center/pages/ai-command/tool-dock.js:1678:  Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
+public/control-center/pages/ai-command/tool-dock.js:1680:      const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
+public/control-center/pages/ai-command/tool-dock.js:1681:      const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1682:      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";
+public/control-center/pages/ai-command/tool-dock.js:1693:          persistSessionDraft,
+public/control-center/pages/ai-command/tool-dock.js:1710:      if (typeof persistSessionDraft === "function") {
+public/control-center/pages/ai-command/tool-dock.js:1711:        persistSessionDraft(sessionKey, session, `${label} dock tool loaded`);
