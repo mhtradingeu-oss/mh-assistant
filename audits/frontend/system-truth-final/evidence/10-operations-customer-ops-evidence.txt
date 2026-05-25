@@ -1,0 +1,873 @@
+# Operations and Customer Operations Evidence
+
+public/control-center/pages/operations-centers.js:172:  if (pageKey === "task-center") {
+public/control-center/pages/operations-centers.js:202:  if (pageKey === "queue-center") {
+public/control-center/pages/operations-centers.js:222:  if (pageKey === "job-monitor") {
+public/control-center/pages/operations-centers.js:255:      preview: "Turn the current notification stream into a short operations summary.",
+public/control-center/pages/operations-centers.js:264:  return asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:299:      route: "job-monitor"
+public/control-center/pages/operations-centers.js:306:      route: "queue-center"
+public/control-center/pages/operations-centers.js:313:      route: "job-monitor"
+public/control-center/pages/operations-centers.js:320:      route: "notification-center"
+public/control-center/pages/operations-centers.js:327:      route: "notification-center"
+public/control-center/pages/operations-centers.js:355:      route: "notification-center"
+public/control-center/pages/operations-centers.js:437:    "Incoming task handoff"
+public/control-center/pages/operations-centers.js:442:    incomingHandoff.payload?.handoff_intent ||
+public/control-center/pages/operations-centers.js:444:    "Review-only handoff prepared by another MH-OS surface."
+public/control-center/pages/operations-centers.js:449:    <section class="panel ops-incoming-handoff mhos-clean-surface">
+public/control-center/pages/operations-centers.js:517:    <section class="page is-active" data-page="task-center">
+public/control-center/pages/operations-centers.js:662:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:689:  const ops = asObject(state.data.operations);
+public/control-center/pages/operations-centers.js:717:  const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:718:  const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);
+public/control-center/pages/operations-centers.js:743:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:745:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:782:          `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
+public/control-center/pages/operations-centers.js:783:          `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
+public/control-center/pages/operations-centers.js:786:      : "No incoming task handoff.";
+public/control-center/pages/operations-centers.js:800:      context.showMessage?.("Incoming handoff summary copied.");
+public/control-center/pages/operations-centers.js:802:      context.showError?.("Failed to copy incoming handoff summary.");
+public/control-center/pages/operations-centers.js:888:    <section class="page is-active" data-page="queue-center">
+public/control-center/pages/operations-centers.js:923:                <h3>Queue operations</h3>
+public/control-center/pages/operations-centers.js:1015:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1041:  const queueCenter = asObject(asObject(state.data.operations).queue_center);
+public/control-center/pages/operations-centers.js:1061:  const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));
+public/control-center/pages/operations-centers.js:1084:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1086:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1179:    <section class="page is-active" data-page="job-monitor">
+public/control-center/pages/operations-centers.js:1310:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1336:  const jobMonitor = asObject(asObject(state.data.operations).job_monitor);
+public/control-center/pages/operations-centers.js:1355:  const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));
+public/control-center/pages/operations-centers.js:1377:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1379:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1437:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+public/control-center/pages/operations-centers.js:1448:  const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
+public/control-center/pages/operations-centers.js:1455:    item_type: "inbox"
+public/control-center/pages/operations-centers.js:1475:  const inboxList = inboxItems.map((item, index) => ({
+public/control-center/pages/operations-centers.js:1477:    _opsKey: getOpsItemKey(item, index, "inbox")
+public/control-center/pages/operations-centers.js:1480:  let listItems = session.focus === "inbox" ? inboxList : baseAlerts;
+public/control-center/pages/operations-centers.js:1489:  const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));
+public/control-center/pages/operations-centers.js:1534:    <section class="page is-active" data-page="notification-center">
+public/control-center/pages/operations-centers.js:1568:                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history" : "Operational alerts")}</h3>
+public/control-center/pages/operations-centers.js:1569:                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
+public/control-center/pages/operations-centers.js:1579:              { value: "inbox", label: "Inbox", count: formatCount(inboxList.length) }
+public/control-center/pages/operations-centers.js:1607:                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1666:                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1697:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1699:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1748:  id: "task-center",
+public/control-center/pages/operations-centers.js:1755:  template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1769:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1771:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1783:  id: "queue-center",
+public/control-center/pages/operations-centers.js:1788:    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+public/control-center/pages/operations-centers.js:1790:  template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1814:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1816:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1831:  id: "job-monitor",
+public/control-center/pages/operations-centers.js:1838:  template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1862:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1864:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1879:  id: "notification-center",
+public/control-center/pages/operations-centers.js:1886:  template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:1910:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1912:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1927:  const root = document.querySelector('[data-page="operations-centers"] .ops-shell');
+public/control-center/pages/operations-centers.js:1932:  const operations = asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:1934:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+public/control-center/pages/operations-centers.js:1935:  const queueCount = asArray(operations.queue?.items || operations.queue).length;
+public/control-center/pages/operations-centers.js:1936:  const jobCount = asArray(operations.jobs?.items || operations.jobs).length;
+public/control-center/pages/operations-centers.js:1937:  const notificationCount = asArray(operations.notifications?.items || operations.notifications).length;
+public/control-center/pages/operations-centers.js:1941:      route: "task-center",
+public/control-center/pages/operations-centers.js:1949:      route: "queue-center",
+public/control-center/pages/operations-centers.js:1957:      route: "job-monitor",
+public/control-center/pages/operations-centers.js:1965:      route: "notification-center",
+public/control-center/pages/operations-centers.js:1975:    <section class="page is-active" data-page="operations-centers">
+public/control-center/pages/operations-centers.js:1994:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2005:                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+public/control-center/pages/operations-centers.js:2032:                  <h3>Operations Lead handoff</h3>
+public/control-center/pages/operations-centers.js:2065:export const operationsCentersRoute = {
+public/control-center/pages/operations-centers.js:2066:  id: "operations-centers",
+public/control-center/pages/operations-centers.js:2068:  template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,
+public/control-center/pages/ai-command.js:66:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:91:                id: "operations",
+public/control-center/pages/ai-command.js:94:                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:98:                id: "customer_ops",
+public/control-center/pages/ai-command.js:101:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+public/control-center/pages/ai-command.js:102:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:105:                id: "sales_crm",
+public/control-center/pages/ai-command.js:108:                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+public/control-center/pages/ai-command.js:115:	executive: "operations",
+public/control-center/pages/ai-command.js:126:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:127:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:128:	support: "customer_ops",
+public/control-center/pages/ai-command.js:129:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:130:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:131:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:132:	admin: "operations"
+public/control-center/pages/ai-command.js:160:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:161:		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+public/control-center/pages/ai-command.js:173:		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+public/control-center/pages/ai-command.js:197:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:198:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:199:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:245:		id: "operations",
+public/control-center/pages/ai-command.js:249:		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+public/control-center/pages/ai-command.js:250:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:251:		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+public/control-center/pages/ai-command.js:252:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:254:		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+public/control-center/pages/ai-command.js:258:		id: "customer_ops",
+public/control-center/pages/ai-command.js:262:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+public/control-center/pages/ai-command.js:263:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:264:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:265:		cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],
+public/control-center/pages/ai-command.js:267:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:271:		id: "sales_crm",
+public/control-center/pages/ai-command.js:275:		summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",
+public/control-center/pages/ai-command.js:276:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:277:		canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],
+public/control-center/pages/ai-command.js:296:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:303:		{ label: "Prepare a media handoff", sub: "Package direction for the team" }
+public/control-center/pages/ai-command.js:315:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+public/control-center/pages/ai-command.js:335:	operations: [
+public/control-center/pages/ai-command.js:337:		{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },
+public/control-center/pages/ai-command.js:341:	customer_ops: [
+public/control-center/pages/ai-command.js:342:		{ label: "Summarize customer thread", sub: "Capture issue, tone, and next reply" },
+public/control-center/pages/ai-command.js:343:		{ label: "Draft customer reply", sub: "Safe response for review" },
+public/control-center/pages/ai-command.js:345:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:347:	sales_crm: [
+public/control-center/pages/ai-command.js:350:		{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },
+public/control-center/pages/ai-command.js:351:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:359:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:360:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:367:	{ id: "draft", title: "Draft", description: "Generate guidance, copy, task, or handoff material." },
+public/control-center/pages/ai-command.js:378:	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+public/control-center/pages/ai-command.js:394:	operations: "OL",
+public/control-center/pages/ai-command.js:395:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:396:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:430:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:437:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:454:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:455:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:475:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:477:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:478:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:481:	operations: [
+public/control-center/pages/ai-command.js:483:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:488:	customer_ops: [
+public/control-center/pages/ai-command.js:489:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:490:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:491:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:492:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:494:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:495:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:496:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:498:	sales_crm: [
+public/control-center/pages/ai-command.js:502:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:505:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:506:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:599:		id: "operations",
+public/control-center/pages/ai-command.js:601:		purpose: "Translate intent into executable workflows and handoffs.",
+public/control-center/pages/ai-command.js:623:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+public/control-center/pages/ai-command.js:637:		if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:638:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:639:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:642:		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+public/control-center/pages/ai-command.js:701:	if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:702:	if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:703:	if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:705:	if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+public/control-center/pages/ai-command.js:784:    "Prepare a handoff summary for:",
+public/control-center/pages/ai-command.js:936:			modeId: "operations",
+public/control-center/pages/ai-command.js:1157:        session.modeId = asString(record.modeId || session.modeId || "operations");
+public/control-center/pages/ai-command.js:1192:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1206:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1259:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1270:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1271:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1272:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1279:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1297:                                : activeTab === "handoff"
+public/control-center/pages/ai-command.js:1298:                                        ? "handoff"
+public/control-center/pages/ai-command.js:1302:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+public/control-center/pages/ai-command.js:1311:        if (outputType === "handoff" || outputType === "task" || looksTaskLike) {
+public/control-center/pages/ai-command.js:1313:                return { outputType, destinationRoute: "task-center" };
+public/control-center/pages/ai-command.js:1354:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1369:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1370:		"task-center": "Task Center",
+public/control-center/pages/ai-command.js:1380:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1391:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1499:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+public/control-center/pages/ai-command.js:1509:				"Prepare handoff for publishing review"
+public/control-center/pages/ai-command.js:1574:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1577:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1578:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1579:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1581:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+public/control-center/pages/ai-command.js:1584:			ticketDraft: [
+public/control-center/pages/ai-command.js:1585:				"Issue summary: customer concern or request captured for review.",
+public/control-center/pages/ai-command.js:1586:				"Priority: draft priority pending runtime inbox and SLA confirmation.",
+public/control-center/pages/ai-command.js:1587:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1591:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1593:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1595:				"Summarize the customer thread",
+public/control-center/pages/ai-command.js:1596:				"Draft a safe customer reply",
+public/control-center/pages/ai-command.js:1597:				"Create ticket draft fields for review",
+public/control-center/pages/ai-command.js:1601:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+public/control-center/pages/ai-command.js:1605:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1608:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1609:			summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",
+public/control-center/pages/ai-command.js:1610:			mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",
+public/control-center/pages/ai-command.js:1630:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1635:				"Route sales handoff without mutating CRM data"
+public/control-center/pages/ai-command.js:1642:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1652:					"Stage 4: Destination handoff and confirmation"
+public/control-center/pages/ai-command.js:1659:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1664:				"Prepare destination handoff context",
+public/control-center/pages/ai-command.js:1677:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1684:		handoff: "handoff"
+public/control-center/pages/ai-command.js:1706:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1714:			"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",
+public/control-center/pages/ai-command.js:1715:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1717:		destinationRoute: outputType === "task" ? "task-center" : "workflows",
+public/control-center/pages/ai-command.js:1719:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1729:		handoff: "Handoff Preview",
+public/control-center/pages/ai-command.js:1969:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:1970:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:1971:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:1984:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+public/control-center/pages/ai-command.js:1989:		resolvedModeId: top.modeId || selectedModeId || "operations",
+public/control-center/pages/ai-command.js:2255:		case "operations":
+public/control-center/pages/ai-command.js:2355:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2356:	"task-center": "Task Center",
+public/control-center/pages/ai-command.js:2357:	"queue-center": "Queue Center",
+public/control-center/pages/ai-command.js:2358:	"job-monitor": "Job Monitor",
+public/control-center/pages/ai-command.js:2359:	"notification-center": "Notification Center",
+public/control-center/pages/ai-command.js:2371:	workflows: "operations",
+public/control-center/pages/ai-command.js:2374:	integrations: "operations",
+public/control-center/pages/ai-command.js:2375:	settings: "operations",
+public/control-center/pages/ai-command.js:2377:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2378:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2379:	"queue-center": "operations",
+public/control-center/pages/ai-command.js:2380:	"job-monitor": "operations",
+public/control-center/pages/ai-command.js:2381:	"notification-center": "operations",
+public/control-center/pages/ai-command.js:2384:	setup: "operations",
+public/control-center/pages/ai-command.js:2385:	workspace: "operations"
+public/control-center/pages/ai-command.js:2392:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2393:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2394:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2395:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2410:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2411:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2412:	tasks: "task-center",
+public/control-center/pages/ai-command.js:2413:	queue: "queue-center",
+public/control-center/pages/ai-command.js:2414:	jobs: "job-monitor",
+public/control-center/pages/ai-command.js:2415:	notifications: "notification-center",
+public/control-center/pages/ai-command.js:2462:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2500:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+public/control-center/pages/ai-command.js:2513:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+public/control-center/pages/ai-command.js:2521:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+public/control-center/pages/ai-command.js:2526:function getAiInboundDurableHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2527:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2529:		handoff?.id,
+public/control-center/pages/ai-command.js:2530:		handoff?.handoff_id,
+public/control-center/pages/ai-command.js:2531:		handoff?.handoffId,
+public/control-center/pages/ai-command.js:2532:		payload.handoff_id,
+public/control-center/pages/ai-command.js:2533:		payload.handoffId
+public/control-center/pages/ai-command.js:2537:function getAiInboundHandoffId(handoff) {
+public/control-center/pages/ai-command.js:2538:	const durableId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2540:	if (!handoff) return "";
+public/control-center/pages/ai-command.js:2541:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2542:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+public/control-center/pages/ai-command.js:2545:		if (!aiInboundHandoffObjectIds.has(handoff)) {
+public/control-center/pages/ai-command.js:2547:			aiInboundHandoffObjectIds.set(handoff, `cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}`);
+public/control-center/pages/ai-command.js:2549:		return aiInboundHandoffObjectIds.get(handoff);
+public/control-center/pages/ai-command.js:2551:	return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]
+public/control-center/pages/ai-command.js:2554:		.join("::") || `cached-ai-handoff-${Date.now()}`;
+public/control-center/pages/ai-command.js:2557:function normalizeAiInboundHandoff(handoff, projectName) {
+public/control-center/pages/ai-command.js:2558:	const payload = asObject(handoff?.payload);
+public/control-center/pages/ai-command.js:2559:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+public/control-center/pages/ai-command.js:2563:		handoff?.source_page,
+public/control-center/pages/ai-command.js:2564:		handoff?.sourcePage,
+public/control-center/pages/ai-command.js:2579:		"operations",
+public/control-center/pages/ai-command.js:2580:		"operations"
+public/control-center/pages/ai-command.js:2591:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2597:		handoff?.title,
+public/control-center/pages/ai-command.js:2598:		`Inbound handoff from ${sourceLabel}`
+public/control-center/pages/ai-command.js:2630:		status: asString(handoff?.status || payload.status || "available"),
+public/control-center/pages/ai-command.js:2631:		note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."
+public/control-center/pages/ai-command.js:2637:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2638:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2639:	const handoffId = getAiInboundHandoffId(handoff);
+public/control-center/pages/ai-command.js:2640:	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
+public/control-center/pages/ai-command.js:2642:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+public/control-center/pages/ai-command.js:2649:		id: handoffId,
+public/control-center/pages/ai-command.js:2681:	session.lastAppliedHandoffId = handoffId;
+public/control-center/pages/ai-command.js:2682:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+public/control-center/pages/ai-command.js:2684:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+public/control-center/pages/ai-command.js:2687:			console.warn("Failed to consume AI handoff:", error.message);
+public/control-center/pages/ai-command.js:2690:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:2800:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:3341:                handoff: "handoff package"
+public/control-center/pages/ai-command.js:3485:	return asString(value || "operations")
+public/control-center/pages/ai-command.js:3488:		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+public/control-center/pages/ai-command.js:3506:	if (preview.outputType === "handoff") return 3;
+public/control-center/pages/ai-command.js:3520:		handoff: "handoff",
+public/control-center/pages/ai-command.js:3530:	if (outputType === "handoff") return "handoff";
+public/control-center/pages/ai-command.js:3545:		handoff: "Prepare Handoff",
+public/control-center/pages/ai-command.js:3555:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3557:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3568:	if (tool.intent === "handoff") return "Prepare";
+public/control-center/pages/ai-command.js:3613:				<p class="aicmd-room-subtitle mhos-context-description">One specialist or the full team turns requests into review-ready drafts, tasks, and handoffs.</p>
+public/control-center/pages/ai-command.js:3683:			<span>${escapeHtml(safeBridgeStatus.available ? "Executive workflow: strategy, creative, compliance, publishing, customer/sales, then operations." : "Preview tools remain available while chat is guarded.")}</span>
+public/control-center/pages/ai-command.js:3750:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3794:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3809:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3837:	if (/handoff|route|destination_brief/.test(haystack)) return "handoff";
+public/control-center/pages/ai-command.js:3838:	if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";
+public/control-center/pages/ai-command.js:3846:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3911:					<span class="aicmd-v2-tools-subtitle">Fast specialist actions for the current output. Review-only: prepares drafts, previews, or handoffs without backend execution.</span>
+public/control-center/pages/ai-command.js:4043:						<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>
+public/control-center/pages/ai-command.js:4158:					<h2>Drafts, tasks, workflows, handoffs</h2>
+public/control-center/pages/ai-command.js:4281:				<li><span>Read preview aloud (browser)</span><strong class="${speechSynthAvailable ? "is-available" : "is-planned"}">${speechSynthAvailable ? "Available in this browser" : "Not supported in this browser"}</strong></li>
+public/control-center/pages/ai-command.js:4325:                ? "Chat only. No workflow, task, handoff, approval, publish, CRM, or customer action was created."
+public/control-center/pages/ai-command.js:4345:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:4413:                                                <span>Home handoff</span>
+public/control-center/pages/ai-command.js:4506:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:4549:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:4551:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:4559:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:4565:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:4738:		const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/ai-command.js:4739:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:4908:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5115:		                                safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",
+public/control-center/pages/ai-command.js:5200:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:5289:                // Phase 1: converts the current conversation into a handoff preview. No backend write.
+public/control-center/pages/ai-command.js:5290:                const handoffBtn = $("aicmdV2HandoffBtn");
+public/control-center/pages/ai-command.js:5291:                if (handoffBtn) {
+public/control-center/pages/ai-command.js:5292:                        handoffBtn.onclick = () => {
+public/control-center/pages/ai-command.js:5296:                                        ? `Prepare a handoff summary for: ${value}`
+public/control-center/pages/ai-command.js:5297:                                        : `Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.`;
+public/control-center/pages/ai-command.js:5300:                                        intent: "handoff",
+public/control-center/pages/ai-command.js:5507:					updateStatus("Read is not supported in this browser.");
+public/control-center/pages/ai-command.js:5571:				const handoffRecord = {
+public/control-center/pages/ai-command.js:5590:				setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);
+public/control-center/pages/ai-command.js:5591:				setSharedHandoff(projectName || "__default__", destination, handoffRecord);
+public/control-center/pages/ai-command.js:5618:					updateStatus("Read preview is not supported in this browser.");
+runtime/orchestrator-service/server.js:48:  getUnsupportedProviderMessage
+runtime/orchestrator-service/server.js:109:} = require('./lib/customer-operations/customer-operations-runtime');
+runtime/orchestrator-service/server.js:488:      operations: buildProjectOperationsPayload(projectName)
+runtime/orchestrator-service/server.js:1406:    throw new Error(`Unsupported email artifact contract: ${artifactType}`);
+runtime/orchestrator-service/server.js:2373:Create a realistic, premium, cinematic, marketing-grade visual that supports the campaign objective while preserving the exact product identity.
+runtime/orchestrator-service/server.js:2866:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:2919:    throw new Error('Unsupported Meta placement');
+runtime/orchestrator-service/server.js:3148:    throw new Error('Unsupported YouTube format');
+runtime/orchestrator-service/server.js:3167:      : 'CTR-first via title-thumbnail fit, then watch-time support through structure.',
+runtime/orchestrator-service/server.js:3176:    throw new Error('Unsupported YouTube format');
+runtime/orchestrator-service/server.js:3338:    throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3483:  throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3511:    throw new Error('Unsupported marketplace');
+runtime/orchestrator-service/server.js:3660:  const supportProducts = launchReadyProducts.slice(3, 10);
+runtime/orchestrator-service/server.js:3668:      'early sales conversion'
+runtime/orchestrator-service/server.js:3676:      support_products: supportProducts.map(p => ({
+runtime/orchestrator-service/server.js:3685:      support_count: supportProducts.length,
+runtime/orchestrator-service/server.js:3963:      'ready_for_manual_handoff',
+runtime/orchestrator-service/server.js:5527:    operations: null,
+runtime/orchestrator-service/server.js:5559:    payload.errors.operations = message;
+runtime/orchestrator-service/server.js:5569:    operations: buildProjectOperationsPayload
+runtime/orchestrator-service/server.js:6699:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+runtime/orchestrator-service/server.js:6731:      default_channels: ['website', 'facebook', 'instagram', 'google', 'crm'],
+runtime/orchestrator-service/server.js:6737:      starter_checklist: ['add_property_data', 'upload_property_media', 'define_lead_flow', 'connect_crm', 'create_listing_campaign'],
+runtime/orchestrator-service/server.js:6738:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6751:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6772:      data_requirements: ['services', 'case_studies', 'target_segments', 'lead_magnets', 'sales_process'],
+runtime/orchestrator-service/server.js:6776:      starter_checklist: ['define_services', 'add_case_studies', 'define_lead_offer', 'connect_crm', 'create_lead_campaign'],
+runtime/orchestrator-service/server.js:6777:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+runtime/orchestrator-service/server.js:6940:    throw new Error('Project rename is not supported by Setup persistence');
+runtime/orchestrator-service/server.js:7867:    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+runtime/orchestrator-service/server.js:7868:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8040:    throw Object.assign(new Error(getUnsupportedProviderMessage(normalizedId)), {
+runtime/orchestrator-service/server.js:8041:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8098:        throw new Error('Unsupported integration action');
+runtime/orchestrator-service/server.js:9341:      supported_execution_states: EXECUTION_BRIDGE_STATES
+runtime/orchestrator-service/server.js:9399:      supported_execution_states: EXECUTION_BRIDGE_STATES
+runtime/orchestrator-service/server.js:9469:      supported_execution_states: EXECUTION_BRIDGE_STATES,
+runtime/orchestrator-service/server.js:9521:      supported_execution_states: EXECUTION_BRIDGE_STATES,
+runtime/orchestrator-service/server.js:10771:      error: error.message || 'Failed to build project operations payload'
+runtime/orchestrator-service/server.js:10776:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:10777:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+runtime/orchestrator-service/server.js:10835:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:10836:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+runtime/orchestrator-service/server.js:10837:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:10838:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+runtime/orchestrator-service/server.js:10839:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:10840:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+runtime/orchestrator-service/server.js:10841:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:10842:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+runtime/orchestrator-service/server.js:10851:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:10852:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+runtime/orchestrator-service/server.js:10905:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:10970:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11036:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11146:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11183:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11301:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11426:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11486:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11507:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11593:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11606:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11628:      error: error.message || 'Failed to list handoffs'
+runtime/orchestrator-service/server.js:11635:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11637:      handoff,
+runtime/orchestrator-service/server.js:11638:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11642:      error: error.message || 'Failed to create handoff'
+runtime/orchestrator-service/server.js:11649:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+runtime/orchestrator-service/server.js:11651:      handoff,
+runtime/orchestrator-service/server.js:11652:      operations: buildProjectOperationsPayload(req.params.project)
+runtime/orchestrator-service/server.js:11656:      error: error.message || 'Failed to consume handoff'
+runtime/orchestrator-service/server.js:11661:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11662:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11663:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11664:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11665:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11666:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11800:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:11870:const customerOperationsRuntime =
+runtime/orchestrator-service/server.js:11915:      customerOperationsRuntime.health()
+runtime/orchestrator-service/server.js:11919:      error: 'customer_operations_health_failed',
+runtime/orchestrator-service/server.js:11928:      customerOperationsRuntime.readiness.snapshot()
+runtime/orchestrator-service/server.js:11932:      error: 'customer_operations_readiness_failed',
+runtime/orchestrator-service/server.js:11942:        customerOperationsRuntime.channels.list()
+runtime/orchestrator-service/server.js:11946:      error: 'customer_operations_channels_failed',
+runtime/orchestrator-service/server.js:11955:      inbox:
+runtime/orchestrator-service/server.js:11956:        customerOperationsRuntime.unifiedInbox.list()
+runtime/orchestrator-service/server.js:11960:      error: 'customer_operations_inbox_failed',
+runtime/orchestrator-service/server.js:11967:  '/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:11972:  '/public/media-manager/project/:project/customer-operations/health',
+runtime/orchestrator-service/server.js:11977:  '/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:11982:  '/public/media-manager/project/:project/customer-operations/readiness',
+runtime/orchestrator-service/server.js:11987:  '/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:11992:  '/public/media-manager/project/:project/customer-operations/channels',
+runtime/orchestrator-service/server.js:11997:  '/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:12002:  '/public/media-manager/project/:project/customer-operations/inbox',
+runtime/orchestrator-service/server.js:12013:        customerOperationsRuntime.conversations.list()
+runtime/orchestrator-service/server.js:12017:      error: 'customer_operations_conversations_failed',
+runtime/orchestrator-service/server.js:12027:        customerOperationsRuntime.messages.list()
+runtime/orchestrator-service/server.js:12031:      error: 'customer_operations_messages_failed',
+runtime/orchestrator-service/server.js:12040:      customers:
+runtime/orchestrator-service/server.js:12041:        customerOperationsRuntime.customers.list()
+runtime/orchestrator-service/server.js:12045:      error: 'customer_operations_customers_failed',
+runtime/orchestrator-service/server.js:12055:        customerOperationsRuntime.sla.list()
+runtime/orchestrator-service/server.js:12059:      error: 'customer_operations_sla_failed',
+runtime/orchestrator-service/server.js:12069:        customerOperationsRuntime.escalation.list()
+runtime/orchestrator-service/server.js:12073:      error: 'customer_operations_escalations_failed',
+runtime/orchestrator-service/server.js:12080:  '/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:12085:  '/public/media-manager/project/:project/customer-operations/conversations',
+runtime/orchestrator-service/server.js:12090:  '/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:12095:  '/public/media-manager/project/:project/customer-operations/messages',
+runtime/orchestrator-service/server.js:12100:  '/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:12105:  '/public/media-manager/project/:project/customer-operations/customers',
+runtime/orchestrator-service/server.js:12110:  '/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:12115:  '/public/media-manager/project/:project/customer-operations/sla',
+runtime/orchestrator-service/server.js:12120:  '/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:12125:  '/public/media-manager/project/:project/customer-operations/escalations',
+runtime/orchestrator-service/server.js:12827:    const hook = map.hook || `${productName} supports ${category} care with ${benefitText}.`;
+runtime/orchestrator-service/server.js:12860:        'Avoid unsupported medical or misleading claims.'
+runtime/orchestrator-service/server.js:13751:      result.execution_status = 'ready_for_manual_handoff';
+runtime/orchestrator-service/server.js:13752:      result.action_type = 'manual_marketplace_handoff';
+runtime/orchestrator-service/server.js:13753:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+runtime/orchestrator-service/server.js:14331:      customer_problem: project.audience_problem,
+runtime/orchestrator-service/server.js:15144:      item.visual_format = 'feed post / reel support';
+runtime/orchestrator-service/server.js:15200:        'Add one high-authority source only if it supports trust and relevance'
+runtime/orchestrator-service/server.js:16289:        primary_goal: 'sales + brand growth',
+runtime/orchestrator-service/server.js:16339:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:16394:          'sales',
+runtime/orchestrator-service/server.js:16483:          'reel/tiktok support'
+runtime/orchestrator-service/server.js:16926:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:17116:      const goal = args.slice(1).join(' ').trim() || 'sales';
+runtime/orchestrator-service/server.js:17221:          'sales',
+runtime/orchestrator-service/server.js:17568:            visual_format: post.platform === 'instagram' ? 'feed post / reel support' : 'social post',
+runtime/orchestrator-service/server.js:20553:      message: `Unsupported command: ${command}`
+runtime/orchestrator-service/server.js:21347:    operations: {
+runtime/orchestrator-service/package-lock.json:286:        "supports-color": {
+runtime/orchestrator-service/package-lock.json:1008:          "url": "https://feross.org/support"
+runtime/orchestrator-service/lib/insights/learning-engine.js:303:      title: 'Link marketplace sales learnings back into content strategy',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:922:          ? 'Marketplace connectivity exists, but sales-level signal is still limited.'
+runtime/orchestrator-service/lib/insights/ingestion-service.js:973:    email_crm: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:974:      status: evaluate(['smtp', 'mailchimp', 'crm']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:975:      integrations: ['smtp', 'mailchimp', 'crm']
+runtime/orchestrator-service/lib/ops/backbone.js:43:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:95:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:135:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:219:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:235:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:413:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:479:    title: 'Team operations model updated',
+runtime/orchestrator-service/lib/ops/backbone.js:543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:544:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:545:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:825:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:842:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:914:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:1356:      message: 'Potentially unsupported or regulated claim language detected.'
+runtime/orchestrator-service/lib/ops/backbone.js:1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2933:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2958:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2961:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:2983:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2999:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3000:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3011:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3013:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3022:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3023:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3024:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3026:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3027:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3029:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3030:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3031:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3042:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3043:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3044:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3046:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3052:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3054:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3058:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3059:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3064:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3065:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3074:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3082:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3099:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3101:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3122:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3126:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3127:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3130:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3842:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3937:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4017:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4018:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4021:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4033:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:135:  operations: 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  publisher: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  compliance_reviewer: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:149:  operations: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:217:          : specialistId === 'operations'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:261:    'Do not claim operations were run.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:316:    operations: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:318:      "Focus on tasks, workflows, ownership, timelines, handoffs, blockers, and operating next steps.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:321:    customer_ops: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:323:      "Focus on inbox review, reply drafts, customer service, SLA thinking, escalation paths, and support tone.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:324:      "Do not send customer replies or mutate tickets from chat; prepare safe drafts and guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:326:    sales: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:540:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:545:  if (intent === 'task') return 'task-center';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:598:      intent: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:599:      modeId: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:601:      outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:609:      intent: selectedMode === 'operations' ? 'operations' : selectedMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:632:    modeId = modeId || 'operations';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:633:    outputType = 'operations_plan';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:634:  } else if (matches(/\b(task|todo|follow up|assign)\b/) && intent === 'operations') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:682:  const operations = asObject(deps.buildOperations(projectName));
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:705:    operations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:843:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:926:  const operationsPlan = outputType === 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:927:    ? normalizeStructuredObject(providerOutput.operationsPlan || providerOutput.raw?.operationsPlan || providerOutput.raw?.operations_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:954:    normalizeRouteSuggestion('task-center', 'Save a durable execution task if an operator follow-up is needed.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:970:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1001:    operationsPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1053:      normalizeRouteSuggestion('task-center', 'Convert the run into a durable task if manual execution is required.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1094:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1178:            route_target: 'task-center',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1185:          linkedEntities.push({ entity_type: 'task', entity_id: task.id, route: 'task-center', label: task.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1222:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1261:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1298:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1390:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1456:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1461:            mutated_operations: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1462:            sent_customer_reply: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1463:            mutated_crm: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1554:            `Unsupported AI provider "${providerConfig.provider}". Supported providers: ${listAiProviders().join(', ')}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1633:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1638:            mutated_operations: false
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1816:        handoff,
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:33:      customer_operations: channel.customer_operations
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:27:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:119:    customer_operations: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:120:      supports_inbox: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:121:      supports_messages: Boolean(base.capabilities.messaging),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:122:      supports_leads: ['instagram', 'facebook', 'website', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:123:      supports_outreach: ['email', 'instagram', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:124:      supports_voice: Boolean(base.capabilities.voice)
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:128:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:4:const ticketStore = require('./tickets/store/ticket-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:8:const customerProfileStore = require('./customers/store/customer-profile-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:14:const unifiedInboxStore = require('./unified-inbox/store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:18:} = require('./unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:41:} = require('./readiness/customer-operations-readiness-snapshot');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:83:    customers: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:84:      create: customerProfileStore.createCustomerProfile,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:85:      get: customerProfileStore.getCustomerProfile,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:86:      list: customerProfileStore.listCustomerProfiles,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:87:      update: customerProfileStore.updateCustomerProfile
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:103:    tickets: {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:104:      create: ticketStore.createTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:105:      get: ticketStore.getTicket,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:106:      list: ticketStore.listTickets,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:107:      update: ticketStore.updateTicket
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:116:        runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:120:          tickets: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:124:          customers: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:127:          unified_inbox: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:128:          integration_inbox_bridge: true,
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:132:          crm: false
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:20:  const tickets = safeList(runtime.tickets?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:22:  const customers = safeList(runtime.customers?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:25:  const inboxEntries = safeList(runtime.unifiedInbox?.list);
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:32:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:38:      integration_inbox_seed: typeof runtime.unifiedInbox?.createFromIntegration === 'function'
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:46:      tickets: tickets.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:47:      customers: customers.length,
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:50:      unified_inbox_entries: inboxEntries.length
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:55:      inbox_ready: Boolean(capabilities.unified_inbox),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:56:      tickets_ready: Boolean(capabilities.tickets),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:57:      customer_profiles_ready: Boolean(capabilities.customers),
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:61:      integration_inbox_bridge_ready: Boolean(capabilities.integration_inbox_bridge)
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:80:      creates_tickets: false,
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:5:} = require('../../contracts/customer-profile-contract');
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:7:const customers = new Map();
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:12:  if (!profile.customer_id) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:13:    throw new Error('customer_id is required');
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:16:  customers.set(profile.customer_id, profile);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:21:function getCustomerProfile(customerId) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:22:  return customers.get(String(customerId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:26:  return Array.from(customers.values());
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:29:function updateCustomerProfile(customerId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:30:  const current = getCustomerProfile(customerId);
+runtime/orchestrator-service/lib/customer-operations/customers/store/customer-profile-store.js:45:  customers.set(current.customer_id, updated);
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:5:} = require('../unified-inbox/register-integration-inbox');
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:24:  const inboxSeed = createIntegrationInboxSeed(
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:30:  if (!inboxSeed.created) {
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:33:      reason: inboxSeed.reason,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:38:  const inbox = inboxSeed.inbox;
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:41:    conversation_id: inbox.conversation.conversation_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:42:    channel: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:43:    customer_id: inbox.conversation.customer_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:44:    assigned_ai_agent: inbox.assignment.assigned_ai_agent,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:45:    priority: inbox.state.priority,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:55:    channel_id: inbox.channel.channel_id,
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:58:      id: asString(payload.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:59:      type: 'customer',
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:65:        'New customer conversation started.'
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:75:    inbox,
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md:6:- inbox threads
+runtime/orchestrator-service/lib/customer-operations/registry/README.md:5:- AI customer agents
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:5:    inbox_id: String(input.inbox_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:17:      customer_id: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:18:        input.conversation?.customer_id || ''
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:24:        input.assignment?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:57:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:5:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:29:    crm: {
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:30:      owner: String(input.crm?.owner || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:31:      stage: String(input.crm?.stage || 'new'),
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:32:      source: String(input.crm?.source || '')
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:43:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:7:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:32:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:5:- ticket contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:6:- customer profile contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:9:      customer_type: String(input.scope?.customer_type || 'default'),
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:31:      human_handoff_minutes: Number(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:32:        input.escalation?.human_handoff_minutes || 120
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:36:        input.escalation?.escalation_queue || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:53:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:16:        input.routing?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:55:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:13:      type: String(input.sender?.type || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:39:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:5:    ticket_id: String(input.ticket_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:8:    type: String(input.type || 'support'),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:12:    customer_id: String(input.customer_id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:33:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:5:} = require('../../contracts/ticket-contract');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:7:const tickets = new Map();
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:10:  const ticket = createTicketContract(input);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:12:  if (!ticket.ticket_id) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:13:    throw new Error('ticket_id is required');
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:16:  tickets.set(ticket.ticket_id, ticket);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:18:  return ticket;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:21:function getTicket(ticketId) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:22:  return tickets.get(String(ticketId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:26:  return Array.from(tickets.values());
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:29:function updateTicket(ticketId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:30:  const current = getTicket(ticketId);
+runtime/orchestrator-service/lib/customer-operations/tickets/store/ticket-store.js:45:  tickets.set(current.ticket_id, updated);
+runtime/orchestrator-service/lib/customer-operations/tickets/README.md:6:- ticket creation
+runtime/orchestrator-service/lib/customer-operations/README.md:5:- customer conversations
+runtime/orchestrator-service/lib/customer-operations/README.md:6:- tickets
+runtime/orchestrator-service/lib/customer-operations/README.md:7:- unified inbox
+runtime/orchestrator-service/lib/customer-operations/README.md:10:- customer profiles
+runtime/orchestrator-service/lib/customer-operations/README.md:13:- AI customer operations
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:5:} = require('../../contracts/unified-inbox-contract');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:7:const inboxEntries = new Map();
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:12:  if (!entry.inbox_id) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:13:    throw new Error('inbox_id is required');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:16:  inboxEntries.set(entry.inbox_id, entry);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:21:function getInboxEntry(inboxId) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:22:  return inboxEntries.get(String(inboxId || '')) || null;
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:26:  return Array.from(inboxEntries.values());
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:29:function updateInboxEntry(inboxId, updates = {}) {
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:30:  const current = getInboxEntry(inboxId);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/store/unified-inbox-store.js:45:  inboxEntries.set(current.inbox_id, updated);
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:9:} = require('./store/unified-inbox-store');
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:35:  const inboxId = asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:36:    options.inbox_id ||
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:37:    `inbox_${channel.channel_id}`
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:41:    inbox_id: inboxId,
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:54:      customer_id: asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:55:        options.customer_id || ''
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:61:        options.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:81:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:88:    inbox: entry
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:70:    throw new Error(`Provider adapter for ${integrationId} does not support ${actionType}`);
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:1:function createUnsupportedAdapter(integrationIds = [], message) {
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:2:  async function unsupported(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:4:    error.status = 'unsupported_provider';
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:10:    unsupportedMessage: message,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:11:    connect: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:12:    testConnection: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:13:    syncCurrent: unsupported,
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:14:    importHistory: unsupported
+runtime/orchestrator-service/lib/integrations/providers/unsupported.js:19:  createUnsupportedAdapter
+runtime/orchestrator-service/lib/integrations/providers/google.js:137:  const customerId = asString(ctx.config.customerId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:144:    headers['login-customer-id'] = asString(ctx.config.managerId).replace(/-/g, '');
+runtime/orchestrator-service/lib/integrations/providers/google.js:149:    url: `https://googleads.googleapis.com/v18/customers/${customerId.replace(/-/g, '')}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:452:  requireFields(ctx.config, ['customerId']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:462:  const customer = await fetchGoogleAdsCustomer(ctx);
+runtime/orchestrator-service/lib/integrations/providers/google.js:466:    metadata: customer,
+runtime/orchestrator-service/lib/integrations/providers/google.js:471:      account: customer
+runtime/orchestrator-service/lib/integrations/providers/google.js:475:    permissionScope: 'Google Ads developer token + customer OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:481:      id: ctx.config.customerId,
+runtime/orchestrator-service/lib/integrations/providers/google.js:482:      name: ctx.config.customerId
+runtime/orchestrator-service/lib/integrations/providers/google.js:564:    throw new Error(`Unsupported Google integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/ops.js:303:    throw new Error(`Unsupported Ops integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:73:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:152:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:203:    readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:58:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:108:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:142:      readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:256:    throw new Error(`Unsupported TikTok integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/providers/meta.js:338:    throw new Error(`Unsupported Meta integration: ${ctx.integrationId}`);
+runtime/orchestrator-service/lib/integrations/insights-contract.js:26:  if (/email|audience|contact|crm/.test(scopeText)) return 'crm_email';
+runtime/orchestrator-service/lib/integrations/provider-registry.js:9:const { createUnsupportedAdapter } = require('./providers/unsupported');
+runtime/orchestrator-service/lib/integrations/provider-registry.js:12:const UNSUPPORTED_INTEGRATION_IDS = ['amazon', 'smtp', 'mailer', 'crm'];
+runtime/orchestrator-service/lib/integrations/provider-registry.js:13:const unsupportedAdapter = {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:14:  ...createUnsupportedAdapter(
+runtime/orchestrator-service/lib/integrations/provider-registry.js:18:  unsupported: true
+runtime/orchestrator-service/lib/integrations/provider-registry.js:30:  unsupportedAdapter
+runtime/orchestrator-service/lib/integrations/provider-registry.js:43:  return Boolean(adapter) && adapter.unsupported !== true;
+runtime/orchestrator-service/lib/integrations/provider-registry.js:46:function getUnsupportedProviderMessage(integrationId) {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:48:  if (!adapter || adapter.unsupported !== true) {
+runtime/orchestrator-service/lib/integrations/provider-registry.js:53:    adapter.unsupportedMessage ||
+runtime/orchestrator-service/lib/integrations/provider-registry.js:62:  getUnsupportedProviderMessage
+runtime/orchestrator-service/lib/integrations/storage.js:122:    // fsync is best-effort — some filesystems (e.g. network mounts) may not support it
+runtime/orchestrator-service/lib/execution/learning-patterns.js:25:        support_count: Number(current.support_count || 0) + Number(pattern.support_count || 1),
+runtime/orchestrator-service/lib/execution/learning-patterns.js:37:      support_count: Number(pattern.support_count || 1),
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:63:        support_count: channel.count,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:75:        support_count: hook.count,
+runtime/orchestrator-service/lib/execution/recommendation-builders.js:88:        support_count: 2,
+runtime/orchestrator-service/lib/ai/providers/openai.js:245:      operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:268:    operationsPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:296:              'Return actionable marketing output, not a process description, unless the command asks for operations.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:300:              `Set outputType to "${requestedOutputType}" unless the command clearly requires a better supported output type.`,
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:407:        operationsPlan: normalized.operationsPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:39:      'Build campaign concepts, launch plans, channel mix, audience segments, offer strategy, launch phases, assets, blockers, and handoffs.',
+runtime/orchestrator-service/lib/ai/provider-config.js:83:  operations: {
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:86:    outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:103:    operations_planner: 'operations'
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:19:      supported_media_types: ['image', 'video']
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:19:    supports_realtime: Boolean(model.supports_realtime),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:20:    supports_streaming: Boolean(model.supports_streaming),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:21:    supported_resolutions: Array.isArray(model.supported_resolutions)
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:22:      ? model.supported_resolutions
+runtime/orchestrator-service/lib/media/native/models/default-models.js:14:      supported_resolutions: ['1024x1024']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:24:      supports_realtime: true,
+runtime/orchestrator-service/lib/media/native/models/default-models.js:25:      supports_streaming: true
+runtime/orchestrator-service/lib/media/native/models/default-models.js:35:      supported_resolutions: ['1024x1024', '2048x2048']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:45:      supported_resolutions: ['1024x1024']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:55:      supported_resolutions: ['720p', '1080p']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:65:      supported_resolutions: ['720p']
+runtime/orchestrator-service/lib/media/native/models/default-models.js:75:      supports_streaming: true
+runtime/orchestrator-service/lib/media/native/models/default-models.js:85:      supports_realtime: true
+runtime/orchestrator-service/lib/media/native/models/README.md:8:- quality tier support
+runtime/orchestrator-service/lib/media/native/knowledge/platform-video-rules.json:26:      "notes": "Avoid unsupported claims and distracting backgrounds."
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:39:        status: 'unsupported_media_type',
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:40:        message: `OpenAI adapter does not yet support media type: ${mediaType}`
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:14:- support future Google Nano Banana, Veo, Runway, Kling, Pika adapters
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:6:  const supported = worker.capabilities?.supported_media_types;
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:8:  if (!Array.isArray(supported)) {
+runtime/orchestrator-service/lib/media/native/registry/worker-selection-engine.js:12:  return supported.includes(mediaType);
+runtime/orchestrator-service/lib/media/native/lifecycle/README.md:15:- retry support
+runtime/orchestrator-service/lib/media/native/protocol/README.md:18:- distributed rendering support
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:40:  const audience = asText(input.audience, 'German-market customers');
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:190:      throw new Error(`Unsupported dual-write domain: ${input.domain}`);

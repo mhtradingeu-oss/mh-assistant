@@ -1,0 +1,1240 @@
+# Priority Audit Summaries
+
+
+===== audits/frontend/master/FRONTEND_MASTER_AUTHORITY.md =====
+# MH-OS Frontend Master Authority
+
+## Product Vision
+
+MH-OS is an AI Business Operating System.
+
+It is not a dashboard, not a chatbot, and not a task list.
+
+The user experience target is that a user feels guided by a smart operating team across every page and transition. Pages are not isolated screens. Each page is a role in one operating surface.
+
+## Canonical User Flow
+
+User Goal -> Page Context -> AI Guidance -> Workflow Session -> Task/Handoff -> Destination Page -> Tracking -> Result/Next Action
+
+This flow is canonical and must be preserved across all major frontend work.
+
+## Architecture Doctrine
+
+- Backend = Authority
+- Frontend = Projection + Experience
+- Duplicate authority is a defect
+- Frontend compatibility fallbacks must be temporary and documented
+
+Authority rule:
+- Permissions, governance, approvals, execution authority, and durable operational truth belong to backend services.
+- Frontend may project, summarize, and guide, but may not become authority.
+
+## Frontend Non-Authority Boundaries
+
+Frontend must not independently own:
+- permissions
+- approvals
+- live publishing
+- live execution
+- Auto Mode
+- governance
+- durable tasks
+- operational authority
+
+## Frontend Responsibilities
+
+Frontend responsibilities are to:
+- render state
+- guide the user
+- preserve context
+- prepare drafts/packages
+- route to AI, Workflow, and Task Center paths
+- show clear feedback
+- expose safe actions only
+- remain a projection/runtime UX layer
+
+## Universal Page Model
+
+Every major page should converge toward this structure:
+- Header
+- Main Workspace
+- Action Panel
+- AI Guidance
+- Workflow Quick Action
+- Task/Handoff Path
+- Technical Details collapsed
+
+Design intent:
+- keep high-signal operating actions visible
+- keep low-signal technical diagnostics available but collapsed
+- reduce competing CTAs in the same panel
+
+## Action Destination Rule
+
+Every important action must clearly indicate destination and authority path. Each action must explicitly communicate whether it:
+- navigates
+- opens AI
+- starts workflow
+- creates task
+- creates handoff
+- prepares draft/package
+- requests approval
+- runs backend action
+- is dangerous and needs confirmation/governance
+
+No ambiguous primary actions are allowed.
+
+## Safety Rules
+
+- No unsafe Auto Mode
+- No live publishing without governance
+- No destructive action without confirmation
+- No frontend-only approvals
+- No raw secrets in UI
+- No metrics shown as fact without source
+- No hidden execution behind UI buttons
+- No page redesign before authority/lifecycle risks are handled
+
+Safety interpretation:
+- If authority is unclear, action must resolve through backend validation or explicit governance gate.
+- If execution side effects are meaningful, user confirmation and traceability are required.
+
+## UX Rules
+
+- premium, dark, executive, compact, clear
+- visual guidance over long text
+- one primary action per panel
+- secondary actions quieter
+- danger zone separated
+- technical details collapsed
+- no duplicate actions
+- no random CSS layering
+- use global primitives before page-specific CSS
+
+UX consistency rule:
+- page-specific styling is allowed only after global primitives and canonical shells are reused.
+
+## Page Role Summary
+
+- Home: Executive mission control and next-best-action entry
+- Setup: Project foundation and operational readiness baseline
+- Library: Asset truth projection, readiness, and controlled asset actions
+- Integrations: Connector health projection, diagnostics, and safe remediation routing
+- AI Command: Guided AI operating entry with context-aware command drafting
+- Workflows: Structured multi-step orchestration planning and controlled execution routing
+- Task Center: Operational task visibility and action tracking projection
+- Queue Center: Queue state visibility and prioritization projection
+- Job Monitor: Execution job status projection and escalation surface
+- Notifications: Operational signal inbox and acknowledgment routing
+- Campaign Studio: Campaign planning surface and package preparation
+- Content Studio: Content planning and draft preparation workspace
+- Media Studio: Media production planning and asset package preparation
+- Publishing: Publication package preparation and governance-gated release path
+- Insights: Performance and operational insight projection with sourced evidence
+- Ads Manager: Paid activity projection, planning, and safe action routing
+- Research: Market/competitor intelligence projection and decision support
+- Governance: Policy projection, approvals visibility, and controlled governance actions
+- Settings: Configuration projection and safe system preference management
+
+## Implementation Protocol
+
+For every page and major frontend feature, execution order is mandatory:
+
+Audit -> Confirm -> Decide -> Implement -> Browser QA -> Commit -> Closeout
+
+Protocol rule:
+- Skip-order implementation is not allowed for authority-sensitive or lifecycle-sensitive changes.
+
+## Current Progress
+
+Completed hardening work to date:
+- route authority boundary
+- lifecycle registry foundation
+- listener/timer density audit
+- app shell lifecycle integration
+- app shell regression audit
+- app shell lifecycle closeout
+- Library lifecycle tiny integration
+
+Current state:
+- App shell lifecycle baseline is stable.
+- Library is now aligned to shared lifecycle plumbing internally.
+- Publishing and Workflows remain deferred for lifecycle migration due to higher coupling risk.
+
+## Next Required Companion Docs
+
+- ACTION_DESTINATION_MAP.md
+- PAGE_BLUEPRINTS.md
+
+Intent:
+- ACTION_DESTINATION_MAP.md defines explicit action-to-authority routing semantics.
+- PAGE_BLUEPRINTS.md defines canonical page compositions and convergence targets.
+
+## Governance Alignment Statement
+
+This document is canonical for frontend/product authority posture.
+
+If any page behavior, design decision, or implementation proposal conflicts with this document:
+- backend authority wins
+- safety rules win
+- explicit action destination clarity wins
+
+## Explicit No-Code-Change Statement
+
+This Step 8 task is documentation-only.
+
+No production code was modified.
+- No frontend JS changes
+- No CSS changes
+- No backend changes
+- No data/projects changes
+- No route behavior changes
+
+===== audits/frontend/master/ACTION_DESTINATION_MAP.md =====
+# MH-OS Action Destination Map
+
+## Purpose
+
+Define canonical action types and execution rules so every important UI action has:
+- a clear destination
+- a clear authority path
+- a clear safety level
+- clear user feedback
+
+This document prevents ambiguous actions, hidden execution, and frontend authority drift.
+
+## Canonical Action Types
+
+### Navigate
+Meaning:
+- Move user to another MH-OS page or scoped workspace.
+
+Authority owner:
+- Frontend route projection. Backend authority unaffected.
+
+Allowed frontend behavior:
+- Route transition, preserve context, keep state continuity.
+
+Required feedback:
+- Show destination context loaded.
+- Show what changed in focus.
+
+Confirmation/governance:
+- Not required for standard navigation.
+
+Example labels:
+- Open in Campaign Studio
+- Go to Task Center
+- View Governance Queue
+
+### Open AI
+Meaning:
+- Open AI Command or AI guidance surface with contextual payload.
+
+Authority owner:
+- Backend for durable execution and policy; frontend only opens guidance and drafts.
+
+Allowed frontend behavior:
+- Pass prompt/context, prefill fields, open AI workspace.
+
+Required feedback:
+- Confirm context sent to AI.
+- Indicate whether this is draft-only or executable suggestion.
+
+Confirmation/governance:
+- Not required for opening AI itself.
+
+Example labels:
+- Ask AI to review selected assets
+- Open AI with campaign context
+- Send setup context to AI
+
+### Start Workflow
+Meaning:
+- Initialize a workflow session from current context.
+
+Authority owner:
+- Backend for durable workflow execution state.
+
+Allowed frontend behavior:
+- Start session scaffold, prefill workflow fields, route to Workflows.
+
+Required feedback:
+- Confirm workflow session started.
+- Show workflow ID/name if available.
+
+Confirmation/governance:
+- Required when workflow can trigger external or destructive execution.
+
+Example labels:
+- Start workflow for launch readiness
+- Start connector recovery workflow
+- Start media preparation workflow
+
+### Create Task
+Meaning:
+- Create a durable operational task assigned for follow-up.
+
+Authority owner:
+- Backend task system.
+
+Allowed frontend behavior:
+- Collect task payload, submit backend request, display created task reference.
+
+Required feedback:
+- Confirm task created.
+- Show owner/priority/destination queue.
+
+Confirmation/governance:
+- Required if task triggers downstream execution by policy.
+
+Example labels:
+- Create task for missing connector
+- Create task for legal review
+- Create remediation task
+
+### Create Handoff
+Meaning:
+- Create durable handoff package from one role/page to another.
+
+Authority owner:
+- Backend handoff persistence.
+
+Allowed frontend behavior:
+- Build handoff payload, submit, route to destination context.
+
+Required feedback:
+- Confirm handoff created.
+- Show destination and next operator/page.
+
+Confirmation/governance:
+- Required when handoff unlocks controlled execution path.
+
+Example labels:
+- Create handoff to Publishing
+- Handoff to AI Command
+- Create governance handoff
+
+### Prepare Draft
+Meaning:
+- Build non-executing draft output (copy, plan, setup, notes).
+
+Authority owner:
+- Frontend projection for temporary draft state; backend if persisted.
+
+Allowed frontend behavior:
+- Generate/prefill/edit draft content.
+
+Required feedback:
+- Explicitly mark as Draft.
+- Indicate not yet executed/published.
+
+Confirmation/governance:
+- Not required for local draft creation.
+
+Example labels:
+- Prepare campaign draft
+- Draft connector recovery plan
+- Save content draft
+
+### Prepare Package
+Meaning:
+- Build structured package for later approval/execution (not live run).
+
+Authority owner:
+- Frontend prepares package; backend validates and executes.
+
+Allowed frontend behavior:
+- Assemble package inputs, readiness checks, dependency summary.
+
+Required feedback:
+- Confirm package prepared.
+- Show missing blockers and required approvals.
+
+Confirmation/governance:
+- Required before any execution from package.
+
+Example labels:
+- Prepare publishing package
+- Prepare media package
+- Build governance package
+
+### Request Approval
+Meaning:
+- Submit approval request into governance authority path.
+
+Authority owner:
+- Backend governance and approval policy.
+
+Allowed frontend behavior:
+- Submit request metadata and context evidence.
+
+Required feedback:
+- Confirm approval requested.
+- Show approval status and where to track it.
+
+Confirmation/governance:
+- Mandatory backend governance path.
+
+Example labels:
+- Request governance approval
+- Submit for publishing approval
+- Request policy approval
+
+### Run Backend Action
+Meaning:
+- Trigger backend execution endpoint with traceable intent.
+
+Authority owner:
+- Backend execution engine and policy controls.
+
+Allowed frontend behavior:
+- Trigger, show pending/running/result state, expose trace/log links.
+
+Required feedback:
+- What started, current status, next step, failure reason if any.
+
+Confirmation/governance:
+- Required for high-impact operations.
+
+Example labels:
+- Run backend sync
+- Execute connector health check
+- Run readiness refresh
+
+### Dangerous Action
+Meaning:
+- Destructive or irreversible action.
+
+Authority owner:
+- Backend with strict validation, confirmation, and governance.
+
+Allowed frontend behavior:
+- Show danger UI, explicit confirmation, optional typed confirmation.
+
+===== audits/frontend/master/PAGE_BLUEPRINTS.md =====
+# MH-OS Page Blueprints
+
+## Purpose
+
+Define canonical target structure for each major page so future UX and frontend work follows one operating model consistent with MH-OS doctrine.
+
+This document converts authority and action-destination rules into page-by-page implementation targets.
+
+## Global Page Contract
+
+Every major page should define:
+- Role
+- Header
+- Main Workspace
+- Action Panel
+- AI Guidance
+- Workflow Quick Action
+- Task/Handoff Path
+- Forbidden Behavior
+- Backend Dependencies
+
+## Universal Page Model Reminder
+
+Header -> Main Workspace -> Action Panel -> AI Guidance -> Workflow Quick Action -> Task/Handoff Path -> Technical Details collapsed
+
+## Page Blueprints
+
+## Home
+
+A. Role: Executive mission control and next-best-action entry.
+B. Header should show: active project, current route context, top-level readiness summary, priority alerts.
+C. Main Workspace should show: cross-page operational snapshot, key blockers, immediate priorities.
+D. Action Panel should include: open destination pages, request focused analysis, start guided resolution path.
+E. AI Guidance should provide: next-best-action recommendations with rationale and destination links.
+F. Workflow Quick Action examples: Start launch-readiness workflow, Start blocker-triage workflow.
+G. Task/Handoff path: create task for blockers, create handoff to owning page/operator.
+H. Forbidden behavior: hidden execution, silent state mutation, authority decisions in frontend.
+I. Backend dependencies/authority source: project summary, readiness, alerts, tasks, queue, approvals.
+
+## Setup
+
+A. Role: Project foundation and operational readiness baseline.
+B. Header should show: project identity, setup completion state, last update timestamp.
+C. Main Workspace should show: setup fields, required completeness indicators, draft status.
+D. Action Panel should include: save draft, request review, route to affected operating pages.
+E. AI Guidance should provide: setup gap analysis and guided completion suggestions.
+F. Workflow Quick Action examples: Start setup completion workflow, Start setup validation workflow.
+G. Task/Handoff path: create task for missing setup dependencies, handoff to Governance when policy-sensitive.
+H. Forbidden behavior: direct governance approval in UI, hidden durable writes without backend trace.
+I. Backend dependencies/authority source: setup persistence, validation endpoints, policy constraints.
+
+## Library
+
+A. Role: Asset truth projection, readiness, and controlled asset actions.
+B. Header should show: project asset readiness, selected category/filter context, upload state.
+C. Main Workspace should show: asset catalog, readiness signals, selected asset details.
+D. Action Panel should include: upload, classify, mark source-of-truth, create package/handoff.
+E. AI Guidance should provide: asset quality/readiness recommendations and missing asset guidance.
+F. Workflow Quick Action examples: Start asset readiness workflow, Start content-prep workflow from selected assets.
+G. Task/Handoff path: create task for missing asset classes, handoff selected assets to Content/Media/Publishing.
+H. Forbidden behavior: direct publishing, frontend-only approval, unsafe destructive actions without confirmation.
+I. Backend dependencies/authority source: library catalog, protected media access, asset status/source-of-truth APIs.
+
+## Integrations
+
+A. Role: Connector health projection and remediation routing.
+B. Header should show: connector status summary, critical integration alerts, sync freshness.
+C. Main Workspace should show: connectors, diagnostics, health checks, error states.
+D. Action Panel should include: run backend sync, reconnect, create remediation task/workflow.
+E. AI Guidance should provide: likely root cause analysis and repair sequence recommendations.
+F. Workflow Quick Action examples: Start connector recovery workflow, Start channel readiness workflow.
+G. Task/Handoff path: create task for unresolved integration failures, handoff to operations/governance when required.
+H. Forbidden behavior: opaque reconnect side effects, execution without explicit backend trace.
+I. Backend dependencies/authority source: integration control center endpoints, diagnostics/sync/reconnect APIs.
+
+## AI Command
+
+A. Role: Guided AI operating entry and orchestration support.
+B. Header should show: active mode, command context scope, project alignment indicator.
+C. Main Workspace should show: command draft, AI responses, suggested actions/routes.
+D. Action Panel should include: send prompt, create task, create handoff, start workflow from AI output.
+E. AI Guidance should provide: structured recommendations with destination-safe action framing.
+F. Workflow Quick Action examples: Start workflow from AI recommendation, Generate workflow package from command.
+G. Task/Handoff path: convert AI recommendation to durable task or handoff with trace.
+H. Forbidden behavior: AI acting as authority, hidden execution, ambiguous Auto Mode triggers.
+I. Backend dependencies/authority source: AI command service, durable handoff/task APIs, automation guard state.
+
+## Workflows
+
+A. Role: Structured multi-step orchestration planning and controlled execution routing.
+B. Header should show: selected workflow, current stage, gate status, run state.
+C. Main Workspace should show: workflow plan, step states, blockers, required approvals.
+D. Action Panel should include: start/pause/resume within allowed policy, request approval, create tasks.
+E. AI Guidance should provide: step optimization suggestions and policy-safe next actions.
+F. Workflow Quick Action examples: Start launch campaign workflow, Run one safe step, Prepare approval package.
+G. Task/Handoff path: create task from blocked step, handoff package to Governance or destination page.
+H. Forbidden behavior: unsafe auto execution, bypassing approvals, hidden high-impact operations.
+I. Backend dependencies/authority source: automation engine state, workflow execution APIs, governance gate data.
+
+## Task Center
+
+A. Role: Operational task visibility and action tracking projection.
+B. Header should show: open task counts by priority/status, owner focus, freshness indicator.
+C. Main Workspace should show: task list, selected task detail, filters/search.
+D. Action Panel should include: refresh, copy summary, navigate to owning page, create follow-up task/handoff.
+E. AI Guidance should provide: prioritization and sequencing recommendations from current task state.
+F. Workflow Quick Action examples: Start blocker-resolution workflow from selected task.
+G. Task/Handoff path: create child task, handoff to Queue/Job/Governance as needed.
+H. Forbidden behavior: frontend-only completion authority without backend trace.
+I. Backend dependencies/authority source: task center read/write endpoints, notification trace links.
+
+## Queue Center
+
+A. Role: Queue state visibility and prioritization projection.
+B. Header should show: queue depth, active/running distribution, status mix.
+C. Main Workspace should show: queue items, selected queue detail, status filters.
+D. Action Panel should include: refresh queue, route to owner page, create remediation task.
+E. AI Guidance should provide: queue prioritization and bottleneck recommendations.
+F. Workflow Quick Action examples: Start queue-clearing workflow for selected queue type.
+G. Task/Handoff path: create task for blocked queue items, handoff to operations owner.
+H. Forbidden behavior: hidden queue mutation without backend acknowledgement.
+I. Backend dependencies/authority source: queue center endpoints, execution status data.
+
+## Job Monitor
+
+A. Role: Execution job status projection and escalation surface.
+B. Header should show: running/failed/completed counts, last refresh status.
+C. Main Workspace should show: jobs list, selected job logs/metadata summary.
+D. Action Panel should include: refresh, open related page, create escalation task.
+E. AI Guidance should provide: failure pattern hints and recommended recovery actions.
+F. Workflow Quick Action examples: Start failure-recovery workflow from selected job family.
+G. Task/Handoff path: escalate failed jobs to task and handoff to responsible page/team.
+H. Forbidden behavior: pretending execution is complete without backend confirmation.
+I. Backend dependencies/authority source: job monitor endpoints, execution telemetry summaries.
+
+## Notifications
+
+A. Role: Operational signal inbox and acknowledgment routing.
+B. Header should show: unread counts, severity distribution, notification freshness.
+C. Main Workspace should show: notification feed, severity filters, selected detail.
+D. Action Panel should include: mark read, open destination context, create follow-up task.
+E. AI Guidance should provide: summarize critical signals and suggest response order.
+F. Workflow Quick Action examples: Start incident-response workflow for critical notifications.
+G. Task/Handoff path: convert critical notifications into tasks/handoffs with evidence.
+H. Forbidden behavior: dropping high-severity notifications without traceable action path.
+I. Backend dependencies/authority source: notification center endpoints, mark status APIs.
+
+## Campaign Studio
+
+A. Role: Campaign planning surface and package preparation.
+B. Header should show: campaign objective, readiness status, channel scope.
+C. Main Workspace should show: campaign plan, audience/message structure, dependencies.
+D. Action Panel should include: prepare campaign draft, send to AI, create package/handoff.
+E. AI Guidance should provide: strategy refinement and risk-aware recommendations.
+F. Workflow Quick Action examples: Start campaign launch workflow, Start campaign QA workflow.
+G. Task/Handoff path: task for unresolved campaign blockers, handoff to Content/Publishing.
+H. Forbidden behavior: direct live execution without governance.
+I. Backend dependencies/authority source: campaign persistence endpoints, readiness data.
+
+## Content Studio
+
+A. Role: Content planning and draft preparation workspace.
+B. Header should show: content objective, format/channel target, draft status.
+C. Main Workspace should show: content drafts, variant options, readiness checks.
+D. Action Panel should include: save draft, ask AI rewrite/review, prepare handoff package.
+E. AI Guidance should provide: quality, consistency, and compliance recommendations.
+F. Workflow Quick Action examples: Start content production workflow, Start content QA workflow.
+G. Task/Handoff path: handoff approved drafts to Media/Publishing; task unresolved content gaps.
+H. Forbidden behavior: publish from unclear buttons, hidden external execution.
+I. Backend dependencies/authority source: content draft persistence, validation/compliance services.
+
+## Media Studio
+
+A. Role: Media production planning and asset package preparation.
+B. Header should show: media job scope, required assets, output readiness state.
+C. Main Workspace should show: media plan, source assets, output drafts/previews.
+D. Action Panel should include: prepare media package, request review, handoff to Publishing.
+E. AI Guidance should provide: format optimization and quality readiness guidance.
+F. Workflow Quick Action examples: Start media production workflow, Start media QA workflow.
+G. Task/Handoff path: task for missing media dependencies, handoff output package to Publishing.
+H. Forbidden behavior: direct live publish, destructive asset mutation without confirmation.
+I. Backend dependencies/authority source: media asset services, packaging/validation endpoints.
+
+## Publishing
+
+A. Role: Publication package preparation and governance-gated release path.
+B. Header should show: package readiness, approvals status, channel targets.
+C. Main Workspace should show: publish candidates, schedule data, blockers, policy gates.
+D. Action Panel should include: prepare package, request approval, run backend publish action when allowed.
+E. AI Guidance should provide: readiness check and channel-risk guidance.
+F. Workflow Quick Action examples: Start publishing readiness workflow, Start preflight checklist workflow.
+G. Task/Handoff path: task for blocker remediation, handoff package to Governance for approval.
+H. Forbidden behavior: live publish without governance, frontend-only approval, unsafe Auto Mode execution.
+I. Backend dependencies/authority source: publishing schedule/action endpoints, approvals/governance state.
+
+## Insights
+
+A. Role: Performance and operational insight projection with sourced evidence.
+B. Header should show: reporting window, project context, confidence/source markers.
+C. Main Workspace should show: key metrics, trends, anomalies, sourced explanatory notes.
+D. Action Panel should include: open source detail, create task from insight, route to relevant page.
+E. AI Guidance should provide: interpretation and suggested next actions with confidence framing.
+F. Workflow Quick Action examples: Start performance improvement workflow.
+G. Task/Handoff path: create task/handoff for underperformance findings.
+H. Forbidden behavior: presenting unsourced metrics as fact.
+I. Backend dependencies/authority source: analytics/insight endpoints with source metadata.
+
+## Ads Manager
+
+A. Role: Paid activity projection, planning, and safe action routing.
+B. Header should show: paid channel status, spend posture, critical performance flags.
+C. Main Workspace should show: campaign/adset performance projection and recommendations.
+D. Action Panel should include: prepare paid change package, request review, create task.
+E. AI Guidance should provide: optimization recommendations and risk-aware options.
+F. Workflow Quick Action examples: Start paid optimization workflow.
+G. Task/Handoff path: handoff approved paid package for governed execution.
+H. Forbidden behavior: hidden live ad execution from ambiguous button.
+I. Backend dependencies/authority source: paid integrations, policy/gate state, execution logs.
+
+## Research
+
+===== audits/frontend/ai-command/full-ai-team-truth-audit/AI_COMMAND_FULL_TEAM_TRUTH_AUDIT.md =====
+# AI Command / AI Team Full Team Truth Audit
+
+## 1. Current Architecture
+
+**What AI Command currently is:**
+- AI Command is the AI Business Operating Team page, providing a unified workspace for specialist and team-based AI operations.
+- Implements both solo specialist and Full Team modes, with specialist roles mapped to business functions (strategist, writer, media, video lead, publisher, ads, analyst, compliance reviewer, operations, customer ops, sales/CRM).
+- Core features: Quick Actions, Smart Tool Drawer, chat composer, output workspace, handoff contracts, and destination intake.
+
+**What is implemented:**
+- Solo specialist and Full Team modes are both present, with clear toggles and visual separation.
+- Specialist tool mapping and drawer grouping are implemented, with per-specialist tool sets and compact UX options.
+- Routing logic for output to Task Center, Workflows, Content Studio, Media Studio, Publishing, Governance, and Insights is present and mapped.
+- Library source return flow is implemented, with shared context contracts for handoff.
+- Chat composer and output workspace support preview, result formatting, and next action guidance.
+- CSS layers for AI Command, drawer, and output workspace are present and mapped.
+
+**What is only planned:**
+- Some advanced features (e.g., real-time team chat execution bridge, native GPU video rendering, voice input) are marked as planned but not yet implemented.
+- Some specialist roles (e.g., research, advanced compliance) are planned but not fully visible in the UI.
+
+**What is frontend-only:**
+- Most tool drawer actions, preview, and composer logic are frontend-only and review-only by default.
+- No direct backend mutation or publishing from AI Command; all execution is confirmation-gated and routed to destination workspaces.
+
+**What connects to backend/API:**
+- Handoff contracts and shared context bridges connect to backend for intake and review, but not for direct execution.
+- Some insights and data coverage may pull from backend APIs for context.
+
+**What is review-only:**
+- All outputs, handoffs, and drafts are review-only until confirmed in the destination workspace (Task Center, Workflows, etc.).
+- No direct publishing, approval, or backend mutation from AI Command.
+
+---
+
+## 2. Specialist and Full Team Model
+
+**Each specialist role:**
+- Strategist, Writer, Media, Video Lead, Publisher, Ads, Analyst, Compliance Reviewer, Operations, Customer Ops, Sales/CRM.
+- Each role has mapped tools, actions, and routing logic.
+
+**Full Team behavior:**
+- Full Team mode orchestrates across all specialists, producing coordinated draft previews only.
+- No execution, publishing, or backend actions from Full Team mode.
+
+**Team model completeness:**
+- Core specialist roles are implemented; some advanced/research roles are planned but not fully visible.
+- Team model is functionally complete for main business operations but could improve visibility for planned roles.
+
+**Missing specialist visibility/power:**
+- Planned specialists are shown as "planned" but not interactive.
+- Some roles (e.g., research, advanced compliance) lack full tool/action mapping.
+
+**User understanding:**
+- Users can see who does what via the team rail, specialist profiles, and tool drawer grouping.
+- Full Team mode is clearly labeled as preview-only, with safety notes.
+
+---
+
+## 3. Routing and Scenario Logic
+
+**Output routing:**
+- Task Center: Task/handoff outputs, customer ops, operations, sales/CRM (when outputType is "task").
+- Workflows: Strategist, operations, sales/CRM, Full Team (when outputType is "workflow" or in team mode).
+- Content Studio: Writer/content outputs, some media outputs.
+- Media Studio: Media, video lead outputs.
+- Publishing: Publisher outputs, publishing checklists.
+- Governance: Compliance reviewer outputs, governance checks.
+- Insights/Research: Analyst outputs, research/insights.
+
+**Full Team routing:**
+- Full Team mode routes all outputs as coordinated draft previews to Workflows or Task Center, never direct execution.
+
+**Scenario gaps:**
+- Some edge cases (e.g., research, advanced compliance, multi-specialist handoff) are planned but not fully implemented.
+- Intake for some destinations (e.g., advanced research, integrations) may need improvement.
+
+---
+
+## 4. Tools and Drawer
+
+**Quick Actions:**
+- Present for each specialist, mapped to common tasks.
+
+**Smart Tool Drawer:**
+- Implements per-specialist tool grouping, compact UX, and source-required logic.
+- Library source return flow is present and contract-based.
+
+**Source-required tools:**
+- Tools requiring source selection enforce source selection and guide user to Library.
+
+**Use in Composer:**
+- All tools support "Use in Composer" for draft preparation.
+
+**Change Source:**
+- Supported via drawer UI and Library integration.
+
+**Library source return flow:**
+- Shared context contract ensures safe return from Library to AI Command.
+
+**Drawer open logic:**
+- All tools can open the drawer; density is managed via compact UX and grouping.
+
+**Drawer density/compact UX:**
+- Compact UX is implemented; density is manageable but could be improved for very large tool sets.
+
+**Source return break risk:**
+- Library return flow is robust but could break if context contract is lost; rare in current implementation.
+
+**Duplication risk:**
+- Some risk of tool duplication if specialist/tool mapping is not maintained; audits in place to monitor.
+
+---
+
+## 5. Chat and Output Workspace
+
+**Composer clarity:**
+- Composer is clear, with role labeling, typing indicator, and guidance.
+
+**Typing indicator:**
+- Implemented for specialist and team modes.
+
+**Result formatting:**
+- Output preview is structured, with clear next actions and confirmation notes.
+
+**Output preview:**
+- Present for all outputs; review-only by default.
+
+**Output clarity:**
+- Output is clear, labeled, and previewed before any action.
+
+**Chat duplication risk:**
+- Some risk if multiple specialists respond in parallel; managed by session logic.
+
+**User next action clarity:**
+- Next actions are clearly labeled (e.g., "Review in Task Center").
+
+---
+
+## 6. Cross-Page Connections
+
+**Destinations with good intake:**
+- Task Center: Strong intake for handoff, review, and task context.
+- Workflows: Robust handoff and intake logic.
+- Library: Well-integrated with source return flow.
+- Content Studio, Media Studio, Publishing: Intake logic present and mapped.
+
+**Destinations needing improvement:**
+- Advanced research, integrations, and some governance flows could improve intake clarity and robustness.
+
+---
+
+## 7. CSS and UI/UX Risk
+
+**Existing CSS layers:**
+- AI Command, drawer, and output workspace have dedicated CSS layers.
+- Ownership is clear; duplication risk is low but present if new layers are added without audit.
+
+**Drawer CSS layers:**
+- Compact and grouped; compact UX is available.
+
+**Duplication risk:**
+- Monitored via audits; no critical duplication found, but vigilance required.
+
+**Patch now or avoid:**
+- No CSS patch recommended until next implementation phase; current layers are stable.
+
+**Best UI/UX model:**
+- Compact, grouped, and role-labeled UI is best for final AI Team page.
+
+---
+
+## 8. Missing / Fix / Upgrade List
+
+**P0 (Must fix before continuing):**
+- None blocking current review-only operation.
+
+**P1 (Needed for AI Command completion):**
+- Full visibility and tool/action mapping for all planned specialists (e.g., research, advanced compliance).
+- Intake robustness for advanced destinations (research, integrations).
+- Finalize team chat execution bridge (if required for business use).
+
+**P2 (UX polish):**
+- Further compacting of tool drawer for very large teams.
+- Improved visual cues for planned vs. active specialists.
+- Minor density and clarity improvements in output workspace.
+
+**P3 (Future expansion):**
+- Real-time voice input, GPU video, advanced research tooling.
+- Deeper backend integration for advanced automation (if ever required).
+
+---
+
+## 9. Final Recommended Implementation Order
+
+1. **Audit/Confirm:**
+   - Confirm all specialist roles and tool mappings are visible and correct.
+   - Validate intake logic for all destinations, especially advanced/research.
+2. **Smallest Safe Patch:**
+   - Add missing specialist visibility and tool mapping.
+   - Patch intake logic for advanced destinations.
+3. **Browser QA:**
+   - Test all routing, drawer, and handoff flows in browser.
+   - Confirm no duplication or context loss in Library return.
+4. **Commit:**
+   - Commit only after full QA and audit.
+5. **Closeout:**
+   - Document final state and update audit.
+
+---
+
+## 10. Final Product Recommendation
+
+**Best professional UI/UX direction:**
+- Show team power via clear Full Team mode, specialist rail, and role-labeled actions.
+- Keep it simple: compact tool drawer, grouped actions, clear preview/review-only labeling.
+- Guide the user: always show next action, confirmation notes, and safety labels.
+- Expose tools without clutter: use grouping, compact UX, and per-specialist drawers.
+- Make it feel like an AI Business Operating Team: emphasize orchestration, review, and safe handoff, not just chat.
+- Avoid direct execution; always route to review/confirmation in destination workspaces.
+
+===== MISSING: audits/frontend/system-truth-final/MH_OS_SYSTEM_TRUTH_READINESS_FINAL_AUDIT.md =====
+
+===== audits/runtime-governance/p1-15-final-freeze/P1_15_FINAL_FREEZE_CHECKPOINT.md =====
+# P1.15 — FINAL FREEZE CHECKPOINT
+
+# STATUS
+P1 COMPLETE
+
+---
+
+# CANONICAL DOCTRINE
+
+Backend owns operational authority.
+Frontend projects operational authority.
+
+---
+
+# CONFIRMED ARCHITECTURE
+
+## Backend responsibilities
+- governance authority
+- workflow authority
+- approvals
+- orchestration authority
+- execution authority
+- route permissions
+- escalation chains
+- durable operations
+- AI team operational model
+
+## Frontend responsibilities
+- executive operating surfaces
+- projection rendering
+- transient UX state
+- local drafts before save
+- visual orchestration
+- runtime shell
+- overlays
+- responsive experience
+- operating workflows UI
+
+---
+
+# COMPLETED P1 STABILIZATION
+
+## Runtime stabilization
+- overlay runtime isolation
+- runtime mapping
+- loading governance
+- AI dock interaction protection
+- auto-mode gating
+- render/runtime separation
+
+## Authority governance
+- authority inventory
+- conflict classification
+- backend projection contract
+- projection helper
+- route permission shadowing
+- app projection integration
+- Home projection integration
+- AI Workspace projection integration
+- router shadow planning
+- authority deprecation mapping
+
+---
+
+# CONFIRMED SAFE BOUNDARIES
+
+## Forbidden
+- heavy intelligence during render
+- frontend governance ownership
+- frontend workflow authority
+- frontend approval authority
+- frontend source-of-truth permissions
+- implicit auto-mode startup
+- duplicate overlay ownership
+- direct operational mutations during render
+
+## Allowed
+- projection rendering
+- transient local UI state
+- compatibility fallback layers
+- temporary static fallback cards/maps
+- local drafts before persistence
+- runtime visual orchestration
+
+---
+
+# KNOWN COMPATIBILITY LAYERS
+
+## Still temporary
+- DEFAULT_ROUTE_ROLE_ACCESS
+- ACTIVE_ROUTE_ROLES
+- AGENT_CARDS fallback
+- MODE_DEFS fallback
+- shared-context transient handoffs
+- automation-engine compatibility runtime
+- workflow compatibility execution logic
+
+## Planned future migration
+- router projection runtime
+- unified orchestration runtime
+- unified workflow execution runtime
+- unified handoff lifecycle
+- backend-driven governance projection
+- backend-driven AI runtime orchestration
+
+---
+
+# FREEZE RULES
+
+From this point forward:
+
+1. No new frontend authority systems.
+2. No new monolithic runtime surfaces.
+3. No execution logic inside render paths.
+4. No duplicate governance ownership.
+5. No direct operational authority in UI pages.
+6. All future migrations must be rollback-safe.
+7. Every runtime change requires:
+   - snapshot
+   - node --check
+   - scoped diff
+   - architecture validation
+   - isolated commit
+
+---
+
+# P1 RESULT
+
+MH-OS is no longer operating as:
+- fragmented dashboard frontend
+- mixed authority frontend/backend system
+- unstable orchestration shell
+
+MH-OS is now operating as:
+- controlled projection runtime
+- backend-authoritative operating system foundation
+- enterprise AI operations architecture
+- governed orchestration runtime foundation
+
+---
+
+# NEXT PHASE
+
+P2 — Projection Runtime Consolidation
+
+Primary goals:
+- unify runtime state
+- unify orchestration bridges
+- unify workflow execution surfaces
+- unify AI Workspace runtime
+- unify operational lifecycle projection
+- consolidate execution/runtime boundaries
+
+
+===== MISSING: audits/release/RELEASE_READINESS_FINAL_QA.md =====
+
+===== MISSING: audits/release/PRODUCTION_OPERATIONS_READINESS.md =====
+
+===== audits/frontend/global-ui/STEP_41B_FINAL_PAGE_SHELL_HEADER_STANDARD_PLAN.md =====
+# STEP 41B — Final Page Shell/Header Standard Plan
+
+**Date:** 2026-05-14  
+**Branch:** architecture/frontend-consolidation-v1  
+**Mode:** DOCUMENTATION ONLY / planning-only  
+**Status:** Ready for adoption execution (STEP 41C)
+
+---
+
+## Executive Summary
+
+This plan defines the **Final Global Page Shell/Header Standard** that all launch-ready Control Center pages must adopt before final UI redesign. The standard is derived from the Operations pages (Task Center, Queue Center, Job Monitor, Notification Center), which have achieved the target structure through clean-layer adoption (STEP 36–40).
+
+**What This Plan Establishes:**
+- ✅ The definitive page structure model (5 required layers, 4 optional patterns)
+- ✅ Global CSS primitives and naming strategy (existing + new)
+- ✅ Adoption rules that preserve all IDs, data attributes, handlers, and APIs
+- ✅ Page-by-page rollout sequence (6 priority pages, then remainder)
+- ✅ Launch-ready page criteria and acceptance checklist
+- ✅ Risk controls and rollback strategies
+- ✅ Recommendation for STEP 41C (either global primitives CSS or first page audit)
+
+**Key Principle:**  
+This is an **opt-in structural adoption**, not a breaking change. All production code remains untouched. CSS additions use `:where()` wrappers and opt-in class namespaces. Pages opt into the standard by adopting the wrapper classes and semantic structure; handler logic and APIs remain exactly as they are today.
+
+**Timeline:**
+- STEP 41B (this plan): Documentation
+- STEP 41C (not yet): Global CSS primitives OR first non-Operations page audit
+- STEP 41D+: Sequential page adoption (Governance → Settings → Integrations → Library → Publishing → Campaign Studio)
+
+---
+
+## Final Page Model
+
+All launch-ready Control Center pages must adopt this 5-layer + 4-pattern structure:
+
+### Layer 1: Page Container
+```
+<section class="page is-active" data-page="{page-id}">
+  <div class="std-page-shell">
+    ...
+  </div>
+</section>
+```
+- **Class:** `std-page-shell` (wrapper for entire page content)
+- **Data Attribute:** `data-page="{page-id}"` (preserved, no changes)
+- **Purpose:** Single, unified page container
+- **Status:** Existing pattern in page-standard.js
+
+---
+
+### Layer 2: Context Ribbon (Header)
+```
+<section class="std-context-ribbon">
+  <div class="std-context-main">
+    <div class="std-context-line">
+      <span class="std-context-eyebrow">{DOMAIN}</span>
+      <h3 class="std-context-title">{Page Title}</h3>
+    </div>
+    <p class="std-context-description">{Purpose, scope, or current state}</p>
+    <div class="std-context-metrics">
+      <span class="std-context-chip">{metric}</span>
+      <span class="std-context-chip is-warning">{metric}</span>
+      <span class="std-context-chip is-danger">{metric}</span>
+    </div>
+  </div>
+  <div class="std-context-actions">
+    <span class="card-badge">{Status Badge}</span>
+    <button class="btn btn-secondary std-context-btn">{Primary Action}</button>
+  </div>
+</section>
+```
+
+**Components:**
+- `.std-context-eyebrow` — Uppercase domain label (e.g., "TASK CENTER", "GOVERNANCE", "LIBRARY")
+- `.std-context-title` — Page title (clipped if needed, no text-overflow on wrap)
+- `.std-context-description` — 1–2 sentence purpose statement (secondary text)
+- `.std-context-metrics` — Live metric chips (total, open, overdue, alerts, etc.)
+  - `.std-context-chip` — Neutral badge
+  - `.std-context-chip.is-warning` — Warning badge
+  - `.std-context-chip.is-danger` — Danger badge
+- `.std-context-actions` — Right side: status badge + primary button
+
+**Status:** Existing pattern; defined in `14-page-standard.css`
+
+**Required on:** All launch-ready pages (100% adoption)
+
+---
+
+### Layer 3: Main View / Content Area
+```
+<div class="std-main-column">
+  <!-- Page-specific content: table, grid, form, builder, etc. -->
+  <!-- May include: focus tabs, filters, toolbar, content grid/table -->
+</div>
+```
+
+**Structure:** Page-specific. Each page type has unique content:
+- **Operations pages:** Table with focus tabs, search, filters
+- **Configuration pages:** Form sections with fields
+- **Asset pages:** Grid or list with search
+- **Builder pages:** Editor + canvas + controls
+
+**CSS:** Page applies layout and structure (grid/flex). May use:
+- `.std-focus-tabs` — Tab navigation (existing pattern in operations)
+- `.std-toolbar` — Filter/search bar
+- `.std-table` — Table container (existing)
+- `.std-grid` — Grid container (page-specific sizing)
+
+**Status:** Mostly existing patterns; may need minor naming consistency
+
+**Required on:** All pages (content varies by page)
+
+---
+
+### Layer 4: Right Rail (Context Navigation)
+```
+<aside class="std-right-rail">
+  <!-- Three stacked panels: detail card, action panel, AI panel -->
+</aside>
+```
+
+**Sub-Containers:**
+
+#### 4a. Detail Card / Selected Item Panel
+```
+<section class="std-detail-card mhos-clean-surface">
+  <div class="panel-header">
+    <div>
+      <div class="panel-kicker">{Entity Type}</div>
+      <h3>{Item Title or "Select an item"}</h3>
+      <p>{Context or instructions}</p>
+    </div>
+  </div>
+  <!-- Page-specific detail rows, metadata, linked entities -->
+</section>
+```
+- **Content:** Selected item review (fields, metadata, linked work)
+- **Empty State:** "Select a {entity} to view details"
+- **Status:** Existing pattern in operations-centers.js
+- **Required on:** Pages with selectable items (Tasks, Governance approvals, Library assets, etc.)
+
+#### 4b. Action Panel
+```
+<section class="std-action-panel mhos-clean-surface">
+  <div class="panel-header">
+    <div>
+      <div class="panel-kicker">Action Panel</div>
+      <h3>Page/Item Actions</h3>
+      <p>{Safety explanation or action description}</p>
+    </div>
+  </div>
+  <div class="std-action-row">
+    <!-- Active, safe, non-destructive buttons -->
+    <button class="btn btn-primary">Primary Action</button>
+    <button class="btn btn-secondary">Secondary Action</button>
+  </div>
+  <div class="std-deferred-actions">
+    <!-- Deferred actions with safety explanations (disabled) -->
+    <button class="btn btn-ghost" disabled>Mutation Action (deferred: mutation safety pass)</button>
+  </div>
+</section>
+```
+- **Content:** Safe actions (refresh, route, copy) + deferred mutations (with explanations)
+- **Safety Model:** Active (enabled) vs. Deferred (disabled) with clear explanations
+- **Status:** Existing pattern in operations-centers.js
+- **Required on:** Pages with state-changing actions
+
+#### 4c. AI Panel
+```
+<section class="std-ai-panel mhos-clean-surface">
+  <div class="panel-header">
+    <div>
+      <div class="panel-kicker">AI Panel</div>
+      <h3>AI Assistant</h3>
+      <p>Context-only handoff: opens AI with prompt/context only.</p>
+    </div>
+  </div>
+  <div class="std-action-row">
+    <button class="btn btn-secondary" data-ops-ai-open>Open in AI Workspace</button>
+  </div>
+  <div class="std-quick-actions">
+    <!-- Page-specific quick prompt buttons -->
+    <button class="std-quick-action-btn" data-ai-prompt="0">
+      <span class="prompt-title">{Prompt Label}</span>
+      <span class="prompt-meta">{Preview Text}</span>
+    </button>
+  </div>
+</section>
+```
+- **Content:** AI open button + 3–5 quick prompt buttons (context-aware)
+- **Handoff:** Context-only (no approval, publishing, or backend execution)
+- **Status:** Existing pattern in operations-centers.js
+- **Required on:** Pages that benefit from AI decision support
+
+**Right Rail Stack:**
+```
+.std-right-rail (flex/grid, column, gap)
+  ├─ .std-detail-card (mhos-clean-surface)
+  ├─ .std-action-panel (mhos-clean-surface)
+  └─ .std-ai-panel (mhos-clean-surface)
+```
+
+**Status:** Structure exists in operations; needs naming standardization
+
+**Required on:** Most pages (detail, action, AI patterns)
+
+---
+
+### Layer 5: System Signal / Context Strip (Optional)
+```
+<section class="std-signal-strip" data-signal-type="runtime|approvals|alerts">
+  <!-- Cross-page operational context, system health, next-best-action -->
+</section>
+```
+
+**Examples:**
+- Operations pages show executive runtime signal (jobs, queue, alerts, approvals)
+- Home page shows team summary + blockers
+- Governance page shows approval queue summary
