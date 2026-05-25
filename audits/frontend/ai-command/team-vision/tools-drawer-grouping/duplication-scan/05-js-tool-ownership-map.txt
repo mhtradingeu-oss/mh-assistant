@@ -1,0 +1,110 @@
+public/control-center/pages/ai-command.js:1:import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
+public/control-center/pages/ai-command.js:3757:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+public/control-center/pages/ai-command.js:3845:function canonicalToolNeedsSelectedSource(tool = {}) {
+public/control-center/pages/ai-command.js:3856:		requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+public/control-center/pages/ai-command.js:3861:function getPhase35ToolSet(session) {
+public/control-center/pages/ai-command.js:3863:	return getAiToolDockTools({
+public/control-center/pages/ai-command.js:3898:	const tools = getPhase35ToolSet(session);
+public/control-center/pages/ai-command.js:3922:							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+public/control-center/pages/ai-command.js:4333:        const selectedToolHints = getAiToolDockTools({
+public/control-center/pages/ai-command.js:5306:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+public/control-center/pages/ai-command.js:5309:				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+public/control-center/pages/ai-command.js:5312:				const tool = getPhase35ToolSet(session).find((entry) => entry.id === toolId);
+public/control-center/pages/ai-command/tool-dock.js:50:  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:55:    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+public/control-center/pages/ai-command/tool-dock.js:59:    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+public/control-center/pages/ai-command/tool-dock.js:60:      || root.querySelector("[data-aicmd-tool-dock]");
+public/control-center/pages/ai-command/tool-dock.js:67:  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:73:  const msg = document.querySelector("[data-aicmd-tool-drawer-status]");
+public/control-center/pages/ai-command/tool-dock.js:196:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+public/control-center/pages/ai-command/tool-dock.js:233:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+public/control-center/pages/ai-command/tool-dock.js:234:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:235:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:258:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change Source</button>
+public/control-center/pages/ai-command/tool-dock.js:259:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove</button>
+public/control-center/pages/ai-command/tool-dock.js:281:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+public/control-center/pages/ai-command/tool-dock.js:284:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+public/control-center/pages/ai-command/tool-dock.js:287:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+public/control-center/pages/ai-command/tool-dock.js:326:export const TOOL_DOCK_BY_SPECIALIST = {
+public/control-center/pages/ai-command/tool-dock.js:1128:  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+public/control-center/pages/ai-command/tool-dock.js:1131:export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1134:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1135:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1136:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1146:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1147:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1148:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1173:    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+public/control-center/pages/ai-command/tool-dock.js:1174:      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+public/control-center/pages/ai-command/tool-dock.js:1178:            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+public/control-center/pages/ai-command/tool-dock.js:1180:              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Smart tool</p>
+public/control-center/pages/ai-command/tool-dock.js:1181:              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+public/control-center/pages/ai-command/tool-dock.js:1184:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+public/control-center/pages/ai-command/tool-dock.js:1187:        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+public/control-center/pages/ai-command/tool-dock.js:1194:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1199:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1200:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+public/control-center/pages/ai-command/tool-dock.js:1201:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+public/control-center/pages/ai-command/tool-dock.js:1206:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1214:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+public/control-center/pages/ai-command/tool-dock.js:1223:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+public/control-center/pages/ai-command/tool-dock.js:1238:                data-aicmd-tool-drawer-source-details
+public/control-center/pages/ai-command/tool-dock.js:1248:                data-aicmd-tool-drawer-extra-brief
+public/control-center/pages/ai-command/tool-dock.js:1257:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+public/control-center/pages/ai-command/tool-dock.js:1263:          <p data-aicmd-tool-drawer-summary>Choose output, source, destination, language, and tone.</p>
+public/control-center/pages/ai-command/tool-dock.js:1271:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
+public/control-center/pages/ai-command/tool-dock.js:1272:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+public/control-center/pages/ai-command/tool-dock.js:1273:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+public/control-center/pages/ai-command/tool-dock.js:1298:            data-aicmd-tool-dock="${safe(tool.id)}"
+public/control-center/pages/ai-command/tool-dock.js:1299:            data-aicmd-tool-dock-label="${safe(tool.label)}"
+public/control-center/pages/ai-command/tool-dock.js:1300:            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+public/control-center/pages/ai-command/tool-dock.js:1301:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+public/control-center/pages/ai-command/tool-dock.js:1302:            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+public/control-center/pages/ai-command/tool-dock.js:1303:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+public/control-center/pages/ai-command/tool-dock.js:1304:            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+public/control-center/pages/ai-command/tool-dock.js:1305:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1306:            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1307:            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+public/control-center/pages/ai-command/tool-dock.js:1308:            data-aicmd-tool-dock-template="${safe(tool.template)}"
+public/control-center/pages/ai-command/tool-dock.js:1415:  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+public/control-center/pages/ai-command/tool-dock.js:1416:  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+public/control-center/pages/ai-command/tool-dock.js:1417:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+public/control-center/pages/ai-command/tool-dock.js:1418:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+public/control-center/pages/ai-command/tool-dock.js:1419:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+public/control-center/pages/ai-command/tool-dock.js:1420:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+public/control-center/pages/ai-command/tool-dock.js:1421:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+public/control-center/pages/ai-command/tool-dock.js:1422:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1423:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+public/control-center/pages/ai-command/tool-dock.js:1489:  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+public/control-center/pages/ai-command/tool-dock.js:1492:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1493:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1494:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+public/control-center/pages/ai-command/tool-dock.js:1495:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+public/control-center/pages/ai-command/tool-dock.js:1496:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+public/control-center/pages/ai-command/tool-dock.js:1497:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:1498:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+public/control-center/pages/ai-command/tool-dock.js:1529:  drawer.dataset.pendingTool = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1530:  const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "guided";
+public/control-center/pages/ai-command/tool-dock.js:1535:  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+public/control-center/pages/ai-command/tool-dock.js:1536:  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+public/control-center/pages/ai-command/tool-dock.js:1537:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+public/control-center/pages/ai-command/tool-dock.js:1540:    "[data-aicmd-tool-drawer-description]",
+public/control-center/pages/ai-command/tool-dock.js:1541:    `Prepare ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"} for the active project. Choose the output, source, destination, language, and tone before using it in the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1543:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+public/control-center/pages/ai-command/tool-dock.js:1545:  const rawOutputs = btn.getAttribute("data-aicmd-tool-dock-outputs") || "";
+public/control-center/pages/ai-command/tool-dock.js:1546:  const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
+public/control-center/pages/ai-command/tool-dock.js:1547:  const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
+public/control-center/pages/ai-command/tool-dock.js:1551:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+public/control-center/pages/ai-command/tool-dock.js:1552:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+public/control-center/pages/ai-command/tool-dock.js:1553:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination");
+public/control-center/pages/ai-command/tool-dock.js:1572:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+public/control-center/pages/ai-command/tool-dock.js:1589:  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+public/control-center/pages/ai-command/tool-dock.js:1591:  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+public/control-center/pages/ai-command/tool-dock.js:1595:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+public/control-center/pages/ai-command/tool-dock.js:1600:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+public/control-center/pages/ai-command/tool-dock.js:1624:        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+public/control-center/pages/ai-command/tool-dock.js:1640:  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+public/control-center/pages/ai-command/tool-dock.js:1678:  Array.from(root.querySelectorAll("[data-aicmd-tool-dock]")).forEach((btn) => {
+public/control-center/pages/ai-command/tool-dock.js:1680:      const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
+public/control-center/pages/ai-command/tool-dock.js:1681:      const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+public/control-center/pages/ai-command/tool-dock.js:1682:      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";
