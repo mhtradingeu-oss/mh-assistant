@@ -1,0 +1,79 @@
+50:  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+67:  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+73:  const msg = document.querySelector("[data-aicmd-tool-drawer-status]");
+196:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+211:function validateDrawerSourceRequirement(drawer, projectName = "") {
+233:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+234:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+235:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+244:    validateDrawerSourceRequirement(drawer, projectName);
+258:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change Source</button>
+259:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove</button>
+281:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+284:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+287:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+295:        validateDrawerSourceRequirement(drawer, projectName);
+300:  validateDrawerSourceRequirement(drawer, projectName);
+1171:function renderSmartToolDrawerShell(safe) {
+1173:    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+1174:      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+1178:            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+1180:              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Smart tool</p>
+1181:              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+1184:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+1187:        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+1194:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
+1199:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+1200:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+1201:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+1206:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
+1214:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+1223:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+1238:                data-aicmd-tool-drawer-source-details
+1248:                data-aicmd-tool-drawer-extra-brief
+1257:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+1263:          <p data-aicmd-tool-drawer-summary>Choose output, source, destination, language, and tone.</p>
+1271:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
+1272:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+1273:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+1284:  return renderSmartToolDrawerShell(safe);
+1325:    ${renderSmartToolDrawerShell(safe)}
+1422:  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+1423:  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+1424:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+1425:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+1426:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1427:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+1428:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+1429:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1430:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1496:  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+1499:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+1500:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+1501:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1502:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+1503:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+1504:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1505:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1532:function openToolDrawer({ drawer, btn, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+1542:  setDrawerText(drawer, "[data-aicmd-tool-drawer-icon]", btn.getAttribute("data-aicmd-tool-dock-icon") || "✦");
+1543:  setDrawerText(drawer, "[data-aicmd-tool-drawer-title]", btn.getAttribute("data-aicmd-tool-dock-label") || "Smart tool");
+1544:  setDrawerText(drawer, "[data-aicmd-tool-drawer-action]", `${humanizeMeta(actionType)} · ${humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-owner") || "ai-command")}`);
+1547:    "[data-aicmd-tool-drawer-description]",
+1550:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+1558:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+1559:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
+1560:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination");
+1565:      validateDrawerSourceRequirement(drawer, projectName);
+1569:      validateDrawerSourceRequirement(drawer, projectName);
+1574:  validateDrawerSourceRequirement(drawer, projectName);
+1594:  const drawer = root?.querySelector?.("[data-aicmd-tool-drawer]");
+1614:  return openToolDrawer({
+1640:  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+1642:  Array.from(root.querySelectorAll("[data-aicmd-tool-drawer-close]")).forEach((btn) => {
+1646:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+1651:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+1675:        outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
+1691:  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+1697:      if (!validateDrawerSourceRequirement(drawer, projectName)) {
+1737:        const opened = openToolDrawer({
