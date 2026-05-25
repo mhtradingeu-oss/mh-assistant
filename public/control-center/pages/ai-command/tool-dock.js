@@ -1185,7 +1185,7 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
-          Review the requirements before preparing the composer prompt.
+          Choose the output, source, and destination before preparing a review-only composer prompt.
         </p>
 
         <div class="mhos-tool-drawer-grid">
@@ -1264,7 +1264,7 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <div class="mhos-tool-drawer-note">
-          This drawer is preparation-only. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
+          Preparation-only: this drawer creates a composer-ready instruction. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
         </div>
 
         <div class="mhos-tool-drawer-actions">
@@ -1277,18 +1277,25 @@ function renderSmartToolDrawerShell(safe) {
   `;
 }
 
+export function renderAiToolDrawerShell({ escapeHtml } = {}) {
+  const safe = typeof escapeHtml === "function"
+    ? escapeHtml
+    : (value) => String(value ?? "");
+  return renderSmartToolDrawerShell(safe);
+}
+
 export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
   const safe = typeof escapeHtml === "function"
     ? escapeHtml
     : (value) => String(value ?? "");
   const tools = getDockTools({ specialistId, teamMode });
-  const label = teamMode === "team" ? "Team quick tools" : "Specialist quick tools";
+  const label = teamMode === "team" ? "Team guided tools" : "Specialist guided tools";
 
   return `
     <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
       <div class="mhos-tool-dock-head">
         <span class="mhos-tool-dock-kicker">${safe(label)}</span>
-        <span class="mhos-tool-dock-copy">Smart tools · review before action</span>
+        <span class="mhos-tool-dock-copy">Guided setup · output, source, destination, then use in composer</span>
       </div>
       <div class="mhos-tool-dock-list">
         ${tools.map((tool) => `
@@ -1571,6 +1578,50 @@ function openToolDrawer({ drawer, btn, text, input, session, projectName, persis
   drawer.classList.add("is-open");
   updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
   return true;
+}
+
+export function openAiToolDrawerFromMetadata({
+  root = typeof document !== "undefined" ? document : null,
+  tool = {},
+  template = "",
+  input,
+  session,
+  projectName = "",
+  persistSessionDraft,
+  sessionKey,
+  updateStatus
+} = {}) {
+  const drawer = root?.querySelector?.("[data-aicmd-tool-drawer]");
+  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
+  const meta = {
+    "data-aicmd-tool-dock": tool.id || "tool",
+    "data-aicmd-tool-dock-label": tool.label || "Smart tool",
+    "data-aicmd-tool-dock-icon": tool.icon || "✦",
+    "data-aicmd-tool-dock-badge": tool.badge || "",
+    "data-aicmd-tool-dock-action": actionType,
+    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
+    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])),
+    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"]))
+  };
+  const btn = {
+    getAttribute(name) {
+      return meta[name] || "";
+    }
+  };
+
+  return openToolDrawer({
+    drawer,
+    btn,
+    text: template || tool.template || tool.prompt || "",
+    input,
+    session,
+    projectName,
+    persistSessionDraft,
+    sessionKey,
+    updateStatus
+  });
 }
 
 export function bindAiToolDock({

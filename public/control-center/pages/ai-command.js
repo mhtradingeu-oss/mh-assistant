@@ -1,4 +1,9 @@
-import { bindAiToolDock, getAiToolDockTools } from "./ai-command/tool-dock.js";
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        openAiToolDrawerFromMetadata,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
 
 import {
@@ -9,7 +14,6 @@ import {
 
 import {
         getSharedHandoff,
-        getSharedAiSource,
         setSharedAiDraft,
         setSharedHandoff
 } from "../shared-context.js";
@@ -3903,8 +3907,8 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
 			<div class="aicmd-v2-tools-head">
 				<div>
-					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Canonical Tools</h3>
-					<span class="aicmd-v2-tools-subtitle">Same tool model as the Smart Dock. These prepare drafts only and do not execute backend operations.</span>
+					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Quick Actions</h3>
+					<span class="aicmd-v2-tools-subtitle">Fast specialist actions for the current output. Review-only: prepares drafts, previews, or handoffs without backend execution.</span>
 				</div>
 				<span class="aicmd-v2-tools-count">${tools.length} tools</span>
 			</div>
@@ -4774,6 +4778,7 @@ export const aiCommandRoute = {
 					</aside>
 				</div>
 				${renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml)}
+				${renderAiToolDrawerShell({ escapeHtml })}
 			</div>
 		`;
 
@@ -5312,40 +5317,35 @@ export const aiCommandRoute = {
 				const tool = getPhase35ToolSet(session).find((entry) => entry.id === toolId);
 				if (!tool) return;
 
-				if (tool.action === "route") {
-					const destination = asString(tool.route || "workflows");
-					showMessage?.(`Opening ${routeLabel(destination)}.`);
-					navigateTo(destination);
-					return;
-				}
-
-				const selectedLibrarySource = getSharedAiSource(projectName || "__default__") || getSharedAiSource("__default__");
-				if (tool.requiresSelectedSource && !selectedLibrarySource?.name) {
-					const message = "This tool needs a source. Choose from Library or change the source type before continuing.";
-					updateStatus(message);
-					showMessage?.(message);
-					return;
-				}
-
 				const preparedPrompt = applyTokenTemplate(tool.template, {
 					projectName,
 					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
 					campaign: aiContext.campaign
 				});
 
-				setAiComposerValue(session, input, preparedPrompt);
+				const drawerTool = {
+					...tool,
+					actionType: tool.requiresSelectedSource ? "source_required" : (tool.actionType || "guided"),
+					destinations: asArray(tool.destinations).length ? tool.destinations : [getToolDestinationRoute(tool, session)],
+					sourceTypes: asArray(tool.sourceTypes).length ? tool.sourceTypes : ["current_chat"],
+					outputTypes: asArray(tool.outputTypes).length ? tool.outputTypes : [asString(tool.intent || tool.id || "draft").replace(/[^a-z0-9_]+/g, "_")]
+				};
 
-				if (tool.intent === "task") {
-					setPreviewFromIntent("task", preparedPrompt, { switchTab: "preview" });
-				} else if (tool.intent === "workflow") {
-					setPreviewFromIntent("workflow", preparedPrompt, { switchTab: "preview" });
-				} else if (tool.intent === "handoff") {
-					setPreviewFromIntent("handoff", preparedPrompt, { switchTab: "preview" });
-				} else {
-					setPreviewFromIntent("guidance", preparedPrompt, { switchTab: "preview" });
+				const opened = openAiToolDrawerFromMetadata({
+					root: document,
+					tool: drawerTool,
+					template: preparedPrompt,
+					input,
+					session,
+					projectName,
+					persistSessionDraft,
+					sessionKey,
+					updateStatus
+				});
+
+				if (!opened) {
+					updateStatus("Smart tool drawer is unavailable. Refresh AI Command and try again.");
 				}
-
-				showMessage?.(`${tool.label} prepared as local preview.`);
 			};
 		});
 

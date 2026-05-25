@@ -1,0 +1,45 @@
+  1278	}
+  1279	
+  1280	export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+  1281	  const safe = typeof escapeHtml === "function"
+  1282	    ? escapeHtml
+  1283	    : (value) => String(value ?? "");
+  1284	  const tools = getDockTools({ specialistId, teamMode });
+  1285	  const label = teamMode === "team" ? "Team quick tools" : "Specialist quick tools";
+  1286	
+  1287	  return `
+  1288	    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+  1289	      <div class="mhos-tool-dock-head">
+  1290	        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+  1291	        <span class="mhos-tool-dock-copy">Smart tools · review before action</span>
+  1292	      </div>
+  1293	      <div class="mhos-tool-dock-list">
+  1294	        ${tools.map((tool) => `
+  1295	          <button
+  1296	            type="button"
+  1297	            class="mhos-tool-dock-item"
+  1298	            data-aicmd-tool-dock="${safe(tool.id)}"
+  1299	            data-aicmd-tool-dock-label="${safe(tool.label)}"
+  1300	            data-aicmd-tool-dock-icon="${safe(tool.icon)}"
+  1301	            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+  1302	            data-aicmd-tool-dock-action="${safe(tool.actionType || "guided")}"
+  1303	            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+  1304	            data-aicmd-tool-dock-owner="${safe(tool.frontendOwnerPage || "ai-command")}"
+  1305	            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+  1306	            data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"
+  1307	            data-aicmd-tool-dock-outputs="${safe(joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"])))}"
+  1308	            data-aicmd-tool-dock-template="${safe(tool.template)}"
+  1309	            title="${safe(tool.template)}"
+  1310	          >
+  1311	            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+  1312	            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+  1313	            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+  1314	          </button>
+  1315	        `).join("")}
+  1316	      </div>
+  1317	    </section>
+  1318	    ${renderSmartToolDrawerShell(safe)}
+  1319	  `;
+  1320	}
+  1321	
+  1322	function humanizeMeta(value = "") {

@@ -1,0 +1,51 @@
+public/control-center/pages/ai-command.js:2633:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2686:	showMessage?.(`Inbound handoff loaded from ${normalized.sourceLabel}.`);
+public/control-center/pages/ai-command.js:3845:function canonicalToolNeedsSelectedSource(tool = {}) {
+public/control-center/pages/ai-command.js:3856:		requiresSelectedSource: canonicalToolNeedsSelectedSource(tool),
+public/control-center/pages/ai-command.js:3861:function getPhase35ToolSet(session) {
+public/control-center/pages/ai-command.js:3898:	const tools = getPhase35ToolSet(session);
+public/control-center/pages/ai-command.js:3921:							class="aicmd-v2-tool-btn aicmd-room-tool-card"
+public/control-center/pages/ai-command.js:3922:							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+public/control-center/pages/ai-command.js:4674:			showMessage,
+public/control-center/pages/ai-command.js:4735:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:4838:		                showMessage?.("AI chat session loaded.");
+public/control-center/pages/ai-command.js:4874:		                showMessage?.("New AI session started. Previous chat saved to Recent chats.");
+public/control-center/pages/ai-command.js:4882:				showMessage?.("Opening Settings.");
+public/control-center/pages/ai-command.js:5005:					showMessage?.("Voice input readiness is staged for compatible browsers.");
+public/control-center/pages/ai-command.js:5054:		                        showMessage?.("AI chat route is not connected yet.");
+public/control-center/pages/ai-command.js:5196:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:5231:                                showMessage?.(`${specLabel} guidance preview prepared from conversation.`);
+public/control-center/pages/ai-command.js:5255:                                showMessage?.("Task draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5278:                                showMessage?.("Workflow draft preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5302:                                showMessage?.("Handoff preview prepared from conversation.");
+public/control-center/pages/ai-command.js:5306:		const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+public/control-center/pages/ai-command.js:5309:				const toolId = asString(btn.getAttribute("data-aicmdv2-tool") || "").trim();
+public/control-center/pages/ai-command.js:5312:				const tool = getPhase35ToolSet(session).find((entry) => entry.id === toolId);
+public/control-center/pages/ai-command.js:5317:					showMessage?.(`Opening ${routeLabel(destination)}.`);
+public/control-center/pages/ai-command.js:5324:					const message = "This tool needs a source. Choose from Library or change the source type before continuing.";
+public/control-center/pages/ai-command.js:5326:					showMessage?.(message);
+public/control-center/pages/ai-command.js:5348:				showMessage?.(`${tool.label} prepared as local preview.`);
+public/control-center/pages/ai-command.js:5359:				showMessage?.("Composer draft saved locally.");
+public/control-center/pages/ai-command.js:5375:				showMessage?.("Composer draft cleared.");
+public/control-center/pages/ai-command.js:5398:						showMessage?.("Response copied.");
+public/control-center/pages/ai-command.js:5432:				showMessage?.("Response saved locally.");
+public/control-center/pages/ai-command.js:5462:		                showMessage?.("Draft preview ready from conversation.");
+public/control-center/pages/ai-command.js:5497:				showMessage?.("Response draft context prepared. Review before saving or executing.");
+public/control-center/pages/ai-command.js:5532:						showMessage?.("Preview copied.");
+public/control-center/pages/ai-command.js:5592:				showMessage?.("Draft context prepared for routing. Review before saving or executing.");
+public/control-center/pages/ai-command.js:5608:				showMessage?.("Preview saved locally.");
+public/control-center/pages/ai-command.js:5636:				showMessage?.("Preview cleared.");
+public/control-center/pages/ai-command/tool-dock.js:72:  const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+public/control-center/pages/ai-command/tool-dock.js:75:    msg.textContent = selectedSource?.name
+public/control-center/pages/ai-command/tool-dock.js:225:    "This tool needs a source. Choose from Library or change the source type before continuing."
+public/control-center/pages/ai-command/tool-dock.js:1280:export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+public/control-center/pages/ai-command/tool-dock.js:1428:  const selectedSourceContext = buildSelectedSourceContextBlock(projectName);
+public/control-center/pages/ai-command/tool-dock.js:1446:  if (selectedSourceContext) {
+public/control-center/pages/ai-command/tool-dock.js:1447:    lines.push("", selectedSourceContext);
+public/control-center/pages/ai-command/tool-dock.js:1525:function openToolDrawer({ drawer, btn, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+public/control-center/pages/ai-command/tool-dock.js:1601:      const selectedSourceType = drawerSourceSelect?.value || "auto";
+public/control-center/pages/ai-command/tool-dock.js:1602:      const mapping = getSourceTypeMapping(selectedSourceType);
+public/control-center/pages/ai-command/tool-dock.js:1607:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1623:        sourceType: selectedSourceType,
+public/control-center/pages/ai-command/tool-dock.js:1647:        updateStatus?.("This tool needs a source. Choose from Library or change the source type before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1686:        const opened = openToolDrawer({

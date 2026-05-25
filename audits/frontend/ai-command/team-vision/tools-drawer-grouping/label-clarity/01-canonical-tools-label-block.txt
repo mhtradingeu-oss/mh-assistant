@@ -1,0 +1,58 @@
+  3888					>
+  3889						<span>${escapeHtml(tab.label)}</span>
+  3890						<small>${escapeHtml(tab.hint)}</small>
+  3891					</button>
+  3892				`).join("")}
+  3893			</div>
+  3894		`;
+  3895	}
+  3896	
+  3897	function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+  3898		const tools = getPhase35ToolSet(session);
+  3899		const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+  3900		const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+  3901	
+  3902		return `
+  3903			<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
+  3904				<div class="aicmd-v2-tools-head">
+  3905					<div>
+  3906						<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Canonical Tools</h3>
+  3907						<span class="aicmd-v2-tools-subtitle">Same tool model as the Smart Dock. These prepare drafts only and do not execute backend operations.</span>
+  3908					</div>
+  3909					<span class="aicmd-v2-tools-count">${tools.length} tools</span>
+  3910				</div>
+  3911				<div class="aicmd-v2-tools-grid aicmd-room-tools-grid">
+  3912					${tools.map((tool) => {
+  3913						const outputLabel = getToolOutputTypeLabel(tool);
+  3914						const actionLabel = getToolSafeActionLabel(tool);
+  3915						const purpose = summarizeToolPurpose(tool);
+  3916						const destination = routeLabel(getToolDestinationRoute(tool, session));
+  3917						const status = getToolExecutionStatusLabel(tool);
+  3918						return `
+  3919							<button
+  3920								type="button"
+  3921								class="aicmd-v2-tool-btn aicmd-room-tool-card"
+  3922								data-aicmdv2-tool="${escapeHtml(tool.id)}"
+  3923								data-output-type="${escapeHtml(outputLabel.toLowerCase())}"
+  3924							>
+  3925								<span class="aicmd-room-tool-topline">
+  3926									<strong class="aicmd-v2-tool-label">${escapeHtml(tool.label)}</strong>
+  3927									<span class="aicmd-room-tool-action">${escapeHtml(actionLabel)}</span>
+  3928								</span>
+  3929								<span class="aicmd-room-tool-purpose">${escapeHtml(purpose)}</span>
+  3930								<span class="aicmd-v2-tool-meta">
+  3931									<span>Output: ${escapeHtml(outputLabel)}</span>
+  3932									<span>Route: ${escapeHtml(destination)}</span>
+  3933									<span>Status: ${escapeHtml(status)}</span>
+  3934								</span>
+  3935							</button>
+  3936						`;
+  3937					}).join("")}
+  3938				</div>
+  3939				${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}</div>` : ""}
+  3940			</section>
+  3941		`;
+  3942	}
+  3943	
+  3944	function renderLanguageMarketStrip(aiContext, escapeHtml) {
+  3945		const languagePlan = getWorkspaceLanguagePlan(aiContext);
