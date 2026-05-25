@@ -1,0 +1,27 @@
+# Source of Truth Mismatch Classification
+
+## Finding
+- Both canonical and legacy files exist.
+- Canonical and legacy schemas differ.
+- Runtime logs repeatedly report canonical_legacy_value_mismatch.
+- This is not a syntax failure; it is a migration/parity boundary issue.
+
+## Classification
+P1 release blocker unless formally accepted as known migration debt.
+
+## Evidence
+150:canonical_keys: ['required_sources', 'sources', 'statuses', 'updated_at']
+151:legacy_keys: ['email', 'facebook', 'instagram', 'tiktok', 'website', 'youtube']
+152:equal_json: False
+153:keys_only_in_canonical: ['required_sources', 'sources', 'statuses', 'updated_at']
+154:keys_only_in_legacy: ['email', 'facebook', 'instagram', 'tiktok', 'website', 'youtube']
+155:changed_top_level_keys: []
+
+## Recent warning sample count
+162
+
+## Required decision
+Decide one of:
+A) migrate legacy sources-registry into canonical model and stop mismatch warnings
+B) deprecate legacy file read for this domain after compatibility audit
+C) formally accept mismatch as known non-release-blocking migration debt with owner/date
