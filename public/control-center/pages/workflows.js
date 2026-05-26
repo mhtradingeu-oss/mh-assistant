@@ -1330,6 +1330,14 @@ function bindWorkflowExecutionLoop({
     };
   }
 
+function confirmWorkflowBackendRun(workflow) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  const title = workflow?.title || "this workflow";
+  return window.confirm(
+    `Confirm workflow preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It does not publish, send messages, create CRM records, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.`
+  );
+}
+
   async function runWorkflow(workflowId) {
     const activeWorkflow = getWorkflowDef(workflowId || session.selectedWorkflowId);
     session.selectedWorkflowId = activeWorkflow.id;
@@ -1346,6 +1354,12 @@ function bindWorkflowExecutionLoop({
 
     if (!projectName) {
       setValidation("Select a project before running a workflow.");
+      return;
+    }
+
+    const confirmed = confirmWorkflowBackendRun(activeWorkflow);
+    if (!confirmed) {
+      setValidation("Workflow preparation cancelled. No backend workflow run was recorded.");
       return;
     }
 
