@@ -1258,7 +1258,7 @@ function getGeneratorFallbackMessage(session, backendProjectName) {
   if (mode === "video" && readiness.video_generation_backend) return "";
   if (mode === "voice" && readiness.voice_generation_backend) return "";
   if (mode === "campaign-pack" && readiness.image_generation_backend && readiness.video_generation_backend && readiness.voice_generation_backend) return "";
-  return "Generator backend not connected yet — prompt/job is ready.";
+  return "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
 }
 
 function renderScopedStyles() {
@@ -1745,7 +1745,7 @@ function renderMediaCommandHeader({ projectName, session, metrics, selectedItem,
         <div>
           <div class="setup-kicker">Media Studio</div>
           <h2>Creative preparation, review, and routing workspace</h2>
-          <p class="media-section-copy">Prepare media briefs, prompts, outputs, Library saves, and review handoffs without live publishing authority.</p>
+          <p class="media-section-copy">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>
         </div>
         <div class="media-command-next">
           <span>Next action</span>
@@ -1933,6 +1933,7 @@ function renderGenerator(session, state, backendProjectName, escapeHtml) {
         <div>
           <div class="setup-kicker">Media Generator</div>
           <h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>
+          <p class="media-section-copy">Choose a media mode, prepare a prompt/job-ready draft, then render with a connected provider or continue safely with review and handoff.</p>
         </div>
         <span class="card-badge neutral">${escapeHtml(modeLabel)}</span>
       </div>
@@ -1942,6 +1943,9 @@ function renderGenerator(session, state, backendProjectName, escapeHtml) {
         `).join("")}
       </div>
       ${fallback ? `<div class="simple-banner">${escapeHtml(fallback)}</div>` : ""}
+          <div class="simple-banner media-block-gap">
+            Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.
+          </div>
       <form id="mediaGeneratorForm" class="setup-form-grid media-generator-form" novalidate>
         <input type="hidden" name="mode" value="${escapeHtml(mode)}">
         <div class="setup-form-grid setup-form-grid-2">
@@ -1958,7 +1962,7 @@ function renderGenerator(session, state, backendProjectName, escapeHtml) {
         </div>
         ${renderField({ id: "mediaObjectiveInput", name: "objective", label: "Objective", value: form.objective, multiline: true, rows: 3 }, session, escapeHtml)}
         ${renderField({ id: "mediaBrandStyleInput", name: "brandStyle", label: "Brand style", value: form.brandStyle, multiline: true, rows: 3 }, session, escapeHtml)}
-        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "If no generation backend exists, this becomes a prompt/job ready item for review and handoff." }, session, escapeHtml)}
+        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
         <div class="setup-form-grid setup-form-grid-2">
           ${renderField({ id: "mediaReferenceInput", name: "referenceAsset", label: "Reference asset if available", value: form.referenceAsset, helper: "Use an asset id, filename, or source note already known to the project." }, session, escapeHtml)}
           ${renderField({ id: "mediaTitleInput", name: "title", label: "Job title", value: form.title, helper: "Optional operator-facing queue title." }, session, escapeHtml)}
@@ -2288,7 +2292,7 @@ function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
           <div class="media-viewer-hint">Tap/click image to expand.</div>
         </div>
       `
-      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "Image generator returned no preview URL/base64 yet.")}</div>`;
+      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
   }
 
   if (mode === "video") {
@@ -2302,7 +2306,7 @@ function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
       const lines = parseStructuredList(videoBrief || asString(payload.message));
       previewBody = lines.length
         ? `<div class="media-prompt-box">${escapeHtml(lines.join("\n"))}</div>`
-        : `<div class="media-prompt-box">${escapeHtml("Video brief is not available yet for this version.")}</div>`;
+        : `<div class="media-prompt-box">${escapeHtml("No video output or video brief is available yet. Generate or prepare a video brief first; provider-backed video output appears here only when the backend returns a video URL.")}</div>`;
     }
   }
 
@@ -2325,7 +2329,7 @@ function renderOutputPreviewPanel(session, selectedItem, escapeHtml) {
           <div class="media-check-item"><span>Pacing</span><strong>${escapeHtml(pacing)}</strong></div>
           <div class="media-check-item"><span>Duration</span><strong>${escapeHtml(duration)}</strong></div>
         </div>
-        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "Voice script is not available yet for this version.")}</div>
+        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>
       `;
     }
   }
@@ -2609,7 +2613,7 @@ function renderApiReadiness(session, backendProjectName, escapeHtml) {
           </div>
         `).join("")}
       </div>
-      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — prompt/job is ready.")}</div>` : ""}
+      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>` : ""}
     </section>
   `;
 }
@@ -2767,13 +2771,13 @@ function bindMediaStudio({
           outputPayload: response,
           providerStatus: "provider_not_configured",
           readinessStatus: "prompt_ready",
-          notes: firstText(response.message, "Generator backend not connected yet — prompt/job is ready."),
+          notes: firstText(response.message, "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation."),
           provider: response.provider || "",
           model: response.model || ""
         });
         syncOutputsFromVersioning(session);
         saveDraftToSession(projectName, state, session, "prompt_ready");
-        session.draftMessage = response.message || "Generator backend not connected yet — prompt/job is ready.";
+        session.draftMessage = response.message || "Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.";
         rerender();
         return;
       }
