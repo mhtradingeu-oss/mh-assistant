@@ -661,20 +661,20 @@ function renderScopedStyles() {
     <style>
       .publishing-execution-center {
         display: grid;
-        gap: 16px;
+        gap: 14px;
         min-width: 0;
       }
 
       .publishing-execution-grid {
         display: grid;
-        gap: 16px;
+        gap: 14px;
         min-width: 0;
       }
 
       .publishing-main-column,
       .publishing-side-column {
         display: grid;
-        gap: 16px;
+        gap: 14px;
         min-width: 0;
         align-content: start;
       }
@@ -686,8 +686,8 @@ function renderScopedStyles() {
 
       .publishing-overview-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+        gap: 9px;
       }
 
       .publishing-overview-item,
@@ -695,7 +695,7 @@ function renderScopedStyles() {
         min-width: 0;
         border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
         border-radius: 8px;
-        padding: 12px;
+        padding: 10px;
         background: var(--surface-muted, rgba(15, 23, 42, 0.03));
       }
 
@@ -729,12 +729,19 @@ function renderScopedStyles() {
       }
 
       .publishing-impact-row {
-        margin-top: 14px;
+        margin-top: 12px;
       }
 
       .publishing-action-row,
       .publishing-form-actions {
-        margin-top: 14px;
+        margin-top: 12px;
+      }
+
+      .publishing-action-row .btn,
+      .publishing-form-actions .btn {
+        white-space: normal;
+        line-height: 1.2;
+        text-align: center;
       }
 
       .publishing-impact-chip {
@@ -764,16 +771,16 @@ function renderScopedStyles() {
       .publishing-calendar-list,
       .publishing-blocker-list {
         display: grid;
-        gap: 10px;
-        margin-top: 14px;
+        gap: 9px;
+        margin-top: 12px;
         min-width: 0;
       }
 
       .publishing-queue-row {
         display: grid;
-        gap: 10px;
+        gap: 9px;
         min-width: 0;
-        padding: 12px;
+        padding: 10px;
         border-radius: 12px;
         background: rgba(15, 23, 42, 0.74);
         border: 1px solid rgba(148, 163, 184, 0.18);
@@ -801,6 +808,7 @@ function renderScopedStyles() {
         display: block;
         font-weight: 800;
         color: #f8fafc;
+        line-height: 1.18;
         overflow-wrap: anywhere;
       }
 
@@ -816,16 +824,28 @@ function renderScopedStyles() {
       .publishing-queue-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 7px;
+        align-items: center;
       }
 
       .publishing-queue-actions button {
+        min-height: 32px;
         border: 1px solid rgba(148, 163, 184, 0.22);
         border-radius: 999px;
-        padding: 6px 9px;
+        padding: 6px 10px;
         background: rgba(15, 23, 42, 0.72);
         color: #e5eef8;
         cursor: pointer;
+        white-space: normal;
+        line-height: 1.18;
+      }
+
+      .publishing-queue-actions button:focus-visible,
+      .publishing-queue-main:focus-visible,
+      .publishing-calendar-row:focus-visible,
+      .publishing-filter-chip:focus-visible {
+        outline: 2px solid rgba(34, 211, 238, 0.72);
+        outline-offset: 2px;
       }
 
       .publishing-queue-actions button:disabled,
@@ -875,9 +895,10 @@ function renderScopedStyles() {
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 6px 10px;
         align-items: center;
+        min-height: 42px;
         border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
         border-radius: 8px;
-        padding: 10px;
+        padding: 9px 10px;
       }
 
       .publishing-calendar-row em {
