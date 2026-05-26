@@ -4026,7 +4026,8 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 					${renderLanguageMarketStrip(aiContext, escapeHtml)}
 				</div>
 
-				<div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
+				<div class="aicmd-v2-composer-hint">Draft/review only · suggested prompts prefill this composer · execution happens in the owning workspace after confirmation.</div>
+                                <div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
 			</div>
 		`;
 }
@@ -4516,7 +4517,7 @@ function renderPhase1SuggestedPrompts(session, escapeHtml) {
 						class="aicmd-v2-prompt-chip"
 						type="button"
 						data-aicmdv2-prompt="${idx}"
-						data-aicmdv2-prompt-text="${escapeHtml(p.label)}"
+						data-aicmdv2-prompt-text="${escapeHtml(p.prompt || `${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.`)}"
 					>
 						<span class="aicmd-v2-prompt-chip-label">${escapeHtml(p.label)}</span>
 						<span class="aicmd-v2-prompt-chip-sub">${escapeHtml(p.sub)}</span>
