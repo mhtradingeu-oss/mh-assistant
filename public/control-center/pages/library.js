@@ -1922,7 +1922,7 @@ function bindLibraryWorkspace({
       `
       : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
     // Bind Use as AI Source button (inspector and grid quick action)
-    const useBtns = previewMeta.querySelectorAll("[data-library-use-ai-source]");
+    let useBtns = Array.from(previewMeta.querySelectorAll("[data-library-use-ai-source]"));
     if (useBtns.length === 0 && gridBody) {
       // fallback: try to find in grid
       const gridBtn = gridBody.querySelector("[data-library-use-ai-source]");

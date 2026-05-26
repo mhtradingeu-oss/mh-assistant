@@ -65,20 +65,40 @@ function tryAutoOpenDrawerAfterLibrary(projectName) {
   }
 
   const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
-  if (activeDrawer) {
+  let drawerIsOpen = Boolean(
+    activeDrawer &&
+    activeDrawer.hidden === false &&
+    activeDrawer.getAttribute("aria-hidden") === "false" &&
+    activeDrawer.classList.contains("is-open")
+  );
+
+  if (!drawerIsOpen && activeDrawer) {
+    if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;
+    if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
+    if (returnContext.modeId) activeDrawer.dataset.modeId = returnContext.modeId;
+    if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;
+
+    activeDrawer.hidden = false;
+    activeDrawer.setAttribute("aria-hidden", "false");
+    activeDrawer.classList.add("is-open");
+
+    drawerIsOpen = true;
+  }
+
+  if (drawerIsOpen && activeDrawer) {
     applySharedAiSourceToDrawer(activeDrawer, projectName);
-  }
 
-  const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
-  const msg = document.querySelector("[data-aicmd-tool-drawer-status]");
-  if (msg) {
-    msg.textContent = selectedSource?.name
-      ? "Source added to drawer."
-      : "Returned to drawer. No source selected.";
-  }
+    const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+    const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");
+    if (msg) {
+      msg.textContent = selectedSource?.name
+        ? "Source added to drawer."
+        : "Returned to drawer. No source selected.";
+    }
 
-  clearSharedAiDrawerReturn(projectName);
-  clearSharedAiDrawerReturn("__default__");
+    clearSharedAiDrawerReturn(projectName);
+    clearSharedAiDrawerReturn("__default__");
+  }
 }
 
 // --- Helper to build AI Drawer Return Context ---
@@ -1651,18 +1671,6 @@ export function bindAiToolDock({
       const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
       const selectedSourceType = drawerSourceSelect?.value || "auto";
       const mapping = getSourceTypeMapping(selectedSourceType);
-      const payload = {
-        type: "library_source_selection",
-        origin: "ai-command",
-        returnTarget: "ai-command",
-        sourceType: selectedSourceType,
-        libraryFilter: mapping.libraryFilter,
-        targetSection: "asset-workspace",
-        created_at: new Date().toISOString()
-      };
-      setSharedLibrarySourceBridge(project, payload);
-      setSharedLibrarySourceBridge("__default__", payload);
-
       const drawerReturnContext = buildAiDrawerReturnContext({
         projectName: project,
         origin: "ai-command",
@@ -1674,6 +1682,20 @@ export function bindAiToolDock({
         sourceType: selectedSourceType,
         outputType: drawer?.querySelector?.("[data-aicmd-tool-drawer-output-select]")?.value || ""
       });
+
+      const payload = {
+        type: "library_source_selection",
+        origin: "ai-command",
+        returnTarget: "ai-command",
+        sourceType: selectedSourceType,
+        libraryFilter: mapping.libraryFilter,
+        targetSection: "asset-workspace",
+        drawerReturnContext,
+        created_at: new Date().toISOString()
+      };
+      setSharedLibrarySourceBridge(project, payload);
+      setSharedLibrarySourceBridge("__default__", payload);
+
       setSharedAiDrawerReturn(project, drawerReturnContext);
       setSharedAiDrawerReturn("__default__", drawerReturnContext);
       updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
@@ -1771,7 +1793,10 @@ export function bindAiToolDock({
   });
 
   // --- Ensure drawer is restored after navigation from Library ---
-  setTimeout(() => tryAutoOpenDrawerAfterLibrary(projectName || "__default__"), 0);
+  const restoreProjectName = projectName || "__default__";
+  [0, 60, 180].forEach((delay) => {
+    setTimeout(() => tryAutoOpenDrawerAfterLibrary(restoreProjectName), delay);
+  });
 
 }
 
