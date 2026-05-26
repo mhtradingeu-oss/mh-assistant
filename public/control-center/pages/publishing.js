@@ -614,6 +614,30 @@ function validateBuilder(session, intent) {
   return !Object.keys(errors).length;
 }
 
+function summarizePublishingBlockers(assetBlockers = []) {
+  const blockers = asArray(assetBlockers);
+  if (!blockers.length) return "";
+  return blockers
+    .slice(0, 4)
+    .map((item) => firstText(item.label, item.name, item.key, item.id, "Required asset"))
+    .join(", ");
+}
+
+function guardPublishingAssetBlockers(session, assetBlockers, showMessage, actionLabel = "this publishing action") {
+  const blockers = asArray(assetBlockers);
+  if (!blockers.length) return false;
+  const summary = summarizePublishingBlockers(blockers);
+  const message = `Publishing blocker(s) must be resolved before ${actionLabel}: ${summary || "required publishing assets are missing or need review"}.`;
+  session.validation.contentItem = message;
+  showMessage?.(message);
+  return true;
+}
+
+function confirmPublishingBackendAction(message) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(message);
+}
+
 function fieldError(session, key, escapeHtml) {
   const message = session.validation[key];
   return message ? `<div class="publishing-inline-error">${escapeHtml(message)}</div>` : "";
@@ -1536,6 +1560,10 @@ function bindPublishingWorkspace({
 
       const current = selected();
       const payload = buildSchedulePayload(session, "scheduled");
+      if (!current?.localOnly && guardPublishingAssetBlockers(session, assetBlockers, showMessage, "scheduling or rescheduling")) {
+        rerender();
+        return;
+      }
       if (current?.localOnly) {
         updateLocalDraft(projectName, current.id, {
           ...buildLocalDraftPayload(session, "scheduled"),
@@ -1543,6 +1571,16 @@ function bindPublishingWorkspace({
         });
         session.draftMessage = "Local publishing draft scheduled in this browser.";
         showMessage?.(session.draftMessage);
+        rerender();
+        return;
+      }
+
+      const confirmed = confirmPublishingBackendAction(
+        current
+          ? "Confirm reschedule\n\nAction: Reschedule this publishing item.\n\nThis updates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep the current schedule."
+          : "Confirm schedule\n\nAction: Queue this publishing item for manual publishing.\n\nThis creates a backend publishing schedule and remains governed by approval rules.\n\nSelect Cancel to keep this as a draft."
+      );
+      if (!confirmed) {
         rerender();
         return;
       }
@@ -1606,6 +1644,11 @@ function bindPublishingWorkspace({
       }
 
       if (action === "publish") {
+        if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "publishing")) {
+          rerender();
+          return;
+        }
+
         const confirmed = window.confirm(
           "Final Confirmation Required\n\nAction: Publish this item to configured channels.\n\nThis is a high-risk, final step. Please verify channel, source, schedule, and approval status.\n\nPublishing is always confirmation-gated and governed by backend approval rules.\nApproval and governance gates must be satisfied before execution.\n\nSelect Cancel to keep this item in the queue."
         );
@@ -1619,12 +1662,33 @@ function bindPublishingWorkspace({
         );
       }
       if (action === "pause") {
+        const confirmed = confirmPublishingBackendAction(
+          "Confirm pause\n\nAction: Move this backend publishing item back to draft.\n\nThis updates the backend publishing lifecycle state.\n\nSelect Cancel to keep the item unchanged."
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
         await runAndRefresh(
           () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "draft")),
           { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item paused as a draft.\n\nConfirmation required before execution. Backend approval rules apply." }
         );
       }
       if (action === "retry") {
+        if (guardPublishingAssetBlockers(session, assetBlockers, showMessage, "retrying or rescheduling")) {
+          rerender();
+          return;
+        }
+
+        const confirmed = confirmPublishingBackendAction(
+          "Confirm retry\n\nAction: Retry this backend publishing item in the scheduled queue.\n\nThis updates the backend publishing schedule/lifecycle state and remains governed by approval rules.\n\nSelect Cancel to keep the item unchanged."
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
         await runAndRefresh(
           () => reschedulePublishingItem(projectName, item.jobId, buildSchedulePayload(session, "scheduled")),
           { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item retried in the scheduled queue.\n\nConfirmation required before execution. Backend approval rules apply." }
@@ -1647,6 +1711,14 @@ function bindPublishingWorkspace({
       if (current.localOnly) {
         updateLocalDraft(projectName, current.id, { ...buildLocalDraftPayload(session, "ready"), id: current.id, approvalStatus: "approved" });
         showMessage?.("Local publishing draft approved.");
+        rerender();
+        return;
+      }
+
+      const confirmed = confirmPublishingBackendAction(
+        "Confirm approval\n\nAction: Mark this backend publishing item ready for publishing.\n\nApproval moves the item toward publishable readiness and remains governed by backend rules.\n\nSelect Cancel to keep the item unchanged."
+      );
+      if (!confirmed) {
         rerender();
         return;
       }
