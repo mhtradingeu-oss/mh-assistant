@@ -1184,7 +1184,7 @@ function renderJobMonitorLayout({
               <span class="std-context-eyebrow">JOB MONITOR</span>
               <h3 class="std-context-title">Job Monitor</h3>
             </div>
-            <p class="std-context-description">Track running, completed, and failed execution across workflows, media, and publishing for ${escapeHtml(projectLabel)}.</p>
+            <p class="std-context-description">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>
             <div class="std-context-metrics" aria-label="Job Monitor metrics">
               <span class="std-context-chip"><span>Health</span><strong>${escapeHtml(titleCase(jobMonitor.health_state || "unknown"))}</strong></span>
               <span class="std-context-chip is-warning"><span>Running</span><strong>${escapeHtml(formatCount(jobMonitor.running_count))}</strong></span>
@@ -1210,8 +1210,8 @@ function renderJobMonitorLayout({
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Main View</div>
-                <h3>Execution inventory</h3>
-                <p>Filter by execution status and kind to inspect active and failed work quickly.</p>
+                <h3>Job state inventory</h3>
+                <p>Filter by job status and kind to review active and failed work without changing lifecycle state.</p>
               </div>
               <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
@@ -1248,7 +1248,7 @@ function renderJobMonitorLayout({
                 <div>
                   <div class="panel-kicker">Selected Job</div>
                   <h3>${escapeHtml(selectedItem?.title || "Select a job")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context." : "Choose a job from the table to inspect details.")}</p>
+                  <p>${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -1273,13 +1273,13 @@ function renderJobMonitorLayout({
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Action Panel</div>
-                  <h3>Execution actions</h3>
-                  <p>Safe actions are active. Mutation and destructive controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+                  <h3>Job review actions</h3>
+                  <p>Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
                 </div>
               </div>
               <div class="ops-action-row">
                 <button class="btn btn-primary" type="button" id="jobMonitorRefreshBtn">Refresh Job Monitor</button>
-                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Job Context") : ""}
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Job Owning Context") : ""}
               </div>
               <div class="ops-log-list">
                 ${asArray(jobMonitor.execution_logs).length ? asArray(jobMonitor.execution_logs).slice(0, 4).map((item) => `
@@ -1295,10 +1295,10 @@ function renderJobMonitorLayout({
                 `).join("") : `<div class="empty-box">Execution logs will appear here as jobs run.</div>`}
               </div>
               <div class="ops-deferred-list">
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (disabled: future destructive mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (disabled: backend worker-control safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>
               </div>
             </section>
 
@@ -1307,11 +1307,11 @@ function renderJobMonitorLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Job Context</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -1833,7 +1833,7 @@ export const jobMonitorRoute = {
   meta: {
     eyebrow: "Operate",
     title: "Job Monitor",
-    description: "Track running jobs, failures, retries, health state, and execution logs across workflows, media, and publishing."
+    description: "Review job health, failures, retry risk, and execution logs across workflows, media, and publishing without silent job mutation."
   },
   template: `<section class="page is-active" data-page="job-monitor"><div class="ops-shell"></div></section>`,
   render(context) {
