@@ -107,7 +107,7 @@ function renderGovernanceEvidenceSummary({ selectedItem, projectData, governance
         </div>
       </div>
       ${!hasEvidence ? `<div class="governance-evidence-card is-missing governance-source-warning">Missing source evidence — attach Library proof before high-risk approval.</div>` : ""}
-      <div class="governance-evidence-guidance">High-risk governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval or override.</div>
+      <div class="governance-evidence-guidance">High-risk Governance decisions should reference source-of-truth evidence, proof assets, or an incoming handoff. Missing evidence should be resolved before approval, rejection, escalation, or override.</div>
     </div>
   `;
 }
@@ -185,18 +185,18 @@ function getDecisionConfirmationMessage(decision) {
   const normalized = asString(decision).toLowerCase().replace(/\s+/g, "_");
 
   if (["approval", "approved", "approve"].includes(normalized)) {
-    return "Submit Approval Decision? This records a governance decision and may affect downstream readiness. It does not publish or execute directly.";
+    return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";
   }
 
   if (["override", "overridden"].includes(normalized)) {
-    return "Record Override Decision? This is a high-risk governance action. Backend authority rules remain active, but this can unblock downstream operations. Continue only after verifying source, risk, and owner.";
+    return "Record high-risk override decision? This records a backend Governance override. It may unblock downstream gated actions where policy allows override. Continue only after verifying source evidence, risk, owner, and reason.";
   }
 
   if (["reject", "rejected", "changes_requested", "request_changes", "escalated", "escalate"].includes(normalized)) {
-    return "Submit Governance Decision? This records the reviewed decision and may update linked queues or review state.";
+    return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
   }
 
-  return "Submit Governance Decision? This records the reviewed decision and may update linked queues or review state.";
+  return "Submit reviewed Governance decision? This records a backend reviewed decision and may update linked queues or review state. It does not publish or execute directly.";
 }
 
 function confirmGovernanceDecision(decision) {
@@ -381,11 +381,11 @@ function renderApprovalCard(item, escapeHtml) {
       ${renderFlagList(flags, "No extra policy flags were attached to this approval.", escapeHtml)}
       <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
       <div class="governance-actions">
-        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Approval Decision</button>
+        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
         <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
         <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
         <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
-        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record Override Decision</button>
+        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>
       </div>
       ${history.length ? `
         <div class="governance-history">
@@ -439,7 +439,7 @@ function renderReviewCard(item, type, escapeHtml, approval) {
             data-risk="${escapeHtml(flags[0]?.severity || "medium")}"
             data-summary="${escapeHtml(flags.map((flag) => flag.message).join(" | ") || "Governance review requested.")}"
           >
-            Request Approval Review
+            Create Approval Request
           </button>
         </div>
       `}
@@ -476,7 +476,7 @@ function renderPolicyControls(summary, settingsDraft, escapeHtml) {
   return `
     <div class="governance-policy-grid">
       <label class="settings-toggle" for="governance-approval-before-publish">
-        <span class="settings-field-label">Approval before publish</span>
+        <span class="settings-field-label">Require approval before publishing mutations</span>
         <input id="governance-approval-before-publish" type="checkbox" class="settings-toggle-input" data-governance-policy="approval_before_publish" ${rules.approval_before_publish ? "checked" : ""} />
         <span class="settings-toggle-pill" aria-hidden="true"></span>
       </label>
@@ -496,12 +496,12 @@ function renderPolicyControls(summary, settingsDraft, escapeHtml) {
         <span class="settings-toggle-pill" aria-hidden="true"></span>
       </label>
       <label class="settings-toggle" for="governance-admin-override">
-        <span class="settings-field-label">Allow admin override</span>
+        <span class="settings-field-label">Allow governed admin override</span>
         <input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />
         <span class="settings-toggle-pill" aria-hidden="true"></span>
       </label>
       <label class="settings-toggle" for="governance-freeze-publishing">
-        <span class="settings-field-label">Freeze publishing</span>
+        <span class="settings-field-label">Freeze publishing mutations</span>
         <input id="governance-freeze-publishing" type="checkbox" class="settings-toggle-input" data-governance-policy="freeze_publishing" ${rules.freeze_publishing ? "checked" : ""} />
         <span class="settings-toggle-pill" aria-hidden="true"></span>
       </label>
@@ -898,7 +898,7 @@ function renderPage(projectName, session, escapeHtml) {
             <article class="mhos-executive-summary-item governance-summary-ai-boundary">
               <span class="mhos-executive-metric-label">AI Role</span>
               <strong class="mhos-executive-metric-value governance-ai-boundary">Prepare / Review / Summarize Only</strong>
-              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve. Human approval required.</small>
+              <small class="mhos-executive-metric-note governance-ai-boundary-note">AI cannot approve or change policy. Human backend decision required.</small>
             </article>
           </div>
 
@@ -1199,25 +1199,25 @@ function renderPage(projectName, session, escapeHtml) {
               <div>
                 <div class="panel-kicker">Governance actions</div>
                 <h3>Review, decide, and maintain policy controls</h3>
-                <p>Backend-authoritative decisions only. Approval actions appear only for real queued approvals.</p>
+                <p>Backend-authoritative decisions only. Approval actions mutate durable approval records and appear only for real queued approvals.</p>
               </div>
             </div>
             <div class="governance-action-stack">
-              <div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation and backend authority remains enforced.</div>
-              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, add rationale, submit one reviewed governance decision, then refresh and validate queue impact.</div>
+              <div class="simple-banner"><strong>Authority boundary:</strong> Governance records reviewed backend decisions and policy gates. It does not publish, send, or execute directly. High-risk decisions require confirmation, evidence review, and backend authority remains enforced.</div>
+              <div class="simple-banner"><strong>Safe execution path:</strong> Review selected context, verify evidence, add rationale, submit one reviewed Governance decision, then refresh and validate queue impact.</div>
               <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
               <div class="governance-actions std-action-row">
                 <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
-                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Governance Policy</button>
-                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings Rules</button>
+                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>
                 ${
                   selectedItem?.queue_kind === "approval"
                     ? `
-                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Approval Decision</button>
+                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
                       <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
                       <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
                       <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
-                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record Override Decision</button>
+                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>
                     `
                     : ""
                 }
@@ -1234,7 +1234,7 @@ function renderPage(projectName, session, escapeHtml) {
                         data-risk="${escapeHtml(selectedItem.queue_risk || "medium")}"
                         data-summary="${escapeHtml(selectedItem.queue_summary || "Governance review requested.")}"
                       >
-                        Request Approval Review
+                        Create Approval Request
                       </button>
                     `
                     : ""
@@ -1276,10 +1276,10 @@ function renderPage(projectName, session, escapeHtml) {
             <div>
               <div class="panel-kicker">AI preparation</div>
               <h3>Governance AI assistant</h3>
-              <p>Explanation-only guidance. Decisions and policy changes stay in governed controls.</p>
+              <p>Explanation-only guidance. AI cannot approve, override, or change policy; backend decisions stay in governed controls.</p>
             </div>
           </div>
-          <div class="simple-banner"><strong>AI context scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
+          <div class="simple-banner"><strong>AI guidance scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
           <div class="governance-ai-toolbar">
             <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
           </div>
@@ -1392,7 +1392,7 @@ function bindGovernance(context, projectName, session) {
           approvalOwners[control.getAttribute("data-governance-owner")] = control.value || "";
         });
 
-        const confirmed = window.confirm("Confirm governance policy save\n\nAction: Save governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
         if (!confirmed) {
           return;
         }
@@ -1403,7 +1403,7 @@ function bindGovernance(context, projectName, session) {
             policy_rules: policyRules,
             approval_owners: approvalOwners
           });
-          context.showMessage("Governance policy saved.");
+          context.showMessage("Backend Governance policy saved.");
           await refreshGovernance(projectName, session, rerender, context.showError);
         } catch (error) {
           context.showError(error.message || "Failed to save governance policy.");
@@ -1418,7 +1418,7 @@ function bindGovernance(context, projectName, session) {
           return;
         }
 
-        const confirmed = window.confirm("Sync Settings Rules to Governance Policy? This updates enforceable governance rules including approval-before-publish, claim review, escalation, owners, and policy behavior. Continue only if these settings are reviewed.");
+        const confirmed = window.confirm("Sync Settings-derived rules to Governance policy? This updates durable Governance rules including approval-before-publish, claim review, escalation, owners, override behavior, and policy behavior. Continue only if the Settings snapshot was reviewed.");
         if (!confirmed) {
           return;
         }
@@ -1428,7 +1428,7 @@ function bindGovernance(context, projectName, session) {
             actor: "governance-console",
             ...mapSettingsToGovernancePolicy(settingsDraft)
           });
-          context.showMessage("Settings rules synced into enforceable Governance policy.");
+          context.showMessage("Settings-derived rules synced into durable Governance policy.");
           await refreshGovernance(projectName, session, rerender, context.showError);
         } catch (error) {
           context.showError(error.message || "Failed to sync Settings into Governance.");
@@ -1463,7 +1463,7 @@ export const governanceRoute = {
   meta: {
     eyebrow: "System",
     title: "Governance",
-    description: "Review approvals, policy violations, overrides, escalation, and audit visibility across content, media, campaigns, and publishing."
+    description: "Review backend approvals, policy violations, overrides, escalation, publishing gates, and audit visibility across content, media, campaigns, and publishing."
   },
   template: `<section class="page is-active" data-page="governance"><div class="governance-shell"></div></section>`,
   render(context) {
