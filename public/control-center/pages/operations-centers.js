@@ -1976,9 +1976,9 @@ function renderOperationsCentersOverview(context) {
       <div class="ops-workspace">
         <div class="std-context-ribbon">
           <div>
-            <span class="std-context-eyebrow">Operations Command Layer</span>
+            <span class="std-context-eyebrow">Operations Routing Layer</span>
             <h2>Operations Centers</h2>
-            <p class="std-context-description">A unified entry point for execution, queues, runtime jobs, and operational notifications for ${context.escapeHtml(projectName)}.</p>
+            <p class="std-context-description">A unified routing entry point for tasks, queues, job health, and notification signals for ${context.escapeHtml(projectName)}.</p>
           </div>
           <div class="std-context-actions">
             <span class="std-context-chip"><span>Tasks</span><strong>${context.escapeHtml(formatCount(taskCount))}</strong></span>
@@ -1990,7 +1990,7 @@ function renderOperationsCentersOverview(context) {
 
         ${renderExecutiveRuntimeStrip(context, {
           kicker: "Operations",
-          title: "Execution Overview",
+          title: "Operations Health Overview",
           description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
           badge: "Composite route"
         })}
@@ -2000,9 +2000,9 @@ function renderOperationsCentersOverview(context) {
             <section class="panel mhos-clean-surface">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Command Handoff</div>
-                  <h3>Choose the operational surface</h3>
-                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes the work to the correct operations center for review and monitoring.</p>
+                  <div class="panel-kicker">Routing Handoff</div>
+                  <h3>Choose the owning operations surface</h3>
+                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
                 </div>
               </div>
 
@@ -2043,14 +2043,14 @@ function renderOperationsCentersOverview(context) {
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Safety</div>
-                  <h3>Review before execution</h3>
-                  <p>This overview does not execute jobs, mutate tasks, send notifications, or approve workflows. It only routes to the owning workspace.</p>
+                  <h3>Routing-only safety</h3>
+                  <p>This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>
                 </div>
               </div>
               <div class="ops-deferred-list">
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: create task from draft</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: execute workflow</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned: acknowledge signal</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: acknowledge signal — future notification lifecycle mutation safety pass</button>
               </div>
             </section>
           </aside>
@@ -2065,6 +2065,11 @@ function renderOperationsCentersOverview(context) {
 export const operationsCentersRoute = {
   id: "operations-centers",
   label: "Operations Centers",
+  meta: {
+    eyebrow: "Operate",
+    title: "Operations Centers",
+    description: "Routing-only overview for Task Center, Queue Center, Job Monitor, Notifications, AI Team, and Workflows."
+  },
   template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,
   render(context) {
     renderOperationsCentersOverview(context);
