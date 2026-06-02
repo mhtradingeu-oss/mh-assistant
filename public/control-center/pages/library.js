@@ -1901,10 +1901,10 @@ function bindLibraryWorkspace({
 
         <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
 
-        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Source in AI Command</button>
+        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Review Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Review Source in AI Command</button>
 
         <div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">
-          <span class="library-inspector-ai-source-guide-text">Select one Library item, then click Use as Source in AI Command.</span>
+          <span class="library-inspector-ai-source-guide-text">Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.</span>
         </div>
 
         <details class="library-inspector-more">
@@ -1930,8 +1930,8 @@ function bindLibraryWorkspace({
     }
     useBtns.forEach((useBtn) => {
       useBtn.classList.add("btn-primary", "std-ai-btn");
-      useBtn.textContent = "Use as Source in AI Command";
-      useBtn.setAttribute("aria-label", "Use as Source in AI Command");
+      useBtn.textContent = "Use as Review Source in AI Command";
+      useBtn.setAttribute("aria-label", "Use as Review Source in AI Command");
       useBtn.onclick = () => {
         const asset = allAssets.find((a) => a.id === selectedAsset.id || a.asset_id === selectedAsset.id);
         if (!asset) {
@@ -2356,7 +2356,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness state and may affect downstream review/publishing flow.\n\nSelect Cancel to keep the current status.`);
+      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.`);
       if (!confirmed) {
         return;
       }
@@ -2394,7 +2394,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm(`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry.\n\nSelect Cancel to keep this asset active.`)) {
+      if (!confirm(`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\n\nSelect Cancel to keep this asset active.`)) {
         return;
       }
 
@@ -2469,7 +2469,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      if (!confirm(`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows.\n\nSelect Cancel to keep this asset available.`)) {
+      if (!confirm(`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.`)) {
         return;
       }
 
@@ -2916,7 +2916,7 @@ export const libraryRoute = {
       ? renderGuideBox({
           title: "Choose source for AI Command",
           instructions: [
-            "Select one Library item, then click Use as Source in AI Command.",
+            "Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.",
             activeSourceMapping.label ? `Source type: ${activeSourceMapping.label}` : "Source type: Auto"
           ],
           actions: [
@@ -3017,6 +3017,7 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <h3>Required Assets</h3>
+            <p class="card-subtitle">Shows evidence and media gaps needed for complete project readiness. This does not approve or publish assets.</p>
             <span class="card-badge warning">Readiness gaps</span>
           </div>
           <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
@@ -3025,6 +3026,7 @@ export const libraryRoute = {
         <section class="card library-actions-card">
           <div class="card-head">
             <h3>Asset Intake</h3>
+            <p class="card-subtitle">Upload or register asset candidates. Approval, source-of-truth status, and publishing readiness remain separate steps.</p>
             <div class="library-action-toolbar">
               <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
               <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
@@ -3130,6 +3132,7 @@ export const libraryRoute = {
                 <section class="card library-preview-card">
                   <div class="card-head">
                     <h3>Preview</h3>
+                    <p class="card-subtitle">Preview selected evidence or media. Protected files are loaded through the protected media endpoint.</p>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
