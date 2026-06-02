@@ -8,7 +8,7 @@ function renderPublishingCommandHeader({ projectName, recommendation, selectedIt
   const status = selectedItem ? titleCase(selectedItem.status) : "No item selected";
   const approval = selectedItem?.approvalStatus ? titleCase(selectedItem.approvalStatus) : "Draft";
   const nextAction = recommendation?.action ? escapeHtml(recommendation.action) : "Review queue";
-  const safety = `Publishing prepares channel packages, schedules, and approval-ready handoffs. Final execution remains <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
+  const safety = `Publishing prepares channel packages, manual schedule records, and approval-ready handoffs. External publishing requires provider proof; backend status changes remain <strong>confirmation-gated</strong> and governed by <strong>backend approval rules</strong>.`;
   const actions = [
     `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingBuilderPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Prepare Publishing Package</button>`,
     `<button type="button" class="btn btn-secondary" onclick="document.getElementById('publishingQueuePanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Open Queue</button>`,
@@ -34,7 +34,7 @@ function renderPublishingWorkflowStrip({ selectedItem, recommendation, blockers,
     { key: "package", label: "Package" },
     { key: "approval", label: "Approval" },
     { key: "schedule", label: "Schedule" },
-    { key: "handoff", label: "Execution Handoff" }
+    { key: "handoff", label: "Manual Completion Handoff" }
   ];
   const statusMap = {
     draft: selectedItem?.status === "draft" ? "active" : selectedItem ? "ready" : "missing",
@@ -585,10 +585,10 @@ function buildPublishingAutoModePlan(session) {
       id: `publishing-gate-${Date.now()}`,
       type: "publish_now",
       targetPage: "publishing",
-      action: "Publish now to external channels",
+      action: "Record manual publish completion",
       payload: {
         prompt: draftPrompt,
-        reason: "Publishing is gated and requires manual approval."
+        reason: "This records a manual publishing completion only after review; external provider execution requires separate proof."
       },
       priority: "critical"
     }
@@ -607,7 +607,7 @@ function validateBuilder(session, intent) {
     errors.publishDate = "Publish date is required for this action.";
   }
   if (intent === "publish" && form.approvalStatus !== "approved") {
-    errors.approvalStatus = "Approval must be approved before publishing now.";
+    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
   }
 
   session.validation = errors;
@@ -982,15 +982,15 @@ function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, gl
   }
   if (ready && !assetBlockers.length) {
     return {
-      action: "Publish the ready item",
-      why: `${ready.title} is approved and ready for execution. Publishing now converts completed workflow output into a live action.`,
+      action: "Record manual completion for the ready item",
+      why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,
       focusId: ready.id
     };
   }
   if (needsApproval) {
     return {
       action: "Review approval queue",
-      why: `${needsApproval.title} needs approval before it can move into the publishable queue.`,
+      why: `${needsApproval.title} needs approval before it can move into the manual publishing queue.`,
       focusId: needsApproval.id,
       externalBlockers
     };
@@ -1033,7 +1033,7 @@ function renderOverview(counts, queue, escapeHtml) {
       </div>
       <div class="publishing-overview-grid">
         <div class="publishing-overview-item"><span>Scheduled items</span><strong>${escapeHtml(String(counts.scheduled))}</strong></div>
-        <div class="publishing-overview-item"><span>Ready to publish</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
+        <div class="publishing-overview-item"><span>Ready for manual review</span><strong>${escapeHtml(String(counts.ready))}</strong></div>
         <div class="publishing-overview-item"><span>Draft items</span><strong>${escapeHtml(String(counts.draft))}</strong></div>
         <div class="publishing-overview-item"><span>Failed / blocked items</span><strong>${escapeHtml(String(counts.failed))}</strong></div>
         <div class="publishing-overview-item is-wide"><span>Next publish window</span><strong>${escapeHtml(getNextPublishWindow(queue))}</strong></div>
@@ -1044,7 +1044,7 @@ function renderOverview(counts, queue, escapeHtml) {
 
 function renderRecommendation(recommendation, counts, assetBlockers, checks, escapeHtml) {
   const chips = [
-    ["Launch readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+    ["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
     ["Content", counts.draft || counts.ready || counts.scheduled ? "Present" : "Empty"],
     ["Workflow output", recommendation.action.includes("workflow") ? "Available" : "Optional"],
     ["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],
@@ -1131,7 +1131,7 @@ function renderQueue(queue, visibleQueue, selectedId, filter, escapeHtml) {
         <div class="publishing-queue-actions">
           <button type="button" data-publishing-action="review" data-publishing-id="${escapeHtml(item.id)}">Review Package</button>
           <button type="button" data-publishing-action="schedule" data-publishing-id="${escapeHtml(item.id)}">Queue for Manual Publishing</button>
-          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Prepare Publishing Package</button>
+          <button type="button" data-publishing-action="publish" data-publishing-id="${escapeHtml(item.id)}">Record Manual Completion</button>
           <button type="button" data-publishing-action="pause" data-publishing-id="${escapeHtml(item.id)}">Pause to draft</button>
           <button type="button" data-publishing-action="retry" data-publishing-id="${escapeHtml(item.id)}">Retry scheduled item</button>
         </div>
@@ -1160,7 +1160,7 @@ function renderBuilder(session, channels, checks, escapeHtml) {
       <div class="card-head">
         <div>
           <div class="setup-kicker">Publishing Builder</div>
-          <h3>Draft, validate, schedule, and execute</h3>
+          <h3>Draft, validate, and queue manual publishing records</h3>
         </div>
         <span class="card-badge neutral">Inline validation</span>
       </div>
@@ -1658,7 +1658,7 @@ function bindPublishingWorkspace({
       if (item.localOnly) {
         const nextStatus = action === "pause" ? "draft" : action === "retry" ? "scheduled" : action === "publish" ? "published" : item.status;
         updateLocalDraft(projectName, item.id, { ...buildLocalDraftPayload(session, nextStatus), id: item.id });
-        session.draftMessage = `Local draft ${action === "publish" ? "marked published" : action === "pause" ? "paused" : "updated"}.`;
+        session.draftMessage = `Local draft ${action === "publish" ? "marked as manual completion recorded" : action === "pause" ? "paused" : "updated"}.`;
         showMessage?.(session.draftMessage);
         rerender();
         return;
@@ -1671,7 +1671,7 @@ function bindPublishingWorkspace({
         }
 
         const confirmed = window.confirm(
-          "Final Confirmation Required\n\nAction: Publish this item to configured channels.\n\nThis is a high-risk, final step. Please verify channel, source, schedule, and approval status.\n\nPublishing is always confirmation-gated and governed by backend approval rules.\nApproval and governance gates must be satisfied before execution.\n\nSelect Cancel to keep this item in the queue."
+          "Final Confirmation Required\n\nAction: Record manual publish completion for this backend job.\n\nThis is a high-risk status update. Confirm that external provider publishing was completed or verified outside this page before recording completion.\n\nThis does not prove live external publishing by itself. Backend approval rules still apply.\n\nSelect Cancel to keep this item in the queue."
         );
         if (!confirmed) {
           rerender();
@@ -1679,7 +1679,7 @@ function bindPublishingWorkspace({
         }
         await runAndRefresh(
           () => publishPublishingItem(projectName, item.jobId, { notes: session.form.notes || item.notes }),
-          { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as published." }
+          { projectName, reloadProjectData, showMessage, showError, successMessage: "Manual publishing completion recorded." }
         );
       }
       if (action === "pause") {
@@ -1737,7 +1737,7 @@ function bindPublishingWorkspace({
       }
 
       const confirmed = confirmPublishingBackendAction(
-        "Confirm approval\n\nAction: Mark this backend publishing item ready for publishing.\n\nApproval moves the item toward publishable readiness and remains governed by backend rules.\n\nSelect Cancel to keep the item unchanged."
+        "Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."
       );
       if (!confirmed) {
         rerender();
@@ -1746,7 +1746,7 @@ function bindPublishingWorkspace({
       
       await runAndRefresh(
         () => approvePublishingItem(projectName, current.jobId, { notes: session.form.notes || current.notes }),
-        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item approved and marked ready." }
+        { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked ready for manual review." }
       );
       rerender();
     };
@@ -1911,7 +1911,7 @@ export const publishingRoute = {
   meta: {
     eyebrow: "Execute & Grow",
     title: "Publishing",
-    description: "Review, approve, schedule, and control publishing with clear previews and real backend actions."
+    description: "Review, prepare, queue, and record manual publishing status with clear previews and backend-controlled actions."
   },
   template: `
     <section class="page is-active" data-page="publishing">
@@ -1986,7 +1986,7 @@ export const publishingRoute = {
                 <span class="card-badge ${badgeTone(selectedItem?.status || "draft")}">${escapeHtml(selectedItem ? titleCase(selectedItem.status) : "Draft")}</span>
               </div>
               <div class="publishing-action-row">
-                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare Governance Review. Confirmation required before execution. Backend approval rules apply.">Mark item ready for publishing</button>
+                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>
                 <button id="publishingFailBtn" class="btn btn-secondary" type="button" title="Request Approval Review or mark as failed. Confirmation required before execution.">Mark publishing item as failed</button>
               </div>
             </section>
