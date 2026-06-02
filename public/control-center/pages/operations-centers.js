@@ -893,7 +893,7 @@ function renderQueueCenterLayout({
               <span class="std-context-eyebrow">QUEUE CENTER</span>
               <h3 class="std-context-title">Queue Center</h3>
             </div>
-            <p class="std-context-description">Workflow, content, media, approval, publishing, and sync queues aligned into one operational queue surface for ${escapeHtml(projectLabel)}.</p>
+            <p class="std-context-description">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>
             <div class="std-context-metrics" aria-label="Queue Center metrics">
               <span class="std-context-chip"><span>Visible</span><strong>${escapeHtml(formatCount(totalVisible))}</strong></span>
               <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(totalItems))}</strong></span>
@@ -920,8 +920,8 @@ function renderQueueCenterLayout({
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Main View</div>
-                <h3>Queue operations</h3>
-                <p>Switch queue type focus and status filter to route each item to the owning page.</p>
+                <h3>Queue review operations</h3>
+                <p>Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>
               </div>
               <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
@@ -958,7 +958,7 @@ function renderQueueCenterLayout({
                 <div>
                   <div class="panel-kicker">Selected Queue Item</div>
                   <h3>${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before acting." : "Choose a queue item from the table to inspect details.")}</p>
+                  <p>${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -983,13 +983,13 @@ function renderQueueCenterLayout({
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Action Panel</div>
-                  <h3>Queue actions</h3>
-                  <p>Safe actions are active. Queue mutation and execution controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+                  <h3>Queue review actions</h3>
+                  <p>Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
                 <button class="btn btn-primary" type="button" id="queueCenterRefreshBtn">Refresh Queue Center</button>
-                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owner Page") : ""}
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}
               </div>
               <div class="ops-mini-list">
                 ${queueCounts.map((item) => `
@@ -1000,10 +1000,10 @@ function renderQueueCenterLayout({
                 `).join("")}
               </div>
               <div class="ops-deferred-list">
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Publish item (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (disabled: Governance/Publishing-owned)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (disabled: future destructive mutation safety pass)</button>
               </div>
             </section>
 
@@ -1012,11 +1012,11 @@ function renderQueueCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -1785,7 +1785,7 @@ export const queueCenterRoute = {
   meta: {
     eyebrow: "Operate",
     title: "Queue Center",
-    description: "Control workflow, content, media, approval, publishing, and sync queues from one central operations surface."
+    description: "Review queue pressure and route workflow, content, media, approval, publishing, and sync items to owning workspaces without silent mutation."
   },
   template: `<section class="page is-active" data-page="queue-center"><div class="ops-shell"></div></section>`,
   render(context) {
