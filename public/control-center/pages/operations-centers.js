@@ -450,8 +450,8 @@ function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {
       <div class="panel-header">
         <div>
           <div class="panel-kicker">Incoming Handoff</div>
-          <h3>Incoming Task Handoff</h3>
-          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically.</p>
+          <h3>Incoming Review-Only Task Handoff</h3>
+          <p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>
         </div>
         <span class="card-badge warning">Review-only</span>
       </div>
@@ -469,7 +469,7 @@ function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {
       </div>
       <div class="ops-action-row">
         <button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>
-        <button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace</button>
+        <button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace for Review</button>
       </div>
     </section>
   `;
@@ -522,7 +522,7 @@ function renderTaskCenterLayout({
               <span class="std-context-eyebrow">TASK CENTER</span>
               <h3 class="std-context-title">Task Center</h3>
             </div>
-            <p class="std-context-description">Durable operational tasks with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
+            <p class="std-context-description">Review durable operational task records with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
             <div class="std-context-metrics" aria-label="Task Center metrics">
               <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
               <span class="std-context-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
@@ -549,8 +549,8 @@ function renderTaskCenterLayout({
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Main View</div>
-                <h3>Execution backlog</h3>
-                <p>Filter by focus, owner, source, and priority to inspect task risk quickly.</p>
+                <h3>Operational task backlog</h3>
+                <p>Filter by focus, owner, source, and priority to review task risk quickly.</p>
               </div>
               <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
@@ -609,7 +609,7 @@ function renderTaskCenterLayout({
                 <div>
                   <div class="panel-kicker">Selected Task</div>
                   <h3>${escapeHtml(selectedItem?.title || "Select a task")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and execution context." : "Choose a task in the table to inspect details.")}</p>
+                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -636,21 +636,21 @@ function renderTaskCenterLayout({
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Action Panel</div>
-                  <h3>Task actions</h3>
-                  <p>Active actions are safe and non-destructive. Mutation actions remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+                  <h3>Task review actions</h3>
+                  <p>Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
                 <button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>
-                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Linked Work") : ""}
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}
                 <button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>
               </div>
               <div class="ops-deferred-list">
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>
               </div>
             </section>
 
@@ -659,11 +659,11 @@ function renderTaskCenterLayout({
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -777,7 +777,7 @@ function renderTaskCenter(context, state, projectName) {
   root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {
     const text = incomingHandoff
       ? [
-          "Incoming Task Handoff",
+          "Incoming Review-Only Task Handoff",
           `Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}`,
           `Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}`,
           `Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}`,
@@ -1750,7 +1750,7 @@ export const taskCenterRoute = {
   meta: {
     eyebrow: "Operate",
     title: "Task Center",
-    description: "Manage durable tasks, owners, due dates, priorities, filters, and linked operational entities in one premium execution surface."
+    description: "Review durable tasks, owners, due dates, priorities, filters, and linked operational entities without silent task mutation."
   },
   template: `<section class="page is-active" data-page="task-center"><div class="ops-shell"></div></section>`,
   render(context) {
