@@ -1539,7 +1539,7 @@ function renderNotificationCenter(context, state, projectName) {
               <span class="std-context-eyebrow">NOTIFICATIONS</span>
               <h3 class="std-context-title">Notification Center</h3>
             </div>
-            <p class="std-context-description">Route-aware operational alerts for approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
+            <p class="std-context-description">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
             <div class="std-context-metrics" aria-label="Notification Center metrics">
               <span class="std-context-chip"><span>Active Alerts</span><strong>${escapeHtml(formatCount(baseAlerts.length))}</strong></span>
               <span class="std-context-chip"><span>Unread Inbox</span><strong>${escapeHtml(formatCount(notificationCenter.unread_count))}</strong></span>
@@ -1565,8 +1565,8 @@ function renderNotificationCenter(context, state, projectName) {
             <div class="panel-header">
               <div>
                 <div class="panel-kicker">Main View</div>
-                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history" : "Operational alerts")}</h3>
-                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history and mark notifications as read where supported." : "Review route-aware alerts, then inspect the selected signal in detail.")}</p>
+                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
+                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
               </div>
               <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
             </div>
@@ -1627,14 +1627,14 @@ function renderNotificationCenter(context, state, projectName) {
               <div class="panel-header">
                 <div>
                   <div class="panel-kicker">Action Panel</div>
-                  <h3>Notification actions</h3>
-                  <p>Safe actions are active. Notification mutation controls remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+                  <h3>Notification review actions</h3>
+                  <p>Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
                 <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh Notification Center</button>
-                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Source Page") : ""}
-                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}">Mark Read</button>` : ""}
+                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Source Page") : ""}
+                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
               </div>
               <div class="ops-mini-list">
                 <div class="ops-mini-item">
@@ -1651,10 +1651,10 @@ function renderNotificationCenter(context, state, projectName) {
                 </div>
               </div>
               <div class="ops-deferred-list">
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (deferred: mutation safety pass)</button>
-                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (deferred: mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>
+                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
               </div>
             </section>
 
@@ -1663,11 +1663,11 @@ function renderNotificationCenter(context, state, projectName) {
                 <div>
                   <div class="panel-kicker">AI Panel</div>
                   <h3>Operations AI Assistant</h3>
-                  <p>Context-only handoff: opens AI with prompt/context only. No approval, publishing, or backend execution is performed.</p>
+                  <p>Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review in AI Workspace</button>
+                <button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Notification Context</button>
               </div>
               <div class="quick-actions">
                 ${prompts.map((item, index) => `
@@ -1881,7 +1881,7 @@ export const notificationCenterRoute = {
   meta: {
     eyebrow: "Operate",
     title: "Notification Center",
-    description: "Review sync failures, pending approvals, publish events, provider disconnects, claim risks, and workflow completion alerts."
+    description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."
   },
   template: `<section class="page is-active" data-page="notification-center"><div class="ops-shell"></div></section>`,
   render(context) {
