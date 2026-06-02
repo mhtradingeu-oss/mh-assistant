@@ -30,7 +30,7 @@ const WORKFLOW_CATALOG = [
   {
     id: "launch-campaign",
     title: "Launch Campaign",
-    purpose: "Build a launch-ready execution sequence across campaign, content, and distribution.",
+    purpose: "Build a launch-ready review sequence across campaign, content, and distribution handoffs.",
     requiredInputs: ["project", "campaign", "product", "channel", "goal"],
     aiModeId: "strategist",
     routeHint: "campaign-studio"
@@ -38,7 +38,7 @@ const WORKFLOW_CATALOG = [
   {
     id: "create-content-plan",
     title: "Create Content Plan",
-    purpose: "Generate an execution-ready content plan tied to campaign and audience context.",
+    purpose: "Generate a review-ready content plan tied to campaign and audience context.",
     requiredInputs: ["project", "campaign", "product", "channel", "goal"],
     aiModeId: "writer",
     routeHint: "content-studio"
@@ -62,7 +62,7 @@ const WORKFLOW_CATALOG = [
   {
     id: "generate-report",
     title: "Generate Report",
-    purpose: "Summarize execution state, results, blockers, and the next operational decision.",
+    purpose: "Summarize workflow state, results, blockers, and the next operational decision.",
     requiredInputs: ["project", "campaign", "goal"],
     aiModeId: "analyst",
     routeHint: "insights"
@@ -525,12 +525,12 @@ function buildFallbackOutput(workflow, inputs, context) {
   const blockedRequirements = getBlockedRequirements(workflow, inputs, context);
 
   return {
-    title: `${workflow.title} execution package`,
+    title: `${workflow.title} review package`,
     summary: `Prepared ${workflow.title.toLowerCase()} for ${inputs.project || context.projectName || "the current project"} with ${inputs.goal || "a defined goal"}.`,
     nextActions: uniqueStrings([
       recommendationText,
-      `Open ${titleCase(workflow.routeHint)} for execution handoff.`,
-      blockedRequirements.length ? "Resolve blockers before live execution." : "Proceed to execution handoff."
+      `Open ${titleCase(workflow.routeHint)} for review handoff.`,
+      blockedRequirements.length ? "Resolve blockers before any destination-owned execution." : "Proceed to review handoff."
     ]).filter(Boolean),
     blockedRequirements,
     requiredInputs: workflow.requiredInputs.map(titleCase),
@@ -538,7 +538,7 @@ function buildFallbackOutput(workflow, inputs, context) {
       {
         label: `Open ${titleCase(workflow.routeHint)}`,
         route: workflow.routeHint,
-        reason: `Continue execution in ${titleCase(workflow.routeHint)}.`
+        reason: `Continue review in ${titleCase(workflow.routeHint)}.`
       },
       {
         label: "Open AI Workspace",
@@ -568,14 +568,14 @@ function buildSmartRecommendation(context, session, globalAction) {
       title: `System intelligence: ${globalAction.title || mapped.title}`,
       reason: firstNonEmpty(globalAction.reason, `Global next best action points to ${titleCase(globalAction.targetPage)}.`),
       chips: ["Launch readiness", "Automation", "Campaign"],
-      prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, `Build a ${mapped.title.toLowerCase()} execution plan from current system blockers and dependencies.`)
+      prompt: firstNonEmpty(globalAction?.draftPayload?.prompt, `Build a ${mapped.title.toLowerCase()} review plan from current system blockers and dependencies.`)
     };
   }
 
   if (context.missingIntegrations.length) {
     return {
       workflowId: "fix-integrations",
-      title: "Run Fix Integrations next",
+      title: "Prepare Fix Integrations review next",
       reason: `${context.missingIntegrations.length} integration gap${context.missingIntegrations.length === 1 ? "" : "s"} can block automation and report quality.`,
       chips: ["Launch readiness", "Automation", "Reports"],
       prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."
@@ -585,7 +585,7 @@ function buildSmartRecommendation(context, session, globalAction) {
   if (context.missingAssets.length) {
     return {
       workflowId: "prepare-publishing-package",
-      title: "Prepare publishing package before distribution",
+      title: "Prepare publishing package handoff before distribution",
       reason: `${context.missingAssets.length} asset requirement${context.missingAssets.length === 1 ? "" : "s"} are still missing and can block final publishing.`,
       chips: ["Publishing", "Campaign", "Launch readiness"],
       prompt: "Prepare a publishing package checklist with missing assets and approval dependencies."
@@ -606,9 +606,9 @@ function buildSmartRecommendation(context, session, globalAction) {
   return {
     workflowId: selected.id,
     title: `Continue with ${selected.title}`,
-    reason: "Current context is sufficient to run the selected execution workflow now.",
+    reason: "Current context is sufficient to prepare the selected workflow review package now.",
     chips: ["Content", "Campaign", "Publishing"],
-    prompt: `Refine ${selected.title.toLowerCase()} for immediate execution with explicit dependencies and next actions.`
+    prompt: `Refine ${selected.title.toLowerCase()} for reviewed handoff with explicit dependencies and next actions.`
   };
 }
 
@@ -626,7 +626,7 @@ function renderOverviewSection(metrics, context, escapeHtml) {
         <article class="wfexec-stat"><span>Ready workflows</span><strong>${escapeHtml(String(metrics.ready))}</strong></article>
         <article class="wfexec-stat"><span>Draft workflows</span><strong>${escapeHtml(String(metrics.draft))}</strong></article>
         <article class="wfexec-stat"><span>Failed / blocked</span><strong>${escapeHtml(String(metrics.failed))}</strong></article>
-        <article class="wfexec-stat wfexec-stat-wide"><span>Last execution</span><strong>${escapeHtml(metrics.lastExecutionAt ? formatDateTime(metrics.lastExecutionAt) : "No execution yet")}</strong></article>
+        <article class="wfexec-stat wfexec-stat-wide"><span>Last prepared output</span><strong>${escapeHtml(metrics.lastExecutionAt ? formatDateTime(metrics.lastExecutionAt) : "No prepared output yet")}</strong></article>
         <article class="wfexec-stat wfexec-stat-wide"><span>Readiness</span><strong>${escapeHtml(Number.isFinite(context.readinessScore) ? `${context.readinessScore}/100` : "Unknown")} · ${escapeHtml(context.readinessStatus || "unclassified")}</strong></article>
       </div>
     </section>
@@ -666,7 +666,7 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
     <section class="wfexec-section">
       <div class="wfexec-head"><h3>Automation Layer</h3></div>
       <p class="wfexec-rec-reason">
-        Safe execution only: navigate, create draft, generate prompt, and create handoff.
+        Safe guided preparation only: navigate, create draft, generate prompt, and create review handoff.
       </p>
 
       <div class="wfexec-overview-grid">
@@ -696,10 +696,10 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
 
       <div class="wfexec-action-row">
         <button id="workflowRunFullAutomationBtn" class="wfexec-btn wfexec-btn-primary" type="button">
-          Simulate Full Automation
+          Simulate Guided Preparation
         </button>
         <button id="workflowRunStepAutomationBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
-          Simulate Next Step
+          Simulate Next Preparation Step
         </button>
       </div>
 
@@ -716,12 +716,12 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
       </div>
 
       <p class="wfexec-rec-reason">
-        Hands-free safe execution with approval gates and inline logs.
+        Guided preparation mode with automation gates and inline logs. It does not replace Governance approval.
       </p>
 
       <div class="wfexec-action-row">
         <button id="workflowAutoStartBtn" class="wfexec-btn wfexec-btn-primary" type="button">
-          Start Guided Mode
+          Start Guided Preparation Mode
         </button>
         <button id="workflowAutoPauseBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
           Pause
@@ -748,17 +748,17 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
         autoMode?.status === "waiting_approval"
           ? `
             <div class="wfexec-meta">
-              <strong>Approval needed:</strong> ${esc(gate.reason || "Manual approval required.")}
+              <strong>Automation gate needs operator review:</strong> ${esc(gate.reason || "Operator review required.")}
             </div>
             <div class="wfexec-meta">
               ${esc(gate.whatWillHappen || "Auto Mode is paused.")}
             </div>
             <div class="wfexec-action-row">
               <button id="workflowAutoApproveBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
-                Approve and Continue
+                Approve Automation Gate Only
               </button>
               <button id="workflowAutoSkipBtn" class="wfexec-btn wfexec-btn-secondary" type="button">
-                Skip Step
+                Skip Automation Step
               </button>
             </div>
           `
@@ -780,7 +780,7 @@ function renderAutomationSection(fullPlan, fixPlan, autoMode, escapeHtml) {
 function renderBuilderSection(session, workflow, inputs, validationMessage, draftStatus, escapeHtml) {
   return `
     <section class="wfexec-section">
-      <div class="wfexec-head"><h3>Workflow Builder / Launcher</h3></div>
+      <div class="wfexec-head"><h3>Workflow Review Package Builder</h3></div>
       <div class="wfexec-field-grid">
         <div>
           <label class="wfexec-label" for="wfexecWorkflowType">Workflow type</label>
@@ -811,7 +811,7 @@ function renderBuilderSection(session, workflow, inputs, validationMessage, draf
       </div>
       <div id="wfexecValidation" class="wfexec-validation${validationMessage ? " is-visible" : ""}">${escapeHtml(validationMessage || "")}</div>
       <div class="wfexec-action-row">
-        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Workflow Package</button>
+        <button id="workflowRunBtn" class="wfexec-btn wfexec-btn-primary" type="button">Prepare Review Package</button>
         <button id="workflowRunBtnMain" class="wfexec-btn wfexec-btn-primary" type="button">Prepare</button>
         <button id="wfexecSaveDraftBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Save Draft</button>
         <button id="wfexecLoadAiStateBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Load AI Command State</button>
@@ -825,7 +825,7 @@ function renderBuilderSection(session, workflow, inputs, validationMessage, draf
 function renderCatalogSection(session, context, escapeHtml) {
   return `
     <section class="wfexec-section">
-      <div class="wfexec-head"><h3>Workflow Catalog</h3></div>
+      <div class="wfexec-head"><h3>Workflow Review Catalog</h3></div>
       <div class="wfexec-catalog-grid">
         ${WORKFLOW_CATALOG.map((workflow) => {
           const inputs = asObject(session.inputsByWorkflow[workflow.id]);
@@ -840,13 +840,13 @@ function renderCatalogSection(session, context, escapeHtml) {
               </div>
               <p>${escapeHtml(workflow.purpose)}</p>
               <div class="wfexec-required"><strong>Required inputs:</strong> ${escapeHtml(workflow.requiredInputs.map(titleCase).join(", "))}</div>
-              <div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to run" : blocked[0])}</div>
+              <div class="wfexec-required"><strong>Readiness status:</strong> ${escapeHtml(ready ? "Ready to prepare" : blocked[0])}</div>
               <div class="wfexec-action-row">
                 <button class="wfexec-btn wfexec-btn-primary" type="button" data-wf-catalog-run="${escapeHtml(workflow.id)}">Prepare</button>
                 <button class="wfexec-btn wfexec-btn-ghost" type="button" data-wf-catalog-save="${escapeHtml(workflow.id)}">Save Draft</button>
                 <button class="wfexec-btn wfexec-btn-secondary" type="button" data-wf-catalog-ai="${escapeHtml(workflow.id)}">Open in AI Command</button>
               </div>
-              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last run ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
+              ${run.lastRunAt ? `<div class="wfexec-catalog-meta">Last prepared ${escapeHtml(formatDateTime(run.lastRunAt))}</div>` : ""}
             </article>
           `;
         }).join("")}
@@ -860,7 +860,7 @@ function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) 
   if (!output.summary) {
     return `
       <section class="wfexec-section">
-        <div class="wfexec-head"><h3>Execution Status / Result</h3></div>
+        <div class="wfexec-head"><h3>Prepared Output / Review Result</h3></div>
         <div class="wfexec-empty">No prepared package yet. Prepare a workflow package to generate a review-ready output.</div>
       </section>
     `;
@@ -869,7 +869,7 @@ function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) 
   return `
     <section class="wfexec-section">
       <div class="wfexec-head">
-        <h3>Execution Status / Result</h3>
+        <h3>Prepared Output / Review Result</h3>
         <span class="wfexec-meta">${escapeHtml(run.lastRunAt ? formatDateTime(run.lastRunAt) : "recent")}</span>
       </div>
       <div class="wfexec-result-summary">${escapeHtml(output.summary)}</div>
@@ -886,13 +886,13 @@ function renderExecutionSection(run, workflow, blockedRequirements, escapeHtml) 
         </div>
       </div>
       <div class="wfexec-action-row">
-        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Refine in AI Command</button>
+        <button id="workflowPushAiBtn" class="wfexec-btn wfexec-btn-secondary" type="button">Send to AI for Review</button>
         <button id="workflowPushAiBtnSecondary" class="wfexec-btn wfexec-btn-secondary" type="button">Open in AI Command</button>
-        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Handoff</button>
+        <button id="workflowSaveTaskBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Prepare Task Review Handoff</button>
         <button id="workflowBuildCustomBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Build Custom Workflow</button>
-        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Workflow</button>
+        <button id="workflowRecommendBtn" class="wfexec-btn wfexec-btn-ghost" type="button">Recommend Review Workflow</button>
       </div>
-      <div class="wfexec-meta">Workflow: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
+      <div class="wfexec-meta">Workflow review package: ${escapeHtml(workflow.title)} · Status: ${escapeHtml(titleCase(normalizeRunStatus(run.status)))}</div>
     </section>
   `;
 }
@@ -1039,7 +1039,7 @@ async function ensureWorkflowIntelligenceLoaded({
 function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
   if (runOutput?.summary) {
     return [
-      `Refine the ${workflow.title.toLowerCase()} execution package.`,
+      `Refine the ${workflow.title.toLowerCase()} review package.`,
       `Project: ${inputs.project || context.projectName || "not set"}`,
       `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
       `Summary: ${runOutput.summary}`,
@@ -1047,7 +1047,7 @@ function buildAiHandoffPrompt(workflow, inputs, runOutput, context) {
     ].join("\n");
   }
   return [
-    `Build a ${workflow.title.toLowerCase()} execution package.`,
+    `Build a ${workflow.title.toLowerCase()} review package.`,
     `Project: ${inputs.project || context.projectName || "not set"}`,
     `Campaign: ${inputs.campaign || context.campaignName || "not set"}`,
     `Product: ${inputs.product || "not set"}`,
@@ -1149,7 +1149,7 @@ function registerWorkflowBridge(context) {
     };
 
     if (!meta.autoRun) {
-      session.draftStatus = "AI prompt imported into workflow builder";
+      session.draftStatus = "AI prompt imported into workflow review builder";
       render();
       return;
     }
@@ -1194,7 +1194,7 @@ function registerWorkflowBridge(context) {
       showMessage?.(`${workflow.title} created from AI context.`);
     } catch (error) {
       run.status = "failed";
-      showError?.(error.message || "Workflow execution failed.");
+      showError?.(error.message || "Workflow review package preparation failed.");
     }
 
     render();
@@ -1309,7 +1309,7 @@ function bindWorkflowExecutionLoop({
           },
           status: "available"
         });
-        session.inputsByWorkflow[session.selectedWorkflowId].goal = firstNonEmpty(inputs.goal, "Execution loop optimization");
+        session.inputsByWorkflow[session.selectedWorkflowId].goal = firstNonEmpty(inputs.goal, "Review loop optimization");
         persistWorkflowDraft(projectName, session, session.selectedWorkflowId, "Local handoff seed created", true);
         showMessage?.("No AI state found. Local workflow seed created safely.");
         render();
@@ -1334,7 +1334,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
   const title = workflow?.title || "this workflow";
   return window.confirm(
-    `Confirm workflow preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It does not publish, send messages, create CRM records, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.`
+    `Confirm workflow review package preparation\n\nAction: Prepare and record backend workflow output for "${title}".\n\nThis may call the backend workflow run endpoint and update workflow run history. It prepares a review output only and does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\nSelect Cancel to keep the workflow unchanged.`
   );
 }
 
@@ -1353,7 +1353,7 @@ function confirmWorkflowBackendRun(workflow) {
     }
 
     if (!projectName) {
-      setValidation("Select a project before running a workflow.");
+      setValidation("Select a project before preparing a workflow review package.");
       return;
     }
 
@@ -1427,12 +1427,12 @@ function confirmWorkflowBackendRun(workflow) {
       activeRun.status = "failed";
       activeRun.output = {
         title: `${activeWorkflow.title} failed`,
-        summary: error.message || "Workflow execution failed.",
-        blockedRequirements: ["Execution failed. Review inputs and retry."],
+        summary: error.message || "Workflow review package preparation failed.",
+        blockedRequirements: ["Preparation failed. Review inputs and retry."],
         nextActions: ["Retry workflow", "Validate project integrations", "Check workflow dependencies"]
       };
       activeRun.blockedRequirements = asArray(activeRun.output.blockedRequirements);
-      showError?.(error.message || "Workflow execution failed.");
+      showError?.(error.message || "Workflow review package preparation failed.");
     }
 
     render();
@@ -1653,7 +1653,7 @@ function confirmWorkflowBackendRun(workflow) {
         render();
         return;
       }
-      const confirmed = window.confirm(`Confirm automation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream task or handoff state.\n\nSelect Cancel to stop.`);
+      const confirmed = window.confirm(`Confirm guided preparation simulation\n\nAction: Simulate ${plan.length} guided automation steps.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to stop.`);
       if (!confirmed) return;
 
       workflowAutomationState.lastPlan = plan;
@@ -1667,7 +1667,7 @@ function confirmWorkflowBackendRun(workflow) {
         }
       });
       workflowAutomationState.lastResults = asArray(result.results);
-      workflowAutomationState.result = result.status === "success" ? "Automation simulation completed." : "Automation simulation stopped before completion.";
+      workflowAutomationState.result = result.status === "success" ? "Guided preparation simulation completed." : "Guided preparation simulation stopped before completion.";
       showMessage?.(workflowAutomationState.result);
       render();
     };
@@ -1683,7 +1683,7 @@ function confirmWorkflowBackendRun(workflow) {
         return;
       }
 
-      const confirmed = window.confirm("Confirm guided simulation step\n\nAction: Simulate the next guided step.\nRisk: This can prepare downstream task or handoff state.\n\nSelect Cancel to keep the current state.");
+      const confirmed = window.confirm("Confirm guided preparation step\n\nAction: Simulate the next preparation step.\nRisk: This can prepare downstream draft or handoff state, but does not publish, approve Governance decisions, or send externally.\n\nSelect Cancel to keep the current state.");
       if (!confirmed) return;
 
       const nextIndex = Math.min(workflowAutomationState.cursor, plan.length - 1);
@@ -1699,8 +1699,8 @@ function confirmWorkflowBackendRun(workflow) {
       workflowAutomationState.lastPlan = plan;
       workflowAutomationState.lastResults = [...asArray(workflowAutomationState.lastResults), ...asArray(stepResult.results)];
       workflowAutomationState.result = workflowAutomationState.cursor >= plan.length
-        ? "Step-by-step simulation completed."
-        : "Step simulated. Continue for the next step.";
+        ? "Step-by-step guided preparation completed."
+        : "Preparation step simulated. Continue for the next step.";
       showMessage?.(workflowAutomationState.result);
       render();
     };
@@ -1721,7 +1721,7 @@ function confirmWorkflowBackendRun(workflow) {
         mode: "auto_until_approval",
         context: { getState, navigateTo, createProjectHandoff, projectName }
       });
-      showMessage?.("Workflow Guided Mode started.");
+      showMessage?.("Workflow Guided Preparation Mode started.");
     };
   }
 
@@ -1729,7 +1729,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (autoPauseBtn) {
     autoPauseBtn.onclick = () => {
       pauseAutoMode();
-      showMessage?.("Guided Mode paused.");
+      showMessage?.("Guided Preparation Mode paused.");
     };
   }
 
@@ -1737,7 +1737,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (autoResumeBtn) {
     autoResumeBtn.onclick = async () => {
       await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
-      showMessage?.("Guided Mode resumed.");
+      showMessage?.("Guided Preparation Mode resumed.");
     };
   }
 
@@ -1745,7 +1745,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (autoStopBtn) {
     autoStopBtn.onclick = () => {
       stopAutoMode();
-      showMessage?.("Guided Mode stopped.");
+      showMessage?.("Guided Preparation Mode stopped.");
     };
   }
 
@@ -1753,7 +1753,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (autoApproveBtn) {
     autoApproveBtn.onclick = async () => {
       await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
-      showMessage?.("Approval gate accepted.");
+      showMessage?.("Automation gate accepted. This is not a Governance approval.");
     };
   }
 
@@ -1761,7 +1761,7 @@ function confirmWorkflowBackendRun(workflow) {
   if (autoSkipBtn) {
     autoSkipBtn.onclick = async () => {
       await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
-      showMessage?.("Guided Mode skipped gated step.");
+      showMessage?.("Guided Preparation Mode skipped one automation step. This does not bypass Governance policy.");
     };
   }
 }
@@ -1772,7 +1772,7 @@ export const workflowsRoute = {
   meta: {
     eyebrow: "AI & Build",
     title: "Workflows",
-    description: "Prepare structured, repeatable workflow packages for common marketing and execution operations."
+    description: "Prepare structured, repeatable workflow review packages and handoffs for common marketing operations."
   },
   template: `
     <section class="page is-active" data-page="workflows">
@@ -1857,7 +1857,7 @@ export const workflowsRoute = {
         `Campaign: ${inputs.campaign || campaignName || "not set"}`,
         `Product: ${inputs.product || "not set"}`,
         `Channel: ${inputs.channel || "not set"}`,
-        `Goal: ${inputs.goal || "Prepare an execution-ready workflow package."}`
+        `Goal: ${inputs.goal || "Prepare a review-ready workflow package."}`
       ].join("\\n");
     }
 
@@ -1932,7 +1932,7 @@ export const workflowsRoute = {
         ? `Complete ${titleCase(missing[0])}.`
         : preparedForSelected
           ? "Review in AI Workspace."
-          : "Prepare workflow package.";
+          : "Prepare workflow review package.";
 
       const readinessNumeric = Number(readinessScore);
       const readinessKnown = Number.isFinite(readinessNumeric);
@@ -1982,7 +1982,7 @@ export const workflowsRoute = {
           <section class="wfloop-workbench">
             <article class="wfloop-zone wfloop-catalog card">
               <div class="card-head">
-                <h3>Workflow Catalog</h3>
+                <h3>Workflow Review Catalog</h3>
                 <span class="badge">${escapeHtml(String(WORKFLOW_CATALOG.length))} templates</span>
               </div>
               <div class="wfloop-catalog-list">
@@ -2085,14 +2085,14 @@ export const workflowsRoute = {
               <details class="wfloop-tech-details">
                 <summary>Technical details</summary>
                 <p>Frontend-safe preparation only. This route prepares and routes context.</p>
-                <p>Existing runtime execution helpers are preserved in file scope and not activated by this active render surface.</p>
+                <p>Existing backend workflow run and automation helpers are preserved in file scope, but this active surface is limited to preparation, review, routing, and destination-owned execution authority.</p>
               </details>
             </article>
 
             <aside class="wfloop-zone wfloop-assist">
               <section class="mhos-ai-guidance">
                 <h3 class="mhos-ai-guidance-title">AI Guidance</h3>
-                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, and missing-context prompts for ${escapeHtml(workflow.title)}.</p>
+                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, and missing-context prompts for review only for ${escapeHtml(workflow.title)}.</p>
                 <p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>
                 <div class="mhos-ai-guidance-actions">
                   <button class="btn btn-secondary btn-sm" type="button" data-wf-hero-ai="1">Open AI Workspace</button>
@@ -2119,7 +2119,7 @@ export const workflowsRoute = {
                   <article class="mhos-destination-item">
                     <div class="mhos-destination-copy">
                       <p class="mhos-destination-title">Create/Draft Task</p>
-                      <p class="mhos-destination-meta"><strong>Type</strong> task handoff</p>
+                      <p class="mhos-destination-meta"><strong>Type</strong> task review handoff</p>
                       <p class="mhos-destination-meta"><strong>Context carried</strong> selected workflow session title and handoff intent</p>
                       <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
                     </div>
@@ -2145,7 +2145,7 @@ export const workflowsRoute = {
                       <p class="mhos-destination-title">Technical Details</p>
                       <p class="mhos-destination-meta"><strong>Type</strong> technical disclosure</p>
                       <p class="mhos-destination-meta"><strong>Context carried</strong> preparation boundary and preserved helper notes</p>
-                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now · Future-gated execution authority remains in destination tools</p>
+                      <p class="mhos-destination-meta"><strong>Status</strong> Safe now · Destination tools own execution authority and Governance-gated actions remain protected</p>
                     </div>
                     <div class="mhos-destination-actions">
                       <button class="btn btn-ghost btn-sm" type="button" data-wf-tech-focus="1">Open details</button>
