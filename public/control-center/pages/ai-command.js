@@ -197,7 +197,7 @@ const SPECIALIST_DEFS = [
 		summary: "Publishing readiness, schedule review, and handoff preparation.",
 		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
 		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
-		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Send to live channels directly"],
+		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
 		destinations: ["Publishing", "Workflows", "AI Command"],
 		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
 		status: "Ready"
@@ -374,8 +374,8 @@ const AI_ROOM_FLOW_STEPS = [
 const AI_ROOM_OUTPUT_TABS = [
 	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
 	{ id: "task", label: "Task", helper: "Task-shaped output" },
-	{ id: "workflow", label: "Draft Workflow", helper: "Operating sequence" },
-	{ id: "handoff", label: "Prepare Handoff", helper: "Destination package" },
+	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
 	{ id: "export", label: "Export", helper: "File-ready package" }
 ];
 
@@ -441,7 +441,7 @@ const PHASE35_SPECIALIST_TOOLS = {
 		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
 		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
 		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
-		{ id: "open-media-studio", label: "Send to Media Studio", action: "route", route: "media-studio" }
+		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
 	],
 	video_lead: [
 		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
@@ -2205,7 +2205,7 @@ function buildOperationsTaskBlock(aiContext, message) {
 	if (/reconnect|missing tools|missing integrations/.test(query)) {
 		return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };
 	}
-	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and execute the first step."] };
+	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };
 }
 
 function buildOperationsResponse(aiContext, message) {
@@ -2967,7 +2967,7 @@ function renderCommandComposer(session, aiContext, escapeHtml) {
 				</div>
 
 				<div class="ctrl-composer-actions">
-					<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send to ${escapeHtml(mode.label)}</button>
+					<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send prompt to ${escapeHtml(mode.label)}</button>
 					<button id="ctrlClearBtn" class="ctrl-secondary-btn" type="button">Clear session</button>
 					<button id="ctrlGlobalBtn" class="ctrl-secondary-btn" type="button">Copy to bar</button>
 				</div>
@@ -2987,7 +2987,7 @@ function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
 		<div class="ctrl-composer-card">
 			<div class="ctrl-composer-head">
 				<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Suggested prompts</h3>
-				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send to run</span>
+				<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>
 			</div>
 			<div class="ctrl-composer-body">
 				<div class="ctrl-prompts-grid">
@@ -3541,8 +3541,8 @@ function getToolOutputTypeLabel(tool) {
 	const labels = {
 		guidance: "Draft",
 		task: "Task Draft",
-		workflow: "Draft Workflow",
-		handoff: "Prepare Handoff",
+		workflow: "Workflow Preview",
+		handoff: "Handoff Preview",
 		media: "Draft"
 	};
 	if (labels[asString(tool.intent)]) return labels[asString(tool.intent)];
@@ -4065,7 +4065,7 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 			? "Route Draft to Publishing"
 			: `Route Draft to ${destination}`;
 	const confirmationLabel = hasPreview
-		? (preview.confirmationRequired ? "Confirmation required" : "Review before route")
+		? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")
 		: "Waiting for output";
 
 	return `
@@ -4148,7 +4148,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 			? "Route Draft to Publishing"
 			: `Route Draft to ${destination}`;
 	const confirmationLabel = hasPreview
-		? (preview.confirmationRequired ? "Confirmation required" : "Review before route")
+		? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")
 		: "Waiting for output";
 
 	return `
@@ -4156,7 +4156,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 			<div class="aicmd-room-output-head">
 				<div>
 					<span class="aicmd-room-kicker">Output Workspace</span>
-					<h2>Drafts, tasks, workflows, handoffs</h2>
+					<h2>Drafts, task previews, workflow previews, handoffs</h2>
                                         <p>${hasPreview ? "Review the result, then route draft context to the next workspace." : "Create a preview from the conversation before routing work to another workspace."}</p>
 				</div>
 				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
@@ -4222,7 +4222,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 			` : `
 				<div class="aicmd-room-output-empty">
                                         <strong>No preview yet</strong>
-                                        <span>Choose Draft, Task, Draft Workflow, or Prepare Handoff, then create a preview from the conversation.</span>
+                                        <span>Choose Draft, Task Preview, Workflow Preview, or Handoff Preview, then create a review-ready preview from the conversation.</span>
 				</div>
 			`}
 
@@ -4233,9 +4233,9 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
                                         <button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
                                         <button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
                                 </div>
-                                <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, and workflow runs happen only in the destination workspace after confirmation.</div>
+                                <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>
                         ` : `
-                                <div class="aicmd-room-planned-note">No output actions yet. Create a Draft, Task, Draft Workflow, or Prepare Handoff from the conversation first.</div>
+                                <div class="aicmd-room-planned-note">No routed preview yet. Create a Draft, Task Preview, Workflow Preview, or Handoff Preview from the conversation first.</div>
                         `}
 		</section>
 	`;
@@ -4323,7 +4323,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
         const latestShared = sharedResponses[0] || null;
         const bridgeLabel = safeBridgeStatus.available ? "Connected" : "Preview-safe";
         const safetyLine = safeBridgeStatus.available
-                ? "Chat only. No workflow, task, handoff, approval, publish, CRM, or customer action was created."
+                ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
                 : "Preview-safe. Chat tools require the protected AI chat route.";
         const emptyBody = safeBridgeStatus.available
                 ? `Start a focused conversation with ${selectedLabel}.`
@@ -4607,7 +4607,7 @@ function renderPhase1SafetyPanel(escapeHtml) {
 				</div>
 				<div class="aicmd-v2-safety-rule">
 					<span class="aicmd-v2-safety-bullet">●</span>
-					<span>Backend owns authority — AI Command prepares guidance and routes. It does not override execution controls.</span>
+					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
 				</div>
 			</div>
 		</div>
@@ -4663,7 +4663,7 @@ export const aiCommandRoute = {
 	meta: {
 		eyebrow: "AI & Build",
 		title: "AI Workspace",
-		description: "Talk to your AI team, run structured tasks, and turn intelligence into action."
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
 	},
 	template: `
 		<section class="page is-active" data-page="ai-command">
@@ -5495,7 +5495,7 @@ export const aiCommandRoute = {
 						}
 					}
 				});
-				showMessage?.("Response draft context prepared. Review before saving or executing.");
+				showMessage?.("Response draft context prepared. Review in the owning workspace before saving or executing there.");
 				navigateTo(destination);
 			};
 		}
