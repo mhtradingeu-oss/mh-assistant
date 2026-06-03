@@ -1088,6 +1088,56 @@ function hasSavedServerCredential(record, fieldKey) {
   return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);
 }
 
+function hasSavedServerRequiredField(record, integration, field) {
+  if (!field) return false;
+
+  if (isSecretField(field)) {
+    return hasSavedServerCredential(record, field.key);
+  }
+
+  const configValue = asString(asObject(record.config)[field.key]).trim();
+  if (configValue) {
+    return true;
+  }
+
+  if (field.key === integration.primaryField) {
+    return Boolean(asString(record.primary_value).trim());
+  }
+
+  return false;
+}
+
+function getTestPreflightIssue(integration, record) {
+  if (!integration || !record) {
+    return null;
+  }
+
+  if (integration.id === "woocommerce") {
+    const savedStoreUrl = asString(asObject(record.config).storeUrl).trim();
+    if (!savedStoreUrl) {
+      return {
+        fieldKey: "storeUrl",
+        message:
+          "WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."
+      };
+    }
+  }
+
+  const missingRequired = integration.fields
+    .filter((field) => field.required)
+    .filter((field) => !hasSavedServerRequiredField(record, integration, field));
+
+  if (!missingRequired.length) {
+    return null;
+  }
+
+  return {
+    fieldKey: missingRequired[0].key,
+    message:
+      "Save or repair this integration before running a connection test. The test uses the saved server-side configuration."
+  };
+}
+
 function getLocalFillCount(session, integration, record, sourceValue, state) {
   return integration.fields.filter((field) => {
     const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();
@@ -1477,6 +1527,20 @@ function bindIntegrationActions({
     if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {
       showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");
       return;
+    }
+
+    const state = getState();
+    const record = getServerRecord(state, integration);
+
+    if (type === "test") {
+      const preflightIssue = getTestPreflightIssue(integration, record);
+      if (preflightIssue) {
+        setIntegrationValidation(session, integrationId, preflightIssue.fieldKey, preflightIssue.message);
+        openIntegrationDrawer(session, integrationId);
+        render();
+        showError?.(preflightIssue.message);
+        return;
+      }
     }
 
     try {
