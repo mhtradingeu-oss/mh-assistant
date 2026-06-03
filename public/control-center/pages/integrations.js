@@ -1491,6 +1491,20 @@ function bindIntegrationActions({
       await reloadProjectData(projectName);
       render();
     } catch (error) {
+      const governanceCode = String(
+        error?.code ||
+        error?.error ||
+        error?.payload?.code ||
+        error?.payload?.error ||
+        ""
+      ).toLowerCase();
+      if (reconnect && governanceCode === "governance_approval_required") {
+        showMessage?.(`Governance approval requested for ${integration.label}. Open Governance to review the reconnect request.`);
+        navigateTo("governance");
+        render();
+        return;
+      }
+
       showError?.(error.message || `Failed to connect ${integration.label}.`);
     }
   }
