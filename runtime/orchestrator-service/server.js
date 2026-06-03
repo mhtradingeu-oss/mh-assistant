@@ -166,6 +166,7 @@ process.on('unhandledRejection', (reason) => {
   }
 });
 
+const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
 const app = express();
 app.use(helmet({
   contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
@@ -11987,6 +11988,76 @@ function handleCustomerOperationsInbox(req, res) {
     });
   }
 }
+
+
+// Canonical Control Center Customer Operations read-only projection routes.
+// These routes are GET-only aliases for Customer Center v1 projections.
+// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+// place calls, trigger IVR, send provider messages, or auto-reply.
+function sendCustomerCenterProjection(res, projector) {
+  try {
+    const runtime = customerOperationsRuntime;
+    return res.json({
+      ok: true,
+      data: projector(runtime)
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: 'customer_center_projection_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerReadiness(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectInboxEntries(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversations(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectTickets(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectChannels(runtime)
+  );
+});
+
 
 app.get(
   '/media-manager/project/:project/customer-operations/health',

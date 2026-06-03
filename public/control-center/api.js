@@ -2320,3 +2320,36 @@ export async function uploadProjectAsset(projectName, assetType, file) {
     "Failed to upload asset"
   );
 }
+
+export async function fetchCustomerOperationsReadiness(projectName) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+}
+
+export async function fetchCustomerOperationsInbox(projectName) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+}
+
+export async function fetchCustomerConversations(projectName) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+}
+
+export async function fetchCustomerConversationDetail(projectName, conversationId) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+}
+
+export async function fetchCustomerConversationMessages(projectName, conversationId) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+}
+
+export async function fetchCustomerProfilePreview(projectName, customerId) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+}
+
+export async function fetchCustomerTickets(projectName) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+}
+
+export async function fetchCustomerChannels(projectName) {
+  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+}
+
