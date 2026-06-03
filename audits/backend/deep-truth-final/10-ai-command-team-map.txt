@@ -1,0 +1,830 @@
+runtime/orchestrator-service/server.js:126:} = require('./lib/media/native/models/default-models');
+runtime/orchestrator-service/server.js:131:} = require('./lib/media/native/providers/provider-model-catalog');
+runtime/orchestrator-service/server.js:229:  /^\/generate_media_from_prompt\/?$/i,
+runtime/orchestrator-service/server.js:457:  const prompt = asString(req?.body?.prompt || '');
+runtime/orchestrator-service/server.js:470:      prompt,
+runtime/orchestrator-service/server.js:474:      model: asString(req?.body?.model || req?.body?.media_model || ''),
+runtime/orchestrator-service/server.js:764:const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
+runtime/orchestrator-service/server.js:1925:    model: renderRequest.result?.model || null
+runtime/orchestrator-service/server.js:2351:${renderRequest.final_generation_prompt}
+runtime/orchestrator-service/server.js:2421:  form.append('model', 'gpt-image-1.5');
+runtime/orchestrator-service/server.js:2422:  form.append('prompt', finalPrompt);
+runtime/orchestrator-service/server.js:2433:    'https://api.openai.com/v1/images/edits',
+runtime/orchestrator-service/server.js:2463:  provider: 'openai',
+runtime/orchestrator-service/server.js:2465:  model: 'gpt-image-1.5',
+runtime/orchestrator-service/server.js:3792:    prompt_pack: p.prompt_pack || {},
+runtime/orchestrator-service/server.js:3977:      'ready_for_manual_handoff',
+runtime/orchestrator-service/server.js:4064:    visual_prompt: String(input.visual_prompt || base.visual_prompt || '').trim(),
+runtime/orchestrator-service/server.js:4093:      visual_prompt: channelAsset.visual_prompt || '',
+runtime/orchestrator-service/server.js:4800:    final_generation_prompt: job.final_generation_prompt,
+runtime/orchestrator-service/server.js:5048:    final_generation_prompt: buildGenerationPrompt(projectName, assetType, goal),
+runtime/orchestrator-service/server.js:5067:  const promptPackage = generateBrandControlledPrompt(projectName, assetType, goal);
+runtime/orchestrator-service/server.js:5085:    final_prompt: promptPackage.final_prompt
+runtime/orchestrator-service/server.js:5180:  const contextPath = path.join(paths.baseDir, 'prompt-engine-context.json');
+runtime/orchestrator-service/server.js:5233:    final_prompt: lines.join(' ')
+runtime/orchestrator-service/server.js:6065:  const promptFileMap = {
+runtime/orchestrator-service/server.js:6075:    path.join(PROMPTS_DIR, promptFileMap[agent] || 'orchestrator.md')
+runtime/orchestrator-service/server.js:6103:      agent_prompt_loaded: agentPrompt.length > 0,
+runtime/orchestrator-service/server.js:6189:    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+runtime/orchestrator-service/server.js:6700:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6720:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6733:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6744:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+runtime/orchestrator-service/server.js:6746:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6759:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6769:      data_requirements: ['services', 'pricing_model', 'service_area', 'booking_or_contact_flow'],
+runtime/orchestrator-service/server.js:6772:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6785:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6798:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/server.js:6811:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:6853:    ai_team_defaults: businessTemplate.ai_team_defaults,
+runtime/orchestrator-service/server.js:8205:        used_in: ['Setup', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8220:        why_it_matters: 'Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.',
+runtime/orchestrator-service/server.js:8221:        used_in: ['Setup', 'Campaign Studio', 'Content Studio', 'Media Studio', 'AI Command']
+runtime/orchestrator-service/server.js:8236:        why_it_matters: 'Campaign Studio, Content Studio, Publishing, and AI Command need accurate product facts.',
+runtime/orchestrator-service/server.js:8237:        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8252:        why_it_matters: 'Prevents Campaign Studio, Publishing, and AI Command from inventing prices or offers.',
+runtime/orchestrator-service/server.js:8253:        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8268:        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+runtime/orchestrator-service/server.js:8269:        used_in: ['Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8285:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8301:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8317:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8333:        used_in: ['Campaign Studio', 'Content Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8349:        used_in: ['Campaign Studio', 'Media Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8364:        why_it_matters: 'Content Studio, Campaign Studio, Publishing, and AI Command need trusted proof points.',
+runtime/orchestrator-service/server.js:8365:        used_in: ['Campaign Studio', 'Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8380:        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+runtime/orchestrator-service/server.js:8381:        used_in: ['Content Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:8396:        why_it_matters: 'Campaign Studio, Publishing, and AI Command need partner constraints before reuse or release.',
+runtime/orchestrator-service/server.js:8397:        used_in: ['Campaign Studio', 'Publishing', 'AI Command']
+runtime/orchestrator-service/server.js:9465:app.post('/generate_media_from_prompt', (req, res) => {
+runtime/orchestrator-service/server.js:9470:    const promptPack = req.body?.prompt_pack && typeof req.body.prompt_pack === 'object'
+runtime/orchestrator-service/server.js:9471:      ? req.body.prompt_pack
+runtime/orchestrator-service/server.js:9472:      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/server.js:9474:    if (!promptPack || typeof promptPack !== 'object' || Object.keys(promptPack).length === 0) {
+runtime/orchestrator-service/server.js:9475:      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
+runtime/orchestrator-service/server.js:9481:    const generated = buildMediaGenerationMock(promptPack, req.body || {});
+runtime/orchestrator-service/server.js:9483:    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9486:        has_image_prompt: Boolean(generated.image_prompt),
+runtime/orchestrator-service/server.js:9496:      image_prompt: generated.image_prompt,
+runtime/orchestrator-service/server.js:9507:      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+runtime/orchestrator-service/server.js:9520:      message: error.message || 'Failed to generate media from prompt'
+runtime/orchestrator-service/server.js:10222:    ai_team_defaults: businessTemplate.ai_team_defaults,
+runtime/orchestrator-service/server.js:10248:          ai_team_defaults: updated.ai_team_defaults,
+runtime/orchestrator-service/server.js:10873:    status_models: STATUS_MODELS
+runtime/orchestrator-service/server.js:10884:      team: readTeamModel(req.params.project)
+runtime/orchestrator-service/server.js:10888:      error: error.message || 'Failed to load project team model'
+runtime/orchestrator-service/server.js:10897:      team: updateTeamModel(req.params.project, req.body || {}, req.body?.actor || 'control-center')
+runtime/orchestrator-service/server.js:10901:      error: error.message || 'Failed to update project team model'
+runtime/orchestrator-service/server.js:10906:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+runtime/orchestrator-service/server.js:10907:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+runtime/orchestrator-service/server.js:10908:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+runtime/orchestrator-service/server.js:10909:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+runtime/orchestrator-service/server.js:11186:  const source = String(req.body?.source || 'ai-command').trim();
+runtime/orchestrator-service/server.js:11190:    route: 'ai-command',
+runtime/orchestrator-service/server.js:11200:      route: 'ai-command',
+runtime/orchestrator-service/server.js:11221:      route: 'ai-command',
+runtime/orchestrator-service/server.js:11234:  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+runtime/orchestrator-service/server.js:11240:    specialist_id: specialistId
+runtime/orchestrator-service/server.js:11251:      specialist_id: result?.specialist?.id || specialistId
+runtime/orchestrator-service/server.js:11277:  const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
+runtime/orchestrator-service/server.js:11283:    specialist_id: specialistId
+runtime/orchestrator-service/server.js:11294:      specialist_id: result?.specialist?.id || specialistId
+runtime/orchestrator-service/server.js:11654:      error: error.message || 'Failed to list handoffs'
+runtime/orchestrator-service/server.js:11661:    const handoff = createHandoff(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11663:      handoff,
+runtime/orchestrator-service/server.js:11668:      error: error.message || 'Failed to create handoff'
+runtime/orchestrator-service/server.js:11675:    const handoff = consumeHandoff(req.params.project, req.params.handoffId, req.body || {});
+runtime/orchestrator-service/server.js:11677:      handoff,
+runtime/orchestrator-service/server.js:11682:      error: error.message || 'Failed to consume handoff'
+runtime/orchestrator-service/server.js:11687:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11688:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+runtime/orchestrator-service/server.js:11689:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11690:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+runtime/orchestrator-service/server.js:11691:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:11692:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+runtime/orchestrator-service/server.js:12241:      prompt: req.body?.prompt || '',
+runtime/orchestrator-service/server.js:12933:      visual_prompt:
+runtime/orchestrator-service/server.js:12942:      video_prompt:
+runtime/orchestrator-service/server.js:12972:  const pp = product.prompt_pack || {};
+runtime/orchestrator-service/server.js:12981:      visual_prompt: b.visual_prompt,
+runtime/orchestrator-service/server.js:12991:      video_prompt: r.video_prompt,
+runtime/orchestrator-service/server.js:13007:      video_prompt: r.video_prompt,
+runtime/orchestrator-service/server.js:13023:      visual_prompt: m.visual_prompt,
+runtime/orchestrator-service/server.js:13035:      visual_prompt: b.visual_prompt
+runtime/orchestrator-service/server.js:13109:      prompt_pack: product.prompt_pack || {},
+runtime/orchestrator-service/server.js:13172:    const promptPack = product.prompt_pack || {};
+runtime/orchestrator-service/server.js:13184:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:13186:          ? promptPack.marketplace || null
+runtime/orchestrator-service/server.js:13188:          ? promptPack.branding || null
+runtime/orchestrator-service/server.js:13189:          : promptPack.branding || null
+runtime/orchestrator-service/server.js:13530:        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+runtime/orchestrator-service/server.js:13593:function buildMediaGenerationMock(promptPack = {}, input = {}) {
+runtime/orchestrator-service/server.js:13594:  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+runtime/orchestrator-service/server.js:13600:    input.image_prompt
+runtime/orchestrator-service/server.js:13601:    || branding.visual_prompt
+runtime/orchestrator-service/server.js:13602:    || feature.visual_prompt
+runtime/orchestrator-service/server.js:13607:    String(reel.video_prompt || 'Show product usage with a clear before/after context and one main benefit.').trim(),
+runtime/orchestrator-service/server.js:13612:    image_prompt: imagePrompt,
+runtime/orchestrator-service/server.js:13625:        direction: String(reel.video_prompt || feature.video_prompt || imagePrompt).trim()
+runtime/orchestrator-service/server.js:13666:  const promptPack = primary.prompt_pack && typeof primary.prompt_pack === 'object'
+runtime/orchestrator-service/server.js:13667:    ? primary.prompt_pack
+runtime/orchestrator-service/server.js:13669:  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+runtime/orchestrator-service/server.js:13670:  const branding = promptPack.branding && typeof promptPack.branding === 'object' ? promptPack.branding : {};
+runtime/orchestrator-service/server.js:13847:      result.execution_status = 'ready_for_manual_handoff';
+runtime/orchestrator-service/server.js:13848:      result.action_type = 'manual_marketplace_handoff';
+runtime/orchestrator-service/server.js:13849:      result.notes.push('Marketplace payload is ready for manual listing handoff.');
+runtime/orchestrator-service/server.js:14872:        creative_prompt:
+runtime/orchestrator-service/server.js:14928:        featured_image_prompt:
+runtime/orchestrator-service/server.js:15243:      item.creative_prompt =
+runtime/orchestrator-service/server.js:15298:      item.featured_image_prompt =
+runtime/orchestrator-service/server.js:15518:          featured_image_prompt: item.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:15522:          media_ready: Boolean(item.featured_image_prompt && item.featured_image_alt)
+runtime/orchestrator-service/server.js:15554:          featured_image_prompt: item.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:15603:        prompt: blogItem.featured_image_prompt || '',
+runtime/orchestrator-service/server.js:15611:        media_ready: Boolean(blogItem.featured_image_prompt && blogItem.featured_image_alt)
+runtime/orchestrator-service/server.js:15678:  if (!asset.prompt) {
+runtime/orchestrator-service/server.js:15679:    return res.json({ error: 'Missing prompt in asset' });
+runtime/orchestrator-service/server.js:15686:      'https://api.openai.com/v1/images/generations',
+runtime/orchestrator-service/server.js:15688:        model: 'gpt-image-1',
+runtime/orchestrator-service/server.js:15689:        prompt: asset.prompt,
+runtime/orchestrator-service/server.js:16076:      const prompt =
+runtime/orchestrator-service/server.js:16089:        prompt,
+runtime/orchestrator-service/server.js:16251:      if (!asset.prompt) {
+runtime/orchestrator-service/server.js:16252:        return res.json({ error: 'Missing prompt in asset' });
+runtime/orchestrator-service/server.js:16257:          'https://api.openai.com/v1/images/generations',
+runtime/orchestrator-service/server.js:16259:            model: 'gpt-image-1',
+runtime/orchestrator-service/server.js:16260:            prompt: asset.prompt,
+runtime/orchestrator-service/server.js:17533:    media_prompts: [
+runtime/orchestrator-service/server.js:17617:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+runtime/orchestrator-service/server.js:17667:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+runtime/orchestrator-service/server.js:17990:        prompt_constraints: {
+runtime/orchestrator-service/server.js:18051:      brandProfile.prompt_constraints = {
+runtime/orchestrator-service/server.js:18411:if (command === '/build_prompt_engine_context') {
+runtime/orchestrator-service/server.js:18426:      error: 'Failed to build prompt engine context',
+runtime/orchestrator-service/server.js:18431:if (command === '/review_prompt_guardrails') {
+runtime/orchestrator-service/server.js:18463:      error: 'Failed to review prompt guardrails',
+runtime/orchestrator-service/server.js:18468:if (command === '/generate_brand_controlled_prompt') {
+runtime/orchestrator-service/server.js:18485:      error: 'Failed to generate brand controlled prompt',
+runtime/orchestrator-service/server.js:19507:if (command === '/build_product_prompt_pack') {
+runtime/orchestrator-service/server.js:19527:    const promptPack = buildProductPromptPack(product);
+runtime/orchestrator-service/server.js:19528:    product.prompt_pack = promptPack;
+runtime/orchestrator-service/server.js:19538:        prompt_pack: promptPack
+runtime/orchestrator-service/server.js:19543:      error: 'Failed to build product prompt pack',
+runtime/orchestrator-service/server.js:19548:if (command === '/bulk_build_product_prompt_packs') {
+runtime/orchestrator-service/server.js:19562:      product.prompt_pack = buildProductPromptPack(product);
+runtime/orchestrator-service/server.js:19573:        prompt_packs_built: count
+runtime/orchestrator-service/server.js:19578:      error: 'Failed to bulk build product prompt packs',
+runtime/orchestrator-service/server.js:19583:if (command === '/review_product_prompt_pack') {
+runtime/orchestrator-service/server.js:19600:        prompt_pack: product.prompt_pack || null
+runtime/orchestrator-service/server.js:19605:      error: 'Failed to review product prompt pack',
+runtime/orchestrator-service/server.js:20914:      item.featured_image_prompt && item.featured_image_alt
+runtime/orchestrator-service/server.js:20929:        item.featured_image_prompt && item.featured_image_alt
+runtime/orchestrator-service/server.js:21872:app.post('/api/media/improve-prompt', async (req, res) => {
+runtime/orchestrator-service/server.js:21881:      output: { improved_prompt: result.improved_prompt },
+runtime/orchestrator-service/server.js:21882:      status: 'prompt_ready'
+runtime/orchestrator-service/server.js:21887:      status: 'prompt_ready',
+runtime/orchestrator-service/server.js:21888:      improved_prompt: result.improved_prompt,
+runtime/orchestrator-service/server.js:21890:      model: result.model,
+runtime/orchestrator-service/server.js:21897:      message: error.message || 'Failed to improve media prompt'
+runtime/orchestrator-service/server.js:21920:      model: result.model,
+runtime/orchestrator-service/server.js:21949:      model: result.model,
+runtime/orchestrator-service/server.js:21979:      model: result.model,
+runtime/orchestrator-service/server.js:22009:      model: result.model,
+runtime/orchestrator-service/server.js:22039:      model: result.model,
+runtime/orchestrator-service/lib/insights/learning-engine.js:365:    assistant_prompts: [
+runtime/orchestrator-service/lib/insights/learning-engine.js:368:        prompt: `Review the latest learning patterns and recommendations for ${projectName}. Tell me the next highest-impact optimization across content, SEO, publishing, paid media, and website conversion.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:372:        prompt: `Using the latest cross-platform insights for ${projectName}, identify the strongest platform and explain what winning pattern the system should reuse there.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:376:        prompt: `From the latest top-performing content in ${projectName}, tell me which items should be repurposed next and how they should be adapted for other platforms.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:380:        prompt: `Use the latest SEO intelligence for ${projectName} to identify the highest-value query, page, and CTR opportunities to act on next.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:384:        prompt: `From the latest underperforming content in ${projectName}, identify which pieces should be rewritten first and what angle should replace them.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:388:        prompt: `Summarize the strongest reusable performance pattern in ${projectName}, including hook, format, channel, CTA, and publishing window.`
+runtime/orchestrator-service/lib/insights/ingestion-service.js:538:    return 'The website already shows page-level traffic and conversion signal. Use the strongest landing pages as the model for future campaigns.';
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1212:    assistant_prompts: asArray(learning.ai_recommendations?.assistant_prompts)
+runtime/orchestrator-service/lib/integrations/provider-registry.js:16:    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+runtime/orchestrator-service/lib/integrations/provider-registry.js:54:    'This provider requires a dedicated auth flow or credential model that is not yet configured in MH Assistant OS.'
+runtime/orchestrator-service/lib/integrations/providers/ops.js:29:        team: response.data.team,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:30:        team_id: response.data.team_id,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:41:      id: response.data.team_id,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:42:      name: response.data.team
+runtime/orchestrator-service/lib/integrations/providers/ops.js:259:      username: 'mhassistant',
+runtime/orchestrator-service/lib/integrations/storage.js:55: * Use this for every read of critical ops state (collections, governance, team).
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:35:    media: '/generate_media_from_prompt',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:42:      const promptPack = payload.prompt_pack && typeof payload.prompt_pack === 'object'
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:43:        ? payload.prompt_pack
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:44:        : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:46:      if (!promptPack || typeof promptPack !== 'object' || Object.keys(promptPack).length === 0) {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:47:        const err = new Error('Missing prompt_pack in package_payload');
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:53:      const generated = buildMediaGenerationMock(promptPack, payload);
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:56:        image_prompt: generated.image_prompt,
+runtime/orchestrator-service/lib/ai/provider-registry.js:1:const { createOpenAiProvider } = require('./providers/openai');
+runtime/orchestrator-service/lib/ai/provider-registry.js:4:  openai: createOpenAiProvider
+runtime/orchestrator-service/lib/ai/providers/openai.js:280:    id: 'openai',
+runtime/orchestrator-service/lib/ai/providers/openai.js:286:        model: asString(config.model || 'gpt-4.1-mini'),
+runtime/orchestrator-service/lib/ai/providers/openai.js:292:              'You are the AI Command marketing execution engine inside MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:293:              modePrompt.prompt,
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:355:        providerError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:368:        emptyError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:377:        emptyContentError.provider = 'openai';
+runtime/orchestrator-service/lib/ai/providers/openai.js:382:        route: 'ai-command',
+runtime/orchestrator-service/lib/ai/providers/openai.js:383:        provider: 'openai',
+runtime/orchestrator-service/lib/ai/providers/openai.js:384:        model: config.model,
+runtime/orchestrator-service/lib/ai/providers/openai.js:389:        provider: 'openai',
+runtime/orchestrator-service/lib/ai/providers/openai.js:390:        model: asString(config.model),
+runtime/orchestrator-service/lib/ai/provider-config.js:27:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:37:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:39:      'Build campaign concepts, launch plans, channel mix, audience segments, offer strategy, launch phases, assets, blockers, and handoffs.',
+runtime/orchestrator-service/lib/ai/provider-config.js:47:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:57:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:67:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:77:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:87:    prompt: [
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:100:    ads_specialist: 'ads',
+runtime/orchestrator-service/lib/ai/provider-config.js:101:    seo_specialist: 'seo',
+runtime/orchestrator-service/lib/ai/provider-config.js:114:  const provider = asString(env.MH_AI_PROVIDER || env.AI_PROVIDER || 'openai').toLowerCase();
+runtime/orchestrator-service/lib/ai/provider-config.js:115:  const model = asString(env.MH_AI_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini');
+runtime/orchestrator-service/lib/ai/provider-config.js:117:  const baseUrl = asString(env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/+$/, '');
+runtime/orchestrator-service/lib/ai/provider-config.js:122:    model,
+runtime/orchestrator-service/lib/ai/provider-config.js:140:  if (provider === 'openai' && !asString(config.apiKey)) {
+runtime/orchestrator-service/lib/ops/backbone.js:43:  handoffs: 250
+runtime/orchestrator-service/lib/ops/backbone.js:95:  handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:104:    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+runtime/orchestrator-service/lib/ops/backbone.js:121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:128:    actions: ['create_visuals', 'revise_visuals', 'handoff_media']
+runtime/orchestrator-service/lib/ops/backbone.js:135:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:170:    actions: ['override_policy', 'manage_team', 'resolve_escalation', 'manage_permissions']
+runtime/orchestrator-service/lib/ops/backbone.js:195:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:219:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:227:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:235:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:381:    version: 'mh-team-ops-v1',
+runtime/orchestrator-service/lib/ops/backbone.js:384:        id: 'mh-assistant-system',
+runtime/orchestrator-service/lib/ops/backbone.js:407:    service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:413:        handoff_to: asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:439:    service_model: defaults.service_model,
+runtime/orchestrator-service/lib/ops/backbone.js:453:    raw = readJsonFileDurable(paths.teamPath);
+runtime/orchestrator-service/lib/ops/backbone.js:455:    console.error(`[backbone] readTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:461:function updateTeamModel(projectName, patch = {}, actor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:465:    raw = readJsonFileDurable(paths.teamPath);
+runtime/orchestrator-service/lib/ops/backbone.js:467:    console.error(`[backbone] updateTeamModel: team file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:472:  writeJsonFile(paths.teamPath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:476:    type: 'team_model_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:477:    entity_type: 'team',
+runtime/orchestrator-service/lib/ops/backbone.js:479:    title: 'Team operations model updated',
+runtime/orchestrator-service/lib/ops/backbone.js:491:function findTeamMemberByRole(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:493:  return asArray(team?.members).find((member) => normalizeRoleKey(member.role) === normalizedRole) || null;
+runtime/orchestrator-service/lib/ops/backbone.js:500:function roleDisplay(team, roleId) {
+runtime/orchestrator-service/lib/ops/backbone.js:501:  const member = findTeamMemberByRole(team, roleId);
+runtime/orchestrator-service/lib/ops/backbone.js:524:function inferPrimaryRole(entityType, record = {}, team = null) {
+runtime/orchestrator-service/lib/ops/backbone.js:543:    handoff_roles: normalizeStringList(record.handoff_roles).length
+runtime/orchestrator-service/lib/ops/backbone.js:544:      ? normalizeStringList(record.handoff_roles)
+runtime/orchestrator-service/lib/ops/backbone.js:545:      : asArray(domain.handoff_to),
+runtime/orchestrator-service/lib/ops/backbone.js:546:    owner_display: roleDisplay(team, record.owner_role || ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+runtime/orchestrator-service/lib/ops/backbone.js:592:function normalizeCommentEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:609:function normalizeCommentList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:621:function appendCommentList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 50) {
+runtime/orchestrator-service/lib/ops/backbone.js:630:function normalizeRequestList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:639:      const source = typeof item === 'string' ? { prompt: item } : asObject(item);
+runtime/orchestrator-service/lib/ops/backbone.js:640:      const prompt = asString(source.prompt || source.request || source.text);
+runtime/orchestrator-service/lib/ops/backbone.js:642:      if (!prompt) {
+runtime/orchestrator-service/lib/ops/backbone.js:649:        prompt,
+runtime/orchestrator-service/lib/ops/backbone.js:658:function appendRequestList(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 25) {
+runtime/orchestrator-service/lib/ops/backbone.js:665:function normalizeRevisionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:679:function normalizeRevisionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:685:function normalizeOutputVersionEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:701:function normalizeOutputVersionList(value, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:707:function normalizePreviewHistoryEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:725:function appendPreviewHistory(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 30) {
+runtime/orchestrator-service/lib/ops/backbone.js:742:    actor: asString(actor) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:785:    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:793:    teamPath: path.join(opsDir, 'team.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:796:    handoffsPath: path.join(opsDir, 'handoffs.json')
+runtime/orchestrator-service/lib/ops/backbone.js:825:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:827:      'team'
+runtime/orchestrator-service/lib/ops/backbone.js:842:  ensureJsonFile(paths.handoffsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:843:  ensureJsonFile(paths.teamPath, buildDefaultTeamModel());
+runtime/orchestrator-service/lib/ops/backbone.js:914:      'handoffs',
+runtime/orchestrator-service/lib/ops/backbone.js:916:      'team'
+runtime/orchestrator-service/lib/ops/backbone.js:973:  if (value.includes('routing') || value.includes('handoff') || value.includes('ai_')) return 'ai_routing';
+runtime/orchestrator-service/lib/ops/backbone.js:991:    actor: asString(event.actor) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:1228:function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:1339:    asString(record.prompt),
+runtime/orchestrator-service/lib/ops/backbone.js:1376:    asString(record.prompt),
+runtime/orchestrator-service/lib/ops/backbone.js:1398:    asString(record.prompt),
+runtime/orchestrator-service/lib/ops/backbone.js:1474:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1497:      entity_type: asString(item.entity_type) || (item.prompt ? 'media_job' : 'content_item'),
+runtime/orchestrator-service/lib/ops/backbone.js:1587:    review_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:1589:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/backbone.js:1590:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1591:        media: roleDisplay(team, 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1592:        publishing: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:1593:        compliance: roleDisplay(team, 'compliance_reviewer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1594:        admin: roleDisplay(team, 'admin')
+runtime/orchestrator-service/lib/ops/backbone.js:1661:      model: job.model,
+runtime/orchestrator-service/lib/ops/backbone.js:1676:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1686:  const routing = inferPrimaryRole('campaign', input, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1701:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1739:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:1762:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1772:  const routing = inferPrimaryRole('content_item', input, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1828:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1843:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1873:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:1904:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:1918:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:1953:    prompt: asString(input.prompt || current.prompt),
+runtime/orchestrator-service/lib/ops/backbone.js:1956:    model: asString(input.model || current.model),
+runtime/orchestrator-service/lib/ops/backbone.js:1970:    owner: asString(input.owner || current.owner) || roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1977:    linked_handoffs: normalizeStringList(input.linked_handoffs || current.linked_handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:1990:        model: asString(input.model || current.model),
+runtime/orchestrator-service/lib/ops/backbone.js:2005:    actor: asString(input.actor || input.owner) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2009:      model: job.model,
+runtime/orchestrator-service/lib/ops/backbone.js:2065:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2164:    source: asString(input.source || current.source) || 'ai-command',
+runtime/orchestrator-service/lib/ops/backbone.js:2165:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2233:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2294:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2360:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2416:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2431:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2439:    owner: asString(input.owner || input.assignee || current.owner || current.assignee) || roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2441:    assignee: asString(input.assignee || current.assignee || input.owner) || roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2443:    team_role: asString(input.team_role || current.team_role || assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2459:    handoff_roles: normalizeStringList(input.handoff_roles || current.handoff_roles || routing.handoff_roles),
+runtime/orchestrator-service/lib/ops/backbone.js:2462:      owner_label: roleDisplay(team, ownerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2464:      assignee_label: roleDisplay(team, assigneeRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2466:      review_label: roleDisplay(team, routing.reviewer_role)
+runtime/orchestrator-service/lib/ops/backbone.js:2513:    actor: asString(input.actor || input.owner || input.assignee) || 'mh-assistant'
+runtime/orchestrator-service/lib/ops/backbone.js:2519:    message: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2520:    body: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2559:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2575:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2593:    reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2595:    requested_by: asString(input.requested_by || current.requested_by || input.actor) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2596:    requested_for: asString(input.requested_for || current.requested_for || input.reviewer) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2611:      owner_label: roleDisplay(team, routing.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2613:      reviewer_label: roleDisplay(team, reviewerRole)
+runtime/orchestrator-service/lib/ops/backbone.js:2744:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2900:      owner: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2902:      assignee: roleDisplay(team, escalationTargetRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2933:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2934:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:2956:  }, team);
+runtime/orchestrator-service/lib/ops/backbone.js:2958:  const handoff = {
+runtime/orchestrator-service/lib/ops/backbone.js:2959:    id: asString(current.id) || asString(input.id) || createId('handoff'),
+runtime/orchestrator-service/lib/ops/backbone.js:2961:    type: asString(input.type) || 'route_handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:2969:    created_by: asString(input.created_by || input.actor || current.created_by) || 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:2972:    source_role_label: roleDisplay(team, input.source_role || current.source_role || sourceRouting.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:2973:    destination_role_label: roleDisplay(team, input.destination_role || current.destination_role || destinationRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2983:      current.id ? 'handoff_updated' : 'handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:2999:      asString(record.source_page) === handoff.source_page &&
+runtime/orchestrator-service/lib/ops/backbone.js:3000:      asString(record.id) !== handoff.id &&
+runtime/orchestrator-service/lib/ops/backbone.js:3011:      updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3012:      history: appendHistory(record, 'handoff_superseded', handoff.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3013:        replaced_by: handoff.id
+runtime/orchestrator-service/lib/ops/backbone.js:3018:  writeCollection(paths.handoffsPath, upsertById(normalizedItems, handoff), MAX_ITEMS.handoffs);
+runtime/orchestrator-service/lib/ops/backbone.js:3022:    type: 'route_handoff_created',
+runtime/orchestrator-service/lib/ops/backbone.js:3023:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3024:    entity_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3025:    title: `${handoff.source_page || 'system'} to ${handoff.destination_page}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3026:    summary: 'Durable cross-page handoff recorded.',
+runtime/orchestrator-service/lib/ops/backbone.js:3027:    actor: handoff.created_by,
+runtime/orchestrator-service/lib/ops/backbone.js:3029:      source_page: handoff.source_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3030:      destination_page: handoff.destination_page,
+runtime/orchestrator-service/lib/ops/backbone.js:3031:      route_key: handoff.route_key
+runtime/orchestrator-service/lib/ops/backbone.js:3035:  const handoffLinkedEntity = handoff.linked_entity || handoff.source_entity;
+runtime/orchestrator-service/lib/ops/backbone.js:3036:  if (handoffLinkedEntity?.entity_type && handoffLinkedEntity?.entity_id) {
+runtime/orchestrator-service/lib/ops/backbone.js:3037:    updateLinkedEntity(paths.project, handoffLinkedEntity.entity_type, handoffLinkedEntity.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:3040:        linked_handoffs: [...new Set([handoff.id, ...normalizeStringList(record.linked_handoffs)])],
+runtime/orchestrator-service/lib/ops/backbone.js:3042:        next_owner_role: handoff.destination_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3043:        next_owner_label: handoff.destination_role_label,
+runtime/orchestrator-service/lib/ops/backbone.js:3044:        updated_at: handoff.updated_at,
+runtime/orchestrator-service/lib/ops/backbone.js:3045:        history: appendHistory(record, 'handoff_linked', input.actor || input.created_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:3046:          handoff_id: handoff.id,
+runtime/orchestrator-service/lib/ops/backbone.js:3047:          destination_page: handoff.destination_page
+runtime/orchestrator-service/lib/ops/backbone.js:3051:      if (handoffLinkedEntity.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:3052:        nextRecord.destination = handoff.destination_page;
+runtime/orchestrator-service/lib/ops/backbone.js:3054:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3058:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3059:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3062:      } else if (handoffLinkedEntity.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:3064:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3065:            ? 'ready_for_handoff'
+runtime/orchestrator-service/lib/ops/backbone.js:3074:  return handoff;
+runtime/orchestrator-service/lib/ops/backbone.js:3082:  let items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3099:function consumeHandoff(projectName, handoffId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3101:  const items = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3102:  const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
+runtime/orchestrator-service/lib/ops/backbone.js:3116:    history: appendHistory(current, 'handoff_consumed', input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:3122:  writeJsonFile(paths.handoffsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:3126:    type: 'route_handoff_consumed',
+runtime/orchestrator-service/lib/ops/backbone.js:3127:    entity_type: 'handoff',
+runtime/orchestrator-service/lib/ops/backbone.js:3130:    summary: 'Durable cross-page handoff consumed.',
+runtime/orchestrator-service/lib/ops/backbone.js:3131:    actor: asString(input.actor) || 'mh-assistant'
+runtime/orchestrator-service/lib/ops/backbone.js:3144:  const team = readTeamModel(safeProject);
+runtime/orchestrator-service/lib/ops/backbone.js:3162:    assignee: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3238:    actor: 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:3265:function summarizeOwnershipVisibility(team, entities = []) {
+runtime/orchestrator-service/lib/ops/backbone.js:3283:        label: roleDisplay(team, roleId),
+runtime/orchestrator-service/lib/ops/backbone.js:3376:  if (normalizedType === 'handoff') return asString(record.destination_page) || 'workflows';
+runtime/orchestrator-service/lib/ops/backbone.js:3829:  const team = readTeamModel(paths.project);
+runtime/orchestrator-service/lib/ops/backbone.js:3842:  const handoffs = readCollection(paths.handoffsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3856:  const handoffLimit = Number(options.handoffLimit || 12) || 12;
+runtime/orchestrator-service/lib/ops/backbone.js:3869:    owner_label: roleDisplay(team, domain.owner_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3871:    review_label: roleDisplay(team, domain.review_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3872:    handoff_to: asArray(domain.handoff_to).map((roleId) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3874:      label: roleDisplay(team, roleId)
+runtime/orchestrator-service/lib/ops/backbone.js:3900:    status_models: STATUS_MODELS,
+runtime/orchestrator-service/lib/ops/backbone.js:3906:    team_service_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:3907:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3908:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3909:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3910:      domains: asArray(team.service_model?.domains),
+runtime/orchestrator-service/lib/ops/backbone.js:3911:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:3914:      default_owner: 'mh-assistant',
+runtime/orchestrator-service/lib/ops/backbone.js:3915:      active_role: team.active_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3916:      team_roles: asArray(team.members).map((member) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:3925:      visibility: summarizeOwnershipVisibility(team, ownershipEntities)
+runtime/orchestrator-service/lib/ops/backbone.js:3927:    team: {
+runtime/orchestrator-service/lib/ops/backbone.js:3928:      members: asArray(team.members),
+runtime/orchestrator-service/lib/ops/backbone.js:3929:      service_model: asObject(team.service_model),
+runtime/orchestrator-service/lib/ops/backbone.js:3930:      route_permissions: asArray(team.route_permissions),
+runtime/orchestrator-service/lib/ops/backbone.js:3931:      role_matrix: asArray(team.role_matrix),
+runtime/orchestrator-service/lib/ops/backbone.js:3932:      escalation_chain: asObject(team.escalation_chain)
+runtime/orchestrator-service/lib/ops/backbone.js:3936:      queue_by_role: summarizeOwnershipVisibility(team, queueItems),
+runtime/orchestrator-service/lib/ops/backbone.js:3937:      handoffs_by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4017:    handoffs: {
+runtime/orchestrator-service/lib/ops/backbone.js:4018:      total: handoffs.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4019:      available_count: handoffs.filter((item) => asString(item.status) === 'available').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4020:      current: summarizeCurrentHandoffs(handoffs),
+runtime/orchestrator-service/lib/ops/backbone.js:4021:      by_role: asArray(handoffs)
+runtime/orchestrator-service/lib/ops/backbone.js:4033:      items: handoffs.slice(0, handoffLimit)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:150:  team: 'executive'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:155:  const source = asString(input.request || input.prompt || input.command);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:188:  const specialistId = asString(input.specialistId || input.specialist_id).toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:189:  const mapped = SPECIALIST_MODE_MAP[specialistId];
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:194:  const request = asString(input.request || input.prompt || input.command);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:195:  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:196:  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:197:  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:209:  const specialistInstruction = specialistId === 'writer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:211:    : specialistId === 'video_lead'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:213:      : specialistId === 'strategist'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:215:        : specialistId === 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:217:          : specialistId === 'operations'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:219:            : 'Produce concrete specialist chat output, not a high-level summary.';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:222:    `Guidance-only live specialist chat response for MH Assistant OS.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:223:    `Specialist ID: ${specialistId || 'specialist'}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:224:    `Specialist name: ${specialistName}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:225:    `Mode: ${teamMode}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:230:    'You are answering inside a live specialist chat.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:231:    'Answer the user directly as the selected specialist.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:257:    specialistInstruction,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:271:function buildSpecialistInstruction(specialistId = "", specialistName = "Specialist") {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:272:  const id = asString(specialistId || "").toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:273:  const name = asString(specialistName || "Specialist");
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:318:      "Focus on tasks, workflows, ownership, timelines, handoffs, blockers, and operating next steps.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:331:    team: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:334:      "Coordinate specialists and recommend who should handle the next step, but do not execute backend actions."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:349:  const request = asString(input.request || input.prompt || input.message || input.command);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:350:  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:351:  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:352:  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:361:    const author = asString(message.specialistLabel || message.author || message.name || role);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:362:    const content = humanizeValue(message.content || message.text || message.message || message.responseText || message.prompt);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:367:  const specialistInstruction = buildSpecialistInstruction(specialistId, specialistName);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:370:    'Chat-only live specialist conversation for MH Assistant OS.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:371:    `Specialist ID: ${specialistId || 'specialist'}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:372:    `Specialist name: ${specialistName}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:373:    `Mode: ${teamMode}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:379:    '- Be a natural chat partner first, like ChatGPT, but with your specialist expertise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:391:    '- If the user asks for copy, caption, script, plan, task, workflow, handoff, or route, help prepare it conversationally.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:393:    '- You may suggest another specialist or page, but do not claim that anything was transferred automatically.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:408:    specialistInstruction,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:843:    record.suggested_handoffs ||
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:966:    `AI Command prepared a ${titleCase(outputType)} for "${command}".`;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:970:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1004:    model: asString(providerOutput.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1081:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1084:          source: asString(input.source) || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1114:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1116:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1142:              model: providerOutput.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1190:            workflow_id: 'ai-command-orchestration',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1193:            source: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1222:        let handoff = null;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1224:          handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1225:            source_page: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1234:              prompt: command,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1254:          source: input.source || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1261:            handoff ? { entity_type: 'handoff', entity_id: handoff.id, route: classified.routeTarget, label: response.title } : null
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1270:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1274:          model: response.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1282:            model: response.model
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1298:          handoff
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1323:          source: input.source || 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1332:          route: 'ai-command',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1336:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1360:      const request = asString(input.request || input.prompt || input.message || input.command);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1365:      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1366:      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1367:      const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1381:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1382:          mode: teamMode
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1412:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1423:            specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1424:            specialist_name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1444:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1445:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1446:            name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1447:            mode: teamMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1456:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1468:            model: asString(providerOutput.model || providerConfig.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1486:          model: chatPayload.provider.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1487:          specialist_id: specialistId
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1497:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1498:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1522:      const request = asString(input.request || input.prompt || input.command);
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1527:      const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1528:      const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1529:      const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1545:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1546:          mode: teamMode
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1576:          model: providerConfig.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1587:            specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1588:            specialist_name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1620:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1621:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1622:            name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1623:            mode: teamMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1633:            created_handoff: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1642:            model: asString(providerOutput.model || providerConfig.model),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1663:              owner: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1666:                'Review guidance output in AI Command.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1677:          model: guidancePayload.provider.model,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1678:          specialist_id: specialistId
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1688:          model: providerConfig?.model || null,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1689:          specialist_id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1704:          specialist: {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1705:            id: specialistId,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1706:            name: specialistName,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1707:            mode: teamMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1791:      const handoff = createHandoff(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1816:        handoff,
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:23:      assigned_team: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:24:        input.assignment?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:13:    assigned_team: String(input.assigned_team || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:15:      assigned_team: String(
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:16:        input.routing?.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:31:      human_handoff_minutes: Number(
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:32:        input.escalation?.human_handoff_minutes || 120
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:67:      'Customer Center read model is preview-first and read-only.',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:93:      assigned_team: asString(assignment.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:120:    assigned_team: asString(conversation.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:201:    assigned_team: asString(ticket.assigned_team || 'customer-care'),
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:60:      assigned_team: asString(
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:61:        options.assigned_team || 'customer-care'
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:45:      ? 'Local rendering can be connected with proper model runtimes.'
+runtime/orchestrator-service/lib/media/native/intelligence/media-learning-memory.js:11:      prompt_hash: String(entry.prompt_hash || ''),
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:3:const { buildNativeMediaBrief, buildGenerationPrompt } = require('./media-prompt-intelligence');
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:13:      prompt: generated.prompt
+runtime/orchestrator-service/lib/media/native/intelligence/native-media-intelligence.js:22:      prompt: generated.prompt,
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:13:  const prompt = asText(plan.prompt || plan.video_brief || plan.voice_script || plan.description);
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:36:      passed: Boolean(productName) || includesAny(prompt, ['product', 'brand']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:42:      passed: Boolean(hook) || includesAny(prompt, ['hook', 'first 2 seconds', 'attention']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:48:      passed: sceneBeats.length >= 3 || includesAny(prompt, ['scene', 'beat', 'shot']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:54:      passed: includesAny(prompt, ['cta', 'call to action', 'discover', 'shop', 'learn more', 'jetzt']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:60:      passed: includesAny(prompt + ' ' + avoidText, ['avoid', 'compliance', 'medical claims', 'brand-safe']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:66:      passed: includesAny(prompt, ['9:16', '1:1', '16:9', 'format']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:103:    prompt: lines.join('\n')
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:5:    provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:6:    model_id: 'gpt-image-1',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:17:    model_id: 'gemini-2.5-flash-image',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:29:    model_id: 'veo',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:40:    model_id: 'runway-video',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:51:    model_id: 'kling-video',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:62:    model_id: 'pika-video',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:73:    model_id: 'flux-dev',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:80:    notes: 'Open-source image model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:84:    model_id: 'stable-diffusion-xl',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:91:    notes: 'Open-source image model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:95:    model_id: 'wan-video',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:102:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:106:    model_id: 'cogvideo-x',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:113:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:117:    model_id: 'ltx-video',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:124:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:128:    model_id: 'xtts-v2',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:138:    provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:139:    model_id: 'gpt-realtime',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:146:    notes: 'OpenAI realtime voice provider target. Exact model/version depends on API availability.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:156:  return PROVIDER_MODEL_CATALOG.filter(model => model.media_type === target);
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:159:function findProviderModel(provider, modelId) {
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:161:  const m = String(modelId || '').toLowerCase();
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:163:  return PROVIDER_MODEL_CATALOG.find(model =>
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:164:    String(model.provider).toLowerCase() === p &&
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:165:    String(model.model_id).toLowerCase() === m
+runtime/orchestrator-service/lib/media/native/providers/README.md:3:Tracks API providers and native/open-source model targets.
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:21:        provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:27:    const prompt = String(job.prompt || '').trim();
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:29:    if (!prompt) {
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:32:        provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:33:        status: 'missing_prompt',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:40:        'https://api.openai.com/v1/images/generations',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:42:          model: String(job.model || job.model_id || 'gpt-image-1'),
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:43:          prompt,
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:57:        provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:66:        provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:78:      provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:86:    provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/adapters/provider-adapter-demo.js:8:const openai = registry.getAdapter('openai');
+runtime/orchestrator-service/lib/media/native/providers/adapters/provider-adapter-demo.js:13:  openai_configured: openai ? openai.isConfigured() : false
+runtime/orchestrator-service/lib/media/native/providers/adapters/provider-adapter-registry.js:3:const { createOpenAiProviderAdapter } = require('./openai-provider-adapter');
+runtime/orchestrator-service/lib/media/native/providers/adapters/provider-adapter-registry.js:8:  adapters.set('openai', createOpenAiProviderAdapter(options.openai || {}));
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:3:const { listProviderModels } = require('./provider-model-catalog');
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:5:function isConfigured(model, env = process.env) {
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:6:  if (!model.requires_api_key) return true;
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:7:  return Boolean(env[model.env_key]);
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:11:  return listProviderModels().map(model => ({
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:12:    provider: model.provider,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:13:    model_id: model.model_id,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:14:    alias: model.alias || '',
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:15:    media_type: model.media_type,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:16:    execution_type: model.execution_type,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:17:    quality_tier: model.quality_tier,
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:18:    configured: isConfigured(model, env),
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:19:    required_env: model.requires_api_key ? model.env_key : '',
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:20:    status: isConfigured(model, env) ? 'ready' : 'missing_credentials'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:9:    provider: 'openai',
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:11:    prompt: 'Start realtime voice session placeholder'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:19:    prompt_hash: 'demo123'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:25:    prompt: 'Test Nano Banana route'
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:30:    openai_voice_check: openAiImageDryCheck,
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:14:    if (provider === 'openai') {
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:15:      const adapter = adapterRegistry.getAdapter('openai');
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:6:- openai/image -> OpenAI image adapter
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:7:- openai/voice_chat -> OpenAI realtime placeholder
+runtime/orchestrator-service/lib/media/native/native-audio-runtime.js:8:    prompt: String(payload.prompt || payload.voice_script || ''),
+runtime/orchestrator-service/lib/media/native/lifecycle/lifecycle-demo.js:12:    model_id: 'wan-video'
+runtime/orchestrator-service/lib/media/native/lifecycle/job-lifecycle-manager.js:17:      model_id: input.model_id || '',
+runtime/orchestrator-service/lib/media/native/lifecycle/job-state-store.js:18:    model_id: String(record.model_id || ''),
+runtime/orchestrator-service/lib/media/native/native-image-runtime.js:8:    prompt: String(payload.prompt || ''),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:3:const models = new Map();
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:5:function registerModel(model = {}) {
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:6:  const modelId = String(model.model_id || '');
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:8:  if (!modelId) {
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:9:    throw new Error('model_id is required');
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:13:    model_id: modelId,
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:14:    provider: String(model.provider || 'native'),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:15:    media_type: String(model.media_type || 'video'),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:16:    category: String(model.category || 'generation'),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:17:    quality_tier: String(model.quality_tier || 'standard'),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:18:    vram_requirement_gb: Number(model.vram_requirement_gb || 0),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:19:    supports_realtime: Boolean(model.supports_realtime),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:20:    supports_streaming: Boolean(model.supports_streaming),
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:21:    supported_resolutions: Array.isArray(model.supported_resolutions)
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:22:      ? model.supported_resolutions
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:24:    enabled: model.enabled !== false,
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:30:  models.set(modelId, record);
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:35:function getModel(modelId) {
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:36:  return models.get(String(modelId || '')) || null;
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:40:  return Array.from(models.values());
+runtime/orchestrator-service/lib/media/native/models/model-registry-store.js:44:  return listModels().filter(model => model.enabled);
+runtime/orchestrator-service/lib/media/native/models/README.md:3:Tracks rendering models available to MH-OS.
+runtime/orchestrator-service/lib/media/native/models/README.md:6:- model registry
+runtime/orchestrator-service/lib/media/native/models/README.md:7:- model capability metadata
+runtime/orchestrator-service/lib/media/native/models/README.md:10:- model selection engine
+runtime/orchestrator-service/lib/media/native/models/README.md:14:- worker/model matching
+runtime/orchestrator-service/lib/media/native/models/default-models.js:3:const { registerModel } = require('./model-registry-store');
+runtime/orchestrator-service/lib/media/native/models/default-models.js:8:      model_id: 'gpt-image-1',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:9:      provider: 'openai',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:18:      model_id: 'gpt-realtime',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:19:      provider: 'openai',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:29:      model_id: 'flux-dev',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:39:      model_id: 'stable-diffusion-xl',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:49:      model_id: 'wan-video',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:59:      model_id: 'cogvideo-x',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:69:      model_id: 'xtts-v2',
+runtime/orchestrator-service/lib/media/native/models/default-models.js:79:      model_id: 'whisper-large',
+runtime/orchestrator-service/lib/media/native/models/model-selection-engine.js:3:const { listEnabledModels } = require('./model-registry-store');
+runtime/orchestrator-service/lib/media/native/models/model-selection-engine.js:5:function modelSupportsRequest(model, request = {}) {
+runtime/orchestrator-service/lib/media/native/models/model-selection-engine.js:9:  if (model.media_type !== mediaType) {
+runtime/orchestrator-service/lib/media/native/models/model-selection-engine.js:13:  if (provider && String(model.provider || '').toLowerCase() !== provider) {
+runtime/orchestrator-service/lib/media/native/models/model-selection-engine.js:24:    .filter(model => modelSupportsRequest(model, request))
+runtime/orchestrator-service/lib/media/native/protocol/worker-job-contract.js:12:    prompt: String(input.prompt || ''),
+runtime/orchestrator-service/lib/media/native/protocol/worker-job-contract.js:13:    prompt_hash: String(input.prompt_hash || ''),
+runtime/orchestrator-service/lib/media/native/native-video-runtime.js:8:    prompt: String(payload.prompt || payload.video_brief || ''),
+runtime/orchestrator-service/lib/media/native/native-voice-chat-runtime.js:8:    agent_role: String(payload.agent_role || 'assistant'),
+runtime/orchestrator-service/lib/media/native/execution/README.md:13:- diffusion models
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:10:function hashPrompt(prompt = '') {
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:13:    .update(String(prompt))
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:40:      prompt_hash: hashPrompt(prepared.prompt),
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:41:      prompt: prepared.prompt,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:50:          prompt: prepared.prompt,
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:66:      prompt: prepared.prompt,
+runtime/orchestrator-service/lib/media/native/workers/README.md:11:- avoid installing large AI models on the main control server
+runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js:33:        prompt_hash: job.prompt_hash || ''
+runtime/orchestrator-service/lib/media/native/rendering/rendering-image-adapter.js:12:      prompt: request.prompt || '',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-audio-adapter.js:12:      prompt: request.prompt || '',
+runtime/orchestrator-service/lib/media/native/rendering/rendering-video-adapter.js:12:      prompt: request.prompt || '',
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:3:const { registerDefaultModels } = require('../models/default-models');
+runtime/orchestrator-service/lib/media/native/orchestrator/orchestrator-demo.js:30:    prompt: 'Create premium beard oil cinematic commercial'
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:7:const { selectBestModel } = require('../models/model-selection-engine');
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:35:        stage: 'model_selection',
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:36:        error: `No model available for media type: ${mediaType}`
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:48:        selected_model: selectedModel,
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:60:      prompt: input.prompt || '',
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:61:      prompt_hash: hashValue(input.prompt || ''),
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:69:      model_id: selectedModel.model_id,
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:76:      selected_model: selectedModel,
+runtime/orchestrator-service/lib/media/native/orchestrator/README.md:4:- model selection
+runtime/orchestrator-service/lib/media/provider-layer.js:3:const PROVIDER_NOT_CONFIGURED_MESSAGE = 'Generator backend not connected yet — prompt/job is ready.';
+runtime/orchestrator-service/lib/media/provider-layer.js:66:  wrapped.provider = 'openai';
+runtime/orchestrator-service/lib/media/provider-layer.js:75:  const openAiBaseUrl = firstText(env.OPENAI_BASE_URL, 'https://api.openai.com/v1').replace(/\/+$/, '');
+runtime/orchestrator-service/lib/media/provider-layer.js:80:  const imageProvider = firstText(env.MEDIA_IMAGE_PROVIDER, 'openai').toLowerCase();
+runtime/orchestrator-service/lib/media/provider-layer.js:82:  const voiceProvider = firstText(env.MEDIA_VOICE_PROVIDER, 'openai').toLowerCase();
+runtime/orchestrator-service/lib/media/provider-layer.js:83:  const promptProvider = firstText(env.MEDIA_PROMPT_PROVIDER, 'openai').toLowerCase();
+runtime/orchestrator-service/lib/media/provider-layer.js:84:  const brandCheckProvider = firstText(env.MEDIA_BRAND_CHECK_PROVIDER, 'openai').toLowerCase();
+runtime/orchestrator-service/lib/media/provider-layer.js:94:      configured: imageProvider === 'openai' ? openAiConfigured : false
+runtime/orchestrator-service/lib/media/provider-layer.js:104:    promptProvider: {
+runtime/orchestrator-service/lib/media/provider-layer.js:105:      id: promptProvider,
+runtime/orchestrator-service/lib/media/provider-layer.js:106:      configured: promptProvider === 'openai' ? openAiConfigured : false
+runtime/orchestrator-service/lib/media/provider-layer.js:110:      configured: brandCheckProvider === 'openai' ? openAiConfigured : false
+runtime/orchestrator-service/lib/media/provider-layer.js:123:          model: textModel,
+runtime/orchestrator-service/lib/media/provider-layer.js:143:        provider: 'openai',
+runtime/orchestrator-service/lib/media/provider-layer.js:144:        model: textModel,
+runtime/orchestrator-service/lib/media/provider-layer.js:153:    const basePrompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:155:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:162:      systemPrompt: 'You are an expert media prompt engineer. Return only improved prompt text with practical constraints and no markdown.',
+runtime/orchestrator-service/lib/media/provider-layer.js:169:        'Original prompt:',
+runtime/orchestrator-service/lib/media/provider-layer.js:172:        'Improve this prompt for quality, clarity, and production constraints while keeping brand-safe wording.'
+runtime/orchestrator-service/lib/media/provider-layer.js:184:      model: result.model,
+runtime/orchestrator-service/lib/media/provider-layer.js:185:      improved_prompt: asString(result.text)
+runtime/orchestrator-service/lib/media/provider-layer.js:190:    const prompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:191:    if (!prompt) {
+runtime/orchestrator-service/lib/media/provider-layer.js:192:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:201:        'Audit this media prompt and return JSON with fields:',
+runtime/orchestrator-service/lib/media/provider-layer.js:214:        prompt
+runtime/orchestrator-service/lib/media/provider-layer.js:228:      recommendations: ['Review prompt wording manually.']
+runtime/orchestrator-service/lib/media/provider-layer.js:235:      model: result.model,
+runtime/orchestrator-service/lib/media/provider-layer.js:248:    const prompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:249:    if (!prompt) {
+runtime/orchestrator-service/lib/media/provider-layer.js:250:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:264:          model: imageModel,
+runtime/orchestrator-service/lib/media/provider-layer.js:265:          prompt,
+runtime/orchestrator-service/lib/media/provider-layer.js:281:          revised_prompt: asString(entry?.revised_prompt)
+runtime/orchestrator-service/lib/media/provider-layer.js:288:        provider: 'openai',
+runtime/orchestrator-service/lib/media/provider-layer.js:289:        model: imageModel,
+runtime/orchestrator-service/lib/media/provider-layer.js:298:    const prompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:299:    if (!prompt) {
+runtime/orchestrator-service/lib/media/provider-layer.js:300:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:317:        'Input prompt:',
+runtime/orchestrator-service/lib/media/provider-layer.js:318:        prompt,
+runtime/orchestrator-service/lib/media/provider-layer.js:332:      model: result.model,
+runtime/orchestrator-service/lib/media/provider-layer.js:338:    const prompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:339:    if (!prompt) {
+runtime/orchestrator-service/lib/media/provider-layer.js:340:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:357:        'Input prompt or video brief:',
+runtime/orchestrator-service/lib/media/provider-layer.js:358:        prompt,
+runtime/orchestrator-service/lib/media/provider-layer.js:372:      model: result.model,
+runtime/orchestrator-service/lib/media/provider-layer.js:378:    const prompt = asString(payload.prompt);
+runtime/orchestrator-service/lib/media/provider-layer.js:379:    if (!prompt) {
+runtime/orchestrator-service/lib/media/provider-layer.js:380:      const err = new Error('prompt is required');
+runtime/orchestrator-service/lib/media/provider-layer.js:386:    if (!availability.promptProvider.configured) {
+runtime/orchestrator-service/lib/media/provider-layer.js:393:        'Return JSON with keys: image_prompt, video_brief, voice_script, channel_notes, publishing_notes.',
+runtime/orchestrator-service/lib/media/provider-layer.js:398:        'Base prompt:',
+runtime/orchestrator-service/lib/media/provider-layer.js:399:        prompt
+runtime/orchestrator-service/lib/media/provider-layer.js:415:      model: result.model,
+runtime/orchestrator-service/lib/media/provider-layer.js:417:        image_prompt: asString(parsed.image_prompt),
+public/control-center/api.js:2001:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+public/control-center/api.js:2002:    "Failed to load project team model"
+public/control-center/api.js:2012:    `/media-manager/project/${encodeURIComponent(projectName)}/team`,
+public/control-center/api.js:2015:    "Failed to update project team model"
+public/control-center/api.js:2150:    "/api/media/improve-prompt",
+public/control-center/api.js:2153:    "Failed to improve media prompt"
+public/control-center/api.js:2228:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs${suffix}`,
+public/control-center/api.js:2229:    "Failed to load handoffs"
+public/control-center/api.js:2239:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs`,
+public/control-center/api.js:2242:    "Failed to create handoff"
+public/control-center/api.js:2246:export async function consumeProjectHandoff(projectName, handoffId, payload = {}) {
+public/control-center/api.js:2251:  if (!handoffId) {
+public/control-center/api.js:2252:    throw new Error("Missing handoff id");
+public/control-center/api.js:2256:    `/media-manager/project/${encodeURIComponent(projectName)}/handoffs/${encodeURIComponent(handoffId)}/consume`,
+public/control-center/api.js:2259:    "Failed to consume handoff"

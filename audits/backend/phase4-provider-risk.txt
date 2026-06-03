@@ -1,0 +1,230 @@
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1185:    executive_overview: buildExecutiveOverview({
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:43:async function executeAdapterAction({
+runtime/orchestrator-service/lib/integrations/adapter-manager.js:154:  executeAdapterAction
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:33:    publish: '/execute_publish_package',
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:34:    email: '/execute_email_package',
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:36:    ads: '/build_ad_execution_package'
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:45:    execution_endpoint: typeMap[String(params.type || '').trim()] || null,
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:46:    execution_state: 'pending',
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:24:    const executionDir = path.join(projectRoot, 'execution');
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:25:    ensureDir(executionDir);
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:26:    return path.join(executionDir, 'scheduler.json');
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:40:    const logsDir = path.join(projectRoot, 'execution', 'logs');
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:15:    const executionSignals = collectExecutionSignals(safeProject);
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:44:    for (const signal of executionSignals.channel_status || []) {
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:47:          `Improve ${signal.channel} execution reliability (failure rate ${signal.failure_rate}).`
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:75:        scheduler_jobs_tracked: executionSignals.total_jobs,
+runtime/orchestrator-service/lib/execution/recommendation-runtime.js:76:        completed_jobs: executionSignals.completed_jobs
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:14:  function executeJobBridge(job) {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:24:        execution_state: 'manual_publish_ready',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:35:        execution_state: 'pending_execution',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:37:        ready_for_provider_send: true
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:55:        execution_state: 'ready_for_review',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:65:        execution_state: 'ready_for_review',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:78:    executeJobBridge
+runtime/orchestrator-service/lib/ai/providers/openai.js:246:      executiveBrief: parsed.executiveBrief || parsed.executive_brief || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:269:    executiveBrief: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:281:    async execute(input = {}) {
+runtime/orchestrator-service/lib/ai/providers/openai.js:292:              'You are the AI Command marketing execution engine inside MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:307:              'For outputType "executive_brief", include executiveBrief with blockers, priorities, decision, nextBestAction.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:408:        executiveBrief: normalized.executiveBrief,
+runtime/orchestrator-service/lib/ai/provider-config.js:23:  executive: {
+runtime/orchestrator-service/lib/ai/provider-config.js:26:    outputType: 'executive_brief',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ai/provider-config.js:105:  return aliases[clean] || clean || 'executive';
+runtime/orchestrator-service/lib/ai/provider-config.js:110:  return AI_MODE_PROMPTS[normalized] || AI_MODE_PROMPTS.executive;
+runtime/orchestrator-service/lib/ai/provider-config.js:141:    throw createProviderConfigError('OPENAI_API_KEY is missing for AI command execution', {
+runtime/orchestrator-service/lib/ops/backbone.js:102:  execution_bridges: {
+runtime/orchestrator-service/lib/ops/backbone.js:103:    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+runtime/orchestrator-service/lib/ops/backbone.js:104:    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+runtime/orchestrator-service/lib/ops/backbone.js:845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:847:    execution_policy: {
+runtime/orchestrator-service/lib/ops/backbone.js:849:      auto_execution_requires_rules: true,
+runtime/orchestrator-service/lib/ops/backbone.js:1236:    execution_policy: {
+runtime/orchestrator-service/lib/ops/backbone.js:1237:      ...asObject(current.execution_policy),
+runtime/orchestrator-service/lib/ops/backbone.js:1238:      ...asObject(sourcePatch.execution_policy)
+runtime/orchestrator-service/lib/ops/backbone.js:2129:          : 'Workflow execution state was updated in the operational backbone.',
+runtime/orchestrator-service/lib/ops/backbone.js:2135:          : 'Workflow execution state was updated in the operational backbone.',
+runtime/orchestrator-service/lib/ops/backbone.js:2159:    mode_id: asString(input.mode_id || current.mode_id) || 'executive',
+runtime/orchestrator-service/lib/ops/backbone.js:2519:    message: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:2520:    body: 'The task is now available for team execution and follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:3142:function syncPublishingJob(projectName, job = {}, executionResult = null) {
+runtime/orchestrator-service/lib/ops/backbone.js:3146:  const execution = asObject(executionResult);
+runtime/orchestrator-service/lib/ops/backbone.js:3153:  const status = asString(execution.execution_status || normalizedJob.status) || 'scheduled';
+runtime/orchestrator-service/lib/ops/backbone.js:3170:      execution_status: asString(execution.execution_status),
+runtime/orchestrator-service/lib/ops/backbone.js:3177:  if (status === 'ready' || status === 'ready_for_manual_publish' || status === 'ready_for_manual_send') {
+runtime/orchestrator-service/lib/ops/backbone.js:3200:      message: 'Publishing execution completed and was recorded durably.',
+runtime/orchestrator-service/lib/ops/backbone.js:3201:      body: 'Publishing execution completed and was recorded durably.',
+runtime/orchestrator-service/lib/ops/backbone.js:3218:      message: 'Publishing execution needs follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:3219:      body: 'Publishing execution needs follow-up.',
+runtime/orchestrator-service/lib/ops/backbone.js:3626:  const executionLogs = asArray(events)
+runtime/orchestrator-service/lib/ops/backbone.js:3652:    execution_logs: executionLogs,
+runtime/orchestrator-service/lib/ops/backbone.js:3721:          ? 'Publishing execution needs follow-up.'
+runtime/orchestrator-service/lib/ops/backbone.js:3723:            ? 'Publishing execution completed successfully.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:96:  const error = new Error(asString(message) || 'AI command execution failed');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:119:  executive: 'home',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:129:  executive: 'executive_brief',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:150:  team: 'executive'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:190:  return normalizeAiModeId(mapped || 'executive');
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:218:            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:319:      "When asked to turn conversation into work, prepare a task/workflow-ready draft but do not execute it."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:324:      "Do not send customer replies or mutate tickets from chat; prepare safe drafts and guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:329:      "Do not update CRM, send outreach, or schedule follow-ups from chat; prepare drafts and next-step guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:334:      "Coordinate specialists and recommend who should handle the next step, but do not execute backend actions."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:341:    "Be conversational, helpful, and safe. Prepare work only when requested; do not claim backend actions were executed."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:405:    '- If the user asks to execute an action, explain that you can prepare a draft/plan and the user must use the safe UI controls or owning page.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:541:  if (intent === 'executive') return 'home';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:556:      intent: 'executive',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:557:      modeId: 'executive',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:559:      outputType: 'executive_brief',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:618:      intent: 'executive',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:619:      modeId: selectedMode || 'executive',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:621:      outputType: OUTPUT_TYPE_BY_MODE[selectedMode] || 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:627:  let outputType = matchedRule.outputType || OUTPUT_TYPE_BY_MODE[modeId] || 'executive_brief';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:910:  const outputType = asString(providerOutput.outputType) || classified.outputType || OUTPUT_TYPE_BY_MODE[classified.resolvedModeId] || 'executive_brief';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:929:  const executiveBrief = outputType === 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:930:    ? normalizeStructuredObject(providerOutput.executiveBrief || providerOutput.raw?.executiveBrief || providerOutput.raw?.executive_brief)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:953:    normalizeRouteSuggestion('workflows', 'Use Workflows when this needs structured repeatable execution.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:954:    normalizeRouteSuggestion('task-center', 'Save a durable execution task if an operator follow-up is needed.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:990:        : 'Integration coverage is still limited, so recommendations should be validated before execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1002:    executiveBrief,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1042:      context.summary.recommendations[0] || `Route this workflow output into ${titleCase(routeTarget)} for execution.`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1053:      normalizeRouteSuggestion('task-center', 'Convert the run into a durable task if manual execution is required.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1069:    async executeCommand(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1082:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1085:          mode_id: asString(input.mode_id || input.modeId) || 'executive'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1120:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1301:        const failureMessage = asString(error.message) || 'AI command execution failed';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1314:          outputType: failureClassification.outputType || OUTPUT_TYPE_BY_MODE[failureClassification.resolvedModeId] || 'executive_brief'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1333:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1350:        const executionError = createAiCommandExecutionError(failureMessage, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1354:        executionError.payload = structuredFailure;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1355:        throw executionError;
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1359:    async executeChat(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1379:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1416:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1494:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1502:        const failureMessage = asString(error.message) || 'AI chat execution failed';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1521:    async executeGuidance(projectName, input = {}) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1543:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1580:        const providerOutput = await provider.execute({
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1685:          action: 'execute',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1693:        const failureMessage = asString(error.message) || 'AI guidance execution failed';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1719:    executeWorkflow(projectName, workflowId, input = {}) {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:25:  'campaign-execution': {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:26:    legacy: 'campaign-execution',
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:27:    canonical: 'campaign-execution'
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:33:  'execution-config': {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:34:    legacy: 'execution',
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:35:    canonical: 'execution'
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:45:  'execution-results': {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:46:    legacy: 'execution/results',
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:127:    if (flags.execution_canonical_write) {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:134:    if (flags.legacy_mirror_write || !flags.execution_canonical_write) {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:194:    const canonicalBase = buildBasePath(input.resolution.executionRoot, domainConfig.canonical);
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:225:      const telemetryDir = path.join(resolution.executionRoot, 'telemetry');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:11:const EXECUTION_ROOT = path.join(DATA_ROOT, 'execution', 'projects');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:29:      execution_canonical_write: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:33:      execution_canonical_read: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:61:      campaign_execution_read_canonical_first: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:69:      execution_results_read_canonical_first: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:79:        execution: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:86:          execution: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:92:          execution: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:114:      'campaign-execution': 'campaign_execution_read_canonical_first',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:116:      'execution-results': 'execution_results_read_canonical_first'
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:134:      executionCanonicalReadMaster: !!featureFlags.execution_canonical_read,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:167:      executionRoot: roots.executionRoot,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:200:      executionRoot: resolveProjectPath(EXECUTION_ROOT, safeProject).projectRoot,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:237:      if (this.featureFlags.execution_canonical_read) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:256:    const executionEligibleDomains = new Set([
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:261:      'campaign-execution',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:263:      'execution-config',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:264:      'execution-results',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:269:    if (!executionEligibleDomains.has(domain)) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:285:    if (this.featureFlags.execution_canonical_read) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:286:      activeReadPath = roots.executionRoot;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:287:      reasonParts.push('execution-canonical-read-enabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:295:      reasonParts.push('execution-canonical-read-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:298:    if (this.featureFlags.execution_canonical_write) {
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:299:      activeWritePath = roots.executionRoot;
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:300:      reasonParts.push('execution-canonical-write-enabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:308:      reasonParts.push('execution-canonical-write-disabled');
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:344:    if (isPathWithinRoot(roots.executionRoot, targetPath)) return 'execution';
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:358:      executionRoot: path.join(EXECUTION_ROOT, entry.project),
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:364:      executionRoot: path.join(EXECUTION_ROOT, entry.project),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:11:    sender: {
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:12:      id: String(input.sender?.id || ''),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:13:      type: String(input.sender?.type || 'customer'),
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:14:      display_name: String(input.sender?.display_name || '')
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:58:    external_send_ready: false,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:61:      ...(provider.voice || capabilities.voice ? [] : ['Voice provider execution is not ready.']),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:62:      ...(provider.ivr || capabilities.ivr ? [] : ['IVR provider execution is not ready.']),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:63:      ...(provider.crm || capabilities.crm ? [] : ['CRM provider execution is not ready.']),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:64:      'External send is locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:139:    sender_type: asString(message.sender?.type || message.sender_type || 'unknown'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:140:    sender_label: asString(message.sender?.type || message.sender_label || 'participant'),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:232:    external_send_ready: false,
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:237:    blocked_reason: 'External send, voice, IVR, and CRM mutation are locked for Customer Center v1.'
+runtime/orchestrator-service/lib/customer-operations/conversations/create-integration-session.js:57:    sender: {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:79:      sends_replies: false,
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:3:const { execFileSync } = require('child_process');
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:7:    execFileSync('which', [command], { stdio: 'ignore' });
+runtime/orchestrator-service/lib/media/native/capabilities/local-rendering-capabilities.js:16:    return String(execFileSync(command, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).trim();
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:10:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:22:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:33:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:44:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:55:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:66:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:77:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:80:    notes: 'Open-source image model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:88:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:91:    notes: 'Open-source image model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:99:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:102:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:110:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:113:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:121:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:124:    notes: 'Open-source video model target for GPU worker execution.'
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:132:    execution_type: 'local-or-worker',
+runtime/orchestrator-service/lib/media/native/providers/provider-model-catalog.js:143:    execution_type: 'api',
+runtime/orchestrator-service/lib/media/native/providers/adapters/openai-provider-adapter.js:81:      message: 'Realtime voice execution adapter is registered but not implemented yet.'
+runtime/orchestrator-service/lib/media/native/providers/adapters/README.md:3:Transforms MH-OS native media jobs into provider-specific API executions.
+runtime/orchestrator-service/lib/media/native/providers/adapters/README.md:19:- Native GPU worker execution adapter
+runtime/orchestrator-service/lib/media/native/providers/provider-readiness.js:16:    execution_type: model.execution_type,
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:3:const { createProviderExecutionRouter } = require('./provider-execution-router');
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:8:  const openAiImageDryCheck = await router.execute({
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:14:  const nativeWorkerCheck = await router.execute({
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router-demo.js:22:  const missingProviderCheck = await router.execute({
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:10:  async function execute(job = {}) {
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:53:      message: `No provider execution adapter registered for provider: ${provider}`
+runtime/orchestrator-service/lib/media/native/providers/router/provider-execution-router.js:65:    execute,
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:3:Routes native media jobs to provider execution adapters.
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:12:- avoid hardcoded provider execution inside orchestrator
+runtime/orchestrator-service/lib/media/native/providers/router/README.md:13:- centralize execution routing
+runtime/orchestrator-service/lib/media/native/lifecycle/README.md:14:- realtime execution visibility
+runtime/orchestrator-service/lib/media/native/protocol/README.md:16:- async execution
+runtime/orchestrator-service/lib/media/native/execution/README.md:3:This layer executes prepared native media jobs.
+runtime/orchestrator-service/lib/media/native/execution/README.md:9:- structured execution result
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js:3:const { createNativeRuntimeExecutor } = require('./native-runtime-executor');
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js:6:  const executor = createNativeRuntimeExecutor(options);
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js:8:  async function executeMediaRequest(payload = {}) {
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js:11:    return executor.execute({
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-controller.js:18:    executeMediaRequest
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-demo.js:12:  const result = await controller.executeMediaRequest({
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:22:  async function execute(input = {}) {
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:30:        error: 'Media plan is not ready for runtime execution.'
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:93:      executed_at: new Date().toISOString()
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:98:    execute
+runtime/orchestrator-service/lib/media/native/workers/README.md:10:- send heavy image/video/audio rendering to GPU workers later
+runtime/orchestrator-service/lib/media/native/rendering/README.md:7:- No GPU execution yet
+runtime/orchestrator-service/lib/media/native/rendering/README.md:8:- No external provider execution
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:10:} = require('../providers/router/provider-execution-router');
+runtime/orchestrator-service/lib/media/native/orchestrator/job-dispatch-orchestrator.js:66:    const workerSubmission = await providerRouter.execute({
+runtime/orchestrator-service/lib/media/native/orchestrator/README.md:12:- centralized media execution routing

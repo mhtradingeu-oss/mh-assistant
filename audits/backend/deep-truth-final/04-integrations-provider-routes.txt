@@ -1,0 +1,265 @@
+runtime/orchestrator-service/server.js:47:} = require('./lib/integrations/token-manager');
+runtime/orchestrator-service/server.js:57:const { executeAdapterAction } = require('./lib/integrations/adapter-manager');
+runtime/orchestrator-service/server.js:58:const { buildHealthState } = require('./lib/integrations/health-manager');
+runtime/orchestrator-service/server.js:62:} = require('./lib/integrations/provider-registry');
+runtime/orchestrator-service/server.js:69:} = require('./lib/media/provider-layer');
+runtime/orchestrator-service/server.js:131:} = require('./lib/media/native/providers/provider-model-catalog');
+runtime/orchestrator-service/server.js:134:} = require('./lib/media/native/providers/provider-readiness');
+runtime/orchestrator-service/server.js:473:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+runtime/orchestrator-service/server.js:1023:  const integrationSecretRequired = checks.project_registry_load.ok
+runtime/orchestrator-service/server.js:1026:  checks.integration_secret_key = {
+runtime/orchestrator-service/server.js:1027:    ok: !integrationSecretRequired || hasIntegrationSecretKeyConfigured(),
+runtime/orchestrator-service/server.js:1028:    required: integrationSecretRequired,
+runtime/orchestrator-service/server.js:1030:    file: path.join(DATA_DIR, 'system', 'integration-secret.key.json')
+runtime/orchestrator-service/server.js:1038:  if (checks.integration_secret_key.required && !checks.integration_secret_key.ok) {
+runtime/orchestrator-service/server.js:1924:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+runtime/orchestrator-service/server.js:2448:    throw new Error('No image data returned from provider');
+runtime/orchestrator-service/server.js:2463:  provider: 'openai',
+runtime/orchestrator-service/server.js:2599:  // مثل SMTP / WordPress mail bridge / provider API
+runtime/orchestrator-service/server.js:2603:    status: 'pending_provider_send',
+runtime/orchestrator-service/server.js:2609:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+runtime/orchestrator-service/server.js:3608:  const tokens = new Set(haystack.split(' ').filter(Boolean));
+runtime/orchestrator-service/server.js:3612:    if (tokens.has(theme)) return true;
+runtime/orchestrator-service/server.js:3859:  const connectorsDir = path.join(baseDir, 'connectors');
+runtime/orchestrator-service/server.js:3861:  const legacyConnectorsDir = path.join(legacyBaseDir, 'connectors');
+runtime/orchestrator-service/server.js:3865:  ensureDir(connectorsDir);
+runtime/orchestrator-service/server.js:3873:    connectorsDir,
+runtime/orchestrator-service/server.js:3918:    artifactType: 'publishing_connector_payload',
+runtime/orchestrator-service/server.js:3947:    connector_file: payload.file_path
+runtime/orchestrator-service/server.js:4122:  let connectorPreview =
+runtime/orchestrator-service/server.js:4123:    rawJob.connector_preview && typeof rawJob.connector_preview === 'object'
+runtime/orchestrator-service/server.js:4124:      ? rawJob.connector_preview
+runtime/orchestrator-service/server.js:4127:  if (!connectorPreview && rawJob.connector_file && fs.existsSync(rawJob.connector_file)) {
+runtime/orchestrator-service/server.js:4128:    const connectorPayload = readJsonFile(rawJob.connector_file, {});
+runtime/orchestrator-service/server.js:4129:    connectorPreview = buildPublishingPreviewFromConnectorPayload(connectorPayload, rawJob);
+runtime/orchestrator-service/server.js:4134:      ...connectorPreview,
+runtime/orchestrator-service/server.js:4139:    connectorPreview
+runtime/orchestrator-service/server.js:4156:    total_assets: Number(rawJob.total_assets || connectorPreview?.asset_count || 0) || 0,
+runtime/orchestrator-service/server.js:4157:    connector_file: rawJob.connector_file || null,
+runtime/orchestrator-service/server.js:4158:    connector_error: rawJob.connector_error || null,
+runtime/orchestrator-service/server.js:4162:    connector_preview: connectorPreview,
+runtime/orchestrator-service/server.js:4195:      connector_file: null,
+runtime/orchestrator-service/server.js:4196:      connector_preview: null,
+runtime/orchestrator-service/server.js:4198:      connector_error: null
+runtime/orchestrator-service/server.js:4205:      connector_file: payload.file_path,
+runtime/orchestrator-service/server.js:4206:      connector_preview: buildPublishingPreviewFromConnectorPayload(payload, input),
+runtime/orchestrator-service/server.js:4208:      connector_error: null
+runtime/orchestrator-service/server.js:4212:      connector_file: null,
+runtime/orchestrator-service/server.js:4213:      connector_preview: null,
+runtime/orchestrator-service/server.js:4215:      connector_error: error.message || 'Connector payload unavailable'
+runtime/orchestrator-service/server.js:4257:  const connectorInfo = tryBuildPublishingConnector(safeProject, waveName, channel, {
+runtime/orchestrator-service/server.js:4266:      ...(connectorInfo.connector_preview || {}),
+runtime/orchestrator-service/server.js:4274:    connectorInfo.connector_preview || existing.preview || existing.connector_preview || null
+runtime/orchestrator-service/server.js:4291:    total_assets: connectorInfo.total_assets || existing.total_assets || preview.asset_count || 0,
+runtime/orchestrator-service/server.js:4292:    connector_file: connectorInfo.connector_file || existing.connector_file || null,
+runtime/orchestrator-service/server.js:4293:    connector_preview: connectorInfo.connector_preview || existing.connector_preview || preview,
+runtime/orchestrator-service/server.js:4294:    connector_error: connectorInfo.connector_error || existing.connector_error || null,
+runtime/orchestrator-service/server.js:4796:    provider: 'provider_pending',
+runtime/orchestrator-service/server.js:5538:    connectors: null,
+runtime/orchestrator-service/server.js:5570:    payload.errors.connectors = message;
+runtime/orchestrator-service/server.js:5580:    connectors: buildProjectControlCenterConnectors,
+runtime/orchestrator-service/server.js:6158:    integrationsDir: path.join(baseDir, 'integrations'),
+runtime/orchestrator-service/server.js:6179:  const integrationsRegistryPath = path.join(base.baseDir, 'integrations-registry.json');
+runtime/orchestrator-service/server.js:6188:    integrationsRegistryPath,
+runtime/orchestrator-service/server.js:6193:    integrationRegistryPath: integrationsRegistryPath,
+runtime/orchestrator-service/server.js:6194:    integrationControlCenterPath: path.join(base.integrationsDir, 'control-center.json'),
+runtime/orchestrator-service/server.js:6468:    paths.integrationsDir,
+runtime/orchestrator-service/server.js:6502:  ensureJsonFile(paths.integrationControlCenterPath, {
+runtime/orchestrator-service/server.js:6506:  ensureJsonFile(paths.integrationsRegistryPath, {
+runtime/orchestrator-service/server.js:6511:  const integrationSnapshot = readJsonFile(paths.integrationControlCenterPath, {
+runtime/orchestrator-service/server.js:6515:  writeJsonFile(paths.integrationsRegistryPath, {
+runtime/orchestrator-service/server.js:6516:    updated_at: normalizeSetupTextValue(integrationSnapshot.updated_at) || new Date().toISOString(),
+runtime/orchestrator-service/server.js:6517:    records: integrationSnapshot.records && typeof integrationSnapshot.records === 'object'
+runtime/orchestrator-service/server.js:6518:      ? integrationSnapshot.records
+runtime/orchestrator-service/server.js:6548:      integrations_registry: {
+runtime/orchestrator-service/server.js:6549:        path: paths.integrationsRegistryPath,
+runtime/orchestrator-service/server.js:6550:        exists: fs.existsSync(paths.integrationsRegistryPath)
+runtime/orchestrator-service/server.js:6568:      integrations: {
+runtime/orchestrator-service/server.js:6569:        path: paths.integrationControlCenterPath,
+runtime/orchestrator-service/server.js:6570:        exists: fs.existsSync(paths.integrationControlCenterPath)
+runtime/orchestrator-service/server.js:6647:    integrations_path: paths.integrationsRegistryPath
+runtime/orchestrator-service/server.js:6668:    paths.integrationsDir,
+runtime/orchestrator-service/server.js:6708:    recommended_integrations: ['website', 'google', 'meta']
+runtime/orchestrator-service/server.js:6722:      recommended_integrations: ['woocommerce', 'google', 'meta', 'tiktok', 'email_crm']
+runtime/orchestrator-service/server.js:6735:      recommended_integrations: ['youtube', 'instagram', 'tiktok', 'spotify', 'website']
+runtime/orchestrator-service/server.js:6748:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'booking']
+runtime/orchestrator-service/server.js:6761:      recommended_integrations: ['website', 'crm', 'google', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6774:      recommended_integrations: ['website', 'google_business', 'meta', 'email_crm']
+runtime/orchestrator-service/server.js:6787:      recommended_integrations: ['google_business', 'instagram', 'tiktok', 'website', 'delivery']
+runtime/orchestrator-service/server.js:6800:      recommended_integrations: ['website', 'linkedin', 'meta', 'google', 'crm']
+runtime/orchestrator-service/server.js:6813:      recommended_integrations: ['google_business', 'website', 'meta']
+runtime/orchestrator-service/server.js:6855:    recommended_integrations: businessTemplate.recommended_integrations,
+runtime/orchestrator-service/server.js:6874:      integrations: paths.integrationsDir,
+runtime/orchestrator-service/server.js:7126:  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+runtime/orchestrator-service/server.js:7164:  const integrationsCompleteness = Number(connectorReadiness.readiness_score || 0);
+runtime/orchestrator-service/server.js:7177:    integrations_completeness: integrationsCompleteness,
+runtime/orchestrator-service/server.js:7198:    has_integrations_dir: fs.existsSync(paths.integrationsDir),
+runtime/orchestrator-service/server.js:7203:    has_integrations_registry: baselineValidation.required_files.integrations_registry.exists,
+runtime/orchestrator-service/server.js:7208:    has_integration_control_center: baselineValidation.required_files.integrations.exists,
+runtime/orchestrator-service/server.js:7224:  if (domainScores.integrations_completeness < 100) missing.push('integrations_incomplete');
+runtime/orchestrator-service/server.js:7469:  return /token|secret|password|key/i.test(String(fieldKey || ''));
+runtime/orchestrator-service/server.js:7487:  const controlCenterRegistryPath = paths.integrationControlCenterPath;
+runtime/orchestrator-service/server.js:7492:  ensureJsonFile(paths.integrationsRegistryPath, {
+runtime/orchestrator-service/server.js:7525:  writeJsonFile(paths.integrationsRegistryPath, payload);
+runtime/orchestrator-service/server.js:7637:  const tokenExpiry = normalizeTextValue(record.token_expires_at);
+runtime/orchestrator-service/server.js:7638:  const tokenExpired = tokenExpiry && !Number.isNaN(new Date(tokenExpiry).getTime())
+runtime/orchestrator-service/server.js:7639:    ? new Date(tokenExpiry).getTime() <= now
+runtime/orchestrator-service/server.js:7645:  if (tokenExpired || explicitStatus === 'token_expired') {
+runtime/orchestrator-service/server.js:7646:    statusKey = 'token_expired';
+runtime/orchestrator-service/server.js:7665:    token_expired: 'Token expired',
+runtime/orchestrator-service/server.js:7671:    healthSummary = 'This integration is not configured yet.';
+runtime/orchestrator-service/server.js:7678:    } else if (statusKey === 'token_expired') {
+runtime/orchestrator-service/server.js:7681:      healthSummary = normalizeTextValue(record.last_error) || 'The last integration action failed.';
+runtime/orchestrator-service/server.js:7706:// Keys matching this pattern are redacted from provider summary objects before
+runtime/orchestrator-service/server.js:7710:  /(secret|token|password|api[_-]?key|apiKey|authorization|credential|cookie|session|bearer|client_secret)/i;
+runtime/orchestrator-service/server.js:7736:    integration_id: sanitizeIntegrationId(record.integration_id),
+runtime/orchestrator-service/server.js:7752:    token_expires_at: normalizeTextValue(record.token_expires_at),
+runtime/orchestrator-service/server.js:7765:    integration_id: normalizedRecord.integration_id,
+runtime/orchestrator-service/server.js:7789:    token_expires_at: normalizedRecord.token_expires_at,
+runtime/orchestrator-service/server.js:7796:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+runtime/orchestrator-service/server.js:7798:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+runtime/orchestrator-service/server.js:7808:  Object.entries(LEGACY_SOURCE_TO_INTEGRATION_ID).forEach(([sourceKey, integrationId]) => {
+runtime/orchestrator-service/server.js:7816:    derived[integrationId] = summarizeIntegrationRecord({
+runtime/orchestrator-service/server.js:7817:      integration_id: integrationId,
+runtime/orchestrator-service/server.js:7837:  Object.entries(asPlainObject(registry.records)).forEach(([integrationId, record]) => {
+runtime/orchestrator-service/server.js:7838:    const normalizedId = sanitizeIntegrationId(integrationId);
+runtime/orchestrator-service/server.js:7845:      integration_id: normalizedId
+runtime/orchestrator-service/server.js:7850:  Object.entries(legacyRecords).forEach(([integrationId, record]) => {
+runtime/orchestrator-service/server.js:7851:    if (!records[integrationId]) {
+runtime/orchestrator-service/server.js:7852:      records[integrationId] = record;
+runtime/orchestrator-service/server.js:7861:    token_expired: all.filter(item => item.status === 'token_expired').length,
+runtime/orchestrator-service/server.js:7885:async function saveProjectIntegrationRecord(projectName, integrationId, payload = {}, options = {}) {
+runtime/orchestrator-service/server.js:7886:  const normalizedId = sanitizeIntegrationId(integrationId);
+runtime/orchestrator-service/server.js:7889:    throw new Error('Missing integration id');
+runtime/orchestrator-service/server.js:7894:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:7912:    integration_id: normalizedId,
+runtime/orchestrator-service/server.js:7931:    token_expires_at: normalizeTextValue(payload.token_expires_at || existing.token_expires_at),
+runtime/orchestrator-service/server.js:7948:    const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:7950:      integrationId: normalizedId,
+runtime/orchestrator-service/server.js:7961:      status: providerResult.status,
+runtime/orchestrator-service/server.js:7962:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+runtime/orchestrator-service/server.js:7963:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+runtime/orchestrator-service/server.js:7964:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+runtime/orchestrator-service/server.js:7965:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+runtime/orchestrator-service/server.js:7966:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+runtime/orchestrator-service/server.js:7967:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+runtime/orchestrator-service/server.js:7968:      provider_metadata: asPlainObject(providerResult.metadata),
+runtime/orchestrator-service/server.js:7969:      provider_account: asPlainObject(providerResult.account),
+runtime/orchestrator-service/server.js:7970:      insights_ready: asPlainObject(providerResult.insights_ready),
+runtime/orchestrator-service/server.js:7973:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+runtime/orchestrator-service/server.js:7974:      health_summary: normalizeTextValue(providerResult.health || ''),
+runtime/orchestrator-service/server.js:7975:      health_state: asPlainObject(providerResult.health_state)
+runtime/orchestrator-service/server.js:7987:        statusFromError === 'token_expired'
+runtime/orchestrator-service/server.js:7988:          ? 'token_expired'
+runtime/orchestrator-service/server.js:7999:          statusFromError === 'token_expired'
+runtime/orchestrator-service/server.js:8000:            ? 'token_expired'
+runtime/orchestrator-service/server.js:8044:    throw new Error(`Connect this integration before you ${actionLabel}.`);
+runtime/orchestrator-service/server.js:8051:  if (status.status === 'token_expired') {
+runtime/orchestrator-service/server.js:8052:    throw new Error(`Reconnect this integration because the saved token has expired.`);
+runtime/orchestrator-service/server.js:8056:async function runProjectIntegrationAction(projectName, integrationId, actionType, payload = {}) {
+runtime/orchestrator-service/server.js:8057:  const normalizedId = sanitizeIntegrationId(integrationId);
+runtime/orchestrator-service/server.js:8067:      status: 'unsupported_provider'
+runtime/orchestrator-service/server.js:8078:    integration_id: normalizedId,
+runtime/orchestrator-service/server.js:8094:      const providerResult = await executeAdapterAction({
+runtime/orchestrator-service/server.js:8096:        integrationId: normalizedId,
+runtime/orchestrator-service/server.js:8105:      nextRecord.status = providerResult.status;
+runtime/orchestrator-service/server.js:8106:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+runtime/orchestrator-service/server.js:8107:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+runtime/orchestrator-service/server.js:8108:      nextRecord.provider_account = asPlainObject(providerResult.account);
+runtime/orchestrator-service/server.js:8109:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+runtime/orchestrator-service/server.js:8111:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+runtime/orchestrator-service/server.js:8112:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+runtime/orchestrator-service/server.js:8113:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+runtime/orchestrator-service/server.js:8119:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8122:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+runtime/orchestrator-service/server.js:8124:        throw new Error('Unsupported integration action');
+runtime/orchestrator-service/server.js:8128:        normalizeTextValue(error.status) === 'token_expired'
+runtime/orchestrator-service/server.js:8129:          ? 'token_expired'
+runtime/orchestrator-service/server.js:9068:    status: missing.length ? 'connectors_incomplete' : 'connectors_ready'
+runtime/orchestrator-service/server.js:9090:    'integrations': base.integrationsDir,
+runtime/orchestrator-service/server.js:9193:    integrations: base.integrationsDir,
+runtime/orchestrator-service/server.js:9424:      ready_for_provider_send: true,
+runtime/orchestrator-service/server.js:9433:        ready_for_provider_send: true
+runtime/orchestrator-service/server.js:10224:    recommended_integrations: businessTemplate.recommended_integrations,
+runtime/orchestrator-service/server.js:10250:          recommended_integrations: updated.recommended_integrations,
+runtime/orchestrator-service/server.js:11204:      provider: result?.provider?.id || result?.response?.provider || null,
+runtime/orchestrator-service/server.js:11250:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:11293:      provider: result?.provider?.id || null,
+runtime/orchestrator-service/server.js:11816:      error: error.message || 'Failed to load integration control center'
+runtime/orchestrator-service/server.js:11823:  if (status === 'token_expired') {
+runtime/orchestrator-service/server.js:11826:  if (status === 'unsupported_provider') {
+runtime/orchestrator-service/server.js:11840:    const result = await saveProjectIntegrationRecord(req.params.project, req.params.integrationId, {
+runtime/orchestrator-service/server.js:11855:      token_expires_at: req.body?.token_expires_at,
+runtime/orchestrator-service/server.js:11862:    logCriticalFailure('integration_connect', req, error, {
+runtime/orchestrator-service/server.js:11864:      integrationId: req.params.integrationId,
+runtime/orchestrator-service/server.js:11868:      error: error.message || 'Failed to save integration connection'
+runtime/orchestrator-service/server.js:11877:      req.params.integrationId,
+runtime/orchestrator-service/server.js:11884:    logCriticalFailure('integration_action', req, error, {
+runtime/orchestrator-service/server.js:11886:      integrationId: req.params.integrationId,
+runtime/orchestrator-service/server.js:11887:      integrationAction: actionType
+runtime/orchestrator-service/server.js:11890:      error: error.message || 'Failed to update integration'
+runtime/orchestrator-service/server.js:11899:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+runtime/orchestrator-service/server.js:11904:    const providers = mediaType
+runtime/orchestrator-service/server.js:11910:      providers,
+runtime/orchestrator-service/server.js:11911:      count: providers.length
+runtime/orchestrator-service/server.js:11915:      error: 'Failed to list native media providers',
+runtime/orchestrator-service/server.js:11930:      error: 'Failed to load native media provider readiness',
+runtime/orchestrator-service/server.js:11996:// place calls, trigger IVR, send provider messages, or auto-reply.
+runtime/orchestrator-service/server.js:12226:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:12227:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+runtime/orchestrator-service/server.js:12228:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:12229:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+runtime/orchestrator-service/server.js:12238:      provider: req.body?.provider || 'native',
+runtime/orchestrator-service/server.js:12264:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+runtime/orchestrator-service/server.js:12266:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+runtime/orchestrator-service/server.js:12272:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+runtime/orchestrator-service/server.js:12278:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12284:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12290:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+runtime/orchestrator-service/server.js:12294:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+runtime/orchestrator-service/server.js:12298:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+runtime/orchestrator-service/server.js:12302:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+runtime/orchestrator-service/server.js:12306:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+runtime/orchestrator-service/server.js:12310:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+runtime/orchestrator-service/server.js:12314:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:12318:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+runtime/orchestrator-service/server.js:13871:      result.notes.push('Unknown channel type. Review connector mapping.');
+runtime/orchestrator-service/server.js:14082:    preview: job.preview || job.connector_preview || null
+runtime/orchestrator-service/server.js:14234:      relatedJob?.connector_preview ||
+runtime/orchestrator-service/server.js:14304:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14311:  const connectorMissing = connectorReadiness.missing || [];
+runtime/orchestrator-service/server.js:14322:  for (const item of connectorMissing) {
+runtime/orchestrator-service/server.js:14324:      critical.push(`connector:${item}`);
+runtime/orchestrator-service/server.js:14326:      important.push(`connector:${item}`);
+runtime/orchestrator-service/server.js:14328:      optional.push(`connector:${item}`);
+runtime/orchestrator-service/server.js:14346:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14353:    connectorReadiness.readiness_score || 0
+runtime/orchestrator-service/server.js:14382:      connectors: connectorReadiness,
+runtime/orchestrator-service/server.js:14399:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14444:      connector_readiness_score: connectorReadiness.readiness_score
+runtime/orchestrator-service/server.js:14594:    integrationControlCenter: controlCenter
+runtime/orchestrator-service/server.js:14604:    integrationControlCenter: controlCenter
+runtime/orchestrator-service/server.js:15401:        note: 'Ad draft is now ready_for_launch. External Meta launch connector is the next layer.'
+runtime/orchestrator-service/server.js:15427:        note: 'Post draft is now ready_for_publish. Social publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:15453:        note: 'Blog draft is now ready_for_publish. Website/blog publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:15477:        note: 'Email draft is now ready_for_send. Email connector is the next layer.'
+runtime/orchestrator-service/server.js:16333:              'x-mh-token': process.env.MH_EMAIL_BRIDGE_TOKEN,
+runtime/orchestrator-service/server.js:19910:if (command === '/build_channel_connector_payload') {
+runtime/orchestrator-service/server.js:19924:      error: 'Failed to build channel connector payload',
+runtime/orchestrator-service/server.js:20420:if (command === '/review_project_connector_readiness') {
+runtime/orchestrator-service/server.js:20432:      error: 'Failed to review project connector readiness',
+runtime/orchestrator-service/server.js:20581:if (command === '/project_control_center_connectors') {
+runtime/orchestrator-service/server.js:20593:      error: 'Failed to build project control center connectors',
+runtime/orchestrator-service/server.js:21437:    connectors: full.connectors || {},
+runtime/orchestrator-service/server.js:21875:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:21889:      provider: result.provider,
+runtime/orchestrator-service/server.js:21905:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:21919:      provider: result.provider,
+runtime/orchestrator-service/server.js:21935:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:21948:      provider: result.provider,
+runtime/orchestrator-service/server.js:21965:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:21978:      provider: result.provider,
+runtime/orchestrator-service/server.js:21995:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:22008:      provider: result.provider,
+runtime/orchestrator-service/server.js:22025:    if (!result.ok && result.status === 'provider_not_configured') {
+runtime/orchestrator-service/server.js:22038:      provider: result.provider,

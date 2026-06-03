@@ -1,0 +1,59 @@
+runtime/orchestrator-service/server.js:4171:  delete payload.file_path;
+runtime/orchestrator-service/server.js:6017:    text.includes('delete')
+runtime/orchestrator-service/server.js:7310:    archived: Boolean(asset.archived),
+runtime/orchestrator-service/server.js:7311:    archived_at: normalizeSetupTextValue(asset.archived_at),
+runtime/orchestrator-service/server.js:7312:    archive_note: normalizeSetupTextValue(asset.archive_note),
+runtime/orchestrator-service/server.js:7313:    deleted: Boolean(asset.deleted),
+runtime/orchestrator-service/server.js:7314:    deleted_at: normalizeSetupTextValue(asset.deleted_at),
+runtime/orchestrator-service/server.js:7315:    deleted_by: normalizeSetupTextValue(asset.deleted_by),
+runtime/orchestrator-service/server.js:7316:    delete_note: normalizeSetupTextValue(asset.delete_note),
+runtime/orchestrator-service/server.js:7393:function removeProjectSourceOfTruth(projectName, sourceType) {
+runtime/orchestrator-service/server.js:7408:  delete sources[normalizedSourceType];
+runtime/orchestrator-service/server.js:7415:    removed: Boolean(existing),
+runtime/orchestrator-service/server.js:8090:      removeProjectSourceOfTruth(projectName, existing.source_key);
+runtime/orchestrator-service/server.js:10569:    const allowed = new Set(['approved', 'needs_review', 'rejected', 'archived']);
+runtime/orchestrator-service/server.js:10588:      asset.archived = status === 'archived';
+runtime/orchestrator-service/server.js:10602:      if (status === 'archived') {
+runtime/orchestrator-service/server.js:10603:        asset.archived_at = now;
+runtime/orchestrator-service/server.js:10604:        asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+runtime/orchestrator-service/server.js:10672:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10682:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10683:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10684:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10685:      asset.archived = true;
+runtime/orchestrator-service/server.js:10686:      asset.archived_at = now;
+runtime/orchestrator-service/server.js:10687:      asset.archive_note = note || asset.archive_note || 'Archived from Control Center Library.';
+runtime/orchestrator-service/server.js:10693:      status: 'archived'
+runtime/orchestrator-service/server.js:10696:    return sendAssetMutationError(res, error, 'Failed to archive asset.');
+runtime/orchestrator-service/server.js:10700:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10710:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10711:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10712:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10713:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10714:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10715:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10716:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10717:      asset.archived = true;
+runtime/orchestrator-service/server.js:10718:      asset.archived_at = asset.archived_at || now;
+runtime/orchestrator-service/server.js:10723:      deleted: true,
+runtime/orchestrator-service/server.js:10724:      status: 'archived'
+runtime/orchestrator-service/server.js:10727:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+runtime/orchestrator-service/server.js:10731:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+runtime/orchestrator-service/server.js:10741:      asset.deleted = true;
+runtime/orchestrator-service/server.js:10742:      asset.deleted_at = now;
+runtime/orchestrator-service/server.js:10743:      asset.deleted_by = 'control_center';
+runtime/orchestrator-service/server.js:10744:      asset.delete_note = note || asset.delete_note || 'Soft deleted from Control Center Library.';
+runtime/orchestrator-service/server.js:10745:      asset.status = 'archived';
+runtime/orchestrator-service/server.js:10746:      asset.readiness_status = 'archived';
+runtime/orchestrator-service/server.js:10747:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10748:      asset.archived = true;
+runtime/orchestrator-service/server.js:10749:      asset.archived_at = asset.archived_at || now;
+runtime/orchestrator-service/server.js:10754:      deleted: true,
+runtime/orchestrator-service/server.js:10755:      status: 'archived'
+runtime/orchestrator-service/server.js:10758:    return sendAssetMutationError(res, error, 'Failed to delete asset.');
+runtime/orchestrator-service/server.js:11789:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+runtime/orchestrator-service/server.js:11791:    const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
+runtime/orchestrator-service/server.js:11795:      error: error.message || 'Failed to remove project source'
+runtime/orchestrator-service/server.js:11800:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+runtime/orchestrator-service/server.js:11802:    const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
+runtime/orchestrator-service/server.js:11806:      error: error.message || 'Failed to remove project source'

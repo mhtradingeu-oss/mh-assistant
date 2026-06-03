@@ -1,0 +1,1282 @@
+runtime/orchestrator-service/server.js:159:    appLogger.error('unhandled_rejection', {
+runtime/orchestrator-service/server.js:161:      action: 'unhandled_rejection',
+runtime/orchestrator-service/server.js:220:  /^\/publish-clone\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:223:  /^\/publish-blog\/[^/]+\/?$/i,
+runtime/orchestrator-service/server.js:227:  /^\/execute_publish_package\/?$/i,
+runtime/orchestrator-service/server.js:451:  status = 'needs_review'
+runtime/orchestrator-service/server.js:480:        preview_url: asString(output?.images?.[0]?.url || output?.image_url || ''),
+runtime/orchestrator-service/server.js:780:  'ready_for_review',
+runtime/orchestrator-service/server.js:781:  'manual_publish_ready',
+runtime/orchestrator-service/server.js:1062:  publishing: {
+runtime/orchestrator-service/server.js:1064:    canonical: 'publishing'
+runtime/orchestrator-service/server.js:1096:    canonical: 'publishing/results'
+runtime/orchestrator-service/server.js:1563:  'publishing',
+runtime/orchestrator-service/server.js:1802:  const aggregate = {
+runtime/orchestrator-service/server.js:1811:    aggregate.read_events += summary.totals.read_events;
+runtime/orchestrator-service/server.js:1812:    aggregate.canonical_hit_count += summary.totals.canonical_hit_count;
+runtime/orchestrator-service/server.js:1813:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1814:    aggregate.unresolved_structural_mismatches += summary.totals.unresolved_structural_mismatches;
+runtime/orchestrator-service/server.js:1815:    aggregate.active_write_read_mismatches += summary.totals.active_write_read_mismatches;
+runtime/orchestrator-service/server.js:1818:  const totalReads = aggregate.read_events;
+runtime/orchestrator-service/server.js:1819:  aggregate.canonical_hit_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1820:    ? Number((aggregate.canonical_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1822:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1823:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:1829:    aggregate,
+runtime/orchestrator-service/server.js:1946:      body: `This campaign asset was auto-prepared by the system using the latest approved brand-controlled render.`,
+runtime/orchestrator-service/server.js:2066:    packageData.status = 'needs_manual_review';
+runtime/orchestrator-service/server.js:2090:function reviewEmailPreparePackage(projectName) {
+runtime/orchestrator-service/server.js:2250:      'Do not invent new ingredients, claims, or visual brand marks.'
+runtime/orchestrator-service/server.js:2375:- Do NOT invent ingredients, claims, or decorative brand elements.
+runtime/orchestrator-service/server.js:2744:    published_count: 0,
+runtime/orchestrator-service/server.js:2753:    if (product.status === 'publish') summary.published_count += 1;
+runtime/orchestrator-service/server.js:2944:    compliance_notes: [
+runtime/orchestrator-service/server.js:2948:      'Avoid misleading claims or non-verifiable promises.'
+runtime/orchestrator-service/server.js:2950:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:2957:  const compliance = buildMetaCompliance(projectName, placement, image);
+runtime/orchestrator-service/server.js:2970:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:2979:    compliance
+runtime/orchestrator-service/server.js:2993:function reviewLatestMetaPackage(projectName) {
+runtime/orchestrator-service/server.js:3056:    compliance_notes: [
+runtime/orchestrator-service/server.js:3060:      'Do not make misleading or non-verifiable claims.'
+runtime/orchestrator-service/server.js:3062:    publish_status: imageInfo ? 'ready_for_production' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3070:  const compliance = buildTikTokCompliance(projectName, image);
+runtime/orchestrator-service/server.js:3081:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3100:    compliance
+runtime/orchestrator-service/server.js:3114:function reviewLatestTikTokPackage(projectName) {
+runtime/orchestrator-service/server.js:3201:    compliance_notes: [
+runtime/orchestrator-service/server.js:3203:      'Do not rely on claimed third-party content for Shorts over one minute.',
+runtime/orchestrator-service/server.js:3205:      'Avoid misleading claims or deceptive packaging presentation.'
+runtime/orchestrator-service/server.js:3207:    publish_status: imageInfo ? 'ready_for_publish' : 'needs_manual_review'
+runtime/orchestrator-service/server.js:3215:  const compliance = buildYouTubeCompliance(projectName, format, image);
+runtime/orchestrator-service/server.js:3226:    : `This video package is designed for ${goal} using approved brand-controlled creative, with emphasis on product credibility, premium presentation, and visual trust.`;
+runtime/orchestrator-service/server.js:3235:    status: compliance.publish_status,
+runtime/orchestrator-service/server.js:3260:    compliance
+runtime/orchestrator-service/server.js:3274:function reviewLatestYouTubePackage(projectName) {
+runtime/orchestrator-service/server.js:3394:    description: `This Amazon package is built for ${goal} using approved real assets and a conversion-oriented marketplace structure.`,
+runtime/orchestrator-service/server.js:3403:    compliance: {
+runtime/orchestrator-service/server.js:3457:    description: `This eBay package is built for ${goal} using approved brand-controlled assets and a trust-oriented listing structure.`,
+runtime/orchestrator-service/server.js:3459:    compliance: {
+runtime/orchestrator-service/server.js:3500:function reviewLatestMarketplacePackage(projectName, marketplace) {
+runtime/orchestrator-service/server.js:3641:    if (status !== 'publish' || !slug || !name || !stableKey) {
+runtime/orchestrator-service/server.js:3697:      published_count: launchReadyProducts.length,
+runtime/orchestrator-service/server.js:3847:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3852:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3855:    requestedIdentifier: 'publishing-root',
+runtime/orchestrator-service/server.js:3856:    requestedFile: 'publishing'
+runtime/orchestrator-service/server.js:3917:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3918:    artifactType: 'publishing_connector_payload',
+runtime/orchestrator-service/server.js:3953:    domain: 'publishing',
+runtime/orchestrator-service/server.js:3954:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:3971:  if (['queued', 'queue', 'scheduled', 'pending', 'pending_publish'].includes(normalized)) return 'scheduled';
+runtime/orchestrator-service/server.js:3975:      'ready_for_manual_publish',
+runtime/orchestrator-service/server.js:3978:      'ready_for_manual_review',
+runtime/orchestrator-service/server.js:3979:      'manual_publish',
+runtime/orchestrator-service/server.js:3981:      'manual_review'
+runtime/orchestrator-service/server.js:3986:  if (['published', 'completed', 'complete', 'success', 'done', 'sent', 'live'].includes(normalized)) {
+runtime/orchestrator-service/server.js:3987:    return 'published';
+runtime/orchestrator-service/server.js:3989:  if (['failed', 'error', 'blocked', 'rejected'].includes(normalized)) return 'failed';
+runtime/orchestrator-service/server.js:4031:  if (safeChannel) return `${safeChannel} publish`;
+runtime/orchestrator-service/server.js:4035:function buildPublishingPreviewBase(input = {}, existingPreview = null) {
+runtime/orchestrator-service/server.js:4036:  const base = existingPreview && typeof existingPreview === 'object' ? existingPreview : {};
+runtime/orchestrator-service/server.js:4048:    preview_type:
+runtime/orchestrator-service/server.js:4068:    asset_preview_items: Array.isArray(base.asset_preview_items) ? base.asset_preview_items.slice(0, 3) : [],
+runtime/orchestrator-service/server.js:4073:function buildPublishingPreviewFromConnectorPayload(payload, input = {}) {
+runtime/orchestrator-service/server.js:4081:  const preview = buildPublishingPreviewBase(
+runtime/orchestrator-service/server.js:4099:    input.preview || null
+runtime/orchestrator-service/server.js:4102:  preview.asset_preview_items = assets.slice(0, 3).map(item => ({
+runtime/orchestrator-service/server.js:4111:  return preview;
+runtime/orchestrator-service/server.js:4122:  let connectorPreview =
+runtime/orchestrator-service/server.js:4123:    rawJob.connector_preview && typeof rawJob.connector_preview === 'object'
+runtime/orchestrator-service/server.js:4124:      ? rawJob.connector_preview
+runtime/orchestrator-service/server.js:4127:  if (!connectorPreview && rawJob.connector_file && fs.existsSync(rawJob.connector_file)) {
+runtime/orchestrator-service/server.js:4129:    connectorPreview = buildPublishingPreviewFromConnectorPayload(connectorPayload, rawJob);
+runtime/orchestrator-service/server.js:4132:  const preview = buildPublishingPreviewBase(
+runtime/orchestrator-service/server.js:4134:      ...connectorPreview,
+runtime/orchestrator-service/server.js:4139:    connectorPreview
+runtime/orchestrator-service/server.js:4156:    total_assets: Number(rawJob.total_assets || connectorPreview?.asset_count || 0) || 0,
+runtime/orchestrator-service/server.js:4162:    connector_preview: connectorPreview,
+runtime/orchestrator-service/server.js:4163:    preview
+runtime/orchestrator-service/server.js:4175:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4176:    artifactType: 'publishing_scheduler_job',
+runtime/orchestrator-service/server.js:4196:      connector_preview: null,
+runtime/orchestrator-service/server.js:4206:      connector_preview: buildPublishingPreviewFromConnectorPayload(payload, input),
+runtime/orchestrator-service/server.js:4213:      connector_preview: null,
+runtime/orchestrator-service/server.js:4263:  const preview = buildPublishingPreviewBase(
+runtime/orchestrator-service/server.js:4265:      ...(existing.preview || {}),
+runtime/orchestrator-service/server.js:4266:      ...(connectorInfo.connector_preview || {}),
+runtime/orchestrator-service/server.js:4267:      ...(input.preview && typeof input.preview === 'object' ? input.preview : {}),
+runtime/orchestrator-service/server.js:4274:    connectorInfo.connector_preview || existing.preview || existing.connector_preview || null
+runtime/orchestrator-service/server.js:4291:    total_assets: connectorInfo.total_assets || existing.total_assets || preview.asset_count || 0,
+runtime/orchestrator-service/server.js:4293:    connector_preview: connectorInfo.connector_preview || existing.connector_preview || preview,
+runtime/orchestrator-service/server.js:4298:    preview
+runtime/orchestrator-service/server.js:4302:function reviewScheduledJobs(projectName) {
+runtime/orchestrator-service/server.js:4305:    domain: 'publishing',
+runtime/orchestrator-service/server.js:4310:    requestedFile: 'publishing/scheduler/*.json'
+runtime/orchestrator-service/server.js:4361:  const reviewsDir = path.join(baseDir, 'reviews');
+runtime/orchestrator-service/server.js:4364:  const legacyReviewsDir = path.join(legacyBaseDir, 'reviews');
+runtime/orchestrator-service/server.js:4369:  ensureDir(reviewsDir);
+runtime/orchestrator-service/server.js:4379:    reviewsDir,
+runtime/orchestrator-service/server.js:4431:    recommendations.push('rewrite copy in natural German for German-market publishing');
+runtime/orchestrator-service/server.js:4447:  const review = {
+runtime/orchestrator-service/server.js:4451:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:4472:    artifactType: 'optimization_review',
+runtime/orchestrator-service/server.js:4475:    data: review
+runtime/orchestrator-service/server.js:4479:    ...review,
+runtime/orchestrator-service/server.js:4598:function reviewProductPerformance(projectName, productSlug) {
+runtime/orchestrator-service/server.js:4624:function reviewChannelLearning(projectName, channel) {
+runtime/orchestrator-service/server.js:4823:function reviewLatestRenderRequest(projectName) {
+runtime/orchestrator-service/server.js:4830:    requestedIdentifier: 'review-latest-render-request',
+runtime/orchestrator-service/server.js:5794:    text.includes('review') ||
+runtime/orchestrator-service/server.js:6013:    text.includes('publish') ||
+runtime/orchestrator-service/server.js:6019:    return 'approval_required';
+runtime/orchestrator-service/server.js:6088:    approval_required: mode === 'approval_required',
+runtime/orchestrator-service/server.js:6095:        mode === 'approval_required'
+runtime/orchestrator-service/server.js:6096:          ? 'Prepare execution summary and request approval.'
+runtime/orchestrator-service/server.js:6151:    publishingDir: path.join(baseDir, 'publishing'),
+runtime/orchestrator-service/server.js:6461:    paths.publishingDir,
+runtime/orchestrator-service/server.js:6577:      publishing: { path: paths.publishingDir, exists: fs.existsSync(paths.publishingDir) },
+runtime/orchestrator-service/server.js:6661:    paths.publishingDir,
+runtime/orchestrator-service/server.js:6699:    workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6700:    ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6718:      content_categories: ['product_launch', 'before_after', 'offers', 'how_to_use', 'reviews'],
+runtime/orchestrator-service/server.js:6719:      workspace_priorities: ['setup', 'library', 'campaign-studio', 'content-studio', 'media-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6720:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'ads_operator', 'analyst', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6732:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6733:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6743:      data_requirements: ['services', 'staff', 'booking_info', 'location', 'offers', 'reviews'],
+runtime/orchestrator-service/server.js:6744:      content_categories: ['services', 'before_after', 'offers', 'team', 'client_reviews'],
+runtime/orchestrator-service/server.js:6745:      workspace_priorities: ['setup', 'library', 'media-studio', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6746:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6758:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'ads-manager', 'governance'],
+runtime/orchestrator-service/server.js:6759:      ai_team_defaults: ['strategist', 'writer', 'designer', 'ads_operator', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/server.js:6771:      workspace_priorities: ['setup', 'library', 'content-studio', 'campaign-studio', 'publishing'],
+runtime/orchestrator-service/server.js:6772:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher', 'analyst'],
+runtime/orchestrator-service/server.js:6783:      content_categories: ['menu_highlights', 'daily_specials', 'behind_the_kitchen', 'reviews', 'events'],
+runtime/orchestrator-service/server.js:6784:      workspace_priorities: ['setup', 'library', 'media-studio', 'publishing', 'campaign-studio'],
+runtime/orchestrator-service/server.js:6785:      ai_team_defaults: ['strategist', 'writer', 'designer', 'video_lead', 'publisher'],
+runtime/orchestrator-service/server.js:6807:      required_assets: ['logo', 'location_photos', 'service_or_product_list', 'reviews'],
+runtime/orchestrator-service/server.js:6808:      data_requirements: ['opening_hours', 'location', 'offers', 'contact_details', 'reviews'],
+runtime/orchestrator-service/server.js:6809:      content_categories: ['local_offers', 'reviews', 'services', 'community', 'faq'],
+runtime/orchestrator-service/server.js:6810:      workspace_priorities: ['setup', 'library', 'content-studio', 'publishing', 'insights'],
+runtime/orchestrator-service/server.js:6811:      ai_team_defaults: ['strategist', 'writer', 'designer', 'publisher'],
+runtime/orchestrator-service/server.js:6867:      publishing: paths.publishingDir,
+runtime/orchestrator-service/server.js:7016:function reviewProject(projectName) {
+runtime/orchestrator-service/server.js:7026:function reviewProjectCanonicalParity(projectName) {
+runtime/orchestrator-service/server.js:7113:function reviewProjectReadiness(projectName) {
+runtime/orchestrator-service/server.js:7125:  const missingAssets = reviewProjectMissingAssets(safeProject);
+runtime/orchestrator-service/server.js:7126:  const connectorReadiness = reviewProjectConnectorReadiness(safeProject);
+runtime/orchestrator-service/server.js:7127:  const parityReport = reviewProjectCanonicalParity(safeProject);
+runtime/orchestrator-service/server.js:7167:  const publishingReadiness = fs.existsSync(paths.publishingDir) ? 100 : 0;
+runtime/orchestrator-service/server.js:7180:    publishing_readiness: publishingReadiness,
+runtime/orchestrator-service/server.js:7191:    has_publishing_dir: fs.existsSync(paths.publishingDir),
+runtime/orchestrator-service/server.js:7227:  if (domainScores.publishing_readiness < 100) missing.push('publishing_readiness');
+runtime/orchestrator-service/server.js:7240:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:7296:    review_status: normalizeSetupTextValue(asset.review_status || asset.readiness_status || status) || status,
+runtime/orchestrator-service/server.js:7301:    approved: Boolean(asset.approved),
+runtime/orchestrator-service/server.js:7302:    approved_at: normalizeSetupTextValue(asset.approved_at),
+runtime/orchestrator-service/server.js:7303:    approval_note: normalizeSetupTextValue(asset.approval_note),
+runtime/orchestrator-service/server.js:7304:    rejected: Boolean(asset.rejected),
+runtime/orchestrator-service/server.js:7305:    rejected_at: normalizeSetupTextValue(asset.rejected_at),
+runtime/orchestrator-service/server.js:7306:    rejection_note: normalizeSetupTextValue(asset.rejection_note),
+runtime/orchestrator-service/server.js:7307:    needs_review: Boolean(asset.needs_review),
+runtime/orchestrator-service/server.js:7308:    reviewed_at: normalizeSetupTextValue(asset.reviewed_at),
+runtime/orchestrator-service/server.js:7309:    reviewed_by: normalizeSetupTextValue(asset.reviewed_by),
+runtime/orchestrator-service/server.js:7420:function reviewProjectSources(projectName) {
+runtime/orchestrator-service/server.js:7804:  const sourceReview = reviewProjectSources(projectName);
+runtime/orchestrator-service/server.js:7833:function reviewProjectIntegrationControlCenter(projectName) {
+runtime/orchestrator-service/server.js:7873:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:8036:    control_center: reviewProjectIntegrationControlCenter(projectName)
+runtime/orchestrator-service/server.js:8153:    control_center: reviewProjectIntegrationControlCenter(projectName)
+runtime/orchestrator-service/server.js:8157:function reviewProjectMissingAssets(projectName) {
+runtime/orchestrator-service/server.js:8181:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:8203:        what_to_upload: 'Primary logo files, transparent logo variants, and approved lockups.',
+runtime/orchestrator-service/server.js:8204:        why_it_matters: 'Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.',
+runtime/orchestrator-service/server.js:8219:        what_to_upload: 'Brand book, tone guide, design system notes, claim rules, and visual do/dont guidance.',
+runtime/orchestrator-service/server.js:8259:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8260:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8264:      aliases: ['legal', 'compliance_doc', 'terms_doc'],
+runtime/orchestrator-service/server.js:8265:      description: 'Policies, legal terms, disclaimers, and claim restrictions.',
+runtime/orchestrator-service/server.js:8267:        what_to_upload: 'Terms, privacy policy, disclaimers, compliance notes, claim restrictions, and regulated copy rules.',
+runtime/orchestrator-service/server.js:8268:        why_it_matters: 'Publishing and AI Command need legal context before release or generated claims.',
+runtime/orchestrator-service/server.js:8281:      description: 'Approved product photography for content, media, ads, and publishing.',
+runtime/orchestrator-service/server.js:8347:        what_to_upload: 'Packaging photos, label artwork, inserts, box shots, bottle/jar details, and compliance label references.',
+runtime/orchestrator-service/server.js:8348:        why_it_matters: 'Media Studio and Publishing need packaging truth for product visuals and compliance checks.',
+runtime/orchestrator-service/server.js:8353:      asset_type: 'testimonials_reviews',
+runtime/orchestrator-service/server.js:8355:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8356:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8360:      aliases: ['testimonial', 'testimonials', 'review', 'reviews'],
+runtime/orchestrator-service/server.js:8361:      description: 'Customer proof, reviews, testimonial exports, and approved quotes.',
+runtime/orchestrator-service/server.js:8363:        what_to_upload: 'Review exports, testimonial docs, approved screenshots, quote permissions, and proof notes.',
+runtime/orchestrator-service/server.js:8371:      purpose: 'proof_compliance',
+runtime/orchestrator-service/server.js:8372:      purpose_label: 'Proof and compliance',
+runtime/orchestrator-service/server.js:8379:        what_to_upload: 'Certificates, compliance proof, awards, lab reports, or official authorization documents.',
+runtime/orchestrator-service/server.js:8380:        why_it_matters: 'Publishing and AI Command can use only approved proof when making trust or compliance claims.',
+runtime/orchestrator-service/server.js:8426:    record.review_status ||
+runtime/orchestrator-service/server.js:8427:    record.approval_status ||
+runtime/orchestrator-service/server.js:8432:  if (record.approved === true || ['approved', 'ready_approved'].includes(explicitStatus)) {
+runtime/orchestrator-service/server.js:8451:  if (['needs_review', 'review', 'blocked', 'rejected'].includes(explicitStatus)) {
+runtime/orchestrator-service/server.js:8895:    let approvedCount = statuses.filter(value => value === 'Approved').length;
+runtime/orchestrator-service/server.js:8904:      approvedCount = 0;
+runtime/orchestrator-service/server.js:8912:      approvedCount = 0;
+runtime/orchestrator-service/server.js:8922:    const approvedAssets = matchingAssets
+runtime/orchestrator-service/server.js:8951:      approved_count: approvedCount,
+runtime/orchestrator-service/server.js:8952:      needs_review_count: needsReviewCount,
+runtime/orchestrator-service/server.js:8956:      approved_assets: approvedAssets,
+runtime/orchestrator-service/server.js:8965:              ? `Review and approve ${item.label} when ready.`
+runtime/orchestrator-service/server.js:8966:              : `${item.label} is approved.`
+runtime/orchestrator-service/server.js:8979:    needs_review: 0,
+runtime/orchestrator-service/server.js:8980:    approved: 0,
+runtime/orchestrator-service/server.js:8991:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:9000:function reviewProjectUploadMapping(projectName) {
+runtime/orchestrator-service/server.js:9011:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:9027:function reviewProjectConnectorReadiness(projectName) {
+runtime/orchestrator-service/server.js:9064:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:9137:function reviewProjectAssetRoutes(projectName) {
+runtime/orchestrator-service/server.js:9171:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:9177:function reviewProjectFolderHealth(projectName) {
+runtime/orchestrator-service/server.js:9213:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:9350:app.post('/execute_publish_package', (req, res) => {
+runtime/orchestrator-service/server.js:9355:    const publishPackage = resolvePublishPackageForExecution(projectName, req.body || {});
+runtime/orchestrator-service/server.js:9356:    const payload = buildSocialExecutionPayload(publishPackage);
+runtime/orchestrator-service/server.js:9357:    const executionState = 'manual_publish_ready';
+runtime/orchestrator-service/server.js:9361:      campaign_name: String(publishPackage.campaign_name || req.body?.campaign_name || '').trim(),
+runtime/orchestrator-service/server.js:9370:    const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9390:      writeExecutionBridgeLog(logProject, 'execute_publish_package', {
+runtime/orchestrator-service/server.js:9403:      message: error.message || 'Failed to execute publish package'
+runtime/orchestrator-service/server.js:9472:      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/server.js:9475:      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
+runtime/orchestrator-service/server.js:9482:    const executionState = 'ready_for_review';
+runtime/orchestrator-service/server.js:9532:    const executionState = 'ready_for_review';
+runtime/orchestrator-service/server.js:9715:      review_required: true,
+runtime/orchestrator-service/server.js:9717:        'Review this prepared draft, then approve before applying any product update to WooCommerce.'
+runtime/orchestrator-service/server.js:9799:      review_required: true,
+runtime/orchestrator-service/server.js:9801:        'Use the cloned draft product for safe content updates before publishing.'
+runtime/orchestrator-service/server.js:9914:      review_required: true,
+runtime/orchestrator-service/server.js:9916:        'Review the updated draft clone in WooCommerce before any publish action.'
+runtime/orchestrator-service/server.js:9956:      message: 'Upload request rejected'
+runtime/orchestrator-service/server.js:10531:    registry.last_reviewed_at = now;
+runtime/orchestrator-service/server.js:10569:    const allowed = new Set(['approved', 'needs_review', 'rejected', 'archived']);
+runtime/orchestrator-service/server.js:10584:      asset.review_status = status;
+runtime/orchestrator-service/server.js:10585:      asset.needs_review = status === 'needs_review';
+runtime/orchestrator-service/server.js:10586:      asset.approved = status === 'approved';
+runtime/orchestrator-service/server.js:10587:      asset.rejected = status === 'rejected';
+runtime/orchestrator-service/server.js:10589:      asset.reviewed_at = now;
+runtime/orchestrator-service/server.js:10590:      asset.reviewed_by = 'control_center';
+runtime/orchestrator-service/server.js:10592:      if (status === 'approved') {
+runtime/orchestrator-service/server.js:10593:        asset.approved_at = now;
+runtime/orchestrator-service/server.js:10594:        asset.approval_note = note || asset.approval_note || 'Approved from Control Center Library.';
+runtime/orchestrator-service/server.js:10597:      if (status === 'rejected') {
+runtime/orchestrator-service/server.js:10598:        asset.rejected_at = now;
+runtime/orchestrator-service/server.js:10599:        asset.rejection_note = note || asset.rejection_note || 'Rejected from Control Center Library.';
+runtime/orchestrator-service/server.js:10684:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10688:      asset.reviewed_by = 'control_center';
+runtime/orchestrator-service/server.js:10716:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:10747:      asset.review_status = 'archived';
+runtime/orchestrator-service/server.js:11502:      error: error.message || 'Failed to list approvals'
+runtime/orchestrator-service/server.js:11509:    const approval = createApproval(req.params.project, req.body || {});
+runtime/orchestrator-service/server.js:11511:      approval,
+runtime/orchestrator-service/server.js:11516:      error: error.message || 'Failed to create approval'
+runtime/orchestrator-service/server.js:11523:    const approval = decideApproval(req.params.project, req.params.approvalId, {
+runtime/orchestrator-service/server.js:11532:      approval,
+runtime/orchestrator-service/server.js:11537:      error: error.message || 'Failed to update approval'
+runtime/orchestrator-service/server.js:11542:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:11543:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+runtime/orchestrator-service/server.js:11544:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11545:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+runtime/orchestrator-service/server.js:11546:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11547:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+runtime/orchestrator-service/server.js:11558:      error: error.message || 'Failed to load governance summary'
+runtime/orchestrator-service/server.js:11572:      error: error.message || 'Failed to update governance policy'
+runtime/orchestrator-service/server.js:11585:      error: error.message || 'Failed to load governance policy'
+runtime/orchestrator-service/server.js:11590:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:11591:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+runtime/orchestrator-service/server.js:11592:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:11593:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+runtime/orchestrator-service/server.js:11594:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:11595:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+runtime/orchestrator-service/server.js:11813:    return res.json(reviewProjectIntegrationControlCenter(req.params.project));
+runtime/orchestrator-service/server.js:12324:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:12338:      preview: req.body?.preview
+runtime/orchestrator-service/server.js:12347:    logCriticalFailure('publishing_schedule', req, error, {
+runtime/orchestrator-service/server.js:12351:      error: error.message || 'Failed to save publishing schedule',
+runtime/orchestrator-service/server.js:12357:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+runtime/orchestrator-service/server.js:12371:      preview: req.body?.preview
+runtime/orchestrator-service/server.js:12380:    logCriticalFailure('publishing_schedule', req, error, {
+runtime/orchestrator-service/server.js:12384:      error: error.message || 'Failed to save publishing schedule',
+runtime/orchestrator-service/server.js:12390:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12405:      preview: req.body?.preview
+runtime/orchestrator-service/server.js:12413:      error: error.message || 'Failed to reschedule publishing item',
+runtime/orchestrator-service/server.js:12419:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+runtime/orchestrator-service/server.js:12434:      preview: req.body?.preview
+runtime/orchestrator-service/server.js:12442:      error: error.message || 'Failed to reschedule publishing item',
+runtime/orchestrator-service/server.js:12448:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12464:      error: error.message || 'Failed to approve publishing item',
+runtime/orchestrator-service/server.js:12470:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+runtime/orchestrator-service/server.js:12486:      error: error.message || 'Failed to approve publishing item',
+runtime/orchestrator-service/server.js:12492:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12494:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+runtime/orchestrator-service/server.js:12496:      status: 'published'
+runtime/orchestrator-service/server.js:12499:      status: 'published',
+runtime/orchestrator-service/server.js:12503:      execution_status: 'published',
+runtime/orchestrator-service/server.js:12504:      action_type: 'manual_publish_complete',
+runtime/orchestrator-service/server.js:12513:    logCriticalFailure('publishing_publish', req, error, {
+runtime/orchestrator-service/server.js:12518:      error: error.message || 'Failed to publish item',
+runtime/orchestrator-service/server.js:12524:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+runtime/orchestrator-service/server.js:12526:    assertPublishingMutationAllowed(req.params.project, 'publish', {
+runtime/orchestrator-service/server.js:12528:      status: 'published'
+runtime/orchestrator-service/server.js:12531:      status: 'published',
+runtime/orchestrator-service/server.js:12535:      execution_status: 'published',
+runtime/orchestrator-service/server.js:12536:      action_type: 'manual_publish_complete',
+runtime/orchestrator-service/server.js:12545:    logCriticalFailure('publishing_publish', req, error, {
+runtime/orchestrator-service/server.js:12550:      error: error.message || 'Failed to publish item',
+runtime/orchestrator-service/server.js:12556:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12568:      action_type: 'manual_publish_failed',
+runtime/orchestrator-service/server.js:12577:    logCriticalFailure('publishing_fail', req, error, {
+runtime/orchestrator-service/server.js:12582:      error: error.message || 'Failed to mark publishing item as failed',
+runtime/orchestrator-service/server.js:12588:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+runtime/orchestrator-service/server.js:12600:      action_type: 'manual_publish_failed',
+runtime/orchestrator-service/server.js:12609:    logCriticalFailure('publishing_fail', req, error, {
+runtime/orchestrator-service/server.js:12614:      error: error.message || 'Failed to mark publishing item as failed',
+runtime/orchestrator-service/server.js:12795:      emphasize: ['clarity', 'compliance', 'real product fidelity'],
+runtime/orchestrator-service/server.js:12796:      avoid: ['fake claims', 'decorative clutter', 'non-compliant overlays']
+runtime/orchestrator-service/server.js:12891:function reviewProductIntelligence(projectName, productSlug) {
+runtime/orchestrator-service/server.js:12952:      compliance_notes: [
+runtime/orchestrator-service/server.js:12955:        'Keep claims aligned with real product data.',
+runtime/orchestrator-service/server.js:12956:        'Avoid unsupported medical or misleading claims.'
+runtime/orchestrator-service/server.js:13215:  const publishDir = path.join(baseDir, 'publish-packages');
+runtime/orchestrator-service/server.js:13218:  const legacyPublishDir = path.join(legacyBaseDir, 'publish-packages');
+runtime/orchestrator-service/server.js:13223:  ensureDir(publishDir);
+runtime/orchestrator-service/server.js:13233:    publishDir,
+runtime/orchestrator-service/server.js:13281:  const packageId = `publish_${Date.now()}`;
+runtime/orchestrator-service/server.js:13293:    ready_for_publish: payload.assets.length > 0,
+runtime/orchestrator-service/server.js:13301:    artifactType: 'campaign_publish_package',
+runtime/orchestrator-service/server.js:13351:function reviewCampaignFinalization(projectName, campaignName) {
+runtime/orchestrator-service/server.js:13362:  const publishDir = resolveExecutionReadCandidate({
+runtime/orchestrator-service/server.js:13365:    relativePath: 'publish-packages',
+runtime/orchestrator-service/server.js:13369:    requestedFile: `campaign-finalization/publish-packages/${safeName}*`
+runtime/orchestrator-service/server.js:13383:  const publishFiles = fs.existsSync(publishDir)
+runtime/orchestrator-service/server.js:13384:    ? fs.readdirSync(publishDir).filter(x => x.startsWith(safeName))
+runtime/orchestrator-service/server.js:13391:    publish_packages_count: publishFiles.length,
+runtime/orchestrator-service/server.js:13393:    ready: mediaFiles.length > 0 || publishFiles.length > 0 || fs.existsSync(emailFile)
+runtime/orchestrator-service/server.js:13471:  const inlinePackage = input.publish_package && typeof input.publish_package === 'object'
+runtime/orchestrator-service/server.js:13472:    ? input.publish_package
+runtime/orchestrator-service/server.js:13481:    const error = new Error('Missing publish package. Provide publish_package or campaign_name + channel');
+runtime/orchestrator-service/server.js:13490:function buildSocialExecutionPayload(publishPackage) {
+runtime/orchestrator-service/server.js:13491:  const assets = assertExecutionPackageAssets(publishPackage, 'publish package');
+runtime/orchestrator-service/server.js:13492:  const channel = String(publishPackage.channel || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:13498:    || `${String(primaryAsset.product_name || publishPackage.campaign_name || 'Campaign').trim()} update`;
+runtime/orchestrator-service/server.js:13790:    domain: 'publishing',
+runtime/orchestrator-service/server.js:13794:    requestedFile: `publishing/scheduler/${jobId}.json`
+runtime/orchestrator-service/server.js:13812:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:13814:      status: 'published'
+runtime/orchestrator-service/server.js:13833:    external_publish: normalizedMode !== 'semi_auto',
+runtime/orchestrator-service/server.js:13843:      result.execution_status = 'ready_for_manual_publish';
+runtime/orchestrator-service/server.js:13844:      result.action_type = 'manual_publish';
+runtime/orchestrator-service/server.js:13845:      result.notes.push('Social payload is ready for operator-controlled publishing.');
+runtime/orchestrator-service/server.js:13851:      result.execution_status = 'ready_for_manual_review';
+runtime/orchestrator-service/server.js:13852:      result.action_type = 'manual_review';
+runtime/orchestrator-service/server.js:13853:      result.notes.push('Unknown channel type. Manual review required.');
+runtime/orchestrator-service/server.js:13861:      result.execution_status = 'auto_publish_pending';
+runtime/orchestrator-service/server.js:13862:      result.action_type = 'auto_publish';
+runtime/orchestrator-service/server.js:13863:      result.notes.push('Full-auto mode enabled. Social publish adapter should consume this.');
+runtime/orchestrator-service/server.js:13869:      result.execution_status = 'auto_review_pending';
+runtime/orchestrator-service/server.js:13870:      result.action_type = 'auto_review';
+runtime/orchestrator-service/server.js:13879:    artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:13949:    const error = new Error('Manual publish recording is allowed only in semi_auto mode.');
+runtime/orchestrator-service/server.js:13973:  const manualPublishDir = path.join(projectPaths.executionDir, 'manual-publish');
+runtime/orchestrator-service/server.js:13982:    published_at: nowIso,
+runtime/orchestrator-service/server.js:13985:    external_publish: false,
+runtime/orchestrator-service/server.js:13986:    manual_publish: true,
+runtime/orchestrator-service/server.js:14012:      manual_publish_recorded: true,
+runtime/orchestrator-service/server.js:14013:      manual_publish_url: safePostUrl,
+runtime/orchestrator-service/server.js:14014:      manual_publish_operator: safeOperator,
+runtime/orchestrator-service/server.js:14015:      manual_publish_recorded_at: nowIso,
+runtime/orchestrator-service/server.js:14016:      final_status: 'manually_published',
+runtime/orchestrator-service/server.js:14017:      manual_publish: true,
+runtime/orchestrator-service/server.js:14018:      external_publish: false,
+runtime/orchestrator-service/server.js:14033:      artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:14042:    warnings.push('Execution result file not found for job_id. Manual publish record saved without execution-result update.');
+runtime/orchestrator-service/server.js:14050:    manual_publish_recorded: true,
+runtime/orchestrator-service/server.js:14051:    external_publish: false,
+runtime/orchestrator-service/server.js:14052:    manual_publish: true,
+runtime/orchestrator-service/server.js:14082:    preview: job.preview || job.connector_preview || null
+runtime/orchestrator-service/server.js:14088:    artifactType: 'publishing_execution_result',
+runtime/orchestrator-service/server.js:14110:      String(item?.entity_type || '').trim() === 'publishing_job'
+runtime/orchestrator-service/server.js:14121:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/server.js:14125:  const policyRules = governance && typeof governance === 'object' && governance.policy_rules && typeof governance.policy_rules === 'object'
+runtime/orchestrator-service/server.js:14126:    ? governance.policy_rules
+runtime/orchestrator-service/server.js:14131:  const freezeSensitiveAction = ['schedule', 'reschedule', 'ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:14132:    || ['ready', 'published'].includes(requestedStatus);
+runtime/orchestrator-service/server.js:14133:  const approvalSensitiveAction = ['ready', 'publish'].includes(actionKey)
+runtime/orchestrator-service/server.js:14134:    || ['ready', 'published'].includes(requestedStatus);
+runtime/orchestrator-service/server.js:14137:  //   freeze_publishing  → default false (permissive — freeze is opt-in)
+runtime/orchestrator-service/server.js:14138:  //   approval_before_publish → default true (restrictive — approval is required by default)
+runtime/orchestrator-service/server.js:14139:  const freezePublishing = typeof policyRules.freeze_publishing === 'boolean'
+runtime/orchestrator-service/server.js:14140:    ? policyRules.freeze_publishing
+runtime/orchestrator-service/server.js:14141:    : policyRules.freeze_publishing == null ? false : Boolean(policyRules.freeze_publishing);
+runtime/orchestrator-service/server.js:14142:  const approvalBeforePublish = typeof policyRules.approval_before_publish === 'boolean'
+runtime/orchestrator-service/server.js:14143:    ? policyRules.approval_before_publish
+runtime/orchestrator-service/server.js:14144:    : policyRules.approval_before_publish == null ? true : Boolean(policyRules.approval_before_publish);
+runtime/orchestrator-service/server.js:14147:    appLogger.warn('governance_blocked', {
+runtime/orchestrator-service/server.js:14148:      route: '/governance/publishing',
+runtime/orchestrator-service/server.js:14158:    logGovernanceBlock('freeze_publishing');
+runtime/orchestrator-service/server.js:14160:      'Publishing is frozen by governance policy. The requested publishing mutation was blocked.',
+runtime/orchestrator-service/server.js:14163:        rule: 'freeze_publishing'
+runtime/orchestrator-service/server.js:14168:  if (approvalSensitiveAction && approvalBeforePublish) {
+runtime/orchestrator-service/server.js:14170:      logGovernanceBlock('approval_before_publish', { reason: 'job_id_missing' });
+runtime/orchestrator-service/server.js:14172:        'Approval before publish is enabled. This publishing action requires a durable publishing job with an approved governance decision.',
+runtime/orchestrator-service/server.js:14175:          rule: 'approval_before_publish'
+runtime/orchestrator-service/server.js:14180:    const approval = getLatestPublishingApproval(projectName, jobId);
+runtime/orchestrator-service/server.js:14181:    const approvalStatus = String(approval?.status || '').trim().toLowerCase();
+runtime/orchestrator-service/server.js:14183:    if (!['approved', 'overridden'].includes(approvalStatus)) {
+runtime/orchestrator-service/server.js:14184:      logGovernanceBlock('approval_before_publish', {
+runtime/orchestrator-service/server.js:14186:        approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:14189:        'Approval before publish is enabled. The publishing job is not approved for ready/publish mutation.',
+runtime/orchestrator-service/server.js:14192:          rule: 'approval_before_publish',
+runtime/orchestrator-service/server.js:14194:          approval_status: approvalStatus || 'missing'
+runtime/orchestrator-service/server.js:14223:    total_assets: Number(rawResult.total_assets || relatedJob?.total_assets || relatedJob?.preview?.asset_count || 0) || 0,
+runtime/orchestrator-service/server.js:14231:    preview:
+runtime/orchestrator-service/server.js:14232:      (rawResult.preview && typeof rawResult.preview === 'object' ? rawResult.preview : null) ||
+runtime/orchestrator-service/server.js:14233:      relatedJob?.preview ||
+runtime/orchestrator-service/server.js:14234:      relatedJob?.connector_preview ||
+runtime/orchestrator-service/server.js:14239:function reviewExecutionResult(projectName, jobId) {
+runtime/orchestrator-service/server.js:14279:function reviewProjectAlignmentStatus(projectName) {
+runtime/orchestrator-service/server.js:14280:  const routes = reviewProjectAssetRoutes(projectName);
+runtime/orchestrator-service/server.js:14294:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14302:function reviewProjectMissingPriorities(projectName) {
+runtime/orchestrator-service/server.js:14303:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:14304:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14334:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14342:function reviewProjectDashboard(projectName) {
+runtime/orchestrator-service/server.js:14343:  const project = reviewProject(projectName);
+runtime/orchestrator-service/server.js:14344:  const readiness = reviewProjectReadiness(projectName);
+runtime/orchestrator-service/server.js:14345:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:14346:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14347:  const alignment = reviewProjectAlignmentStatus(projectName);
+runtime/orchestrator-service/server.js:14348:  const folderHealth = reviewProjectFolderHealth(projectName);
+runtime/orchestrator-service/server.js:14349:  const priorities = reviewProjectMissingPriorities(projectName);
+runtime/orchestrator-service/server.js:14367:    reviewed_at: new Date().toISOString(),
+runtime/orchestrator-service/server.js:14395:  const project = reviewProject(projectName);
+runtime/orchestrator-service/server.js:14396:  const dashboard = reviewProjectDashboard(projectName);
+runtime/orchestrator-service/server.js:14398:  const sources = reviewProjectSources(projectName);
+runtime/orchestrator-service/server.js:14399:  const connectorReadiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14400:  const alignment = reviewProjectAlignmentStatus(projectName);
+runtime/orchestrator-service/server.js:14535:  const routes = reviewProjectAssetRoutes(projectName);
+runtime/orchestrator-service/server.js:14536:  const missingAssets = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:14537:  const folderHealth = reviewProjectFolderHealth(projectName);
+runtime/orchestrator-service/server.js:14548:    approved_assets: categoryReadiness.categories
+runtime/orchestrator-service/server.js:14549:      .flatMap(category => category.approved_assets.map(assetId => ({
+runtime/orchestrator-service/server.js:14561:  const sources = reviewProjectSources(projectName);
+runtime/orchestrator-service/server.js:14562:  const readiness = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:14563:  const controlCenter = reviewProjectIntegrationControlCenter(projectName);
+runtime/orchestrator-service/server.js:14575:  const dashboard = reviewProjectDashboard(projectName);
+runtime/orchestrator-service/server.js:14576:  const priorities = reviewProjectMissingPriorities(projectName);
+runtime/orchestrator-service/server.js:14577:  const alignment = reviewProjectAlignmentStatus(projectName);
+runtime/orchestrator-service/server.js:14590:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+runtime/orchestrator-service/server.js:14600:  const controlCenter = reviewProjectIntegrationControlCenter(safeProject);
+runtime/orchestrator-service/server.js:14614:    scheduledJobs = reviewScheduledJobs(projectName);
+runtime/orchestrator-service/server.js:15035:       if (command === '/review_ads') {
+runtime/orchestrator-service/server.js:15046:    if (command === '/review_posts') {
+runtime/orchestrator-service/server.js:15057:    if (command === '/review_blog') {
+runtime/orchestrator-service/server.js:15068:    if (command === '/review_emails') {
+runtime/orchestrator-service/server.js:15069:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+runtime/orchestrator-service/server.js:15077:    if (command === '/approve_ad') {
+runtime/orchestrator-service/server.js:15092:      item.status = 'approved';
+runtime/orchestrator-service/server.js:15102:    if (command === '/approve_post') {
+runtime/orchestrator-service/server.js:15117:      item.status = 'approved';
+runtime/orchestrator-service/server.js:15127:    if (command === '/approve_blog') {
+runtime/orchestrator-service/server.js:15142:      item.status = 'approved';
+runtime/orchestrator-service/server.js:15152:    if (command === '/approve_email') {
+runtime/orchestrator-service/server.js:15165:      item.status = 'approved';
+runtime/orchestrator-service/server.js:15420:      item.status = 'ready_for_publish';
+runtime/orchestrator-service/server.js:15427:        note: 'Post draft is now ready_for_publish. Social publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:15446:      item.status = 'ready_for_publish';
+runtime/orchestrator-service/server.js:15453:        note: 'Blog draft is now ready_for_publish. Website/blog publishing connector is the next layer.'
+runtime/orchestrator-service/server.js:15480:if (command === '/publish_blog') {
+runtime/orchestrator-service/server.js:15487:    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
+runtime/orchestrator-service/server.js:15527:    if (command === '/review_blog_assets') {
+runtime/orchestrator-service/server.js:15627:    if (command === '/review_blog_media_asset') {
+runtime/orchestrator-service/server.js:15744:  if (!blogItem || !blogItem.published_post_id) {
+runtime/orchestrator-service/server.js:15745:    return res.json({ error: 'Blog not published or not found' });
+runtime/orchestrator-service/server.js:15780:      `${process.env.WP_BASE_URL}/posts/${blogItem.published_post_id}`,
+runtime/orchestrator-service/server.js:15797:    asset.attached_post_id = blogItem.published_post_id;
+runtime/orchestrator-service/server.js:15820:        post_id: blogItem.published_post_id,
+runtime/orchestrator-service/server.js:15837:    if (command === '/enhance_published_blog') {
+runtime/orchestrator-service/server.js:15849:      if (!blogItem || !blogItem.published_post_id) {
+runtime/orchestrator-service/server.js:15859:        const postId = blogItem.published_post_id;
+runtime/orchestrator-service/server.js:15970:    if (command === '/review_published_blog') {
+runtime/orchestrator-service/server.js:15992:          published_post_id: blogItem.published_post_id || null,
+runtime/orchestrator-service/server.js:16008:    if (command === '/review_email_asset') {
+runtime/orchestrator-service/server.js:16109:    if (command === '/review_email_media') {
+runtime/orchestrator-service/server.js:16413:    if (command === '/review_project_profile') {
+runtime/orchestrator-service/server.js:16511:    if (command === '/review_campaign_strategy') {
+runtime/orchestrator-service/server.js:16582:          'Generate assets from strategy, then run review -> approval -> media -> publish/send.',
+runtime/orchestrator-service/server.js:17322:          'publish landing/product/blog asset',
+runtime/orchestrator-service/server.js:17326:          'review performance and improve winners'
+runtime/orchestrator-service/server.js:17431:          'publish one authority blog',
+runtime/orchestrator-service/server.js:17433:          'publish three social assets',
+runtime/orchestrator-service/server.js:17756:    if (command === '/review_campaign_autogen') {
+runtime/orchestrator-service/server.js:17786:    if (command === '/campaign_publish_blog') {
+runtime/orchestrator-service/server.js:17813:          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
+runtime/orchestrator-service/server.js:17816:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:17817:        campaignExec.controlled_publish.blog = {
+runtime/orchestrator-service/server.js:17818:          status: 'published',
+runtime/orchestrator-service/server.js:17821:          published_at: new Date().toISOString()
+runtime/orchestrator-service/server.js:17832:          result: campaignExec.controlled_publish.blog
+runtime/orchestrator-service/server.js:17836:          error: 'Campaign blog publish failed',
+runtime/orchestrator-service/server.js:17877:        campaignExec.controlled_publish = campaignExec.controlled_publish || {};
+runtime/orchestrator-service/server.js:17878:        campaignExec.controlled_publish.email = {
+runtime/orchestrator-service/server.js:17894:          result: campaignExec.controlled_publish.email
+runtime/orchestrator-service/server.js:17904:    if (command === '/campaign_review_publish_state') {
+runtime/orchestrator-service/server.js:17929:          controlled_publish: campaignExec.controlled_publish || {},
+runtime/orchestrator-service/server.js:17931:            blog: campaignExec.controlled_publish?.blog?.status || 'not_published',
+runtime/orchestrator-service/server.js:17932:            email: campaignExec.controlled_publish?.email?.status || 'not_sent'
+runtime/orchestrator-service/server.js:18007:    if (command === '/review_brand_assets') {
+runtime/orchestrator-service/server.js:18061:        approved_style_only: true,
+runtime/orchestrator-service/server.js:18100:        approved_for_ai_composition: true,
+runtime/orchestrator-service/server.js:18210:      approved_for_ai_composition: true,
+runtime/orchestrator-service/server.js:18371:if (command === '/review_media_inputs') {
+runtime/orchestrator-service/server.js:18431:if (command === '/review_prompt_guardrails') {
+runtime/orchestrator-service/server.js:18463:      error: 'Failed to review prompt guardrails',
+runtime/orchestrator-service/server.js:18535:if (command === '/review_execution_package') {
+runtime/orchestrator-service/server.js:18557:      error: 'Failed to review execution package',
+runtime/orchestrator-service/server.js:18625:if (command === '/review_generation_job') {
+runtime/orchestrator-service/server.js:18652:      error: 'Failed to review generation job',
+runtime/orchestrator-service/server.js:18677:if (command === '/review_render_request') {
+runtime/orchestrator-service/server.js:18685:    const result = reviewLatestRenderRequest(projectName);
+runtime/orchestrator-service/server.js:18692:      error: 'Failed to review render request',
+runtime/orchestrator-service/server.js:18786:if (command === '/review_email_prepare_package') {
+runtime/orchestrator-service/server.js:18794:    const result = reviewEmailPreparePackage(projectName);
+runtime/orchestrator-service/server.js:18801:      error: 'Failed to review email prepare package',
+runtime/orchestrator-service/server.js:18814:    const result = reviewEmailPreparePackage(projectName);
+runtime/orchestrator-service/server.js:18873:if (command === '/review_email_delivery') {
+runtime/orchestrator-service/server.js:18907:      error: 'Failed to review email delivery',
+runtime/orchestrator-service/server.js:18935:if (command === '/review_meta_package') {
+runtime/orchestrator-service/server.js:18943:    const result = reviewLatestMetaPackage(projectName);
+runtime/orchestrator-service/server.js:18950:      error: 'Failed to review Meta package',
+runtime/orchestrator-service/server.js:18974:if (command === '/review_tiktok_package') {
+runtime/orchestrator-service/server.js:18982:    const result = reviewLatestTikTokPackage(projectName);
+runtime/orchestrator-service/server.js:18986:      error: 'Failed to review TikTok package',
+runtime/orchestrator-service/server.js:19012:if (command === '/review_youtube_package') {
+runtime/orchestrator-service/server.js:19020:    const result = reviewLatestYouTubePackage(projectName);
+runtime/orchestrator-service/server.js:19024:      error: 'Failed to review YouTube package',
+runtime/orchestrator-service/server.js:19052:if (command === '/review_marketplace_package') {
+runtime/orchestrator-service/server.js:19061:    const result = reviewLatestMarketplacePackage(projectName, marketplace);
+runtime/orchestrator-service/server.js:19068:      error: 'Failed to review marketplace package',
+runtime/orchestrator-service/server.js:19073:if (command === '/review_asset_fidelity') {
+runtime/orchestrator-service/server.js:19093:      error: 'Failed to review asset fidelity',
+runtime/orchestrator-service/server.js:19174:if (command === '/review_product_intelligence') {
+runtime/orchestrator-service/server.js:19183:    const result = reviewProductIntelligence(projectName, productSlug);
+runtime/orchestrator-service/server.js:19190:      error: 'Failed to review product intelligence',
+runtime/orchestrator-service/server.js:19298:if (command === '/review_wc_sync_summary') {
+runtime/orchestrator-service/server.js:19313:      error: 'Failed to review WooCommerce sync summary',
+runtime/orchestrator-service/server.js:19480:if (command === '/review_product_creative_map') {
+runtime/orchestrator-service/server.js:19489:    const product = reviewProductIntelligence(projectName, slug);
+runtime/orchestrator-service/server.js:19502:      error: 'Failed to review product creative map',
+runtime/orchestrator-service/server.js:19583:if (command === '/review_product_prompt_pack') {
+runtime/orchestrator-service/server.js:19592:    const product = reviewProductIntelligence(projectName, slug);
+runtime/orchestrator-service/server.js:19605:      error: 'Failed to review product prompt pack',
+runtime/orchestrator-service/server.js:19671:if (command === '/review_product_channel_pack') {
+runtime/orchestrator-service/server.js:19680:    const product = reviewProductIntelligence(project, slug);
+runtime/orchestrator-service/server.js:19690:    return res.json({ error: 'Failed review', details: e.message });
+runtime/orchestrator-service/server.js:19727:if (command === '/review_campaign_execution_package') {
+runtime/orchestrator-service/server.js:19744:      error: 'Failed to review campaign execution package',
+runtime/orchestrator-service/server.js:19819:if (command === '/build_campaign_publish_package') {
+runtime/orchestrator-service/server.js:19836:      error: 'Failed to build campaign publish package',
+runtime/orchestrator-service/server.js:19841:if (command === '/review_campaign_finalization') {
+runtime/orchestrator-service/server.js:19850:    const result = reviewCampaignFinalization(projectName, campaignName);
+runtime/orchestrator-service/server.js:19857:      error: 'Failed to review campaign finalization',
+runtime/orchestrator-service/server.js:19872:if (command === '/review_german_launch_plan') {
+runtime/orchestrator-service/server.js:19882:    return res.json({ error: 'Failed to review launch plan', details: error.message });
+runtime/orchestrator-service/server.js:19896:if (command === '/review_launch_wave') {
+runtime/orchestrator-service/server.js:19907:    return res.json({ error: 'Failed to review launch wave', details: error.message });
+runtime/orchestrator-service/server.js:19949:if (command === '/review_scheduled_jobs') {
+runtime/orchestrator-service/server.js:19957:    const result = reviewScheduledJobs(projectName);
+runtime/orchestrator-service/server.js:19961:      error: 'Failed to review scheduled jobs',
+runtime/orchestrator-service/server.js:19985:if (command === '/record_manual_publish') {
+runtime/orchestrator-service/server.js:19996:      error: 'Missing required args. Usage: /record_manual_publish <project> <campaign> <channel> <job_id> <operator> <post_url> [notes...]'
+runtime/orchestrator-service/server.js:20005:      error: 'Failed to record manual publish',
+runtime/orchestrator-service/server.js:20028:if (command === '/review_execution_mode') {
+runtime/orchestrator-service/server.js:20040:      error: 'Failed to review execution mode',
+runtime/orchestrator-service/server.js:20063:if (command === '/review_execution_result') {
+runtime/orchestrator-service/server.js:20072:    const result = reviewExecutionResult(projectName, jobId);
+runtime/orchestrator-service/server.js:20076:      error: 'Failed to review execution result',
+runtime/orchestrator-service/server.js:20098:if (command === '/review_channel_post') {
+runtime/orchestrator-service/server.js:20112:      error: 'Failed to review channel post',
+runtime/orchestrator-service/server.js:20156:if (command === '/review_product_performance') {
+runtime/orchestrator-service/server.js:20165:    const result = reviewProductPerformance(projectName, productSlug);
+runtime/orchestrator-service/server.js:20169:      error: 'Failed to review product performance',
+runtime/orchestrator-service/server.js:20174:if (command === '/review_channel_learning') {
+runtime/orchestrator-service/server.js:20183:    const result = reviewChannelLearning(projectName, channel);
+runtime/orchestrator-service/server.js:20187:      error: 'Failed to review channel learning',
+runtime/orchestrator-service/server.js:20262:if (command === '/review_project') {
+runtime/orchestrator-service/server.js:20270:    const result = reviewProject(projectName);
+runtime/orchestrator-service/server.js:20274:      error: 'Failed to review project',
+runtime/orchestrator-service/server.js:20280:if (command === '/review_project_readiness') {
+runtime/orchestrator-service/server.js:20288:    const result = reviewProjectReadiness(projectName);
+runtime/orchestrator-service/server.js:20292:      error: 'Failed to review project readiness',
+runtime/orchestrator-service/server.js:20355:if (command === '/review_project_sources') {
+runtime/orchestrator-service/server.js:20363:    const result = reviewProjectSources(projectName);
+runtime/orchestrator-service/server.js:20367:      error: 'Failed to review project sources',
+runtime/orchestrator-service/server.js:20373:if (command === '/review_project_missing_assets') {
+runtime/orchestrator-service/server.js:20381:    const result = reviewProjectMissingAssets(projectName);
+runtime/orchestrator-service/server.js:20385:      error: 'Failed to review project missing assets',
+runtime/orchestrator-service/server.js:20402:if (command === '/review_project_upload_mapping') {
+runtime/orchestrator-service/server.js:20410:    const result = reviewProjectUploadMapping(projectName);
+runtime/orchestrator-service/server.js:20414:      error: 'Failed to review project upload mapping',
+runtime/orchestrator-service/server.js:20420:if (command === '/review_project_connector_readiness') {
+runtime/orchestrator-service/server.js:20428:    const result = reviewProjectConnectorReadiness(projectName);
+runtime/orchestrator-service/server.js:20432:      error: 'Failed to review project connector readiness',
+runtime/orchestrator-service/server.js:20457:if (command === '/review_project_asset_routes') {
+runtime/orchestrator-service/server.js:20465:    const result = reviewProjectAssetRoutes(projectName);
+runtime/orchestrator-service/server.js:20469:      error: 'Failed to review project asset routes',
+runtime/orchestrator-service/server.js:20475:if (command === '/review_project_folder_health') {
+runtime/orchestrator-service/server.js:20483:    const result = reviewProjectFolderHealth(projectName);
+runtime/orchestrator-service/server.js:20487:      error: 'Failed to review project folder health',
+runtime/orchestrator-service/server.js:20492:if (command === '/review_project_alignment_status') {
+runtime/orchestrator-service/server.js:20500:    const result = reviewProjectAlignmentStatus(projectName);
+runtime/orchestrator-service/server.js:20504:      error: 'Failed to review project alignment status',
+runtime/orchestrator-service/server.js:20510:if (command === '/review_project_missing_priorities') {
+runtime/orchestrator-service/server.js:20518:    const result = reviewProjectMissingPriorities(projectName);
+runtime/orchestrator-service/server.js:20522:      error: 'Failed to review project missing priorities',
+runtime/orchestrator-service/server.js:20528:if (command === '/review_project_dashboard') {
+runtime/orchestrator-service/server.js:20536:    const result = reviewProjectDashboard(projectName);
+runtime/orchestrator-service/server.js:20540:      error: 'Failed to review project dashboard',
+runtime/orchestrator-service/server.js:20660:app.post('/publish-clone/:cloneId', async (req, res) => {
+runtime/orchestrator-service/server.js:20663:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:20664:      status: 'published'
+runtime/orchestrator-service/server.js:20671:        status: 'publish'
+runtime/orchestrator-service/server.js:20681:    const publishedProduct = response.data;
+runtime/orchestrator-service/server.js:20684:      mode: 'publish_clone',
+runtime/orchestrator-service/server.js:20685:      product_id: publishedProduct.id,
+runtime/orchestrator-service/server.js:20686:      name: publishedProduct.name,
+runtime/orchestrator-service/server.js:20687:      status: publishedProduct.status,
+runtime/orchestrator-service/server.js:20688:      permalink: publishedProduct.permalink,
+runtime/orchestrator-service/server.js:20691:        'This action published a draft product. Original product was not modified.'
+runtime/orchestrator-service/server.js:20694:    logCriticalFailure('publish_clone', req, error, {
+runtime/orchestrator-service/server.js:20698:      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
+runtime/orchestrator-service/server.js:20706:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:20707:      status: 'published'
+runtime/orchestrator-service/server.js:20747:      status: 'publish'
+runtime/orchestrator-service/server.js:20839:app.post('/publish-blog/:draftId', async (req, res) => {
+runtime/orchestrator-service/server.js:20842:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:20843:      status: 'published'
+runtime/orchestrator-service/server.js:20891:        status: 'publish'
+runtime/orchestrator-service/server.js:20901:        message: `WordPress publish failed with status ${response.status}`
+runtime/orchestrator-service/server.js:20905:    item.status = 'published';
+runtime/orchestrator-service/server.js:20906:    item.published_post_id = data.id || null;
+runtime/orchestrator-service/server.js:20909:    item.date_published = data.date || '';
+runtime/orchestrator-service/server.js:20931:      note: 'Blog published successfully'
+runtime/orchestrator-service/server.js:20934:    logCriticalFailure('publish_blog', req, err, {
+runtime/orchestrator-service/server.js:20940:      message: 'Failed to publish blog draft'
+runtime/orchestrator-service/server.js:20948:    assertPublishingMutationAllowed(projectName, 'publish', {
+runtime/orchestrator-service/server.js:20949:      status: 'published'
+runtime/orchestrator-service/server.js:20977:      status: backupData.status || 'publish'
+runtime/orchestrator-service/server.js:21016:const SCHEDULER_VALID_JOB_TYPES = Object.freeze(['publish', 'email', 'media', 'ads']);
+runtime/orchestrator-service/server.js:21076:  const publishPackage = payload.publish_package && typeof payload.publish_package === 'object'
+runtime/orchestrator-service/server.js:21077:    ? payload.publish_package
+runtime/orchestrator-service/server.js:21079:  const assets = Array.isArray(publishPackage.assets) ? publishPackage.assets : [];
+runtime/orchestrator-service/server.js:21085:      || publishPackage.campaign_id
+runtime/orchestrator-service/server.js:21912:      status: 'needs_review'
+runtime/orchestrator-service/server.js:21917:      status: 'needs_review',
+runtime/orchestrator-service/server.js:21942:      status: 'needs_review'
+runtime/orchestrator-service/server.js:21947:      status: 'needs_review',
+runtime/orchestrator-service/server.js:21972:      status: 'needs_review'
+runtime/orchestrator-service/server.js:21977:      status: 'needs_review',
+runtime/orchestrator-service/server.js:22002:      status: 'needs_review'
+runtime/orchestrator-service/server.js:22007:      status: 'needs_review',
+runtime/orchestrator-service/server.js:22032:      status: 'needs_review'
+runtime/orchestrator-service/server.js:22037:      status: 'needs_review',
+runtime/orchestrator-service/server.js:22139:    reviewProject,
+runtime/orchestrator-service/server.js:22140:    reviewProjectReadiness,
+runtime/orchestrator-service/server.js:22141:    reviewProjectSources,
+runtime/orchestrator-service/server.js:22142:    reviewProjectCanonicalParity,
+runtime/orchestrator-service/server.js:22158:    reviewCampaignFinalization,
+runtime/orchestrator-service/lib/insights/learning-engine.js:40:    item.published_at ||
+runtime/orchestrator-service/lib/insights/learning-engine.js:259:      title: 'Rewrite weak content before publishing more of the same',
+runtime/orchestrator-service/lib/insights/learning-engine.js:323:      domain: 'publishing',
+runtime/orchestrator-service/lib/insights/learning-engine.js:327:      action: 'Sync Facebook, Instagram, TikTok, and YouTube feeds so the system can compare hooks, formats, and publishing windows across channels.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:328:      reason: 'Cross-platform learning depends on post-level metrics, not just publishing logs.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:353:    publishing_improvements: filterDomain('publishing'),
+runtime/orchestrator-service/lib/insights/learning-engine.js:368:        prompt: `Review the latest learning patterns and recommendations for ${projectName}. Tell me the next highest-impact optimization across content, SEO, publishing, paid media, and website conversion.`
+runtime/orchestrator-service/lib/insights/learning-engine.js:388:        prompt: `Summarize the strongest reusable performance pattern in ${projectName}, including hook, format, channel, CTA, and publishing window.`
+runtime/orchestrator-service/lib/insights/ingestion-service.js:280:    published_at: asString(fields.published_at || fields.created_at || fields.timestamp),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:291:function aggregateSocialData(snapshotRecords = [], historyByIntegration = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:311:          published_at: item.created_at,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:327:          published_at: item.timestamp,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:344:          published_at: item.create_time,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:361:          published_at: item.published_at,
+runtime/orchestrator-service/lib/insights/ingestion-service.js:415:function aggregateWebsiteData(snapshotRecords = [], historyByIntegration = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:609:function aggregateSeoData(snapshotRecords = [], historyByIntegration = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:744:function aggregatePaidData(snapshotRecords = [], historyByIntegration = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:858:function aggregateMarketplaceData(snapshotRecords = [], historyByIntegration = {}) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1152:  const social = aggregateSocialData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1153:  const website = aggregateWebsiteData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1154:  const seo = aggregateSeoData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1155:  const paid = aggregatePaidData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1156:  const marketplace = aggregateMarketplaceData(snapshots, historyByIntegration);
+runtime/orchestrator-service/lib/integrations/providers/google.js:405:    writeScopes: ['publishing'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:436:        published_at: item.snippet?.publishedAt || '',
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:96:            onlineStorePreviewUrl
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:123:    url: node.onlineStorePreviewUrl
+runtime/orchestrator-service/lib/integrations/providers/meta.js:96:    permissionScope: 'Page insights and publishing access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:99:    writeScopes: ['publishing'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:114:  const posts = await graphGet(`${page.id}/published_posts`, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:171:    permissionScope: 'Instagram business insights and publishing access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:174:    writeScopes: ['publishing'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:243:    writeScopes: ['publishing'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:66:    writeScopes: ['publishing'],
+runtime/orchestrator-service/lib/integrations/storage.js:55: * Use this for every read of critical ops state (collections, governance, team).
+runtime/orchestrator-service/lib/integrations/health-manager.js:40:      action_required: 'investigate',
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:33:    publish: '/execute_publish_package',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:20:    if (job.type === 'publish') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:21:      const publishPackage = resolvePublishPackageForExecution(project, payload);
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:22:      const socialPayload = buildSocialExecutionPayload(publishPackage);
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:24:        execution_state: 'manual_publish_ready',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:44:        : payload.publish_package?.assets?.[0]?.fallback_prompt_pack;
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:55:        execution_state: 'ready_for_review',
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:65:        execution_state: 'ready_for_review',
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/provider-config.js:85:    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+runtime/orchestrator-service/lib/ai/provider-config.js:89:      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+runtime/orchestrator-service/lib/ops/backbone.js:18:// Any governance file that is missing policy_rules (or missing individual keys)
+runtime/orchestrator-service/lib/ops/backbone.js:21:  approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:22:  high_risk_claim_review_required: true,
+runtime/orchestrator-service/lib/ops/backbone.js:23:  brand_safety_review_required: true,
+runtime/orchestrator-service/lib/ops/backbone.js:26:  freeze_publishing: false
+runtime/orchestrator-service/lib/ops/backbone.js:38:  approvals: 300,
+runtime/orchestrator-service/lib/ops/backbone.js:49:    lifecycle: ['draft', 'review', 'ready', 'active', 'closed']
+runtime/orchestrator-service/lib/ops/backbone.js:52:    statuses: ['draft', 'in_review', 'approved', 'scheduled', 'published', 'archived'],
+runtime/orchestrator-service/lib/ops/backbone.js:53:    lifecycle: ['draft', 'review', 'approved', 'distribution', 'closed'],
+runtime/orchestrator-service/lib/ops/backbone.js:54:    approval_statuses: ['not_requested', 'pending', 'approved', 'rejected'],
+runtime/orchestrator-service/lib/ops/backbone.js:55:    publish_statuses: ['draft', 'scheduled', 'published', 'failed']
+runtime/orchestrator-service/lib/ops/backbone.js:59:    lifecycle: ['requested', 'prepared', 'running', 'review', 'closed'],
+runtime/orchestrator-service/lib/ops/backbone.js:60:    approval_states: ['not_requested', 'pending', 'approved', 'rejected']
+runtime/orchestrator-service/lib/ops/backbone.js:68:    intents: ['inspect', 'task', 'workflow', 'campaign', 'content', 'media', 'approval', 'recommendation']
+runtime/orchestrator-service/lib/ops/backbone.js:76:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:82:  approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:83:    statuses: ['pending', 'approved', 'rejected', 'changes_requested', 'escalated', 'overridden', 'cancelled'],
+runtime/orchestrator-service/lib/ops/backbone.js:84:    lifecycle: ['requested', 'reviewing', 'decided', 'escalated', 'closed']
+runtime/orchestrator-service/lib/ops/backbone.js:100:    categories: ['entity', 'workflow', 'approval', 'sync', 'publish', 'ai_routing', 'system']
+runtime/orchestrator-service/lib/ops/backbone.js:103:    statuses: ['draft', 'ready_for_review', 'manual_publish_ready', 'pending_execution', 'executed', 'failed'],
+runtime/orchestrator-service/lib/ops/backbone.js:104:    bridge_actions: ['execute_publish_package', 'execute_email_package', 'generate_media_from_prompt', 'build_ad_execution_package']
+runtime/orchestrator-service/lib/ops/backbone.js:114:    actions: ['plan_campaign', 'route_work', 'approve_strategy', 'request_research']
+runtime/orchestrator-service/lib/ops/backbone.js:121:    actions: ['draft_content', 'revise_copy', 'handoff_to_review', 'handoff_to_publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:135:    actions: ['create_video', 'review_video', 'handoff_video']
+runtime/orchestrator-service/lib/ops/backbone.js:138:    id: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:140:    routes: ['publishing', 'library', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:141:    service_domains: ['publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:142:    actions: ['schedule_publish', 'publish', 'return_for_changes']
+runtime/orchestrator-service/lib/ops/backbone.js:155:    service_domains: ['research', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:159:    id: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:161:    routes: ['governance', 'content-studio', 'media-studio', 'publishing'],
+runtime/orchestrator-service/lib/ops/backbone.js:162:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:163:    actions: ['review_claims', 'review_brand_safety', 'approve_release', 'escalate_risk']
+runtime/orchestrator-service/lib/ops/backbone.js:168:    routes: ['home', 'settings', 'integrations', 'governance', 'workflows'],
+runtime/orchestrator-service/lib/ops/backbone.js:169:    service_domains: ['governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:177:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:178:  'media-studio': ['designer', 'video_lead', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:179:  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:181:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:186:  library: ['designer', 'video_lead', 'publisher', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:194:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:202:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:203:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:205:    page_permissions: ['content-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:210:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:211:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:213:    page_permissions: ['media-studio', 'workflows', 'publishing']
+runtime/orchestrator-service/lib/ops/backbone.js:215:  publishing: {
+runtime/orchestrator-service/lib/ops/backbone.js:217:    owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:218:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:220:    route_target: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:221:    page_permissions: ['publishing', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:226:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:231:  governance: {
+runtime/orchestrator-service/lib/ops/backbone.js:233:    owner_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:234:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:236:    route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:237:    page_permissions: ['governance', 'settings']
+runtime/orchestrator-service/lib/ops/backbone.js:245:  publishing_job: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:247:  approval: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:248:  task: 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:252:  low: ['compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:253:  medium: ['compliance_reviewer', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:254:  high: ['compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:255:  critical: ['compliance_reviewer', 'admin']
+runtime/orchestrator-service/lib/ops/backbone.js:389:        page_permissions: ['workflows', 'governance'],
+runtime/orchestrator-service/lib/ops/backbone.js:391:        service_domains: ['campaign', 'content', 'media', 'publishing', 'research', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:412:        review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:515:  if (routeTarget === 'publishing') return 'publishing';
+runtime/orchestrator-service/lib/ops/backbone.js:517:  if (routeTarget === 'governance') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:542:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+runtime/orchestrator-service/lib/ops/backbone.js:547:    reviewer_display: roleDisplay(team, record.reviewer_role || domain.review_role)
+runtime/orchestrator-service/lib/ops/backbone.js:692:    preview_url: asString(source.preview_url || source.previewUrl),
+runtime/orchestrator-service/lib/ops/backbone.js:704:    .filter((item) => item.label || item.preview_url || item.file_path || item.outputs.length);
+runtime/orchestrator-service/lib/ops/backbone.js:707:function normalizePreviewHistoryEntry(input = {}, fallbackActor = 'mh-assistant') {
+runtime/orchestrator-service/lib/ops/backbone.js:709:  const previewLabel = asString(source.preview_label || source.label || source.title);
+runtime/orchestrator-service/lib/ops/backbone.js:711:  if (!previewLabel && !asString(source.preview_url || source.previewUrl)) {
+runtime/orchestrator-service/lib/ops/backbone.js:716:    id: asString(source.id) || createId('preview'),
+runtime/orchestrator-service/lib/ops/backbone.js:717:    preview_label: previewLabel || 'Preview',
+runtime/orchestrator-service/lib/ops/backbone.js:718:    preview_url: asString(source.preview_url || source.previewUrl),
+runtime/orchestrator-service/lib/ops/backbone.js:725:function appendPreviewHistory(current = [], additions = [], fallbackActor = 'mh-assistant', maxItems = 30) {
+runtime/orchestrator-service/lib/ops/backbone.js:733:    ...list.map((item) => normalizePreviewHistoryEntry(item, fallbackActor)).filter(Boolean),
+runtime/orchestrator-service/lib/ops/backbone.js:790:    approvalsPath: path.join(opsDir, 'approvals.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:794:    governancePath: path.join(opsDir, 'governance.json'),
+runtime/orchestrator-service/lib/ops/backbone.js:822:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:839:  ensureJsonFile(paths.approvalsPath, []);
+runtime/orchestrator-service/lib/ops/backbone.js:844:  ensureJsonFile(paths.governancePath, {
+runtime/orchestrator-service/lib/ops/backbone.js:845:    approval_required_actions: ['publish', 'launch', 'budget_change', 'integration_reconnect', 'execution_mode_change'],
+runtime/orchestrator-service/lib/ops/backbone.js:848:      semi_auto_requires_approval: true,
+runtime/orchestrator-service/lib/ops/backbone.js:853:      approval_before_publish: true,
+runtime/orchestrator-service/lib/ops/backbone.js:854:      high_risk_claim_review_required: true,
+runtime/orchestrator-service/lib/ops/backbone.js:855:      brand_safety_review_required: true,
+runtime/orchestrator-service/lib/ops/backbone.js:858:      freeze_publishing: false
+runtime/orchestrator-service/lib/ops/backbone.js:860:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:864:      publishing: 'Publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:865:      compliance: 'Compliance Reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:871:      approval_mode: 'Only high-risk',
+runtime/orchestrator-service/lib/ops/backbone.js:872:      claim_safety_mode: 'Strict evidence required',
+runtime/orchestrator-service/lib/ops/backbone.js:873:      approval_before_publish: true
+runtime/orchestrator-service/lib/ops/backbone.js:911:      'approvals',
+runtime/orchestrator-service/lib/ops/backbone.js:969:  if (value.includes('approval')) return 'approval';
+runtime/orchestrator-service/lib/ops/backbone.js:971:  if (value.includes('publish')) return 'publish';
+runtime/orchestrator-service/lib/ops/backbone.js:1182: * Normalizes a raw governance file object so that:
+runtime/orchestrator-service/lib/ops/backbone.js:1185: *  - freeze_publishing and approval_before_publish are always explicit booleans
+runtime/orchestrator-service/lib/ops/backbone.js:1204:    freeze_publishing: asBoolean(safeRules.freeze_publishing, DEFAULT_POLICY_RULES.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1205:    approval_before_publish: asBoolean(safeRules.approval_before_publish, DEFAULT_POLICY_RULES.approval_before_publish)
+runtime/orchestrator-service/lib/ops/backbone.js:1218:    raw = readJsonFileDurable(paths.governancePath);
+runtime/orchestrator-service/lib/ops/backbone.js:1221:    console.error(`[backbone] getGovernancePolicy: governance file corrupt for project ${projectName}: ${err.message}`);
+runtime/orchestrator-service/lib/ops/backbone.js:1244:    approval_owners: {
+runtime/orchestrator-service/lib/ops/backbone.js:1245:      ...asObject(current.approval_owners),
+runtime/orchestrator-service/lib/ops/backbone.js:1246:      ...asObject(sourcePatch.approval_owners)
+runtime/orchestrator-service/lib/ops/backbone.js:1258:  writeJsonFile(paths.governancePath, next);
+runtime/orchestrator-service/lib/ops/backbone.js:1262:    type: 'governance_policy_updated',
+runtime/orchestrator-service/lib/ops/backbone.js:1263:    entity_type: 'governance_policy',
+runtime/orchestrator-service/lib/ops/backbone.js:1284:    approval_id: asString(input.approval_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1323:  if (normalizedType === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1325:      asString(item.entity_type) === 'publishing_job' &&
+runtime/orchestrator-service/lib/ops/backbone.js:1333:function buildPolicyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1344:  if (asBoolean(governance.policy_rules?.freeze_publishing) && asString(record.entity_type) === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:1346:      code: 'publishing_frozen',
+runtime/orchestrator-service/lib/ops/backbone.js:1348:      message: 'Publishing is frozen by governance policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1354:      code: 'high_risk_claim',
+runtime/orchestrator-service/lib/ops/backbone.js:1356:      message: 'Potentially unsupported or regulated claim language detected.'
+runtime/orchestrator-service/lib/ops/backbone.js:1362:      code: 'brand_safety_review',
+runtime/orchestrator-service/lib/ops/backbone.js:1364:      message: 'Brand safety review recommended before release.'
+runtime/orchestrator-service/lib/ops/backbone.js:1381:    { regex: /guarantee|guaranteed/i, label: 'Guarantee claim language detected', severity: 'high' },
+runtime/orchestrator-service/lib/ops/backbone.js:1382:    { regex: /clinically|dermatologist|doctor recommended/i, label: 'Clinical authority claim detected', severity: 'high' },
+runtime/orchestrator-service/lib/ops/backbone.js:1383:    { regex: /regrow|cure|eliminate hair loss/i, label: 'Medical efficacy claim detected', severity: 'critical' },
+runtime/orchestrator-service/lib/ops/backbone.js:1384:    { regex: /instant|overnight|in \d+ days/i, label: 'Unverifiable speed/result claim detected', severity: 'medium' }
+runtime/orchestrator-service/lib/ops/backbone.js:1390:      id: createId('claim'),
+runtime/orchestrator-service/lib/ops/backbone.js:1396:function buildBrandSafetyFlags(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1422:  if (asString(record.entity_type) === 'media_job' && asBoolean(governance.policy_rules?.brand_safety_review_required, true)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1423:    if (!asString(record.approval_state) || asString(record.approval_state) === 'not_requested') {
+runtime/orchestrator-service/lib/ops/backbone.js:1427:        message: 'Media asset has not completed brand safety review.'
+runtime/orchestrator-service/lib/ops/backbone.js:1435:function buildPublishGuardrails(record = {}, governance = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:1444:  if (!asString(record.scheduled_for) && status !== 'published') {
+runtime/orchestrator-service/lib/ops/backbone.js:1452:  if (asBoolean(governance.policy_rules?.approval_before_publish, true) && !['approved', 'ready', 'published'].includes(status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1456:      message: 'Publishing item is not marked approved/ready under current policy.'
+runtime/orchestrator-service/lib/ops/backbone.js:1460:  if (asBoolean(governance.policy_rules?.freeze_publishing)) {
+runtime/orchestrator-service/lib/ops/backbone.js:1473:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1475:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:1481:  const pendingApprovals = approvals.filter((item) => asString(item.status) === 'pending');
+runtime/orchestrator-service/lib/ops/backbone.js:1482:  const escalationApprovals = approvals.filter((item) => asString(item.status) === 'escalated');
+runtime/orchestrator-service/lib/ops/backbone.js:1483:  const activeOverrides = asArray(governance.active_overrides).filter((item) => asString(item.status) === 'active');
+runtime/orchestrator-service/lib/ops/backbone.js:1485:  const approvalQueue = pendingApprovals.map((approval) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1486:    ...approval,
+runtime/orchestrator-service/lib/ops/backbone.js:1487:    entity_snapshot: buildEntitySnapshot(projectName, approval.entity_type, approval.entity_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1488:    policy_flags: buildPolicyFlags(approval, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1491:  const claimReview = [
+runtime/orchestrator-service/lib/ops/backbone.js:1493:    ...approvals.filter((item) => ['pending', 'changes_requested', 'escalated'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:1499:      title: asString(item.title) || 'Claim review item',
+runtime/orchestrator-service/lib/ops/backbone.js:1500:      status: asString(item.status || item.approval_status) || 'open',
+runtime/orchestrator-service/lib/ops/backbone.js:1501:      claim_flags: buildClaimFlags(item)
+runtime/orchestrator-service/lib/ops/backbone.js:1503:    .filter((item) => item.claim_flags.length);
+runtime/orchestrator-service/lib/ops/backbone.js:1511:      status: asString(item.status || item.approval_state),
+runtime/orchestrator-service/lib/ops/backbone.js:1512:      brand_safety_flags: buildBrandSafetyFlags(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1516:  const publishGuardrails = queueItems
+runtime/orchestrator-service/lib/ops/backbone.js:1517:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+runtime/orchestrator-service/lib/ops/backbone.js:1520:      publish_guardrails: buildPublishGuardrails(item, governance)
+runtime/orchestrator-service/lib/ops/backbone.js:1522:    .filter((item) => item.publish_guardrails.length || ['scheduled', 'ready', 'failed'].includes(asString(item.status)));
+runtime/orchestrator-service/lib/ops/backbone.js:1525:    ...approvalQueue.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1528:        source: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:1536:    ...claimReview.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1537:      item.claim_flags.map((flag) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1539:        source: 'claim_review',
+runtime/orchestrator-service/lib/ops/backbone.js:1558:    ...publishGuardrails.flatMap((item) =>
+runtime/orchestrator-service/lib/ops/backbone.js:1559:      item.publish_guardrails.map((flag) => ({
+runtime/orchestrator-service/lib/ops/backbone.js:1561:        source: 'publish_guardrails',
+runtime/orchestrator-service/lib/ops/backbone.js:1562:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:1577:      asString(item.source_type) === 'approval' || asString(item.route_target) === 'governance'
+runtime/orchestrator-service/lib/ops/backbone.js:1586:    policy: governance,
+runtime/orchestrator-service/lib/ops/backbone.js:1587:    review_model: {
+runtime/orchestrator-service/lib/ops/backbone.js:1592:        publishing: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:1593:        compliance: roleDisplay(team, 'compliance_reviewer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1596:      escalation_chain: governance.escalation_chain || ESCALATION_CHAINS
+runtime/orchestrator-service/lib/ops/backbone.js:1599:      approval_queue: approvalQueue,
+runtime/orchestrator-service/lib/ops/backbone.js:1601:      claim_review: claimReview,
+runtime/orchestrator-service/lib/ops/backbone.js:1602:      brand_safety_review: brandSafetyReview,
+runtime/orchestrator-service/lib/ops/backbone.js:1603:      publish_guardrails: publishGuardrails,
+runtime/orchestrator-service/lib/ops/backbone.js:1607:        freeze_publishing: asBoolean(governance.policy_rules?.freeze_publishing),
+runtime/orchestrator-service/lib/ops/backbone.js:1608:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1616:      publishing_jobs: queueItems.filter((item) => asString(item.entity_type) === 'publishing_job').length,
+runtime/orchestrator-service/lib/ops/backbone.js:1617:      pending_approvals: pendingApprovals.length
+runtime/orchestrator-service/lib/ops/backbone.js:1628:    status: item.publish_status || item.approval_status || item.status || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1630:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1631:    priority: item.approval_status === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1637:      publish_status: item.publish_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1638:      approval_status: item.approval_status,
+runtime/orchestrator-service/lib/ops/backbone.js:1641:      review_role: item.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1653:    status: job.approval_state === 'pending' ? 'pending_approval' : (job.status || 'requested'),
+runtime/orchestrator-service/lib/ops/backbone.js:1655:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1656:    priority: job.approval_state === 'pending' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:1664:      publishing_job_id: job.publishing_job_id,
+runtime/orchestrator-service/lib/ops/backbone.js:1665:      approval_state: job.approval_state,
+runtime/orchestrator-service/lib/ops/backbone.js:1667:      review_role: job.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:1703:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1710:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1771:  const status = asString(input.status || current.status || input.publish_status) || 'draft';
+runtime/orchestrator-service/lib/ops/backbone.js:1773:  const approvalStatus = asString(input.approval_status || current.approval_status) || 'not_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:1774:  const publishStatus = asString(input.publish_status || current.publish_status) || 'draft';
+runtime/orchestrator-service/lib/ops/backbone.js:1827:    approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1830:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1833:    destination_type: asString(input.destination_type || current.destination_type || 'publishing'),
+runtime/orchestrator-service/lib/ops/backbone.js:1835:    publishing_destination: asString(input.publishing_destination || current.publishing_destination || input.destination),
+runtime/orchestrator-service/lib/ops/backbone.js:1836:    publish_status: publishStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1839:      publishStatus === 'published' ? 'distribution' : approvalStatus === 'approved' ? 'approved' : 'draft'
+runtime/orchestrator-service/lib/ops/backbone.js:1842:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1848:    queue_status: asString(input.queue_status || current.queue_status || publishStatus || approvalStatus || status) || 'draft',
+runtime/orchestrator-service/lib/ops/backbone.js:1857:        approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1858:        publish_status: publishStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1877:      approval_status: approvalStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1878:      publish_status: publishStatus,
+runtime/orchestrator-service/lib/ops/backbone.js:1935:        preview_url: asString(input.new_output_version?.preview_url || input.preview_url),
+runtime/orchestrator-service/lib/ops/backbone.js:1942:  const previewHistory = input.preview_history !== undefined
+runtime/orchestrator-service/lib/ops/backbone.js:1943:    ? asArray(input.preview_history)
+runtime/orchestrator-service/lib/ops/backbone.js:1944:    : appendPreviewHistory(current.preview_history, input.preview_entry, input.actor || input.owner);
+runtime/orchestrator-service/lib/ops/backbone.js:1964:    approval_state: asString(input.approval_state || current.approval_state) || 'not_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:1966:    approval_notes: normalizeNotes(input.approval_notes || current.approval_notes),
+runtime/orchestrator-service/lib/ops/backbone.js:1969:    publishing_job_id: asString(input.publishing_job_id || current.publishing_job_id),
+runtime/orchestrator-service/lib/ops/backbone.js:1972:    review_role: normalizeRoleKey(input.review_role || current.review_role || routing.reviewer_role, routing.reviewer_role),
+runtime/orchestrator-service/lib/ops/backbone.js:1976:    linked_approvals: normalizeStringList(input.linked_approvals || current.linked_approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:1979:    preview_history: previewHistory,
+runtime/orchestrator-service/lib/ops/backbone.js:2465:      review_role: routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2466:      review_label: roleDisplay(team, routing.reviewer_role)
+runtime/orchestrator-service/lib/ops/backbone.js:2557:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2558:  const governance = getGovernancePolicy(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2568:  const title = asString(input.title) || `${targetEntityType} approval`;
+runtime/orchestrator-service/lib/ops/backbone.js:2576:  const reviewerRole = normalizeRoleKey(
+runtime/orchestrator-service/lib/ops/backbone.js:2577:    input.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2578:      current.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:2580:      input.reviewer ||
+runtime/orchestrator-service/lib/ops/backbone.js:2581:      routing.reviewer_role,
+runtime/orchestrator-service/lib/ops/backbone.js:2582:    routing.reviewer_role
+runtime/orchestrator-service/lib/ops/backbone.js:2587:  const approval = {
+runtime/orchestrator-service/lib/ops/backbone.js:2588:    id: asString(current.id) || asString(input.id) || createId('approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:2593:    reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2594:    reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2596:    requested_for: asString(input.requested_for || current.requested_for || input.reviewer) || roleDisplay(team, reviewerRole),
+runtime/orchestrator-service/lib/ops/backbone.js:2603:    approval_type: asString(input.approval_type || current.approval_type) || targetEntityType,
+runtime/orchestrator-service/lib/ops/backbone.js:2604:    requested_action: asString(input.requested_action || current.requested_action) || 'review_and_decide',
+runtime/orchestrator-service/lib/ops/backbone.js:2606:    route_target: asString(input.route_target || current.route_target || entityLink?.route || routing.route_target || 'governance'),
+runtime/orchestrator-service/lib/ops/backbone.js:2612:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2613:      reviewer_label: roleDisplay(team, reviewerRole)
+runtime/orchestrator-service/lib/ops/backbone.js:2616:    policy_flags: asArray(input.policy_flags || current.policy_flags || buildPolicyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2617:    claim_flags: asArray(input.claim_flags || current.claim_flags || buildClaimFlags(input)),
+runtime/orchestrator-service/lib/ops/backbone.js:2618:    brand_safety_flags: asArray(input.brand_safety_flags || current.brand_safety_flags || buildBrandSafetyFlags(input, governance)),
+runtime/orchestrator-service/lib/ops/backbone.js:2619:    publish_guardrails: asArray(input.publish_guardrails || current.publish_guardrails || []),
+runtime/orchestrator-service/lib/ops/backbone.js:2631:      current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2637:        reviewer_role: reviewerRole
+runtime/orchestrator-service/lib/ops/backbone.js:2642:  writeCollection(paths.approvalsPath, upsertById(items, approval), MAX_ITEMS.approvals);
+runtime/orchestrator-service/lib/ops/backbone.js:2645:    type: current.id ? 'approval_updated' : 'approval_requested',
+runtime/orchestrator-service/lib/ops/backbone.js:2646:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2647:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2648:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2649:    summary: approval.summary || 'A new approval was requested.',
+runtime/orchestrator-service/lib/ops/backbone.js:2650:    actor: approval.requested_by,
+runtime/orchestrator-service/lib/ops/backbone.js:2652:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2653:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2654:      risk_level: approval.risk_level,
+runtime/orchestrator-service/lib/ops/backbone.js:2655:      approval_type: approval.approval_type
+runtime/orchestrator-service/lib/ops/backbone.js:2659:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2660:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2661:    title: `${approval.title} needs approval`,
+runtime/orchestrator-service/lib/ops/backbone.js:2662:    message: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2663:    body: approval.summary || 'Review and decide on the requested operation.',
+runtime/orchestrator-service/lib/ops/backbone.js:2664:    severity: approval.risk_level === 'high' || approval.risk_level === 'critical' ? 'warning' : 'info',
+runtime/orchestrator-service/lib/ops/backbone.js:2666:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2667:      entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2668:      route: inferRouteTarget('approval', approval)
+runtime/orchestrator-service/lib/ops/backbone.js:2670:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2671:    entity_id: approval.id
+runtime/orchestrator-service/lib/ops/backbone.js:2675:    queue_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2676:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2677:    entity_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2678:    title: approval.title,
+runtime/orchestrator-service/lib/ops/backbone.js:2679:    status: approval.status,
+runtime/orchestrator-service/lib/ops/backbone.js:2680:    assignee: approval.reviewer,
+runtime/orchestrator-service/lib/ops/backbone.js:2681:    role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2682:    priority: approval.risk_level === 'critical' ? 'critical' : approval.risk_level === 'high' ? 'high' : 'normal',
+runtime/orchestrator-service/lib/ops/backbone.js:2683:    route: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2685:      entity_type: approval.entity_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2686:      entity_id: approval.entity_id,
+runtime/orchestrator-service/lib/ops/backbone.js:2687:      approval_type: approval.approval_type,
+runtime/orchestrator-service/lib/ops/backbone.js:2688:      requested_action: approval.requested_action,
+runtime/orchestrator-service/lib/ops/backbone.js:2689:      reviewer_role: reviewerRole,
+runtime/orchestrator-service/lib/ops/backbone.js:2690:      escalation_chain: approval.escalation_chain
+runtime/orchestrator-service/lib/ops/backbone.js:2694:  updateLinkedEntity(paths.project, approval.entity_type, approval.entity_id, (record) => {
+runtime/orchestrator-service/lib/ops/backbone.js:2696:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2700:      approval.entity_type === 'media_job'
+runtime/orchestrator-service/lib/ops/backbone.js:2706:      linked_approvals: [...new Set([approval.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2708:      history: appendHistory(record, 'approval_linked', input.actor || input.requested_by, {
+runtime/orchestrator-service/lib/ops/backbone.js:2709:        approval_id: approval.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2710:        status: approval.status
+runtime/orchestrator-service/lib/ops/backbone.js:2714:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2715:      nextRecord.approval_status = nextApprovalStatus;
+runtime/orchestrator-service/lib/ops/backbone.js:2716:      nextRecord.status = 'in_review';
+runtime/orchestrator-service/lib/ops/backbone.js:2717:      nextRecord.queue_status = 'pending_approval';
+runtime/orchestrator-service/lib/ops/backbone.js:2720:    if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2721:      nextRecord.approval_state = nextApprovalState;
+runtime/orchestrator-service/lib/ops/backbone.js:2724:    if (approval.entity_type === 'content_item') {
+runtime/orchestrator-service/lib/ops/backbone.js:2726:    } else if (approval.entity_type === 'media_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2733:  return approval;
+runtime/orchestrator-service/lib/ops/backbone.js:2738:  return listItems(readCollection(paths.approvalsPath), options);
+runtime/orchestrator-service/lib/ops/backbone.js:2741:function decideApproval(projectName, approvalId, input = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:2743:  const items = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:2745:  const targetId = asString(approvalId);
+runtime/orchestrator-service/lib/ops/backbone.js:2748:  if (!['approved', 'rejected', 'changes_requested', 'escalated', 'overridden', 'cancelled'].includes(decision)) {
+runtime/orchestrator-service/lib/ops/backbone.js:2749:    throw new Error('Invalid approval decision');
+runtime/orchestrator-service/lib/ops/backbone.js:2765:      escalationChain.find((role) => normalizeRoleKey(role) !== normalizeRoleKey(current.reviewer_role)) ||
+runtime/orchestrator-service/lib/ops/backbone.js:2786:      `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2797:  writeJsonFile(paths.approvalsPath, items);
+runtime/orchestrator-service/lib/ops/backbone.js:2800:    type: `approval_${decision}`,
+runtime/orchestrator-service/lib/ops/backbone.js:2801:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2813:    category: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2814:    type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2818:    severity: decision === 'approved' ? 'success' : decision === 'escalated' ? 'critical' : 'warning',
+runtime/orchestrator-service/lib/ops/backbone.js:2820:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2822:      route: inferRouteTarget('approval', next)
+runtime/orchestrator-service/lib/ops/backbone.js:2824:    entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2828:  updateQueueEntity(paths.project, 'approval', next.id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2842:      linked_approvals: [...new Set([next.id, ...normalizeStringList(record.linked_approvals)])],
+runtime/orchestrator-service/lib/ops/backbone.js:2844:      history: appendHistory(record, `linked_approval_${decision}`, input.actor, {
+runtime/orchestrator-service/lib/ops/backbone.js:2845:        approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2851:      nextRecord.approval_status =
+runtime/orchestrator-service/lib/ops/backbone.js:2852:        decision === 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2853:          ? 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2854:          : decision === 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2855:            ? 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2857:              ? 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2859:                ? 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2861:      nextRecord.status = ['approved', 'overridden'].includes(decision) ? 'approved' : 'draft';
+runtime/orchestrator-service/lib/ops/backbone.js:2862:      nextRecord.queue_status = ['approved', 'overridden'].includes(decision) ? 'approved' : decision === 'escalated' ? 'escalated' : 'changes_requested';
+runtime/orchestrator-service/lib/ops/backbone.js:2865:      nextRecord.approval_state =
+runtime/orchestrator-service/lib/ops/backbone.js:2866:        decision === 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2867:          ? 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2868:          : decision === 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2869:            ? 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2871:              ? 'rejected'
+runtime/orchestrator-service/lib/ops/backbone.js:2873:                ? 'approved'
+runtime/orchestrator-service/lib/ops/backbone.js:2875:      if (decision === 'approved' && !asString(nextRecord.status)) {
+runtime/orchestrator-service/lib/ops/backbone.js:2884:  if (next.entity_type === 'publishing_job') {
+runtime/orchestrator-service/lib/ops/backbone.js:2885:    updateQueueEntity(paths.project, 'publishing_job', next.entity_id, {
+runtime/orchestrator-service/lib/ops/backbone.js:2887:        decision === 'approved' || decision === 'overridden'
+runtime/orchestrator-service/lib/ops/backbone.js:2905:      service_domain: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2906:      route_target: 'governance',
+runtime/orchestrator-service/lib/ops/backbone.js:2907:      source_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:2919:      approval_id: next.id,
+runtime/orchestrator-service/lib/ops/backbone.js:2957:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+runtime/orchestrator-service/lib/ops/backbone.js:3053:        nextRecord.publish_status =
+runtime/orchestrator-service/lib/ops/backbone.js:3054:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3056:            : nextRecord.publish_status;
+runtime/orchestrator-service/lib/ops/backbone.js:3058:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3064:          handoff.destination_page === 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3155:    queue_type: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3156:    entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3162:    assignee: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:3163:    role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3164:    route: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3171:      service_domain: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3172:      owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3173:      review_role: 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/backbone.js:3177:  if (status === 'ready' || status === 'ready_for_manual_publish' || status === 'ready_for_manual_send') {
+runtime/orchestrator-service/lib/ops/backbone.js:3179:      category: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3180:      type: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3182:      message: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3183:      body: 'The publishing item is waiting for operator approval or handoff.',
+runtime/orchestrator-service/lib/ops/backbone.js:3186:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3188:        route: 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3190:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3195:  if (status === 'published') {
+runtime/orchestrator-service/lib/ops/backbone.js:3197:      category: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3198:      type: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3199:      title: `${queueItem.title} published`,
+runtime/orchestrator-service/lib/ops/backbone.js:3204:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3206:        route: 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3208:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3215:      category: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3216:      type: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3222:        entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3224:        route: 'publishing'
+runtime/orchestrator-service/lib/ops/backbone.js:3226:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3232:    category: 'publish',
+runtime/orchestrator-service/lib/ops/backbone.js:3233:    type: 'publishing_job_synced',
+runtime/orchestrator-service/lib/ops/backbone.js:3234:    entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3272:      item.reviewer_role ||
+runtime/orchestrator-service/lib/ops/backbone.js:3290:    if (!['completed', 'published', 'closed', 'archived', 'cancelled'].includes(asString(item.status))) {
+runtime/orchestrator-service/lib/ops/backbone.js:3320:  if (['ready', 'scheduled', 'approved'].includes(normalized)) return 2;
+runtime/orchestrator-service/lib/ops/backbone.js:3321:  if (['completed', 'published', 'read', 'archived', 'cancelled', 'closed'].includes(normalized)) return 4;
+runtime/orchestrator-service/lib/ops/backbone.js:3370:  if (normalizedType === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/backbone.js:3374:  if (normalizedType === 'publishing_job') return 'publishing';
+runtime/orchestrator-service/lib/ops/backbone.js:3522:    approval: normalizedQueue.filter((item) => item.queue_type === 'approval'),
+runtime/orchestrator-service/lib/ops/backbone.js:3523:    publishing: normalizedQueue.filter((item) => item.queue_type === 'publishing'),
+runtime/orchestrator-service/lib/ops/backbone.js:3544:    active_count: items.filter((item) => !['completed', 'published', 'read', 'archived', 'closed', 'cancelled'].includes(item.status)).length,
+runtime/orchestrator-service/lib/ops/backbone.js:3548:      active: asArray(groupedItems).filter((item) => !['completed', 'published', 'closed', 'cancelled'].includes(asString(item.status))).length
+runtime/orchestrator-service/lib/ops/backbone.js:3559:    approval_queue: queueGroups.approval,
+runtime/orchestrator-service/lib/ops/backbone.js:3560:    publishing_queue: queueGroups.publishing,
+runtime/orchestrator-service/lib/ops/backbone.js:3595:  const publishingJobs = asArray(queueItems)
+runtime/orchestrator-service/lib/ops/backbone.js:3596:    .filter((item) => asString(item.entity_type) === 'publishing_job')
+runtime/orchestrator-service/lib/ops/backbone.js:3599:      kind: 'publishing',
+runtime/orchestrator-service/lib/ops/backbone.js:3600:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3604:      route: inferRouteTarget('publishing_job', item),
+runtime/orchestrator-service/lib/ops/backbone.js:3612:  return [...workflowJobs, ...mediaJobItems, ...publishingJobs]
+runtime/orchestrator-service/lib/ops/backbone.js:3623:  const completedJobs = items.filter((item) => ['completed', 'published'].includes(asString(item.status)));
+runtime/orchestrator-service/lib/ops/backbone.js:3627:    .filter((item) => ['workflow', 'publish', 'sync', 'system'].includes(asString(item.category)) || ['workflow_run', 'publishing_job', 'media_job'].includes(asString(item.entity_type)))
+runtime/orchestrator-service/lib/ops/backbone.js:3676:  approvals = [],
+runtime/orchestrator-service/lib/ops/backbone.js:3679:  governanceSummary = {},
+runtime/orchestrator-service/lib/ops/backbone.js:3701:  const approvalPendingAlerts = asArray(approvals)
+runtime/orchestrator-service/lib/ops/backbone.js:3704:      id: `approval-pending-${item.id}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3706:      message: asString(item.summary) || 'Approval requires review.',
+runtime/orchestrator-service/lib/ops/backbone.js:3708:      source: 'approval_pending',
+runtime/orchestrator-service/lib/ops/backbone.js:3709:      entity_type: 'approval',
+runtime/orchestrator-service/lib/ops/backbone.js:3714:  const publishAlerts = asArray(queueItems)
+runtime/orchestrator-service/lib/ops/backbone.js:3715:    .filter((item) => asString(item.entity_type) === 'publishing_job' && ['ready', 'published', 'failed'].includes(asString(item.status)))
+runtime/orchestrator-service/lib/ops/backbone.js:3717:      id: `publishing-${item.entity_id}-${item.status}`,
+runtime/orchestrator-service/lib/ops/backbone.js:3722:          : asString(item.status) === 'published'
+runtime/orchestrator-service/lib/ops/backbone.js:3724:            : 'Publishing item is waiting for approval or release.',
+runtime/orchestrator-service/lib/ops/backbone.js:3728:          : asString(item.status) === 'published'
+runtime/orchestrator-service/lib/ops/backbone.js:3731:      source: 'publish',
+runtime/orchestrator-service/lib/ops/backbone.js:3732:      entity_type: 'publishing_job',
+runtime/orchestrator-service/lib/ops/backbone.js:3756:  const claimRiskAlerts = [
+runtime/orchestrator-service/lib/ops/backbone.js:3757:    ...asArray(governanceSummary?.sections?.claim_review)
+runtime/orchestrator-service/lib/ops/backbone.js:3758:      .flatMap((item) => asArray(item.claim_flags).map((flag) => buildNotificationAlert({
+runtime/orchestrator-service/lib/ops/backbone.js:3763:        source: 'claim_risk',
+runtime/orchestrator-service/lib/ops/backbone.js:3767:    ...asArray(governanceSummary?.sections?.policy_violations)
+runtime/orchestrator-service/lib/ops/backbone.js:3768:      .filter((item) => asString(item.source) === 'claim_review')
+runtime/orchestrator-service/lib/ops/backbone.js:3774:        source: 'claim_risk',
+runtime/orchestrator-service/lib/ops/backbone.js:3799:    ...approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3800:    ...publishAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3802:    ...claimRiskAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3816:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3817:    publish_alerts: publishAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3819:    claim_risk_alerts: claimRiskAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3828:  const governance = asObject(readJsonFile(paths.governancePath, {}));
+runtime/orchestrator-service/lib/ops/backbone.js:3839:  const approvals = readCollection(paths.approvalsPath);
+runtime/orchestrator-service/lib/ops/backbone.js:3844:  const governanceSummary = buildGovernanceSummary(paths.project, {
+runtime/orchestrator-service/lib/ops/backbone.js:3849:  const approvalLimit = Number(options.approvalLimit || 8) || 8;
+runtime/orchestrator-service/lib/ops/backbone.js:3862:    ...approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3870:    review_role: domain.review_role,
+runtime/orchestrator-service/lib/ops/backbone.js:3871:    review_label: roleDisplay(team, domain.review_role),
+runtime/orchestrator-service/lib/ops/backbone.js:3884:    approvals,
+runtime/orchestrator-service/lib/ops/backbone.js:3887:    governanceSummary,
+runtime/orchestrator-service/lib/ops/backbone.js:3901:    governance,
+runtime/orchestrator-service/lib/ops/backbone.js:3959:      pending_approval_count: contentItems.filter((item) => asString(item.approval_status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4001:    approvals: {
+runtime/orchestrator-service/lib/ops/backbone.js:4002:      total: approvals.length,
+runtime/orchestrator-service/lib/ops/backbone.js:4003:      pending_count: approvals.filter((item) => asString(item.status) === 'pending').length,
+runtime/orchestrator-service/lib/ops/backbone.js:4004:      by_reviewer_role: summarizeOwnershipVisibility(team, approvals),
+runtime/orchestrator-service/lib/ops/backbone.js:4005:      items: approvals.slice(0, approvalLimit)
+runtime/orchestrator-service/lib/ops/backbone.js:4009:      active_count: queueItems.filter((item) => !['published', 'completed', 'closed'].includes(asString(item.status))).length,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  publisher: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  compliance_reviewer: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:177:// Backward-compatible alias — now resolves publishing/output language
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:215:        : specialistId === 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:216:          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:218:            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:227:    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:233:    'If publishable content uses a different output language, do not make the entire answer that output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:234:    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:239:      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:240:      : 'Generate publishable content in the same language as your conversation.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:242:      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:244:    'If the user explicitly requests a different output language, use that language for publishable content instead.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:255:    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:258:    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:259:    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:260:    'Do not claim approvals were granted.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:261:    'Do not claim operations were run.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:262:    'Output must be review-ready.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:296:    publisher: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:298:      "Focus on publishing readiness, schedule review, channel fit, final packaging, captions, and handoff preparation.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:299:      "When asked about posting or publishing, prepare safe publish-ready guidance without claiming anything was published."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:311:    compliance: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:313:      "Focus on approval safety, claims review, legal/compliance risk, disclaimers, and governance boundaries.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:314:      "When asked to approve or publish, do not approve automatically; prepare review guidance only."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:323:      "Focus on inbox review, reply drafts, customer service, SLA thinking, escalation paths, and support tone.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:341:    "Be conversational, helpful, and safe. Prepare work only when requested; do not claim backend actions were executed."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:383:    '- If publishable content uses a different output language, put only that publishable section in the output language under a clear label.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:384:    '- MANDATORY FORMAT when conversation language differs from publishable output language: first write one short opening sentence in the conversation language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:385:    '- Then write a section titled exactly: Publishable content — {outputLanguage}: and put the publishable copy there only.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:386:    '- Then write a final section titled Next step in the conversation language, not the publishable output language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:388:    '- Do not make the whole answer the publishable output language unless the user wrote in that language.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:393:    '- You may suggest another specialist or page, but do not claim that anything was transferred automatically.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:399:      ? `When producing publishable content, write the publishable content in ${outputLanguage}.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:400:      : 'Use the conversation language for publishable content unless the user asks otherwise.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:404:    '- Do not claim that publishing, approval, deletion, sync, CRM update, customer reply, workflow run, export, task creation, handoff creation, or backend action happened.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:543:  if (intent === 'approval') return 'governance';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:602:      pattern: /\b(task plan|workflow|handoff|approval|approvals|timeline|execution plan|operator|owners?|assign|todo|follow up|route)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:630:    intent = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:631:    actionType = 'approval';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:720:        approved_assets: asArray(item.approved_assets).slice(0, 5),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:723:      approved_assets: assetCategories
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:725:        .flatMap((item) => asArray(item.approved_assets).map((assetId) => `${asString(item.label || item.asset_type)}: ${assetId}`))
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:844:    ['content-studio', 'media-studio', 'publishing', 'ads-manager'],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:949:        normalizeRouteSuggestion('publishing', 'Schedule approved launch content.'),
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:967:  const taskBlock = ['workflow', 'task', 'approval'].includes(classified.actionType)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:974:        'Create approval only if execution changes publishing, spend, or sensitive settings.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1044:      `Use tasks or approvals if human follow-through is required.`
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1210:        if (classified.actionType === 'approval') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1211:          const approval = createApproval(projectName, {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1212:            title: `${response.title} approval`,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1219:          linkedEntities.push({ entity_type: 'approval', entity_id: approval.id, route: 'governance', label: approval.title });
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1457:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1458:            published: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1634:            created_approval: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1635:            published: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1667:                'Create task/workflow/handoff manually only if explicitly approved.'
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:13:  publishing: {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:15:    canonical: 'publishing'
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:47:    canonical: 'publishing/results'
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:49:      publishing_read_canonical_first: parseBooleanFlag(
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:111:      publishing: 'publishing_read_canonical_first',
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:258:      'publishing',
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:22:      requires_approval: Boolean(input.workflow?.requires_approval || false),
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:23:      approval_state: String(input.workflow?.approval_state || 'not_required')
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:67:      'Customer Center read model is preview-first and read-only.',
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:96:    last_message_preview: truncate(lastMessage.body || lastMessage.message || entry.last_message_preview || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:101:    privacy_flags: ['customer_identity_masked', 'message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:141:    body_preview: truncate(message.body || message.message || ''),
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:146:    privacy_flags: ['message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:185:    privacy_flags: ['customer_identity_masked', 'message_preview_truncated']
+runtime/orchestrator-service/lib/customer-operations/README.md:20:- Reuse governance/escalation systems.
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:19:  const avoidText = asText(plan.avoid || plan.compliance_avoid);
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:56:      reason: 'A publishing-ready asset needs a CTA.'
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:60:      passed: includesAny(prompt + ' ' + avoidText, ['avoid', 'compliance', 'medical claims', 'brand-safe']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:77:    status: score >= 85 ? 'ready' : score >= 65 ? 'needs_review' : 'weak',
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:73:    compliance_avoid: [
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:98:    `Avoid: ${brief.compliance_avoid.join(', ')}`
+runtime/orchestrator-service/lib/media/native/knowledge/brand-voice-audio-guide.json:12:    "clarity": "avoid long sentences and unclear claims",
+runtime/orchestrator-service/lib/media/native/knowledge/brand-voice-audio-guide.json:18:    "overhyped claims",
+runtime/orchestrator-service/lib/media/native/knowledge/product-visual-rules.json:9:    "compliance": "Do not imply medical treatment, guaranteed results, or unverified certification claims."
+runtime/orchestrator-service/lib/media/native/knowledge/platform-video-rules.json:26:      "notes": "Avoid unsupported claims and distracting backgrounds."
+runtime/orchestrator-service/lib/media/native/knowledge/brand-video-style-guide.json:15:    "medical claims",
+runtime/orchestrator-service/lib/media/native/execution/native-runtime-executor.js:91:        preview: fakeOutput
+runtime/orchestrator-service/lib/media/provider-layer.js:165:        `Objective: ${firstText(payload.objective, 'Create publishable media')}`,
+runtime/orchestrator-service/lib/media/provider-layer.js:199:      systemPrompt: 'You are a strict brand and publishing safety reviewer. Return valid JSON only.',
+runtime/orchestrator-service/lib/media/provider-layer.js:393:        'Return JSON with keys: image_prompt, video_brief, voice_script, channel_notes, publishing_notes.',
+runtime/orchestrator-service/lib/media/provider-layer.js:421:        publishing_notes: asString(parsed.publishing_notes)

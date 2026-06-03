@@ -1,0 +1,361 @@
+    );
+
+    return res.json(result);
+  } catch (error) {
+    logCriticalFailure('integration_action', req, error, {
+      project: req.params.project,
+      integrationId: req.params.integrationId,
+      integrationAction: actionType
+    });
+    return res.status(getIntegrationErrorHttpStatus(error)).json({
+      error: error.message || 'Failed to update integration'
+    });
+  }
+}
+
+
+const customerOperationsRuntime =
+  createCustomerOperationsRuntime();
+
+app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+
+function handleGetNativeMediaProviders(req, res) {
+  try {
+    const mediaType = String(req.query?.media_type || '').trim();
+    const providers = mediaType
+      ? listProviderModelsByMediaType(mediaType)
+      : listProviderModels();
+
+    return res.json({
+      project: req.params.project,
+      providers,
+      count: providers.length
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to list native media providers',
+      message: error.message
+    });
+  }
+}
+
+function handleGetNativeMediaProviderReadiness(req, res) {
+  try {
+    return res.json({
+      project: req.params.project,
+      readiness: getProviderReadiness(),
+      capabilities: getLocalRenderingCapabilities()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Failed to load native media provider readiness',
+      message: error.message
+    });
+  }
+}
+
+
+
+function handleCustomerOperationsHealth(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.health()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_health_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsReadiness(req, res) {
+  try {
+    return res.json(
+      customerOperationsRuntime.readiness.snapshot()
+    );
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_readiness_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsChannels(req, res) {
+  try {
+    return res.json({
+      channels:
+        customerOperationsRuntime.channels.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_channels_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsInbox(req, res) {
+  try {
+    return res.json({
+      inbox:
+        customerOperationsRuntime.unifiedInbox.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_inbox_failed',
+      message: error.message
+    });
+  }
+}
+
+
+// Canonical Control Center Customer Operations read-only projection routes.
+// These routes are GET-only aliases for Customer Center v1 projections.
+// They do not send customer replies, mutate CRM, create/update tickets, assign conversations,
+// place calls, trigger IVR, send provider messages, or auto-reply.
+function sendCustomerCenterProjection(res, projector) {
+  try {
+    const runtime = customerOperationsRuntime;
+    return res.json({
+      ok: true,
+      data: projector(runtime)
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: 'customer_center_projection_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerReadiness(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectInboxEntries(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversations(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationDetail(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectConversationMessages(runtime, req.params.conversationId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectCustomerProfileById(runtime, req.params.customerId)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectTickets(runtime)
+  );
+});
+
+app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+  return sendCustomerCenterProjection(res, (runtime) =>
+    customerCenterProjection.projectChannels(runtime)
+  );
+});
+
+
+app.get(
+  '/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/health',
+  handleCustomerOperationsHealth
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/readiness',
+  handleCustomerOperationsReadiness
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/channels',
+  handleCustomerOperationsChannels
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/inbox',
+  handleCustomerOperationsInbox
+);
+
+
+
+
+function handleCustomerOperationsConversations(req, res) {
+  try {
+    return res.json({
+      conversations:
+        customerOperationsRuntime.conversations.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_conversations_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsMessages(req, res) {
+  try {
+    return res.json({
+      messages:
+        customerOperationsRuntime.messages.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_messages_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsCustomers(req, res) {
+  try {
+    return res.json({
+      customers:
+        customerOperationsRuntime.customers.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_customers_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsSla(req, res) {
+  try {
+    return res.json({
+      sla:
+        customerOperationsRuntime.sla.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_sla_failed',
+      message: error.message
+    });
+  }
+}
+
+function handleCustomerOperationsEscalations(req, res) {
+  try {
+    return res.json({
+      escalations:
+        customerOperationsRuntime.escalation.list()
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'customer_operations_escalations_failed',
+      message: error.message
+    });
+  }
+}
+
+app.get(
+  '/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/conversations',
+  handleCustomerOperationsConversations
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/messages',
+  handleCustomerOperationsMessages
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/customers',
+  handleCustomerOperationsCustomers
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/sla',
+  handleCustomerOperationsSla
+);
+
+app.get(
+  '/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+app.get(
+  '/public/media-manager/project/:project/customer-operations/escalations',
+  handleCustomerOperationsEscalations
+);
+
+
+app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+
+async function handleNativeMediaGenerate(req, res) {
+  registerDefaultModels();
+  try {
+    const orchestrator = createJobDispatchOrchestrator();
+
+    const result = await orchestrator.dispatch({
+      media_type: req.body?.media_type || req.body?.type || 'image',
+      provider: req.body?.provider || 'native',
+      project: req.params.project,
+      platform: req.body?.platform || '',
