@@ -98,15 +98,15 @@ async function loadCustomerCenterModel(projectName) {
 
 function buildDisabledActions() {
   return [
-    ["Send reply", "External send is locked for Customer Center v1."],
-    ["Add CRM note", "CRM mutation requires a future confirmation gate and audit log."],
-    ["Update ticket", "Ticket mutation is not enabled in this read-only release."],
-    ["Assign conversation", "Assignment mutation is not enabled in this read-only release."],
-    ["Mark reviewed", "Review state mutation requires a future safety pass."],
-    ["Trigger callback", "Call placement is not ready."],
-    ["Trigger IVR", "IVR provider execution is not ready."],
-    ["Sync CRM", "CRM provider execution is not ready."],
-    ["Auto-reply", "Auto-reply is forbidden by default."]
+    ["Send reply", "Locked: Customer Center v1 cannot send external replies or provider messages."],
+    ["Add CRM note", "Locked: CRM writes require a future confirmation gate, role check, and audit log."],
+    ["Update ticket", "Locked: ticket changes are outside this read-only release."],
+    ["Assign conversation", "Locked: assignment changes require a future workflow owner and audit trail."],
+    ["Mark reviewed", "Locked: review-state writes require a future safety pass."],
+    ["Trigger callback", "Locked: call placement is not enabled from Customer Center."],
+    ["Trigger IVR", "Locked: IVR provider execution is not enabled from Customer Center."],
+    ["Sync CRM", "Locked: CRM provider execution is not enabled from Customer Center."],
+    ["Auto-reply", "Locked: autonomous customer replies remain forbidden by default."]
   ];
 }
 
@@ -135,20 +135,20 @@ function renderProtectedReadGuard(model) {
       <div class="panel-header">
         <div>
           <div class="panel-kicker">Protected read guard</div>
-          <h3>Customer Center data is locked by server configuration</h3>
+          <h3>Server guard is active: no customer data is loaded</h3>
         </div>
       </div>
       <p class="muted">${escapeHtml(model.guardMessage)}</p>
       <div class="empty-box">
-        <strong>Server setup required</strong>
-        <p>Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload this page to load read-only customer projections.</p>
-        <p>No fake customer data is shown. External send, CRM updates, ticket changes, calls, IVR, and auto-reply remain locked.</p>
+        <strong>Protected-read setup required</strong>
+        <p>This page is intentionally blank while protected customer read routes are disabled. Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload to show read-only projections.</p>
+        <p>No placeholder customer records are shown. External send, CRM updates, ticket changes, calls, IVR, provider sync, and auto-reply remain locked.</p>
       </div>
     </section>
   `;
 }
 
-function renderEmptyState(title, body, nextStep = "Safe next step: connect/read customer operations data when backend readiness is confirmed.") {
+function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
   return `
     <div class="empty-state">
       <strong>${escapeHtml(title)}</strong>
@@ -161,7 +161,7 @@ function renderEmptyState(title, body, nextStep = "Safe next step: connect/read 
 function renderInbox(model) {
   const inbox = asArray(model?.inbox);
   if (!inbox.length) {
-    return renderEmptyState("No inbox entries yet", "Customer conversations will appear here after read-only customer operations data is available.");
+    return renderEmptyState("Inbox is empty in read-only mode", "No inbound customer signals are available for this project right now. This is expected when protected-read data is not connected or no conversations match the current projection.");
   }
 
   return inbox.slice(0, 8).map((entry) => `
@@ -178,7 +178,7 @@ function renderInbox(model) {
 function renderConversations(model) {
   const conversations = asArray(model?.conversations);
   if (!conversations.length) {
-    return renderEmptyState("No conversations selected", "Conversation previews will appear here. Customer identity and messages remain masked/truncated by default.");
+    return renderEmptyState("No conversation previews available", "Masked conversation context will appear here after read-only projections return conversations. Customer identity and message content stay masked or truncated by default.");
   }
 
   return conversations.slice(0, 6).map((item) => `
@@ -195,7 +195,7 @@ function renderConversations(model) {
 function renderTickets(model) {
   const tickets = asArray(model?.tickets);
   if (!tickets.length) {
-    return renderEmptyState("No tickets yet", "Ticket and SLA snapshots will appear here when support records are available.");
+    return renderEmptyState("No ticket snapshots available", "Support ticket and SLA records will appear here when the read-only projection includes them. No ticket creation or update is available from this page.");
   }
 
   return tickets.slice(0, 6).map((ticket) => `
@@ -212,7 +212,7 @@ function renderTickets(model) {
 function renderChannels(model) {
   const channels = asArray(model?.channels);
   if (!channels.length) {
-    return renderEmptyState("No channels connected", "Email, social messaging, CRM, voice, and IVR readiness will appear here when providers are configured.");
+    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
   }
 
   return channels.map((channel) => `
@@ -229,8 +229,8 @@ function renderChannels(model) {
 function renderDisabledActions(actions) {
   return `
     <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
-      <div class="panel-kicker">Future actions locked</div>
-      <p class="muted">These actions require confirmation gates, role permissions, provider readiness, and audit logging before they can be enabled.</p>
+      <div class="panel-kicker">Execution actions locked</div>
+      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
       <div class="button-row">
         ${asArray(actions).map(([label, reason]) => `
           <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
@@ -248,6 +248,20 @@ function renderCustomerCenter(context) {
   const conversations = asArray(model.conversations);
   const tickets = asArray(model.tickets);
   const channels = asArray(model.channels);
+  const protectedReadStatusTitle = model.protectedReadGuard
+    ? "Guard active: waiting for server readiness"
+    : CUSTOMER_CENTER_STATE.error
+      ? "Protected-read request needs attention"
+      : CUSTOMER_CENTER_STATE.loaded
+        ? "Read-only projections loaded"
+        : "Awaiting protected-read load";
+  const protectedReadStatusBody = model.protectedReadGuard
+    ? "Customer data is intentionally withheld until protected read routes are enabled on the server."
+    : CUSTOMER_CENTER_STATE.error
+      ? "Customer Center could not load the current read-only projection. Customer execution actions remain unavailable."
+      : CUSTOMER_CENTER_STATE.loaded
+        ? "Customer Center is using read-only projections only. Outbound sends, CRM writes, ticket changes, assignments, calls, IVR, and auto-replies remain unavailable."
+        : "Customer Center will request protected read-only projections when the page initializes. No outbound or mutation action is available.";
 
   if (CUSTOMER_CENTER_STATE.loading) {
     return `
@@ -266,7 +280,7 @@ function renderCustomerCenter(context) {
       <div>
         <p class="mhos-context-eyebrow">Customer Operations</p>
         <h1>Customer Center</h1>
-        <p class="mhos-context-description">Read-only customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and AI handoff preparation.</p>
+        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
       </div>
       <div class="mhos-hero-actions">
         <button class="btn btn-secondary" type="button" data-customer-center-action="refresh">Refresh read-only data</button>
@@ -281,22 +295,34 @@ function renderCustomerCenter(context) {
       ${renderMetric("Channels", channels.length || "0", "Send locked")}
     </section>
 
+    <section class="page-grid page-grid-2">
+      <div class="panel mhos-clean-surface">
+        <div class="panel-header"><div><div class="panel-kicker">Protected-read status</div><h3>${protectedReadStatusTitle}</h3></div></div>
+        <p class="muted">${protectedReadStatusBody}</p>
+      </div>
+
+      <div class="panel mhos-clean-surface">
+        <div class="panel-header"><div><div class="panel-kicker">Execution boundary</div><h3>No direct customer actions</h3></div></div>
+        <p class="muted">This page can review customer context and prepare handoffs. Any future customer-facing action must happen in an owning workflow with confirmation, permissions, and audit logging.</p>
+      </div>
+    </section>
+
     ${renderProtectedReadGuard(model)}
 
     <section class="page-grid page-grid-2">
       <div class="panel mhos-clean-surface">
         <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
         <div class="ops-list">
-          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display safe projections only.</p></div><span class="card-badge">Allowed</span></article>
-          <article class="ops-list-item"><div><strong>External send</strong><p>Replies and provider messages are locked.</p></div><span class="card-badge">Locked</span></article>
-          <article class="ops-list-item"><div><strong>CRM / Ticket mutations</strong><p>CRM notes, ticket updates, and assignment changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
-          <article class="ops-list-item"><div><strong>Calls / IVR</strong><p>Voice and IVR provider execution is not ready.</p></div><span class="card-badge">Locked</span></article>
+          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display protected customer snapshots only.</p></div><span class="card-badge">Allowed</span></article>
+          <article class="ops-list-item"><div><strong>External send</strong><p>Replies, social messages, SMS, and provider sends are unavailable here.</p></div><span class="card-badge">Locked</span></article>
+          <article class="ops-list-item"><div><strong>CRM / Ticket / Assignment writes</strong><p>CRM notes, ticket updates, review marks, and ownership changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+          <article class="ops-list-item"><div><strong>Calls / IVR / Auto-reply</strong><p>Voice placement, IVR provider execution, and autonomous replies remain disabled.</p></div><span class="card-badge">Locked</span></article>
         </div>
       </div>
 
       <div class="panel mhos-clean-surface">
         <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
-        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs. Any future outbound customer action must be approved in its owning surface with audit logging.</p>
+        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs only. Nothing in this page sends a reply, changes CRM, updates tickets, assigns conversations, places calls, triggers IVR, or starts auto-reply.</p>
       </div>
     </section>
 
@@ -324,8 +350,8 @@ function renderCustomerCenter(context) {
 
     <section class="page-grid page-grid-2">
       <div class="panel mhos-clean-surface">
-        <div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Safe handoffs only</h3></div></div>
-        <p class="muted">These buttons only prepare navigation/context handoffs. They do not send customer messages or mutate records.</p>
+        <div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Handoff-only, no execution</h3></div></div>
+        <p class="muted">These buttons prepare navigation/context handoffs only. They do not send customer messages, contact providers, update CRM, change tickets, assign conversations, or mark records reviewed.</p>
         <div class="button-row">
           <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
           <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
@@ -336,7 +362,7 @@ function renderCustomerCenter(context) {
 
       <div class="panel mhos-clean-surface">
         <div class="panel-header"><div><div class="panel-kicker">AI Panel</div><h3>Draft and guidance only</h3></div></div>
-        <p class="muted">AI may summarize, draft, translate, and suggest next steps. It must not send replies, update CRM, close tickets, place calls, or trigger IVR.</p>
+        <p class="muted">AI may summarize read-only context, draft response guidance, translate, and suggest next steps for a human handoff. It must not send replies, update CRM, close tickets, assign conversations, place calls, trigger IVR, sync providers, or start auto-reply.</p>
       </div>
     </section>
   `;
