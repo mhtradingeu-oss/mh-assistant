@@ -182,11 +182,21 @@ function publicAliasDeprecationHeaders(req, res, next) {
     if (classification && classification.publicAlias) {
       res.setHeader("X-MH-Canonical-Route-Required", "true");
     }
+
+    if (classification && classification.publicAlias && classification.allowed === false) {
+      return res.status(410).json({
+        ok: false,
+        error: "public_alias_retired",
+        message: "This public compatibility route is retired. Use the canonical API route.",
+        canonicalRequired: true,
+        reason: classification.reason
+      });
+    }
   } catch (error) {
     res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
   }
 
-  next();
+  return next();
 }
 
 app.use(helmet({
