@@ -36,6 +36,7 @@ const { createLearningPatterns } = require('./lib/execution/learning-patterns');
 const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
 const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
 const express = require('express');
+const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -168,6 +169,26 @@ process.on('unhandledRejection', (reason) => {
 
 const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
 const app = express();
+
+function publicAliasDeprecationHeaders(req, res, next) {
+  try {
+    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "");
+    const headers = buildPublicAliasHeaders(classification);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    if (classification && classification.publicAlias) {
+      res.setHeader("X-MH-Canonical-Route-Required", "true");
+    }
+  } catch (error) {
+    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+  }
+
+  next();
+}
+
 app.use(helmet({
   contentSecurityPolicy: false // CSP managed separately; avoids breaking existing UI
 }));
@@ -186,6 +207,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(compression());
+app.use("/public", publicAliasDeprecationHeaders);
 app.use(express.json());
 
 const appLogger = createLogger({
