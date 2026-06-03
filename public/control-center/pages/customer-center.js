@@ -139,16 +139,21 @@ function renderProtectedReadGuard(model) {
         </div>
       </div>
       <p class="muted">${escapeHtml(model.guardMessage)}</p>
-      <p class="muted">Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server to load read-only customer projections. No fake data is shown and all mutation actions remain disabled.</p>
+      <div class="empty-box">
+        <strong>Server setup required</strong>
+        <p>Configure <code>MH_CONTROL_CENTER_WRITE_KEY</code> on the server, restart the service, then reload this page to load read-only customer projections.</p>
+        <p>No fake customer data is shown. External send, CRM updates, ticket changes, calls, IVR, and auto-reply remain locked.</p>
+      </div>
     </section>
   `;
 }
 
-function renderEmptyState(title, body) {
+function renderEmptyState(title, body, nextStep = "Safe next step: connect/read customer operations data when backend readiness is confirmed.") {
   return `
     <div class="empty-state">
       <strong>${escapeHtml(title)}</strong>
       <p>${escapeHtml(body)}</p>
+      <small>${escapeHtml(nextStep)}</small>
     </div>
   `;
 }
@@ -222,11 +227,19 @@ function renderChannels(model) {
 }
 
 function renderDisabledActions(actions) {
-  return asArray(actions).map(([label, reason]) => `
-    <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
-      ${escapeHtml(label)} — disabled
-    </button>
-  `).join("");
+  return `
+    <div class="customer-center-locked-actions" aria-label="Future customer actions locked">
+      <div class="panel-kicker">Future actions locked</div>
+      <p class="muted">These actions require confirmation gates, role permissions, provider readiness, and audit logging before they can be enabled.</p>
+      <div class="button-row">
+        ${asArray(actions).map(([label, reason]) => `
+          <button class="btn btn-ghost" type="button" disabled title="${escapeHtml(reason)}">
+            ${escapeHtml(label)}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function renderCustomerCenter(context) {
@@ -272,6 +285,23 @@ function renderCustomerCenter(context) {
 
     <section class="page-grid page-grid-2">
       <div class="panel mhos-clean-surface">
+        <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
+        <div class="ops-list">
+          <article class="ops-list-item"><div><strong>Read-only projections</strong><p>Customer Center can display safe projections only.</p></div><span class="card-badge">Allowed</span></article>
+          <article class="ops-list-item"><div><strong>External send</strong><p>Replies and provider messages are locked.</p></div><span class="card-badge">Locked</span></article>
+          <article class="ops-list-item"><div><strong>CRM / Ticket mutations</strong><p>CRM notes, ticket updates, and assignment changes require future confirmation gates.</p></div><span class="card-badge">Locked</span></article>
+          <article class="ops-list-item"><div><strong>Calls / IVR</strong><p>Voice and IVR provider execution is not ready.</p></div><span class="card-badge">Locked</span></article>
+        </div>
+      </div>
+
+      <div class="panel mhos-clean-surface">
+        <div class="panel-header"><div><div class="panel-kicker">Safe Operating Rules</div><h3>Preview-first support workflow</h3></div></div>
+        <p class="muted">Use Customer Center to review, summarize, and prepare handoffs. Any future outbound customer action must be approved in its owning surface with audit logging.</p>
+      </div>
+    </section>
+
+    <section class="page-grid page-grid-2">
+      <div class="panel mhos-clean-surface">
         <div class="panel-header"><div><div class="panel-kicker">Unified Inbox</div><h3>Inbound customer signals</h3></div></div>
         <div class="ops-list">${renderInbox(model)}</div>
       </div>
@@ -295,12 +325,13 @@ function renderCustomerCenter(context) {
     <section class="page-grid page-grid-2">
       <div class="panel mhos-clean-surface">
         <div class="panel-header"><div><div class="panel-kicker">Action Panel</div><h3>Safe handoffs only</h3></div></div>
+        <p class="muted">These buttons only prepare navigation/context handoffs. They do not send customer messages or mutate records.</p>
         <div class="button-row">
-          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Route to Task Center</button>
-          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Route to Governance</button>
-          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Route to AI Command</button>
+          <button class="btn btn-secondary" type="button" data-customer-center-action="task-handoff">Prepare Task Center handoff</button>
+          <button class="btn btn-secondary" type="button" data-customer-center-action="governance-handoff">Prepare Governance review</button>
+          <button class="btn btn-secondary" type="button" data-customer-center-action="ai-handoff">Prepare AI Command prompt</button>
         </div>
-        <div class="button-row">${renderDisabledActions(model.disabledActions)}</div>
+        ${renderDisabledActions(model.disabledActions)}
       </div>
 
       <div class="panel mhos-clean-surface">
