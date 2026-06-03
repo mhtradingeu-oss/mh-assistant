@@ -20,6 +20,7 @@ import {
 import { setupRoute } from "./pages/setup.js";
 import { libraryRoute } from "./pages/library.js";
 import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
 import { settingsRoute } from "./pages/settings.js";
 import { governanceRoute } from "./pages/governance.js";
 import {
@@ -45,6 +46,7 @@ const routeRegistry = {
   [researchRoute.id]: researchRoute,
   [setupRoute.id]: setupRoute,
   [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
   [integrationsRoute.id]: integrationsRoute,
   [settingsRoute.id]: settingsRoute,
   [governanceRoute.id]: governanceRoute
