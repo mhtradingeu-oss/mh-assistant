@@ -47,6 +47,36 @@ function read(filePath) {
   return fs.readFileSync(filePath, 'utf8');
 }
 
+function collectStylesheets(indexSource) {
+  const hrefs = [];
+  const stylesheetRegex = /<link\b[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
+  let match = stylesheetRegex.exec(indexSource);
+  while (match) {
+    hrefs.push(match[1].split('?')[0]);
+    match = stylesheetRegex.exec(indexSource);
+  }
+  return hrefs
+    .filter((href) => href && !/^https?:\/\//i.test(href))
+    .map((href) => path.join(CC_DIR, href));
+}
+
+function readControlCenterStyles(indexSource, legacyStylesPath) {
+  if (fs.existsSync(legacyStylesPath)) {
+    return {
+      source: 'legacy',
+      files: [legacyStylesPath],
+      css: read(legacyStylesPath)
+    };
+  }
+
+  const files = collectStylesheets(indexSource).filter((filePath) => fs.existsSync(filePath));
+  return {
+    source: 'modular',
+    files,
+    css: files.map(read).join('\n')
+  };
+}
+
 function check(condition, code, message, details = {}) {
   return {
     code,
@@ -105,7 +135,8 @@ function main() {
   const routerSource = read(routerPath);
   const appSource = read(appPath);
   const indexSource = read(indexPath);
-  const stylesSource = read(stylesPath);
+  const stylesBundle = readControlCenterStyles(indexSource, stylesPath);
+  const stylesSource = stylesBundle.css;
   const standardUiSource = fs.existsSync(standardUiPath) ? read(standardUiPath) : '';
 
   const checks = [];
@@ -145,7 +176,7 @@ function main() {
     routerPath,
     appPath,
     indexPath,
-    stylesPath,
+    ...stylesBundle.files,
     standardUiPath,
     ...Object.values(PAGE_TO_FILE).map((file) => path.join(PAGES_DIR, file))
   ].filter((file) => fs.existsSync(file));
@@ -166,19 +197,21 @@ function main() {
   ));
 
   // 4) required UI sections exist
-  const requiredUiRoles = ['page-header', 'main-dashboard', 'action-panel', 'ai-panel', 'kpi-cards', 'status-cards'];
-  const missingUiRoles = requiredUiRoles.filter((role) => !standardUiSource.includes(`data-ui-role=\"${role}\"`));
+  const requiredUiRoles = ['page-context-ribbon', 'smart-strip'];
+  const missingUiRoles = requiredUiRoles.filter((role) => !new RegExp(`data-ui-role=["']${role}["']`).test(standardUiSource));
+  const requiredUiIds = ['stdPageTitle', 'stdPageDescription', 'stdContextMetrics', 'stdHeaderActions', 'stdAskAiAction', 'stdMainContentSlot'];
+  const missingUiIds = requiredUiIds.filter((id) => !new RegExp(`id=["']${id}["']`).test(standardUiSource));
 
   checks.push(check(
-    missingUiRoles.length === 0,
+    missingUiRoles.length === 0 && missingUiIds.length === 0,
     'required_ui_sections_exist',
-    missingUiRoles.length ? 'Missing required standard UI sections.' : 'Required standard UI sections are defined.',
-    { missing_ui_roles: missingUiRoles }
+    (missingUiRoles.length || missingUiIds.length) ? 'Missing required standard UI sections.' : 'Required standard UI sections are defined.',
+    { missing_ui_roles: missingUiRoles, missing_ui_ids: missingUiIds }
   ));
 
   // 5) AI panel exists where required
   const requiredRoutesDeclared = requiredUiRoles.length ? REQUIRED_PAGES : [];
-  const aiPanelExists = /data-ui-role=\"ai-panel\"/.test(standardUiSource);
+  const aiPanelExists = /id=["']stdAskAiAction["']/.test(standardUiSource) && /queueAiPrompt\(/.test(standardUiSource);
   const aiLayoutApplied = /applyStandardPageLayout\(/.test(appSource);
   checks.push(check(
     aiPanelExists && aiLayoutApplied,
@@ -190,7 +223,7 @@ function main() {
   ));
 
   // 6) dashboard cards exist
-  const hasKpiGrid = /std-kpi-grid/.test(stylesSource) && /id=\"stdKpiGrid\"/.test(standardUiSource);
+  const hasKpiGrid = /std-context-metrics/.test(stylesSource) && /id=["']stdContextMetrics["']/.test(standardUiSource);
   checks.push(check(
     hasKpiGrid,
     'dashboard_cards_exist',
@@ -240,7 +273,10 @@ function main() {
     'public/control-center/ui/page-standard.js'
   ].filter((item) => filesChanged.includes(item));
 
-  const cssChanges = filesChanged.filter((item) => item === 'public/control-center/styles.css');
+  const cssChanges = filesChanged.filter((item) =>
+    item === 'public/control-center/styles.css' ||
+    item.startsWith('public/control-center/styles/')
+  );
   const passedChecks = checks.filter((item) => item.pass).length;
   const readinessScore = Number(((passedChecks / checks.length) * 10).toFixed(1));
 

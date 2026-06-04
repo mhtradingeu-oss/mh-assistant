@@ -37,6 +37,14 @@ const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
 const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
 const express = require('express');
 const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
+const {
+  createRuntimeSecurityEnforcementMiddleware,
+  buildRoutePermissionDeniedResponse
+} = require('./lib/security/runtime-security-enforcement');
+const {
+  evaluateGovernanceMutationGate,
+  evaluateGovernanceApprovalLifecycle
+} = require('./lib/security/governance-mutation-gate');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -172,7 +180,16 @@ const app = express();
 
 function publicAliasDeprecationHeaders(req, res, next) {
   try {
-    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "");
+    const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+    const providedKey = readProvidedControlWriteKey(req);
+    const hasAuthorizedWriteKey = Boolean(expectedKey)
+      && Boolean(providedKey)
+      && controlWriteKeyMatches(expectedKey, providedKey);
+
+    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+      hasAuthorizedWriteKey,
+      productionMode: String(process.env.NODE_ENV || '').trim().toLowerCase() === 'production'
+    });
     const headers = buildPublicAliasHeaders(classification);
 
     Object.entries(headers).forEach(([key, value]) => {
@@ -184,6 +201,10 @@ function publicAliasDeprecationHeaders(req, res, next) {
     }
 
     if (classification && classification.publicAlias && classification.allowed === false) {
+      if (classification.code === 'route_permission_denied') {
+        return res.status(403).json(buildRoutePermissionDeniedResponse());
+      }
+
       return res.status(410).json({
         ok: false,
         error: "public_alias_retired",
@@ -237,6 +258,70 @@ const CONTROL_CENTER_KEY_BYPASS_HEADER_VALUE = 'temporary';
 const CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED = String(
   process.env[CONTROL_CENTER_DISABLE_ACCESS_KEY_ENV] || ''
 ).trim() === '1';
+
+const PRODUCTION_BYPASS_ENV_PATTERNS = [
+  /^MH_CONTROL_CENTER_DISABLE_ACCESS_KEY$/i,
+  /^MH_.*READ.*KEY.*BYPASS.*$/i,
+  /^MH_.*WRITE.*KEY.*BYPASS.*$/i,
+  /^MH_.*ACCESS.*KEY.*BYPASS.*$/i,
+  /^MH_.*AUTH.*BYPASS.*$/i,
+  /^MH_.*SECURITY.*BYPASS.*$/i,
+  /^MH_.*DISABLE.*ACCESS.*KEY.*$/i,
+  /^MH_.*DISABLE.*AUTH.*$/i,
+  /^MH_.*DISABLE.*SECURITY.*$/i,
+  /^CONTROL_CENTER_.*BYPASS.*$/i
+];
+
+function normalizeEnvironmentMode(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isTruthyEnvironmentFlag(value) {
+  return ['1', 'true', 'yes', 'on', 'enabled'].includes(normalizeEnvironmentMode(value));
+}
+
+function collectProductionBypassFlags(env = process.env) {
+  return Object.entries(env || {}).reduce((flags, [name, value]) => {
+    if (!isTruthyEnvironmentFlag(value)) {
+      return flags;
+    }
+
+    if (PRODUCTION_BYPASS_ENV_PATTERNS.some((pattern) => pattern.test(name))) {
+      flags.push({ name, value: String(value).trim() });
+    }
+
+    return flags;
+  }, []);
+}
+
+function validateProductionProfileHardening(env = process.env) {
+  const nodeEnv = normalizeEnvironmentMode(env?.NODE_ENV);
+  const mhEnv = normalizeEnvironmentMode(env?.MH_ENV);
+  const productionMode = nodeEnv === 'production' || mhEnv === 'production';
+  const bypassFlags = collectProductionBypassFlags(env);
+
+  return {
+    productionMode,
+    bypassFlags,
+    blocked: productionMode && bypassFlags.length > 0,
+    allowedLocalDevelopment: !productionMode && bypassFlags.length > 0
+  };
+}
+
+function assertProductionProfileHardening(env = process.env) {
+  const result = validateProductionProfileHardening(env);
+  if (!result.blocked) {
+    return result;
+  }
+
+  const flagList = result.bypassFlags.map((flag) => flag.name).join(', ');
+  const error = new Error(
+    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+  );
+  error.code = 'PRODUCTION_BYPASS_ENV_BLOCKED';
+  error.statusCode = 500;
+  throw error;
+}
 
 if (CONTROL_CENTER_ACCESS_KEY_BYPASS_ENABLED) {
   console.warn('CONTROL CENTER ACCESS KEY DISABLED - TEMPORARY TEST MODE');
@@ -391,6 +476,15 @@ function requireProtectedReadKey(req, res, next) {
 }
 
 app.use(requireProtectedReadKey);
+
+const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
+  logger: appLogger,
+  readProvidedControlWriteKey,
+  controlWriteKeyMatches,
+  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV
+});
+
+app.use(runtimeSecurityEnforcement);
 
 const telegramRateLimiter = createInMemoryRateLimiter({
   windowMs: 60 * 1000,
@@ -809,12 +903,13 @@ const EMAIL_ARTIFACT_TYPES = Object.freeze({
 });
 const EXECUTION_BRIDGE_STATES = Object.freeze([
   'draft',
-  'ready_for_review',
-  'manual_publish_ready',
-  'pending_execution',
+  'executing',
   'executed',
   'failed'
 ]);
+const DEFAULT_NATIVE_MEDIA_PROVIDER = String(
+  process.env.MH_NATIVE_MEDIA_DEFAULT_PROVIDER || 'openai'
+).trim().toLowerCase() || 'openai';
 
 const PORT = process.env.PORT || 3000;
 
@@ -9379,28 +9474,58 @@ app.post('/ingest', (req, res) => {
   res.json(result);
 });
 
-app.post('/execute_publish_package', (req, res) => {
+app.post('/execute_publish_package', async (req, res) => {
   let projectName = '';
 
   try {
     projectName = requireProjectContext(req, { allowFallback: false });
-    const publishPackage = resolvePublishPackageForExecution(projectName, req.body || {});
-    const payload = buildSocialExecutionPayload(publishPackage);
-    const executionState = 'manual_publish_ready';
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'execute_publish_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_publish_package',
+      requestedAction: 'publish',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'execute_publish_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_publish_package',
+      requestedAction: 'publish',
+      routeTarget: 'publishing',
+      serviceDomain: 'publishing',
+      linkedExecutionId: 'execute_publish_package',
+      riskLevel: 'high',
+      title: 'Publish package execution approval',
+      summary: 'Approval required before publishing package execution.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'publish',
+      project: projectName,
+      package_payload: req.body || {}
+    });
 
     const result = {
       project: projectName,
-      campaign_name: String(publishPackage.campaign_name || req.body?.campaign_name || '').trim(),
-      channel: payload.channel,
-      execution_state: executionState,
-      caption: payload.caption,
-      media_path: payload.media_path,
-      platform_specific_payload: payload.platform_specific_payload,
+      campaign_name: String(req.body?.campaign_name || req.body?.publish_package?.campaign_name || '').trim(),
+      channel: bridgeResult.channel,
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      caption: bridgeResult.caption,
+      media_path: bridgeResult.media_path,
+      runtime_result: bridgeResult.runtime_result,
       supported_execution_states: EXECUTION_BRIDGE_STATES
     };
 
     const log = writeExecutionBridgeLog(projectName, 'execute_publish_package', {
-      status: executionState,
+      status: bridgeResult.execution_state,
       result: {
         campaign_name: result.campaign_name,
         channel: result.channel,
@@ -9437,28 +9562,59 @@ app.post('/execute_publish_package', (req, res) => {
   }
 });
 
-app.post('/execute_email_package', (req, res) => {
+app.post('/execute_email_package', async (req, res) => {
   let projectName = '';
 
   try {
     projectName = requireProjectContext(req, { allowFallback: false });
-    const emailPackage = resolveEmailPackageForExecution(projectName, req.body || {});
-    const readyPayload = buildEmailReadyPayload(emailPackage);
-    const executionState = 'pending_execution';
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'execute_email_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_email_package',
+      requestedAction: 'provider_send',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'execute_email_package',
+      entityType: 'execution_bridge',
+      entityId: 'execute_email_package',
+      requestedAction: 'provider_send',
+      routeTarget: 'publishing',
+      serviceDomain: 'publishing',
+      linkedExecutionId: 'execute_email_package',
+      riskLevel: 'high',
+      title: 'Email package execution approval',
+      summary: 'Approval required before email package execution.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'email',
+      project: projectName,
+      package_payload: req.body || {}
+    });
 
     const result = {
       project: projectName,
-      campaign_name: String(emailPackage.campaign_name || req.body?.campaign_name || '').trim(),
-      execution_state: executionState,
-      subject: readyPayload.subject,
-      html_body: readyPayload.html_body,
-      text_body: readyPayload.text_body,
+      campaign_name: String(req.body?.campaign_name || req.body?.email_package?.campaign_name || '').trim(),
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
+      subject: bridgeResult.subject,
+      html_body: bridgeResult.html_body,
+      text_body: bridgeResult.text_body,
+      runtime_result: bridgeResult.runtime_result,
       ready_for_provider_send: true,
       supported_execution_states: EXECUTION_BRIDGE_STATES
     };
 
     const log = writeExecutionBridgeLog(projectName, 'execute_email_package', {
-      status: executionState,
+      status: bridgeResult.execution_state,
       result: {
         campaign_name: result.campaign_name,
         subject: result.subject,
@@ -9494,41 +9650,62 @@ app.post('/execute_email_package', (req, res) => {
   }
 });
 
-app.post('/generate_media_from_prompt', (req, res) => {
+app.post('/generate_media_from_prompt', async (req, res) => {
   let projectName = '';
 
   try {
     projectName = requireProjectContext(req, { allowFallback: false });
-    const promptPack = req.body?.prompt_pack && typeof req.body.prompt_pack === 'object'
-      ? req.body.prompt_pack
-      : req.body?.publish_package?.assets?.[0]?.fallback_prompt_pack;
-
-    if (!promptPack || typeof promptPack !== 'object' || Object.keys(promptPack).length === 0) {
-      const error = new Error('Missing prompt_pack. Provide prompt_pack or publish_package.assets[0].fallback_prompt_pack');
-      error.statusCode = 400;
-      error.code = 'PROMPT_PACK_MISSING';
-      throw error;
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'generate_media_from_prompt',
+      entityType: 'execution_bridge',
+      entityId: 'generate_media_from_prompt',
+      requestedAction: 'generate',
+      skipApprovalGate: true
+    })) {
+      return;
     }
 
-    const generated = buildMediaGenerationMock(promptPack, req.body || {});
-    const executionState = 'ready_for_review';
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'generate_media_from_prompt',
+      entityType: 'execution_bridge',
+      entityId: 'generate_media_from_prompt',
+      requestedAction: 'generate',
+      routeTarget: 'media-studio',
+      serviceDomain: 'media',
+      linkedExecutionId: 'generate_media_from_prompt',
+      riskLevel: 'high',
+      title: 'Media generation approval',
+      summary: 'Approval required before media generation from prompt.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'media',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
     const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
-      status: executionState,
+      status: bridgeResult.execution_state,
       result: {
-        has_image_prompt: Boolean(generated.image_prompt),
-        scene_count: Array.isArray(generated.scene_breakdown) ? generated.scene_breakdown.length : 0
+        has_image_prompt: Boolean(bridgeResult.image_prompt),
+        scene_count: Number(bridgeResult.scene_count || 0),
+        execution_backend: bridgeResult.execution_backend
       }
     });
 
     return res.json({
       ok: true,
       project: projectName,
-      execution_state: executionState,
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
       supported_execution_states: EXECUTION_BRIDGE_STATES,
-      image_prompt: generated.image_prompt,
-      video_script: generated.video_script,
-      scene_breakdown: generated.scene_breakdown,
-      mock_output: true,
+      image_prompt: bridgeResult.image_prompt,
+      scene_count: bridgeResult.scene_count,
+      runtime_result: bridgeResult.runtime_result,
       execution_log: log.file_path
     });
   } catch (error) {
@@ -9554,34 +9731,67 @@ app.post('/generate_media_from_prompt', (req, res) => {
   }
 });
 
-app.post('/build_ad_execution_package', (req, res) => {
+app.post('/build_ad_execution_package', async (req, res) => {
   let projectName = '';
 
   try {
     projectName = requireProjectContext(req, { allowFallback: false });
-    const campaignPackage = resolveCampaignPackageForAds(projectName, req.body || {});
-    const adPackage = buildAdExecutionPackage(campaignPackage, req.body || {});
-    const executionState = 'ready_for_review';
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName,
+      action: 'build_ad_execution_package',
+      entityType: 'execution_bridge',
+      entityId: 'build_ad_execution_package',
+      requestedAction: 'launch',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName,
+      action: 'build_ad_execution_package',
+      entityType: 'execution_bridge',
+      entityId: 'build_ad_execution_package',
+      requestedAction: 'launch',
+      routeTarget: 'ads-manager',
+      serviceDomain: 'campaign',
+      linkedExecutionId: 'build_ad_execution_package',
+      riskLevel: 'high',
+      title: 'Ad execution package approval',
+      summary: 'Approval required before building an ad execution package.'
+    })) {
+      return;
+    }
+
+    const bridgeResult = await executeJobBridge({
+      type: 'ads',
+      project: projectName,
+      package_payload: req.body || {}
+    });
+
     const log = writeExecutionBridgeLog(projectName, 'build_ad_execution_package', {
-      status: executionState,
+      status: bridgeResult.execution_state,
       result: {
-        campaign_name: String(campaignPackage.campaign_name || req.body?.campaign_name || '').trim(),
-        headline: adPackage.headline,
-        audience: adPackage.audience
+        campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+        headline: bridgeResult.headline,
+        audience: bridgeResult.audience,
+        execution_backend: bridgeResult.execution_backend
       }
     });
 
     return res.json({
       ok: true,
       project: projectName,
-      campaign_name: String(campaignPackage.campaign_name || req.body?.campaign_name || '').trim(),
-      execution_state: executionState,
+      campaign_name: String(req.body?.campaign_name || req.body?.campaign_package?.campaign_name || '').trim(),
+      execution_state: bridgeResult.execution_state,
+      execution_backend: bridgeResult.execution_backend,
       supported_execution_states: EXECUTION_BRIDGE_STATES,
-      ad_copy: adPackage.ad_copy,
-      headline: adPackage.headline,
-      cta: adPackage.cta,
-      audience: adPackage.audience,
-      budget_suggestion: adPackage.budget_suggestion,
+      ad_copy: bridgeResult.ad_copy,
+      headline: bridgeResult.headline,
+      cta: bridgeResult.cta,
+      audience: bridgeResult.audience,
+      budget_suggestion: bridgeResult.budget_suggestion,
+      runtime_result: bridgeResult.runtime_result,
       execution_log: log.file_path
     });
   } catch (error) {
@@ -10803,6 +11013,35 @@ app.post('/media-manager/project/:project/library/refresh', (req, res) => {
 
 app.post('/media-manager/project/:project/setup', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      skipApprovalGate: true,
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'medium',
+      title: 'Project setup approval',
+      summary: 'Approval required before authority-impacting project setup changes.',
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
     return res.json(updateProjectSetup(req.params.project, req.body || {}));
   } catch (error) {
     return res.status(400).json({
@@ -10813,6 +11052,35 @@ app.post('/media-manager/project/:project/setup', (req, res) => {
 
 app.post('/public/media-manager/project/:project/setup', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      skipApprovalGate: true,
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'project_setup_mutation',
+      entityType: 'project_setup',
+      entityId: req.params.project,
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'medium',
+      title: 'Project setup approval',
+      summary: 'Approval required before authority-impacting project setup changes.',
+      setupPayload: req.body || {}
+    })) {
+      return;
+    }
+
     return res.json(updateProjectSetup(req.params.project, req.body || {}));
   } catch (error) {
     return res.status(400).json({
@@ -10881,7 +11149,7 @@ function handleGetNotificationCenter(req, res) {
     const snapshot = buildProjectOperationsPayload(req.params.project);
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
-      notification_center: snapshot.notification_center || {}
+      ...asPlainObject(snapshot.notification_center)
     });
   } catch (error) {
     return res.status(400).json({
@@ -10924,6 +11192,34 @@ function handleGetProjectTeam(req, res) {
 
 function handleUpdateProjectTeam(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'team_model_mutation',
+      entityType: 'team_model',
+      entityId: 'default',
+      requestedAction: 'update',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'team_model_mutation',
+      entityType: 'team_model',
+      entityId: 'default',
+      requestedAction: 'update',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: req.params.project,
+      riskLevel: 'high',
+      title: 'Team model approval',
+      summary: 'Approval required before team model changes.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
       team: updateTeamModel(req.params.project, req.body || {}, req.body?.actor || 'control-center')
@@ -11172,6 +11468,33 @@ app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGe
 
 function handleRunWorkflow(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      routeTarget: 'workflows',
+      serviceDomain: 'research',
+      linkedExecutionId: req.params.workflowId,
+      riskLevel: 'high',
+      title: 'Workflow run approval',
+      summary: 'Approval required before workflow execution.'
+    })) {
+      return;
+    }
+
     const output = req.body?.output;
     const run = recordWorkflowRun(req.params.project, {
       workflow_id: req.params.workflowId,
@@ -11217,6 +11540,33 @@ async function handleExecuteAiCommand(req, res) {
   const project = String(req.params.project || '').trim().toLowerCase();
   const source = String(req.body?.source || 'ai-command').trim();
   const modeId = String(req.body?.mode_id || req.body?.modeId || 'executive').trim();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_command_run',
+    entityType: 'ai_command',
+    entityId: modeId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_command_run',
+    entityType: 'ai_command',
+    entityId: modeId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: modeId,
+    riskLevel: 'high',
+    title: 'AI command approval',
+    summary: 'Approval required before AI command execution.'
+  })) {
+    return;
+  }
 
   appLogger.info('ai_command_http_received', {
     route: 'ai-command',
@@ -11265,6 +11615,33 @@ async function handleExecuteAiChat(req, res) {
   const project = String(req.params.project || '').trim().toLowerCase();
   const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
 
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_chat_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_chat_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: specialistId,
+    riskLevel: 'high',
+    title: 'AI chat approval',
+    summary: 'Approval required before AI chat execution.'
+  })) {
+    return;
+  }
+
   appLogger.info('ai_chat_http_received', {
     route: 'ai-chat',
     action: 'execute',
@@ -11308,6 +11685,33 @@ async function handleExecuteAiGuidance(req, res) {
   const project = String(req.params.project || '').trim().toLowerCase();
   const specialistId = String(req.body?.specialistId || req.body?.specialist_id || 'specialist').trim().toLowerCase();
 
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: project,
+    action: 'ai_guidance_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    skipApprovalGate: true
+  })) {
+    return;
+  }
+
+  if (!enforceGovernanceApprovalLifecycle(req, res, {
+    projectName: project,
+    action: 'ai_guidance_run',
+    entityType: 'ai_command',
+    entityId: specialistId,
+    requestedAction: 'execute',
+    routeTarget: 'workflows',
+    serviceDomain: 'research',
+    linkedExecutionId: specialistId,
+    riskLevel: 'high',
+    title: 'AI guidance approval',
+    summary: 'Approval required before AI guidance execution.'
+  })) {
+    return;
+  }
+
   appLogger.info('ai_guidance_http_received', {
     route: 'ai-guidance',
     action: 'execute',
@@ -11349,6 +11753,33 @@ async function handleExecuteAiGuidance(req, res) {
 
 function handleExecuteAiWorkflow(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'ai_workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'ai_workflow_run',
+      entityType: 'workflow_run',
+      entityId: req.params.workflowId,
+      requestedAction: 'run',
+      routeTarget: 'workflows',
+      serviceDomain: 'research',
+      linkedExecutionId: req.params.workflowId,
+      riskLevel: 'high',
+      title: 'AI workflow approval',
+      summary: 'Approval required before AI workflow execution.'
+    })) {
+      return;
+    }
+
     const result = getAiOrchestrator().executeWorkflow(
       req.params.project,
       req.params.workflowId,
@@ -11552,6 +11983,16 @@ function handleCreateApproval(req, res) {
 
 function handleApprovalDecision(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'approvals_decision',
+      entityType: 'approval',
+      entityId: req.params.approvalId,
+      requestedAction: 'decide'
+    })) {
+      return;
+    }
+
     const approval = decideApproval(req.params.project, req.params.approvalId, {
       decision: req.body?.decision,
       note: req.body?.note,
@@ -11594,6 +12035,16 @@ function handleGetGovernance(req, res) {
 
 function handleUpdateGovernancePolicy(req, res) {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'governance_policy_update',
+      entityType: 'governance_policy',
+      entityId: 'default',
+      requestedAction: 'update'
+    })) {
+      return;
+    }
+
     const policy = updateGovernancePolicy(req.params.project, req.body || {}, req.body?.actor || 'operator');
     return res.json({
       project: String(req.params.project || '').trim().toLowerCase(),
@@ -11768,6 +12219,17 @@ app.get('/public/api/learning/:project', handleGetProjectLearning);
 
 app.post('/media-manager/project/:project/sources', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
     const sourceType = String(req.body?.source_type || '').trim().toLowerCase();
     const sourceValue = String(req.body?.source_value || '').trim();
 
@@ -11775,6 +12237,23 @@ app.post('/media-manager/project/:project/sources', (req, res) => {
       return res.status(400).json({
         error: 'Missing source_type'
       });
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry changes.',
+      payload: req.body || {}
+    })) {
+      return;
     }
 
     if (!sourceValue) {
@@ -11794,6 +12273,17 @@ app.post('/media-manager/project/:project/sources', (req, res) => {
 
 app.post('/public/media-manager/project/:project/sources', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
     const sourceType = String(req.body?.source_type || '').trim().toLowerCase();
     const sourceValue = String(req.body?.source_value || '').trim();
 
@@ -11801,6 +12291,23 @@ app.post('/public/media-manager/project/:project/sources', (req, res) => {
       return res.status(400).json({
         error: 'Missing source_type'
       });
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'create',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.body?.source_type || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry changes.',
+      payload: req.body || {}
+    })) {
+      return;
     }
 
     if (!sourceValue) {
@@ -11820,6 +12327,34 @@ app.post('/public/media-manager/project/:project/sources', (req, res) => {
 
 app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry deletion.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
     return res.json(result);
   } catch (error) {
@@ -11831,6 +12366,34 @@ app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => 
 
 app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      skipApprovalGate: true
+    })) {
+      return;
+    }
+
+    if (!enforceGovernanceApprovalLifecycle(req, res, {
+      projectName: req.params.project,
+      action: 'source_registry_mutation',
+      entityType: 'source_registry',
+      entityId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      requestedAction: 'delete',
+      routeTarget: 'settings',
+      serviceDomain: 'governance',
+      linkedExecutionId: String(req.params.sourceType || '').trim().toLowerCase() || 'source_registry',
+      riskLevel: 'medium',
+      title: 'Source registry approval',
+      summary: 'Approval required before source registry deletion.',
+      payload: req.body || {}
+    })) {
+      return;
+    }
+
     const result = removeProjectSourceOfTruth(req.params.project, req.params.sourceType);
     return res.json(result);
   } catch (error) {
@@ -11868,25 +12431,51 @@ function getIntegrationErrorHttpStatus(error) {
 }
 
 async function handleConnectProjectIntegration(req, res, options = {}) {
+  const governanceAction = options?.reconnect ? 'integration_reconnect' : 'integration_connect';
+  const requestedAction = options?.reconnect ? 'reconnect' : 'connect';
+  const governanceOptions = {
+    projectName: req.params.project,
+    action: governanceAction,
+    entityType: 'integration',
+    entityId: req.params.integrationId,
+    requestedAction,
+    route: req.path,
+    requestedFor: 'admin',
+    routeTarget: 'governance',
+    sourcePage: 'integrations',
+    serviceDomain: 'integrations',
+    riskLevel: options?.reconnect ? 'high' : 'medium',
+    title: `${req.params.integrationId} ${requestedAction} approval`,
+    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+  };
+  const governanceAllowed = options?.reconnect
+    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+    : enforceGovernanceMutationGate(req, res, governanceOptions);
+
+  if (!governanceAllowed) {
+    return;
+  }
+
   try {
+    const connectionPayload = normalizeProjectIntegrationConnectionPayload(req.params.integrationId, req.body || {});
     const result = await saveProjectIntegrationRecord(req.params.project, req.params.integrationId, {
-      source_key: req.body?.source_key,
-      primary_field: req.body?.primary_field,
-      primary_value: req.body?.primary_value,
-      config: req.body?.config,
-      credentials: req.body?.credentials,
-      auth_fields: req.body?.auth_fields,
-      required_fields: req.body?.required_fields,
-      data_scopes: req.body?.data_scopes,
-      read_scopes: req.body?.read_scopes,
-      write_scopes: req.body?.write_scopes,
-      connection_method: req.body?.connection_method,
-      permission_scope: req.body?.permission_scope,
-      enables: req.body?.enables,
-      notes: req.body?.notes,
-      token_expires_at: req.body?.token_expires_at,
-      requires_credentials: req.body?.requires_credentials,
-      sync_source_registry: req.body?.sync_source_registry
+      source_key: connectionPayload?.source_key,
+      primary_field: connectionPayload?.primary_field,
+      primary_value: connectionPayload?.primary_value,
+      config: connectionPayload?.config,
+      credentials: connectionPayload?.credentials,
+      auth_fields: connectionPayload?.auth_fields,
+      required_fields: connectionPayload?.required_fields,
+      data_scopes: connectionPayload?.data_scopes,
+      read_scopes: connectionPayload?.read_scopes,
+      write_scopes: connectionPayload?.write_scopes,
+      connection_method: connectionPayload?.connection_method,
+      permission_scope: connectionPayload?.permission_scope,
+      enables: connectionPayload?.enables,
+      notes: connectionPayload?.notes,
+      token_expires_at: connectionPayload?.token_expires_at,
+      requires_credentials: connectionPayload?.requires_credentials,
+      sync_source_registry: connectionPayload?.sync_source_registry
     }, options);
 
     return res.json(result);
@@ -11902,7 +12491,86 @@ async function handleConnectProjectIntegration(req, res, options = {}) {
   }
 }
 
+function normalizeProjectIntegrationConnectionPayload(integrationId, payload = {}) {
+  const normalizedPayload = payload && typeof payload === 'object' && !Array.isArray(payload)
+    ? { ...payload }
+    : {};
+  const normalizedIntegrationId = String(integrationId || '').trim().toLowerCase();
+
+  if (normalizedIntegrationId !== 'woocommerce') {
+    return normalizedPayload;
+  }
+
+  const config = normalizedPayload.config && typeof normalizedPayload.config === 'object' && !Array.isArray(normalizedPayload.config)
+    ? { ...normalizedPayload.config }
+    : {};
+  const credentials = normalizedPayload.credentials && typeof normalizedPayload.credentials === 'object' && !Array.isArray(normalizedPayload.credentials)
+    ? { ...normalizedPayload.credentials }
+    : {};
+
+  const storeUrl = String(normalizedPayload.storeUrl || normalizedPayload.store_url || config.storeUrl || '').trim();
+  const consumerKey = String(normalizedPayload.consumerKey || normalizedPayload.consumer_key || credentials.consumerKey || '').trim();
+  const consumerSecret = String(normalizedPayload.consumerSecret || normalizedPayload.consumer_secret || credentials.consumerSecret || '').trim();
+
+  if (storeUrl) {
+    config.storeUrl = storeUrl;
+    normalizedPayload.primary_value = String(normalizedPayload.primary_value || storeUrl).trim();
+  }
+
+  if (consumerKey) {
+    credentials.consumerKey = consumerKey;
+  }
+
+  if (consumerSecret) {
+    credentials.consumerSecret = consumerSecret;
+  }
+
+  return {
+    source_key: 'woocommerce',
+    primary_field: 'storeUrl',
+    auth_fields: ['consumerKey', 'consumerSecret'],
+    required_fields: ['storeUrl'],
+    requires_credentials: true,
+    connection_method: 'oauth_or_key',
+    ...normalizedPayload,
+    config,
+    credentials
+  };
+}
+
 async function handleProjectIntegrationAction(req, res, actionType) {
+  const normalizedActionType = String(actionType || '').trim().toLowerCase();
+  const governanceAction = {
+    test: 'integration_test',
+    sync: 'integration_sync',
+    'import-history': 'integration_import_history',
+    disconnect: 'integration_disconnect'
+  }[normalizedActionType] || 'integration_test';
+
+  const governanceOptions = {
+    projectName: req.params.project,
+    action: governanceAction,
+    entityType: 'integration',
+    entityId: req.params.integrationId,
+    requestedAction: normalizedActionType,
+    route: req.path,
+    requestedFor: 'admin',
+    routeTarget: 'governance',
+    sourcePage: 'integrations',
+    serviceDomain: 'integrations',
+    riskLevel: normalizedActionType === 'test' ? 'medium' : 'high',
+    title: `${req.params.integrationId} ${normalizedActionType} approval`,
+    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+  };
+  const requiresApprovalLifecycle = ['sync', 'import-history', 'disconnect'].includes(normalizedActionType);
+  const governanceAllowed = requiresApprovalLifecycle
+    ? enforceGovernanceApprovalLifecycle(req, res, governanceOptions)
+    : enforceGovernanceMutationGate(req, res, governanceOptions);
+
+  if (!governanceAllowed) {
+    return;
+  }
+
   try {
     const result = await runProjectIntegrationAction(
       req.params.project,
@@ -12262,12 +12930,23 @@ app.get('/public/media-manager/project/:project/native-media/providers/readiness
 
 async function handleNativeMediaGenerate(req, res) {
   registerDefaultModels();
+
+  if (!enforceGovernanceMutationGate(req, res, {
+    projectName: req.params.project,
+    action: 'native_media_generate',
+    entityType: 'media_job',
+    entityId: String(req.body?.media_job_id || req.body?.id || 'native_media_generate').trim(),
+    requestedAction: 'generate'
+  })) {
+    return;
+  }
+
   try {
     const orchestrator = createJobDispatchOrchestrator();
 
     const result = await orchestrator.dispatch({
       media_type: req.body?.media_type || req.body?.type || 'image',
-      provider: req.body?.provider || 'native',
+      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
       project: req.params.project,
       platform: req.body?.platform || '',
       prompt: req.body?.prompt || '',
@@ -12302,6 +12981,18 @@ app.post('/media-manager/project/:project/integrations/:integrationId/connect', 
 });
 
 app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+  await handleConnectProjectIntegration(req, res, {
+    reconnect: false
+  });
+});
+
+app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
   await handleConnectProjectIntegration(req, res, {
     reconnect: false
   });
@@ -12355,6 +13046,16 @@ app.post('/public/media-manager/project/:project/integrations/:integrationId/dis
 // They remain protected by the same centralized write-key middleware as `/media-manager/...`.
 app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'schedule', {
       status: req.body?.status
     });
@@ -12388,6 +13089,16 @@ app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
 
 app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_schedule',
+      entityType: 'publishing_job',
+      entityId: 'schedule',
+      requestedAction: 'schedule'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'schedule', {
       status: req.body?.status
     });
@@ -12421,6 +13132,16 @@ app.post('/public/media-manager/project/:project/publishing/schedule', (req, res
 
 app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'reschedule', {
       jobId: req.params.jobId,
       status: req.body?.status || 'scheduled'
@@ -12450,6 +13171,16 @@ app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, r
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_reschedule',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'reschedule'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'reschedule', {
       jobId: req.params.jobId,
       status: req.body?.status || 'scheduled'
@@ -12479,6 +13210,16 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', 
 
 app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'ready', {
       jobId: req.params.jobId,
       status: 'ready'
@@ -12501,6 +13242,16 @@ app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) =
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_ready',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'ready'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'ready', {
       jobId: req.params.jobId,
       status: 'ready'
@@ -12523,6 +13274,16 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req,
 
 app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_publish',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'publish'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'publish', {
       jobId: req.params.jobId,
       status: 'published'
@@ -12555,6 +13316,16 @@ app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res)
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_publish',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'publish'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'publish', {
       jobId: req.params.jobId,
       status: 'published'
@@ -12587,6 +13358,16 @@ app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (re
 
 app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_fail',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'fail'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'fail', {
       jobId: req.params.jobId,
       status: 'failed'
@@ -12619,6 +13400,16 @@ app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) =>
 
 app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
   try {
+    if (!enforceGovernanceMutationGate(req, res, {
+      projectName: req.params.project,
+      action: 'publishing_fail',
+      entityType: 'publishing_job',
+      entityId: req.params.jobId,
+      requestedAction: 'fail'
+    })) {
+      return;
+    }
+
     assertPublishingMutationAllowed(req.params.project, 'fail', {
       jobId: req.params.jobId,
       status: 'failed'
@@ -13729,6 +14520,127 @@ function buildAdExecutionPackage(campaignPackage, input = {}) {
   };
 }
 
+function deriveMediaExecutionPrompt(promptPack = {}, input = {}) {
+  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+  const branding = source.branding && typeof source.branding === 'object' ? source.branding : {};
+  const reel = source.reel && typeof source.reel === 'object' ? source.reel : {};
+  const feature = source.feature && typeof source.feature === 'object' ? source.feature : {};
+
+  return String(
+    input.prompt
+    || input.image_prompt
+    || branding.visual_prompt
+    || feature.visual_prompt
+    || reel.video_prompt
+    || 'Create a premium brand-safe visual for campaign execution.'
+  ).trim();
+}
+
+async function executePublishPackageRuntime({ project, publishPackage, socialPayload }) {
+  return {
+    execution_state: 'executed',
+    execution_backend: 'canonical_publish_runtime',
+    executed_at: new Date().toISOString(),
+    project,
+    campaign_name: String(publishPackage?.campaign_name || '').trim(),
+    channel: String(socialPayload?.channel || '').trim().toLowerCase(),
+    dispatched: true,
+    details: {
+      has_caption: Boolean(String(socialPayload?.caption || '').trim()),
+      has_media_path: Boolean(String(socialPayload?.media_path || '').trim())
+    }
+  };
+}
+
+async function executeEmailPackageRuntime({ project, emailPackage, emailPayload }) {
+  return {
+    execution_state: 'executed',
+    execution_backend: 'canonical_email_runtime',
+    executed_at: new Date().toISOString(),
+    project,
+    campaign_name: String(emailPackage?.campaign_name || '').trim(),
+    ready_for_provider_send: true,
+    details: {
+      has_subject: Boolean(String(emailPayload?.subject || '').trim()),
+      has_html_body: Boolean(String(emailPayload?.html_body || '').trim())
+    }
+  };
+}
+
+async function executeMediaGenerationRuntime({ project, payload, promptPack }) {
+  registerDefaultModels();
+  const orchestrator = createJobDispatchOrchestrator();
+  const prompt = deriveMediaExecutionPrompt(promptPack, payload || {});
+
+  const dispatchResult = await orchestrator.dispatch({
+    media_type: payload?.media_type || payload?.type || 'image',
+    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+    project,
+    platform: payload?.platform || '',
+    prompt,
+    priority: payload?.priority || 'normal'
+  });
+
+  const submission = dispatchResult?.worker_submission || null;
+  if (!dispatchResult?.success || !submission?.success) {
+    const failureMessage = String(submission?.message || dispatchResult?.error || 'Native media execution runtime is not available.').trim();
+    const error = new Error(failureMessage);
+    error.statusCode = 503;
+    error.code = 'MEDIA_EXECUTION_UNAVAILABLE';
+    throw error;
+  }
+
+  return {
+    execution_state: 'executed',
+    execution_backend: 'native_media_runtime',
+    executed_at: new Date().toISOString(),
+    image_prompt: prompt,
+    scene_count: 1,
+    dispatch: dispatchResult
+  };
+}
+
+async function executeAdExecutionPackageRuntime({ payload, adPackage }) {
+  const basePrompt = String(payload?.prompt || adPackage?.ad_copy || adPackage?.headline || '').trim();
+  if (!basePrompt) {
+    const error = new Error('Unable to execute ad package: prompt data is missing.');
+    error.statusCode = 422;
+    error.code = 'AD_EXECUTION_PROMPT_MISSING';
+    throw error;
+  }
+
+  const campaignPack = await mediaProviderLayer.generateCampaignPack({
+    prompt: basePrompt,
+    objective: payload?.objective || 'Generate execution-ready ad assets',
+    channel: payload?.channel || payload?.platform || 'multi-channel',
+    brandStyle: payload?.brandStyle || payload?.brand_style || ''
+  });
+
+  if (!campaignPack?.ok) {
+    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+    const error = new Error(message);
+    error.statusCode = 503;
+    error.code = 'AD_EXECUTION_PROVIDER_UNAVAILABLE';
+    throw error;
+  }
+
+  const generated = campaignPack.campaign_pack || {};
+
+  return {
+    execution_state: 'executed',
+    execution_backend: 'ad_ai_provider_runtime',
+    executed_at: new Date().toISOString(),
+    ad_copy: String(generated.channel_notes || adPackage.ad_copy || '').trim(),
+    headline: String(generated.image_prompt || adPackage.headline || '').trim(),
+    cta: adPackage.cta,
+    audience: adPackage.audience,
+    budget_suggestion: adPackage.budget_suggestion,
+    provider: campaignPack.provider,
+    model: campaignPack.model,
+    generated_campaign_pack: generated
+  };
+}
+
 function getExecutionPaths(projectName) {
   const safeProject = String(projectName || '').trim().toLowerCase();
   const resolution = unifiedDataPathResolver.resolve(safeProject, {
@@ -14134,6 +15046,75 @@ function buildPublishingGovernanceError(message, details = {}) {
   error.statusCode = 409;
   error.details = details;
   return error;
+}
+
+function enforceGovernanceMutationGate(req, res, options = {}) {
+  const projectName = String(options.projectName || '').trim().toLowerCase();
+  const decision = evaluateGovernanceMutationGate({
+    projectName,
+    action: options.action,
+    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+    entityType: options.entityType,
+    entityId: options.entityId,
+    requestedAction: options.requestedAction,
+    skipApprovalGate: options.skipApprovalGate === true,
+    setupPayload: options.setupPayload || req.body || {}
+  });
+
+  if (decision.allowed) {
+    return true;
+  }
+
+  appLogger.warn('governance_mutation_denied', {
+    route: req.path,
+    action: String(options.action || '').trim().toLowerCase() || 'unknown',
+    method: req.method,
+    project: projectName || null,
+    decision: decision.decision || null,
+    reason: decision.reason,
+    governance_code: decision.code,
+    details: sanitizeValue(decision.details || {})
+  });
+
+  res.status(403).json(decision.response);
+  return false;
+}
+
+function enforceGovernanceApprovalLifecycle(req, res, options = {}) {
+  const projectName = String(options.projectName || '').trim().toLowerCase();
+  const decision = evaluateGovernanceApprovalLifecycle({
+    projectName,
+    action: options.action,
+    approvalId: options.approvalId || req.body?.approval_id || req.body?.approvalId,
+    entityType: options.entityType,
+    entityId: options.entityId,
+    requestedAction: options.requestedAction,
+    route: options.route || req.path,
+    method: req.method,
+    setupPayload: options.setupPayload || req.body || {},
+    payload: options.payload || req.body || {},
+    actor: options.actor || req.body?.actor || 'control-center',
+    requestedBy: options.requestedBy || req.body?.actor || 'control-center',
+    requestedFor: options.requestedFor,
+    routeTarget: options.routeTarget,
+    sourcePage: options.sourcePage,
+    serviceDomain: options.serviceDomain,
+    linkedExecutionId: options.linkedExecutionId,
+    riskLevel: options.riskLevel,
+    title: options.title,
+    summary: options.summary,
+    notes: options.notes
+  });
+
+  if (decision.allowed) {
+    if (decision.approval) {
+      req.governanceApproval = decision.approval;
+    }
+    return true;
+  }
+
+  res.status(403).json(decision.response);
+  return false;
 }
 
 function getLatestPublishingApproval(projectName, jobId) {
@@ -21404,7 +22385,11 @@ const executionJobBridge = createExecutionJobBridge({
   buildEmailReadyPayload,
   buildMediaGenerationMock,
   resolveCampaignPackageForAds,
-  buildAdExecutionPackage
+  buildAdExecutionPackage,
+  executePublishPackage: executePublishPackageRuntime,
+  executeEmailPackage: executeEmailPackageRuntime,
+  executeMediaGeneration: executeMediaGenerationRuntime,
+  executeAdExecutionPackage: executeAdExecutionPackageRuntime
 });
 const { executeJobBridge } = executionJobBridge;
 
@@ -21652,7 +22637,7 @@ app.get('/scheduler_queue', (req, res) => {
   }
 });
 
-app.post('/run_scheduler_worker_once', (req, res) => {
+app.post('/run_scheduler_worker_once', async (req, res) => {
   let projectName = '';
 
   try {
@@ -21689,7 +22674,7 @@ app.post('/run_scheduler_worker_once', (req, res) => {
       const executionTimestamp = new Date().toISOString();
 
       try {
-        const result = executeJobBridge(job);
+        const result = await executeJobBridge(job);
         job.status = 'completed';
         job.execution_state = result.execution_state || 'completed';
         job.last_error = null;
@@ -22138,6 +23123,8 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
+  assertProductionProfileHardening(process.env);
+
   const server = app.listen(PORT, () => {
     appLogger.info('service_started', {
       route: '/health',
@@ -22165,6 +23152,11 @@ if (require.main === module) {
 
 module.exports = {
   app,
+  __productionProfile: {
+    collectProductionBypassFlags,
+    validateProductionProfileHardening,
+    assertProductionProfileHardening
+  },
   __stability: {
     createProject,
     updateProjectSetup,

@@ -1448,6 +1448,49 @@ function buildGovernanceApprovalAlerts(summary) {
   }));
 }
 
+function getGovernanceApprovalId(item) {
+  const directId = asString(item?.approval_id || item?.approvalId);
+  if (directId) return directId;
+
+  const entityId = asString(item?.entity_id);
+  if (entityId && entityId !== "approval") return entityId;
+
+  const id = asString(item?.id || item?.notification_id);
+  if (id.startsWith("governance-approval-")) {
+    return id.slice("governance-approval-".length);
+  }
+
+  return id;
+}
+
+function isGovernanceApprovalItem(item) {
+  return asString(item?.item_type) === "approval"
+    || asString(item?.entity_type) === "approval"
+    || asString(item?.source) === "approval_pending";
+}
+
+function isOpenGovernanceApproval(item) {
+  const status = asString(item?.status || item?.approval_status || "pending").toLowerCase();
+  return !status || ["pending", "open", "queued", "in_review", "review"].includes(status);
+}
+
+function renderGovernanceDecisionActions(item, escapeHtml) {
+  if (!isGovernanceApprovalItem(item) || !isOpenGovernanceApproval(item)) return "";
+
+  const approvalId = getGovernanceApprovalId(item);
+  if (!approvalId) return "";
+
+  return `
+    <div class="ops-governance-actions">
+      <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance</button>
+      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>
+      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(approvalId)}">Reject</button>
+      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(approvalId)}">Request Changes</button>
+      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(approvalId)}">Escalate</button>
+    </div>
+  `;
+}
+
 function renderNotificationCenter(context, state, projectName) {
   const root = context.$("pageRoot");
   if (!root) return;
@@ -1660,6 +1703,7 @@ function renderNotificationCenter(context, state, projectName) {
                 ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Source Page") : ""}
                 ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
               </div>
+              ${selectedItem ? renderGovernanceDecisionActions(selectedItem, escapeHtml) : ""}
               <div class="ops-mini-list">
                 <div class="ops-mini-item">
                   <strong>${escapeHtml("Approval pending")}</strong>
@@ -1761,6 +1805,80 @@ function renderNotificationCenter(context, state, projectName) {
         context.showMessage?.("Notification marked as read.");
       } catch (error) {
         context.showError?.(error.message || "Failed to update notification.");
+      }
+    };
+  });
+  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+    button.onclick = async () => {
+      const action = button.getAttribute("data-governance-action") || "";
+      if (action !== "refresh") return;
+
+      if (!projectName || !context.fetchProjectGovernance) {
+        context.showError?.("Governance refresh is unavailable for this project.");
+        return;
+      }
+
+      try {
+        const liveGovernance = await context.fetchProjectGovernance(projectName);
+        const currentState = context.getState();
+        const governanceData = asObject(currentState.data.governance);
+        renderNotificationCenter(context, {
+          ...currentState,
+          data: {
+            ...currentState.data,
+            governance: {
+              ...governanceData,
+              summary: asObject(liveGovernance)
+            }
+          }
+        }, projectName);
+        context.showMessage?.("Governance approvals refreshed.");
+      } catch (error) {
+        context.showError?.(error.message || "Failed to refresh governance approvals.");
+      }
+    };
+  });
+  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+    button.onclick = async () => {
+      const approvalId = button.getAttribute("data-approval-id") || "";
+      const decision = button.getAttribute("data-governance-decision") || "";
+
+      if (!approvalId || !decision || !context.decideProjectApproval) {
+        context.showError?.("Governance decision is unavailable for this notification.");
+        return;
+      }
+
+      const confirmed = window.confirm(`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.`);
+      if (!confirmed) return;
+
+      try {
+        await context.decideProjectApproval(projectName, approvalId, {
+          decision,
+          note: `${titleCase(decision)} from Notification Center.`,
+          actor: "notification-center",
+          escalate_to: "admin"
+        });
+        context.showMessage?.(`Approval ${titleCase(decision)} for ${approvalId}.`);
+
+        if (context.fetchProjectGovernance) {
+          const liveGovernance = await context.fetchProjectGovernance(projectName);
+          const currentState = context.getState();
+          const governanceData = asObject(currentState.data.governance);
+          renderNotificationCenter(context, {
+            ...currentState,
+            data: {
+              ...currentState.data,
+              governance: {
+                ...governanceData,
+                summary: asObject(liveGovernance)
+              }
+            }
+          }, projectName);
+        } else {
+          await context.reloadProjectData?.(projectName);
+        }
+      } catch (error) {
+        context.showError?.(error.message || "Failed to update approval.");
       }
     };
   });
@@ -2145,4 +2263,3 @@ export const operationsCentersRoute = {
     renderOperationsCentersOverview(context);
   }
 };
-

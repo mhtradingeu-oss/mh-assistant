@@ -35,6 +35,14 @@ function blockCriticalPublicMutationsEnabled() {
   return readBooleanEnv("MH_BLOCK_CRITICAL_PUBLIC_MUTATION_ALIASES", false);
 }
 
+function isProductionMode(options = {}) {
+  if (typeof options.productionMode === "boolean") {
+    return options.productionMode;
+  }
+
+  return String(process.env.NODE_ENV || "").trim().toLowerCase() === "production";
+}
+
 function isCriticalPublicAlias(pathname) {
   const value = normalizePath(pathname);
   return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
@@ -44,12 +52,19 @@ function isMutationMethod(method) {
   return DEFAULT_BLOCKED_PUBLIC_ALIAS_METHODS.includes(normalizeMethod(method));
 }
 
-function classifyPublicAliasAccess(method, pathname) {
+function isPublicSensitiveMutationPath(pathname) {
+  const value = normalizePath(pathname);
+  return /ai\/|native-media|api\/media|execute_|generate_media_from_prompt|build_ad_execution_package|integrations|publishing|governance|approvals|sources|workflows/i.test(value);
+}
+
+function classifyPublicAliasAccess(method, pathname, options = {}) {
   const normalizedMethod = normalizeMethod(method);
   const normalizedPath = normalizePath(pathname);
   const publicAlias = isPublicAliasPath(normalizedPath);
   const mutation = isMutationMethod(normalizedMethod);
   const critical = publicAlias && isCriticalPublicAlias(normalizedPath);
+  const sensitiveMutation = publicAlias && mutation && isPublicSensitiveMutationPath(normalizedPath);
+  const hasAuthorizedWriteKey = options.hasAuthorizedWriteKey === true;
 
   if (!publicAlias) {
     return {
@@ -65,7 +80,18 @@ function classifyPublicAliasAccess(method, pathname) {
       publicAlias: true,
       allowed: false,
       status: "blocked",
-      reason: "public_alias_compatibility_disabled"
+      reason: "public_alias_compatibility_disabled",
+      code: "public_alias_retired"
+    };
+  }
+
+  if (mutation && isProductionMode(options) && !hasAuthorizedWriteKey) {
+    return {
+      publicAlias: true,
+      allowed: false,
+      status: "blocked_sensitive_mutation_unauthorized",
+      reason: "public_alias_mutation_requires_authorization",
+      code: "route_permission_denied"
     };
   }
 
@@ -74,7 +100,8 @@ function classifyPublicAliasAccess(method, pathname) {
       publicAlias: true,
       allowed: false,
       status: "blocked",
-      reason: "critical_public_mutation_alias_blocked"
+      reason: "critical_public_mutation_alias_blocked",
+      code: "route_permission_denied"
     };
   }
 
@@ -91,8 +118,10 @@ function classifyPublicAliasAccess(method, pathname) {
     return {
       publicAlias: true,
       allowed: true,
-      status: "compatibility_write",
-      reason: "public_write_alias_compatibility_enabled"
+      status: sensitiveMutation ? "compatibility_sensitive_write" : "compatibility_write",
+      reason: sensitiveMutation
+        ? "sensitive_public_write_alias_compatibility_enabled"
+        : "public_write_alias_compatibility_enabled"
     };
   }
 
@@ -130,9 +159,11 @@ module.exports = {
   isPublicAliasPath,
   isCriticalPublicAlias,
   isMutationMethod,
+  isPublicSensitiveMutationPath,
   readBooleanEnv,
   publicAliasCompatibilityEnabled,
   blockCriticalPublicMutationsEnabled,
+  isProductionMode,
   classifyPublicAliasAccess,
   buildPublicAliasHeaders
 };

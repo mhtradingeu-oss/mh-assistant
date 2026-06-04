@@ -905,6 +905,20 @@ function getSmartConnectLabel(card) {
   return getQuickConnectLabel(card) || "Connect";
 }
 
+function hasSavedCredentialState(card) {
+  const authFields = asArray(card.auth_fields);
+  const credentialState = asObject(card.credential_state);
+  if (!authFields.length) return true;
+
+  return authFields.every((field) => Boolean(asObject(credentialState[field]).is_set));
+}
+
+function shouldUseReconnectAction(card) {
+  if (card.statusLabel === "Token expired") return true;
+  if (card.statusLabel !== "Error") return false;
+  return hasSavedCredentialState(card);
+}
+
 function getDrawerPrimaryAction(card) {
   if (card.backendSupported === false) {
     return { action: "select", label: "Open setup" };
@@ -912,7 +926,7 @@ function getDrawerPrimaryAction(card) {
   if (card.statusLabel === "Connected") {
     return { action: "sync", label: "Run backend sync" };
   }
-  if (["Token expired", "Error"].includes(card.statusLabel)) {
+  if (shouldUseReconnectAction(card)) {
     return { action: "reconnect", label: getSmartConnectLabel(card) };
   }
   return { action: "connect", label: getSmartConnectLabel(card) };
@@ -1209,7 +1223,7 @@ function getConnectorWorkspaceAction(card) {
   if (statusKey === "failed") {
     return {
       label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",
-      action: "reconnect"
+      action: shouldUseReconnectAction(card) ? "reconnect" : "connect"
     };
   }
 
@@ -1499,7 +1513,11 @@ function bindIntegrationActions({
         ""
       ).toLowerCase();
       if (reconnect && governanceCode === "governance_approval_required") {
-        showMessage?.(`Governance approval requested for ${integration.label}. Open Governance to review the reconnect request.`);
+        const approvalId = asString(error?.payload?.approval?.approval_id);
+        showMessage?.(`Governance approval requested for ${integration.label}${approvalId ? ` (${approvalId})` : ""}. Review and decide it in Governance before reconnecting.`);
+        try {
+          await reloadProjectData(projectName);
+        } catch (_) {}
         navigateTo("governance");
         render();
         return;

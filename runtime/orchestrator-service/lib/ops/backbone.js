@@ -23,7 +23,13 @@ const DEFAULT_POLICY_RULES = {
   brand_safety_review_required: true,
   allow_admin_override: true,
   auto_escalate_critical_risk: true,
-  freeze_publishing: false
+  freeze_publishing: false,
+  require_approval_for_team_model_changes: true,
+  require_approval_for_source_registry_changes: true,
+  require_approval_for_project_setup_authority_changes: true,
+  block_team_model_changes: false,
+  block_source_registry_changes: false,
+  block_project_setup_authority_changes: false
 };
 
 const MAX_ITEMS = {
@@ -855,7 +861,13 @@ function ensureOperationsFiles(paths) {
       brand_safety_review_required: true,
       allow_admin_override: true,
       auto_escalate_critical_risk: true,
-      freeze_publishing: false
+      freeze_publishing: false,
+      require_approval_for_team_model_changes: true,
+      require_approval_for_source_registry_changes: true,
+      require_approval_for_project_setup_authority_changes: true,
+      block_team_model_changes: false,
+      block_source_registry_changes: false,
+      block_project_setup_authority_changes: false
     },
     approval_owners: {
       content: 'Marketing lead',
@@ -2590,6 +2602,14 @@ function createApproval(projectName, input = {}) {
     title,
     entity_type: targetEntityType,
     entity_id: targetEntityId,
+    mutation_type: asString(input.mutation_type || current.mutation_type) || asString(input.approval_type || current.approval_type) || targetEntityType,
+    route: asString(input.route || current.route),
+    method: asString(input.method || current.method).toUpperCase(),
+    approval_fingerprint: asString(input.approval_fingerprint || current.approval_fingerprint),
+    intended_action_id: asString(input.intended_action_id || current.intended_action_id),
+    linked_execution_id: asString(input.linked_execution_id || current.linked_execution_id),
+    request_payload_hash: asString(input.request_payload_hash || current.request_payload_hash),
+    request_payload_summary: input.request_payload_summary != null ? input.request_payload_summary : current.request_payload_summary || null,
     reviewer: asString(input.reviewer || current.reviewer || input.requested_for) || roleDisplay(team, reviewerRole),
     reviewer_role: reviewerRole,
     requested_by: asString(input.requested_by || current.requested_by || input.actor) || 'mh-assistant',
@@ -2625,6 +2645,7 @@ function createApproval(projectName, input = {}) {
     created_at: createdAt,
     updated_at: nowIso(),
     decided_at: asString(input.decided_at || current.decided_at),
+    decision_at: asString(input.decision_at || current.decision_at),
     decided_by: asString(input.decided_by || current.decided_by),
     history: appendHistory(
       current,
@@ -2777,6 +2798,7 @@ function decideApproval(projectName, approvalId, input = {}) {
     escalation_chain: escalationChain,
     decided_at: decidedAt,
     updated_at: decidedAt,
+    decision_at: decidedAt,
     timestamps: mergeDefined(asObject(current.timestamps), {
       updated_at: decidedAt,
       decided_at: decidedAt
