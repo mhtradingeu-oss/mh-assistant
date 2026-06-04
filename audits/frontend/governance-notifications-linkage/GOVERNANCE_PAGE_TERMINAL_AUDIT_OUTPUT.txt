@@ -1,0 +1,320 @@
+
+===== GOVERNANCE TERMINAL AUDIT START =====
+
+===== TOOLS =====
+git version 2.47.1
+v25.2.1
+curl 8.7.1 (x86_64-apple-darwin25.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.67.1
+grep (BSD grep, GNU compatible) 2.6.0-FreeBSD
+
+===== PORT 3000 =====
+COMMAND   PID       USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    74862 nadeemnour   15u  IPv6 0xb83c39d99e0001e6      0t0  TCP *:hbci (LISTEN)
+
+===== NODE CHECK =====
+
+===== CUSTOMER READ-ONLY API WITH KEY =====
+
+===== GET /api/projects/hairoticmen/customer-operations/readiness =====
+{"ok":true,"data":{"runtime":"mh-os-customer-operations","runtime_ready":false,"inbox_ready":false,"conversations_ready":false,"messages_ready":false,"tickets_ready":false,"customers_ready":false,"escalation_ready":false,"sla_ready":false,"integration_inbox_bridge_ready":false,"voice_ready":false,"ivr_ready":false,"crm_ready":false,"external_send_ready":false,"summary":{},"blockers":["Voice provider execution is not ready.","IVR provider execution is not ready.","CRM provider execution is not ready.","External send is locked for Customer Center v1."],"warnings":["Customer Center read model is preview-first and read-only.","Customer messages may be truncated or masked for privacy."]}}
+
+===== GET /api/projects/hairoticmen/customer-operations/inbox =====
+{"ok":true,"data":[]}
+
+===== GET /api/projects/hairoticmen/customer-operations/conversations =====
+{"ok":true,"data":[]}
+
+===== GET /api/projects/hairoticmen/customer-operations/tickets =====
+{"ok":true,"data":[]}
+
+===== GET /api/projects/hairoticmen/customer-operations/channels =====
+{"ok":true,"data":[{"channel_id":"website-chat","provider":"internal","type":"messaging","read_ready":false,"draft_ready":true,"external_send_ready":false,"voice_ready":false,"ivr_ready":false,"crm_sync_ready":false,"backend_supported":false,"blocked_reason":"External send, voice, IVR, and CRM mutation are locked for Customer Center v1."},{"channel_id":"email","provider":"smtp","type":"messaging","read_ready":false,"draft_ready":true,"external_send_ready":false,"voice_ready":false,"ivr_ready":false,"crm_sync_ready":false,"backend_supported":false,"blocked_reason":"External send, voice, IVR, and CRM mutation are locked for Customer Center v1."},{"channel_id":"instagram","provider":"meta","type":"messaging","read_ready":false,"draft_ready":true,"external_send_ready":false,"voice_ready":false,"ivr_ready":false,"crm_sync_ready":false,"backend_supported":false,"blocked_reason":"External send, voice, IVR, and CRM mutation are locked for Customer Center v1."},{"channel_id":"voice","provider":"ivr","type":"messaging","read_ready":false,"draft_ready":true,"external_send_ready":false,"voice_ready":true,"ivr_ready":false,"crm_sync_ready":false,"backend_supported":false,"blocked_reason":"Exter
+
+===== GOVERNANCE API WITH KEY =====
+{"project":"hairoticmen","generated_at":"2026-06-03T21:06:23.968Z","policy":{"approval_required_actions":["publish","launch","budget_change","integration_reconnect","execution_mode_change"],"risk_levels":["low","medium","high","critical"],"execution_policy":{"semi_auto_requires_approval":true,"auto_execution_requires_rules":true,"audit_logging_enabled":true},"mobile_ready":true,"updated_at":"2026-04-27T09:56:37.673Z","policy_rules":{"approval_before_publish":true,"high_risk_claim_review_required":true,"brand_safety_review_required":true,"allow_admin_override":true,"auto_escalate_critical_risk":true,"freeze_publishing":false,"require_approval_for_team_model_changes":true,"require_approval_for_source_registry_changes":true,"require_approval_for_project_setup_authority_changes":true,"block_team_model_changes":false,"block_source_registry_changes":false,"block_project_setup_authority_changes":false}},"review_model":{"ownership":{"campaign":"MH Assistant","content":"Writer","media":"Designer","publishing":"Publisher","compliance":"Compliance Reviewer","admin":"Admin"},"escalation_chain":{"low":["compliance_reviewer"],"medium":["compliance_reviewer","strategist"],"high":["compliance_reviewer","admin"],"critical":["compliance_reviewer","admin"]}},"sections":{"approval_queue":[{"id":"approval_1780516122896_jfss4z","project":"hairoticmen","title":"AI chat approval","entity_type":"ai_command","entity_id":"media","mutation_type":"ai_chat_run","route":"/media-manager/project/hairoticmen/ai/chat","method":"POST","approval_fingerprint":"98f7b4946692c060fa2d88fe9b9a1b97a41d2b8925fe66ea10977763a88ef195","intended_action_id":"98f7b4946692c060fa2d88fe9b9a1b97a41d2b8925fe66ea10977763a88ef195","linked_execution_id":"media","request_payload_hash":"af63089ffb49fddbbb15f948f8789a7262440b66156cdab862b9fb0baf1a5d2a","request_payload_summary":{"project":"hairoticmen","specialistId":"media","specialistName":"Media Director","mode":"solo","request":"Review the current task backlog for hairoticmen. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.","message":"Review the current task backlog for hairoticmen. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.","messages":[{"id":"chat-user-1780516122803-2lf96","role":"user","modeId":"media","specialistId":"media","specialistLabel":"You","teamMode":"solo","content":"Review the current task backlog for hairoticmen. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.","createdAt":"2026-06-03T19:48:42.803Z","source":"ai-command-chat"}],"language":"Auto - follow the latest user message language","outputLanguage":"German","market":"Germany","marketLanguage":"German","contextSummary":{"projectName":"hairoticmen","campaign":"Not selected yet","readinessScore":77},"safetyInstruction":"Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.","source":"ai-command-specialist-chat","actor":
+
+===== NOTIFICATION CENTER API WITH KEY =====
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /media-manager/project/hairoticmen/operations/notification-center</pre>
+</body>
+</html>
+
+
+===== GOVERNANCE BUTTON LABELS =====
+384:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
+385:        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
+386:        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
+387:        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
+388:        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>
+442:            Create Approval Request
+954:            <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
+955:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
+1211:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+1212:                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>
+1216:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
+1217:                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
+1218:                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
+1219:                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
+1220:                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>
+1237:                        Create Approval Request
+1284:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
+
+===== GOVERNANCE BUTTON HANDLERS =====
+384:        <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(item.id)}">Submit Reviewed Approval</button>
+385:        <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(item.id)}">Submit Rejection Decision</button>
+386:        <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(item.id)}">Request Changes Review</button>
+387:        <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(item.id)}">Escalate Review</button>
+388:        <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(item.id)}">Record High-Risk Override</button>
+435:            data-governance-request-approval="true"
+920:                <button class="btn btn-secondary" type="button" data-governance-focus="all">View Full Queue</button>
+921:                <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Open Approvals</button>
+922:                <button class="btn btn-secondary" type="button" data-governance-open-ai>Ask AI for Guidance</button>
+954:            <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh Governance Data</button>
+955:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI Context</button>
+956:            <button class="btn btn-secondary" type="button" data-governance-focus="approvals">Focus Approvals</button>
+1053:                  <button class="governance-focus-tab${session.focus === value ? " is-active" : ""}" type="button" data-governance-focus="${escapeHtml(value)}">
+1077:                            <button class="governance-select-link" type="button" data-governance-select="${escapeHtml(item.selected_key)}">
+1210:                <button class="btn btn-secondary" type="button" data-governance-action="refresh">Refresh</button>
+1211:                <button class="btn btn-primary" type="button" data-governance-action="save-policy">Save Backend Governance Policy</button>
+1212:                <button class="btn btn-secondary" type="button" data-governance-action="sync-settings"${Object.keys(settingsDraft).length ? "" : " disabled"}>Review & Sync Settings-Derived Rules</button>
+1216:                      <button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Reviewed Approval</button>
+1217:                      <button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(selectedItem.id)}">Submit Rejection Decision</button>
+1218:                      <button class="btn btn-secondary" type="button" data-governance-decision="changes_requested" data-approval-id="${escapeHtml(selectedItem.id)}">Request Changes Review</button>
+1219:                      <button class="btn btn-secondary" type="button" data-governance-decision="escalated" data-approval-id="${escapeHtml(selectedItem.id)}">Escalate Review</button>
+1220:                      <button class="btn btn-secondary" type="button" data-governance-decision="overridden" data-approval-id="${escapeHtml(selectedItem.id)}">Record High-Risk Override</button>
+1230:                        data-governance-request-approval="true"
+1284:            <button class="btn btn-secondary" type="button" data-governance-open-ai>Open AI: Review in AI Workspace</button>
+1309:  Array.from(root.querySelectorAll("[data-governance-decision]")).forEach((button) => {
+1312:      const decision = button.getAttribute("data-governance-decision") || "";
+1336:  Array.from(root.querySelectorAll("[data-governance-focus]")).forEach((button) => {
+1338:      session.focus = button.getAttribute("data-governance-focus") || "all";
+1343:  Array.from(root.querySelectorAll("[data-governance-select]")).forEach((button) => {
+1345:      session.selectedKey = button.getAttribute("data-governance-select") || "";
+1350:  Array.from(root.querySelectorAll("[data-governance-request-approval]")).forEach((button) => {
+1375:  Array.from(root.querySelectorAll("[data-governance-action]")).forEach((button) => {
+1377:      const action = button.getAttribute("data-governance-action");
+1440:  Array.from(root.querySelectorAll("[data-governance-open-ai]")).forEach((button) => {
+
+===== NOTIFICATION ACTION LABELS =====
+1659:                <button class="btn btn-primary" type="button" id="notificationCenterRefreshBtn">Refresh Notification Center</button>
+1660:                ${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Source Page") : ""}
+1661:                ${selectedItem?.notification_id ? `<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>` : ""}
+1678:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>
+1679:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>
+1680:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>
+1681:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
+
+===== GOVERNANCE / NOTIFICATION HYDRATION =====
+public/control-center/app.js:43:  fetchProjectGovernance,
+public/control-center/app.js:72:  fetchProjectNotificationCenter
+public/control-center/app.js:2084:      fetchProjectGovernance,
+public/control-center/app.js:2113:      fetchProjectNotificationCenter
+public/control-center/pages/operations-centers.js:281:  const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;
+public/control-center/pages/operations-centers.js:282:  const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;
+public/control-center/pages/operations-centers.js:1433:function buildGovernanceApprovalAlerts(summary) {
+public/control-center/pages/operations-centers.js:1463:    didAutoRefresh: false,
+public/control-center/pages/operations-centers.js:1464:    didHydrateGovernanceApprovals: false
+public/control-center/pages/operations-centers.js:1467:  const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
+public/control-center/pages/operations-centers.js:1468:  const governanceApprovalAlerts = buildGovernanceApprovalAlerts(asObject(asObject(state.data.governance).summary));
+public/control-center/pages/operations-centers.js:1479:  const approvalAlerts = (asArray(notificationCenter.approval_pending_alerts).length
+public/control-center/pages/operations-centers.js:1480:    ? asArray(notificationCenter.approval_pending_alerts)
+public/control-center/pages/operations-centers.js:1713:    if (context.fetchProjectNotificationCenter && projectName) {
+public/control-center/pages/operations-centers.js:1717:      context.fetchProjectNotificationCenter(projectName)
+public/control-center/pages/operations-centers.js:1772:    !session.didHydrateGovernanceApprovals &&
+public/control-center/pages/operations-centers.js:1774:    context.fetchProjectGovernance
+public/control-center/pages/operations-centers.js:1776:    session.didHydrateGovernanceApprovals = true;
+public/control-center/pages/operations-centers.js:1778:      context.fetchProjectGovernance(projectName)
+public/control-center/pages/operations-centers.js:1780:          const liveApprovalAlerts = buildGovernanceApprovalAlerts(asObject(liveGovernance));
+public/control-center/pages/operations-centers.js:1789:            approval_pending_alerts: liveApprovalAlerts
+public/control-center/pages/operations-centers.js:1811:  if (!session.didAutoRefresh && projectName && context.fetchProjectNotificationCenter) {
+public/control-center/pages/operations-centers.js:1812:    session.didAutoRefresh = true;
+public/control-center/pages/operations-centers.js:1964:      if (!projectName || !context.fetchProjectNotificationCenter) return;
+public/control-center/pages/operations-centers.js:1976:      context.fetchProjectNotificationCenter(projectName)
+runtime/orchestrator-service/lib/ops/backbone.js:3838:    approval_pending_alerts: approvalPendingAlerts,
+runtime/orchestrator-service/lib/ops/backbone.js:3840:    provider_disconnect_alerts: providerDisconnectAlerts,
+
+===== INTEGRATION GOVERNANCE HANDOFF =====
+public/control-center/pages/integrations.js:1110:function getTestPreflightIssue(integration, record) {
+public/control-center/pages/integrations.js:1252:  reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1253:  testProjectIntegration,
+public/control-center/pages/integrations.js:1484:        await reconnectProjectIntegration(projectName, integrationId, payload);
+public/control-center/pages/integrations.js:1501:      if (reconnect && governanceCode === "governance_approval_required") {
+public/control-center/pages/integrations.js:1503:        navigateTo("governance");
+public/control-center/pages/integrations.js:1550:      const preflightIssue = getTestPreflightIssue(integration, record);
+public/control-center/pages/integrations.js:1562:        await testProjectIntegration(projectName, integrationId, {
+public/control-center/pages/integrations.js:1657:    reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1658:    testProjectIntegration,
+public/control-center/pages/integrations.js:1918:      reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1919:      testProjectIntegration,
+public/control-center/pages/integrations.js:1935:        reconnectProjectIntegration,
+public/control-center/pages/integrations.js:1936:        testProjectIntegration,
+public/control-center/api.js:1774:export async function reconnectProjectIntegration(projectName, integrationId, payload = {}) {
+public/control-center/api.js:1791:export async function testProjectIntegration(projectName, integrationId, payload = {}) {
+
+===== NO UNSAFE CUSTOMER MUTATION ROUTES =====
+runtime/orchestrator-service/server.js:12619:// place calls, trigger IVR, send provider messages, or auto-reply.
+
+===== GOVERNANCE GATE / BYPASS CHECK =====
+runtime/orchestrator-service/server.js:254:// Temporary local/server diagnostic bypass. Do not enable in production.
+runtime/orchestrator-service/server.js:301:  const bypassFlags = collectProductionBypassFlags(env);
+runtime/orchestrator-service/server.js:305:    bypassFlags,
+runtime/orchestrator-service/server.js:306:    blocked: productionMode && bypassFlags.length > 0,
+runtime/orchestrator-service/server.js:307:    allowedLocalDevelopment: !productionMode && bypassFlags.length > 0
+runtime/orchestrator-service/server.js:317:  const flagList = result.bypassFlags.map((flag) => flag.name).join(', ');
+runtime/orchestrator-service/server.js:319:    `Production startup blocked: bypass environment flags are not allowed in production (${flagList})`
+runtime/orchestrator-service/server.js:9482:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9488:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9570:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9576:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9658:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9664:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:9739:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:9745:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11016:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11022:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11055:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11061:      skipApprovalGate: true,
+runtime/orchestrator-service/server.js:11195:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11201:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11471:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11477:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11544:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11550:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11618:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11624:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11688:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11694:    skipApprovalGate: true
+runtime/orchestrator-service/server.js:11756:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:11762:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:11986:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12038:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12222:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12228:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12276:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12282:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12330:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12336:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12369:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12375:      skipApprovalGate: true
+runtime/orchestrator-service/server.js:12434:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12487:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12857:  if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:12960:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13003:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13046:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13085:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13124:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13156:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13188:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13230:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13272:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:13314:    if (!enforceGovernanceMutationGate(req, res, {
+runtime/orchestrator-service/server.js:14962:function enforceGovernanceMutationGate(req, res, options = {}) {
+runtime/orchestrator-service/server.js:14971:    skipApprovalGate: options.skipApprovalGate === true,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:13:  code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:330:    code: "governance_approval_required",
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:417:    skipApprovalGate: true
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:551:  if (input.skipApprovalGate === true && requiresApproval) {
+public/control-center/pages/integrations.js:1501:      if (reconnect && governanceCode === "governance_approval_required") {
+public/control-center/pages/operations-centers.js:1015:                  <p>Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1310:                  <p>Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
+public/control-center/pages/operations-centers.js:1690:                  <p>Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
+
+===== SECRET LEAK CHECK =====
+runtime/orchestrator-service/server.js:1236:  if (telemetryEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1364:    legacy_fallback_hit: legacyHit,
+runtime/orchestrator-service/server.js:1372:      legacy_fallback_read: !!readPolicy.legacyFallbackRead
+runtime/orchestrator-service/server.js:1376:  telemetryEntry.fallback_reason = classifyImmediateFallbackReason(telemetryEntry);
+runtime/orchestrator-service/server.js:1437:        legacyFallbackRead: !!resolution.featureFlags.legacy_fallback_read,
+runtime/orchestrator-service/server.js:1745:  if (!readEntry || readEntry.selected_root !== 'legacy' || !readEntry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1792:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1793:    fallback_rate: 0,
+runtime/orchestrator-service/server.js:1794:    fallback_causes: {
+runtime/orchestrator-service/server.js:1835:    if (entry.selected_root === 'legacy' && entry.legacy_fallback_hit) {
+runtime/orchestrator-service/server.js:1836:      stats.fallback_hit_count += 1;
+runtime/orchestrator-service/server.js:1839:      if (!Object.prototype.hasOwnProperty.call(stats.fallback_causes, cause)) {
+runtime/orchestrator-service/server.js:1840:        stats.fallback_causes.unresolved_risk += 1;
+runtime/orchestrator-service/server.js:1842:        stats.fallback_causes[cause] += 1;
+runtime/orchestrator-service/server.js:1856:    stats.fallback_rate = stats.read_events > 0
+runtime/orchestrator-service/server.js:1857:      ? Number((stats.fallback_hit_count / stats.read_events).toFixed(4))
+runtime/orchestrator-service/server.js:1862:    fallbackHits += stats.fallback_hit_count;
+runtime/orchestrator-service/server.js:1863:    historicalFallbacks += stats.fallback_causes.historical_artifact;
+runtime/orchestrator-service/server.js:1864:    unresolvedStructuralMismatches += stats.fallback_causes.structural_mismatch;
+runtime/orchestrator-service/server.js:1866:      stats.fallback_causes.parity_gap +
+runtime/orchestrator-service/server.js:1867:      stats.fallback_causes.missing_canonical_write +
+runtime/orchestrator-service/server.js:1868:      stats.fallback_causes.policy_or_config_mismatch;
+runtime/orchestrator-service/server.js:1904:      fallback_hit_count: fallbackHits,
+runtime/orchestrator-service/server.js:1906:      fallback_rate: Number(fallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1907:      fallback_historical_rate: Number(historicalFallbackRate.toFixed(4)),
+runtime/orchestrator-service/server.js:1932:    fallback_hit_count: 0,
+runtime/orchestrator-service/server.js:1940:    aggregate.fallback_hit_count += summary.totals.fallback_hit_count;
+runtime/orchestrator-service/server.js:1949:  aggregate.fallback_rate = totalReads > 0
+runtime/orchestrator-service/server.js:1950:    ? Number((aggregate.fallback_hit_count / totalReads).toFixed(4))
+runtime/orchestrator-service/server.js:3466:      decorative_graphics_allowed: false,
+runtime/orchestrator-service/server.js:3593:        decorative_graphics_allowed: false
+runtime/orchestrator-service/server.js:7198:        reason: 'canonical_legacy_parity_check_mismatch',
+runtime/orchestrator-service/server.js:7213:      fallback_in_use: !canonicalExists && legacyExists
+runtime/orchestrator-service/server.js:7218:  const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+runtime/orchestrator-service/server.js:7223:    fallback_dependencies: fallbackDependencies,
+runtime/orchestrator-service/server.js:13918:      fallback_prompt_pack:
+runtime/orchestrator-service/server.js:21918:      mode: 'rollback_product',
+runtime/orchestrator-service/server.js:21926:    logCriticalFailure('rollback_product', req, error, {
+runtime/orchestrator-service/server.js:22499:        running.push(isJobLockExpired(job, SCHEDULER_LOCK_TIMEOUT_MS) ? { ...job, lock_expired: true } : job);
+runtime/orchestrator-service/server.js:22729:      trigger: 'feedback_recorded',
+runtime/orchestrator-service/server.js:22737:      feedback_record: appended.record,
+runtime/orchestrator-service/server.js:22742:      analytics_file: getIntelligencePaths(projectName).performancePath
+
+===== GIT STATUS / DIFF =====
+ M audits/backend/production-completion-plan/backend-p1c2-public-alias-helper/public-alias-compatibility-check.json
+ M audits/backend/production-completion-plan/backend-p1c2-public-alias-helper/public-alias-compatibility-check.md
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/app.js
+ M public/control-center/pages/operations-centers.js
+ M runtime/orchestrator-service/lib/execution/execution-job-bridge.js
+ M runtime/orchestrator-service/lib/media/native/workers/external-gpu-worker-adapter.js
+ M runtime/orchestrator-service/lib/ops/backbone.js
+ M runtime/orchestrator-service/lib/security/public-alias-compatibility.js
+ M runtime/orchestrator-service/server.js
+ M scripts/backend/check-public-alias-compatibility.js
+?? audits/backend/local-truth-audit/
+?? audits/backend/public-alias-compatibility-check.json
+?? audits/backend/public-alias-compatibility-check.md
+?? audits/frontend/governance-notifications-linkage/
+?? package-lock.json
+?? runtime/orchestrator-service/lib/security/governance-mutation-gate.js
+?? runtime/orchestrator-service/lib/security/runtime-security-enforcement.js
+?? scripts/backend/check-admin-policy-granularity.js
+?? scripts/backend/check-core-execution-paths.js
+?? scripts/backend/check-durable-approval-lifecycle.js
+?? scripts/backend/check-governance-mutation-gates.js
+?? scripts/backend/check-live-provider-readiness.js
+?? scripts/backend/check-production-profile-hardening.js
+?? scripts/backend/check-public-alias-hardening.js
+?? scripts/backend/check-runtime-security-enforcement.js
+?? scripts/backend/run-live-provider-proof.js
+ .../public-alias-compatibility-check.json          | 1534 +++++++++++++++-----
+ .../public-alias-compatibility-check.md            |  162 ++-
+ data/projects/hairoticmen/ops/approvals.json       |  108 +-
+ data/projects/hairoticmen/ops/events.json          |   18 +
+ data/projects/hairoticmen/ops/notifications.json   |   22 +
+ data/projects/hairoticmen/ops/system.json          |    2 +-
+ public/control-center/app.js                       |    2 +
+ public/control-center/pages/operations-centers.js  |   74 +-
+ .../lib/execution/execution-job-bridge.js          |   93 +-
+ .../native/workers/external-gpu-worker-adapter.js  |   58 +-
+ runtime/orchestrator-service/lib/ops/backbone.js   |   26 +-
+ .../lib/security/public-alias-compatibility.js     |   41 +-
+ runtime/orchestrator-service/server.js             | 1031 ++++++++++++-
+ .../backend/check-public-alias-compatibility.js    |   81 +-
+ 14 files changed, 2690 insertions(+), 562 deletions(-)
+
+===== GOVERNANCE TERMINAL AUDIT END =====

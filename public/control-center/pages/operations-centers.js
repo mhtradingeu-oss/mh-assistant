@@ -1430,6 +1430,24 @@ function deriveProviderDisconnectAlerts(state, existingAlerts) {
     }));
 }
 
+function buildGovernanceApprovalAlerts(summary) {
+  return asArray(asObject(summary).sections?.approval_queue).map((item) => ({
+    id: `governance-approval-${asString(item.id)}`,
+    title: asString(item.title) || "Approval pending",
+    message: asString(item.summary) || "Approval requires review.",
+    severity: asString(item.risk_level) === "critical" ? "critical" : asString(item.risk_level) === "high" ? "warning" : "info",
+    status: asString(item.status) || "pending",
+    source: "approval_pending",
+    entity_type: "approval",
+    entity_id: asString(item.id),
+    route: "governance",
+    route_label: "governance",
+    created_at: asString(item.created_at),
+    notification_id: `governance-approval-${asString(item.id)}`,
+    item_type: "approval"
+  }));
+}
+
 function renderNotificationCenter(context, state, projectName) {
   const root = context.$("pageRoot");
   if (!root) return;
@@ -1441,10 +1459,13 @@ function renderNotificationCenter(context, state, projectName) {
     search: "",
     selectedKey: "",
     isLoading: false,
-    errorMessage: ""
+    errorMessage: "",
+    didAutoRefresh: false,
+    didHydrateGovernanceApprovals: false
   });
 
   const providerDisconnectAlerts = deriveProviderDisconnectAlerts(state, notificationCenter.provider_disconnect_alerts);
+  const governanceApprovalAlerts = buildGovernanceApprovalAlerts(asObject(asObject(state.data.governance).summary));
   const inboxItems = asArray(notificationCenter.notification_items).map((item) => ({
     ...item,
     title: asString(item.title) || "Notification",
@@ -1455,7 +1476,10 @@ function renderNotificationCenter(context, state, projectName) {
     item_type: "inbox"
   }));
   const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: "sync" }));
-  const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).map((item) => ({ ...item, item_type: "approval" }));
+  const approvalAlerts = (asArray(notificationCenter.approval_pending_alerts).length
+    ? asArray(notificationCenter.approval_pending_alerts)
+    : governanceApprovalAlerts
+  ).map((item) => ({ ...item, item_type: "approval" }));
   const publishAlerts = asArray(notificationCenter.publish_alerts).map((item) => ({ ...item, item_type: "publish" }));
   const providerAlerts = providerDisconnectAlerts.map((item) => ({ ...item, item_type: "provider" }));
   const claimAlerts = asArray(notificationCenter.claim_risk_alerts).map((item) => ({ ...item, item_type: "claim" }));
@@ -1742,6 +1766,52 @@ function renderNotificationCenter(context, state, projectName) {
   });
   bindRouteButtons(root, context);
   bindOpsAssistantButtons(root, context, prompts);
+
+  if (
+    !approvalAlerts.length &&
+    !session.didHydrateGovernanceApprovals &&
+    projectName &&
+    context.fetchProjectGovernance
+  ) {
+    session.didHydrateGovernanceApprovals = true;
+    queueMicrotask(() => {
+      context.fetchProjectGovernance(projectName)
+        .then((liveGovernance) => {
+          const liveApprovalAlerts = buildGovernanceApprovalAlerts(asObject(liveGovernance));
+          if (!liveApprovalAlerts.length) {
+            return;
+          }
+
+          const currentState = context.getState();
+          const ops = asObject(currentState.data.operations);
+          ops.notification_center = {
+            ...asObject(ops.notification_center),
+            approval_pending_alerts: liveApprovalAlerts
+          };
+
+          const governanceData = asObject(currentState.data.governance);
+          const nextState = {
+            ...currentState,
+            data: {
+              ...currentState.data,
+              operations: ops,
+              governance: {
+                ...governanceData,
+                summary: asObject(liveGovernance)
+              }
+            }
+          };
+
+          renderNotificationCenter(context, nextState, projectName);
+        })
+        .catch(() => {});
+    });
+  }
+
+  if (!session.didAutoRefresh && projectName && context.fetchProjectNotificationCenter) {
+    session.didAutoRefresh = true;
+    queueMicrotask(refreshNotificationCenter);
+  }
 }
 
 export const taskCenterRoute = {
