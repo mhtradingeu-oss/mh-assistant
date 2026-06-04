@@ -1310,6 +1310,23 @@
   },
   {
     "method": "POST",
+    "route": "/media-manager/project/:project/integrations/:integrationId",
+    "domain": "integrations",
+    "readWrite": "write",
+    "publicAlias": false,
+    "requiredAccess": "write_key",
+    "requiredScope": "integration.write",
+    "status": "active",
+    "dataRisk": "high",
+    "providerRisk": "critical",
+    "destructiveRisk": "low",
+    "providerExecution": true,
+    "destructive": false,
+    "auditEvent": "integrations.mutation.canonical",
+    "recommendation": "require_provider_scope_audit_and_idempotency"
+  },
+  {
+    "method": "POST",
     "route": "/media-manager/project/:project/integrations/:integrationId/connect",
     "domain": "integrations",
     "readWrite": "write",
@@ -2921,6 +2938,23 @@
     "providerExecution": false,
     "destructive": false,
     "auditEvent": "workflow_operations.mutation.public_alias",
+    "recommendation": "retire_public_mutation_alias"
+  },
+  {
+    "method": "POST",
+    "route": "/public/media-manager/project/:project/integrations/:integrationId",
+    "domain": "integrations",
+    "readWrite": "write",
+    "publicAlias": true,
+    "requiredAccess": "write_key",
+    "requiredScope": "integration.write",
+    "status": "retire",
+    "dataRisk": "high",
+    "providerRisk": "critical",
+    "destructiveRisk": "low",
+    "providerExecution": true,
+    "destructive": false,
+    "auditEvent": "integrations.mutation.public_alias",
     "recommendation": "retire_public_mutation_alias"
   },
   {

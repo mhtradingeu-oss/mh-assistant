@@ -1,0 +1,31 @@
+# Phase 2A — Authenticated Protected Endpoint Smoke Test
+
+Generated: Thu Jun  4 10:47:57 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: 043803c
+
+===== ENV KEY PRESENCE CHECK =====
+MH_CONTROL_CENTER_WRITE_KEY is NOT present in shell env.
+
+Key source: missing
+Key value is intentionally not printed.
+
+===== BASE PUBLIC HEALTH CHECKS =====
+--- /health ---
+{"status":"ok","service":"orchestrator-service","port":3000}
+--- /readyz ---
+{"service":"orchestrator-service","ready":true,"checks":{"control_write_key_configured":{"ok":true,"required":true},"data_dir_exists":{"ok":true,"required":true,"path":"/Users/nadeemnour/Desktop/Last-Update-MH-Assistant/data"},"data_dir_writable":{"ok":true,"required":true,"path":"/Users/nadeemnour/Desktop/Last-Update-MH-Assistant/data"},"project_registry_load":{"ok":true,"required":true,"total_projects":4},"integration_secret_key":{"ok":true,"required":true,"env":"MH_INTEGRATION_SECRET_KEY","file":"/Users/nadeemnour/Desktop/Last-Update-MH-Assistant/data/system/integration-secret.key.json"}},"protected_write_mode":{"enabled":true,"required_key_env":"MH_CONTROL_CENTER_WRITE_KEY","key_configured":true},"missing_required_env":[]}
+
+===== PROTECTED ENDPOINT WITHOUT KEY EXPECTED REJECTION =====
+--- /media-manager/storage/parity-readiness without key ---
+{"error":"Missing read key. Provide x-mh-control-key or Authorization: Bearer <key>."}
+
+===== PROTECTED ENDPOINT WITH KEY =====
+SKIPPED authenticated checks because MH_CONTROL_CENTER_WRITE_KEY is not available in this shell.
+Next action: export the key in the terminal, then rerun this phase.
+
+===== PHASE 2A DECISION PLACEHOLDER =====
+Review required:
+- If env key is missing: this phase is incomplete.
+- If authenticated endpoints return JSON and not Missing read key: protected read behavior is verified.
+- If any endpoint returns 500/error: investigate before final readiness.

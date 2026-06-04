@@ -1,0 +1,28 @@
+# Phase 2A.1 — Control Key Source Discovery
+
+Generated: Thu Jun  4 10:49:11 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: 043803c
+
+Important: this file intentionally records key presence only, never key values.
+
+===== SHELL ENV PRESENCE =====
+MH_CONTROL_CENTER_WRITE_KEY present in current shell env: no
+MH_CONTROL_CENTER_READ_KEY present in current shell env: no
+
+===== LOCAL ENV FILE CANDIDATES =====
+./.env.local
+
+===== KEY NAME PRESENCE IN ENV FILES WITHOUT VALUES =====
+--- ./.env.local ---
+
+===== READYZ CONFIRMS SERVER KEY CONFIGURATION =====
+ready: true
+protected_write_mode.enabled: true
+protected_write_mode.key_configured: true
+required_key_env: MH_CONTROL_CENTER_WRITE_KEY
+missing_required_env: []
+
+===== NEXT DECISION =====
+If an env file contains MH_CONTROL_CENTER_WRITE_KEY=<redacted>, load it safely in shell and rerun Phase 2A.
+If no env file contains it, inspect how the local server was started and from where it receives env variables.
