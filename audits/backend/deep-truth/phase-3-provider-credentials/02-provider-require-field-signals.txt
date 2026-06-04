@@ -1,0 +1,157 @@
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:23:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:24:  const privileges = await ebayGet('/sell/account/v1/privilege', ctx.credentials.accessToken);
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:39:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:46:      id: ctx.config.sellerId || ctx.primaryValue,
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:47:      name: ctx.config.sellerId || ctx.primaryValue
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:57:  const programs = await ebayGet('/sell/account/v1/program/get_opted_in_programs', ctx.credentials.accessToken);
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:14:    url: `${ctx.config.storeUrl.replace(/\/+$/, '')}/wp-json/wc/v3/${endpoint.replace(/^\/+/, '')}`,
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:16:      ...buildAuthParams(ctx.credentials),
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:30:  requireFields(ctx.config, ['storeUrl']);
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:31:  requireFields(ctx.credentials, ['consumerKey', 'consumerSecret'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:38:      store_url: ctx.config.storeUrl,
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:50:        url: ctx.config.storeUrl,
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:62:      id: ctx.config.storeUrl,
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:63:      name: systemStatus?.environment?.home_url || ctx.config.storeUrl
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:81:      store_url: ctx.config.storeUrl
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:123:        store_url: ctx.config.storeUrl
+runtime/orchestrator-service/lib/integrations/providers/google.js:12:  const propertyId = asString(ctx.config.propertyId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:18:      ...getBearerHeaders(ctx.credentials)
+runtime/orchestrator-service/lib/integrations/providers/google.js:35:    headers: getBearerHeaders(ctx.credentials)
+runtime/orchestrator-service/lib/integrations/providers/google.js:52:      ...getBearerHeaders(ctx.credentials)
+runtime/orchestrator-service/lib/integrations/providers/google.js:66:  const channelId = asString(ctx.config.channelId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:70:    headers: getBearerHeaders(ctx.credentials),
+runtime/orchestrator-service/lib/integrations/providers/google.js:94:    headers: getBearerHeaders(ctx.credentials),
+runtime/orchestrator-service/lib/integrations/providers/google.js:121:    headers: getBearerHeaders(ctx.credentials),
+runtime/orchestrator-service/lib/integrations/providers/google.js:137:  const customerId = asString(ctx.config.customerId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:139:    Authorization: `Bearer ${ctx.credentials.refreshToken || ctx.credentials.accessToken}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:140:    'developer-token': firstNonEmpty(ctx.credentials.developerToken, ctx.config.developerToken)
+runtime/orchestrator-service/lib/integrations/providers/google.js:143:  if (asString(ctx.config.managerId)) {
+runtime/orchestrator-service/lib/integrations/providers/google.js:144:    headers['login-customer-id'] = asString(ctx.config.managerId).replace(/-/g, '');
+runtime/orchestrator-service/lib/integrations/providers/google.js:162:  const folderId = asString(ctx.config.folderId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:166:    headers: getBearerHeaders(ctx.credentials),
+runtime/orchestrator-service/lib/integrations/providers/google.js:181:  const token = ctx.credentials.accessToken;
+runtime/orchestrator-service/lib/integrations/providers/google.js:182:  const containerId = asString(ctx.config.containerId);
+runtime/orchestrator-service/lib/integrations/providers/google.js:226:  requireFields(ctx.config, ['propertyId']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:227:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/google.js:239:      property_id: ctx.config.propertyId,
+runtime/orchestrator-service/lib/integrations/providers/google.js:240:      measurement_id: ctx.config.measurementId || '',
+runtime/orchestrator-service/lib/integrations/providers/google.js:247:      property_id: ctx.config.propertyId
+runtime/orchestrator-service/lib/integrations/providers/google.js:250:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/google.js:257:      id: ctx.config.propertyId,
+runtime/orchestrator-service/lib/integrations/providers/google.js:258:      name: ctx.config.propertyId
+runtime/orchestrator-service/lib/integrations/providers/google.js:290:      property_id: ctx.config.propertyId
+runtime/orchestrator-service/lib/integrations/providers/google.js:308:  requireFields(ctx.config, ['propertyUrl']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:309:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/google.js:312:  const target = sites.find(site => site.siteUrl === ctx.config.propertyUrl || site.siteUrl === ctx.config.siteDomain);
+runtime/orchestrator-service/lib/integrations/providers/google.js:328:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/google.js:342:  const propertyUrl = firstNonEmpty(ctx.config.propertyUrl, ctx.config.siteDomain);
+runtime/orchestrator-service/lib/integrations/providers/google.js:380:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/google.js:401:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/google.js:409:      name: channel.snippet?.title || ctx.config.channelUrl
+runtime/orchestrator-service/lib/integrations/providers/google.js:452:  requireFields(ctx.config, ['customerId']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:455:      token: ctx.credentials.refreshToken || ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/google.js:456:      developerToken: ctx.credentials.developerToken || ctx.config.developerToken
+runtime/orchestrator-service/lib/integrations/providers/google.js:474:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/google.js:481:      id: ctx.config.customerId,
+runtime/orchestrator-service/lib/integrations/providers/google.js:482:      name: ctx.config.customerId
+runtime/orchestrator-service/lib/integrations/providers/google.js:488:  requireFields(ctx.config, ['folderId']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:489:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/google.js:502:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/google.js:516:  requireFields(ctx.config, ['containerId']);
+runtime/orchestrator-service/lib/integrations/providers/google.js:517:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/google.js:530:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:11:    url: `https://${getStoreDomain(ctx.config)}/admin/api/2025-01/graphql.json`,
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:14:      'X-Shopify-Access-Token': ctx.credentials.adminToken
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:32:  requireFields(ctx.config, ['storeDomain']);
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:33:  requireFields(ctx.credentials, ['adminToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:77:      id: shop.myshopifyDomain || ctx.config.storeDomain,
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:78:      name: shop.name || ctx.config.storeDomain
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:137:      store_domain: getStoreDomain(ctx.config)
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:190:      store_domain: getStoreDomain(ctx.config)
+runtime/orchestrator-service/lib/integrations/providers/website.js:32:  const config = ctx.config || {};
+runtime/orchestrator-service/lib/integrations/providers/website.js:62:  const metadata = await fetchWebsiteMetadata(ctx.config.url);
+runtime/orchestrator-service/lib/integrations/providers/website.js:83:    const sitemapUrl = new URL('/sitemap.xml', ctx.config.url).toString();
+runtime/orchestrator-service/lib/integrations/providers/meta.js:73:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/meta.js:75:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:76:    ctx.config.pageId,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:77:    firstNonEmpty(ctx.config.pageUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:95:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/meta.js:110:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:111:    ctx.config.pageId,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:112:    firstNonEmpty(ctx.config.pageUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:114:  const posts = await graphGet(`${page.id}/published_posts`, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:147:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/meta.js:149:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:150:    ctx.config.businessAccountId,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:151:    firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:170:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/meta.js:185:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:186:    ctx.config.businessAccountId,
+runtime/orchestrator-service/lib/integrations/providers/meta.js:187:    firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:189:  const media = await graphGet(`${account.id}/media`, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:224:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/meta.js:225:  requireFields(ctx.config, ['adAccountId']);
+runtime/orchestrator-service/lib/integrations/providers/meta.js:226:  const accountId = asString(ctx.config.adAccountId).startsWith('act_')
+runtime/orchestrator-service/lib/integrations/providers/meta.js:227:    ? asString(ctx.config.adAccountId)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:228:    : `act_${asString(ctx.config.adAccountId)}`;
+runtime/orchestrator-service/lib/integrations/providers/meta.js:229:  const account = await graphGet(accountId, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:243:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/meta.js:257:  const accountId = asString(ctx.config.adAccountId).startsWith('act_')
+runtime/orchestrator-service/lib/integrations/providers/meta.js:258:    ? asString(ctx.config.adAccountId)
+runtime/orchestrator-service/lib/integrations/providers/meta.js:259:    : `act_${asString(ctx.config.adAccountId)}`;
+runtime/orchestrator-service/lib/integrations/providers/meta.js:260:  const insights = await graphGet(`${accountId}/insights`, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:294:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/meta.js:295:  requireFields(ctx.config, ['pixelId']);
+runtime/orchestrator-service/lib/integrations/providers/meta.js:296:  const pixel = await graphGet(ctx.config.pixelId, ctx.credentials.accessToken, {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:310:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ops.js:5:  requireFields(ctx.credentials, ['botToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:10:      Authorization: `Bearer ${ctx.credentials.botToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:48:  requireFields(ctx.credentials, ['botToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:51:    url: `https://api.telegram.org/bot${ctx.credentials.botToken}/getMe`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:84:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:89:      Authorization: `Bearer ${ctx.credentials.accessToken}`,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:109:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ops.js:116:      id: response.data.bot?.id || ctx.config.workspaceName,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:117:      name: ctx.config.workspaceName || 'Notion workspace'
+runtime/orchestrator-service/lib/integrations/providers/ops.js:123:  const url = ctx.config.endpointUrl || ctx.config.webhookUrl;
+runtime/orchestrator-service/lib/integrations/providers/ops.js:128:    headers: ctx.credentials.accessToken
+runtime/orchestrator-service/lib/integrations/providers/ops.js:130:          Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:156:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ops.js:161:    connectionMethod: ctx.credentials.accessToken ? 'oauth_or_key' : 'direct_config',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:170:  const url = ctx.config.endpointUrl;
+runtime/orchestrator-service/lib/integrations/providers/ops.js:175:    headers: ctx.credentials.accessToken
+runtime/orchestrator-service/lib/integrations/providers/ops.js:177:          Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:202:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ops.js:207:    connectionMethod: ctx.credentials.accessToken ? 'oauth_or_key' : 'direct_config',
+runtime/orchestrator-service/lib/integrations/providers/ops.js:216:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:221:      Authorization: `Bearer ${ctx.credentials.accessToken}`
+runtime/orchestrator-service/lib/integrations/providers/ops.js:239:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/ops.js:247:      name: ctx.config.companyUrl || response.data.id
+runtime/orchestrator-service/lib/integrations/providers/ops.js:253:  requireFields(ctx.credentials, ['apiKey'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/ops.js:254:  const serverPrefix = ctx.config.serverPrefix || String(ctx.credentials.apiKey).split('-')[1];
+runtime/orchestrator-service/lib/integrations/providers/ops.js:260:      password: ctx.credentials.apiKey
+runtime/orchestrator-service/lib/integrations/providers/ops.js:287:      id: response.data.login_id || ctx.config.audienceId,
+runtime/orchestrator-service/lib/integrations/providers/ops.js:288:      name: response.data.account_name || ctx.config.audienceId
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:42:  requireFields(ctx.credentials, ['accessToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:45:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:62:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:69:      id: user.open_id || ctx.config.accountId,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:70:      name: user.display_name || firstNonEmpty(ctx.config.profileUrl, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:78:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:87:      account_id: firstNonEmpty(ctx.config.accountId, ctx.primaryValue)
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:115:      advertiserId: ctx.config.advertiserId,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:116:      token: ctx.credentials.accessToken
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:124:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:126:      advertiser_id: ctx.config.advertiserId
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:142:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:149:      id: advertiser.advertiser_id || ctx.config.advertiserId,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:150:      name: advertiser.name || ctx.config.advertiserId
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:158:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:160:      advertiser_id: ctx.config.advertiserId,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:173:      advertiser_id: ctx.config.advertiserId
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:201:      pixelId: ctx.config.pixelId,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:202:      token: ctx.credentials.accessToken
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:210:    ctx.credentials.accessToken,
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:212:      advertiser_id: ctx.config.accountId
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:216:  const pixel = asArray(data?.data?.pixel_list).find(item => String(item.pixel_id) === String(ctx.config.pixelId));
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:231:    tokenExpiresAt: decodeJwtExpiry(ctx.credentials.accessToken),
