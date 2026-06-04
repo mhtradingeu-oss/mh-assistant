@@ -1,79 +1,87 @@
 # BACKEND-P1C.2 Public Alias Compatibility Helper Check
 
-| method | route | allowed | status | reason |
-|---|---|---:|---|---|
-| GET | /public/media-manager/project/:project/storage/parity-readiness | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/storage/parity-readiness | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/rename | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/apply-template | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/projects | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/projects | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/asset-catalog | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/startup | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/setup | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/operations | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/task-center | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/queue-center | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/job-monitor | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/notification-center | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/operations/schema | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/team | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/team | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/campaigns | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/campaigns | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| PATCH | /public/media-manager/project/:project/campaigns/:campaignId | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/campaigns/:campaignId | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/content-items | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/content-items | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| PATCH | /public/media-manager/project/:project/content-items/:contentItemId | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/content-items/:contentItemId | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/media-jobs | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/media-jobs | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| PATCH | /public/media-manager/project/:project/media-jobs/:mediaJobId | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/media-jobs/:mediaJobId | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/workflows/runs | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/workflows/runs/:runId | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/workflows/:workflowId/run | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/ai/commands | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/ai/commands/:commandId | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/ai/command | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/ai/chat | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/ai/guidance | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/ai/workflows/:workflowId/run | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/ai/artifacts | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/ai/recommendations | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/ai/memory | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/tasks | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/tasks | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/tasks/:taskId | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/approvals | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/approvals | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/approvals/:approvalId/decision | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/governance | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/governance/policy | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/governance/policy | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/notifications | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| PATCH | /public/media-manager/project/:project/notifications/:notificationId | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/handoffs | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/handoffs | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/handoffs/:handoffId/consume | yes | compatibility_write | public_write_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/events | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/api/insights/:project | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/api/learning/:project | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/sources | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| DELETE | /public/media-manager/project/:project/sources/:sourceType | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/native-media/providers | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/native-media/providers/readiness | yes | compatibility_read | public_read_alias_compatibility_enabled |
-| GET | /public/media-manager/project/:project/integrations/control-center | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/connect | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/reconnect | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/test | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/sync | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/import-history | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/integrations/:integrationId/disconnect | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/publishing/schedule | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/publishing/:jobId/reschedule | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/publishing/:jobId/ready | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/publishing/:jobId/publish | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
-| POST | /public/media-manager/project/:project/publishing/:jobId/fail | yes | compatibility_critical | critical_public_mutation_alias_compatibility_enabled |
+Context: `unauthenticated` assumes production mode with no write authorization.
+
+Truth status categories:
+- `compatibility_read_allowed`
+- `authorized_public_write_allowed`
+- `blocked_without_authorization`
+- `retired_or_disabled`
+
+| method | route | unauthenticated allowed | unauthenticated status | unauthenticated reason | unauthenticated truth | authorized allowed | authorized status | authorized truth |
+|---|---|---:|---|---|---|---:|---|---|
+| GET | /public/media-manager/project/:project/storage/parity-readiness | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/storage/parity-readiness | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/rename | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/apply-template | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| POST | /public/media-manager/projects | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/projects | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/asset-catalog | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/startup | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/setup | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/operations | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/task-center | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/queue-center | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/job-monitor | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/notification-center | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/operations/schema | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/team | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/team | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/campaigns | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/campaigns | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| PATCH | /public/media-manager/project/:project/campaigns/:campaignId | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/campaigns/:campaignId | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/content-items | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/content-items | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| PATCH | /public/media-manager/project/:project/content-items/:contentItemId | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/content-items/:contentItemId | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/media-jobs | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/media-jobs | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| PATCH | /public/media-manager/project/:project/media-jobs/:mediaJobId | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/media-jobs/:mediaJobId | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/workflows/runs | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/workflows/runs/:runId | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/workflows/:workflowId/run | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/ai/commands | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/ai/commands/:commandId | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/ai/command | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_sensitive_write | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/ai/chat | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_sensitive_write | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/ai/guidance | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_sensitive_write | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/ai/workflows/:workflowId/run | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/ai/artifacts | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/ai/recommendations | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/ai/memory | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/tasks | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/tasks | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/tasks/:taskId | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/approvals | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/approvals | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/approvals/:approvalId/decision | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/governance | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/governance/policy | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/governance/policy | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/notifications | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| PATCH | /public/media-manager/project/:project/notifications/:notificationId | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/handoffs | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/handoffs | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/handoffs/:handoffId/consume | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_write | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/events | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/api/insights/:project | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/api/learning/:project | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/sources | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| DELETE | /public/media-manager/project/:project/sources/:sourceType | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| GET | /public/media-manager/project/:project/native-media/providers | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/native-media/providers/readiness | yes | compatibility_read | public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_read | compatibility_read_allowed |
+| GET | /public/media-manager/project/:project/integrations/control-center | yes | compatibility_sensitive_read | sensitive_public_read_alias_compatibility_enabled | compatibility_read_allowed | yes | compatibility_sensitive_read | compatibility_read_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/connect | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/reconnect | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/test | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/sync | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/import-history | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/integrations/:integrationId/disconnect | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/publishing/schedule | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/publishing/:jobId/reschedule | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/publishing/:jobId/ready | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/publishing/:jobId/publish | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
+| POST | /public/media-manager/project/:project/publishing/:jobId/fail | no | blocked_sensitive_mutation_unauthorized | public_alias_mutation_requires_authorization | blocked_without_authorization | yes | compatibility_critical | authorized_public_write_allowed |
