@@ -1177,23 +1177,23 @@ function renderJobMonitorLayout({
 
   return `
     <section class="page is-active" data-page="job-monitor">
-      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
-        <section class="std-context-ribbon">
-          <div class="std-context-main">
-            <div class="std-context-line">
-              <span class="std-context-eyebrow">JOB MONITOR</span>
-              <h3 class="std-context-title">Job Monitor</h3>
+      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell mhos-os-page">
+        <section class="std-context-ribbon mhos-os-header">
+          <div class="std-context-main mhos-os-header-main">
+            <div>
+              <p class="mhos-os-kicker">Runtime Execution Monitor</p>
+              <h3 class="std-context-title mhos-os-title">Job Monitor</h3>
+              <p class="std-context-description mhos-os-subtitle">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>
             </div>
-            <p class="std-context-description">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>
-            <div class="std-context-metrics" aria-label="Job Monitor metrics">
-              <span class="std-context-chip"><span>Health</span><strong>${escapeHtml(titleCase(jobMonitor.health_state || "unknown"))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Running</span><strong>${escapeHtml(formatCount(jobMonitor.running_count))}</strong></span>
-              <span class="std-context-chip"><span>Completed</span><strong>${escapeHtml(formatCount(jobMonitor.completed_count))}</strong></span>
-              <span class="std-context-chip is-danger"><span>Failed</span><strong>${escapeHtml(formatCount(jobMonitor.failed_count))}</strong></span>
+            <div class="std-context-metrics mhos-os-chip-row" aria-label="Job Monitor metrics">
+              <span class="std-context-chip mhos-os-chip"><span>Health</span><strong>${escapeHtml(titleCase(jobMonitor.health_state || "unknown"))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Running</span><strong>${escapeHtml(formatCount(jobMonitor.running_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Completed</span><strong>${escapeHtml(formatCount(jobMonitor.completed_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-danger"><span>Failed</span><strong>${escapeHtml(formatCount(jobMonitor.failed_count))}</strong></span>
             </div>
           </div>
-          <div class="std-context-actions">
-            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+          <div class="std-context-actions mhos-os-action-row">
+            <span class="mhos-os-chip">Project: ${escapeHtml(projectLabel)}</span>
             <button class="btn btn-secondary std-context-btn" type="button" id="jobMonitorRefreshBtnHeader">Refresh</button>
           </div>
         </section>
@@ -1205,15 +1205,15 @@ function renderJobMonitorLayout({
           badge: "Supporting context"
         })}
 
-        <div class="ops-layout-grid">
-          <article class="panel ops-main-column mhos-clean-stack">
-            <div class="panel-header">
+        <div class="ops-layout-grid mhos-os-layout">
+          <article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">
+            <div class="panel-header mhos-os-section-head">
               <div>
-                <div class="panel-kicker">Main View</div>
-                <h3>Job state inventory</h3>
-                <p>Filter by job status and kind to review active and failed work without changing lifecycle state.</p>
+                <p class="mhos-os-kicker">Main View</p>
+                <h3 class="mhos-os-section-title">Job state inventory</h3>
+                <p class="mhos-os-section-copy">Filter by job status and kind to review active and failed work without changing lifecycle state.</p>
               </div>
-              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -1242,13 +1242,13 @@ function renderJobMonitorLayout({
             )}
           </article>
 
-          <aside class="ops-right-rail mhos-clean-stack">
-            <section class="panel ops-detail-card mhos-clean-surface">
+          <aside class="ops-right-rail mhos-clean-stack mhos-os-rail">
+            <section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Selected Job</div>
-                  <h3>${escapeHtml(selectedItem?.title || "Select a job")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>
+                  <p class="mhos-os-kicker">Selected Job</p>
+                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a job")}</h3>
+                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -1269,12 +1269,12 @@ function renderJobMonitorLayout({
               ` : `<div class="empty-box">No job is selected.</div>`}
             </section>
 
-            <section class="panel ops-action-panel mhos-clean-surface">
+            <section class="panel ops-action-panel mhos-clean-surface mhos-os-evidence-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Action Panel</div>
-                  <h3>Job review actions</h3>
-                  <p>Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
+                  <p class="mhos-os-kicker">Action Panel</p>
+                  <h3 class="mhos-os-panel-title">Job review actions</h3>
+                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1302,12 +1302,12 @@ function renderJobMonitorLayout({
               </div>
             </section>
 
-            <section class="panel ops-ai-panel mhos-clean-surface">
+            <section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">AI Panel</div>
-                  <h3>Operations AI Assistant</h3>
-                  <p>Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
+                  <p class="mhos-os-kicker">AI Panel</p>
+                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
