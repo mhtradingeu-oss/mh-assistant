@@ -166,6 +166,17 @@ function getValidationSummary({ missingFields, readinessStatus, readinessScore, 
   return { tone: "neutral", label: "Partial" };
 }
 
+function dedupeDisplayLabels(items = []) {
+  const seen = new Set();
+  return asArray(items).filter((item) => {
+    const label = asString(item).trim();
+    const key = humanizeStatus(label).toLowerCase();
+    if (!label || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function getMissingFieldInsights(missingFields) {
   return missingFields.map((field) => ({
     name: field.name,
@@ -740,11 +751,11 @@ function updateWizardDashboard({
   const blockerList = document.getElementById("setupSystemGaps");
   if (blockerList) {
     blockerList.innerHTML = renderIndicatorList(
-      [
+      dedupeDisplayLabels([
         ...missingConnectors.map((item) => `connector:${item}`),
         ...missingAssets,
         ...criticalGaps
-      ],
+      ]),
       escapeHtml,
       "No operational blockers detected from readiness signals."
     );
@@ -1439,9 +1450,9 @@ export const setupRoute = {
               <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
             </article>
             <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
-              <span class="data-label">Dependencies</span>
+              <span class="data-label">Readiness signals</span>
               <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
-              <span class="setup-helper">Assets and connectors pending</span>
+              <span class="setup-helper">Assets, connectors, and diagnostics</span>
             </article>
             <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Validation</span>
@@ -1600,11 +1611,11 @@ export const setupRoute = {
             <h5>System blockers</h5>
             <div id="setupSystemGaps">
               ${renderIndicatorList(
-                [
+                dedupeDisplayLabels([
                   ...missingConnectors.map((item) => `Connect ${item}`),
                   ...missingAssets.map((item) => `Provide ${item}`),
                   ...criticalGaps
-                ],
+                ]),
                 escapeHtml,
                 "No operational blockers detected from readiness signals."
               )}
