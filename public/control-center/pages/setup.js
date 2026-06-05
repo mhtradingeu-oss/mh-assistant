@@ -170,7 +170,15 @@ function dedupeDisplayLabels(items = []) {
   const seen = new Set();
   return asArray(items).filter((item) => {
     const label = asString(item).trim();
-    const key = humanizeStatus(label).toLowerCase();
+    const key = label
+      .replace(/^connector:/i, "")
+      .replace(/^connect\s+/i, "")
+      .replace(/^provide\s+/i, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
     if (!label || seen.has(key)) return false;
     seen.add(key);
     return true;
