@@ -1,0 +1,307 @@
+public/control-center/router.js:1:// public/control-center/router.js
+public/control-center/router.js:3:import { homeRoute } from "./pages/home.js";
+public/control-center/router.js:4:import { aiCommandRoute } from "./pages/ai-command.js";
+public/control-center/router.js:5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/router.js:7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+public/control-center/router.js:8:import { publishingRoute } from "./pages/publishing.js";
+public/control-center/router.js:9:import { adsManagerRoute } from "./pages/ads-manager.js";
+public/control-center/router.js:10:import { insightsRoute } from "./pages/insights.js";
+public/control-center/router.js:11:import { researchRoute } from "./pages/research.js";
+public/control-center/router.js:12:import { workflowsRoute } from "./pages/workflows.js";
+public/control-center/router.js:14:  taskCenterRoute,
+public/control-center/router.js:15:  queueCenterRoute,
+public/control-center/router.js:16:  jobMonitorRoute,
+public/control-center/router.js:17:  notificationCenterRoute,
+public/control-center/router.js:18:  operationsCentersRoute
+public/control-center/router.js:20:import { setupRoute } from "./pages/setup.js";
+public/control-center/router.js:21:import { libraryRoute } from "./pages/library.js";
+public/control-center/router.js:22:import { integrationsRoute } from "./pages/integrations.js";
+public/control-center/router.js:23:import { customerCenterRoute } from "./pages/customer-center.js";
+public/control-center/router.js:24:import { settingsRoute } from "./pages/settings.js";
+public/control-center/router.js:25:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:28:  getFallbackRouteAccess
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/router.js:31:const routeRegistry = {
+public/control-center/router.js:32:  [homeRoute.id]: homeRoute,
+public/control-center/router.js:33:  [aiCommandRoute.id]: aiCommandRoute,
+public/control-center/router.js:34:  [workflowsRoute.id]: workflowsRoute,
+public/control-center/router.js:35:  [operationsCentersRoute.id]: operationsCentersRoute,
+public/control-center/router.js:36:  [taskCenterRoute.id]: taskCenterRoute,
+public/control-center/router.js:37:  [queueCenterRoute.id]: queueCenterRoute,
+public/control-center/router.js:38:  [jobMonitorRoute.id]: jobMonitorRoute,
+public/control-center/router.js:39:  [notificationCenterRoute.id]: notificationCenterRoute,
+public/control-center/router.js:40:  [campaignStudioRoute.id]: campaignStudioRoute,
+public/control-center/router.js:41:  [contentStudioRoute.id]: contentStudioRoute,
+public/control-center/router.js:42:  [mediaStudioRoute.id]: mediaStudioRoute,
+public/control-center/router.js:43:  [publishingRoute.id]: publishingRoute,
+public/control-center/router.js:44:  [adsManagerRoute.id]: adsManagerRoute,
+public/control-center/router.js:45:  [insightsRoute.id]: insightsRoute,
+public/control-center/router.js:46:  [researchRoute.id]: researchRoute,
+public/control-center/router.js:47:  [setupRoute.id]: setupRoute,
+public/control-center/router.js:48:  [libraryRoute.id]: libraryRoute,
+public/control-center/router.js:49:  [customerCenterRoute.id]: customerCenterRoute,
+public/control-center/router.js:50:  [integrationsRoute.id]: integrationsRoute,
+public/control-center/router.js:51:  [settingsRoute.id]: settingsRoute,
+public/control-center/router.js:52:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:55:let routeAccessResolver = null;
+public/control-center/router.js:57:const routeChangeSubscribers = new Set();
+public/control-center/router.js:59:export function subscribeRouteChange(handler) {
+public/control-center/router.js:61:  routeChangeSubscribers.add(handler);
+public/control-center/router.js:62:  return () => routeChangeSubscribers.delete(handler);
+public/control-center/router.js:65:function notifyRouteChange(route) {
+public/control-center/router.js:66:  routeChangeSubscribers.forEach((handler) => {
+public/control-center/router.js:68:      handler(route);
+public/control-center/router.js:70:      console.warn("Route change subscriber failed:", error?.message || error);
+public/control-center/router.js:80:function getFallbackRoute(route) {
+public/control-center/router.js:82:    id: route,
+public/control-center/router.js:92:            <div class="empty-box">Unknown route: ${route}</div>
+public/control-center/router.js:108:function getAccessDeniedRoute(route, reason = "") {
+public/control-center/router.js:109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:114:      title: "Route Blocked",
+public/control-center/router.js:115:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:123:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+public/control-center/router.js:137:function normalizeRouteAccessResult(result, route) {
+public/control-center/router.js:141:      reason: result ? "" : `Access to ${route} is restricted.`
+public/control-center/router.js:158:function getDefaultRouteAccess(route) {
+public/control-center/router.js:159:  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+public/control-center/router.js:162:function getRouteAccess(route) {
+public/control-center/router.js:163:  if (typeof routeAccessResolver !== "function") {
+public/control-center/router.js:164:    return getDefaultRouteAccess(route);
+public/control-center/router.js:168:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+public/control-center/router.js:170:    return getDefaultRouteAccess(route);
+public/control-center/router.js:174:function updatePageHeader(route) {
+public/control-center/router.js:175:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:176:  const meta = routeDef.meta;
+public/control-center/router.js:187:function updateActiveNav(route) {
+public/control-center/router.js:188:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/router.js:190:  navItems.forEach((item) => {
+public/control-center/router.js:191:    const itemRoute = item.getAttribute("data-route");
+public/control-center/router.js:192:    item.classList.toggle("is-active", itemRoute === route);
+public/control-center/router.js:196:export function getRouteDefinition(route) {
+public/control-center/router.js:197:  const access = getRouteAccess(route);
+public/control-center/router.js:199:    return getAccessDeniedRoute(route, access.reason);
+public/control-center/router.js:202:  return routeRegistry[route] || getFallbackRoute(route);
+public/control-center/router.js:205:export function setRouteAccessResolver(resolver) {
+public/control-center/router.js:206:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+public/control-center/router.js:209:export function renderRouteTemplate(route) {
+public/control-center/router.js:213:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:214:  root.innerHTML = routeDef.template;
+public/control-center/router.js:216:  updatePageHeader(route);
+public/control-center/router.js:217:  updateActiveNav(route);
+public/control-center/router.js:220:export function navigateTo(route, emit = true) {
+public/control-center/router.js:221:  renderRouteTemplate(route);
+public/control-center/router.js:222:  notifyRouteChange(route);
+public/control-center/router.js:224:  // Sync browser URL — setting the same hash value does not re-fire hashchange
+public/control-center/router.js:225:  const newHash = `#${route}`;
+public/control-center/router.js:226:  if (typeof location !== "undefined" && location.hash !== newHash) {
+public/control-center/router.js:227:    location.hash = newHash;
+public/control-center/router.js:232:      new CustomEvent("mh:route-change", {
+public/control-center/router.js:233:        detail: { route }
+public/control-center/router.js:239:export function initRouter() {
+public/control-center/router.js:240:  renderRouteTemplate("home");
+public/control-center/app.js:5:  getProjectedRoutePermissions
+public/control-center/app.js:9:  getFallbackRouteAccess
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:13:  initRouter,
+public/control-center/app.js:14:  navigateTo,
+public/control-center/app.js:15:  renderRouteTemplate,
+public/control-center/app.js:16:  getRouteDefinition,
+public/control-center/app.js:17:  setRouteAccessResolver
+public/control-center/app.js:18:} from "./router.js";
+public/control-center/app.js:24:  setCurrentRoute,
+public/control-center/app.js:93:// Manages global listeners (resize, orientation, route change, navigation)
+public/control-center/app.js:94:// Cleaned up on route changes to prevent listener accumulation
+public/control-center/app.js:206:    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+public/control-center/app.js:251:function resolveRouteAccess(route) {
+public/control-center/app.js:253:  const routePermissions = getProjectedRoutePermissions({ operations });
+public/control-center/app.js:256:  const explicitRule = routePermissions.find((item) => item?.route === route);
+public/control-center/app.js:259:    return getFallbackRouteAccess(route, activeRole);
+public/control-center/app.js:271:      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+public/control-center/app.js:278:setRouteAccessResolver(resolveRouteAccess);
+public/control-center/app.js:297:        static routes or logged to the console.
+public/control-center/app.js:495:  navigateTo("home");
+public/control-center/app.js:539:        navigateTo("home");
+public/control-center/app.js:731:function ensureRouteDom(route) {
+public/control-center/app.js:735:  const page = pageRoot.querySelector(`.page[data-page="${route}"]`);
+public/control-center/app.js:737:    renderRouteTemplate(route);
+public/control-center/app.js:1185:    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+public/control-center/app.js:1201:      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+public/control-center/app.js:1214:      dataRoute: String(element.getAttribute("data-route") || ""),
+public/control-center/app.js:1940:  setText("ctxRoute", state.currentRoute || "home");
+public/control-center/app.js:1997:    ["aiCommandChat", "This section is currently unavailable."],
+public/control-center/app.js:2008:    ["contentPreview", "This section is currently unavailable."],
+public/control-center/app.js:2010:    ["mediaImages", "This section is currently unavailable."],
+public/control-center/app.js:2011:    ["mediaVideoAudio", "This section is currently unavailable."],
+public/control-center/app.js:2018:    ["adsBudget", "This section is currently unavailable."],
+public/control-center/app.js:2019:    ["adsPerformance", "This section is currently unavailable."],
+public/control-center/app.js:2021:    ["insightsOverview", "This section is currently unavailable."],
+public/control-center/app.js:2040:let activeRouteCleanup = null;
+public/control-center/app.js:2041:let activeRouteCleanupRoute = "";
+public/control-center/app.js:2043:function disposeActiveRouteCleanup(nextRoute = "") {
+public/control-center/app.js:2044:  if (!activeRouteCleanup) {
+public/control-center/app.js:2045:    activeRouteCleanupRoute = nextRoute || "";
+public/control-center/app.js:2049:  if (activeRouteCleanupRoute && nextRoute && activeRouteCleanupRoute === nextRoute) {
+public/control-center/app.js:2053:  const cleanup = activeRouteCleanup;
+public/control-center/app.js:2054:  activeRouteCleanup = null;
+public/control-center/app.js:2055:  activeRouteCleanupRoute = "";
+public/control-center/app.js:2060:    console.warn("[Route] cleanup failed", error);
+public/control-center/app.js:2065:  const { currentRoute } = getState();
+public/control-center/app.js:2066:  disposeActiveRouteCleanup(currentRoute);
+public/control-center/app.js:2067:  ensureRouteDom(currentRoute);
+public/control-center/app.js:2068:  const routeDef = getRouteDefinition(currentRoute);
+public/control-center/app.js:2070:  if (typeof routeDef.render === "function") {
+public/control-center/app.js:2071:    const renderResult = routeDef.render({
+public/control-center/app.js:2078:      navigateTo,
+public/control-center/app.js:2119:      activeRouteCleanup = renderResult;
+public/control-center/app.js:2120:      activeRouteCleanupRoute = currentRoute;
+public/control-center/app.js:2123:    if (!routeDef.disableStandardLayout) {
+public/control-center/app.js:2125:        route: currentRoute,
+public/control-center/app.js:2127:        navigateTo,
+public/control-center/app.js:2138:    route: currentRoute,
+public/control-center/app.js:2140:    navigateTo,
+public/control-center/app.js:2468:  return `Loaded required project data. Optional sections unavailable: ${unique.join(", ")}.`;
+public/control-center/app.js:3017:   * can be restored later with route-level lazy loading to avoid startup
+public/control-center/app.js:3036:  const fallbackLabelRoutes = {
+public/control-center/app.js:3046:  const navItems = Array.from(document.querySelectorAll(".nav-item"));
+public/control-center/app.js:3047:  navItems.forEach((item) => {
+public/control-center/app.js:3048:    const labeledRoute = fallbackLabelRoutes[String(item.textContent || "").trim()] || "";
+public/control-center/app.js:3049:    const route = item.getAttribute("data-route") || labeledRoute;
+public/control-center/app.js:3050:    if (!route) return;
+public/control-center/app.js:3051:    item.setAttribute("data-route", route);
+public/control-center/app.js:3052:    item.setAttribute("data-page", route);
+public/control-center/app.js:3063:  const actionRouteMap = {
+public/control-center/app.js:3090:      navigateTo("home");
+public/control-center/app.js:3098:        navigateTo("ai-command");
+public/control-center/app.js:3104:    const targetRoute = actionRouteMap[actionName];
+public/control-center/app.js:3105:    if (targetRoute) {
+public/control-center/app.js:3106:      navigateTo(targetRoute);
+public/control-center/app.js:3115:      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+public/control-center/app.js:3121:    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+public/control-center/app.js:3123:    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+public/control-center/app.js:3124:    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+public/control-center/app.js:3126:    if (routeAttrAllowed) {
+public/control-center/app.js:3128:      navigateTo(routeAttrAllowed);
+public/control-center/app.js:3155:function bindRouteListener() {
+public/control-center/app.js:3156:  if (window.__mhRouteListenerBound) return;
+public/control-center/app.js:3157:  window.__mhRouteListenerBound = true;
+public/control-center/app.js:3166:    const sidebarNav = document.querySelector(".sidebar-nav");
+public/control-center/app.js:3167:    if (sidebarNav) {
+public/control-center/app.js:3168:      const activeItem = sidebarNav.querySelector(".nav-item.is-active");
+public/control-center/app.js:3175:  // Register route change listener with lifecycle registry
+public/control-center/app.js:3176:  // Handles shell-level route change (different from page content)
+public/control-center/app.js:3177:  addAppShellListener(window, "mh:route-change", (event) => {
+public/control-center/app.js:3178:    const route = event?.detail?.route || "home";
+public/control-center/app.js:3179:    setCurrentRoute(route);
+public/control-center/app.js:3184:  // Back/Forward support — hashchange fires when the user navigates browser history
+public/control-center/app.js:3185:  // Register with lifecycle registry for proper cleanup on route changes
+public/control-center/app.js:3186:  addAppShellListener(window, "hashchange", () => {
+public/control-center/app.js:3187:    const route = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:3188:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:3189:      navigateTo(route);
+public/control-center/app.js:3230:  const sidebar = document.querySelector(".sidebar");
+public/control-center/app.js:3231:  const toggleBtn = $("sidebarToggleBtn");
+public/control-center/app.js:3232:  const backdrop = $("sidebarBackdrop");
+public/control-center/app.js:3251:    toggleBtn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+public/control-center/app.js:3304:    if (!sidebar || !isMobileViewport()) return;
+public/control-center/app.js:3305:    sidebar.classList.add("is-open");
+public/control-center/app.js:3312:    document.body.classList.add("sidebar-open");
+public/control-center/app.js:3318:    if (!sidebar) return;
+public/control-center/app.js:3319:    sidebar.classList.remove("is-open");
+public/control-center/app.js:3326:    document.body.classList.remove("sidebar-open");
+public/control-center/app.js:3338:      if (sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3375:    const clickedNavItem = event.target.closest(".nav-item[data-route]");
+public/control-center/app.js:3392:    if (event.key === "Escape" && sidebar?.classList.contains("is-open")) {
+public/control-center/app.js:3401:  // These ensure proper cleanup on route changes
+public/control-center/app.js:3431:  const sidebarBackdrop = $("sidebarBackdrop");
+public/control-center/app.js:3445:  const sidebarActive =
+public/control-center/app.js:3446:    sidebarBackdrop &&
+public/control-center/app.js:3447:    !sidebarBackdrop.hidden &&
+public/control-center/app.js:3448:    sidebarBackdrop.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3450:  const blocked = loadingActive || commandActive || sidebarActive;
+public/control-center/app.js:3527:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3531:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/app.js:3532:  const candidates = navItems.map((item) => {
+public/control-center/app.js:3533:    const route = item.getAttribute("data-route") || "";
+public/control-center/app.js:3536:      route,
+public/control-center/app.js:3538:      haystack: `${route} ${label}`.toLowerCase()
+public/control-center/app.js:3547:    showError(`No route matches "${query}".`);
+public/control-center/app.js:3552:    navigateTo(matches[0].route);
+public/control-center/app.js:3559:  navigateTo(top[0].route);
+public/control-center/app.js:3602:  navigateTo("ai-command");
+public/control-center/app.js:3779:  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+public/control-center/app.js:3781:      const route = button.getAttribute("data-ai-route");
+public/control-center/app.js:3782:      if (!route) return;
+public/control-center/app.js:3783:      navigateTo(route);
+public/control-center/app.js:3791:    const route = window.location.hash.replace(/^#/, "") || "home";
+public/control-center/app.js:3794:      context.textContent = `Current workspace: ${route}`;
+public/control-center/app.js:3800:  // Updates dock to reflect current route context
+public/control-center/app.js:3801:  addAppShellListener(window, "hashchange", syncContext);
+public/control-center/app.js:3885:          data-new-route="setup"
+public/control-center/app.js:3894:        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+public/control-center/app.js:3900:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3906:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3912:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3918:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3924:        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+public/control-center/app.js:4001:        navigateTo("setup");
+public/control-center/app.js:4009:    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+public/control-center/app.js:4022:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4027:        navigateTo(route);
+public/control-center/app.js:4069:      navigateTo("ai-command");
+public/control-center/app.js:4110:    initRouter();
+public/control-center/app.js:4111:    // Restore the route from the URL hash on refresh or deep-link
+public/control-center/app.js:4112:    const startRoute = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:4113:    setCurrentRoute(startRoute || "home");
+public/control-center/app.js:4117:    bindRouteListener();
+public/control-center/app.js:4181:  const route = String(state.currentRoute || "home");
+public/control-center/app.js:4193:    route !== window.__mhLastGlobalUiRoute ||
+public/control-center/app.js:4201:  window.__mhLastGlobalUiRoute = route;
+public/control-center/index.html:12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+public/control-center/index.html:30:    <!-- Mobile sidebar backdrop -->
+public/control-center/index.html:31:    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true" hidden></div>
+public/control-center/index.html:98:      <aside id="sidebarNav" class="sidebar" aria-label="Main navigation">
+public/control-center/index.html:99:        <div class="sidebar-brand">
+public/control-center/index.html:105:        <div class="sidebar-project">
+public/control-center/index.html:106:          <label for="projectSwitcher" class="sidebar-label">Current Project</label>
+public/control-center/index.html:107:          <select id="projectSwitcher" class="sidebar-select" aria-label="Current Project">
+public/control-center/index.html:112:        <nav class="sidebar-nav" aria-label="Primary navigation">
+public/control-center/index.html:113:          <div class="nav-group">
+public/control-center/index.html:114:            <div class="nav-group-title">Primary</div>
+public/control-center/index.html:115:            <button class="nav-item is-active" data-route="home" data-page="home" type="button">Home</button>
+public/control-center/index.html:116:            <button class="nav-item" data-route="setup" data-page="setup" type="button">Setup</button>
+public/control-center/index.html:117:            <button class="nav-item" data-route="library" data-page="library" type="button">Library</button>
+public/control-center/index.html:118:            <button class="nav-item" data-route="integrations" data-page="integrations" type="button">Integrations</button>
+public/control-center/index.html:119:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+public/control-center/index.html:120:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+public/control-center/index.html:121:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+public/control-center/index.html:122:            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+public/control-center/index.html:125:          <div class="nav-group">
+public/control-center/index.html:126:            <div class="nav-group-title">Secondary</div>
+public/control-center/index.html:127:            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+public/control-center/index.html:128:            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+public/control-center/index.html:129:            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+public/control-center/index.html:130:            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+public/control-center/index.html:131:            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+public/control-center/index.html:134:          <div class="nav-group">
+public/control-center/index.html:135:            <div class="nav-group-title">Customer</div>
+public/control-center/index.html:136:            <button class="nav-item" data-route="customer-center" data-page="customer-center" type="button">Customer Center</button>
+public/control-center/index.html:139:          <div class="nav-group">
+public/control-center/index.html:140:            <div class="nav-group-title">System</div>
+public/control-center/index.html:141:            <button class="nav-item" data-route="operations-centers" data-page="operations-centers" type="button">Operations Overview</button>
+public/control-center/index.html:142:            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+public/control-center/index.html:143:            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+public/control-center/index.html:144:            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+public/control-center/index.html:145:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+public/control-center/index.html:146:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+public/control-center/index.html:147:            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
+public/control-center/index.html:149:        </nav>
+public/control-center/index.html:151:        <div class="sidebar-actions">
+public/control-center/index.html:166:            id="sidebarToggleBtn"
+public/control-center/index.html:167:            class="sidebar-toggle"
+public/control-center/index.html:169:            aria-label="Toggle sidebar"
+public/control-center/index.html:170:            aria-controls="sidebarNav"
+public/control-center/index.html:426:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+public/control-center/index.html:430:              <button class="ai-dock-chip" data-ai-route="content-studio">
+public/control-center/index.html:434:              <button class="ai-dock-chip" data-ai-route="media-studio">
+public/control-center/index.html:438:              <button class="ai-dock-chip" data-ai-route="publishing">
