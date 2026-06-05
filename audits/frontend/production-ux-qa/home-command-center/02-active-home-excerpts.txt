@@ -1,0 +1,679 @@
+===== public/control-center/pages/home.js =====
+import {
+  renderActivityItems,
+  renderAiTeamCards,
+  renderBadge,
+  renderBlockerColumn,
+  renderCompactList,
+  renderHomeExecutiveIntro
+} from "./home/render-sections.js";
+import {
+  getProjectedActiveRole,
+  getProjectedTeamMembers
+} from "../runtime/authority/authority-projection.js";
+
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot
+} from "../state.js";
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function asNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatPercent(value) {
+  return `${Math.max(0, Math.round(asNumber(value, 0)))}%`;
+}
+
+function formatCount(value) {
+  return String(Math.max(0, Math.round(asNumber(value, 0))));
+}
+
+function statusTone(input, score) {
+  const text = asString(input).toLowerCase();
+
+  if (
+    text.includes("critical") ||
+    text.includes("failed") ||
+    text.includes("blocked") ||
+    text.includes("error") ||
+    text.includes("missing")
+  ) {
+    return "danger";
+  }
+
+  if (
+    text.includes("warning") ||
+    text.includes("pending") ||
+    text.includes("partial") ||
+    text.includes("review")
+  ) {
+    return "warning";
+  }
+
+  if (
+    text.includes("ready") ||
+    text.includes("healthy") ||
+    text.includes("connected") ||
+    text.includes("active") ||
+    text.includes("complete")
+  ) {
+    return "success";
+  }
+
+  const parsed = Number(score);
+  if (Number.isFinite(parsed)) {
+    if (parsed >= 80) return "success";
+    if (parsed >= 50) return "warning";
+    return "danger";
+  }
+
+  return "neutral";
+}
+
+function toneLabel(tone) {
+  if (tone === "success") return "Healthy";
+  if (tone === "warning") return "Attention";
+  if (tone === "danger") return "Critical";
+  return "Unknown";
+}
+
+function humanizeStatus(value, fallback = "Unknown") {
+  const raw = asString(value).trim();
+  if (!raw) return fallback;
+  return raw
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function parseTimestamp(item) {
+  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+  for (const field of fields) {
+    const value = item?.[field];
+    if (!value) continue;
+    const stamp = Date.parse(value);
+    if (Number.isFinite(stamp)) {
+      return stamp;
+    }
+  }
+  return 0;
+}
+
+function formatRelativeDate(value) {
+  const stamp = Date.parse(value || "");
+  if (!Number.isFinite(stamp)) return "Not available";
+  return new Date(stamp).toLocaleString();
+}
+
+function dedupe(values = []) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function compact(value, fallback = "-") {
+  const text = asString(value).trim();
+  return text || fallback;
+}
+
+function routeForAction(action) {
+  const text = asString(action).toLowerCase();
+  if (/(connector|integration|sync)/.test(text)) return "integrations";
+  if (/(asset|library|upload|brand file)/.test(text)) return "library";
+  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+  if (/(content|copy)/.test(text)) return "content-studio";
+  return "ai-command";
+}
+
+function buildAiTeamCards(state) {
+  const operations = asObject(selectOperationsSnapshot(state));
+  const notifications = asArray(operations.notifications?.items);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const projectedMembers = getProjectedTeamMembers(state);
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+        fallback: asString(
+          member.description ||
+          member.summary ||
+          "Ready to support this project."
+        )
+      }))
+    : [
+    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+  ];
+
+  return roles.map((role) => {
+    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+
+    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+    const statusRaw = asString(latest?.status || latest?.level || "idle");
+    const tone = statusTone(statusRaw);
+
+    return {
+      ...role,
+      tone,
+      status:
+        role.id === projectedActiveRole
+          ? "Active role"
+          : humanizeStatus(statusRaw, "Idle"),
+      summary: latest
+        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+        : role.fallback
+    };
+  });
+}
+
+function buildExecutiveData(state) {
+  const overview = asObject(state.data.overview);
+  const readiness = asObject(state.data.readiness);
+  const integrations = asObject(state.data.integrations);
+  const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
+  const operations = asObject(selectOperationsSnapshot(state));
+
+  const overviewData = asObject(overview.overview);
+  const readinessData = asObject(readiness.dashboard);
+  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+
+  const scheduledJobs = asArray(activity.scheduled_jobs);
+  const executionResults = asArray(activity.execution_results);
+  const recommendations = asArray(readinessData.next_best_actions).length
+    ? asArray(readinessData.next_best_actions)
+    : asArray(overview.next_best_actions);
+
+  const insights = asObject(activity.insights);
+  const learning = asObject(activity.learning);
+  const notifications = asArray(operations.notifications?.items);
+
+  const sortedExecution = executionResults
+    .slice()
+    .sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
+  const sortedSchedule = scheduledJobs
+    .slice()
+    .sort((a, b) => parseTimestamp(a) - parseTimestamp(b));
+
+  const latestExecution = sortedExecution[0] || null;
+  const nextScheduled = sortedSchedule[0] || null;
+
+  const projectName =
+    asString(selectCurrentProject(state)) ||
+    asString(overviewData.project_name);
+
+  const readinessScore =
+    readinessData.readiness_score ??
+    overviewData.readiness_score ??
+    0;
+
+  const connectorScore =
+    integrations.readiness?.readiness_score ??
+    overviewData.connector_readiness_score ??
+    0;
+
+  const criticalGaps = asArray(readinessPriorities.critical);
+  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
+  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+
+  const connectorChecks = asObject(integrations.readiness?.checks);
+  const connectorKeys = Object.keys(connectorChecks);
+  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+
+  const categoryReadiness = asArray(assets.category_readiness?.categories);
+  const missingAssetLabels = [
+    ...asArray(assets.missing_assets?.assets),
+    ...asArray(assets.missing_assets?.missing),
+
+===== public/control-center/pages/home/render-sections.js =====
+/*
+  Home Executive Runtime Render Sections
+
+  Pure render helpers only.
+  No DOM listeners.
+  No data fetching.
+  No state mutation.
+*/
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function formatCount(value) {
+  const parsed = Number(value);
+  return String(Math.max(0, Math.round(Number.isFinite(parsed) ? parsed : 0)));
+}
+
+export function renderBadge(tone, label, escapeHtml) {
+  return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
+}
+
+export function renderCompactList(items, escapeHtml, emptyText = "Nothing to show yet.") {
+  const safeItems = asArray(items).slice(0, 5);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
+  }
+
+  return `
+    <ul class="home-compact-list">
+      ${safeItems.map((item) => `
+        <li>${escapeHtml(asString(item))}</li>
+      `).join("")}
+    </ul>
+  `;
+}
+
+export function renderBlockerColumn(title, items, tone, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 5);
+
+  return `
+    <article class="home-blocker-card">
+      <div class="home-blocker-head">
+        <span class="data-label">${escapeHtml(title)}</span>
+        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
+      </div>
+      ${renderCompactList(safeItems, escapeHtml, "No blocker detected.")}
+    </article>
+  `;
+}
+
+export function renderActivityItems(items, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 6);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">No recent activity recorded yet.</p>`;
+  }
+
+  return `
+    <div class="home-activity-list">
+      ${safeItems.map((item) => `
+        <article class="home-activity-item">
+          <div>
+            <span class="data-label">${escapeHtml(item.kind || "Activity")}</span>
+            <strong>${escapeHtml(item.title || "Untitled activity")}</strong>
+            <p>${escapeHtml(item.detail || "")}</p>
+          </div>
+          <div class="home-activity-meta">
+            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+export function renderAiTeamCards(cards, escapeHtml) {
+  const safeCards = asArray(cards).slice(0, 7);
+
+  if (!safeCards.length) {
+    return `<p class="home-empty-note">AI team status is not available yet.</p>`;
+  }
+
+  return `
+    <div class="home-ai-team-grid">
+      ${safeCards.map((agent) => `
+          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Click to open ${escapeHtml(agent.name)} workspace">
+          <div class="home-ai-team-card-head">
+            <strong>${escapeHtml(agent.name)}</strong>
+            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+          </div>
+          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+          </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+export function renderHomeExecutiveIntro({
+  dashboard = {},
+  capabilityCards = [],
+  escapeHtml,
+  formatPercent,
+  toneLabel
+}) {
+  return `
+    <section class="card home-exec-hero">
+      <div class="home-exec-hero-main">
+        <div>
+          <p class="card-label">Executive Command Center</p>
+          <h2>${escapeHtml(dashboard.projectName || "Project Command Center")}</h2>
+          <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
+        </div>
+
+        <div class="home-exec-hero-status">
+          ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+          <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+          <span class="data-label">System Health</span>
+        </div>
+      </div>
+
+      <div class="home-exec-hero-actions">
+        <button id="homePrimaryActionBtn" class="btn btn-primary" type="button">
+          ${escapeHtml(dashboard.primaryActionLabel)}
+        </button>
+        <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+          ${escapeHtml(dashboard.secondaryActionLabel)}
+        </button>
+        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+          Ask Executive AI
+        </button>
+      </div>
+    </section>
+
+    <section class="home-kpi-grid">
+      ${capabilityCards.map((item) => `
+        <article class="card home-kpi-card">
+          <span class="data-label">${escapeHtml(item.title)}</span>
+          <strong>${escapeHtml(item.value)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+          ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+        </article>
+      `).join("")}
+    </section>
+
+
+  `;
+}
+
+===== public/control-center/styles/13-home-executive.css =====
+/*
+  Executive Home UX - Final Operating Surface
+  International AI-native operational dashboard layer.
+  Date: 2026-05-14
+*/
+
+/* =========================================
+   Command Center Container
+========================================= */
+
+.home-command-center {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* =========================================
+   1. EXECUTIVE SMART HEADER
+========================================= */
+
+.home-exec-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: flex-start;
+
+  padding: 22px;
+  border-radius: 16px;
+
+  background:
+    radial-gradient(460px 180px at 100% 0,
+      rgba(45, 212, 191, 0.12),
+      transparent 60%),
+    linear-gradient(
+      160deg,
+      rgba(15, 30, 50, 0.95),
+      rgba(10, 22, 38, 0.92)
+    );
+
+  border: 1px solid rgba(45, 212, 191, 0.22);
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.16);
+}
+
+.home-header-left {
+  min-width: 0;
+}
+
+.home-header-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: rgba(45, 212, 191, 0.88);
+  margin-bottom: 6px;
+}
+
+.home-header-title {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.home-header-subtitle {
+  margin: 8px 0 0;
+  max-width: 700px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(237, 247, 255, 0.72);
+}
+
+.home-header-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.home-header-score {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.home-header-score strong {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.home-header-score-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(237, 247, 255, 0.68);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+/* =========================================
+   2. EXECUTIVE SNAPSHOT / KEY INDICATORS
+========================================= */
+
+.home-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.home-snapshot-card {
+  display: grid;
+  gap: 10px;
+
+  padding: 16px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border: 1px solid rgba(122, 169, 205, 0.14);
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.home-snapshot-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(45, 212, 191, 0.28);
+  box-shadow: 0 8px 20px rgba(45, 212, 191, 0.1);
+}
+
+.home-snapshot-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-snapshot-detail {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(237, 247, 255, 0.68);
+  margin: 2px 0 0;
+}
+
+/* =========================================
+   3. NEXT BEST ACTION PANEL
+========================================= */
+
+.home-next-action-panel {
+  display: grid;
+  gap: 16px;
+
+  padding: 20px;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      150deg,
+      rgba(52, 211, 153, 0.06),
+      rgba(255, 255, 255, 0.02)
+    );
+
+  border: 1px solid rgba(52, 211, 153, 0.22);
+
+  box-shadow: 0 10px 24px rgba(52, 211, 153, 0.08);
+}
+
+.home-action-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.home-action-panel-head h3 {
+  margin: 6px 0 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.home-action-explanation {
+  display: grid;
+  gap: 8px;
+}
+
+.home-action-explanation p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.home-action-destination {
+  color: rgba(237, 247, 255, 0.62);
+  font-size: 0.82rem;
+}
+
+.home-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   4. MAIN EXECUTIVE WORKSPACE
+========================================= */
+
+.home-workspace-main {
+  display: grid;
+  gap: 16px;
+}
+
+.home-workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.home-workspace-section {
+  padding: 18px;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border: 1px solid rgba(122, 169, 205, 0.12);
+}
+
+.home-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+
+  margin-bottom: 14px;
+}
+
+.home-section-head h3 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}

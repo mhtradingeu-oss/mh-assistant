@@ -1,0 +1,175 @@
+public/control-center/pages/home.js:69:    text.includes("healthy") ||
+public/control-center/pages/home.js:142:  const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/home.js:143:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:144:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:145:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:176:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+public/control-center/pages/home.js:204:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/home.js:208:  const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/home.js:211:  const readinessData = asObject(readiness.dashboard);
+public/control-center/pages/home.js:212:  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+public/control-center/pages/home.js:216:  const recommendations = asArray(readinessData.next_best_actions).length
+public/control-center/pages/home.js:217:    ? asArray(readinessData.next_best_actions)
+public/control-center/pages/home.js:222:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:238:  const readinessScore =
+public/control-center/pages/home.js:239:    readinessData.readiness_score ??
+public/control-center/pages/home.js:240:    overviewData.readiness_score ??
+public/control-center/pages/home.js:244:    integrations.readiness?.readiness_score ??
+public/control-center/pages/home.js:245:    overviewData.connector_readiness_score ??
+public/control-center/pages/home.js:248:  const criticalGaps = asArray(readinessPriorities.critical);
+public/control-center/pages/home.js:252:  const connectorChecks = asObject(integrations.readiness?.checks);
+public/control-center/pages/home.js:255:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+public/control-center/pages/home.js:257:  const categoryReadiness = asArray(assets.category_readiness?.categories);
+public/control-center/pages/home.js:273:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:274:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:299:      : "Acting now keeps momentum and converts current readiness into measurable output.";
+public/control-center/pages/home.js:314:    readinessData.readiness_status ||
+public/control-center/pages/home.js:315:    overviewData.readiness_status,
+public/control-center/pages/home.js:319:  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+public/control-center/pages/home.js:355:  const mediaJobs = asArray(operations.media_jobs?.items);
+public/control-center/pages/home.js:358:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+public/control-center/pages/home.js:370:  const readinessMissing = [
+public/control-center/pages/home.js:371:    ...asArray(readinessData.missing),
+public/control-center/pages/home.js:372:    ...asArray(readiness.missing_fields)
+public/control-center/pages/home.js:378:    asNumber(readinessScore) >= 80 ? 1 : 0,
+public/control-center/pages/home.js:440:    readinessGaps: dedupe([
+public/control-center/pages/home.js:442:      ...readinessMissing
+public/control-center/pages/home.js:450:    blockers.readinessGaps.length;
+public/control-center/pages/home.js:460:          confidence: formatPercent(systemScore),
+public/control-center/pages/home.js:462:          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+public/control-center/pages/home.js:466:      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,
+public/control-center/pages/home.js:469:    headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),
+public/control-center/pages/home.js:471:      ? `${projectName} is at ${formatPercent(readinessScore)} readiness with ${formatPercent(connectorScore)} connector coverage and ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
+public/control-center/pages/home.js:472:      : "Select a project to view executive status, system health, and clear next actions.",
+public/control-center/pages/home.js:478:    health: {
+public/control-center/pages/home.js:479:      systemScore,
+public/control-center/pages/home.js:480:      projectReadiness: asNumber(readinessScore),
+public/control-center/pages/home.js:505:        value: formatPercent(systemScore),
+public/control-center/pages/home.js:506:        detail: dashboardLabelFromScore(systemScore),
+public/control-center/pages/home.js:507:        tone: statusTone("score", systemScore)
+public/control-center/pages/home.js:511:        value: formatPercent(readinessScore),
+public/control-center/pages/home.js:513:        tone: statusTone("score", readinessScore)
+public/control-center/pages/home.js:539:        hint: "Core pillars healthy",
+public/control-center/pages/home.js:599:      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+public/control-center/pages/home.js:605:        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+public/control-center/pages/home.js:613:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+public/control-center/pages/home.js:670:      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+public/control-center/pages/home.js:687:              <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+public/control-center/pages/home.js:804:                  <span class="section-helper">Tracks campaign, publishing, and media readiness. Shows current campaign state and next scheduled actions.</span>
+public/control-center/pages/home.js:831:              <span class="section-helper">Shows operational health and movement.</span>
+public/control-center/pages/home.js:916:              <span class="home-prompt-title">Why is readiness low?</span>
+public/control-center/pages/home.js:917:              <span class="home-prompt-meta">AI explains blockers and readiness gaps in operational terms.</span>
+public/control-center/pages/home.js:969:                <span class="mhos-orchestration-pressure-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</span>
+public/control-center/pages/home.js:1013:            <span class="home-customer-ops-badge">${dashboard.health?.customerOpsStatus || "Planned/Partial"}</span>
+public/control-center/pages/home.js:1014:            <span class="home-comm-readiness-badge">Communication Readiness: <strong>${dashboard.health?.commReadiness || "Planned/Not Ready"}</strong></span>
+public/control-center/pages/home.js:1050:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1052:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1054:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1055:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1056:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1058:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+public/control-center/pages/home.js:1081:    const operationsBtn = $("homeOpenOperationsBtn");
+public/control-center/pages/home.js:1082:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+public/control-center/pages/home.js:1108:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+public/control-center/pages/home.js:1113:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+public/control-center/pages/home/render-sections.js:123:          <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+public/control-center/system-intelligence.js:76:  const readinessRoot = asObject(state?.data?.readiness);
+public/control-center/system-intelligence.js:77:  const readiness = asObject(readinessRoot.dashboard || readinessRoot);
+public/control-center/system-intelligence.js:80:  const operations = asObject(state?.data?.operations);
+public/control-center/system-intelligence.js:83:  const readinessCritical = dedupe([
+public/control-center/system-intelligence.js:84:    ...asArray(readiness.priorities?.critical),
+public/control-center/system-intelligence.js:85:    ...asArray(readiness.critical_gaps)
+public/control-center/system-intelligence.js:88:  const readinessImportant = dedupe([
+public/control-center/system-intelligence.js:89:    ...asArray(readiness.priorities?.important),
+public/control-center/system-intelligence.js:90:    ...asArray(readiness.missing),
+public/control-center/system-intelligence.js:91:    ...asArray(readinessRoot.missing_fields)
+public/control-center/system-intelligence.js:101:    ...readinessCritical,
+public/control-center/system-intelligence.js:102:    ...readinessImportant,
+public/control-center/system-intelligence.js:106:  const categoryReadiness = asArray(assetsRoot.category_readiness?.categories);
+public/control-center/system-intelligence.js:119:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/system-intelligence.js:122:    ...asArray(integrations.readiness?.missing).map((item) => titleCase(item))
+public/control-center/system-intelligence.js:125:  const contentItems = asArray(operations.content_items?.items);
+public/control-center/system-intelligence.js:126:  const mediaJobs = asArray(operations.media_jobs?.items);
+public/control-center/system-intelligence.js:127:  const workflowRuns = asArray(operations.workflows?.items);
+public/control-center/system-intelligence.js:128:  const handoffs = asArray(operations.handoffs?.items);
+public/control-center/system-intelligence.js:135:  const queueItems = asArray(operations.queues?.items);
+public/control-center/system-intelligence.js:141:  const readinessScore = Number(readiness.readiness_score ?? overview.readiness_score);
+public/control-center/system-intelligence.js:156:    readinessScore: Number.isFinite(readinessScore) ? readinessScore : null,
+public/control-center/system-intelligence.js:188:      impactChips: ["Setup", "Integrations", "Campaign readiness"],
+public/control-center/system-intelligence.js:220:      impactChips: ["Integrations", "Automation", "Campaign readiness"],
+public/control-center/system-intelligence.js:280:      reason: "Content/media readiness exists but nothing is scheduled yet.",
+public/control-center/system-intelligence.js:316:      blockerType: "library_readiness",
+public/control-center/system-intelligence.js:322:  if (signals.readinessScore != null && signals.readinessScore < 75) {
+public/control-center/system-intelligence.js:324:      id: "campaign-readiness-low",
+public/control-center/system-intelligence.js:325:      title: "Raise campaign readiness before scale",
+public/control-center/system-intelligence.js:326:      reason: `Campaign readiness is ${Math.round(signals.readinessScore)}/100 and still below a stable launch threshold.`,
+public/control-center/system-intelligence.js:330:      impactChips: ["Campaign readiness", "Setup"],
+public/control-center/system-intelligence.js:331:      blockerType: "campaign_readiness",
+public/control-center/system-intelligence.js:369:  const readinessMap = buildReadinessMap(signals);
+public/control-center/system-intelligence.js:384:    reason: "Core readiness is stable. Continue with optimization and output quality improvements.",
+public/control-center/system-intelligence.js:401:    readinessMap,
+public/control-center/system-intelligence.js:403:      score: signals.readinessScore,
+public/control-center/system-intelligence.js:404:      status: signals.readinessScore != null && signals.readinessScore >= 80 ? "ready" : "in_progress"
+public/control-center/system-intelligence.js:417:  const readiness = asObject(asObject(data.readiness).dashboard || data.readiness);
+public/control-center/system-intelligence.js:419:  const operations = asObject(data.operations);
+public/control-center/system-intelligence.js:422:    ...asArray(readiness.next_best_actions),
+public/control-center/system-intelligence.js:425:    ...asArray(operations.ai_recommendations?.items)
+public/control-center/shared-context.js:145:function getLatestHandoffFromOperations(operations, destinationPage, sourcePage = "") {
+public/control-center/shared-context.js:146:  const handoffs = asArray(operations?.handoffs?.items);
+public/control-center/shared-context.js:162:export function getSharedCampaignRecord(projectName, operations) {
+public/control-center/shared-context.js:166:  const campaigns = asArray(operations?.campaigns?.items);
+public/control-center/shared-context.js:180:export function getSharedAiDraft(projectName, operations) {
+public/control-center/shared-context.js:185:    getLatestHandoffFromOperations(operations, "workflows", "ai-command") ||
+public/control-center/shared-context.js:186:    getLatestHandoffFromOperations(operations, "ai-command", "workflows") ||
+public/control-center/shared-context.js:197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+public/control-center/shared-context.js:200:  return getLatestHandoffFromOperations(operations, destinationPage, sourcePage);
+public/control-center/api.js:1:// public/control-center/api.js
+public/control-center/api.js:223:    normalized === "api.response.text.start" ||
+public/control-center/api.js:224:    normalized === "api.response.text.done" ||
+public/control-center/api.js:225:    normalized === "api.response.text.timeout" ||
+public/control-center/api.js:226:    normalized === "api.response.parse.start" ||
+public/control-center/api.js:227:    normalized === "api.response.parse.done" ||
+public/control-center/api.js:228:    normalized === "api.response.parse.error" ||
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:254:        stage: String(stage || "api.trace"),
+public/control-center/api.js:349:      emitApiRuntimeTrace("api.response.text.timeout", {
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:429:        parseStage: "api.response.text.timeout",
+public/control-center/api.js:466:  emitApiRuntimeTrace("api.response.parse.start", {
+public/control-center/api.js:483:    emitApiRuntimeTrace("api.response.parse.done", {
+public/control-center/api.js:493:    emitApiRuntimeTrace("api.response.parse.error", {
+public/control-center/api.js:510:      parseStage: "api.response.parse.error",
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:536:      parseStage = "api.response.parse.done";
+public/control-center/api.js:538:      parseStage = "api.response.parse.error";
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:893:    operations: payload?.operations || null
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:947:  if (section === "operations") {
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1178:        "operations",
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1203:    operations: createOptionalFallback(safeProjectName, "operations"),
+public/control-center/api.js:1225:      section: "operations",
+public/control-center/api.js:1244:    operations: createOptionalFallback(safeProjectName, "operations")
+public/control-center/api.js:1249:      section: "operations",
+public/control-center/api.js:1363:    `/media-manager/project/${encodeURIComponent(projectName)}/operations`,
+public/control-center/api.js:1364:    "Failed to load project operations",
+public/control-center/api.js:1946:    `/media-manager/project/${encodeURIComponent(projectName)}/operations/schema`,
+public/control-center/api.js:1947:    "Failed to load operations schema"
+public/control-center/api.js:2325:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2329:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2333:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2337:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2341:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2345:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2349:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2353:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
