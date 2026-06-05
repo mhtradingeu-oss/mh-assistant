@@ -1,0 +1,481 @@
+{
+  "generated_at": "2026-06-05T16:15:02",
+  "branch": "architecture/frontend-consolidation-v1",
+  "head": "5077aa2",
+  "env_files_detected": {
+    ".env.local": true,
+    ".env.production": false,
+    ".env": false
+  },
+  "providers": [
+    {
+      "provider": "core",
+      "required": true,
+      "env": [
+        "MH_CONTROL_CENTER_READ_KEY",
+        "MH_CONTROL_CENTER_WRITE_KEY"
+      ],
+      "decision": "required",
+      "smoke": "health, readyz, protected read endpoints",
+      "env_checks": [
+        {
+          "key": "MH_CONTROL_CENTER_READ_KEY",
+          "status": "present",
+          "present": true,
+          "length": 50,
+          "sha256": "4542a9c73e89d889add05f5cc1e36e35e3f2a052d269d1c244126ad23fac1118"
+        },
+        {
+          "key": "MH_CONTROL_CENTER_WRITE_KEY",
+          "status": "present",
+          "present": true,
+          "length": 50,
+          "sha256": "4542a9c73e89d889add05f5cc1e36e35e3f2a052d269d1c244126ad23fac1118"
+        }
+      ],
+      "fallback": null,
+      "present_count": 2,
+      "missing_count": 0,
+      "placeholder_count": 0,
+      "enabled_detected": true,
+      "status": "ready_for_smoke"
+    },
+    {
+      "provider": "integration_encryption",
+      "required": true,
+      "env": [
+        "MH_INTEGRATION_SECRET_KEY"
+      ],
+      "fallback_file": "data/system/integration-secret.key.json",
+      "decision": "required for saved encrypted integration credentials",
+      "smoke": "token manager key availability",
+      "env_checks": [
+        {
+          "key": "MH_INTEGRATION_SECRET_KEY",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": {
+        "path": "data/system/integration-secret.key.json",
+        "exists": true,
+        "size": 273
+      },
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": true,
+      "status": "ready_for_smoke"
+    },
+    {
+      "provider": "openai",
+      "required": true,
+      "env": [
+        "OPENAI_API_KEY",
+        "MH_OPENAI_API_KEY"
+      ],
+      "decision": "required if AI enabled",
+      "smoke": "minimal provider auth/model check or app AI route",
+      "env_checks": [
+        {
+          "key": "OPENAI_API_KEY",
+          "status": "present",
+          "present": true,
+          "length": 164,
+          "sha256": "6de56d4b8ec7d83a06cebf99ff34a8cd9d95c14d00749f9662fdcf93b1317060"
+        },
+        {
+          "key": "MH_OPENAI_API_KEY",
+          "status": "present",
+          "present": true,
+          "length": 164,
+          "sha256": "419cb2ade063983c163b9f9d21707b7b72e52ab560e5e79dd7d4e84d560e1a20"
+        }
+      ],
+      "fallback": null,
+      "present_count": 2,
+      "missing_count": 0,
+      "placeholder_count": 0,
+      "enabled_detected": true,
+      "status": "ready_for_smoke"
+    },
+    {
+      "provider": "woocommerce",
+      "required": false,
+      "env": [
+        "WC_BASE_URL",
+        "WC_KEY",
+        "WC_SECRET"
+      ],
+      "decision": "enable if ecommerce sync is required",
+      "smoke": "system status/products count read",
+      "env_checks": [
+        {
+          "key": "WC_BASE_URL",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "WC_KEY",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "WC_SECRET",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 3,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "wordpress",
+      "required": false,
+      "env": [
+        "WP_BASE_URL",
+        "WP_USER",
+        "WP_APP_PASSWORD"
+      ],
+      "decision": "enable if publishing to WordPress is required",
+      "smoke": "REST auth/user or posts endpoint",
+      "env_checks": [
+        {
+          "key": "WP_BASE_URL",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "WP_USER",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "WP_APP_PASSWORD",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 3,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "email_bridge",
+      "required": false,
+      "env": [
+        "MH_EMAIL_BRIDGE_URL",
+        "MH_EMAIL_BRIDGE_TOKEN"
+      ],
+      "decision": "enable if email send is required",
+      "smoke": "bridge health/auth check",
+      "env_checks": [
+        {
+          "key": "MH_EMAIL_BRIDGE_URL",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "MH_EMAIL_BRIDGE_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 2,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "google",
+      "required": false,
+      "env": [
+        "GOOGLE_ACCESS_TOKEN",
+        "GOOGLE_REFRESH_TOKEN",
+        "GOOGLE_DEVELOPER_TOKEN"
+      ],
+      "decision": "optional unless Google/YouTube/Ads enabled",
+      "smoke": "account/property validation",
+      "env_checks": [
+        {
+          "key": "GOOGLE_ACCESS_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "GOOGLE_REFRESH_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "GOOGLE_DEVELOPER_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 3,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "meta",
+      "required": false,
+      "env": [
+        "META_ACCESS_TOKEN"
+      ],
+      "decision": "optional unless Meta channels enabled",
+      "smoke": "page/business/ad account validation",
+      "env_checks": [
+        {
+          "key": "META_ACCESS_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "tiktok",
+      "required": false,
+      "env": [
+        "TIKTOK_ACCESS_TOKEN"
+      ],
+      "decision": "optional unless TikTok enabled",
+      "smoke": "account/advertiser validation",
+      "env_checks": [
+        {
+          "key": "TIKTOK_ACCESS_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "slack",
+      "required": false,
+      "env": [
+        "SLACK_BOT_TOKEN"
+      ],
+      "decision": "optional unless Slack notifications enabled",
+      "smoke": "auth.test or bot identity",
+      "env_checks": [
+        {
+          "key": "SLACK_BOT_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "telegram",
+      "required": false,
+      "env": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "decision": "optional unless Telegram enabled",
+      "smoke": "getMe",
+      "env_checks": [
+        {
+          "key": "TELEGRAM_BOT_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "shopify",
+      "required": false,
+      "env": [
+        "SHOPIFY_STORE_DOMAIN",
+        "SHOPIFY_ADMIN_TOKEN"
+      ],
+      "decision": "optional unless Shopify enabled",
+      "smoke": "shop identity query",
+      "env_checks": [
+        {
+          "key": "SHOPIFY_STORE_DOMAIN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "SHOPIFY_ADMIN_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 2,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "ebay",
+      "required": false,
+      "env": [
+        "EBAY_ACCESS_TOKEN",
+        "EBAY_SELLER_ID"
+      ],
+      "decision": "optional unless eBay enabled",
+      "smoke": "account privilege endpoint",
+      "env_checks": [
+        {
+          "key": "EBAY_ACCESS_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "EBAY_SELLER_ID",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 2,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "notion",
+      "required": false,
+      "env": [
+        "NOTION_ACCESS_TOKEN"
+      ],
+      "decision": "optional unless Notion enabled",
+      "smoke": "workspace/user validation",
+      "env_checks": [
+        {
+          "key": "NOTION_ACCESS_TOKEN",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 1,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    },
+    {
+      "provider": "mailchimp",
+      "required": false,
+      "env": [
+        "MAILCHIMP_API_KEY",
+        "MAILCHIMP_SERVER_PREFIX",
+        "MAILCHIMP_AUDIENCE_ID"
+      ],
+      "decision": "optional unless Mailchimp-like provider enabled",
+      "smoke": "account/audience validation",
+      "env_checks": [
+        {
+          "key": "MAILCHIMP_API_KEY",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "MAILCHIMP_SERVER_PREFIX",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        },
+        {
+          "key": "MAILCHIMP_AUDIENCE_ID",
+          "status": "missing",
+          "present": false,
+          "length": 0,
+          "sha256": ""
+        }
+      ],
+      "fallback": null,
+      "present_count": 0,
+      "missing_count": 3,
+      "placeholder_count": 0,
+      "enabled_detected": false,
+      "status": "disabled_or_missing_optional"
+    }
+  ]
+}
