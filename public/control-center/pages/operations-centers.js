@@ -2202,7 +2202,7 @@ function renderOperationsCentersOverview(context) {
                     <small>${context.escapeHtml(center.description)}</small>
                     <span class="card-badge neutral">${context.escapeHtml(formatCount(center.count))}</span>
                     <div class="ops-action-row">
-                      <button class="btn btn-secondary" type="button" data-route="${context.escapeHtml(center.route)}">
+                      <button class="btn btn-secondary" type="button" data-ops-route="${context.escapeHtml(center.route)}" data-ops-label="${context.escapeHtml(center.title)}">
                         ${context.escapeHtml(center.action)}
                       </button>
                     </div>
@@ -2222,8 +2222,8 @@ function renderOperationsCentersOverview(context) {
                 </div>
               </div>
               <div class="ops-action-row">
-                <button class="btn btn-secondary" type="button" data-route="ai-command">Open AI Team</button>
-                <button class="btn btn-ghost" type="button" data-route="workflows">Open Workflows</button>
+                <button class="btn btn-secondary" type="button" data-ops-route="ai-command" data-ops-label="AI Team">Open AI Team</button>
+                <button class="btn btn-ghost" type="button" data-ops-route="workflows" data-ops-label="Workflows">Open Workflows</button>
               </div>
             </section>
 
