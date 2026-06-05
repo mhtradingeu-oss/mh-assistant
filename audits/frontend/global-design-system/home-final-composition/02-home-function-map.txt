@@ -1,0 +1,217 @@
+2:  renderActivityItems,
+3:  renderAiTeamCards,
+4:  renderBadge,
+5:  renderBlockerColumn,
+6:  renderCompactList,
+7:  renderHomeExecutiveIntro
+8:} from "./home/render-sections.js";
+19:function asArray(value) {
+23:function asObject(value) {
+27:function asString(value) {
+32:function asNumber(value, fallback = 0) {
+33:  const parsed = Number(value);
+37:function formatPercent(value) {
+41:function formatCount(value) {
+45:function statusTone(input, score) {
+46:  const text = asString(input).toLowerCase();
+77:  const parsed = Number(score);
+87:function toneLabel(tone) {
+94:function humanizeStatus(value, fallback = "Unknown") {
+95:  const raw = asString(value).trim();
+102:function parseTimestamp(item) {
+103:  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+105:    const value = item?.[field];
+107:    const stamp = Date.parse(value);
+115:function formatRelativeDate(value) {
+116:  const stamp = Date.parse(value || "");
+121:function dedupe(values = []) {
+125:function compact(value, fallback = "-") {
+126:  const text = asString(value).trim();
+130:function routeForAction(action) {
+131:  const text = asString(action).toLowerCase();
+141:function buildAiTeamCards(state) {
+142:  const operations = asObject(selectOperationsSnapshot(state));
+143:  const notifications = asArray(operations.notifications?.items);
+144:  const tasks = asArray(operations.tasks?.items);
+145:  const approvals = asArray(operations.approvals?.items);
+147:  const projectedMembers = getProjectedTeamMembers(state);
+148:  const projectedActiveRole = asString(
+152:  const roles = projectedMembers.length
+180:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+181:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+182:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+184:    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+185:    const statusRaw = asString(latest?.status || latest?.level || "idle");
+186:    const tone = statusTone(statusRaw);
+202:function buildExecutiveData(state) {
+203:  const overview = asObject(state.data.overview);
+204:  const readiness = asObject(state.data.readiness);
+205:  const integrations = asObject(state.data.integrations);
+206:  const activity = asObject(state.data.activity);
+207:  const assets = asObject(state.data.assets);
+208:  const operations = asObject(selectOperationsSnapshot(state));
+210:  const overviewData = asObject(overview.overview);
+211:  const readinessData = asObject(readiness.dashboard);
+212:  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+214:  const scheduledJobs = asArray(activity.scheduled_jobs);
+215:  const executionResults = asArray(activity.execution_results);
+216:  const recommendations = asArray(readinessData.next_best_actions).length
+220:  const insights = asObject(activity.insights);
+221:  const learning = asObject(activity.learning);
+222:  const notifications = asArray(operations.notifications?.items);
+224:  const sortedExecution = executionResults
+227:  const sortedSchedule = scheduledJobs
+231:  const latestExecution = sortedExecution[0] || null;
+232:  const nextScheduled = sortedSchedule[0] || null;
+234:  const projectName =
+238:  const readinessScore =
+243:  const connectorScore =
+248:  const criticalGaps = asArray(readinessPriorities.critical);
+249:  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
+250:  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+252:  const connectorChecks = asObject(integrations.readiness?.checks);
+253:  const connectorKeys = Object.keys(connectorChecks);
+254:  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+255:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+257:  const categoryReadiness = asArray(assets.category_readiness?.categories);
+258:  const missingAssetLabels = [
+266:  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+268:  const assetItems = asArray(assets.assets);
+269:  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
+271:  const insightsRecommendations = asArray(insights.recommendations);
+272:  const learningLessons = asArray(learning.system_lessons);
+273:  const tasks = asArray(operations.tasks?.items);
+274:  const approvals = asArray(operations.approvals?.items);
+276:  const automationTone = failedExecutions.length
+282:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+283:  const intelligenceTone = intelligenceScore > 0 ? "success" : "warning";
+285:  const fallbackAction =
+292:  const nextAction = asString(recommendations[0]).trim() || fallbackAction;
+293:  const nextActionRoute = routeForAction(nextAction);
+295:  const whyItMatters = criticalGaps.length
+301:  const activeCampaignName =
+306:  const activeChannels = dedupe([
+311:  const currentStage = humanizeStatus(
+319:  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+321:  const pendingTasks = tasks.filter((item) => {
+322:    const text = asString(item?.status || "").toLowerCase();
+326:  const pendingApprovals = approvals.filter((item) => {
+327:    const text = asString(item?.status || "").toLowerCase();
+331:  const urgencyLabel = criticalGaps.length
+337:  const workflowImpact = criticalGaps.length
+343:  const continuationSummary = nextScheduled
+347:  const confidenceSummary = intelligenceScore > 0
+351:  const escalationSummary = pendingApprovals.length
+355:  const mediaJobs = asArray(operations.media_jobs?.items);
+356:  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+358:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+361:  const publishReadyCount = publishingQueue.filter((item) => {
+362:    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();
+366:  const emailConnected = Boolean(
+370:  const readinessMissing = [
+375:  const completedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "success");
+377:  const readyCount = [
+383:  const recentExecutionSummary = sortedExecution.slice(0, 4).map((item) => {
+384:    const channel = humanizeStatus(item?.channel, "Channel");
+385:    const status = humanizeStatus(item?.execution_status, "Unknown");
+386:    const when = formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at);
+395:  const schedulerQueue = sortedSchedule.slice(0, 4).map((item) => {
+396:    const channel = humanizeStatus(item?.channel, "Channel");
+397:    const status = humanizeStatus(item?.status, "Scheduled");
+398:    const when = formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at);
+407:  const recentActivity = [
+434:  const blockers = {
+446:  const totalBlockers =
+452:  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+490:    nextBestAction: {
+506:        detail: dashboardLabelFromScore(systemScore),
+630:function dashboardLabelFromScore(score) {
+635:function setGlobalAiPrompt($, prompt) {
+636:  const input = $("quickCommandInput");
+643:export const homeRoute = {
+656:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+657:    const state = getState();
+658:    const dashboard = buildExecutiveData(state);
+659:    const root = $("homeExecRoot");
+661:    const aiTeamCards = buildAiTeamCards(state);
+663:    const capabilityCards = asArray(dashboard.capabilities).slice(0, 4);
+664:    const statusItems = asArray(dashboard.statusBoard).slice(0, 6);
+665:    const campaignChannels = asArray(dashboard.campaign.channels);
+666:    const blockerColumns = [
+667:      { title: "Integrations", items: dashboard.blockers.integrations, tone: "warning" },
+668:      { title: "Assets", items: dashboard.blockers.assets, tone: "warning" },
+669:      { title: "Failed Jobs", items: dashboard.blockers.failedJobs, tone: "danger" },
+670:      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+672:    const activeBlockerColumns = blockerColumns.filter((column) => asArray(column.items).length).slice(0, 4);
+680:            <h1 class="home-header-title">${escapeHtml(dashboard.projectName || "Project Command Center")}</h1>
+681:            <p class="home-header-subtitle">${escapeHtml(dashboard.oneLineSummary)}</p>
+685:            ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+687:              <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+696:            <span class="mhos-next-action-urgency">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+697:            <span class="mhos-next-action-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</span>
+700:            ${escapeHtml(dashboard.nextBestAction.whyItMatters)}
+704:            ${escapeHtml(dashboard.nextBestAction.workflowImpact)}
+708:            <span class="mhos-next-action-continuation">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+709:            <span class="mhos-next-action-destination">Next: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
+712:            <span class="mhos-next-action-confidence">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+713:            <span class="mhos-next-action-escalation">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+717:              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+732:              ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+742:              <h3>${dashboard.totalBlockers ? "Needs executive attention" : "No critical blockers"}</h3>
+743:              <span class="section-helper">${dashboard.totalBlockers ? "Top blockers only; deeper operational context stays below." : "The system is clear to execute on the next best action."}</span>
+745:            ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
+748:          ${dashboard.totalBlockers ? `
+751:                renderBlockerColumn(column.title, column.items, column.tone, escapeHtml)
+772:                ${renderBadge(
+773:                  dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
+774:                  dashboard.launchSnapshot.campaignReadiness,
+782:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+786:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+790:                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+794:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+803:                  <h3>${escapeHtml(compact(dashboard.campaign.name, "No active campaign"))}</h3>
+806:                ${renderBadge(dashboard.campaign.name ? "success" : "warning", dashboard.campaign.currentStage, escapeHtml)}
+812:                  <strong>${escapeHtml(dashboard.campaign.executionMode)}</strong>
+816:                  <strong>${escapeHtml(dashboard.campaign.nextScheduledAction)}</strong>
+840:                  ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+941:                  const workflowChain = aiTeamCards.slice(0, 5);
+942:                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
+943:                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
+945:                    const isActive = idx === activeIdx;
+946:                    const isBlocked = idx === blockedIdx && blockedIdx !== -1;
+969:                <span class="mhos-orchestration-pressure-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</span>
+975:                  const escalationItems = (dashboard.advanced?.pendingApprovals > 0 ? [{
+979:                    message: `${dashboard.advanced.pendingApprovals} approval${dashboard.advanced.pendingApprovals === 1 ? "" : "s"} required`,
+982:                    dashboard.blockers.failedJobs.map((msg, i) => ({
+1013:            <span class="home-customer-ops-badge">${dashboard.health?.customerOpsStatus || "Planned/Partial"}</span>
+1014:            <span class="home-comm-readiness-badge">Communication Readiness: <strong>${dashboard.health?.commReadiness || "Planned/Not Ready"}</strong></span>
+1030:          ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
+1035:    const openRoute = (route, message = "") => {
+1040:    const openAiWithPrompt = (prompt) => {
+1047:    const handleAiRoleClick = (roleId, roleName) => {
+1048:      const projectLabel = dashboard.projectName || "this project";
+1049:      const rolePrompts = {
+1061:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+1066:    const nextBtn = $("homeNextActionBtn");
+1069:        if (dashboard.nextBestAction.route === "ai-command") {
+1070:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1072:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1076:    const askNextActionBtn = $("homeAskNextActionBtn");
+1078:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+1081:    const operationsBtn = $("homeOpenOperationsBtn");
+1084:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1086:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+1089:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1092:    const quickAssetBtn = $("homeQuickUploadAssetBtn");
+1095:    const quickConnectBtn = $("homeQuickConnectPlatformBtn");
+1098:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+1101:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1103:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1106:    const promptNextBtn = $("homePromptNextBtn");
+1111:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1116:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1121:    const promptPlanBtn = $("homePromptPlanBtn");
+1123:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1126:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1128:      const roleId = card.getAttribute("data-role-id");
+1129:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
