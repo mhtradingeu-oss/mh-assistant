@@ -366,21 +366,21 @@ function renderExecutiveRuntimeStrip(context, options = {}) {
   const badge = asString(options.badge) || "Live context";
 
   return `
-    <section class="panel ops-executive-strip">
-      <div class="panel-header">
+    <section class="panel ops-executive-strip mhos-os-section">
+      <div class="panel-header mhos-os-section-head">
         <div>
-          <div class="panel-kicker">${context.escapeHtml(kicker)}</div>
-          <h3>${context.escapeHtml(title)}</h3>
-          <p>${context.escapeHtml(description)}</p>
+          <p class="mhos-os-kicker">${context.escapeHtml(kicker)}</p>
+          <h3 class="mhos-os-section-title">${context.escapeHtml(title)}</h3>
+          <p class="mhos-os-section-copy">${context.escapeHtml(description)}</p>
         </div>
-        <span class="card-badge neutral">${context.escapeHtml(badge)}</span>
+        <span class="mhos-os-chip">${context.escapeHtml(badge)}</span>
       </div>
-      <div class="ops-runtime-signal-grid">
+      <div class="ops-runtime-signal-grid mhos-os-attention-grid">
         ${signals.map((signal) => `
-          <button class="ops-runtime-signal" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
-            <span class="card-badge ${context.escapeHtml(signal.tone)}">${context.escapeHtml(signal.label)}</span>
-            <strong>${context.escapeHtml(asString(signal.value))}</strong>
-            <small>${context.escapeHtml(signal.helper)}</small>
+          <button class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">
+            <span class="mhos-os-chip ${context.escapeHtml(signal.tone)}">${context.escapeHtml(signal.label)}</span>
+            <strong class="mhos-os-path-title">${context.escapeHtml(asString(signal.value))}</strong>
+            <small class="mhos-os-path-meta">${context.escapeHtml(signal.helper)}</small>
           </button>
         `).join("")}
       </div>
@@ -2161,18 +2161,20 @@ function renderOperationsCentersOverview(context) {
 
   root.innerHTML = `
     <section class="page is-active" data-page="operations-centers">
-      <div class="ops-workspace">
-        <div class="std-context-ribbon">
-          <div>
-            <span class="std-context-eyebrow">Operations Routing Layer</span>
-            <h2>Operations Centers</h2>
-            <p class="std-context-description">A unified routing entry point for tasks, queues, job health, and notification signals for ${context.escapeHtml(projectName)}.</p>
-          </div>
-          <div class="std-context-actions">
-            <span class="std-context-chip"><span>Tasks</span><strong>${context.escapeHtml(formatCount(taskCount))}</strong></span>
-            <span class="std-context-chip"><span>Queue</span><strong>${context.escapeHtml(formatCount(queueCount))}</strong></span>
-            <span class="std-context-chip"><span>Jobs</span><strong>${context.escapeHtml(formatCount(jobCount))}</strong></span>
-            <span class="std-context-chip"><span>Signals</span><strong>${context.escapeHtml(formatCount(notificationCount))}</strong></span>
+      <div class="ops-workspace mhos-os-page">
+        <div class="std-context-ribbon mhos-os-header">
+          <div class="mhos-os-header-main">
+            <div>
+              <p class="mhos-os-kicker">AI Operations Execution</p>
+              <h2 class="mhos-os-title">Operations Centers</h2>
+              <p class="std-context-description mhos-os-subtitle">Route tasks, queues, job health, and notification signals for ${context.escapeHtml(projectName)} into the right operational workspace.</p>
+            </div>
+            <div class="std-context-actions mhos-os-chip-row">
+              <span class="std-context-chip mhos-os-chip"><span>Tasks</span><strong>${context.escapeHtml(formatCount(taskCount))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Queue</span><strong>${context.escapeHtml(formatCount(queueCount))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Jobs</span><strong>${context.escapeHtml(formatCount(jobCount))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Signals</span><strong>${context.escapeHtml(formatCount(notificationCount))}</strong></span>
+            </div>
           </div>
         </div>
 
@@ -2183,21 +2185,21 @@ function renderOperationsCentersOverview(context) {
           badge: "Composite route"
         })}
 
-        <div class="ops-layout-grid">
-          <div class="ops-main-column">
-            <section class="panel mhos-clean-surface">
-              <div class="panel-header">
+        <div class="ops-layout-grid mhos-os-layout">
+          <div class="ops-main-column mhos-os-main">
+            <section class="panel mhos-clean-surface mhos-os-section">
+              <div class="panel-header mhos-os-section-head">
                 <div>
-                  <div class="panel-kicker">Routing Handoff</div>
-                  <h3>Choose the owning operations surface</h3>
-                  <p>AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+                  <p class="mhos-os-kicker">Routing Handoff</p>
+                  <h3 class="mhos-os-section-title">Choose the owning operations surface</h3>
+                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
                 </div>
               </div>
 
-              <div class="ops-runtime-signal-grid">
+              <div class="ops-runtime-signal-grid mhos-os-attention-grid">
                 ${centers.map((center) => `
-                  <article class="ops-runtime-signal">
-                    <span>${context.escapeHtml(center.kicker)}</span>
+                  <article class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft">
+                    <span class="mhos-os-chip">${context.escapeHtml(center.kicker)}</span>
                     <strong>${context.escapeHtml(center.title)}</strong>
                     <small>${context.escapeHtml(center.description)}</small>
                     <span class="card-badge neutral">${context.escapeHtml(formatCount(center.count))}</span>
@@ -2212,13 +2214,13 @@ function renderOperationsCentersOverview(context) {
             </section>
           </div>
 
-          <aside class="ops-right-rail">
-            <section class="panel ops-ai-panel mhos-clean-surface">
+          <aside class="ops-right-rail mhos-os-rail">
+            <section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">AI Team Connection</div>
-                  <h3>Operations Lead handoff</h3>
-                  <p>For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>
+                  <p class="mhos-os-kicker">AI Team Connection</p>
+                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+                  <p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -2227,12 +2229,12 @@ function renderOperationsCentersOverview(context) {
               </div>
             </section>
 
-            <section class="panel ops-action-panel mhos-clean-surface">
+            <section class="panel ops-action-panel mhos-clean-surface mhos-os-evidence-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Safety</div>
-                  <h3>Routing-only safety</h3>
-                  <p>This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>
+                  <p class="mhos-os-kicker">Safety</p>
+                  <h3 class="mhos-os-panel-title">Routing-only safety</h3>
+                  <p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>
                 </div>
               </div>
               <div class="ops-deferred-list">
