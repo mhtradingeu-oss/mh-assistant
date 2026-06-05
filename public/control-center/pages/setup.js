@@ -385,6 +385,13 @@ function getLaunchReadinessSummary({ missingFields, missingAssets, missingConnec
   };
 }
 
+function getSetupPrimaryFocus({ missingFields = [], missingAssets = [], missingConnectors = [] }) {
+  if (missingFields.length) return "Complete required fields";
+  if (missingAssets.length) return "Prepare assets in Library";
+  if (missingConnectors.length) return "Connect platforms";
+  return "Validate and continue";
+}
+
 function getNextSetupActionText(missingFields, missingAssets, missingConnectors) {
   if (missingFields.length) {
     return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
@@ -1372,6 +1379,7 @@ export const setupRoute = {
     const contentTruthStatus = getSetupContentTruthStatus(values);
     const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
     const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+    const primaryFocus = getSetupPrimaryFocus({ missingFields, missingAssets, missingConnectors });
     const failedCount = asArray(integrations.readiness?.failed).length;
     const validationSummary = getValidationSummary({
       missingFields,
@@ -1396,25 +1404,27 @@ export const setupRoute = {
     if (!root) return;
 
     root.innerHTML = `
-      <div class="setup-wizard-shell">
-        <section class="card setup-smart-overview">
-          <div class="setup-wizard-header-top">
+      <div class="setup-wizard-shell mhos-os-page">
+        <section class="card setup-smart-overview mhos-os-header">
+          <div class="setup-wizard-header-top mhos-os-header-main">
             <div>
-              <h3 class="setup-v2-title">Smart Guided Setup</h3>
-              <p class="setup-v2-subtitle">Setup configures your project foundation and hands off assets, connectors, and publishing to the right workspace.</p>
+              <p class="mhos-os-kicker">Foundation Readiness</p>
+              <h3 class="setup-v2-title mhos-os-title">Smart Guided Setup</h3>
+              <p class="setup-v2-subtitle mhos-os-subtitle">Build the trusted project foundation before assets, connectors, campaigns, and publishing execution.</p>
               <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
-              <div class="setup-operating-chips">
+              <div class="setup-operating-chips mhos-os-chip-row">
                 <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
                 <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+                <span class="mhos-os-chip ${missingFields.length || missingAssets.length || missingConnectors.length ? "is-warning" : "is-live"}">Focus: ${escapeHtml(primaryFocus)}</span>
               </div>
             </div>
-            <div class="setup-v2-toolbar">
+            <div class="setup-v2-toolbar mhos-os-action-row">
               <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
             </div>
           </div>
 
-          <div class="setup-top-summary-row" aria-label="Configuration intelligence summary">
-            <article class="setup-top-summary-item">
+          <div class="setup-top-summary-row mhos-os-brief-grid" aria-label="Configuration intelligence summary">
+            <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Completion</span>
               <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
               <div class="setup-progress" aria-label="Setup completion">
@@ -1423,17 +1433,17 @@ export const setupRoute = {
                 </div>
               </div>
             </article>
-            <article class="setup-top-summary-item">
+            <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Required complete</span>
               <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
               <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
             </article>
-            <article class="setup-top-summary-item">
+            <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Dependencies</span>
               <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
               <span class="setup-helper">Assets and connectors pending</span>
             </article>
-            <article class="setup-top-summary-item">
+            <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Validation</span>
               <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
               <div class="setup-inline-status-row">
@@ -1444,10 +1454,10 @@ export const setupRoute = {
             </article>
           </div>
 
-          <div class="setup-guidance-strip">
-            <strong>Next required step</strong>
+          <div class="setup-guidance-strip mhos-os-decision-card">
+            <strong>Next safest setup action</strong>
             <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
-            <div class="setup-config-intel-metrics">
+            <div class="setup-config-intel-metrics mhos-os-chip-row">
               <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
               <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
               <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
