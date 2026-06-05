@@ -1,0 +1,1605 @@
+public/control-center/pages/ai-command/tool-dock.js:371:      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
+public/control-center/pages/ai-command/tool-dock.js:372:      template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:422:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:707:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:708:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:1030:      sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1195:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="Smart tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1201:              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+public/control-center/pages/ai-command/tool-dock.js:1282:          <span>Setup summary</span>
+public/control-center/pages/ai-command/tool-dock.js:1318:        <span class="mhos-tool-dock-copy">Guided setup · output, source, destination, then use in composer</span>
+public/control-center/pages/ai-command/tool-dock.js:1460:    "Selected setup:",
+public/control-center/pages/ai-command/tool-dock.js:1487:    "Do not repeat this setup back to the user unless useful; produce the best practical output.",
+public/control-center/pages/ai-command/tool-dock.js:1599:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+public/control-center/pages/campaign-studio.js:209:  const readiness = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/campaign-studio.js:253:    executionNotes: asArray(readiness.next_best_actions).join("; ")
+public/control-center/pages/campaign-studio.js:301:    <div class="setup-field-group">
+public/control-center/pages/campaign-studio.js:302:      <div class="setup-field-head">
+public/control-center/pages/campaign-studio.js:303:        <label class="setup-label" for="campaign-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/campaign-studio.js:304:        <span class="setup-field-state is-optional">Draft</span>
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:311:      <div class="setup-helper">${escapeHtml(helper)}</div>
+public/control-center/pages/campaign-studio.js:662:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "Performance or setup risk detected.")
+public/control-center/pages/campaign-studio.js:919:  readiness,
+public/control-center/pages/campaign-studio.js:920:  readinessStatus
+public/control-center/pages/campaign-studio.js:922:  const topRecommendation = recommendations[0] || normalizeRecommendation(asArray(readiness.next_best_actions)[0] || "");
+public/control-center/pages/campaign-studio.js:955:      asArray(readiness.next_best_actions)[0],
+public/control-center/pages/campaign-studio.js:956:      readinessStatus ? `Readiness status is ${readinessStatus}. Close the top blocker before routing this campaign.` : "",
+public/control-center/pages/campaign-studio.js:1006:  const readinessRoot = asObject(state.data.readiness);
+public/control-center/pages/campaign-studio.js:1007:  const readiness = asObject(readinessRoot.dashboard);
+public/control-center/pages/campaign-studio.js:1011:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/campaign-studio.js:1015:    asArray(learning.recommendations || insights.recommendations || overviewBlock.next_best_actions || readiness.next_best_actions)
+public/control-center/pages/campaign-studio.js:1062:      body: "Connection or readiness check is still incomplete."
+public/control-center/pages/campaign-studio.js:1116:    readiness,
+public/control-center/pages/campaign-studio.js:1117:    readinessStatus: readiness.readiness_status || overviewData.readiness_status
+public/control-center/pages/campaign-studio.js:1123:    readiness,
+public/control-center/pages/campaign-studio.js:1177:    <div class="campaign-readiness-block">
+public/control-center/pages/campaign-studio.js:1178:      <div class="campaign-readiness-head">
+public/control-center/pages/campaign-studio.js:1185:          : `<div class="setup-helper">${escapeHtml(emptyBody)}</div>`
+public/control-center/pages/campaign-studio.js:1233:      render();
+public/control-center/pages/campaign-studio.js:1239:      render();
+public/control-center/pages/campaign-studio.js:1323:      const prompt = `Build an execution plan for campaign ${session.values.campaignName || "this campaign"} with goal ${session.values.campaignGoal || "launch"}, channels ${session.values.channelPlan || "to be defined"}, and offer ${session.values.offerHeadline || "to be defined"}. Use current project intelligence, readiness blockers, and recommendation signals.`;
+public/control-center/pages/campaign-studio.js:1409:      render();
+public/control-center/pages/campaign-studio.js:1442:      render();
+public/control-center/pages/campaign-studio.js:1461:  render({
+public/control-center/pages/campaign-studio.js:1482:    const rerender = () => this.render({
+public/control-center/pages/campaign-studio.js:1534:    const readinessTone = executionReadiness.total ? "warning" : "success";
+public/control-center/pages/campaign-studio.js:1551:      ? "Current intelligence is shaping campaign direction and readiness."
+public/control-center/pages/campaign-studio.js:1561:              <span class="mhos-campaign-state mhos-campaign-state--${readinessTone}">${escapeHtml(executionReadiness.status)}</span>
+public/control-center/pages/campaign-studio.js:1586:            <article class="mhos-campaign-summary-item mhos-campaign-summary-item--${readinessTone} mhos-executive-summary-item">
+public/control-center/pages/campaign-studio.js:1619:              <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/campaign-studio.js:1653:              <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/campaign-studio.js:1689:              <div class="setup-form-grid">
+public/control-center/pages/campaign-studio.js:1800:                    <div class="setup-form-grid">
+public/control-center/pages/campaign-studio.js:1881:              <div class="setup-form-grid">
+public/control-center/pages/campaign-studio.js:1906:              <div class="campaign-readiness-grid">
+public/control-center/pages/campaign-studio.js:2002:              <div class="campaign-helper-note">${escapeHtml(hasLiveIntelligence ? "Live intelligence is shaping the readiness and channel recommendations on this page." : "This page is still usable without full intelligence; recommendations are falling back to current draft and readiness inputs.")}</div>
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:300:  readinessStatus = "draft",
+public/control-center/pages/media-studio-workspace.js:313:    readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),
+public/control-center/pages/media-studio-workspace.js:338:    readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),
+public/control-center/pages/media-studio-workspace.js:354:    readinessStatus: firstText(seed.readinessStatus, "draft"),
+public/control-center/pages/media-studio-workspace.js:373:      readinessStatus: session.form?.status || "draft"
+public/control-center/pages/media-studio-workspace.js:427:    readinessStatus: itemObject.status || "draft"
+public/control-center/pages/media-studio-workspace.js:437:  current.readiness_status = normalizeStatus(session.form.status || current.readiness_status || "draft", "draft");
+public/control-center/pages/media-studio-workspace.js:445:  session.form.status = normalizeStatus(current.readiness_status || session.form.status || "draft", "draft");
+public/control-center/pages/media-studio-workspace.js:576:  rerender();
+public/control-center/pages/media-studio-workspace.js:634:    rerender();
+public/control-center/pages/media-studio-workspace.js:702:    readinessStatus: firstText(payload.readiness_status, contentVersion.readiness_status),
+public/control-center/pages/media-studio-workspace.js:747:    readinessStatus: "draft"
+public/control-center/pages/media-studio-workspace.js:795:    `Objective: ${form.objective || overview.primary_goal || "support campaign readiness"}.`,
+public/control-center/pages/media-studio-workspace.js:877:      readiness_status: version.readiness_status,
+public/control-center/pages/media-studio-workspace.js:939:function normalizeApprovalStatus(readinessStatus) {
+public/control-center/pages/media-studio-workspace.js:940:  const normalized = normalizeStatus(readinessStatus || "draft", "draft");
+public/control-center/pages/media-studio-workspace.js:946:function classifyLibraryUsage(session, selectedItem, version, readiness) {
+public/control-center/pages/media-studio-workspace.js:957:  if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {
+public/control-center/pages/media-studio-workspace.js:966:  const readiness = getVersionReadiness(version, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:992:    readiness_status: readiness.readinessStatus,
+public/control-center/pages/media-studio-workspace.js:993:    approval_status: normalizeApprovalStatus(readiness.readinessStatus),
+public/control-center/pages/media-studio-workspace.js:994:    brand_checklist: readiness.checklist.map(([label, ready]) => ({ label, ready })),
+public/control-center/pages/media-studio-workspace.js:998:    usage: classifyLibraryUsage(session, selectedItem, version, readiness),
+public/control-center/pages/media-studio-workspace.js:999:    status: normalizeStatus(version?.readiness_status || readiness.readinessStatus || "draft", "draft"),
+public/control-center/pages/media-studio-workspace.js:1032:    rerender();
+public/control-center/pages/media-studio-workspace.js:1041:    rerender();
+public/control-center/pages/media-studio-workspace.js:1134:  if (["draft", "prompt_ready"].includes(normalizeStatus(version.readiness_status || "draft", "draft"))) {
+public/control-center/pages/media-studio-workspace.js:1135:    version.readiness_status = "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:1140:  saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));
+public/control-center/pages/media-studio-workspace.js:1150:      readiness_status: version.readiness_status,
+public/control-center/pages/media-studio-workspace.js:1255:  const readiness = getApiReadiness(session, backendProjectName);
+public/control-center/pages/media-studio-workspace.js:1257:  if (mode === "image" && readiness.image_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1258:  if (mode === "video" && readiness.video_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1259:  if (mode === "voice" && readiness.voice_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1260:  if (mode === "campaign-pack" && readiness.image_generation_backend && readiness.video_generation_backend && readiness.voice_generation_backend) return "";
+public/control-center/pages/media-studio-workspace.js:1516:      .media-readiness-grid,
+public/control-center/pages/media-studio-workspace.js:1580:        .media-readiness-grid,
+public/control-center/pages/media-studio-workspace.js:1659:  const readiness = getVersionReadiness(version, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:1667:  const isBrandSafe = !readiness.missingItems.includes("brand safe");
+public/control-center/pages/media-studio-workspace.js:1668:  const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:1721:    <section class="media-readiness-summary" aria-label="Media Studio compact readiness summary">
+public/control-center/pages/media-studio-workspace.js:1723:        <article class="media-readiness-chip is-${escapeHtml(item.state)}">
+public/control-center/pages/media-studio-workspace.js:1737:  const status = displayMediaStatusLabel(selectedVersionEntry(session)?.readiness_status || selectedItem?.status || form.status || "draft");
+public/control-center/pages/media-studio-workspace.js:1746:          <div class="setup-kicker">Media Studio</div>
+public/control-center/pages/media-studio-workspace.js:1777:  const readiness = getVersionReadiness(version, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:1783:  const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:1784:  const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:1804:      state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:1805:      detail: hasOutput ? displayMediaStatusLabel(readiness.readinessStatus) : "Needs output"
+public/control-center/pages/media-studio-workspace.js:1845:          <div class="setup-kicker">Media Overview</div>
+public/control-center/pages/media-studio-workspace.js:1865:    ["Image generation", "Check API readiness"],
+public/control-center/pages/media-studio-workspace.js:1869:    ["Campaign readiness", handoff ? "Workflow linked" : "Draft first"]
+public/control-center/pages/media-studio-workspace.js:1876:          <div class="setup-kicker">Smart Recommendation</div>
+public/control-center/pages/media-studio-workspace.js:1903:      <select id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input">
+public/control-center/pages/media-studio-workspace.js:1910:      ? `<textarea id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}">${escapeHtml(value)}</textarea>`
+public/control-center/pages/media-studio-workspace.js:1911:      : `<input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(value)}">`;
+public/control-center/pages/media-studio-workspace.js:1914:    <div class="setup-field-group">
+public/control-center/pages/media-studio-workspace.js:1915:      <div class="setup-field-head">
+public/control-center/pages/media-studio-workspace.js:1916:        <label class="setup-label" for="${escapeHtml(id)}">${escapeHtml(label)}</label>
+public/control-center/pages/media-studio-workspace.js:1919:      ${helper ? `<div class="setup-helper">${escapeHtml(helper)}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:1934:          <div class="setup-kicker">Media Generator</div>
+public/control-center/pages/media-studio-workspace.js:1947:            Start here: choose Image, Video, Voice, or Campaign Pack. Complete the brief, generate or improve the prompt, then use Generate Output only when a provider/backend is connected. If generation is unavailable or times out, keep the prompt/job-ready draft and continue with review, Library save, AI Command review, or provider setup in Integrations.
+public/control-center/pages/media-studio-workspace.js:1949:      <form id="mediaGeneratorForm" class="setup-form-grid media-generator-form" novalidate>
+public/control-center/pages/media-studio-workspace.js:1951:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:1955:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:1959:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:1966:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/media-studio-workspace.js:1987:          <div class="setup-kicker">Smart Prompt Intelligence</div>
+public/control-center/pages/media-studio-workspace.js:1993:        <button id="mediaPromptFromContextBtn" class="btn btn-secondary" type="button">Generate from project setup</button>
+public/control-center/pages/media-studio-workspace.js:2013:            <div class="setup-kicker">Inbound Media Brief</div>
+public/control-center/pages/media-studio-workspace.js:2036:          <div class="setup-kicker">${escapeHtml(kicker)}</div>
+public/control-center/pages/media-studio-workspace.js:2064:            <div class="setup-kicker">Media Job Queue</div>
+public/control-center/pages/media-studio-workspace.js:2078:          <div class="setup-kicker">Media Job Queue</div>
+public/control-center/pages/media-studio-workspace.js:2109:  const readinessStatus = normalizeStatus(current.readiness_status || session.form.status || selectedItem?.status || "draft", "draft");
+public/control-center/pages/media-studio-workspace.js:2128:  const publishingReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:2129:  const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";
+public/control-center/pages/media-studio-workspace.js:2141:    readinessStatus,
+public/control-center/pages/media-studio-workspace.js:2156:  if (key === "publishing-readiness") return item.status === "publishing_ready" || item.status === "sent_to_publishing" ? "Ready" : "Prepare";
+public/control-center/pages/media-studio-workspace.js:2162:  const readiness = getVersionReadiness(version, session, selectedItem);
+public/control-center/pages/media-studio-workspace.js:2163:  const activeStatus = readiness.readinessStatus;
+public/control-center/pages/media-studio-workspace.js:2168:          <div class="setup-kicker">Output Readiness State</div>
+public/control-center/pages/media-studio-workspace.js:2169:          <h3>Generation and package readiness lifecycle</h3>
+public/control-center/pages/media-studio-workspace.js:2173:      <div class="media-readiness-grid">
+public/control-center/pages/media-studio-workspace.js:2174:        ${readiness.checklist.map(([label, ready]) => `
+public/control-center/pages/media-studio-workspace.js:2182:          <strong>${escapeHtml(readiness.approvalStatus === "approved" ? "Review Ready" : "Pending")}</strong>
+public/control-center/pages/media-studio-workspace.js:2186:          <strong>${escapeHtml(readiness.missingItems.length ? readiness.missingItems.join(", ") : "None")}</strong>
+public/control-center/pages/media-studio-workspace.js:2266:            <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:2295:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:2326:        <div class="media-readiness-grid">
+public/control-center/pages/media-studio-workspace.js:2339:      <div class="media-readiness-grid">
+public/control-center/pages/media-studio-workspace.js:2353:          <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:2357:        <span class="card-badge ${statusTone(normalizeStatus(version.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(stateLabel))}</span>
+public/control-center/pages/media-studio-workspace.js:2369:  const compareStatusChanged = Boolean(previous && clean(previous.readiness_status) !== clean(selected?.readiness_status));
+public/control-center/pages/media-studio-workspace.js:2376:          <div class="setup-kicker">Versioning</div>
+public/control-center/pages/media-studio-workspace.js:2409:          <strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong>
+public/control-center/pages/media-studio-workspace.js:2420:      <div class="setup-field-group media-block-gap">
+public/control-center/pages/media-studio-workspace.js:2421:        <div class="setup-field-head">
+public/control-center/pages/media-studio-workspace.js:2422:          <label class="setup-label" for="mediaVersionCompareNotes">Compare notes</label>
+public/control-center/pages/media-studio-workspace.js:2424:        <textarea id="mediaVersionCompareNotes" class="setup-input setup-textarea" rows="3">${escapeHtml(versioning.compareNotes || "")}</textarea>
+public/control-center/pages/media-studio-workspace.js:2433:            <strong>${escapeHtml(selected?.id ? `${titleCase(selected.id)} (${titleCase(selected.readiness_status || "draft")})` : "None")}</strong>
+public/control-center/pages/media-studio-workspace.js:2437:            <strong>${escapeHtml(previous?.id ? `${titleCase(previous.id)} (${titleCase(previous.readiness_status || "draft")})` : "No previous version")}</strong>
+public/control-center/pages/media-studio-workspace.js:2479:    ["publishing-readiness", "Publishing readiness"]
+public/control-center/pages/media-studio-workspace.js:2486:          <div class="setup-kicker">Asset Preview / Brand Safety Checklist</div>
+public/control-center/pages/media-studio-workspace.js:2489:        <span class="card-badge ${statusTone(normalizeStatus(version?.readiness_status || selectedItem?.status || "draft", "draft"))}">${escapeHtml(displayMediaStatusLabel(version?.readiness_status || selectedItem?.status || "draft"))}</span>
+public/control-center/pages/media-studio-workspace.js:2579:          <div class="setup-kicker">Brand-Safe Assets</div>
+public/control-center/pages/media-studio-workspace.js:2591:  const readiness = getApiReadiness(session, backendProjectName);
+public/control-center/pages/media-studio-workspace.js:2593:    ["image generation backend", readiness.image_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2594:    ["video generation backend", readiness.video_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2595:    ["voice generation backend", readiness.voice_generation_backend],
+public/control-center/pages/media-studio-workspace.js:2596:    ["publishing handoff", readiness.publishing_handoff],
+public/control-center/pages/media-studio-workspace.js:2597:    ["approval backend", readiness.approval_backend]
+public/control-center/pages/media-studio-workspace.js:2603:          <div class="setup-kicker">API Readiness</div>
+public/control-center/pages/media-studio-workspace.js:2606:        <span class="card-badge ${readiness.hasBackend ? "success" : "warning"}">${escapeHtml(readiness.hasBackend ? "Backend project linked" : "Fallback/derived")}</span>
+public/control-center/pages/media-studio-workspace.js:2616:      ${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class="simple-banner media-block-gap">${escapeHtml("Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.")}</div>` : ""}
+public/control-center/pages/media-studio-workspace.js:2639:  const readiness = getVersionReadiness(version, session, source);
+public/control-center/pages/media-studio-workspace.js:2661:      readiness_status: readiness.readinessStatus,
+public/control-center/pages/media-studio-workspace.js:2670:        readiness_status: readiness.readinessStatus,
+public/control-center/pages/media-studio-workspace.js:2672:        brand_checklist: readiness.checklist.map(([label, ready]) => ({ label, ready })),
+public/control-center/pages/media-studio-workspace.js:2736:    rerender();
+public/control-center/pages/media-studio-workspace.js:2749:      rerender();
+public/control-center/pages/media-studio-workspace.js:2759:    rerender();
+public/control-center/pages/media-studio-workspace.js:2773:          readinessStatus: "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:2781:        rerender();
+public/control-center/pages/media-studio-workspace.js:2791:        readinessStatus: "needs_review",
+public/control-center/pages/media-studio-workspace.js:2822:      rerender();
+public/control-center/pages/media-studio-workspace.js:2839:        readinessStatus: "failed",
+public/control-center/pages/media-studio-workspace.js:2855:      rerender();
+public/control-center/pages/media-studio-workspace.js:2864:        rerender();
+public/control-center/pages/media-studio-workspace.js:2873:      rerender();
+public/control-center/pages/media-studio-workspace.js:2884:      rerender();
+public/control-center/pages/media-studio-workspace.js:2894:      rerender();
+public/control-center/pages/media-studio-workspace.js:2903:        rerender();
+public/control-center/pages/media-studio-workspace.js:2907:      rerender();
+public/control-center/pages/media-studio-workspace.js:2925:        rerender();
+public/control-center/pages/media-studio-workspace.js:2934:      rerender();
+public/control-center/pages/media-studio-workspace.js:2944:        rerender();
+public/control-center/pages/media-studio-workspace.js:2973:        rerender();
+public/control-center/pages/media-studio-workspace.js:3040:      rerender();
+public/control-center/pages/media-studio-workspace.js:3054:        rerender();
+public/control-center/pages/media-studio-workspace.js:3073:        if (currentVersion) currentVersion.readiness_status = "approved";
+public/control-center/pages/media-studio-workspace.js:3082:        if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:3088:      rerender();
+public/control-center/pages/media-studio-workspace.js:3100:        currentVersion.readiness_status = "approved";
+public/control-center/pages/media-studio-workspace.js:3123:      rerender();
+public/control-center/pages/media-studio-workspace.js:3159:      rerender();
+public/control-center/pages/media-studio-workspace.js:3170:      if (currentVersion) currentVersion.readiness_status = "draft";
+public/control-center/pages/media-studio-workspace.js:3191:      rerender();
+public/control-center/pages/media-studio-workspace.js:3204:            description: session.form.objective || item.brief || "Review prompt, outputs, approval, and publishing readiness.",
+public/control-center/pages/media-studio-workspace.js:3227:      rerender();
+public/control-center/pages/media-studio-workspace.js:3272:      if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:3292:      rerender();
+public/control-center/pages/media-studio-workspace.js:3309:      rerender();
+public/control-center/pages/media-studio-workspace.js:3323:        rerender();
+public/control-center/pages/media-studio-workspace.js:3329:        currentVersion.readiness_status = "approved";
+public/control-center/pages/media-studio-workspace.js:3337:        currentVersion.readiness_status = "draft";
+public/control-center/pages/media-studio-workspace.js:3353:          readinessStatus: "prompt_ready",
+public/control-center/pages/media-studio-workspace.js:3368:        currentVersion.readiness_status = "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:3385:      rerender();
+public/control-center/pages/media-studio-workspace.js:3429:      rerender();
+public/control-center/pages/media-studio-workspace.js:3475:  render({
+public/control-center/pages/media-studio-workspace.js:3490:    const rerender = () => mediaStudioRoute.render({
+public/control-center/pages/media-studio-workspace.js:3524:              <div class="setup-kicker">Welcome to Media Studio</div>
+public/control-center/pages/media-studio-workspace.js:3526:              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+public/control-center/pages/media-studio-workspace.js:3549:              <div class="setup-kicker">Source Context</div>
+public/control-center/pages/media-studio-workspace.js:3566:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3572:              <div class="setup-kicker">Creative Readiness</div>
+public/control-center/pages/media-studio-workspace.js:3577:            ${readinessItems.map((item) => `
+public/control-center/pages/media-studio-workspace.js:3591:      const readinessItems = getMediaReadinessItems(session, selectedItem, handoff)
+public/control-center/pages/media-studio-workspace.js:3597:              <div class="setup-kicker">Brand Compliance</div>
+public/control-center/pages/media-studio-workspace.js:3602:            ${readinessItems.map((item) => `
+public/control-center/pages/media-studio-workspace.js:3610:          <div class="media-hint media-readiness-hint" aria-label="Governance review guidance">Prepare Governance Review if any risk or compliance concern exists.</div>
+public/control-center/pages/customer-center.js:54:  const [readiness, inbox, conversations, tickets, channels] = await Promise.all([
+public/control-center/pages/customer-center.js:62:  const responses = [readiness, inbox, conversations, tickets, channels];
+public/control-center/pages/customer-center.js:68:      readiness: {},
+public/control-center/pages/customer-center.js:79:  const readinessData = asObject(getPayload(readiness));
+public/control-center/pages/customer-center.js:88:    readiness: readinessData,
+public/control-center/pages/customer-center.js:93:    blockers: asArray(readinessData.blockers),
+public/control-center/pages/customer-center.js:94:    warnings: asArray(readinessData.warnings),
+public/control-center/pages/customer-center.js:143:        <strong>Protected-read setup required</strong>
+public/control-center/pages/customer-center.js:151:function renderEmptyState(title, body, nextStep = "Safe next step: verify protected-read readiness, then reload read-only customer projections.") {
+public/control-center/pages/customer-center.js:215:    return renderEmptyState("No channel readiness records", "Provider readiness for email, social messaging, CRM, voice, and IVR will appear here when configured. Send and provider execution remain locked.");
+public/control-center/pages/customer-center.js:233:      <p class="muted">Visible for roadmap clarity only. These customer actions cannot execute here and require future confirmation gates, role permissions, provider readiness, and audit logging.</p>
+public/control-center/pages/customer-center.js:252:    ? "Guard active: waiting for server readiness"
+public/control-center/pages/customer-center.js:283:        <p class="mhos-context-description">Protected-read customer communication surface for inbox visibility, conversation previews, ticket/SLA state, channel readiness, and handoff preparation. No customer execution happens here.</p>
+public/control-center/pages/operations-centers.js:738:      rerender();
+public/control-center/pages/operations-centers.js:750:          rerender();
+public/control-center/pages/operations-centers.js:807:    rerender();
+public/control-center/pages/operations-centers.js:811:    rerender();
+public/control-center/pages/operations-centers.js:815:    rerender();
+public/control-center/pages/operations-centers.js:820:      rerender();
+public/control-center/pages/operations-centers.js:1079:      rerender();
+public/control-center/pages/operations-centers.js:1091:          rerender();
+public/control-center/pages/operations-centers.js:1103:    rerender();
+public/control-center/pages/operations-centers.js:1107:    rerender();
+public/control-center/pages/operations-centers.js:1111:    rerender();
+public/control-center/pages/operations-centers.js:1116:      rerender();
+public/control-center/pages/operations-centers.js:1372:      rerender();
+public/control-center/pages/operations-centers.js:1384:          rerender();
+public/control-center/pages/operations-centers.js:1396:    rerender();
+public/control-center/pages/operations-centers.js:1400:    rerender();
+public/control-center/pages/operations-centers.js:1404:    rerender();
+public/control-center/pages/operations-centers.js:1409:      rerender();
+public/control-center/pages/operations-centers.js:1420:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/operations-centers.js:1427:      message: "Provider readiness check is currently failing.",
+public/control-center/pages/operations-centers.js:1760:      rerender();
+public/control-center/pages/operations-centers.js:1772:          rerender();
+public/control-center/pages/operations-centers.js:1784:    rerender();
+public/control-center/pages/operations-centers.js:1788:    rerender();
+public/control-center/pages/operations-centers.js:1792:    rerender();
+public/control-center/pages/operations-centers.js:1796:    rerender();
+public/control-center/pages/operations-centers.js:1944:  render(context) {
+public/control-center/pages/operations-centers.js:1979:  render(context) {
+public/control-center/pages/operations-centers.js:2027:  render(context) {
+public/control-center/pages/operations-centers.js:2075:  render(context) {
+public/control-center/pages/operations-centers.js:2133:      description: "Review generated tasks, owners, priorities, and execution readiness.",
+public/control-center/pages/operations-centers.js:2262:  render(context) {
+public/control-center/pages/research.js:246:  const readinessChecks = asObject(integrations?.readiness?.checks);
+public/control-center/pages/research.js:257:  const fromIntegrations = Object.keys({ ...sources, ...readinessChecks }).map((id) => {
+public/control-center/pages/research.js:259:    const connected = Boolean(readinessChecks[id] || asString(source.value).trim());
+public/control-center/pages/research.js:284:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/research.js:314:    readiness,
+public/control-center/pages/research.js:322:      readiness.next_best_actions,
+public/control-center/pages/research.js:332:      readiness.critical_gaps,
+public/control-center/pages/research.js:333:      readiness.blockers,
+public/control-center/pages/research.js:610:    readiness,
+public/control-center/pages/research.js:708:      render();
+public/control-center/pages/research.js:885:      render();
+public/control-center/pages/research.js:1052:      render();
+public/control-center/pages/research.js:1072:      render();
+public/control-center/pages/research.js:1095:      render();
+public/control-center/pages/research.js:1114:  render({
+public/control-center/pages/research.js:1132:    const rerender = () => this.render({
+public/control-center/pages/research.js:1423:              <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
+public/control-center/pages/research.js:1424:              <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
+public/control-center/pages/research.js:1425:              <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
+public/control-center/pages/library/action-panel.js:49:        <p class="setup-helper">Primary Actions</p>
+public/control-center/pages/library/action-panel.js:57:        <p class="setup-helper">Utility</p>
+public/control-center/pages/library/action-panel.js:64:        <p class="setup-helper">Decisions</p>
+public/control-center/pages/library/action-panel.js:77:        <p class="setup-helper">Danger</p>
+public/control-center/pages/library/catalog-readiness.js:31:  const readinessScore = required.length
+public/control-center/pages/library/catalog-readiness.js:40:    readinessScore,
+public/control-center/pages/library/catalog-readiness.js:46:export function buildLibraryNextBestAction(readiness = {}) {
+public/control-center/pages/library/catalog-readiness.js:47:  if (readiness.missingCount > 0) {
+public/control-center/pages/library/catalog-readiness.js:52:      reason: `${readiness.missingCount} required asset categories are still missing.`,
+public/control-center/pages/library/ai-panel.js:1:export function renderLibraryAiPanel({ readiness = {}, selectedAsset = null, disabled = false } = {}) {
+public/control-center/pages/library/ai-panel.js:3:  const missingCountNumber = Number(readiness?.missingCount || 0);
+public/control-center/pages/library/ai-panel.js:4:  const readinessScoreValue = readiness?.readinessScore == null ? null : Number(readiness.readinessScore);
+public/control-center/pages/library/ai-panel.js:7:  const readinessScore = escapePanelHtml(readinessScoreValue == null || Number.isNaN(readinessScoreValue) ? "n/a" : `${readinessScoreValue}%`);
+public/control-center/pages/library/ai-panel.js:8:  const nextBestAction = buildLibraryAiNextBestAction({ readiness, selectedAsset });
+public/control-center/pages/library/ai-panel.js:39:          <strong>${readinessScore}</strong>
+public/control-center/pages/library/ai-panel.js:44:        <p class="setup-helper">Why it matters</p>
+public/control-center/pages/library/ai-panel.js:52:        <p class="setup-helper">Suggested next move</p>
+public/control-center/pages/library/ai-panel.js:63:function buildLibraryAiNextBestAction({ readiness = {}, selectedAsset = null } = {}) {
+public/control-center/pages/library/ai-panel.js:64:  const missingCount = Number(readiness?.missingCount || 0);
+public/control-center/pages/ai-command.js:66:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:197:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+public/control-center/pages/ai-command.js:198:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:199:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+public/control-center/pages/ai-command.js:227:		destinations: ["Insights", "Integrations", "Setup"],
+public/control-center/pages/ai-command.js:290:		{ label: "Review launch readiness", sub: "Identify what is blocking launch" },
+public/control-center/pages/ai-command.js:312:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+public/control-center/pages/ai-command.js:371:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+public/control-center/pages/ai-command.js:454:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:478:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:489:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:515:	{ icon: "🔧", label: "Fix Readiness", sub: "Close critical gaps", template: "What are the critical readiness gaps for {project} and what exactly needs to be done to fix them?" }
+public/control-center/pages/ai-command.js:540:	"Launch readiness",
+public/control-center/pages/ai-command.js:554:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:573:		purpose: "Align media formats with channels, cadence, and readiness.",
+public/control-center/pages/ai-command.js:582:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:790:    "Fix readiness for:"
+public/control-center/pages/ai-command.js:1371:		setup: "Setup",
+public/control-center/pages/ai-command.js:1420:				"Strategic priorities aligned to current readiness",
+public/control-center/pages/ai-command.js:1503:				"Publishing remains gated until channel, approval, and asset readiness are confirmed."
+public/control-center/pages/ai-command.js:1506:				"Validate asset and copy readiness",
+public/control-center/pages/ai-command.js:1550:				"Signals to check: readiness, channel performance, data coverage",
+public/control-center/pages/ai-command.js:1705:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1853:	const readiness = asObject(state.data.readiness);
+public/control-center/pages/ai-command.js:1854:	const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/ai-command.js:1874:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+public/control-center/pages/ai-command.js:1875:	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+public/control-center/pages/ai-command.js:1876:	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+public/control-center/pages/ai-command.js:1904:		readinessScore: toNumber(readinessDashboard.readiness_score ?? overview.readiness_score),
+public/control-center/pages/ai-command.js:1905:		readinessStatus: asString(readinessDashboard.readiness_status || overview.readiness_status || "unknown"),
+public/control-center/pages/ai-command.js:1916:		readiness,
+public/control-center/pages/ai-command.js:1917:		readinessDashboard,
+public/control-center/pages/ai-command.js:1969:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2028:	if (aiContext.readinessScore != null) summaryParts.push(`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).`);
+public/control-center/pages/ai-command.js:2035:			aiContext.criticalGaps.length ? `Critical gaps: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No critical readiness gaps flagged.",
+public/control-center/pages/ai-command.js:2048:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+public/control-center/pages/ai-command.js:2121:			routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")
+public/control-center/pages/ai-command.js:2168:			aiContext.criticalGaps.length ? `Critical gaps affecting research quality: ${aiContext.criticalGaps.slice(0, 4).map(normalizeActionLabel).join(", ")}.` : "No major setup gaps blocking research quality.",
+public/control-center/pages/ai-command.js:2177:			"Review Setup and tighten goals, audience, competitor, and market assumptions.",
+public/control-center/pages/ai-command.js:2182:			routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),
+public/control-center/pages/ai-command.js:2286:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/ai-command.js:2319:				rerender();
+public/control-center/pages/ai-command.js:2324:	rerender();
+public/control-center/pages/ai-command.js:2362:	setup: "Setup",
+public/control-center/pages/ai-command.js:2384:	setup: "operations",
+public/control-center/pages/ai-command.js:2818:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+public/control-center/pages/ai-command.js:2855:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:3406:			title: "Close critical readiness gaps before scale",
+public/control-center/pages/ai-command.js:3407:			reason: `${aiContext.criticalGaps.length} critical setup gap${aiContext.criticalGaps.length === 1 ? "" : "s"} can block launch quality and downstream automation reliability.`,
+public/control-center/pages/ai-command.js:3408:			command: `Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.`,
+public/control-center/pages/ai-command.js:3409:			chips: buildImpactChips(["Launch readiness", "Campaign", "Automation"])
+public/control-center/pages/ai-command.js:3428:			chips: buildImpactChips(["Integrations", "Automation", "Launch readiness"])
+public/control-center/pages/ai-command.js:3437:			chips: buildImpactChips(["Campaign", "Content", "Launch readiness"])
+public/control-center/pages/ai-command.js:3443:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3444:		command: `Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.`,
+public/control-center/pages/ai-command.js:3570:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3606:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+public/control-center/pages/ai-command.js:3650:					<strong>${escapeHtml(readinessLabel)}</strong>
+public/control-center/pages/ai-command.js:3961:	const readinessItems = [
+public/control-center/pages/ai-command.js:3971:		<section class="aicmd-v2-readiness-strip">
+public/control-center/pages/ai-command.js:3972:			${readinessItems.map((item) => `
+public/control-center/pages/ai-command.js:3973:				<span class="aicmd-v2-readiness-chip ${item.className}">
+public/control-center/pages/ai-command.js:4246:	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+public/control-center/pages/ai-command.js:4255:			<div><span>Readiness</span><strong>${escapeHtml(readiness)}</strong></div>
+public/control-center/pages/ai-command.js:4275:				<span class="aicmd-v2-media-status-badge">Honest readiness view</span>
+public/control-center/pages/ai-command.js:4533:	const readiness = aiContext.readinessScore;
+public/control-center/pages/ai-command.js:4547:		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
+public/control-center/pages/ai-command.js:4673:	render(context) {
+public/control-center/pages/ai-command.js:4738:		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/ai-command.js:4741:		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+public/control-center/pages/ai-command.js:4819:			aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4845:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4881:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4902:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4927:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:4938:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5011:					showMessage?.("Voice input readiness is staged for compatible browsers.");
+public/control-center/pages/ai-command.js:5058:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5094:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5113:		                                        readinessScore: aiContext.readinessScore,
+public/control-center/pages/ai-command.js:5114:		                                        readinessSummary: aiContext.summary
+public/control-center/pages/ai-command.js:5200:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5215:		                        aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5238:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5262:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5285:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5309:                                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5464:		                aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5636:				aiCommandRoute.render(context);
+public/control-center/pages/ai-command.js:5650:				rerender: () => aiCommandRoute.render(context)
+public/control-center/pages/library.js:28:// This must be run inside the render() function, after projectName is defined.
+public/control-center/pages/library.js:104:    why: "Logos keep brand identity consistent across setup, media generation, and publishing.",
+public/control-center/pages/library.js:700:      merged.readiness_status ||
+public/control-center/pages/library.js:806:    status: normalizeReadinessStatus(asset.status || asset.readiness_status || "needs_review"),
+public/control-center/pages/library.js:858:          status: libraryAsset.status || libraryAsset.readiness_status || item.status
+public/control-center/pages/library.js:1530:    rerender();
+public/control-center/pages/library.js:1567:  const readinessSummary = {
+public/control-center/pages/library.js:1572:    readinessScore: requiredGroups.length
+public/control-center/pages/library.js:1973:      readiness: readinessSummary,
+public/control-center/pages/library.js:2209:      rerender();
+public/control-center/pages/library.js:2224:      rerender();
+public/control-center/pages/library.js:2247:      rerender();
+public/control-center/pages/library.js:2265:    rerender();
+public/control-center/pages/library.js:2328:        await reloadOrRerender();
+public/control-center/pages/library.js:2359:      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.`);
+public/control-center/pages/library.js:2367:        await reloadOrRerender();
+public/control-center/pages/library.js:2404:        await reloadOrRerender();
+public/control-center/pages/library.js:2445:        await reloadOrRerender();
+public/control-center/pages/library.js:2481:        await reloadOrRerender();
+public/control-center/pages/library.js:2541:      rerender();
+public/control-center/pages/library.js:2564:        rerender();
+public/control-center/pages/library.js:2793:          rerender();
+public/control-center/pages/library.js:2897:  render({
+public/control-center/pages/library.js:3006:              <div class="setup-kicker">Asset Control System</div>
+public/control-center/pages/library.js:3008:              <p class="setup-helper">
+public/control-center/pages/library.js:3020:            <p class="card-subtitle">Shows evidence and media gaps needed for complete project readiness. This does not approve or publish assets.</p>
+public/control-center/pages/library.js:3029:            <p class="card-subtitle">Upload or register asset candidates. Approval, source-of-truth status, and publishing readiness remain separate steps.</p>
+public/control-center/pages/library.js:3045:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+public/control-center/pages/library.js:3046:              <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+public/control-center/pages/library.js:3051:              <div class="setup-helper">Upload and classify for readiness in one step.</div>
+public/control-center/pages/library.js:3088:                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+public/control-center/pages/library.js:3089:                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+public/control-center/pages/library.js:3092:                  <label class="setup-label" for="libraryFilterStatusSelect">Status</label>
+public/control-center/pages/library.js:3093:                  <select id="libraryFilterStatusSelect" class="setup-input" aria-label="Filter by status">
+public/control-center/pages/library.js:3107:                  <label class="setup-label" for="libraryFilterSourceSelect">Source</label>
+public/control-center/pages/library.js:3108:                  <select id="libraryFilterSourceSelect" class="setup-input" aria-label="Filter by source"></select>
+public/control-center/pages/library.js:3111:                  <label class="setup-label" for="librarySortSelect">Sort</label>
+public/control-center/pages/library.js:3112:                  <select id="librarySortSelect" class="setup-input" aria-label="Sort assets">
+public/control-center/pages/library.js:3121:                  <label class="setup-label" for="librarySearchInput">Search</label>
+public/control-center/pages/library.js:3122:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+public/control-center/pages/home.js:140:    "product videos": "Create product videos to unblock launch readiness",
+public/control-center/pages/home.js:144:    "amazon": "Review Amazon connector readiness",
+public/control-center/pages/home.js:145:    "ebay": "Review eBay connector readiness",
+public/control-center/pages/home.js:146:    "setup": "Complete setup foundation before execution",
+public/control-center/pages/home.js:175:      title: "Setup foundation",
+public/control-center/pages/home.js:176:      meta: health.projectReadiness >= 80 ? "Foundation is mostly ready" : "Review setup and readiness gaps",
+public/control-center/pages/home.js:302:  const readiness = asObject(state.data.readiness);
+public/control-center/pages/home.js:309:  const readinessData = asObject(readiness.dashboard);
+public/control-center/pages/home.js:310:  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+public/control-center/pages/home.js:314:  const recommendations = asArray(readinessData.next_best_actions).length
+public/control-center/pages/home.js:315:    ? asArray(readinessData.next_best_actions)
+public/control-center/pages/home.js:336:  const readinessScore =
+public/control-center/pages/home.js:337:    readinessData.readiness_score ??
+public/control-center/pages/home.js:338:    overviewData.readiness_score ??
+public/control-center/pages/home.js:342:    integrations.readiness?.readiness_score ??
+public/control-center/pages/home.js:343:    overviewData.connector_readiness_score ??
+public/control-center/pages/home.js:346:  const criticalGaps = asArray(readinessPriorities.critical);
+public/control-center/pages/home.js:350:  const connectorChecks = asObject(integrations.readiness?.checks);
+public/control-center/pages/home.js:353:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+public/control-center/pages/home.js:355:  const categoryReadiness = asArray(assets.category_readiness?.categories);
+public/control-center/pages/home.js:398:      : "Acting now keeps momentum and converts current readiness into measurable output.";
+public/control-center/pages/home.js:413:    readinessData.readiness_status ||
+public/control-center/pages/home.js:414:    overviewData.readiness_status,
+public/control-center/pages/home.js:418:  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+public/control-center/pages/home.js:469:  const readinessMissing = [
+public/control-center/pages/home.js:470:    ...asArray(readinessData.missing),
+public/control-center/pages/home.js:471:    ...asArray(readiness.missing_fields)
+public/control-center/pages/home.js:477:    asNumber(readinessScore) >= 80 ? 1 : 0,
+public/control-center/pages/home.js:539:    readinessGaps: dedupe([
+public/control-center/pages/home.js:541:      ...readinessMissing
+public/control-center/pages/home.js:549:    blockers.readinessGaps.length;
+public/control-center/pages/home.js:565:      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,
+public/control-center/pages/home.js:568:    headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),
+public/control-center/pages/home.js:570:      ? `${projectName} is at ${formatPercent(readinessScore)} readiness with ${formatPercent(connectorScore)} connector coverage and ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
+public/control-center/pages/home.js:574:    secondaryActionLabel: "Review Setup Foundation",
+public/control-center/pages/home.js:575:    secondaryActionRoute: "setup",
+public/control-center/pages/home.js:579:      projectReadiness: asNumber(readinessScore),
+public/control-center/pages/home.js:610:        value: formatPercent(readinessScore),
+public/control-center/pages/home.js:612:        tone: statusTone("score", readinessScore)
+public/control-center/pages/home.js:644:        hint: "Critical setup or assets",
+public/control-center/pages/home.js:698:      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+public/control-center/pages/home.js:704:        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+public/control-center/pages/home.js:712:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+public/control-center/pages/home.js:755:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+public/control-center/pages/home.js:769:      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+public/control-center/pages/home.js:790:        detail: dashboard.blockers.readinessGaps.length
+public/control-center/pages/home.js:791:          ? `${formatCount(dashboard.blockers.readinessGaps.length)} readiness gap${dashboard.blockers.readinessGaps.length === 1 ? "" : "s"} still affect confidence.`
+public/control-center/pages/home.js:792:          : "No critical readiness gaps are currently blocking the main path.",
+public/control-center/pages/home.js:793:        tone: dashboard.blockers.readinessGaps.length ? "is-warning" : "is-live"
+public/control-center/pages/home.js:903:                  <h2 class="mhos-os-section-title">From readiness to execution</h2>
+public/control-center/pages/home.js:904:                  <p class="mhos-os-section-copy">A simple guided path that keeps setup, assets, integrations, campaign, and execution in the right order.</p>
+public/control-center/pages/home.js:980:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+public/control-center/pages/home.js:981:                <span class="home-action-title">Review Setup Foundation</span>
+public/control-center/pages/home.js:982:                <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
+public/control-center/pages/home.js:1038:                <span class="home-prompt-title">Why is readiness low?</span>
+public/control-center/pages/home.js:1039:                <span class="home-prompt-meta">Explain blockers and readiness gaps in operational terms.</span>
+public/control-center/pages/home.js:1057:              <span class="mhos-os-chip">${escapeHtml(compactModuleState(dashboard.health?.commReadiness, "Communication readiness activates when live channels are connected."))}</span>
+public/control-center/pages/home.js:1081:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1083:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1085:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1086:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1087:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1129:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+public/control-center/pages/home.js:1130:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+public/control-center/pages/home.js:1139:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+public/control-center/pages/home.js:1144:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+public/control-center/pages/insights.js:221:    checks: asObject(state.data.integrations?.readiness?.checks)
+public/control-center/pages/insights.js:1040:  render({
+public/control-center/pages/insights.js:1428:        insightsRoute.render({
+public/control-center/pages/insights.js:1446:        insightsRoute.render({
+public/control-center/pages/insights.js:1461:      insightsRoute.render({
+public/control-center/pages/insights.js:1488:          insightsRoute.render({
+public/control-center/pages/insights.js:1504:          insightsRoute.render({
+public/control-center/pages/content-studio-workspace.js:65:    purpose: "Plan message angles and format mix that moves campaign readiness quickly.",
+public/control-center/pages/content-studio-workspace.js:116:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:319:  readinessStatus = "draft",
+public/control-center/pages/content-studio-workspace.js:333:    readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),
+public/control-center/pages/content-studio-workspace.js:351:    readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),
+public/control-center/pages/content-studio-workspace.js:368:    readinessStatus: firstText(seed.readinessStatus, "draft"),
+public/control-center/pages/content-studio-workspace.js:389:      readinessStatus: session.form?.status || "draft"
+public/control-center/pages/content-studio-workspace.js:437:  selected.readiness_status = normalizeStatus(session.form.status || selected.readiness_status || "draft", "draft");
+public/control-center/pages/content-studio-workspace.js:448:  session.form.status = normalizeStatus(selected.readiness_status || session.form.status || "draft", "draft");
+public/control-center/pages/content-studio-workspace.js:471:    readinessStatus: firstText(raw.status, "draft"),
+public/control-center/pages/content-studio-workspace.js:592:    readinessStatus: "draft"
+public/control-center/pages/content-studio-workspace.js:662:      readiness_status: version.readiness_status,
+public/control-center/pages/content-studio-workspace.js:715:  const statusChanged = Boolean(previous && clean(previous.readiness_status) !== clean(selected?.readiness_status));
+public/control-center/pages/content-studio-workspace.js:752:    readinessStatus: firstText(selectedVersion.readiness_status, payload.readiness_status, "draft"),
+public/control-center/pages/content-studio-workspace.js:778:  rerender();
+public/control-center/pages/content-studio-workspace.js:808:    rerender();
+public/control-center/pages/content-studio-workspace.js:855:    why: "Higher-quality prompt context improves draft quality and handoff readiness."
+public/control-center/pages/content-studio-workspace.js:1076:          <div class="setup-kicker">Content Overview</div>
+public/control-center/pages/content-studio-workspace.js:1095:    ["Campaign readiness", selectedItem ? "Active" : "Initialize"],
+public/control-center/pages/content-studio-workspace.js:1108:          <div class="setup-kicker">Smart Recommendation</div>
+public/control-center/pages/content-studio-workspace.js:1127:            <div class="setup-kicker">Draft Queue</div>
+public/control-center/pages/content-studio-workspace.js:1140:          <div class="setup-kicker">Draft Queue</div>
+public/control-center/pages/content-studio-workspace.js:1168:          <div class="setup-kicker">Content Composer</div>
+public/control-center/pages/content-studio-workspace.js:1177:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1178:            <div class="setup-field-head"><label class="setup-label" for="contentProjectInput">Project</label></div>
+public/control-center/pages/content-studio-workspace.js:1179:            <input id="contentProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(form.project || "")}">
+public/control-center/pages/content-studio-workspace.js:1182:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1183:            <div class="setup-field-head"><label class="setup-label" for="contentCampaignInput">Campaign</label></div>
+public/control-center/pages/content-studio-workspace.js:1184:            <input id="contentCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(form.campaign || "")}">
+public/control-center/pages/content-studio-workspace.js:1187:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1188:            <div class="setup-field-head"><label class="setup-label" for="contentProductInput">Product</label></div>
+public/control-center/pages/content-studio-workspace.js:1189:            <input id="contentProductInput" name="product" class="setup-input" type="text" value="${escapeHtml(form.product || "")}">
+public/control-center/pages/content-studio-workspace.js:1192:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1193:            <div class="setup-field-head"><label class="setup-label" for="contentChannelInput">Channel</label></div>
+public/control-center/pages/content-studio-workspace.js:1194:            <input id="contentChannelInput" name="channel" class="setup-input" type="text" value="${escapeHtml(form.channel || "")}">
+public/control-center/pages/content-studio-workspace.js:1197:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1198:            <div class="setup-field-head"><label class="setup-label" for="contentLanguageInput">Language</label></div>
+public/control-center/pages/content-studio-workspace.js:1199:            <input id="contentLanguageInput" name="language" class="setup-input" type="text" value="${escapeHtml(form.language || "")}">
+public/control-center/pages/content-studio-workspace.js:1202:          <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1203:            <div class="setup-field-head"><label class="setup-label" for="contentToneInput">Tone</label></div>
+public/control-center/pages/content-studio-workspace.js:1204:            <input id="contentToneInput" name="tone" class="setup-input" type="text" value="${escapeHtml(form.tone || "")}">
+public/control-center/pages/content-studio-workspace.js:1209:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1210:          <div class="setup-field-head"><label class="setup-label" for="contentObjectiveInput">Objective</label></div>
+public/control-center/pages/content-studio-workspace.js:1211:          <input id="contentObjectiveInput" name="objective" class="setup-input" type="text" value="${escapeHtml(form.objective || "")}">
+public/control-center/pages/content-studio-workspace.js:1215:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1216:          <div class="setup-field-head"><label class="setup-label" for="contentBriefInput">Main prompt / brief</label></div>
+public/control-center/pages/content-studio-workspace.js:1217:          <textarea id="contentBriefInput" name="brief" class="setup-input setup-textarea" rows="6">${escapeHtml(form.brief || "")}</textarea>
+public/control-center/pages/content-studio-workspace.js:1221:        <div class="setup-field-group">
+public/control-center/pages/content-studio-workspace.js:1222:          <div class="setup-field-head"><label class="setup-label" for="contentTitleInput">Draft title</label></div>
+public/control-center/pages/content-studio-workspace.js:1223:          <input id="contentTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(form.title || "")}">
+public/control-center/pages/content-studio-workspace.js:1343:          <div class="setup-kicker">Content Preview</div>
+public/control-center/pages/content-studio-workspace.js:1347:        <span class="card-badge ${statusTone(normalizeStatus(selected?.readiness_status || session.form.status || "draft", "draft"))}">${escapeHtml(titleCase(selected?.readiness_status || session.form.status || "draft"))}</span>
+public/control-center/pages/content-studio-workspace.js:1363:          <div class="setup-kicker">Draft / Versioning</div>
+public/control-center/pages/content-studio-workspace.js:1381:        <div class="content-data-item"><span>Readiness status</span><strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong></div>
+public/control-center/pages/content-studio-workspace.js:1417:          <div class="setup-kicker">Smart Writing Agents</div>
+public/control-center/pages/content-studio-workspace.js:1447:            <div class="setup-kicker">Workflow / AI Handoff</div>
+public/control-center/pages/content-studio-workspace.js:1461:          <div class="setup-kicker">Workflow / AI Handoff</div>
+public/control-center/pages/content-studio-workspace.js:1500:  const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");
+public/control-center/pages/content-studio-workspace.js:1529:        readiness_status: readinessStatus,
+public/control-center/pages/content-studio-workspace.js:1537:      readiness_status: readinessStatus
+public/control-center/pages/content-studio-workspace.js:1546:  const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");
+public/control-center/pages/content-studio-workspace.js:1567:      readiness_status: readinessStatus,
+public/control-center/pages/content-studio-workspace.js:1576:        readiness_status: readinessStatus,
+public/control-center/pages/content-studio-workspace.js:1614:    rerender();
+public/control-center/pages/content-studio-workspace.js:1621:    rerender();
+public/control-center/pages/content-studio-workspace.js:1658:    readiness_status: normalizeStatus(selected.readiness_status || "draft", "draft"),
+public/control-center/pages/content-studio-workspace.js:1774:          <div class="setup-kicker">Content Inputs</div>
+public/control-center/pages/content-studio-workspace.js:1820:      rerender();
+public/control-center/pages/content-studio-workspace.js:1830:      rerender();
+public/control-center/pages/content-studio-workspace.js:1839:        rerender();
+public/control-center/pages/content-studio-workspace.js:1854:        status: normalizeStatus(handoff.readinessStatus || "draft", "draft")
+public/control-center/pages/content-studio-workspace.js:1863:        readinessStatus: session.form.status,
+public/control-center/pages/content-studio-workspace.js:1868:      rerender();
+public/control-center/pages/content-studio-workspace.js:1877:        rerender();
+public/control-center/pages/content-studio-workspace.js:1907:              readinessStatus: "needs_review",
+public/control-center/pages/content-studio-workspace.js:1921:              readinessStatus: "prompt_ready",
+public/control-center/pages/content-studio-workspace.js:1935:            readinessStatus: "prompt_ready",
+public/control-center/pages/content-studio-workspace.js:1949:          readinessStatus: "prompt_ready",
+public/control-center/pages/content-studio-workspace.js:1957:      rerender();
+public/control-center/pages/content-studio-workspace.js:1967:        rerender();
+public/control-center/pages/content-studio-workspace.js:1973:      rerender();
+public/control-center/pages/content-studio-workspace.js:1983:        rerender();
+public/control-center/pages/content-studio-workspace.js:1992:        rerender();
+public/control-center/pages/content-studio-workspace.js:2010:      rerender();
+public/control-center/pages/content-studio-workspace.js:2019:        rerender();
+public/control-center/pages/content-studio-workspace.js:2024:      rerender();
+public/control-center/pages/content-studio-workspace.js:2068:        rerender();
+public/control-center/pages/content-studio-workspace.js:2085:          selectedVersion.readiness_status = "sent_to_media";
+public/control-center/pages/content-studio-workspace.js:2091:      rerender();
+public/control-center/pages/content-studio-workspace.js:2100:        rerender();
+public/control-center/pages/content-studio-workspace.js:2117:          selectedVersion.readiness_status = "sent_to_publishing";
+public/control-center/pages/content-studio-workspace.js:2123:      rerender();
+public/control-center/pages/content-studio-workspace.js:2132:      rerender();
+public/control-center/pages/content-studio-workspace.js:2146:        rerender();
+public/control-center/pages/content-studio-workspace.js:2151:        current.readiness_status = "approved";
+public/control-center/pages/content-studio-workspace.js:2159:        current.readiness_status = "draft";
+public/control-center/pages/content-studio-workspace.js:2175:          readinessStatus: "prompt_ready",
+public/control-center/pages/content-studio-workspace.js:2186:        await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });
+public/control-center/pages/content-studio-workspace.js:2192:        await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });
+public/control-center/pages/content-studio-workspace.js:2195:      rerender();
+public/control-center/pages/content-studio-workspace.js:2242:      rerender();
+public/control-center/pages/content-studio-workspace.js:2260:  render({
+public/control-center/pages/content-studio-workspace.js:2274:    const rerender = () => contentStudioRoute.render({
+public/control-center/pages/content-studio-workspace.js:2329:      sourceLines.push(`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>`);
+public/control-center/pages/content-studio-workspace.js:2330:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Source Context</div><h3>Source / Provenance</h3></div></div><div class="content-data-item">${sourceLines.join("")}</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2337:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">SEO Checklist</div><h3>SEO Readiness Guidance</h3></div></div><ul class="content-seo-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2346:      </ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>`;
+public/control-center/pages/content-studio-workspace.js:2351:      const ariaLabel = "Governance risk and approval readiness panel";
+public/control-center/pages/content-studio-workspace.js:2352:      return `<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">
+public/control-center/pages/content-studio-workspace.js:2359:      </ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>`;
+public/control-center/pages/integrations/cards.js:116:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/cards.js:121:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/cards.js:154:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations/cards.js:155:    return { action: "connect", label: "Complete setup" };
+public/control-center/pages/integrations/cards.js:168:function conciseSetupMethod(card = {}) {
+public/control-center/pages/integrations/cards.js:180:function getSetupMethodLabel(card = {}) {
+public/control-center/pages/integrations/cards.js:182:    return "Setup method: Backend support not configured";
+public/control-center/pages/integrations/cards.js:186:    return "Setup method: OAuth recommended";
+public/control-center/pages/integrations/cards.js:189:  return "Setup method: Manual fields";
+public/control-center/pages/integrations/cards.js:214:  return "Access needed: Setup details in drawer";
+public/control-center/pages/integrations/cards.js:224:  const setupMethodLabel = conciseSetupMethod(card);
+public/control-center/pages/integrations/cards.js:245:              <span class="integration-control-meta-pill">Access: ${esc(requirementLabel || "Setup details in drawer")}</span>
+public/control-center/pages/integrations/cards.js:246:              <span class="integration-control-meta-pill">Setup: ${esc(setupMethodLabel)}</span>
+public/control-center/pages/integrations/cards.js:269:  const countLabel = `${group.connectedCount || 0} connected • ${group.setupCount || 0} needs setup • ${group.failedCount || 0} failed • ${group.missingCount || 0} missing`;
+public/control-center/pages/integrations/cards.js:278:        <span class="card-badge ${group.failedCount || group.missingCount ? "warning" : group.setupCount ? "warning" : "success"}">${esc(countLabel)}</span>
+public/control-center/pages/integrations/cards.js:309:    return "Complete setup";
+public/control-center/pages/integrations/cards.js:390:  const compactHealth = shortenText(card.healthSummary, 120) || "Use the setup drawer for connection validation and actions.";
+public/control-center/pages/integrations/cards.js:397:          <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure fields and run connector actions.</p>
+public/control-center/pages/integrations/layout.js:130:            Partial setup, token issues, or server-reported errors need review.
+public/control-center/pages/integrations/builders.js:178:    description: "Website, storefront, and marketplace connectors that prove demand and commerce readiness.",
+public/control-center/pages/integrations/builders.js:221:  if (card.statusLabel === "Partial") return "needs_setup";
+public/control-center/pages/integrations/builders.js:226:  if (statusKey === "needs_setup") return "Needs setup";
+public/control-center/pages/integrations/builders.js:265:  const warningCount = requiredCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+public/control-center/pages/integrations/builders.js:272:    launchReadinessImpact = `${warningCount} required connector${warningCount === 1 ? "" : "s"} still need setup before diagnostics can be trusted.`;
+public/control-center/pages/integrations/builders.js:306:    .filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup")
+public/control-center/pages/integrations/builders.js:356:        setupCount: groupCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length
+public/control-center/pages/integrations/builders.js:366:  if (/(pending|partial|warning|setup)/.test(text)) return "warning";
+public/control-center/pages/integrations/builders.js:588:    impactChips.push("Launch readiness");
+public/control-center/pages/integrations/render.js:34:      : `<p class="ai-smart-rec-healthy-copy">All connectors are active. No additional setup is required right now.</p>`;
+public/control-center/pages/integrations/render.js:86:            Open setup drawer
+public/control-center/pages/integrations/render.js:88:          <span class="ai-smart-rec-cta-note">Opens the ${esc(card.label)} setup drawer and focuses the first required field.</span>
+public/control-center/pages/integrations/drawer.js:29:        <label class="setup-label" for="integration-${esc(integrationId)}-${esc(field.key)}">${esc(field.label)}</label>
+public/control-center/pages/integrations/drawer.js:30:        ${options.suggestion ? `<span class="integration-field-chip">Suggested from Setup</span>` : ""}
+public/control-center/pages/integrations/drawer.js:34:        class="setup-input${invalidClass}"
+public/control-center/pages/integrations/drawer.js:44:      <div class="setup-helper" data-integration-field-helper="${esc(integrationId)}:${esc(field.key)}"></div>
+public/control-center/pages/integrations/drawer.js:104:    return { action: "connect", label: "Complete setup" };
+public/control-center/pages/integrations/drawer.js:187:  const hasOAuthSetup = Boolean(card.quickConnectLabel || card.oauthSupported || card.authMode === "oauth");
+public/control-center/pages/integrations/drawer.js:188:  const setupMethod = card.backendSupported === false
+public/control-center/pages/integrations/drawer.js:190:    : hasOAuthSetup
+public/control-center/pages/integrations/drawer.js:331:              : "Access needed: Setup details below"
+public/control-center/pages/integrations/drawer.js:333:          <span class="integration-requirement-pill">${esc(`Setup method: ${setupMethod}`)}</span>
+public/control-center/pages/integrations/drawer.js:423:        aria-label="Close setup drawer"
+public/control-center/pages/integrations/drawer.js:431:        aria-label="${esc(card.label)} setup"
+public/control-center/pages/governance.js:188:    return "Submit reviewed approval decision? This records a backend Governance decision and may affect downstream readiness where policy gates apply. It does not publish, send, or execute directly.";
+public/control-center/pages/governance.js:272:  rerender();
+public/control-center/pages/governance.js:283:    rerender();
+public/control-center/pages/governance.js:382:      <textarea id="${escapeHtml(noteId)}" class="setup-input setup-textarea governance-note" rows="3" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(item.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:845:  const readiness = buildReadinessSnapshot(summary, queueItems, selectedItem);
+public/control-center/pages/governance.js:873:            <article class="mhos-executive-summary-item governance-summary-readiness">
+public/control-center/pages/governance.js:875:              <strong class="mhos-executive-metric-value">${escapeHtml(readiness.state)}</strong>
+public/control-center/pages/governance.js:876:              <small class="mhos-executive-metric-note">${escapeHtml(`${readiness.totalQueue} open decision${readiness.totalQueue === 1 ? "" : "s"}`)}</small>
+public/control-center/pages/governance.js:880:              <strong class="mhos-executive-metric-value">${escapeHtml(asString(readiness.approvals))}</strong>
+public/control-center/pages/governance.js:881:              <small class="mhos-executive-metric-note">${escapeHtml(readiness.approvals ? "Awaiting governed decision" : "No approval queue pressure")}</small>
+public/control-center/pages/governance.js:885:              <strong class="mhos-executive-metric-value">${escapeHtml(readiness.escalations ? `${readiness.escalations} active` : "Clear")}</strong>
+public/control-center/pages/governance.js:908:              <p class="governance-copy mhos-executive-guidance">${escapeHtml(readiness.nextBestAction)}</p>
+public/control-center/pages/governance.js:928:                ${readiness.blockers.length
+public/control-center/pages/governance.js:929:                  ? readiness.blockers.map((item) => `
+public/control-center/pages/governance.js:943:                  <span>${escapeHtml(readiness.approvals ? "Review queued approvals" : "No queued approvals")}</span>
+public/control-center/pages/governance.js:1208:              <textarea id="governanceDecisionNote" class="setup-input setup-textarea governance-note" rows="4" placeholder="Add a decision reason, change request, or escalation note.">${escapeHtml(selectedItem?.decision_note || "")}</textarea>
+public/control-center/pages/governance.js:1282:          <div class="simple-banner"><strong>AI guidance scope:</strong> Policy pressure, approval readiness, ownership coverage, risk, and next governance move.</div>
+public/control-center/pages/governance.js:1339:      rerender();
+public/control-center/pages/governance.js:1346:      rerender();
+public/control-center/pages/governance.js:1395:        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+public/control-center/pages/governance.js:1469:  render(context) {
+public/control-center/pages/governance.js:1487:    rerender();
+public/control-center/pages/integrations.js:243:        whyItMatters: "GA4 is the foundation for understanding what content and channels actually drive sessions and conversions.",
+public/control-center/pages/integrations.js:838:function getProjectSetupOverview(state) {
+public/control-center/pages/integrations.js:843:  const overview = getProjectSetupOverview(state);
+public/control-center/pages/integrations.js:900:  if (card.backendSupported === false) return "Open setup";
+public/control-center/pages/integrations.js:902:  if (card.statusLabel === "Partial") return "Complete setup";
+public/control-center/pages/integrations.js:924:    return { action: "select", label: "Open setup" };
+public/control-center/pages/integrations.js:1213:    return { label: "Open setup", action: "select" };
+public/control-center/pages/integrations.js:1230:  if (statusKey === "needs_setup") {
+public/control-center/pages/integrations.js:1231:    return { label: "Complete setup", action: "select" };
+public/control-center/pages/integrations.js:1280:      showMessage?.(`Setup drawer opened for ${integration?.label || "connector"}.`);
+public/control-center/pages/integrations.js:1281:      render();
+public/control-center/pages/integrations.js:1291:      showMessage?.(`Setup drawer opened for ${integration?.label || "connector"}.`);
+public/control-center/pages/integrations.js:1294:        render();
+public/control-center/pages/integrations.js:1299:        render();
+public/control-center/pages/integrations.js:1303:      render();
+public/control-center/pages/integrations.js:1349:      render();
+public/control-center/pages/integrations.js:1356:      render();
+public/control-center/pages/integrations.js:1363:      render();
+public/control-center/pages/integrations.js:1371:      showMessage?.(`Setup drawer closed for ${closedIntegration?.label || "connector"}.`);
+public/control-center/pages/integrations.js:1372:      render();
+public/control-center/pages/integrations.js:1408:      render();
+public/control-center/pages/integrations.js:1491:      render();
+public/control-center/pages/integrations.js:1506:      render();
+public/control-center/pages/integrations.js:1522:        render();
+public/control-center/pages/integrations.js:1550:      render();
+public/control-center/pages/integrations.js:1572:        render();
+public/control-center/pages/integrations.js:1597:      render();
+public/control-center/pages/integrations.js:1645:      showMessage?.(`Setup drawer closed for ${closedIntegration?.label || "connector"}.`);
+public/control-center/pages/integrations.js:1646:      render();
+public/control-center/pages/integrations.js:1665:  render({
+public/control-center/pages/integrations.js:1726:    const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;
+public/control-center/pages/integrations.js:1727:    const readinessBase = Math.max(allCards.length, 1);
+public/control-center/pages/integrations.js:1730:    const partialTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;
+public/control-center/pages/integrations.js:1731:    const systemScore = Math.round(((connectedTotal + partialTotal * 0.5) / readinessBase) * 100);
+public/control-center/pages/integrations.js:1748:              <div class="setup-kicker">Integration Control Tower</div>
+public/control-center/pages/integrations.js:1799:                <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open setup</button>
+public/control-center/pages/integrations.js:1813:                  <div class="setup-kicker">Required Launch Connectors</div>
+public/control-center/pages/integrations.js:1815:                  <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search providers, and open setup quickly.</p>
+public/control-center/pages/integrations.js:1821:                  <span class="setup-label">Category</span>
+public/control-center/pages/integrations.js:1828:                  <span class="setup-label">Status</span>
+public/control-center/pages/integrations.js:1834:                    <option value="needs_setup" ${session.statusFilter === "needs_setup" ? "selected" : ""}>Partial</option>
+public/control-center/pages/integrations.js:1838:                  <span class="setup-label">Search</span>
+public/control-center/pages/integrations.js:1857:            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open the setup drawer.</div>`}
+public/control-center/pages/integrations.js:1900:        <section class="card integration-system-readiness-map">
+public/control-center/pages/integrations.js:1943:      render: () => this.render({
+public/control-center/pages/setup.js:83:  primary_goal: "Aligns optimization priorities and readiness evaluation.",
+public/control-center/pages/setup.js:143:function getAllSetupFieldNames() {
+public/control-center/pages/setup.js:152:function getValidationSummary({ missingFields, readinessStatus, readinessScore, criticalGaps, failedCount }) {
+public/control-center/pages/setup.js:153:  const normalizedReadiness = asString(readinessStatus).toLowerCase();
+public/control-center/pages/setup.js:154:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:173:    reason: FIELD_IMPORTANCE_REASON[field.name] || "Required to improve setup quality and downstream reliability.",
+public/control-center/pages/setup.js:178:function getSetupDraftKey(projectName) {
+public/control-center/pages/setup.js:179:  return `mh-control-center:setup-draft:${projectName || "default"}`;
+public/control-center/pages/setup.js:182:function loadSetupDraft(projectName) {
+public/control-center/pages/setup.js:186:    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:195:function saveSetupDraft(projectName, data) {
+public/control-center/pages/setup.js:199:    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));
+public/control-center/pages/setup.js:206:function clearSetupDraft(projectName) {
+public/control-center/pages/setup.js:210:    window.localStorage.removeItem(getSetupDraftKey(projectName));
+public/control-center/pages/setup.js:217:function buildSetupValues(state) {
+public/control-center/pages/setup.js:219:  const readinessDashboard = asObject(state.data.readiness?.dashboard);
+public/control-center/pages/setup.js:249:      overviewData.setup_payload?.social_channels ||
+public/control-center/pages/setup.js:250:      overviewData.setup_payload?.channels ||
+public/control-center/pages/setup.js:251:      overviewData.setup_payload?.social_links
+public/control-center/pages/setup.js:253:    operator_notes: toListText(readinessDashboard.operator_notes)
+public/control-center/pages/setup.js:300:function getWizardReadinessStatus(values, readinessScore, readinessStatus) {
+public/control-center/pages/setup.js:302:  const score = Number(readinessScore);
+public/control-center/pages/setup.js:304:  const backendReady = asString(readinessStatus).toLowerCase() === "strong";
+public/control-center/pages/setup.js:308:function getSetupBrandStatus(values) {
+public/control-center/pages/setup.js:316:function getSetupLocalizationStatus(values) {
+public/control-center/pages/setup.js:324:function getSetupBusinessIdentityStatus(values) {
+public/control-center/pages/setup.js:332:function getSetupContentTruthStatus(values) {
+public/control-center/pages/setup.js:340:function getSetupChannelsStatus(values, missingConnectors) {
+public/control-center/pages/setup.js:347:function getSetupAiGuidanceStatus(values) {
+public/control-center/pages/setup.js:371:      label: "Launch readiness: strong"
+public/control-center/pages/setup.js:378:      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+public/control-center/pages/setup.js:384:    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+public/control-center/pages/setup.js:388:function getNextSetupActionText(missingFields, missingAssets, missingConnectors) {
+public/control-center/pages/setup.js:390:    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
+public/control-center/pages/setup.js:401:  return "Save setup, then continue to Library or Integrations.";
+public/control-center/pages/setup.js:429:    <div class="setup-field-group${required && !filled ? " is-missing" : ""}" data-setup-field="${escapeHtml(name)}" data-required="${required ? "true" : "false"}">
+public/control-center/pages/setup.js:430:      <div class="setup-field-head">
+public/control-center/pages/setup.js:431:        <div class="setup-label-with-info">
+public/control-center/pages/setup.js:432:          <label class="setup-label" for="setup-${escapeHtml(name)}">${escapeHtml(label)}</label>
+public/control-center/pages/setup.js:434:        <span class="setup-field-state ${indicatorClass}" data-setup-indicator-for="${escapeHtml(name)}">${escapeHtml(indicatorText)}</span>
+public/control-center/pages/setup.js:438:          ? `<textarea id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/setup.js:439:          : `<input id="setup-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/setup.js:441:      <div class="setup-helper">${escapeHtml(infoText)}</div>
+public/control-center/pages/setup.js:479:function readSetupFormValues(form) {
+public/control-center/pages/setup.js:490:function buildSetupPersistencePayload(values) {
+public/control-center/pages/setup.js:518:function updateSetupFieldIndicators(form, values) {
+public/control-center/pages/setup.js:519:  const groups = Array.from(form.querySelectorAll("[data-setup-field]"));
+public/control-center/pages/setup.js:521:    const name = group.getAttribute("data-setup-field") || "";
+public/control-center/pages/setup.js:524:    const indicator = group.querySelector("[data-setup-indicator-for]");
+public/control-center/pages/setup.js:570:  const positioning = document.getElementById("setupAiPositioningText");
+public/control-center/pages/setup.js:571:  if (positioning) positioning.textContent = compactListText([buildPositioningSuggestion(values)], "Generate positioning guidance from setup context.");
+public/control-center/pages/setup.js:573:  const audience = document.getElementById("setupAiAudienceText");
+public/control-center/pages/setup.js:576:  const tone = document.getElementById("setupAiToneText");
+public/control-center/pages/setup.js:587:  readinessScore,
+public/control-center/pages/setup.js:588:  readinessStatus,
+public/control-center/pages/setup.js:595:  const allFields = getAllSetupFieldNames();
+public/control-center/pages/setup.js:599:  const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+public/control-center/pages/setup.js:609:    readinessStatus,
+public/control-center/pages/setup.js:610:    readinessScore,
+public/control-center/pages/setup.js:617:  const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
+public/control-center/pages/setup.js:618:  const brandStatus = getSetupBrandStatus(values);
+public/control-center/pages/setup.js:619:  const localizationStatus = getSetupLocalizationStatus(values);
+public/control-center/pages/setup.js:620:  const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+public/control-center/pages/setup.js:621:  const contentTruthStatus = getSetupContentTruthStatus(values);
+public/control-center/pages/setup.js:622:  const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
+public/control-center/pages/setup.js:624:  updateSetupFieldIndicators(form, values);
+public/control-center/pages/setup.js:626:  const completionTextWide = document.getElementById("setupCompletionPercentValue");
+public/control-center/pages/setup.js:629:  const topCompletionBadge = document.getElementById("setupTopCompletionBadge");
+public/control-center/pages/setup.js:635:  const topReadinessBadge = document.getElementById("setupTopReadinessBadge");
+public/control-center/pages/setup.js:641:  const requiredCompleteEl = document.getElementById("setupRequiredCompleted");
+public/control-center/pages/setup.js:644:  const requiredTotalEl = document.getElementById("setupRequiredTotal");
+public/control-center/pages/setup.js:647:  const completionBar = document.getElementById("setupCompletionBar");
+public/control-center/pages/setup.js:660:  const missingCount = document.getElementById("setupMissingCount");
+public/control-center/pages/setup.js:663:  const nextBestActionEl = document.getElementById("setupNextBestAction");
+public/control-center/pages/setup.js:668:  const readinessMissingFieldsEl = document.getElementById("setupReadinessMissingFields");
+public/control-center/pages/setup.js:669:  if (readinessMissingFieldsEl) {
+public/control-center/pages/setup.js:670:    readinessMissingFieldsEl.textContent = String(missingFields.length);
+public/control-center/pages/setup.js:673:  const readinessMissingAssetsEl = document.getElementById("setupReadinessMissingAssets");
+public/control-center/pages/setup.js:674:  if (readinessMissingAssetsEl) {
+public/control-center/pages/setup.js:675:    readinessMissingAssetsEl.textContent = String(missingAssets.length);
+public/control-center/pages/setup.js:678:  const readinessMissingConnectorsEl = document.getElementById("setupReadinessMissingConnectors");
+public/control-center/pages/setup.js:679:  if (readinessMissingConnectorsEl) {
+public/control-center/pages/setup.js:680:    readinessMissingConnectorsEl.textContent = String(missingConnectors.length);
+public/control-center/pages/setup.js:683:  const dependencyGapCardEl = document.getElementById("setupDependencyGapCount");
+public/control-center/pages/setup.js:689:    { id: "setupBusinessIdentityStatus", value: businessIdentityStatus },
+public/control-center/pages/setup.js:690:    { id: "setupBrandStatus", value: brandStatus },
+public/control-center/pages/setup.js:691:    { id: "setupLocalizationStatus", value: localizationStatus },
+public/control-center/pages/setup.js:692:    { id: "setupChannelsStatus", value: channelsStatus },
+public/control-center/pages/setup.js:693:    { id: "setupContentTruthStatus", value: contentTruthStatus },
+public/control-center/pages/setup.js:694:    { id: "setupAiGuidanceStatus", value: aiGuidanceStatus }
+public/control-center/pages/setup.js:705:  const readinessBadge = document.getElementById("setupReadinessBadge");
+public/control-center/pages/setup.js:706:  if (readinessBadge) {
+public/control-center/pages/setup.js:707:    const label = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:708:    readinessBadge.className = `card-badge ${label === "Ready" ? "success" : "warning"}`;
+public/control-center/pages/setup.js:709:    readinessBadge.textContent = label;
+public/control-center/pages/setup.js:712:  const validationBadge = document.getElementById("setupValidationBadge");
+public/control-center/pages/setup.js:718:  const missingActionList = document.getElementById("setupMissingActions");
+public/control-center/pages/setup.js:721:      ? `<div class="setup-smart-gap-list">${missingInsights.map((item) => `
+public/control-center/pages/setup.js:722:          <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:727:            <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Open field</button>
+public/control-center/pages/setup.js:733:  const blockerList = document.getElementById("setupSystemGaps");
+public/control-center/pages/setup.js:742:      "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:746:  const completeNowBtn = document.getElementById("setupCompleteNowBtn");
+public/control-center/pages/setup.js:764:    const badge = document.getElementById(`setupStepBadge-${step.id}`);
+public/control-center/pages/setup.js:765:    const button = form.querySelector(`[data-setup-step="${step.id}"]`);
+public/control-center/pages/setup.js:766:    const statusNote = form.querySelector(`[data-setup-step-note="${step.id}"]`);
+public/control-center/pages/setup.js:782:      statusNote.className = `setup-smart-step-note tone-${status.tone}`;
+public/control-center/pages/setup.js:791:  const recommendedTitle = document.getElementById("setupRecommendedStepTitle");
+public/control-center/pages/setup.js:794:  const recommendedReason = document.getElementById("setupRecommendedStepReason");
+public/control-center/pages/setup.js:797:  const recommendedBtn = document.getElementById("setupRecommendedStepBtn");
+public/control-center/pages/setup.js:799:    recommendedBtn.setAttribute("data-setup-open-step", recommendedStep.id);
+public/control-center/pages/setup.js:803:  const continueLibraryBtn = document.getElementById("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:804:  const continueIntegrationsBtn = document.getElementById("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:805:  const continueCampaignBtn = document.getElementById("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:825:  const stepCounter = document.getElementById("setupStepCounter");
+public/control-center/pages/setup.js:834:function bindSetupActions({
+public/control-center/pages/setup.js:842:  saveProjectSetup,
+public/control-center/pages/setup.js:845:  readinessScore,
+public/control-center/pages/setup.js:846:  readinessStatus,
+public/control-center/pages/setup.js:849:  const form = $("setupProjectForm");
+public/control-center/pages/setup.js:852:  const stepButtons = Array.from(document.querySelectorAll("[data-setup-step]"));
+public/control-center/pages/setup.js:853:  const stepActionButtons = Array.from(document.querySelectorAll("[data-setup-open-step]"));
+public/control-center/pages/setup.js:854:  const stepPanels = Array.from(document.querySelectorAll("[data-setup-step-panel]"));
+public/control-center/pages/setup.js:861:      const isActive = button.getAttribute("data-setup-step") === stepId;
+public/control-center/pages/setup.js:867:      const isActive = panel.getAttribute("data-setup-step-panel") === stepId;
+public/control-center/pages/setup.js:872:    const values = readSetupFormValues(form);
+public/control-center/pages/setup.js:880:      readinessScore,
+public/control-center/pages/setup.js:881:      readinessStatus,
+public/control-center/pages/setup.js:888:    button.onclick = () => activateStep(button.getAttribute("data-setup-step") || STEP_DEFINITIONS[0].id);
+public/control-center/pages/setup.js:893:      const stepId = button.getAttribute("data-setup-open-step") || STEP_DEFINITIONS[0].id;
+public/control-center/pages/setup.js:895:      const panel = document.querySelector(`[data-setup-step-panel="${stepId}"]`);
+public/control-center/pages/setup.js:900:  const prevBtn = $("setupPrevStepBtn");
+public/control-center/pages/setup.js:908:  const nextBtn = $("setupNextStepBtn");
+public/control-center/pages/setup.js:917:    const values = readSetupFormValues(form);
+public/control-center/pages/setup.js:925:      readinessScore,
+public/control-center/pages/setup.js:926:      readinessStatus,
+public/control-center/pages/setup.js:935:    const saved = saveSetupDraft(projectName, values);
+public/control-center/pages/setup.js:949:        setupDraft: {
+public/control-center/pages/setup.js:963:      saveSetupDraft(projectName, values);
+public/control-center/pages/setup.js:972:  const keepSetupFieldFocused = (event) => {
+public/control-center/pages/setup.js:973:    const field = event.target?.closest?.(".setup-input, .setup-textarea");
+public/control-center/pages/setup.js:988:  const setupRoot = $("setupRoot") || form.closest(".setup-wizard-shell") || form;
+public/control-center/pages/setup.js:990:  setupRoot.onclick = (event) => {
+public/control-center/pages/setup.js:991:    const jumpBtn = event.target.closest("[data-setup-jump-field]");
+public/control-center/pages/setup.js:996:    const fieldName = jumpBtn.getAttribute("data-setup-jump-field") || "";
+public/control-center/pages/setup.js:997:    const stepId = jumpBtn.getAttribute("data-setup-jump-step") || getFieldStepId(fieldName);
+public/control-center/pages/setup.js:1017:  const saveDraftBtn = $("setupSaveDraftBtn");
+public/control-center/pages/setup.js:1024:  const saveBackendBtn = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1028:        showError?.("Select a project before saving Setup changes.");
+public/control-center/pages/setup.js:1034:      const payload = buildSetupPersistencePayload(values);
+public/control-center/pages/setup.js:1039:      showMessage?.(`Saving setup for ${draftKeyName}...`);
+public/control-center/pages/setup.js:1042:        await saveProjectSetup?.(projectName, payload);
+public/control-center/pages/setup.js:1043:        clearSetupDraft(projectName);
+public/control-center/pages/setup.js:1051:        showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
+public/control-center/pages/setup.js:1054:        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
+public/control-center/pages/setup.js:1066:  const resetBtn = $("setupResetDraftBtn");
+public/control-center/pages/setup.js:1069:      clearSetupDraft(projectName);
+public/control-center/pages/setup.js:1070:      navigateTo("setup");
+public/control-center/pages/setup.js:1072:        showMessage(`Local setup draft cleared for ${draftKeyName}.`);
+public/control-center/pages/setup.js:1077:  const aiPositioningBtn = $("setupAiPositioningBtn");
+public/control-center/pages/setup.js:1090:  const aiAudienceBtn = $("setupAiAudienceBtn");
+public/control-center/pages/setup.js:1103:  const aiToneBtn = $("setupAiToneBtn");
+public/control-center/pages/setup.js:1116:  const aiFillBtn = $("setupAiFillMissingBtn");
+public/control-center/pages/setup.js:1144:  const aiCommandBtn = $("setupAiCommandBtn");
+public/control-center/pages/setup.js:1151:        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
+public/control-center/pages/setup.js:1154:      showMessage?.("Setup context sent to AI Command.");
+public/control-center/pages/setup.js:1158:  const validateNowBtn = $("setupValidateNowBtn");
+public/control-center/pages/setup.js:1161:      const target = $("setupSaveBackendBtn");
+public/control-center/pages/setup.js:1168:  const continueLibraryBtn = $("setupContinueLibraryBtn");
+public/control-center/pages/setup.js:1175:  const continueIntegrationsBtn = $("setupContinueIntegrationsBtn");
+public/control-center/pages/setup.js:1182:  const continueCampaignBtn = $("setupContinueCampaignBtn");
+public/control-center/pages/setup.js:1189:  const reviewMissingBtn = $("setupReviewMissingBtn");
+public/control-center/pages/setup.js:1195:        showMessage?.("No required setup gaps found.");
+public/control-center/pages/setup.js:1205:      showMessage?.(`Reviewing missing setup items (${missing.length}).`);
+public/control-center/pages/setup.js:1209:  const reviewReadinessBtn = $("setupReviewReadinessBtn");
+public/control-center/pages/setup.js:1216:  const smartActionBtn = $("setupSmartActionBtn");
+public/control-center/pages/setup.js:1281:    <section class="card setup-business-template-panel">
+public/control-center/pages/setup.js:1282:      <div class="setup-template-head">
+public/control-center/pages/setup.js:1284:          <div class="setup-kicker">Business Template</div>
+public/control-center/pages/setup.js:1285:          <h3 class="setup-v2-title">Project Operating Model</h3>
+public/control-center/pages/setup.js:1286:          <p class="setup-v2-subtitle">Select the template that sets setup defaults, checklist scope, and launch priorities.</p>
+public/control-center/pages/setup.js:1288:        <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
+public/control-center/pages/setup.js:1291:      <div class="setup-template-body">
+public/control-center/pages/setup.js:1292:        <label class="setup-template-selector">
+public/control-center/pages/setup.js:1294:          <select id="setupBusinessTemplateSelect">
+public/control-center/pages/setup.js:1303:        <div class="setup-template-preview${requiredAssets.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1305:          <span class="${requiredAssets.length ? "" : "setup-template-empty"}">${escapeHtml(requirementsText)}</span>
+public/control-center/pages/setup.js:1308:        <div class="setup-template-preview${starterChecklist.length ? "" : " is-empty"}">
+public/control-center/pages/setup.js:1310:          <span class="${starterChecklist.length ? "" : "setup-template-empty"}">${escapeHtml(checklistText)}</span>
+public/control-center/pages/setup.js:1314:      <div class="setup-template-actions">
+public/control-center/pages/setup.js:1315:        <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
+public/control-center/pages/setup.js:1318:        <span id="setupTemplateStatus" class="setup-template-status"></span>
+public/control-center/pages/setup.js:1325:export const setupRoute = {
+public/control-center/pages/setup.js:1326:  id: "setup",
+public/control-center/pages/setup.js:1330:    title: "Smart Guided Setup",
+public/control-center/pages/setup.js:1334:    <section class="page is-active" data-page="setup">
+public/control-center/pages/setup.js:1335:      <div id="setupRoot"></div>
+public/control-center/pages/setup.js:1338:  render({
+public/control-center/pages/setup.js:1346:    saveProjectSetup
+public/control-center/pages/setup.js:1350:    const readiness = asObject(state.data.readiness);
+public/control-center/pages/setup.js:1351:    const readinessDashboard = asObject(readiness.dashboard);
+public/control-center/pages/setup.js:1356:    const draft = loadSetupDraft(projectName);
+public/control-center/pages/setup.js:1357:    const values = { ...buildSetupValues(state), ...(draft || {}) };
+public/control-center/pages/setup.js:1359:    const readinessScore = readinessDashboard.readiness_score ?? overviewData.readiness_score ?? 0;
+public/control-center/pages/setup.js:1360:    const readinessStatus = readinessDashboard.readiness_status || overviewData.readiness_status || "needs_work";
+public/control-center/pages/setup.js:1362:    const missingConnectors = asArray(integrations.readiness?.missing);
+public/control-center/pages/setup.js:1363:    const criticalGaps = asArray(readinessDashboard.priorities?.critical);
+public/control-center/pages/setup.js:1367:    const wizardStatus = getWizardReadinessStatus(values, readinessScore, readinessStatus);
+public/control-center/pages/setup.js:1368:    const businessIdentityStatus = getSetupBusinessIdentityStatus(values);
+public/control-center/pages/setup.js:1369:    const brandStatus = getSetupBrandStatus(values);
+public/control-center/pages/setup.js:1370:    const localizationStatus = getSetupLocalizationStatus(values);
+public/control-center/pages/setup.js:1371:    const channelsStatus = getSetupChannelsStatus(values, missingConnectors);
+public/control-center/pages/setup.js:1372:    const contentTruthStatus = getSetupContentTruthStatus(values);
+public/control-center/pages/setup.js:1373:    const aiGuidanceStatus = getSetupAiGuidanceStatus(values);
+public/control-center/pages/setup.js:1374:    const nextBestAction = getNextSetupActionText(missingFields, missingAssets, missingConnectors);
+public/control-center/pages/setup.js:1375:    const failedCount = asArray(integrations.readiness?.failed).length;
+public/control-center/pages/setup.js:1378:      readinessStatus,
+public/control-center/pages/setup.js:1379:      readinessScore,
+public/control-center/pages/setup.js:1383:    const allFields = getAllSetupFieldNames();
+public/control-center/pages/setup.js:1389:      readinessDashboard.updated_at ||
+public/control-center/pages/setup.js:1390:      readinessDashboard.last_saved_at ||
+public/control-center/pages/setup.js:1395:    const root = $("setupRoot");
+public/control-center/pages/setup.js:1399:      <div class="setup-wizard-shell">
+public/control-center/pages/setup.js:1400:        <section class="card setup-smart-overview">
+public/control-center/pages/setup.js:1401:          <div class="setup-wizard-header-top">
+public/control-center/pages/setup.js:1403:              <h3 class="setup-v2-title">Smart Guided Setup</h3>
+public/control-center/pages/setup.js:1404:              <p class="setup-v2-subtitle">Setup configures your project foundation and hands off assets, connectors, and publishing to the right workspace.</p>
+public/control-center/pages/setup.js:1405:              <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
+public/control-center/pages/setup.js:1406:              <div class="setup-operating-chips">
+public/control-center/pages/setup.js:1407:                <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
+public/control-center/pages/setup.js:1408:                <span class="card-badge ${getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).tone}" id="setupTopReadinessBadge">${escapeHtml(getLaunchReadinessSummary({ missingFields, missingAssets, missingConnectors, criticalGaps }).label)}</span>
+public/control-center/pages/setup.js:1411:            <div class="setup-v2-toolbar">
+public/control-center/pages/setup.js:1412:              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+public/control-center/pages/setup.js:1416:          <div class="setup-top-summary-row" aria-label="Configuration intelligence summary">
+public/control-center/pages/setup.js:1417:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1419:              <strong id="setupCompletionPercentValue" class="setup-wizard-progress-value">${escapeHtml(String(completionPercent))}%</strong>
+public/control-center/pages/setup.js:1420:              <div class="setup-progress" aria-label="Setup completion">
+public/control-center/pages/setup.js:1421:                <div class="setup-progress-track">
+public/control-center/pages/setup.js:1422:                  <div id="setupCompletionBar" class="setup-progress-fill" style="width:${escapeHtml(String(completionPercent))}%"></div>
+public/control-center/pages/setup.js:1426:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1428:              <strong><span id="setupRequiredCompleted">${escapeHtml(String(requiredCompleted))}</span>/<span id="setupRequiredTotal">${escapeHtml(String(requiredNames.length))}</span></strong>
+public/control-center/pages/setup.js:1429:              <span class="setup-helper"><span id="setupMissingCount">${escapeHtml(String(missingFields.length))}</span> missing</span>
+public/control-center/pages/setup.js:1431:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1433:              <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
+public/control-center/pages/setup.js:1434:              <span class="setup-helper">Assets and connectors pending</span>
+public/control-center/pages/setup.js:1436:            <article class="setup-top-summary-item">
+public/control-center/pages/setup.js:1438:              <strong>${escapeHtml(formatPercent(readinessScore))}</strong>
+public/control-center/pages/setup.js:1439:              <div class="setup-inline-status-row">
+public/control-center/pages/setup.js:1440:                <span id="setupReadinessBadge" class="card-badge ${wizardStatus === "Ready" ? "success" : "warning"}">${escapeHtml(wizardStatus)}</span>
+public/control-center/pages/setup.js:1441:                <span id="setupValidationBadge" class="card-badge ${escapeHtml(validationSummary.tone)}">${escapeHtml(validationSummary.label)}</span>
+public/control-center/pages/setup.js:1443:              <span class="setup-helper">Updated ${escapeHtml(lastSavedAt)}</span>
+public/control-center/pages/setup.js:1447:          <div class="setup-guidance-strip">
+public/control-center/pages/setup.js:1449:            <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
+public/control-center/pages/setup.js:1450:            <div class="setup-config-intel-metrics">
+public/control-center/pages/setup.js:1451:              <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
+public/control-center/pages/setup.js:1452:              <span>Assets missing: <strong id="setupReadinessMissingAssets">${escapeHtml(String(missingAssets.length))}</strong> <span class=\"setup-handoff-label\">(manage in Library)</span></span>
+public/control-center/pages/setup.js:1453:              <span>Connectors missing: <strong id="setupReadinessMissingConnectors">${escapeHtml(String(missingConnectors.length))}</strong> <span class=\"setup-handoff-label\">(manage in Integrations)</span></span>
+public/control-center/pages/setup.js:1458:        <div class="setup-wizard-layout">
+public/control-center/pages/setup.js:1459:          <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
+public/control-center/pages/setup.js:1460:            <h4>Guided Setup Steps</h4>
+public/control-center/pages/setup.js:1461:            <p class="setup-helper">Select a step to load that section in the main form.</p>
+public/control-center/pages/setup.js:1462:            <div class="setup-smart-recommended-inline">
+public/control-center/pages/setup.js:1463:              <span class="setup-smart-recommended-label">Recommended</span>
+public/control-center/pages/setup.js:1464:              <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
+public/control-center/pages/setup.js:1465:                <span id="setupRecommendedStepTitle">${escapeHtml(getRecommendedStep(values).title)}</span>
+public/control-center/pages/setup.js:1468:            <div class="setup-smart-step-list" role="tablist" aria-label="Setup wizard steps">
+public/control-center/pages/setup.js:1472:                  <button class="setup-wizard-step ${index === 0 ? "is-active" : ""}" type="button" data-setup-step="${escapeHtml(step.id)}" role="tab" aria-current="${index === 0 ? "step" : "false"}">
+public/control-center/pages/setup.js:1473:                    <span class="setup-wizard-step-meta">Step ${index + 1}</span>
+public/control-center/pages/setup.js:1474:                    <span class="setup-wizard-step-title">${escapeHtml(step.title)}</span>
+public/control-center/pages/setup.js:1475:                    <span class="setup-wizard-step-purpose">${escapeHtml(step.description)}</span>
+public/control-center/pages/setup.js:1476:                    <span id="setupStepBadge-${escapeHtml(step.id)}" class="card-badge ${status.tone}">${escapeHtml(status.label)}</span>
+public/control-center/pages/setup.js:1477:                    <span class="setup-smart-step-note tone-${escapeHtml(status.tone)}" data-setup-step-note="${escapeHtml(step.id)}">${status.tone === "danger" ? "Needs required data" : status.tone === "warning" ? "Partially complete" : ""}</span>
+public/control-center/pages/setup.js:1484:          <section class="setup-wizard-form card setup-smart-form-panel">
+public/control-center/pages/setup.js:1485:            <div class="setup-wizard-form-head">
+public/control-center/pages/setup.js:1487:                <span class="data-label">Main Setup Form</span>
+public/control-center/pages/setup.js:1488:                <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
+public/control-center/pages/setup.js:1490:              <div class="setup-wizard-nav-actions">
+public/control-center/pages/setup.js:1491:                <button id="setupPrevStepBtn" class="btn btn-ghost" type="button">Previous</button>
+public/control-center/pages/setup.js:1492:                <button id="setupNextStepBtn" class="btn btn-secondary" type="button">Next</button>
+public/control-center/pages/setup.js:1496:            <form id="setupProjectForm" class="setup-v2-form">
+public/control-center/pages/setup.js:1497:              <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
+public/control-center/pages/setup.js:1499:                <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/setup.js:1507:              <section class="setup-wizard-step-panel" data-setup-step-panel="brand-identity" hidden>
+public/control-center/pages/setup.js:1510:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1519:              <section class="setup-wizard-step-panel" data-setup-step-panel="market-language" hidden>
+public/control-center/pages/setup.js:1522:                <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/setup.js:1529:              <section class="setup-wizard-step-panel" data-setup-step-panel="audience" hidden>
+public/control-center/pages/setup.js:1532:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1539:              <section class="setup-wizard-step-panel" data-setup-step-panel="goals" hidden>
+public/control-center/pages/setup.js:1542:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1548:              <section class="setup-wizard-step-panel" data-setup-step-panel="competitors" hidden>
+public/control-center/pages/setup.js:1551:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1557:              <section class="setup-wizard-step-panel" data-setup-step-panel="channels" hidden>
+public/control-center/pages/setup.js:1560:                <div class="setup-form-grid">
+public/control-center/pages/setup.js:1562:                  ${renderField({ name: "operator_notes", label: "Operator notes", value: values.operator_notes, helper: "Important setup notes for the next operator.", placeholder: "Any constraints, watchouts, or handoff notes", escapeHtml, multiline: true, rows: 4 })}
+public/control-center/pages/setup.js:1569:        <div class="setup-wizard-side-panels">
+public/control-center/pages/setup.js:1570:          <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
+public/control-center/pages/setup.js:1573:              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+public/control-center/pages/setup.js:1575:            <div id="setupMissingActions">
+public/control-center/pages/setup.js:1577:                ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
+public/control-center/pages/setup.js:1578:                    <article class="setup-smart-gap-item">
+public/control-center/pages/setup.js:1583:                      <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
+public/control-center/pages/setup.js:1586:                : `<div class="empty-box">All required setup fields are complete.</div>`
+public/control-center/pages/setup.js:1589:            <div class="setup-wizard-missing-divider"></div>
+public/control-center/pages/setup.js:1591:            <div id="setupSystemGaps">
+public/control-center/pages/setup.js:1599:                "No operational blockers detected from readiness signals."
+public/control-center/pages/setup.js:1604:          <section class="card setup-smart-validation-panel">
+public/control-center/pages/setup.js:1607:              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+public/control-center/pages/setup.js:1609:            <div class="setup-smart-diagnostics-grid">
+public/control-center/pages/setup.js:1610:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1613:                <p>Readiness status: ${escapeHtml(asString(readinessStatus) || "Unknown")}</p>
+public/control-center/pages/setup.js:1615:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1618:                <p>Critical readiness gaps reported by diagnostics.</p>
+public/control-center/pages/setup.js:1620:              <article class="setup-smart-diagnostic-card">
+public/control-center/pages/setup.js:1629:        <section class="card setup-smart-handoff-panel">
+public/control-center/pages/setup.js:1632:            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+public/control-center/pages/setup.js:1634:          <div class="setup-handoff-note">Brand evidence and product files belong in <strong>Library</strong> or <strong>Governance</strong>.</div>
+public/control-center/pages/setup.js:1635:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
+public/control-center/pages/setup.js:1636:            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup</button>
+public/control-center/pages/setup.js:1637:            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
+public/control-center/pages/setup.js:1638:            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+public/control-center/pages/setup.js:1640:          <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
+public/control-center/pages/setup.js:1641:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1642:              <span class="setup-action-group-label">Continue</span>
+public/control-center/pages/setup.js:1643:              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+public/control-center/pages/setup.js:1645:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1646:              <span class="setup-action-group-label">AI and review</span>
+public/control-center/pages/setup.js:1647:              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+public/control-center/pages/setup.js:1648:              <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
+public/control-center/pages/setup.js:1650:            <div class="setup-action-group">
+public/control-center/pages/setup.js:1651:              <span class="setup-action-group-label">Local draft</span>
+public/control-center/pages/setup.js:1652:              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
+public/control-center/pages/setup.js:1653:              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+public/control-center/pages/setup.js:1660:        <section class="card setup-smart-ai-tools">
+public/control-center/pages/setup.js:1665:          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+public/control-center/pages/setup.js:1666:          <div class="setup-smart-handoff-actions">
+public/control-center/pages/setup.js:1667:            <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
+public/control-center/pages/setup.js:1668:            <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
+public/control-center/pages/setup.js:1669:            <button id="setupAiToneBtn" class="btn btn-ghost" type="button">Suggest channel priorities</button>
+public/control-center/pages/setup.js:1670:            <button id="setupAiFillMissingBtn" class="btn btn-secondary" type="button">Prepare setup checklist</button>
+public/control-center/pages/setup.js:1676:    bindSetupActions({
+public/control-center/pages/setup.js:1684:      saveProjectSetup,
+public/control-center/pages/setup.js:1687:      readinessScore,
+public/control-center/pages/setup.js:1688:      readinessStatus,
+public/control-center/pages/setup.js:1693:    const templateSelect = $("setupBusinessTemplateSelect");
+public/control-center/pages/setup.js:1694:    const templateApplyBtn = $("setupApplyTemplateBtn");
+public/control-center/pages/setup.js:1695:    const templateStatus = $("setupTemplateStatus");
+public/control-center/pages/setup.js:1738:    const saveBottomBtn = $("setupSaveBackendBtnBottom");
+public/control-center/pages/setup.js:1739:    const saveTopBtn = $("setupSaveBackendBtn");
+public/control-center/pages/publishing.js:60:  const readiness = [
+public/control-center/pages/publishing.js:69:  const blockersSummary = blockers && blockers.length ? `<div class="publishing-readiness-card is-warning">${escapeHtml(blockers.length)} blocker(s) present</div>` : "";
+public/control-center/pages/publishing.js:71:    <section class="publishing-readiness-summary" aria-label="Publishing Readiness Summary">
+public/control-center/pages/publishing.js:72:      ${readiness.map(r => `
+public/control-center/pages/publishing.js:73:        <div class="publishing-readiness-card is-${r.state}">
+public/control-center/pages/publishing.js:74:          <span class="publishing-readiness-card-label">${escapeHtml(r.label)}</span>
+public/control-center/pages/publishing.js:487:  const checks = asObject(state.data.integrations?.readiness?.checks);
+public/control-center/pages/publishing.js:610:    errors.approvalStatus = "Publishing readiness must be approved before recording manual completion.";
+public/control-center/pages/publishing.js:986:      why: `${ready.title} is approved for a backend readiness update. Record manual completion only after external execution is verified.`,
+public/control-center/pages/publishing.js:1018:      : "Channel readiness is missing. Publishing can prepare drafts, but live execution needs a connected destination.",
+public/control-center/pages/publishing.js:1029:          <div class="setup-kicker">Publishing Overview</div>
+public/control-center/pages/publishing.js:1047:    ["Manual publishing readiness", counts.ready + counts.scheduled > 0 ? "Active" : "Needs queue"],
+public/control-center/pages/publishing.js:1050:    ["Channel readiness", Object.values(checks).filter(Boolean).length ? "Connected" : "Needs setup"],
+public/control-center/pages/publishing.js:1059:          <div class="setup-kicker">Smart Recommendation</div>
+public/control-center/pages/publishing.js:1146:          <div class="setup-kicker">Publish Queue</div>
+public/control-center/pages/publishing.js:1162:          <div class="setup-kicker">Publishing Builder</div>
+public/control-center/pages/publishing.js:1167:      <form id="publishingBuilderForm" class="setup-form-grid publishing-builder-form" novalidate>
+public/control-center/pages/publishing.js:1168:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/publishing.js:1169:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1170:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1171:              <label class="setup-label" for="publishingProjectInput">Project</label>
+public/control-center/pages/publishing.js:1172:              <span class="setup-field-state is-optional">Required</span>
+public/control-center/pages/publishing.js:1174:            <input id="publishingProjectInput" name="project" class="setup-input" type="text" value="${escapeHtml(session.form.project)}" placeholder="Project name">
+public/control-center/pages/publishing.js:1177:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1178:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1179:              <label class="setup-label" for="publishingCampaignInput">Campaign</label>
+public/control-center/pages/publishing.js:1180:              <span class="setup-field-state is-optional">Required</span>
+public/control-center/pages/publishing.js:1182:            <input id="publishingCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(session.form.campaign)}" placeholder="Campaign or launch wave">
+public/control-center/pages/publishing.js:1187:        <div class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/publishing.js:1188:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1189:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1190:              <label class="setup-label" for="publishingChannelInput">Channel</label>
+public/control-center/pages/publishing.js:1191:              <span class="setup-field-state is-optional">${escapeHtml(checks[toKey(session.form.channel)] ? "Ready" : "Planning")}</span>
+public/control-center/pages/publishing.js:1193:            <select id="publishingChannelInput" name="channel" class="setup-input">
+public/control-center/pages/publishing.js:1201:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1202:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1203:              <label class="setup-label" for="publishingContentInput">Content item</label>
+public/control-center/pages/publishing.js:1204:              <span class="setup-field-state is-optional">Required</span>
+public/control-center/pages/publishing.js:1206:            <input id="publishingContentInput" name="contentItem" class="setup-input" type="text" value="${escapeHtml(session.form.contentItem)}" placeholder="Caption, email, product update, or workflow output">
+public/control-center/pages/publishing.js:1211:        <div class="setup-form-grid setup-form-grid-3">
+public/control-center/pages/publishing.js:1212:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1213:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1214:              <label class="setup-label" for="publishingDateInput">Publish date</label>
+public/control-center/pages/publishing.js:1215:              <span class="setup-field-state is-optional">Queue for Manual Publishing</span>
+public/control-center/pages/publishing.js:1217:            <input id="publishingDateInput" name="publishDate" class="setup-input" type="date" value="${escapeHtml(session.form.publishDate)}">
+public/control-center/pages/publishing.js:1220:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1221:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1222:              <label class="setup-label" for="publishingTimeInput">Publish time</label>
+public/control-center/pages/publishing.js:1223:              <span class="setup-field-state is-optional">Slot</span>
+public/control-center/pages/publishing.js:1225:            <input id="publishingTimeInput" name="publishTime" class="setup-input" type="time" value="${escapeHtml(session.form.publishTime)}">
+public/control-center/pages/publishing.js:1227:          <div class="setup-field-group">
+public/control-center/pages/publishing.js:1228:            <div class="setup-field-head">
+public/control-center/pages/publishing.js:1229:              <label class="setup-label" for="publishingApprovalInput">Approval status</label>
+public/control-center/pages/publishing.js:1230:              <span class="setup-field-state is-optional">Gate</span>
+public/control-center/pages/publishing.js:1232:            <select id="publishingApprovalInput" name="approvalStatus" class="setup-input">
+public/control-center/pages/publishing.js:1241:        <div class="setup-field-group">
+public/control-center/pages/publishing.js:1242:          <div class="setup-field-head">
+public/control-center/pages/publishing.js:1243:            <label class="setup-label" for="publishingTitleInput">Queue title</label>
+public/control-center/pages/publishing.js:1244:            <span class="setup-field-state is-optional">Optional</span>
+public/control-center/pages/publishing.js:1246:          <input id="publishingTitleInput" name="title" class="setup-input" type="text" value="${escapeHtml(session.form.title)}" placeholder="Operator-facing title">
+public/control-center/pages/publishing.js:1249:        <div class="setup-field-group">
+public/control-center/pages/publishing.js:1250:          <div class="setup-field-head">
+public/control-center/pages/publishing.js:1251:            <label class="setup-label" for="publishingNotesInput">Execution notes</label>
+public/control-center/pages/publishing.js:1252:            <span class="setup-field-state is-optional">Context</span>
+public/control-center/pages/publishing.js:1254:          <textarea id="publishingNotesInput" name="notes" class="setup-input setup-textarea" rows="4" placeholder="Approval notes, blockers, manual steps, content references">${escapeHtml(session.form.notes)}</textarea>
+public/control-center/pages/publishing.js:1273:            <div class="setup-kicker">Workflow Handoff</div>
+public/control-center/pages/publishing.js:1289:          <div class="setup-kicker">Workflow Handoff</div>
+public/control-center/pages/publishing.js:1319:            <div class="setup-kicker">Calendar / Timeline Snapshot</div>
+public/control-center/pages/publishing.js:1364:          <div class="setup-kicker">Calendar / Timeline Snapshot</div>
+public/control-center/pages/publishing.js:1385:            <div class="setup-kicker">Execution Result Area</div>
+public/control-center/pages/publishing.js:1399:          <div class="setup-kicker">Execution Result Area</div>
+public/control-center/pages/publishing.js:1430:          <div class="setup-kicker">Channel & Approval Readiness</div>
+public/control-center/pages/publishing.js:1476:  function rerender() {
+public/control-center/pages/publishing.js:1520:      rerender();
+public/control-center/pages/publishing.js:1529:      rerender();
+public/control-center/pages/publishing.js:1539:        rerender();
+public/control-center/pages/publishing.js:1549:      rerender();
+public/control-center/pages/publishing.js:1565:        rerender();
+public/control-center/pages/publishing.js:1569:      rerender();
+public/control-center/pages/publishing.js:1578:        rerender();
+public/control-center/pages/publishing.js:1585:        rerender();
+public/control-center/pages/publishing.js:1595:        rerender();
+public/control-center/pages/publishing.js:1605:        rerender();
+public/control-center/pages/publishing.js:1627:      rerender();
+public/control-center/pages/publishing.js:1642:        rerender();
+public/control-center/pages/publishing.js:1648:        rerender();
+public/control-center/pages/publishing.js:1654:        rerender();
+public/control-center/pages/publishing.js:1663:        rerender();
+public/control-center/pages/publishing.js:1669:          rerender();
+public/control-center/pages/publishing.js:1677:          rerender();
+public/control-center/pages/publishing.js:1690:          rerender();
+public/control-center/pages/publishing.js:1701:          rerender();
+public/control-center/pages/publishing.js:1709:          rerender();
+public/control-center/pages/publishing.js:1718:      rerender();
+public/control-center/pages/publishing.js:1728:        rerender();
+public/control-center/pages/publishing.js:1735:        rerender();
+public/control-center/pages/publishing.js:1740:        "Confirm publishing readiness\n\nAction: Mark this backend publishing item ready for manual publishing review.\n\nThis does not replace Governance approval or external provider readiness proof.\n\nSelect Cancel to keep the item unchanged."
+public/control-center/pages/publishing.js:1743:        rerender();
+public/control-center/pages/publishing.js:1751:      rerender();
+public/control-center/pages/publishing.js:1761:        rerender();
+public/control-center/pages/publishing.js:1767:        rerender();
+public/control-center/pages/publishing.js:1773:        rerender();
+public/control-center/pages/publishing.js:1781:      rerender();
+public/control-center/pages/publishing.js:1804:      rerender();
+public/control-center/pages/publishing.js:1856:        rerender();
+public/control-center/pages/publishing.js:1864:      rerender();
+public/control-center/pages/publishing.js:1879:      rerender();
+public/control-center/pages/publishing.js:1921:  render({
+public/control-center/pages/publishing.js:1941:    const checks = asObject(state.data.integrations?.readiness?.checks);
+public/control-center/pages/publishing.js:1983:                  <div class="setup-kicker">Manual Execution Controls</div>
+public/control-center/pages/publishing.js:1989:                <button id="publishingApproveBtn" class="btn btn-secondary" type="button" title="Prepare publishing readiness review. Confirmation required. Backend approval rules apply.">Mark ready for manual review</button>
+public/control-center/pages/publishing.js:2017:      render: () => publishingRoute.render({
+public/control-center/pages/workflows.js:81:    purpose: "Prioritize integration recovery actions that restore readiness and automation reliability.",
+public/control-center/pages/workflows.js:89:  "Launch readiness",
+public/control-center/pages/workflows.js:406:  const readinessRoot = asObject(dashboard.readiness || state.data.readiness);
+public/control-center/pages/workflows.js:407:  const readiness = asObject(readinessRoot.dashboard || readinessRoot);
+public/control-center/pages/workflows.js:415:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/workflows.js:431:    readiness.next_best_actions ||
+public/control-center/pages/workflows.js:438:    readinessScore: Number(readiness.readiness_score ?? overview.readiness_score),
+public/control-center/pages/workflows.js:439:    readinessStatus: firstNonEmpty(readiness.readiness_status, overview.readiness_status),
+public/control-center/pages/workflows.js:516:    context.readinessScore ? `Readiness: ${context.readinessScore}/100` : "Readiness: unknown",
+public/control-center/pages/workflows.js:558:  if (target === "setup" || target === "campaign-studio") return "launch-campaign";
+public/control-center/pages/workflows.js:570:      chips: ["Launch readiness", "Automation", "Campaign"],
+public/control-center/pages/workflows.js:580:      chips: ["Launch readiness", "Automation", "Reports"],
+public/control-center/pages/workflows.js:581:      prompt: "Build a prioritized integration recovery workflow with dependency order and expected readiness impact."
+public/control-center/pages/workflows.js:590:      chips: ["Publishing", "Campaign", "Launch readiness"],
+public/control-center/pages/workflows.js:600:      chips: ["Campaign", "Launch readiness", "Automation"],
+public/control-center/pages/workflows.js:630:        <article class="wfexec-stat wfexec-stat-wide"><span>Readiness</span><strong>${escapeHtml(Number.isFinite(context.readinessScore) ? `${context.readinessScore}/100` : "Unknown")} · ${escapeHtml(context.readinessStatus || "unclassified")}</strong></article>
+public/control-center/pages/workflows.js:994:  const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+public/control-center/pages/workflows.js:1030:        rerender();
+public/control-center/pages/workflows.js:1035:  rerender();
+public/control-center/pages/workflows.js:1153:      render();
+public/control-center/pages/workflows.js:1159:    render();
+public/control-center/pages/workflows.js:1200:    render();
+public/control-center/pages/workflows.js:1225:      render();
+public/control-center/pages/workflows.js:1267:      render();
+public/control-center/pages/workflows.js:1276:      render();
+public/control-center/pages/workflows.js:1288:      render();
+public/control-center/pages/workflows.js:1315:        render();
+public/control-center/pages/workflows.js:1329:      render();
+public/control-center/pages/workflows.js:1370:    render();
+public/control-center/pages/workflows.js:1438:    render();
+public/control-center/pages/workflows.js:1462:      render();
+public/control-center/pages/workflows.js:1496:      render();
+public/control-center/pages/workflows.js:1653:        render();
+public/control-center/pages/workflows.js:1666:          render();
+public/control-center/pages/workflows.js:1672:      render();
+public/control-center/pages/workflows.js:1682:        render();
+public/control-center/pages/workflows.js:1705:      render();
+public/control-center/pages/workflows.js:1717:        render();
+public/control-center/pages/workflows.js:1782:    render({
+public/control-center/pages/workflows.js:1797:    const readinessRoot = asObject(payload.readiness?.dashboard || payload.readiness);
+public/control-center/pages/workflows.js:1800:    const readinessScore = readinessRoot.readiness_score ?? overview.readiness_score ?? null;
+public/control-center/pages/workflows.js:1801:    const readinessStatus = firstNonEmpty(readinessRoot.readiness_status, overview.readiness_status, "Unknown");
+public/control-center/pages/workflows.js:1937:      const readinessNumeric = Number(readinessScore);
+public/control-center/pages/workflows.js:1938:      const readinessKnown = Number.isFinite(readinessNumeric);
+public/control-center/pages/workflows.js:1939:      const readinessValue = readinessKnown ? Math.max(0, Math.min(100, Math.round(readinessNumeric))) : null;
+public/control-center/pages/workflows.js:1940:      const readinessTone = !readinessKnown ? "neutral" : readinessValue >= 80 ? "success" : readinessValue >= 60 ? "warning" : "danger";
+public/control-center/pages/workflows.js:1954:                <span class="wfloop-chip is-${escapeHtml(readinessTone)}">Readiness: ${escapeHtml(readinessValue == null ? "Unknown" : `${readinessValue}/100`)} · ${escapeHtml(readinessStatus || "Unknown")}</span>
+public/control-center/pages/workflows.js:2027:                  <select id="wfLightWorkflowType" class="setup-input">
+public/control-center/pages/workflows.js:2033:                  <input id="wfLightProject" class="setup-input" type="text" value="${escapeHtml(inputs.project || "")}" placeholder="Current project">
+public/control-center/pages/workflows.js:2037:                  <input id="wfLightCampaign" class="setup-input" type="text" value="${escapeHtml(inputs.campaign || "")}" placeholder="Campaign name">
+public/control-center/pages/workflows.js:2041:                  <input id="wfLightGoal" class="setup-input" type="text" value="${escapeHtml(inputs.goal || "")}" placeholder="Workflow goal">
+public/control-center/pages/settings.js:106:    description: "Reads signals, monitors readiness, and flags weak performance."
+public/control-center/pages/settings.js:283:        path: "automation.readinessThreshold",
+public/control-center/pages/settings.js:284:        label: "Campaign readiness threshold",
+public/control-center/pages/settings.js:286:        options: ["High confidence only", "Medium and above", "Any partial readiness", "Manual review decides"]
+public/control-center/pages/settings.js:624:    description: "Manage project identity, publishing defaults, and reusable presets without scattering core setup across multiple cards.",
+public/control-center/pages/settings.js:860:  const checks = asObject(connectors?.readiness?.checks);
+public/control-center/pages/settings.js:925:      readinessThreshold: "Medium and above",
+public/control-center/pages/settings.js:927:      routingNotes: "Push readiness gaps into workflows, route SEO findings into Research, and send weak ads to Ads Manager."
+public/control-center/pages/settings.js:1092:  rerender();
+public/control-center/pages/settings.js:1119:    rerender();
+public/control-center/pages/settings.js:1183:    : "Save this configuration, then open Governance to verify policy impact and approval readiness.";
+public/control-center/pages/settings.js:1551:  const readiness = buildReadinessModel(session, summary);
+public/control-center/pages/settings.js:1552:  const riskItems = readiness.blockers.length
+public/control-center/pages/settings.js:1553:    ? readiness.blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+public/control-center/pages/settings.js:1596:          <span class="card-badge ${readiness.blockerCount ? "danger" : "success"}">
+public/control-center/pages/settings.js:1597:            ${escapeHtml(`${readiness.readyCount}/${readiness.checks.length} ready`)}
+public/control-center/pages/settings.js:1601:          ${readiness.checks.map((item) => `
+public/control-center/pages/settings.js:1613:        <p class="governance-copy">${escapeHtml(readiness.nextBestAction)}</p>
+public/control-center/pages/settings.js:1636:        <strong>AI context scope:</strong> configuration readiness, approval ownership, publishing safety, AI posture, and operations routing.
+public/control-center/pages/settings.js:1770:        <strong>Safe execution path:</strong> Review readiness and blockers, update the required section, save once, then validate Governance impact.
+public/control-center/pages/settings.js:1853:          const confirmed = window.confirm("Confirm settings save\n\nAction: Save team and governance settings for this project.\nRisk: These settings can affect team roles, approval behavior, publishing readiness, brand safety review, and admin override behavior.\nAuthority: This is a backend-governed durable settings update.\n\nSelect Cancel to review the settings before saving.");
+public/control-center/pages/settings.js:2026:  render(context) {
+public/control-center/pages/ads-manager.js:124:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/pages/ads-manager.js:161:      readinessScore: Math.round(((primaryConnected.length * 2) + supportConnected.length) / ((platform.primarySources.length * 2) + platform.supportSources.length) * 100),
+public/control-center/pages/ads-manager.js:207:      prompt: `Review the paid media setup for ${projectName || "this project"}. Use current strong platforms (${strongPlatforms.join(", ") || "none identified"}) and recommend which campaigns to scale, what budget to move, and which creatives to duplicate.`
+public/control-center/pages/ads-manager.js:211:      prompt: `For ${projectName || "this project"}, identify which ad platforms or campaign groups should be paused first based on weak readiness (${weakPlatforms.join(", ") || "none listed"}), missing measurement, and creative risk.`
+public/control-center/pages/ads-manager.js:226:    <div class="setup-field-group">
+public/control-center/pages/ads-manager.js:227:      <div class="setup-field-head">
+public/control-center/pages/ads-manager.js:228:        <label class="setup-label" for="${escapeHtml(id)}">${escapeHtml(label)}</label>
+public/control-center/pages/ads-manager.js:229:        <span class="setup-field-state is-optional">Working value</span>
+public/control-center/pages/ads-manager.js:231:      <input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder || "")}">
+public/control-center/pages/ads-manager.js:232:      <div class="setup-helper">${escapeHtml(helper)}</div>
+public/control-center/pages/ads-manager.js:255:      render();
+public/control-center/pages/ads-manager.js:292:    description: "Plan budgets, assess pacing, review platform readiness, and manage paid media decisions from one ad-ops workspace."
+public/control-center/pages/ads-manager.js:299:  render({
+public/control-center/pages/ads-manager.js:348:            <div class="setup-kicker">Paid Media Operations</div>
+public/control-center/pages/ads-manager.js:349:            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Ads Manager` : "Ads Manager")}</h3>
+public/control-center/pages/ads-manager.js:350:            <p class="setup-hero-text">
+public/control-center/pages/ads-manager.js:351:              Use this workspace to set the working budget, check pacing, understand channel readiness, map creatives to platforms, and decide what to scale or pause next.
+public/control-center/pages/ads-manager.js:354:              <div class="setup-status-chip">
+public/control-center/pages/ads-manager.js:358:              <div class="setup-status-chip">
+public/control-center/pages/ads-manager.js:362:              <div class="setup-status-chip">
+public/control-center/pages/ads-manager.js:366:              <div class="setup-status-chip">
+public/control-center/pages/ads-manager.js:373:          <div class="setup-hero-actions">
+public/control-center/pages/ads-manager.js:386:              <form id="adsManagerBudgetForm" class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/ads-manager.js:483:                      <div class="data-row"><span>Readiness</span><strong>${escapeHtml(formatPercent(platform.readinessScore))}</strong></div>
+public/control-center/pages/ads-manager.js:488:                      ${escapeHtml(platform.missing.length ? `Missing: ${platform.missing.map(titleCase).join(", ")}` : "No immediate setup blockers in the current plan.")}
+public/control-center/pages/ads-manager.js:524:              <div class="setup-form-grid">
+public/control-center/pages/ads-manager.js:606:      render: () => adsManagerRoute.render({
+public/control-center/ai-team-model.js:36:    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:66:    defaultPrompt: "Act as Ads Optimizer. Build a paid testing plan based on current readiness and performance signals."
+public/control-center/ai-team-model.js:82:    primaryPages: ["research", "setup", "campaign-studio"],
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:108:  setup: ["strategist", "researcher", "compliance_reviewer"],
+public/control-center/api.js:887:    readiness: payload?.readiness || null,
+public/control-center/api.js:938:      readiness: {
+public/control-center/api.js:939:        readiness_score: 0,
+public/control-center/api.js:1101:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/api.js:1197:    readiness: requiredData.readiness,
+public/control-center/api.js:1400:export async function saveProjectSetup(projectName, payload = {}) {
+public/control-center/api.js:1406:    `/media-manager/project/${encodeURIComponent(projectName)}/setup`,
+public/control-center/api.js:1409:    "Failed to save project setup"
+public/control-center/api.js:2325:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/app.js:45:  saveProjectSetup,
+public/control-center/app.js:2005:    ["campaignAssets", "Open the related setup page to complete this section."],
+public/control-center/app.js:2015:    ["publishingQueue", "Open the related setup page to complete this section."],
+public/control-center/app.js:2016:    ["publishingChannels", "Open the related setup page to complete this section."],
+public/control-center/app.js:2024:    ["settingsProject", "Open the related setup page to complete this section."],
+public/control-center/app.js:2071:    const renderResult = routeDef.render({
+public/control-center/app.js:2087:      saveProjectSetup,
+public/control-center/app.js:2381:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/app.js:2416:    readiness: payload.readiness,
+public/control-center/app.js:3038:    Setup: "setup",
+public/control-center/app.js:3885:          data-new-route="setup"
+public/control-center/app.js:3887:          data-new-prompt="Create a new project from zero. Guide me through project name, business type, market, language, channels, brand tone, goals, and required setup."
+public/control-center/app.js:3891:          <span>Create a project from scratch: brand, market, language, channels, and setup.</span>
+public/control-center/app.js:4001:        navigateTo("setup");
+public/control-center/asset-library.js:5:    purpose: "brand_foundation",
+public/control-center/asset-library.js:6:    purpose_label: "Brand foundation",
+public/control-center/asset-library.js:14:      why_it_matters: "Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.",
+public/control-center/asset-library.js:15:      used_in: ["Setup", "Media Studio", "Publishing", "AI Command"]
+public/control-center/asset-library.js:21:    purpose: "brand_foundation",
+public/control-center/asset-library.js:22:    purpose_label: "Brand foundation",
+public/control-center/asset-library.js:30:      why_it_matters: "Gives Setup, Content Studio, Media Studio, and AI Command the guardrails they need.",
+public/control-center/asset-library.js:31:      used_in: ["Setup", "Campaign Studio", "Content Studio", "Media Studio", "AI Command"]
+public/control-center/asset-library.js:213:  "brand_foundation",
+public/control-center/asset-library.js:342:    asset.readiness_status ||
+public/control-center/asset-library.js:357:  const fromServer = asArray(assetsData.category_readiness?.categories || assetsData.missing_assets?.category_readiness?.categories);
+public/control-center/asset-library.js:424:  return asString(blocker?.next_action || assetsData.category_readiness?.next_best_action || "Library inputs are covered for this step.");
+public/control-center/router.js:20:import { setupRoute } from "./pages/setup.js";
+public/control-center/router.js:47:  [setupRoute.id]: setupRoute,
+public/control-center/state.js:22:    readiness: null,
+public/control-center/state.js:102:    state.data.readiness === null &&
+public/control-center/state.js:306:  state.data.readiness = null;
+public/control-center/system-intelligence.js:76:  const readinessRoot = asObject(state?.data?.readiness);
+public/control-center/system-intelligence.js:77:  const readiness = asObject(readinessRoot.dashboard || readinessRoot);
+public/control-center/system-intelligence.js:83:  const readinessCritical = dedupe([
+public/control-center/system-intelligence.js:84:    ...asArray(readiness.priorities?.critical),
+public/control-center/system-intelligence.js:85:    ...asArray(readiness.critical_gaps)
+public/control-center/system-intelligence.js:88:  const readinessImportant = dedupe([
+public/control-center/system-intelligence.js:89:    ...asArray(readiness.priorities?.important),
+public/control-center/system-intelligence.js:90:    ...asArray(readiness.missing),
+public/control-center/system-intelligence.js:91:    ...asArray(readinessRoot.missing_fields)
+public/control-center/system-intelligence.js:100:  const setupGaps = dedupe([
+public/control-center/system-intelligence.js:101:    ...readinessCritical,
+public/control-center/system-intelligence.js:102:    ...readinessImportant,
+public/control-center/system-intelligence.js:106:  const categoryReadiness = asArray(assetsRoot.category_readiness?.categories);
+public/control-center/system-intelligence.js:119:  const checks = asObject(integrations.readiness?.checks);
+public/control-center/system-intelligence.js:122:    ...asArray(integrations.readiness?.missing).map((item) => titleCase(item))
+public/control-center/system-intelligence.js:141:  const readinessScore = Number(readiness.readiness_score ?? overview.readiness_score);
+public/control-center/system-intelligence.js:146:    setupGaps,
+public/control-center/system-intelligence.js:156:    readinessScore: Number.isFinite(readinessScore) ? readinessScore : null,
+public/control-center/system-intelligence.js:180:  if (signals.setupGaps.some((gap) => normalizeText(gap).includes("website"))) {
+public/control-center/system-intelligence.js:182:      id: "setup-website-url",
+public/control-center/system-intelligence.js:183:      title: "Complete website URL in setup",
+public/control-center/system-intelligence.js:186:      targetPage: "setup",
+public/control-center/system-intelligence.js:187:      actionLabel: "Open Setup",
+public/control-center/system-intelligence.js:188:      impactChips: ["Setup", "Integrations", "Campaign readiness"],
+public/control-center/system-intelligence.js:189:      blockerType: "setup_gap",
+public/control-center/system-intelligence.js:191:      draftPayload: { prompt: "Add the project website URL and validate setup completeness." },
+public/control-center/system-intelligence.js:220:      impactChips: ["Integrations", "Automation", "Campaign readiness"],
+public/control-center/system-intelligence.js:280:      reason: "Content/media readiness exists but nothing is scheduled yet.",
+public/control-center/system-intelligence.js:316:      blockerType: "library_readiness",
+public/control-center/system-intelligence.js:322:  if (signals.readinessScore != null && signals.readinessScore < 75) {
+public/control-center/system-intelligence.js:324:      id: "campaign-readiness-low",
+public/control-center/system-intelligence.js:325:      title: "Raise campaign readiness before scale",
+public/control-center/system-intelligence.js:326:      reason: `Campaign readiness is ${Math.round(signals.readinessScore)}/100 and still below a stable launch threshold.`,
+public/control-center/system-intelligence.js:328:      targetPage: "setup",
+public/control-center/system-intelligence.js:330:      impactChips: ["Campaign readiness", "Setup"],
+public/control-center/system-intelligence.js:331:      blockerType: "campaign_readiness",
+public/control-center/system-intelligence.js:347:  const setupReady = signals.setupGaps.length === 0;
+public/control-center/system-intelligence.js:355:    { key: "setup", label: "Setup", ready: setupReady, note: setupReady ? "Complete" : `${signals.setupGaps.length} gaps` },
+public/control-center/system-intelligence.js:369:  const readinessMap = buildReadinessMap(signals);
+public/control-center/system-intelligence.js:384:    reason: "Core readiness is stable. Continue with optimization and output quality improvements.",
+public/control-center/system-intelligence.js:401:    readinessMap,
+public/control-center/system-intelligence.js:403:      score: signals.readinessScore,
+public/control-center/system-intelligence.js:404:      status: signals.readinessScore != null && signals.readinessScore >= 80 ? "ready" : "in_progress"
+public/control-center/system-intelligence.js:417:  const readiness = asObject(asObject(data.readiness).dashboard || data.readiness);
+public/control-center/system-intelligence.js:422:    ...asArray(readiness.next_best_actions),
+public/control-center/styles/03-app-shell.css:3:  Purpose: stable viewport, scroll, and workspace layout foundation.
+public/control-center/styles/15-clean-operating-layer.css:447::where(.mhos-clean-surface.is-selected, .mhos-clean-surface[aria-selected="true"], .mhos-clean-state.is-selected, .mhos-clean-readiness-item.is-selected, .mhos-clean-blocker.is-selected, .mhos-clean-next-step.is-selected) {
+public/control-center/styles/15-clean-operating-layer.css:668::where(.mhos-clean-readiness-list, .mhos-clean-blockers-list, .mhos-clean-safe-path) {
+public/control-center/styles/15-clean-operating-layer.css:677::where(.mhos-clean-readiness-item, .mhos-clean-blocker, .mhos-clean-next-step) {
+public/control-center/styles/15-clean-operating-layer.css:692::where(.mhos-clean-readiness-item:hover, .mhos-clean-blocker:hover, .mhos-clean-next-step:hover) {
+public/control-center/styles/15-clean-operating-layer.css:795:  :where(.mhos-clean-surface, .mhos-clean-readiness-item, .mhos-clean-blocker, .mhos-clean-next-step, .mhos-clean-btn, .mhos-clean-pill) {
+public/control-center/styles/14-page-standard.css:323:.setup-input,
+public/control-center/styles/14-page-standard.css:324:.setup-textarea {
+public/control-center/styles/14-page-standard.css:626::where(.std-readiness-list, .std-blockers-list, .std-safe-path-list) {
+public/control-center/styles/14-page-standard.css:634::where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+public/control-center/styles/14-page-standard.css:762::where(.std-detail-card.is-selected, .std-action-panel.is-selected, .std-ai-panel.is-selected, .std-readiness-item.is-selected, .std-blocker-item.is-selected, .std-safe-step.is-selected, .std-state-card.is-selected, .std-detail-card[aria-selected="true"], .std-action-panel[aria-selected="true"], .std-ai-panel[aria-selected="true"]) {
+public/control-center/styles/14-page-standard.css:768::where(.std-readiness-item, .std-blocker-item, .std-safe-step) {
+public/control-center/styles/14-page-standard.css:772::where(.std-readiness-item:hover, .std-blocker-item:hover, .std-safe-step:hover) {
+public/control-center/styles/14-page-standard.css:935:  :where(.std-detail-card, .std-action-panel, .std-ai-panel, .std-readiness-item, .std-blocker-item, .std-safe-step, .std-action-row > .btn, .std-action-row > button, .std-context-actions > .btn, .std-context-actions > button, .std-quick-actions > .btn, .std-quick-actions > button, .std-context-chip) {
+public/control-center/styles/14-page-standard.css:1016:[data-page="library"] .library-smart-shell > .card:first-child .setup-kicker {
+public/control-center/styles/14-page-standard.css:1031:[data-page="library"] .library-smart-shell > .card:first-child .setup-helper {
+public/control-center/styles/14-page-standard.css:1347:[data-page="library"] .library-upload-controls .setup-helper {
+public/control-center/styles/14-page-standard.css:1502:[data-page="library"] .library-filter-field .setup-label {
+public/control-center/styles/14-page-standard.css:1936:[data-page="integrations"] .integration-system-readiness-map,
+public/control-center/styles/14-page-standard.css:1944:[data-page="integrations"] .integration-system-readiness-map .card-head,
+public/control-center/styles/14-page-standard.css:1952:[data-page="integrations"] .integration-system-readiness-map .home-section-copy,
+public/control-center/styles/08-components-foundation.css:169:.setup-input,
+public/control-center/styles/08-components-foundation.css:170:.setup-textarea,
+public/control-center/styles/08-components-foundation.css:185:.setup-textarea {
+public/control-center/styles/08-components-foundation.css:195:.setup-input:focus,
+public/control-center/styles/08-components-foundation.css:196:.setup-textarea:focus {
+public/control-center/styles/08-components-foundation.css:271:.setup-progress-head,
+public/control-center/styles/08-components-foundation.css:310:.setup-kicker,
+public/control-center/styles/08-components-foundation.css:313:.setup-helper {
+public/control-center/styles/08-components-foundation.css:640:.setup-layout,
+public/control-center/styles/08-components-foundation.css:672:.setup-main,
+public/control-center/styles/08-components-foundation.css:673:.setup-side,
+public/control-center/styles/08-components-foundation.css:700:.setup-layout,
+public/control-center/styles/08-components-foundation.css:884:  .setup-layout,
+public/control-center/styles/08-components-foundation.css:903:  .setup-layout,
+public/control-center/styles/08-components-foundation.css:1507:/* MH-OS Smart Tool Drawer — source-ready setup */
+public/control-center/styles/12-pages.css:1:/* === Setup Guided Steps Visual Polish === */
+public/control-center/styles/12-pages.css:2:[data-page="setup"] .setup-smart-step-list {
+public/control-center/styles/12-pages.css:7:[data-page="setup"] .setup-wizard-step {
+public/control-center/styles/12-pages.css:21:[data-page="setup"] .setup-wizard-step:hover,
+public/control-center/styles/12-pages.css:22:[data-page="setup"] .setup-wizard-step:focus {
+public/control-center/styles/12-pages.css:28:[data-page="setup"] .setup-wizard-step.is-active {
+public/control-center/styles/12-pages.css:34:[data-page="setup"] .setup-wizard-step-title {
+public/control-center/styles/12-pages.css:40:[data-page="setup"] .setup-wizard-step-purpose {
+public/control-center/styles/12-pages.css:46:[data-page="setup"] .setup-wizard-step .card-badge.success {
+public/control-center/styles/12-pages.css:55:[data-page="setup"] .setup-wizard-step .card-badge.warning {
+public/control-center/styles/12-pages.css:64:[data-page="setup"] .setup-wizard-step .card-badge.danger {
+public/control-center/styles/12-pages.css:73:[data-page="setup"] .setup-wizard-step .card-badge {
+public/control-center/styles/12-pages.css:77:[data-page="setup"] .setup-smart-step-note {
+public/control-center/styles/12-pages.css:83:/* Setup page button hover/focus polish */
+public/control-center/styles/12-pages.css:84:[data-page="setup"] .btn,
+public/control-center/styles/12-pages.css:85:[data-page="setup"] button {
+public/control-center/styles/12-pages.css:88:[data-page="setup"] .btn-primary:hover,
+public/control-center/styles/12-pages.css:89:[data-page="setup"] .btn-primary:focus {
+public/control-center/styles/12-pages.css:95:[data-page="setup"] .btn-secondary:hover,
+public/control-center/styles/12-pages.css:96:[data-page="setup"] .btn-secondary:focus {
+public/control-center/styles/12-pages.css:102:[data-page="setup"] .btn-ghost:hover,
+public/control-center/styles/12-pages.css:103:[data-page="setup"] .btn-ghost:focus {
+public/control-center/styles/12-pages.css:615:.publishing-readiness-summary {
+public/control-center/styles/12-pages.css:625:.publishing-readiness-card {
+public/control-center/styles/12-pages.css:639:.publishing-readiness-card.is-warning {
+public/control-center/styles/12-pages.css:644:.publishing-readiness-card.is-missing {
+public/control-center/styles/12-pages.css:649:.publishing-readiness-card-label {
+public/control-center/styles/12-pages.css:816:.media-readiness-chip.is-ready,
+public/control-center/styles/12-pages.css:822:.media-readiness-chip.is-active,
+public/control-center/styles/12-pages.css:828:.media-readiness-chip.is-warning,
+public/control-center/styles/12-pages.css:834:.media-readiness-chip.is-missing,
+public/control-center/styles/12-pages.css:839:.media-readiness-summary {
+public/control-center/styles/12-pages.css:844:.media-readiness-chip {
+public/control-center/styles/12-pages.css:854:.media-readiness-chip span,
+public/control-center/styles/12-pages.css:855:.media-readiness-chip small {
+public/control-center/styles/12-pages.css:860:.media-readiness-chip strong {
+public/control-center/styles/12-pages.css:947:.media-readiness-checklist,
+public/control-center/styles/12-pages.css:955:.media-readiness-checklist li strong,
+public/control-center/styles/12-pages.css:1096:  Scope: page-specific layouts for Home, Setup, Library, and AI Workspace.
+public/control-center/styles/12-pages.css:1104:.setup-wizard-shell,
+public/control-center/styles/12-pages.css:1134:.setup-template-actions,
+public/control-center/styles/12-pages.css:1135:.setup-smart-handoff-actions,
+public/control-center/styles/12-pages.css:1165:.setup-smart-overview-grid,
+public/control-center/styles/12-pages.css:1166:.setup-smart-diagnostics-grid,
+public/control-center/styles/12-pages.css:1180:.setup-wizard-layout,
+public/control-center/styles/12-pages.css:1190:.setup-v2-answers,
+public/control-center/styles/12-pages.css:1197:.setup-field-group,
+public/control-center/styles/12-pages.css:1204:.setup-input,
+public/control-center/styles/12-pages.css:1205:.setup-textarea,
+public/control-center/styles/12-pages.css:1206:.library-filter-bar .setup-input,
+public/control-center/styles/12-pages.css:1211:.setup-label,
+public/control-center/styles/12-pages.css:1212:.setup-label-with-info {
+public/control-center/styles/12-pages.css:1217:.setup-helper,
+public/control-center/styles/12-pages.css:1224:.setup-field-group.is-missing {
+public/control-center/styles/12-pages.css:1231:.setup-field-head,
+public/control-center/styles/12-pages.css:1232:.setup-wizard-form-head,
+public/control-center/styles/12-pages.css:1233:.setup-wizard-header-top,
+public/control-center/styles/12-pages.css:1234:.setup-wizard-step,
+public/control-center/styles/12-pages.css:1235:.setup-smart-recommended-step,
+public/control-center/styles/12-pages.css:1236:.setup-business-template-panel .card-head,
+public/control-center/styles/12-pages.css:1256:.setup-wizard-side-panels,
+public/control-center/styles/12-pages.css:1267:.setup-smart-gap-list,
+public/control-center/styles/12-pages.css:1268:.setup-smart-step-list,
+public/control-center/styles/12-pages.css:1275:.setup-field-state,
+public/control-center/styles/12-pages.css:1276:.setup-template-status,
+public/control-center/styles/12-pages.css:1277:.setup-wizard-progress-value,
+public/control-center/styles/12-pages.css:1289:.setup-field-state.is-missing,
+public/control-center/styles/12-pages.css:1294:.setup-field-state.is-ready {
+public/control-center/styles/12-pages.css:1298:.setup-progress-track {
+public/control-center/styles/12-pages.css:1306:.setup-progress-fill {
+public/control-center/styles/12-pages.css:1329:.setup-smart-overview-card,
+public/control-center/styles/12-pages.css:1330:.setup-smart-diagnostic-card,
+public/control-center/styles/12-pages.css:1400:  .setup-smart-overview-grid,
+public/control-center/styles/12-pages.css:1401:  .setup-smart-diagnostics-grid,
+public/control-center/styles/12-pages.css:1415:  .setup-wizard-layout,
+public/control-center/styles/12-pages.css:1433:  .setup-smart-overview-grid,
+public/control-center/styles/12-pages.css:1434:  .setup-smart-diagnostics-grid,
+public/control-center/styles/12-pages.css:1530:[data-page="setup"] .setup-operating-chips,
+public/control-center/styles/12-pages.css:1531:[data-page="setup"] .setup-inline-status-row,
+public/control-center/styles/12-pages.css:1532:[data-page="setup"] .setup-config-intel-metrics {
+public/control-center/styles/12-pages.css:1539:[data-page="setup"] .setup-config-intelligence {
+public/control-center/styles/12-pages.css:1545:[data-page="setup"] .setup-top-summary-row {
+public/control-center/styles/12-pages.css:1551:[data-page="setup"] .setup-top-summary-item {
+public/control-center/styles/12-pages.css:1561:[data-page="setup"] .setup-config-intel-card {
+public/control-center/styles/12-pages.css:1571:[data-page="setup"] .setup-config-intel-head {
+public/control-center/styles/12-pages.css:1578:[data-page="setup"] .setup-config-intel-head h4 {
+public/control-center/styles/12-pages.css:1582:[data-page="setup"] .setup-config-intel-card p {
+public/control-center/styles/12-pages.css:1588:[data-page="setup"] .setup-config-intel-metrics span {
+public/control-center/styles/12-pages.css:1593:[data-page="setup"] .setup-config-intel-metrics strong {
+public/control-center/styles/12-pages.css:1597:[data-page="setup"] .setup-smart-overview-grid {
+public/control-center/styles/12-pages.css:1602:[data-page="setup"] .setup-v2-toolbar {
+public/control-center/styles/12-pages.css:1609:[data-page="setup"] .setup-save-note {
+public/control-center/styles/12-pages.css:1617:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions {
+public/control-center/styles/12-pages.css:1621:[data-page="setup"] .setup-wizard-shell {
+public/control-center/styles/12-pages.css:1626:[data-page="setup"] .setup-wizard-layout {
+public/control-center/styles/12-pages.css:1631:[data-page="setup"] .setup-smart-steps-panel,
+public/control-center/styles/12-pages.css:1632:[data-page="setup"] .setup-smart-handoff-panel,
+public/control-center/styles/12-pages.css:1633:[data-page="setup"] .setup-smart-ai-tools,
+public/control-center/styles/12-pages.css:1634:[data-page="setup"] .setup-smart-overview {
+public/control-center/styles/12-pages.css:1638:[data-page="setup"] .setup-smart-form-panel {
+public/control-center/styles/12-pages.css:1644:[data-page="setup"] .setup-smart-steps-panel,
+public/control-center/styles/12-pages.css:1645:[data-page="setup"] .setup-smart-handoff-panel,
+public/control-center/styles/12-pages.css:1646:[data-page="setup"] .setup-smart-ai-tools,
+public/control-center/styles/12-pages.css:1647:[data-page="setup"] .setup-business-template-panel {
+public/control-center/styles/12-pages.css:1651:[data-page="setup"] .setup-smart-step-list {
+public/control-center/styles/12-pages.css:1656:[data-page="setup"] .setup-wizard-step {
+public/control-center/styles/12-pages.css:1669:[data-page="setup"] .setup-wizard-step-meta {
+public/control-center/styles/12-pages.css:1676:[data-page="setup"] .setup-wizard-step-purpose {
+public/control-center/styles/12-pages.css:1685:[data-page="setup"] .setup-wizard-step-cta {
+public/control-center/styles/12-pages.css:1692:[data-page="setup"] .setup-smart-step-note {
+public/control-center/styles/12-pages.css:1699:[data-page="setup"] .setup-wizard-step.is-active .setup-smart-step-note,
+public/control-center/styles/12-pages.css:1700:[data-page="setup"] .setup-wizard-step.is-warning .setup-smart-step-note,
+public/control-center/styles/12-pages.css:1701:[data-page="setup"] .setup-wizard-step.is-problem .setup-smart-step-note {
+public/control-center/styles/12-pages.css:1705:[data-page="setup"] .setup-wizard-step.is-active {
+public/control-center/styles/12-pages.css:1710:[data-page="setup"] .setup-wizard-step.is-recommended {
+public/control-center/styles/12-pages.css:1715:[data-page="setup"] .setup-wizard-form-head {
+public/control-center/styles/12-pages.css:1719:[data-page="setup"] .setup-v2-form {
+public/control-center/styles/12-pages.css:1724:[data-page="setup"] .setup-wizard-step-panel {
+public/control-center/styles/12-pages.css:1731:[data-page="setup"] .setup-wizard-step-panel h4 {
+public/control-center/styles/12-pages.css:1735:[data-page="setup"] .setup-wizard-step-panel .home-section-copy {
+public/control-center/styles/12-pages.css:1739:[data-page="setup"] .setup-form-grid {
+public/control-center/styles/12-pages.css:1743:[data-page="setup"] .setup-field-group {
+public/control-center/styles/12-pages.css:1750:[data-page="setup"] .setup-label {
+public/control-center/styles/12-pages.css:1755:[data-page="setup"] .setup-helper {
+public/control-center/styles/12-pages.css:1762:[data-page="setup"] .setup-guidance-strip {
+public/control-center/styles/12-pages.css:1769:[data-page="setup"] .setup-guidance-strip p {
+public/control-center/styles/12-pages.css:1775:[data-page="setup"] .setup-header-project {
+public/control-center/styles/12-pages.css:1781:[data-page="setup"] .setup-intel-next {
+public/control-center/styles/12-pages.css:1787:[data-page="setup"] .setup-impact-chip-row {
+public/control-center/styles/12-pages.css:1793:[data-page="setup"] .setup-impact-chip {
+public/control-center/styles/12-pages.css:1805:[data-page="setup"] .setup-smart-overview-card {
+public/control-center/styles/12-pages.css:1809:[data-page="setup"] .setup-smart-recommended-inline {
+public/control-center/styles/12-pages.css:1820:[data-page="setup"] .setup-smart-recommended-label {
+public/control-center/styles/12-pages.css:1827:[data-page="setup"] .setup-smart-overview-card .data-label {
+public/control-center/styles/12-pages.css:1831:[data-page="setup"] .setup-smart-overview-card strong {
+public/control-center/styles/12-pages.css:1835:[data-page="setup"] .setup-business-template-panel .setup-template-head {
+public/control-center/styles/12-pages.css:1842:[data-page="setup"] .setup-business-template-panel .setup-template-current {
+public/control-center/styles/12-pages.css:1854:[data-page="setup"] .setup-business-template-panel .setup-template-body {
+public/control-center/styles/12-pages.css:1861:[data-page="setup"] .setup-business-template-panel .setup-template-preview {
+public/control-center/styles/12-pages.css:1870:[data-page="setup"] .setup-business-template-panel .setup-template-preview strong {
+public/control-center/styles/12-pages.css:1874:[data-page="setup"] .setup-business-template-panel .setup-template-preview span {
+public/control-center/styles/12-pages.css:1879:[data-page="setup"] .setup-template-preview.is-empty {
+public/control-center/styles/12-pages.css:1884:[data-page="setup"] .setup-template-empty {
+public/control-center/styles/12-pages.css:1888:[data-page="setup"] .setup-business-template-panel .setup-template-actions {
+public/control-center/styles/12-pages.css:1893:[data-page="setup"] .setup-smart-handoff-actions-primary {
+public/control-center/styles/12-pages.css:1897:[data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1902:[data-page="setup"] .setup-action-group {
+public/control-center/styles/12-pages.css:1912:[data-page="setup"] .setup-action-group-label {
+public/control-center/styles/12-pages.css:1919:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-primary {
+public/control-center/styles/12-pages.css:1923:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-secondary {
+public/control-center/styles/12-pages.css:1927:[data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions .btn-ghost {
+public/control-center/styles/12-pages.css:1931:[data-page="setup"] .setup-smart-ai-tools {
+public/control-center/styles/12-pages.css:1935:[data-page="setup"] .setup-smart-ai-tools .setup-v2-subtitle {
+public/control-center/styles/12-pages.css:1940:  [data-page="setup"] .setup-top-summary-row {
+public/control-center/styles/12-pages.css:1944:  [data-page="setup"] .setup-wizard-layout {
+public/control-center/styles/12-pages.css:1948:  [data-page="setup"] .setup-business-template-panel .setup-template-body {
+public/control-center/styles/12-pages.css:1952:  [data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1958:  [data-page="setup"] .setup-config-intelligence,
+public/control-center/styles/12-pages.css:1959:  [data-page="setup"] .setup-smart-handoff-panel .setup-smart-handoff-actions {
+public/control-center/styles/12-pages.css:1963:  [data-page="setup"] .setup-impact-chip-row {
+public/control-center/styles/12-pages.css:1967:  [data-page="setup"] .setup-smart-handoff-actions-secondary {
+public/control-center/styles/12-pages.css:1971:  [data-page="setup"] .setup-top-summary-row {
+public/control-center/styles/12-pages.css:1977:  [data-page="setup"] .setup-top-summary-row {
+public/control-center/styles/12-pages.css:4691:.aicmd-v2-readiness-strip {
+public/control-center/styles/12-pages.css:4698:.aicmd-v2-readiness-chip {
+public/control-center/styles/12-pages.css:4707:.aicmd-v2-readiness-chip strong {
+public/control-center/styles/12-pages.css:4711:.aicmd-v2-readiness-chip.is-available {
+public/control-center/styles/12-pages.css:4716:.aicmd-v2-readiness-chip.is-available strong {
+public/control-center/styles/12-pages.css:4720:.aicmd-v2-readiness-chip.is-planned strong {
+public/control-center/styles/12-pages.css:5015:[data-page="ai-command"] .aicmd-v2-readiness-chip,
+public/control-center/styles/12-pages.css:5455:[data-page="ai-command"] .aicmd-v2-readiness-strip {
+public/control-center/styles/12-pages.css:7568:/* Library readiness patch: remove inline styles */
+public/control-center/styles/12-pages.css:7588:/* Content Studio readiness patch */
+public/control-center/styles/12-pages.css:7589:.content-readiness-list {
+public/control-center/styles/12-pages.css:7595:.content-readiness-hint {
+public/control-center/styles/12-pages.css:7599:/* Media Studio readiness patch */
+public/control-center/styles/12-pages.css:7600:.media-readiness-hint {
+public/control-center/styles/mhos-action-primitives.css:3: * Extracted from 08-components-foundation.css
+public/control-center/styles/13-home-executive.css:1210:.home-comm-readiness-badge {
+public/control-center/styles/13-home-executive.css:1224:.home-comm-readiness-badge strong {
+public/control-center/styles/13-home-executive.css:1240:  .home-comm-readiness-badge,
