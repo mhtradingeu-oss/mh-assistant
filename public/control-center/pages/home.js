@@ -961,6 +961,11 @@ export const homeRoute = {
               </div>
             </details>
 
+            <details class="mhos-os-evidence-panel">
+              <summary class="mhos-os-panel-title">Recent activity</summary>
+              ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
+            </details>
+
           </main>
 
           <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
@@ -1054,11 +1059,6 @@ export const homeRoute = {
 
           </aside>
         </div>
-
-        <details class="mhos-os-evidence-panel">
-          <summary class="mhos-os-panel-title">Recent activity</summary>
-          ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
-        </details>
 
       </div>
     `;
