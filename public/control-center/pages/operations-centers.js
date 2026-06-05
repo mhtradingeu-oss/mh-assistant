@@ -1599,23 +1599,23 @@ function renderNotificationCenter(context, state, projectName) {
 
   root.innerHTML = `
     <section class="page is-active" data-page="notification-center">
-      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
-        <section class="std-context-ribbon">
-          <div class="std-context-main">
-            <div class="std-context-line">
-              <span class="std-context-eyebrow">NOTIFICATIONS</span>
-              <h3 class="std-context-title">Notification Center</h3>
+      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell mhos-os-page">
+        <section class="std-context-ribbon mhos-os-header">
+          <div class="std-context-main mhos-os-header-main">
+            <div>
+              <p class="mhos-os-kicker">Operational Signals Review</p>
+              <h3 class="std-context-title mhos-os-title">Notification Center</h3>
+              <p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
             </div>
-            <p class="std-context-description">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>
-            <div class="std-context-metrics" aria-label="Notification Center metrics">
-              <span class="std-context-chip"><span>Active Alerts</span><strong>${escapeHtml(formatCount(baseAlerts.length))}</strong></span>
-              <span class="std-context-chip"><span>Unread Inbox</span><strong>${escapeHtml(formatCount(notificationCenter.unread_count))}</strong></span>
-              <span class="std-context-chip is-danger"><span>Critical</span><strong>${escapeHtml(formatCount(notificationCenter.critical_count))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Approvals</span><strong>${escapeHtml(formatCount(approvalAlerts.length))}</strong></span>
+            <div class="std-context-metrics mhos-os-chip-row" aria-label="Notification Center metrics">
+              <span class="std-context-chip mhos-os-chip"><span>Active Alerts</span><strong>${escapeHtml(formatCount(baseAlerts.length))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Unread Inbox</span><strong>${escapeHtml(formatCount(notificationCenter.unread_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-danger"><span>Critical</span><strong>${escapeHtml(formatCount(notificationCenter.critical_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Approvals</span><strong>${escapeHtml(formatCount(approvalAlerts.length))}</strong></span>
             </div>
           </div>
-          <div class="std-context-actions">
-            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+          <div class="std-context-actions mhos-os-action-row">
+            <span class="mhos-os-chip">Project: ${escapeHtml(projectLabel)}</span>
             <button class="btn btn-secondary std-context-btn" type="button" id="notificationCenterRefreshBtnHeader">Refresh</button>
           </div>
         </section>
@@ -1627,15 +1627,15 @@ function renderNotificationCenter(context, state, projectName) {
           badge: "Supporting context"
         })}
 
-        <div class="ops-layout-grid">
-          <article class="panel ops-main-column mhos-clean-stack">
-            <div class="panel-header">
+        <div class="ops-layout-grid mhos-os-layout">
+          <article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">
+            <div class="panel-header mhos-os-section-head">
               <div>
-                <div class="panel-kicker">Main View</div>
-                <h3>${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
-                <p>${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
+                <p class="mhos-os-kicker">Main View</p>
+                <h3 class="mhos-os-section-title">${escapeHtml(session.focus === "inbox" ? "Notification history and read-state review" : "Operational alert review")}</h3>
+                <p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>
               </div>
-              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
+              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${listItems.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -1665,13 +1665,13 @@ function renderNotificationCenter(context, state, projectName) {
             )}
           </article>
 
-          <aside class="ops-right-rail mhos-clean-stack">
-            <section class="panel ops-detail-card mhos-clean-surface">
+          <aside class="ops-right-rail mhos-clean-stack mhos-os-rail">
+            <section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Selected Notification</div>
-                  <h3>${escapeHtml(selectedItem?.title || "Select a notification")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
+                  <p class="mhos-os-kicker">Selected Notification</p>
+                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a notification")}</h3>
+                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -1690,12 +1690,12 @@ function renderNotificationCenter(context, state, projectName) {
               ` : `<div class="empty-box">No notification is selected.</div>`}
             </section>
 
-            <section class="panel ops-action-panel mhos-clean-surface">
+            <section class="panel ops-action-panel mhos-clean-surface mhos-os-evidence-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Action Panel</div>
-                  <h3>Notification review actions</h3>
-                  <p>Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
+                  <p class="mhos-os-kicker">Action Panel</p>
+                  <h3 class="mhos-os-panel-title">Notification review actions</h3>
+                  <p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1726,12 +1726,12 @@ function renderNotificationCenter(context, state, projectName) {
               </div>
             </section>
 
-            <section class="panel ops-ai-panel mhos-clean-surface">
+            <section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">AI Panel</div>
-                  <h3>Operations AI Assistant</h3>
-                  <p>Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
+                  <p class="mhos-os-kicker">AI Panel</p>
+                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
