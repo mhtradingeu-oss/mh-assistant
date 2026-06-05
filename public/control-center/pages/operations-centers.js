@@ -886,24 +886,24 @@ function renderQueueCenterLayout({
 
   return `
     <section class="page is-active" data-page="queue-center">
-      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
-        <section class="std-context-ribbon">
-          <div class="std-context-main">
-            <div class="std-context-line">
-              <span class="std-context-eyebrow">QUEUE CENTER</span>
-              <h3 class="std-context-title">Queue Center</h3>
+      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell mhos-os-page">
+        <section class="std-context-ribbon mhos-os-header">
+          <div class="std-context-main mhos-os-header-main">
+            <div>
+              <p class="mhos-os-kicker">Operational Queue Review</p>
+              <h3 class="std-context-title mhos-os-title">Queue Center</h3>
+              <p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>
             </div>
-            <p class="std-context-description">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>
-            <div class="std-context-metrics" aria-label="Queue Center metrics">
-              <span class="std-context-chip"><span>Visible</span><strong>${escapeHtml(formatCount(totalVisible))}</strong></span>
-              <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(totalItems))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Active</span><strong>${escapeHtml(formatCount(totalActive))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Queued</span><strong>${escapeHtml(formatCount(totalQueued))}</strong></span>
-              <span class="std-context-chip"><span>Running</span><strong>${escapeHtml(formatCount(totalRunning))}</strong></span>
+            <div class="std-context-metrics mhos-os-chip-row" aria-label="Queue Center metrics">
+              <span class="std-context-chip mhos-os-chip"><span>Visible</span><strong>${escapeHtml(formatCount(totalVisible))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Total</span><strong>${escapeHtml(formatCount(totalItems))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Active</span><strong>${escapeHtml(formatCount(totalActive))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Queued</span><strong>${escapeHtml(formatCount(totalQueued))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Running</span><strong>${escapeHtml(formatCount(totalRunning))}</strong></span>
             </div>
           </div>
-          <div class="std-context-actions">
-            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+          <div class="std-context-actions mhos-os-action-row">
+            <span class="mhos-os-chip">Project: ${escapeHtml(projectLabel)}</span>
             <button class="btn btn-secondary std-context-btn" type="button" id="queueCenterRefreshBtnHeader">Refresh</button>
           </div>
         </section>
@@ -915,15 +915,15 @@ function renderQueueCenterLayout({
           badge: "Supporting context"
         })}
 
-        <div class="ops-layout-grid">
-          <article class="panel ops-main-column mhos-clean-stack">
-            <div class="panel-header">
+        <div class="ops-layout-grid mhos-os-layout">
+          <article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">
+            <div class="panel-header mhos-os-section-head">
               <div>
-                <div class="panel-kicker">Main View</div>
-                <h3>Queue review operations</h3>
-                <p>Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>
+                <p class="mhos-os-kicker">Main View</p>
+                <h3 class="mhos-os-section-title">Queue review operations</h3>
+                <p class="mhos-os-section-copy">Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>
               </div>
-              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -952,13 +952,13 @@ function renderQueueCenterLayout({
             )}
           </article>
 
-          <aside class="ops-right-rail mhos-clean-stack">
-            <section class="panel ops-detail-card mhos-clean-surface">
+          <aside class="ops-right-rail mhos-clean-stack mhos-os-rail">
+            <section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Selected Queue Item</div>
-                  <h3>${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>
+                  <p class="mhos-os-kicker">Selected Queue Item</p>
+                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>
+                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -979,12 +979,12 @@ function renderQueueCenterLayout({
               ` : `<div class="empty-box">No queue item is selected.</div>`}
             </section>
 
-            <section class="panel ops-action-panel mhos-clean-surface">
+            <section class="panel ops-action-panel mhos-clean-surface mhos-os-evidence-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Action Panel</div>
-                  <h3>Queue review actions</h3>
-                  <p>Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
+                  <p class="mhos-os-kicker">Action Panel</p>
+                  <h3 class="mhos-os-panel-title">Queue review actions</h3>
+                  <p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -1007,12 +1007,12 @@ function renderQueueCenterLayout({
               </div>
             </section>
 
-            <section class="panel ops-ai-panel mhos-clean-surface">
+            <section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">AI Panel</div>
-                  <h3>Operations AI Assistant</h3>
-                  <p>Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
+                  <p class="mhos-os-kicker">AI Panel</p>
+                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
