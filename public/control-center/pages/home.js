@@ -127,10 +127,108 @@ function compact(value, fallback = "-") {
   return text || fallback;
 }
 
+function humanizeExecutiveAction(value, fallback = "Next executive action") {
+  const raw = asString(value).trim();
+  if (!raw) return fallback;
+
+  const normalized = raw
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const known = {
+    "product videos": "Create product videos to unblock launch readiness",
+    "connector ecommerce": "Connect ecommerce data to improve launch confidence",
+    "ecommerce": "Connect ecommerce data to improve launch confidence",
+    "analytics": "Connect analytics to strengthen decision quality",
+    "amazon": "Review Amazon connector readiness",
+    "ebay": "Review eBay connector readiness",
+    "setup": "Complete setup foundation before execution",
+    "library": "Prepare missing brand assets",
+    "integrations": "Connect required platforms",
+    "campaign studio": "Prepare the next campaign wave"
+  };
+
+  const key = normalized.toLowerCase();
+  if (known[key]) return known[key];
+
+  return normalized.replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function compactModuleState(value, fallback = "Not enabled yet") {
+  const text = asString(value).trim();
+  if (!text) return fallback;
+  if (/planned\/partial|planned|not ready|partial/i.test(text)) {
+    return fallback;
+  }
+  return text;
+}
+
+function buildOperatingPath(dashboard = {}) {
+  const blockers = asObject(dashboard.blockers);
+  const campaign = asObject(dashboard.campaign);
+  const launch = asObject(dashboard.launchSnapshot);
+  const health = asObject(dashboard.health);
+
+  return [
+    {
+      title: "Setup foundation",
+      meta: health.projectReadiness >= 80 ? "Foundation is mostly ready" : "Review setup and readiness gaps",
+      tone: health.projectReadiness >= 80 ? "is-live" : "is-warning",
+      status: health.projectReadiness >= 80 ? "Ready" : "Needs review"
+    },
+    {
+      title: "Prepare assets",
+      meta: asArray(blockers.assets).length ? `${formatCount(asArray(blockers.assets).length)} missing asset groups` : "Assets ready for next step",
+      tone: asArray(blockers.assets).length ? "is-warning" : "is-live",
+      status: asArray(blockers.assets).length ? "Needs assets" : "Ready"
+    },
+    {
+      title: "Connect platforms",
+      meta: asArray(blockers.integrations).length ? `${formatCount(asArray(blockers.integrations).length)} integrations missing` : "Core integrations connected",
+      tone: asArray(blockers.integrations).length ? "is-warning" : "is-live",
+      status: asArray(blockers.integrations).length ? "Needs connection" : "Ready"
+    },
+    {
+      title: "Build campaign",
+      meta: campaign.name ? `Active: ${campaign.name}` : "No active campaign selected",
+      tone: campaign.name ? "is-live" : "is-warning",
+      status: campaign.name ? "Active" : "Missing"
+    },
+    {
+      title: "Publish / execute",
+      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+      tone: launch.campaignReadiness === "Ready" ? "is-live" : "is-warning",
+      status: launch.campaignReadiness || "At risk"
+    }
+  ];
+}
+
+function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+  const blockers = asObject(dashboard.blockers);
+  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+
+  if (next.includes("video") || asArray(blockers.assets).length) {
+    return (
+      aiTeamCards.find((card) => /video/i.test(card.name || card.id || "")) ||
+      aiTeamCards.find((card) => /media/i.test(card.name || card.id || "")) ||
+      aiTeamCards.find((card) => /creative|brand|content/i.test(card.name || card.id || "")) ||
+      aiTeamCards[0]
+    );
+  }
+
+  if (asArray(blockers.integrations).length) {
+    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+  }
+
+  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+}
+
+
 function routeForAction(action) {
   const text = asString(action).toLowerCase();
-  if (/(connector|integration|sync)/.test(text)) return "integrations";
-  if (/(asset|library|upload|brand file)/.test(text)) return "library";
+  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return "library";
+  if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
   if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
   if (/(publish|schedule|queue)/.test(text)) return "publishing";
   if (/(ad|budget|paid)/.test(text)) return "ads-manager";
@@ -289,8 +387,9 @@ function buildExecutiveData(state) {
         ? "Recover failed execution items"
         : "Review and confirm next launch move";
 
-  const nextAction = asString(recommendations[0]).trim() || fallbackAction;
-  const nextActionRoute = routeForAction(nextAction);
+  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+  const nextActionRoute = routeForAction(rawNextAction || nextAction);
 
   const whyItMatters = criticalGaps.length
     ? "Removing this blocker increases launch confidence and prevents avoidable delays."
@@ -671,111 +770,157 @@ export const homeRoute = {
     ];
     const activeBlockerColumns = blockerColumns.filter((column) => asArray(column.items).length).slice(0, 4);
 
+    const topAttentionCards = [
+      {
+        title: "Assets",
+        detail: dashboard.blockers.assets.length
+          ? `${formatCount(dashboard.blockers.assets.length)} missing asset groups need preparation.`
+          : "Asset library looks ready for the current operating path.",
+        tone: dashboard.blockers.assets.length ? "is-warning" : "is-live"
+      },
+      {
+        title: "Integrations",
+        detail: dashboard.blockers.integrations.length
+          ? `${formatCount(dashboard.blockers.integrations.length)} platform connections need attention.`
+          : "Required platform connections look stable.",
+        tone: dashboard.blockers.integrations.length ? "is-warning" : "is-live"
+      },
+      {
+        title: "Readiness gaps",
+        detail: dashboard.blockers.readinessGaps.length
+          ? `${formatCount(dashboard.blockers.readinessGaps.length)} readiness gap${dashboard.blockers.readinessGaps.length === 1 ? "" : "s"} still affect confidence.`
+          : "No critical readiness gaps are currently blocking the main path.",
+        tone: dashboard.blockers.readinessGaps.length ? "is-warning" : "is-live"
+      }
+    ];
+
+    const operatingPath = buildOperatingPath(dashboard);
+    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+    const attentionBlockerColumns = activeBlockerColumns.slice(0, 3);
+
     root.innerHTML = `
-      <div class="home-command-center">
-        <!-- 1. EXECUTIVE SMART HEADER -->
-        <section class="home-exec-header">
-          <div class="home-header-left">
-            <p class="home-header-eyebrow">Executive Command Center</p>
-            <h1 class="home-header-title">${escapeHtml(dashboard.projectName || "Project Command Center")}</h1>
-            <p class="home-header-subtitle">${escapeHtml(dashboard.oneLineSummary)}</p>
-          </div>
+      <div class="home-command-center mhos-os-page">
 
-          <div class="home-header-status">
-            ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
-            <div class="home-header-score">
-              <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
-              <span class="home-header-score-label">System Health</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- 2. NEXT BEST ACTION SURFACE (MH-OS) -->
-        <section class="mhos-next-action" aria-label="Next Best Action">
-          <div class="mhos-next-action-title-row">
-            <span class="mhos-next-action-urgency">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
-            <span class="mhos-next-action-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</span>
-          </div>
-          <div class="mhos-next-action-reason">
-            ${escapeHtml(dashboard.nextBestAction.whyItMatters)}
-            <span class="mhos-next-action-helper">Current executive priority.</span>
-          </div>
-          <div class="mhos-next-action-impact">
-            ${escapeHtml(dashboard.nextBestAction.workflowImpact)}
-            <span class="mhos-next-action-helper">Execution continues here.</span>
-          </div>
-          <div class="mhos-next-action-flow">
-            <span class="mhos-next-action-continuation">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
-            <span class="mhos-next-action-destination">Next: <strong>${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</strong></span>
-          </div>
-          <div class="mhos-next-action-meta-row">
-            <span class="mhos-next-action-confidence">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
-            <span class="mhos-next-action-escalation">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
-          </div>
-          <div class="mhos-next-action-actions">
-            <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
-              ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
-            </button>
-            <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
-              Ask AI: Why is this the focus?
-            </button>
-          </div>
-        </section>
-
-        <!-- 2. EXECUTIVE SNAPSHOT / KEY INDICATORS -->
-        <div class="home-snapshot-grid executive-signal-grid">
-          ${capabilityCards.map((item) => `
-            <article class="card home-snapshot-card executive-signal-card">
-              <span class="executive-signal-label">${escapeHtml(item.title)}</span>
-              <strong class="executive-signal-value">${escapeHtml(item.value)}</strong>
-              <p class="executive-signal-detail">${escapeHtml(item.detail)}</p>
-              ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
-
-            </article>
-          `).join("")}
-        </div>
-        <!-- 3. CONCISE EXCEPTIONS -->
-        <article class="card home-workspace-section home-exception-section">
-          <div class="home-section-head">
+        <section class="mhos-os-header" aria-label="Executive Command Brief">
+          <div class="mhos-os-header-main">
             <div>
-              <p class="card-label">Exceptions</p>
-              <h3>${dashboard.totalBlockers ? "Needs executive attention" : "No critical blockers"}</h3>
-              <span class="section-helper">${dashboard.totalBlockers ? "Top blockers only; deeper operational context stays below." : "The system is clear to execute on the next best action."}</span>
+              <p class="mhos-os-kicker">AI Operations Command</p>
+              <h1 class="mhos-os-title">${escapeHtml(dashboard.projectName || "Project Command Center")}</h1>
+              <p class="mhos-os-subtitle">${escapeHtml(dashboard.oneLineSummary)}</p>
             </div>
-            ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} blockers` : "Clear", escapeHtml)}
+            <div class="mhos-os-chip-row">
+              ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+              <span class="mhos-os-chip ${dashboard.totalBlockers ? "is-warning" : "is-live"}">
+                <span class="mhos-os-live-dot"></span>
+                ${escapeHtml(dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} attention signals` : "Clear path")}
+              </span>
+            </div>
           </div>
 
-          ${dashboard.totalBlockers ? `
-            <div class="home-blocker-grid home-exception-grid">
-              ${activeBlockerColumns.map((column) =>
-                renderBlockerColumn(column.title, column.items, column.tone, escapeHtml)
-              ).join("")}
-            </div>
-          ` : `
-            <div class="home-empty-state home-exception-clear">
-              <p>No critical blockers detected. The next best action can move without an exception review.</p>
-            </div>
-          `}
-        </article>
+          <div class="mhos-os-brief-grid">
+            <article class="mhos-os-brief-card mhos-motion-soft">
+              <span class="mhos-os-brief-label">System Health</span>
+              <strong class="mhos-os-brief-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+              <span class="mhos-os-brief-hint">${escapeHtml(dashboardLabelFromScore(dashboard.health?.systemScore))}</span>
+            </article>
+            <article class="mhos-os-brief-card mhos-motion-soft">
+              <span class="mhos-os-brief-label">Readiness</span>
+              <strong class="mhos-os-brief-value">${escapeHtml(formatPercent(dashboard.health?.projectReadiness))}</strong>
+              <span class="mhos-os-brief-hint">${escapeHtml(dashboard.totalBlockers ? "Needs focused action" : "Ready for next move")}</span>
+            </article>
+            <article class="mhos-os-brief-card mhos-motion-soft">
+              <span class="mhos-os-brief-label">Connector Coverage</span>
+              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.health?.connectorCoverage || "0/0")}</strong>
+              <span class="mhos-os-brief-hint">${escapeHtml(dashboard.blockers.integrations.length ? "Connections need attention" : "Core platforms connected")}</span>
+            </article>
+            <article class="mhos-os-brief-card mhos-motion-soft">
+              <span class="mhos-os-brief-label">Primary Focus</span>
+              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+              <span class="mhos-os-brief-hint">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+            </article>
+          </div>
+        </section>
 
+        <div class="mhos-os-layout">
+          <main class="mhos-os-main">
 
-        <!-- 4. MAIN EXECUTIVE WORKSPACE -->
-        <div class="home-workspace-main">
-          <div class="home-workspace-grid">
-            <article class="card home-workspace-section">
-              <div class="home-section-head">
+            <section class="mhos-os-decision-card mhos-motion-soft" aria-label="Primary Decision">
+              <div class="mhos-os-chip-row">
+                <span class="mhos-os-chip ${dashboard.nextBestAction.urgencyLabel === "Urgent" ? "is-danger" : dashboard.nextBestAction.urgencyLabel === "Attention" ? "is-warning" : "is-live"}">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.workflowImpact)}</span>
+                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+              </div>
+              <div>
+                <p class="mhos-os-kicker">Next Best Action</p>
+                <h2 class="mhos-os-decision-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</h2>
+                <p class="mhos-os-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+              </div>
+              <div class="mhos-os-chip-row">
+                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+                <span class="mhos-os-chip">Next: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
+                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+              </div>
+              <div class="mhos-os-action-row">
+                <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
+                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+                </button>
+                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+                  Ask AI to explain
+                </button>
+                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+                  Operations Centers
+                </button>
+              </div>
+            </section>
+
+            <section class="mhos-os-section" aria-label="What Needs Attention">
+              <div class="mhos-os-section-head">
                 <div>
-                  <p class="card-label">Operational Readiness</p>
-                  <h3>What is ready to move?</h3>
-                  <span class="section-helper">Shows what is ready for executive action.</span>
+                  <p class="mhos-os-kicker">What needs attention</p>
+                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Top operating blockers" : "No critical blockers"}</h2>
+                  <p class="mhos-os-section-copy">
+                    ${dashboard.totalBlockers ? "The system is highlighting only the areas that affect the next operating move." : "The current path is clear. Continue with the next best action."}
+                  </p>
                 </div>
-                ${renderBadge(
-                  dashboard.launchSnapshot.campaignReadiness === "Ready" ? "success" : "warning",
-                  dashboard.launchSnapshot.campaignReadiness,
-                  escapeHtml
-                )}
+                ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} signals` : "Clear", escapeHtml)}
               </div>
 
+              <div class="mhos-os-attention-grid">
+                ${topAttentionCards.map((item) => `
+                  <article class="mhos-os-attention-card mhos-motion-soft">
+                    <span class="mhos-os-chip ${escapeHtml(item.tone)}">${escapeHtml(item.title)}</span>
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <span>${escapeHtml(item.detail)}</span>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+
+            <section class="mhos-os-section" aria-label="Operating Path">
+              <div class="mhos-os-section-head">
+                <div>
+                  <p class="mhos-os-kicker">Operating path</p>
+                  <h2 class="mhos-os-section-title">From readiness to execution</h2>
+                  <p class="mhos-os-section-copy">A simple guided path that keeps setup, assets, integrations, campaign, and execution in the right order.</p>
+                </div>
+              </div>
+
+              <div class="mhos-os-path">
+                ${operatingPath.map((step, index) => `
+                  <article class="mhos-os-path-step mhos-motion-soft">
+                    <span class="mhos-os-path-index">${index + 1}</span>
+                    <div>
+                      <h3 class="mhos-os-path-title">${escapeHtml(step.title)}</h3>
+                      <p class="mhos-os-path-meta">${escapeHtml(step.meta)}</p>
+                    </div>
+                    <span class="mhos-os-chip ${escapeHtml(step.tone)}">${escapeHtml(step.status)}</span>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+
+            <details class="mhos-os-evidence-panel">
+              <summary class="mhos-os-panel-title">System details and evidence</summary>
               <div class="home-status-grid">
                 <div class="home-status-item">
                   <span class="data-label">Publish Ready</span>
@@ -794,244 +939,130 @@ export const homeRoute = {
                   <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
                 </div>
               </div>
-            </article>
 
-            <article class="card home-workspace-section">
-              <div class="home-section-head">
-                <div>
-                  <p class="card-label">Launch Readiness Snapshot</p>
-                  <h3>${escapeHtml(compact(dashboard.campaign.name, "No active campaign"))}</h3>
-                  <span class="section-helper">Tracks campaign, publishing, and media readiness. Shows current campaign state and next scheduled actions.</span>
+              ${attentionBlockerColumns.length ? `
+                <div class="home-blocker-grid home-exception-grid">
+                  ${attentionBlockerColumns.map((column) =>
+                    renderBlockerColumn(column.title, column.items, column.tone, escapeHtml)
+                  ).join("")}
                 </div>
-                ${renderBadge(dashboard.campaign.name ? "success" : "warning", dashboard.campaign.currentStage, escapeHtml)}
+              ` : `
+                <p class="mhos-os-panel-copy">No detailed blockers are currently available for this project.</p>
+              `}
+
+              <div class="home-status-board">
+                ${statusItems.map((item) => `
+                  <article class="home-status-board-card">
+                    <span class="data-label">${escapeHtml(item.label)}</span>
+                    <strong>${escapeHtml(item.value)}</strong>
+                    <p>${escapeHtml(item.hint)}</p>
+                  </article>
+                `).join("")}
+              </div>
+            </details>
+
+          </main>
+
+          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+
+            <section class="mhos-os-action-panel">
+              <div>
+                <p class="mhos-os-kicker">Navigate & execute</p>
+                <h2 class="mhos-os-panel-title">Safe next destinations</h2>
+                <p class="mhos-os-panel-copy">Use the shortest route to complete the operating path.</p>
               </div>
 
-              <div class="home-campaign-info">
-                <div class="home-campaign-row">
-                  <span class="home-info-label">Execution Mode</span>
-                  <strong>${escapeHtml(dashboard.campaign.executionMode)}</strong>
-                </div>
-                <div class="home-campaign-row">
-                  <span class="home-info-label">Next Scheduled</span>
-                  <strong>${escapeHtml(dashboard.campaign.nextScheduledAction)}</strong>
-                </div>
-                <div class="home-campaign-row">
-                  <span class="home-info-label">Channels</span>
-                  <strong>${escapeHtml(campaignChannels.length ? campaignChannels.join(", ") : "No channels selected")}</strong>
-                </div>
+              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Review Setup Foundation</span>
+                <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
+              </button>
+              <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Asset Library</span>
+                <span class="home-action-meta">Prepare missing brand and campaign assets.</span>
+              </button>
+              <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Integrations</span>
+                <span class="home-action-meta">Connect required platforms and providers.</span>
+              </button>
+              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Campaign Studio</span>
+                <span class="home-action-meta">Build the next launch wave.</span>
+              </button>
+            </section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+                <p class="mhos-os-panel-copy">
+                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+                </p>
               </div>
-            </article>
-          </div>
 
+              ${recommendedSpecialist ? `
+                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist.name)}</span>
+                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}</span>
+                </button>
+              ` : ""}
 
-          <article class="card home-workspace-section">
-            <div class="home-section-head">
-              <p class="card-label">Operating State Overview</p>
-              <h3>Executive System State</h3>
-              <span class="section-helper">Shows operational health and movement.</span>
-            </div>
+              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open AI Workspace</span>
+                <span class="home-action-meta">Get guidance on the next best action.</span>
+              </button>
 
-            <div class="home-status-board">
-              ${statusItems.map((item) => `
-                <article class="home-status-board-card">
-                  <span class="data-label">${escapeHtml(item.label)}</span>
-                  <strong>${escapeHtml(item.value)}</strong>
-                  <p>${escapeHtml(item.hint)}</p>
-                  ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
-                </article>
-              `).join("")}
-            </div>
-          </article>
+              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+                Open AI Command
+              </button>
+              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+                Open Full Team
+              </button>
+            </section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">AI prompts</p>
+                <h2 class="mhos-os-panel-title">Ask the system</h2>
+              </div>
+
+              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">What is the next executive action?</span>
+                <span class="home-prompt-meta">Clarify why this is the focus and what to do next.</span>
+              </button>
+              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Why is readiness low?</span>
+                <span class="home-prompt-meta">Explain blockers and readiness gaps in operational terms.</span>
+              </button>
+              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Summarize launch blockers</span>
+                <span class="home-prompt-meta">Prepare a launch risk summary.</span>
+              </button>
+              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Turn next action into a plan</span>
+                <span class="home-prompt-meta">Convert the next action into a stepwise operating plan.</span>
+              </button>
+            </section>
+
+            <section class="mhos-os-evidence-panel">
+              <p class="mhos-os-kicker">Customer operations</p>
+              <h2 class="mhos-os-panel-title">Not enabled as a live channel yet</h2>
+              <p class="mhos-os-panel-copy">
+                ${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, "Customer Ops activates when CRM/live channels are connected."))}
+              </p>
+              <span class="mhos-os-chip">${escapeHtml(compactModuleState(dashboard.health?.commReadiness, "Communication readiness activates when live channels are connected."))}</span>
+            </section>
+
+          </aside>
         </div>
 
-        <!-- 5. ACTION PANEL / QUICK NAVIGATION -->
-        <section class="card home-action-panel">
-          <div class="home-panel-head">
-            <div>
-              <p class="card-label">Navigate & Execute</p>
-              <h3>Next operational destinations</h3>
-            </div>
-          </div>
-
-          <div class="home-action-group">
-            <p class="home-action-group-title">Continue Setup & Configuration</p>
-            <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Review Setup Foundation</span>
-              <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
-            </button>
-          </div>
-
-          <div class="home-action-group">
-            <p class="home-action-group-title">Build & Launch</p>
-            <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Campaign Studio</span>
-              <span class="home-action-meta">Create launch waves and campaign briefs.</span>
-            </button>
-            <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Asset Library</span>
-              <span class="home-action-meta">Upload and organize brand assets.</span>
-            </button>
-          </div>
-
-          <div class="home-action-group">
-            <p class="home-action-group-title">Integrations & Automation</p>
-            <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Integrations</span>
-              <span class="home-action-meta">Connect platforms and configure automation.</span>
-            </button>
-            <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
-              Operations Centers
-            </button>
-          </div>
-
-          <div class="home-action-group">
-            <p class="home-action-group-title">AI Guidance</p>
-            <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
-              <span class="home-action-title">Open AI Workspace</span>
-              <span class="home-action-meta">Get AI guidance on the next best action.</span>
-            </button>
-          </div>
-        </section>
-
-        <!-- 6. EXECUTIVE AI GUIDANCE PANEL -->
-        <section class="card home-ai-guidance-panel">
-          <div class="home-panel-head">
-            <div>
-              <p class="card-label">Executive AI Guidance</p>
-              <h3>AI explains, plans, and clarifies operational flow</h3>
-              <span class="section-helper">AI explains blockers, turns next action into a plan, and routes guidance to the right workspace.</span>
-            </div>
-            <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
-              Open Workspace
-            </button>
-          </div>
-
-          <div class="home-ai-prompt-grid">
-            <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
-              <span class="home-prompt-title">What is the next executive action?</span>
-              <span class="home-prompt-meta">AI can clarify why this is the focus and what to do next.</span>
-            </button>
-
-            <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
-              <span class="home-prompt-title">Why is readiness low?</span>
-              <span class="home-prompt-meta">AI explains blockers and readiness gaps in operational terms.</span>
-            </button>
-
-            <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
-              <span class="home-prompt-title">Summarize launch blockers</span>
-              <span class="home-prompt-meta">AI prepares a risk summary for launch and escalation.</span>
-            </button>
-
-            <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
-              <span class="home-prompt-title">Turn next action into a plan</span>
-              <span class="home-prompt-meta">AI converts the next action into a stepwise operational plan.</span>
-            </button>
-          </div>
-
-          <div class="mhos-workforce-room">
-            <div class="mhos-workforce-head">
-              <span class="mhos-workforce-focus">AI Team Command Center</span>
-            </div>
-            <div class="mhos-workforce-flow">
-              <!-- Workflow Chain: show only 3–5 roles, summary + handoff only -->
-              <p class="mhos-workflow-chain-note">Roles represent operational handoffs, not personas. Only key roles shown.</p>
-              <div class="mhos-workflow-chain">
-                ${(() => {
-                  // Show only 3–5 roles, summary + handoff only
-                  const workflowChain = aiTeamCards.slice(0, 5);
-                  const activeIdx = workflowChain.findIndex(card => card.status === "Active role");
-                  const blockedIdx = workflowChain.findIndex(card => card.status.toLowerCase().includes("blocked"));
-                  return workflowChain.map((card, idx) => {
-                    const isActive = idx === activeIdx;
-                    const isBlocked = idx === blockedIdx && blockedIdx !== -1;
-                    return `
-                      <div class="mhos-workflow-step${isActive ? ' mhos-workflow-active' : ''}${isBlocked ? ' mhos-workflow-blocked' : ''}" data-role-id="${escapeHtml(card.id)}">
-                        <div class="mhos-specialist-row">
-                          <div class="mhos-specialist-state mhos-specialist-state--${escapeHtml(card.tone)}">${escapeHtml(card.status)}</div>
-                          <div class="mhos-specialist-summary">
-                            <strong>${escapeHtml(card.name)}</strong>
-                            <span>${escapeHtml(card.summary)}</span>
-                          </div>
-                        </div>
-                        ${isActive ? `<div class="mhos-workflow-handoff" aria-label="Active handoff"></div>` : ""}
-                        ${isBlocked ? `<div class="mhos-workflow-blocked" aria-label="Blocked step"></div>` : ""}
-                      </div>
-                    `;
-                  }).join("")
-                })()}
-              </div>
-              <div class="mhos-ai-team-handoff-row">
-                <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">Open Full Team</button>
-              </div>
-              <!-- Orchestration Pressure Indicator -->
-              <div class="mhos-orchestration-pressure">
-                <span class="mhos-orchestration-pressure-label">Orchestration Pressure</span>
-                <span class="mhos-orchestration-pressure-value">${escapeHtml(formatPercent(dashboard.health?.systemScore))}</span>
-              </div>
-              <!-- Escalation Lane -->
-              <div class="mhos-escalation-lane">
-                ${(() => {
-                  // Projection-only escalation lane
-                  const escalationItems = (dashboard.advanced?.pendingApprovals > 0 ? [{
-                    id: "pending-approvals",
-                    type: "approval",
-                    severity: "warning",
-                    message: `${dashboard.advanced.pendingApprovals} approval${dashboard.advanced.pendingApprovals === 1 ? "" : "s"} required`,
-                    persistent: true
-                  }] : []).concat(
-                    dashboard.blockers.failedJobs.map((msg, i) => ({
-                      id: `failed-job-${i}`,
-                      type: "execution",
-                      severity: "danger",
-                      message: msg,
-                      persistent: true
-                    }))
-                  );
-                  return escalationItems.length ? escalationItems.map(item => `
-                    <div class="mhos-escalation-item mhos-escalation-severity--${escapeHtml(item.severity)}" data-escalation-id="${escapeHtml(item.id)}">
-                      <span class="mhos-escalation-severity">${escapeHtml(item.severity)}</span>
-                      <span class="mhos-escalation-message">${escapeHtml(item.message)}</span>
-                    </div>
-                  `).join("") : `<div class="mhos-escalation-item mhos-escalation-severity--neutral"><span class="mhos-escalation-message">No escalations</span></div>`;
-                })()}
-              </div>
-            </div>
-          </div>
-
-        </section>
-
-        <!-- 7. CUSTOMER OPERATIONS PULSE & COMMUNICATION READINESS (Independent Card, sibling to AI Guidance) -->
-        <section class="card home-customer-ops-panel">
-          <div class="home-panel-head">
-            <div>
-              <p class="card-label">Customer Operations Pulse</p>
-              <h3>Customer Operations Readiness</h3>
-              <span class="section-helper">Status and handoff only. No live CRM/IVR claims.</span>
-            </div>
-          </div>
-          <div class="home-customer-ops-body">
-            <span class="home-customer-ops-badge">${dashboard.health?.customerOpsStatus || "Planned/Partial"}</span>
-            <span class="home-comm-readiness-badge">Communication Readiness: <strong>${dashboard.health?.commReadiness || "Planned/Not Ready"}</strong></span>
-            <p>
-              <em>All advanced actions require handoff to Operations Centers or AI Command.</em>
-            </p>
-          </div>
-        </section>
-
-        <!-- 7. RECENT ACTIVITY / SYSTEM PULSE -->
-        <section class="card home-activity-panel">
-          <div class="home-section-head">
-            <div>
-              <p class="card-label">Recent Activity</p>
-              <h3>System pulse and recent events</h3>
-            </div>
-          </div>
-
+        <details class="mhos-os-evidence-panel">
+          <summary class="mhos-os-panel-title">Recent activity</summary>
           ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
-        </section>
+        </details>
+
       </div>
     `;
-
+    
     const openRoute = (route, message = "") => {
       navigateTo(route);
       if (message) showMessage?.(message);
