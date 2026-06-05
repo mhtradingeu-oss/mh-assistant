@@ -515,24 +515,24 @@ function renderTaskCenterLayout({
 
   return `
     <section class="page is-active" data-page="task-center">
-      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell">
-        <section class="std-context-ribbon">
-          <div class="std-context-main">
-            <div class="std-context-line">
-              <span class="std-context-eyebrow">TASK CENTER</span>
-              <h3 class="std-context-title">Task Center</h3>
+      <div class="ops-shell ops-workspace mhos-clean-root mhos-clean-shell mhos-os-page">
+        <section class="std-context-ribbon mhos-os-header">
+          <div class="std-context-main mhos-os-header-main">
+            <div>
+              <p class="mhos-os-kicker">Operational Task Review</p>
+              <h3 class="std-context-title mhos-os-title">Task Center</h3>
+              <p class="std-context-description mhos-os-subtitle">Review ownership, due-state, linked entities, and safe route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
             </div>
-            <p class="std-context-description">Review durable operational task records with ownership, due-state, linked entities, and route-aware follow-up for ${escapeHtml(projectLabel)}.</p>
-            <div class="std-context-metrics" aria-label="Task Center metrics">
-              <span class="std-context-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
-              <span class="std-context-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
-              <span class="std-context-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>
-              <span class="std-context-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>
+            <div class="std-context-metrics mhos-os-chip-row" aria-label="Task Center metrics">
+              <span class="std-context-chip mhos-os-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>
+              <span class="std-context-chip mhos-os-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>
+              <span class="std-context-chip mhos-os-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>
             </div>
           </div>
-          <div class="std-context-actions">
-            <span class="card-badge neutral">Project: ${escapeHtml(projectLabel)}</span>
+          <div class="std-context-actions mhos-os-action-row">
+            <span class="mhos-os-chip">Project: ${escapeHtml(projectLabel)}</span>
             <button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>
           </div>
         </section>
@@ -544,15 +544,15 @@ function renderTaskCenterLayout({
           badge: "Supporting context"
         })}
 
-        <div class="ops-layout-grid">
-          <article class="panel ops-main-column mhos-clean-stack">
-            <div class="panel-header">
+        <div class="ops-layout-grid mhos-os-layout">
+          <article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">
+            <div class="panel-header mhos-os-section-head">
               <div>
-                <div class="panel-kicker">Main View</div>
-                <h3>Operational task backlog</h3>
-                <p>Filter by focus, owner, source, and priority to review task risk quickly.</p>
+                <p class="mhos-os-kicker">Main View</p>
+                <h3 class="mhos-os-section-title">Operational task backlog</h3>
+                <p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>
               </div>
-              <span class="card-badge ${showLoadingState ? "warning" : "neutral"}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
+              <span class="mhos-os-chip ${showLoadingState ? "is-warning" : ""}">${escapeHtml(showLoadingState ? "Refreshing" : `${items.length} visible`)}</span>
             </div>
 
             ${renderOpsFocusTabs([
@@ -602,14 +602,14 @@ function renderTaskCenterLayout({
             )}
           </article>
 
-          <aside class="ops-right-rail mhos-clean-stack">
+          <aside class="ops-right-rail mhos-clean-stack mhos-os-rail">
             ${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}
-            <section class="panel ops-detail-card mhos-clean-surface">
+            <section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Selected Task</div>
-                  <h3>${escapeHtml(selectedItem?.title || "Select a task")}</h3>
-                  <p>${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>
+                  <p class="mhos-os-kicker">Selected Task</p>
+                  <h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a task")}</h3>
+                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>
                 </div>
               </div>
               ${selectedItem ? `
@@ -632,12 +632,12 @@ function renderTaskCenterLayout({
               ` : `<div class="empty-box">No task is selected.</div>`}
             </section>
 
-            <section class="panel ops-action-panel mhos-clean-surface">
+            <section class="panel ops-action-panel mhos-clean-surface mhos-os-evidence-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">Action Panel</div>
-                  <h3>Task review actions</h3>
-                  <p>Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
+                  <p class="mhos-os-kicker">Action Panel</p>
+                  <h3 class="mhos-os-panel-title">Task review actions</h3>
+                  <p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>
                 </div>
               </div>
               <div class="ops-action-row">
@@ -654,12 +654,12 @@ function renderTaskCenterLayout({
               </div>
             </section>
 
-            <section class="panel ops-ai-panel mhos-clean-surface">
+            <section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">
               <div class="panel-header">
                 <div>
-                  <div class="panel-kicker">AI Panel</div>
-                  <h3>Operations AI Assistant</h3>
-                  <p>Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>
+                  <p class="mhos-os-kicker">AI Panel</p>
+                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+                  <p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>
                 </div>
               </div>
               <div class="ops-action-row">
