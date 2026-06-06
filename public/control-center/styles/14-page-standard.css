@@ -2781,3 +2781,38 @@ button,
   }
 }
 
+
+/* LIB-FEATURE-5L — CSS-only move-to-group dropdown */
+[data-page="library"] .library-panel-move-checkbox {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-page="library"] .library-panel-move-toggle {
+  width: 100%;
+  justify-content: space-between;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+[data-page="library"] .library-panel-move-toggle::after {
+  content: "▾";
+  opacity: 0.78;
+  font-size: 0.8rem;
+}
+
+[data-page="library"] .library-panel-move-checkbox:checked + .library-panel-move-toggle::after {
+  content: "▴";
+}
+
+[data-page="library"] .library-panel-move-checkbox:not(:checked) ~ .library-panel-choice-grid {
+  display: none !important;
+}
+
+[data-page="library"] .library-panel-move-checkbox:checked ~ .library-panel-choice-grid {
+  display: grid;
+}
+
