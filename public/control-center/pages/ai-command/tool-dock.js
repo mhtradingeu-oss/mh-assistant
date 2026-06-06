@@ -191,7 +191,7 @@ function formatSharedAiSource(source = {}) {
   return { name, type, path };
 }
 
-function getSelectedLibrarySource(projectName = "") {
+export function getSelectedLibrarySource(projectName = "") {
   return getSharedAiSource(projectName) || getSharedAiSource("__default__");
 }
 

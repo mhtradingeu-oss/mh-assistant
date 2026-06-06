@@ -1,6 +1,7 @@
 import {
         bindAiToolDock,
         getAiToolDockTools,
+        getSelectedLibrarySource,
         openAiToolDrawerFromMetadata,
         renderAiToolDrawerShell
 } from "./ai-command/tool-dock.js";
@@ -3956,6 +3957,31 @@ function renderLanguageMarketStrip(aiContext, escapeHtml) {
 	`;
 }
 
+function renderAiCommandMainSourceIndicator(projectName, escapeHtml) {
+	const source = getSelectedLibrarySource(projectName);
+	if (!source) return "";
+	const name = asString(source.name || source.filename || source.fileName || "Selected Library source");
+	if (!name) return "";
+	const type = asString(source.asset_type || source.type || source.source_type || "Library asset");
+	const sourceOfTruth = typeof source.source_of_truth === "boolean"
+		? (source.source_of_truth ? "Source of truth" : "")
+		: asString(source.source_of_truth || "");
+	const status = asString(source.review_status || source.status_label || source.status || "");
+	const meta = [type, sourceOfTruth, status]
+		.map((item) => asString(item).trim())
+		.filter(Boolean)
+		.slice(0, 2)
+		.join(" · ");
+
+	return `
+		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
+			<span>AI Source</span>
+			<strong>${escapeHtml(name)}</strong>
+			${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
+		</div>
+	`;
+}
+
 function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 	const providerConfigured = isProviderLikelyConfigured(aiContext);
 	const readinessItems = [
@@ -4024,6 +4050,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 
 				<div class="aicmd-chatgpt-context-row">
 					${renderLanguageMarketStrip(aiContext, escapeHtml)}
+					${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}
 				</div>
 
 				<div class="aicmd-v2-composer-hint">Draft/review only · suggested prompts prefill this composer · execution happens in the owning workspace after confirmation.</div>
