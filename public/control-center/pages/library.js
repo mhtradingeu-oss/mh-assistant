@@ -57,10 +57,10 @@ let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 const LIBRARY_UPLOAD_TYPE_LABELS = {
   logo: "Logo",
-  brand_guidelines: "Brand Guidelines",
+  brand_guideline: "Brand Guidelines",
   product_csv: "Product Data",
-  pricing_offers: "Pricing & Offers",
-  legal_documents: "Legal Documents",
+  pricing_doc: "Pricing & Offers",
+  legal_doc: "Legal Documents",
   product_photos: "Product Photos",
   product_videos: "Product Videos",
   social_assets: "Social Assets",
@@ -68,7 +68,7 @@ const LIBRARY_UPLOAD_TYPE_LABELS = {
   packaging_images: "Packaging Images",
   testimonials_reviews: "Testimonials & Reviews",
   certificates: "Certificates",
-  partner_documents: "Partner Documents"
+  partner_docs: "Partner Documents"
 };
 
 function getLibraryUploadTypeLabel(assetType = "") {
@@ -152,7 +152,7 @@ const LIBRARY_FOLDERS = [
   { key: "all_assets", label: "All Assets" },
   { key: "logos", label: "Logos", types: ["logo"] },
   { key: "product_data", label: "Product Data", types: ["product_csv"] },
-  { key: "product_images", label: "Product Images", types: ["product_photos"] },
+  { key: "product_images", label: "Product Images", types: ["product_photos", "packaging_images"] },
   { key: "packaging_images", label: "Packaging Images", types: ["packaging_images"] },
   { key: "videos", label: "Videos", types: ["product_videos"] },
   { key: "legal_pricing", label: "Legal & Pricing", types: ["legal_doc", "pricing_doc"] },
@@ -1484,6 +1484,54 @@ function promptForTextInput(title, initialValue = "") {
   });
 }
 
+function getLibraryScrollContainer(target) {
+  if (!target || typeof document === "undefined") return null;
+
+  const preferred = document.getElementById("workspace");
+  if (preferred && typeof preferred.scrollTo === "function") {
+    return preferred;
+  }
+
+  let node = target.parentElement;
+  while (node && node !== document.body) {
+    const style = window.getComputedStyle ? window.getComputedStyle(node) : null;
+    const overflow = style ? `${style.overflow} ${style.overflowY} ${style.overflowX}` : "";
+    if (/(auto|scroll)/.test(overflow) && node.scrollHeight > node.clientHeight && typeof node.scrollTo === "function") {
+      return node;
+    }
+    node = node.parentElement;
+  }
+
+  return document.scrollingElement || document.documentElement || document.body;
+}
+
+function scrollLibraryTargetIntoView(target, highlightClass = "is-required-action-target") {
+  if (!target || typeof document === "undefined") return;
+
+  target.classList.add(highlightClass);
+
+  const scroller = getLibraryScrollContainer(target);
+  const prefersReducedMotion = typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior = prefersReducedMotion ? "auto" : "smooth";
+
+  if (scroller && scroller !== document.body && scroller !== document.documentElement) {
+    const scrollerRect = scroller.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const targetTop = Number(scroller.scrollTop || 0) + targetRect.top - scrollerRect.top - 18;
+
+    scroller.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior
+    });
+  } else if (typeof target.scrollIntoView === "function") {
+    target.scrollIntoView({ behavior, block: "start" });
+  }
+
+  setTimeout(() => target.classList.remove(highlightClass), 2600);
+}
+
 function bindLibraryWorkspace({
   $,
   projectName,
@@ -1647,7 +1695,7 @@ function bindLibraryWorkspace({
           </div>
           <p class="library-required-why">${escapeHtml(reasonHint)}</p>
           <div class="library-required-card-foot">
-            <small>${escapeHtml(`Detected: ${formatCount(item.totalCount)}`)}</small>
+            <small>${escapeHtml(`Files found: ${formatCount(item.totalCount)}`)}</small>
             <button
               class="btn btn-secondary btn-sm"
               type="button"
@@ -2005,7 +2053,7 @@ function bindLibraryWorkspace({
           `).join("")}
         </ul>
       `
-      : `<div class="empty-box">No uploads in this session yet. Choose files and upload them to start building the asset library.</div>`;
+      : `<div class="empty-box library-upload-empty-state"><strong>No session uploads yet.</strong><span>Choose files, classify them, then upload to add new assets to this Library.</span></div>`;
   }
 
   const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
@@ -2030,19 +2078,14 @@ function bindLibraryWorkspace({
       }
 
       if (mappedFolder) {
+        const isReviewAction = action === "review";
         session.folderKey = mappedFolder.key;
-        session.selectedType = uploadType;
+        session.selectedType = isReviewAction ? "all" : uploadType;
+        session.selectedStatus = isReviewAction ? "active" : session.selectedStatus;
+        session.selectedSource = isReviewAction ? "all" : session.selectedSource;
+        session.searchQuery = isReviewAction ? "" : session.searchQuery;
         session.page = 1;
-        // Focus/scroll asset workspace
-        setTimeout(() => {
-          const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
-          if (assetWorkspace) {
-            assetWorkspace.classList.add("is-required-action-target");
-            assetWorkspace.scrollIntoView({ behavior: "smooth", block: "start" });
-            setTimeout(() => assetWorkspace.classList.remove("is-required-action-target"), 2000);
-          }
-        }, 0);
-        showMessage?.(`Showing ${mappedFolder.label} assets. Upload category set to ${getLibraryUploadTypeLabel(uploadType)}.`);
+
         bindLibraryWorkspace({
           $,
           projectName,
@@ -2058,6 +2101,28 @@ function bindLibraryWorkspace({
           showError,
           escapeHtml
         });
+
+        const uploadLabel = getLibraryUploadTypeLabel(uploadType);
+
+        if (isReviewAction) {
+          showMessage?.(`Showing ${mappedFolder.label} assets. Select a file, then use the action panel.`);
+          setTimeout(() => {
+            const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+            scrollLibraryTargetIntoView(assetWorkspace);
+          }, 120);
+          return;
+        }
+
+        showMessage?.(`Upload category set to ${uploadLabel}. Choose files, then upload them to this asset group.`);
+        setTimeout(() => {
+          const assetIntake = document.querySelector(".library-actions-card") || document.getElementById("libraryDropZone");
+          const dropZone = document.getElementById("libraryDropZone");
+          scrollLibraryTargetIntoView(assetIntake);
+          if (dropZone && dropZone !== assetIntake) {
+            dropZone.classList.add("is-required-action-target");
+            setTimeout(() => dropZone.classList.remove("is-required-action-target"), 2600);
+          }
+        }, 120);
         return;
       } else {
         showMessage?.(`Upload category set to ${getLibraryUploadTypeLabel(uploadType)}. Matching workspace filter is not available yet.`);
