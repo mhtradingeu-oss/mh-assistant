@@ -61,26 +61,31 @@ node --check public/control-center/router.js
 node --check public/control-center/api.js
 git diff --stat
 git status --short
-Browser QA Checklist
+```
+
+## Browser QA Checklist
 
 Manual QA recommended:
 
-Open Ads Manager.
-Confirm old Section labels are gone.
-Confirm Budget Control, Creative Readiness, Performance Signals, and Paid Growth AI appear.
-Confirm Paid Growth Next Actions appears instead of Action Prompts.
-Confirm Next Best Action copy is visible.
-Enter budget, daily budget, spend, CTR, CPC, CPA, and ROAS.
-Confirm recalculated UI still updates.
-Click AI prompt buttons and confirm they still route/fill AI Command.
-Click Publishing and Library buttons.
-Confirm no console errors.
-Risks
-Low functional risk because the patch changes visible copy and adds a static guidance card only.
-Low visual risk because it reuses existing page classes.
-No execution authority is added.
-Rollback Path
+- Open Ads Manager.
+- Confirm old Section labels are gone.
+- Confirm Budget Control, Creative Readiness, Performance Signals, and Paid Growth AI appear.
+- Confirm Paid Growth Next Actions appears instead of Action Prompts.
+- Confirm Next Best Action copy is visible.
+- Enter budget, daily budget, spend, CTR, CPC, CPA, and ROAS.
+- Confirm recalculated UI still updates.
+- Click AI prompt buttons and confirm they still route/fill AI Command.
+- Click Publishing and Library buttons.
+- Confirm no console errors.
 
-Revert public/control-center/pages/ads-manager.js and delete this closeout file.
+## Risks
+
+- Low functional risk because the patch changes visible copy and adds a static guidance card only.
+- Low visual risk because it reuses existing page classes.
+- No execution authority is added.
+
+## Rollback Path
+
+Revert `public/control-center/pages/ads-manager.js` and delete this closeout file.
 
 No backend, API, router, app, CSS, or project data rollback is required.
