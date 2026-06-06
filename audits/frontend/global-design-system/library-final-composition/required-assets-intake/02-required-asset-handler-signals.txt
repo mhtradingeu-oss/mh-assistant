@@ -1,0 +1,66 @@
+# LIB-FINAL-4 — Required Asset Button Handler Signals
+
+Generated: Sat Jun  6 08:24:41 CEST 2026
+Branch: architecture/frontend-consolidation-v1
+HEAD: e143d34
+
+public/control-center/pages/library.js:69:  testimonials_reviews: "Testimonials & Reviews",
+public/control-center/pages/library.js:642:  if (value === "needs_review") return "Needs Review";
+public/control-center/pages/library.js:892:  const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;
+public/control-center/pages/library.js:901:    needsReviewAssets,
+public/control-center/pages/library.js:907:      ? `${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}`
+public/control-center/pages/library.js:922:    let status = "Needs Review";
+public/control-center/pages/library.js:926:      status = "Needs Review";
+public/control-center/pages/library.js:1371:    return `Classify the current library assets for ${project}, propose best category keys, and flag items that should be source-of-truth.`;
+public/control-center/pages/library.js:1571:    needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,
+public/control-center/pages/library.js:1638:      const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";
+public/control-center/pages/library.js:1639:      const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";
+public/control-center/pages/library.js:1654:              data-library-required-action="${escapeHtml(item.action)}"
+public/control-center/pages/library.js:1655:              data-library-required-key="${escapeHtml(item.key)}"
+public/control-center/pages/library.js:1664:  const typeSelect = $("libraryFilterTypeSelect");
+public/control-center/pages/library.js:1904:        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Review Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Review Source in AI Command</button>
+public/control-center/pages/library.js:1913:            <div class="data-row"><span>Review Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
+public/control-center/pages/library.js:1933:      useBtn.textContent = "Use as Review Source in AI Command";
+public/control-center/pages/library.js:1934:      useBtn.setAttribute("aria-label", "Use as Review Source in AI Command");
+public/control-center/pages/library.js:2011:  const requiredActionButtons = Array.from(document.querySelectorAll("[data-library-required-action]"));
+public/control-center/pages/library.js:2014:      const action = button.getAttribute("data-library-required-action") || "review";
+public/control-center/pages/library.js:2016:      const requiredKey = button.getAttribute("data-library-required-key") || "";
+public/control-center/pages/library.js:2020:      const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2038:          const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+public/control-center/pages/library.js:2041:            assetWorkspace.scrollIntoView({ behavior: "smooth", block: "start" });
+public/control-center/pages/library.js:2095:      showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");
+public/control-center/pages/library.js:2113:      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
+public/control-center/pages/library.js:2148:      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
+public/control-center/pages/library.js:2177:      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
+public/control-center/pages/library.js:2208:      if (_fbCard?.name) showMessage?.(`Selected ${_fbCard.name}. Review status and available actions.`);
+public/control-center/pages/library.js:2223:      if (selected?.name) showMessage?.(`Selected ${selected.name}. Review status and available actions.`);
+public/control-center/pages/library.js:2269:  const finderWorkspace = $("libraryFinderWorkspace");
+public/control-center/pages/library.js:2514:      const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2545:  const searchInput = $("librarySearchInput");
+public/control-center/pages/library.js:2569:  const uploadTypeSelect = $("libraryUploadTypeSelect");
+public/control-center/pages/library.js:2719:        assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);
+public/control-center/pages/library.js:2819:  const classifyBtn = $("libraryAiClassifyBtn");
+public/control-center/pages/library.js:2825:      showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");
+public/control-center/pages/library.js:2850:      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
+public/control-center/pages/library.js:2864:      showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");
+public/control-center/pages/library.js:2957:        const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
+public/control-center/pages/library.js:2960:          assetWorkspace.scrollIntoView({ behavior: "smooth", block: "start" });
+public/control-center/pages/library.js:3009:                ${escapeHtml(`${formatCount(overview.totalAssets || 0)} assets · ${formatCount(overview.sourceOfTruthAssets || 0)} source-of-truth · ${formatCount(overview.needsReviewAssets || 0)} need review · ${formatCount(overview.approvedAssets || 0)} approved · ${String(overview.sourceCoverage || 0)}% source coverage`)}
+public/control-center/pages/library.js:3020:            <p class="card-subtitle">Track the source files, product data, media, and proof needed for campaign readiness. Review here does not approve, publish, or change asset truth automatically.</p>
+public/control-center/pages/library.js:3031:              <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
+public/control-center/pages/library.js:3032:              <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
+public/control-center/pages/library.js:3033:              <button id="libraryAiExtractBtn" class="btn btn-secondary" type="button">Extract Docs</button>
+public/control-center/pages/library.js:3045:              <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
+public/control-center/pages/library.js:3046:              <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
+public/control-center/pages/library.js:3058:        <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
+public/control-center/pages/library.js:3064:            <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+public/control-center/pages/library.js:3088:                  <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
+public/control-center/pages/library.js:3089:                  <select id="libraryFilterTypeSelect" class="setup-input" aria-label="Filter by type"></select>
+public/control-center/pages/library.js:3121:                  <label class="setup-label" for="librarySearchInput">Search</label>
+public/control-center/pages/library.js:3122:                  <input id="librarySearchInput" class="setup-input" type="text" placeholder="Search by name, path, type, or usage" />
+public/control-center/pages/library/action-panel.js:35:          <span>Review Status</span>
+public/control-center/pages/library/ai-panel.js:30:          <span>Review Status</span>
+public/control-center/pages/library/ai-panel.js:88:      description: "This asset is selected but not marked as source-of-truth. Review it before using it across campaigns.",
+public/control-center/pages/library/ai-panel.js:95:      title: "Review before production",
+public/control-center/pages/library/catalog-readiness.js:60:    label: "Review and approve Library assets",
+public/control-center/pages/library/catalog-readiness.js:61:    reason: "Required asset coverage is available. Review quality and source-of-truth status.",

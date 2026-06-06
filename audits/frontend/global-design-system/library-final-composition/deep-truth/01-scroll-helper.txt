@@ -1,0 +1,46 @@
+        event.preventDefault();
+        cancelBtn.click();
+      }
+    };
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(submitBtn);
+    modal.appendChild(heading);
+    modal.appendChild(input);
+    modal.appendChild(actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    input.focus();
+    input.select();
+  });
+}
+
+function scrollLibraryTargetIntoView(target, highlightClass = "is-required-action-target") {
+  if (!target || typeof document === "undefined") return;
+
+  target.classList.add(highlightClass);
+
+  const workspace = document.getElementById("workspace");
+  if (workspace && typeof workspace.scrollTo === "function") {
+    const workspaceRect = workspace.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const currentTop = Number(workspace.scrollTop || 0);
+    const targetTop = currentTop + targetRect.top - workspaceRect.top - 18;
+
+    workspace.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: "smooth"
+    });
+  } else if (typeof target.scrollIntoView === "function") {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  setTimeout(() => target.classList.remove(highlightClass), 2600);
+}
+
+function bindLibraryWorkspace({
+  $,
+  projectName,
+  session,
+  assetsData,
+  operations,

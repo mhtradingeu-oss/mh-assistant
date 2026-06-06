@@ -1,0 +1,59 @@
+# 04 — Current Patch CSS Blocks
+
+Generated: Sat Jun  6 10:41:37 CEST 2026
+
+## Diff in 14-page-standard.css
+diff --git a/public/control-center/styles/14-page-standard.css b/public/control-center/styles/14-page-standard.css
+index d624b10..56db504 100644
+--- a/public/control-center/styles/14-page-standard.css
++++ b/public/control-center/styles/14-page-standard.css
+@@ -2650,3 +2650,40 @@ button,
+ [data-page="library"] #libraryOverviewCards:empty {
+   display: none;
+ }
++
++[data-page="library"] .library-upload-empty-state {
++  display: grid;
++  gap: 4px;
++  justify-items: center;
++  text-align: center;
++  padding: 14px 18px;
++}
++
++[data-page="library"] .library-upload-empty-state strong {
++  color: var(--text-primary);
++  font-weight: 800;
++}
++
++[data-page="library"] .library-upload-empty-state span {
++  color: var(--text-secondary);
++  font-size: 0.92rem;
++}
++
++/* LIB-FINAL-4D — Required asset action target feedback */
++[data-page="library"] #libraryAssetWorkspace.is-required-action-target {
++  border-color: rgba(45, 212, 191, 0.72);
++  box-shadow:
++    0 0 0 1px rgba(45, 212, 191, 0.32),
++    0 0 34px rgba(45, 212, 191, 0.14);
++  transition: border-color 180ms ease, box-shadow 180ms ease;
++}
++
++/* LIB-FINAL-4E — Required asset CTA target feedback */
++[data-page="library"] .library-actions-card.is-required-action-target,
++[data-page="library"] #libraryDropZone.is-required-action-target {
++  border-color: rgba(45, 212, 191, 0.72);
++  box-shadow:
++    0 0 0 1px rgba(45, 212, 191, 0.32),
++    0 0 34px rgba(45, 212, 191, 0.14);
++  transition: border-color 180ms ease, box-shadow 180ms ease;
++}
+
+## Required target selectors
+1208:[data-page="library"] .library-required-card-foot small {
+2654:[data-page="library"] .library-upload-empty-state {
+2662:[data-page="library"] .library-upload-empty-state strong {
+2667:[data-page="library"] .library-upload-empty-state span {
+2673:[data-page="library"] #libraryAssetWorkspace.is-required-action-target {
+2682:[data-page="library"] .library-actions-card.is-required-action-target,
+2683:[data-page="library"] #libraryDropZone.is-required-action-target {
