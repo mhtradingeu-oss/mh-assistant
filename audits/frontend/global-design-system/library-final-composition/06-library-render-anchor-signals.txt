@@ -1,0 +1,38 @@
+30:import { renderLibraryActionPanel } from "./library/action-panel.js";
+31:import { renderLibraryAiPanel } from "./library/ai-panel.js";
+35:import { mountLibraryListeners } from "./library/listener-lifecycle.js";
+181:    "button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"
+481:  disposeLibraryGlobalListeners = mountLibraryListeners({
+489:          if (!button || !button.closest(".library-workspace")) return;
+505:          if (!link || !link.closest(".library-workspace")) return;
+525:          const root = event.target?.closest?.(".library-workspace");
+1108:function renderPreview(asset, escapeHtml) {
+1809:            ? `<div class="library-grid-thumb-shell" data-library-protected-thumb="${escapeHtml(asset.id)}"><div class="library-grid-icon">IMG</div></div>`
+1810:            : `<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">`
+1811:          : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
+1815:          <article class="library-grid-card${isSelected ? " is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}" aria-selected="${isSelected ? "true" : "false"}">
+1816:            <div class="library-grid-preview">${previewNode}</div>
+1817:            <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(titleName)}</div>
+1818:            <div class="library-grid-meta" title="${escapeHtml(asset.filename || "-")}">${escapeHtml(fileName)}</div>
+1819:            <div class="library-grid-foot">
+1821:              <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+1835:      <div class="library-grid-page-info">Showing ${escapeHtml(String(showingStart))}-${escapeHtml(String(showingEnd))} of ${escapeHtml(String(filteredAssets.length))}</div>
+1836:      <div class="library-grid-page-actions">
+1837:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>
+1839:        <button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>
+1864:      className: "library-grid-thumb",
+1866:      fallbackMarkup: `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`,
+1964:    actionPanelMount.innerHTML = renderLibraryActionPanel({
+1972:    aiPanelMount.innerHTML = renderLibraryAiPanel({
+2196:  const selectableCards = Array.from(document.querySelectorAll("[data-library-grid-select]"));
+2200:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2215:      const nextId = card.getAttribute("data-library-grid-select") || "";
+2522:  const gridPageButtons = Array.from(document.querySelectorAll("[data-library-grid-page]"));
+2528:      const action = button.getAttribute("data-library-grid-page");
+3001:    root.innerHTML = `
+3037:            <div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">
+3064:            <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
+3065:            <div class="library-workspace-main">
+3126:              <div id="libraryAssetGridBody" class="library-grid-body"></div>
+3127:              <div id="libraryGridPagination" class="library-grid-pagination"></div>
+3130:            <aside class="library-workspace-side">
