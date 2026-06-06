@@ -57,7 +57,7 @@ const librarySessionStore = new Map();
 let librarySearchRenderTimer = null;
 const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
 const LIBRARY_UPLOAD_TYPE_LABELS = {
-  logo: "Logo",
+  logo: "Logos",
   brand_guideline: "Brand Guidelines",
   product_csv: "Product Data",
   pricing_doc: "Pricing & Offers",
