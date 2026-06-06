@@ -1548,8 +1548,8 @@ function confirmWorkflowBackendRun(workflow) {
         source_page: "workflows",
         destination_page: "task-center",
         title: `${workflow.title} • ${inputs.campaign || inputs.project || projectName || "Project"}`,
-        summary: asString(run.output.summary || "Review-only task handoff prepared from Workflows."),
-        description: asString(run.output.summary || "Review-only task handoff prepared from Workflows."),
+        summary: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),
+        description: asString(run.output.summary || "Review-only task handoff prepared from the Workflows operating path."),
         payload: {
           workflow_id: workflow.id,
           workflow_title: workflow.title,
@@ -1948,7 +1948,7 @@ export const workflowsRoute = {
             <div class="wfloop-hero-head">
               <p class="wfloop-kicker">Workflow control</p>
               <h1>Workflow Operating Loop</h1>
-              <p class="wfloop-mission">Start a session, prepare the package, and continue it across MH-OS destinations.</p>
+              <p class="wfloop-mission">Choose an operating playbook, prepare a review-ready package, and route it safely to the right MH-OS destination.</p>
               <div class="wfloop-hero-meta">
                 <span class="wfloop-chip is-session">Active session: ${escapeHtml(workflow.title)}</span>
                 <span class="wfloop-chip is-${escapeHtml(readinessTone)}">Readiness: ${escapeHtml(readinessValue == null ? "Unknown" : `${readinessValue}/100`)} · ${escapeHtml(readinessStatus || "Unknown")}</span>
@@ -2044,7 +2044,7 @@ export const workflowsRoute = {
 
               <div class="wfloop-session-grid">
                 <div>
-                  <p class="wfloop-session-label">Output to prepare</p>
+                  <p class="wfloop-session-label">Review package to prepare</p>
                   <p class="wfloop-session-value">${escapeHtml(workflow.title)} package for ${escapeHtml(destinationName)}</p>
                 </div>
                 <div>
@@ -2076,23 +2076,23 @@ export const workflowsRoute = {
               <div class="wfloop-preview card">
                 <div class="card-head">
                   <h4>Prepared Package Preview</h4>
-                  <span class="badge">${escapeHtml(preparedForSelected ? "Package ready" : "Not prepared")}</span>
+                  <span class="badge">${escapeHtml(preparedForSelected ? "Review package ready" : "Not prepared yet")}</span>
                 </div>
-                <p class="wfloop-preview-meta">${escapeHtml(preparedForSelected ? `Prepared ${formatDateTime(preparedForSelected.createdAt)} · ${workflow.title} session package` : "Prepare to generate a compact session package preview.")}</p>
-                <pre>${escapeHtml(preparedForSelected?.prompt || "Package will include workflow, purpose, project, campaign, product, channel, and goal context.")}</pre>
+                <p class="wfloop-preview-meta">${escapeHtml(preparedForSelected ? `Prepared ${formatDateTime(preparedForSelected.createdAt)} · ${workflow.title} session package` : "Prepare to generate a compact operating package preview.")}</p>
+                <pre>${escapeHtml(preparedForSelected?.prompt || "Package will include playbook, purpose, project, campaign, product, channel, goal, and destination context.")}</pre>
               </div>
 
               <details class="wfloop-tech-details">
                 <summary>Technical details</summary>
-                <p>Frontend-safe preparation only. This route prepares and routes context.</p>
-                <p>Existing backend workflow run and automation helpers are preserved in file scope, but this active surface is limited to preparation, review, routing, and destination-owned execution authority.</p>
+                <p>Safe preparation path only. This surface prepares review context and routes it to the correct destination.</p>
+                <p>Backend workflow run and automation helpers remain preserved, but this active surface stays limited to preparation, review, routing, and destination-owned execution authority.</p>
               </details>
             </article>
 
             <aside class="wfloop-zone wfloop-assist">
               <section class="mhos-ai-guidance">
                 <h3 class="mhos-ai-guidance-title">AI Guidance</h3>
-                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, and missing-context prompts for review only for ${escapeHtml(workflow.title)}.</p>
+                <p class="mhos-ai-guidance-copy">AI prepares structure, sequencing, destination context, and missing-input prompts for review only for ${escapeHtml(workflow.title)}.</p>
                 <p class="mhos-ai-guidance-reason">Remaining gaps: ${escapeHtml(missing.map(titleCase).join(", ") || "No missing inputs")}. Safest next step: ${escapeHtml(nextAction)}</p>
                 <div class="mhos-ai-guidance-actions">
                   <button class="btn btn-secondary btn-sm" type="button" data-wf-hero-ai="1">Open AI Workspace</button>
@@ -2108,7 +2108,7 @@ export const workflowsRoute = {
                     <div class="mhos-destination-copy">
                       <p class="mhos-destination-title">Review in AI Workspace</p>
                       <p class="mhos-destination-meta"><strong>Type</strong> AI review</p>
-                      <p class="mhos-destination-meta"><strong>Context carried</strong> workflow package prompt, selected workflow, and input state</p>
+                      <p class="mhos-destination-meta"><strong>Destination context</strong> workflow package prompt, selected workflow, and input state</p>
                       <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
                     </div>
                     <div class="mhos-destination-actions">
@@ -2120,7 +2120,7 @@ export const workflowsRoute = {
                     <div class="mhos-destination-copy">
                       <p class="mhos-destination-title">Create/Draft Task</p>
                       <p class="mhos-destination-meta"><strong>Type</strong> task review handoff</p>
-                      <p class="mhos-destination-meta"><strong>Context carried</strong> selected workflow session title and handoff intent</p>
+                      <p class="mhos-destination-meta"><strong>Destination context</strong> selected workflow session title and handoff intent</p>
                       <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
                     </div>
                     <div class="mhos-destination-actions">
@@ -2132,7 +2132,7 @@ export const workflowsRoute = {
                     <div class="mhos-destination-copy">
                       <p class="mhos-destination-title">Open Owning Destination</p>
                       <p class="mhos-destination-meta"><strong>Type</strong> destination navigation</p>
-                      <p class="mhos-destination-meta"><strong>Context carried</strong> route hint and prepared package context</p>
+                      <p class="mhos-destination-meta"><strong>Destination context</strong> route hint, prepared package, and review context</p>
                       <p class="mhos-destination-meta"><strong>Status</strong> Safe now</p>
                     </div>
                     <div class="mhos-destination-actions">
@@ -2144,7 +2144,7 @@ export const workflowsRoute = {
                     <div class="mhos-destination-copy">
                       <p class="mhos-destination-title">Technical Details</p>
                       <p class="mhos-destination-meta"><strong>Type</strong> technical disclosure</p>
-                      <p class="mhos-destination-meta"><strong>Context carried</strong> preparation boundary and preserved helper notes</p>
+                      <p class="mhos-destination-meta"><strong>Destination context</strong> preparation boundary and preserved helper notes</p>
                       <p class="mhos-destination-meta"><strong>Status</strong> Safe now · Destination tools own execution authority and Governance-gated actions remain protected</p>
                     </div>
                     <div class="mhos-destination-actions">
@@ -2186,7 +2186,7 @@ export const workflowsRoute = {
         workflowType.onchange = () => {
           stateModel.selectedWorkflowId = workflowType.value || WORKFLOW_CATALOG[0].id;
           stateModel.lastStatusTone = "is-info";
-          stateModel.lastStatusText = "Workflow template selected. Complete context and prepare package.";
+          stateModel.lastStatusText = "Operating playbook selected. Complete context and prepare a review package.";
           renderSurface();
         };
       }
@@ -2237,7 +2237,7 @@ export const workflowsRoute = {
         };
         stateModel.lastStatusTone = "is-success";
         stateModel.lastStatusText = "Prepared package updated and mirrored in the global AI bar.";
-        showMessage?.("Workflow prepared.");
+        showMessage?.("Workflow review package prepared.");
         renderSurface();
       }
 
@@ -2302,8 +2302,8 @@ export const workflowsRoute = {
             source_page: "workflows",
             destination_page: "task-center",
             title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
-            summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
-            description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+            summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+            description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
             payload: {
               workflow_id: asString(stateModel.selectedWorkflow?.id || ""),
               workflow_title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow"),
@@ -2328,8 +2328,8 @@ export const workflowsRoute = {
               source_page: "workflows",
               destination_page: "task-center",
               title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow task handoff"),
-              summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
-              description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from Workflows."),
+              summary: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
+              description: asString(stateModel.preparedPackage?.summary || stateModel.packagePreview || "Review-only task handoff prepared from the Workflows operating path."),
               payload: {
                 workflow_id: asString(stateModel.selectedWorkflow?.id || ""),
                 workflow_title: asString(stateModel.selectedWorkflow?.name || stateModel.selectedWorkflow?.title || "Workflow"),
