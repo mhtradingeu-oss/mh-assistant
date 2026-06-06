@@ -1516,6 +1516,31 @@ export async function deleteProjectAsset(projectName, assetId, note = "") {
   );
 }
 
+export async function reclassifyProjectAsset(projectName, assetId, assetType, note = "") {
+  if (!projectName) {
+    throw new Error("Missing project name");
+  }
+
+  if (!assetId) {
+    throw new Error("Missing asset id");
+  }
+
+  const normalizedAssetType = String(assetType || "").trim().toLowerCase();
+  if (!normalizedAssetType) {
+    throw new Error("Missing asset type");
+  }
+
+  return sendJson(
+    `/media-manager/project/${encodeURIComponent(projectName)}/assets/${encodeURIComponent(assetId)}/classification`,
+    "PATCH",
+    {
+      asset_type: normalizedAssetType,
+      note: String(note || "").trim()
+    },
+    "Failed to reclassify asset"
+  );
+}
+
 export async function runProjectWorkflow(projectName, workflowId, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");
