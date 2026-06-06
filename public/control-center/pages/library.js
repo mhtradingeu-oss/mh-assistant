@@ -3003,8 +3003,8 @@ export const libraryRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <div class="setup-kicker">Asset Control System</div>
-              <h3>${escapeHtml(projectName ? `${projectName} Asset Overview` : "Asset Overview")}</h3>
+              <div class="setup-kicker">Asset Source Command</div>
+              <h3>${escapeHtml(projectName ? `${projectName} Asset Library` : "Asset Library")}</h3>
               <p class="setup-helper">
                 ${escapeHtml(`${formatCount(overview.totalAssets || 0)} assets · ${formatCount(overview.sourceOfTruthAssets || 0)} source-of-truth · ${formatCount(overview.needsReviewAssets || 0)} need review · ${formatCount(overview.approvedAssets || 0)} approved · ${String(overview.sourceCoverage || 0)}% source coverage`)}
               </p>
@@ -3016,8 +3016,8 @@ export const libraryRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Required Assets</h3>
-            <p class="card-subtitle">Shows evidence and media gaps needed for complete project readiness. This does not approve or publish assets.</p>
+            <h3>Required Asset Evidence</h3>
+            <p class="card-subtitle">Track the source files, product data, media, and proof needed for campaign readiness. Review here does not approve, publish, or change asset truth automatically.</p>
             <span class="card-badge warning">Readiness gaps</span>
           </div>
           <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
@@ -3026,7 +3026,7 @@ export const libraryRoute = {
         <section class="card library-actions-card">
           <div class="card-head">
             <h3>Asset Intake</h3>
-            <p class="card-subtitle">Upload or register asset candidates. Approval, source-of-truth status, and publishing readiness remain separate steps.</p>
+            <p class="card-subtitle">Upload, classify, and prepare asset candidates. Approval, source-of-truth status, and publishing readiness remain controlled follow-up steps.</p>
             <div class="library-action-toolbar">
               <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
               <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
@@ -3058,7 +3058,7 @@ export const libraryRoute = {
         <section id="libraryAssetWorkspace" class="card library-asset-workspace-section" data-library-section="asset-workspace">
             <div class="card-head">
               <h3>Asset Workspace</h3>
-            <span class="card-badge neutral">Selected asset workspace</span>
+            <span class="card-badge neutral">Inspect, filter, and route trusted assets</span>
           </div>
           ${sourceGuideHtml ? `<div id="librarySourceBridgeGuideBox" class="library-source-guide-inline">${sourceGuideHtml}</div>` : ""}
             <div id="libraryFinderWorkspace" class="library-workspace-grid library-finder-workspace" data-library-view-mode="${escapeHtml(session.viewMode || "grid")}">
@@ -3131,8 +3131,8 @@ export const libraryRoute = {
               <div class="library-side-stack">
                 <section class="card library-preview-card">
                   <div class="card-head">
-                    <h3>Preview</h3>
-                    <p class="card-subtitle">Preview selected evidence or media. Protected files are loaded through the protected media endpoint.</p>
+                    <h3>Selected Asset Preview</h3>
+                    <p class="card-subtitle">Preview selected evidence or media. Protected files are loaded through the protected media endpoint without changing asset status.</p>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
