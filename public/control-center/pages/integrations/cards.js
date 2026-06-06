@@ -393,7 +393,7 @@ export function renderSelectedConnectorSummary(card = {}) {
     <section class="card integration-selected-summary">
       <div class="card-head">
         <div>
-          <h3>Connector workspace</h3>
+          <h3>Connector control center</h3>
           <p class="home-section-copy" style="margin:6px 0 0;">Open the setup drawer to configure fields and run connector actions.</p>
         </div>
         <span class="card-badge ${esc(card.statusTone)}">${esc(card.statusLabel)}</span>

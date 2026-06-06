@@ -897,7 +897,7 @@ function getQuickConnectLabel(integration) {
 }
 
 function getSmartConnectLabel(card) {
-  if (card.backendSupported === false) return "Open setup";
+  if (card.backendSupported === false) return "Open connector setup";
   if (card.statusLabel === "Connected") return "Manage";
   if (card.statusLabel === "Partial") return "Complete setup";
   if (card.statusLabel === "Token expired") return "Reconnect integration";
@@ -921,7 +921,7 @@ function shouldUseReconnectAction(card) {
 
 function getDrawerPrimaryAction(card) {
   if (card.backendSupported === false) {
-    return { action: "select", label: "Open setup" };
+    return { action: "select", label: "Open connector setup" };
   }
   if (card.statusLabel === "Connected") {
     return { action: "sync", label: "Run backend sync" };
@@ -1210,7 +1210,7 @@ function getConnectorWorkspaceAction(card) {
   const statusKey = getConnectorWorkspaceStatus(card);
 
   if (card.backendSupported === false) {
-    return { label: "Open setup", action: "select" };
+    return { label: "Open connector setup", action: "select" };
   }
 
   if (statusKey === "connected") {
@@ -1747,7 +1747,7 @@ export const integrationsRoute = {
             <div>
               <div class="setup-kicker">Integration Control Tower</div>
               <h3>Executive health</h3>
-              <p class="home-section-copy integration-system-purpose">Connect business platforms so MH-OS can sync performance, automate actions, and learn from live operating data.</p>
+              <p class="home-section-copy integration-system-purpose">Connect business platforms so MH-OS can sync performance, route safe backend actions, and learn from live operating data.</p>
             </div>
             <span class="card-badge ${escapeHtml(attentionTotal || criticalMissingCount ? "warning" : "success")}">${escapeHtml(attentionTotal || criticalMissingCount ? "Action needed" : "Operational")}</span>
           </div>
@@ -1796,7 +1796,7 @@ export const integrationsRoute = {
                     <p><strong>Risk if missing:</strong> ${escapeHtml(aiRec.reasonLabel)} remains unresolved.</p>
                   </div>
                 </details>
-                <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open setup</button>
+                <button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open connector setup</button>
               </div>
             </div>
           ` : ""}
@@ -1810,8 +1810,8 @@ export const integrationsRoute = {
             <section class="card integration-system-filters">
               <div class="card-head integration-system-filters-head">
                 <div>
-                  <div class="setup-kicker">Required Launch Connectors</div>
-                  <h3>Connector Workspace</h3>
+                  <div class="setup-kicker">Required Operating Connectors</div>
+                  <h3>Connector Control Center</h3>
                   <p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search providers, and open setup quickly.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(filteredCards.length ? "neutral" : "warning")}">${escapeHtml(filteredCards.length ? `${filteredCards.length} visible` : "No matches")}</span>
@@ -1854,27 +1854,27 @@ export const integrationsRoute = {
           </div>
 
           <aside class="integration-system-workspace-side">
-            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to open the setup drawer.</div>`}
+            ${selectedCard ? renderSelectedConnectorSummary(selectedCard) : `<div class="empty-box">Select a connector to review setup, sync health, and safe backend actions.</div>`}
 
             <section class="card integration-system-diagnostics">
               <div class="card-head">
                 <div>
-                  <h3>Diagnostics</h3>
+                  <h3>Reliability Diagnostics</h3>
                   <p class="home-section-copy" style="margin:6px 0 0;">Scan blockers, warnings, and required fixes before launch.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(diagnostics.blockers.length ? "danger" : diagnostics.warnings.length ? "warning" : "success")}">${escapeHtml(diagnostics.blockers.length ? "Blockers" : diagnostics.warnings.length ? "Warnings" : "Clear")}</span>
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Blockers</h4>
-                ${renderIntegrationDiagnosticsList(diagnostics.blockers, "No launch blockers are currently flagged.")}
+                ${renderIntegrationDiagnosticsList(diagnostics.blockers, "No connection blockers are currently flagged.")}
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Warnings</h4>
-                ${renderIntegrationDiagnosticsList(diagnostics.warnings, "No connector warnings are currently active.")}
+                ${renderIntegrationDiagnosticsList(diagnostics.warnings, "No connector reliability warnings are currently active.")}
               </div>
               <div class="integration-diagnostic-section">
                 <h4 class="integration-mini-heading">Fix Before Launch</h4>
-                ${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before launch.")}
+                ${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before the next operating step.")}
               </div>
               <div class="integration-system-prompt-row">
                 <button class="btn btn-secondary" type="button" data-integration-diagnostics="run">Run diagnostics</button>
@@ -1887,7 +1887,7 @@ export const integrationsRoute = {
             <section class="card integration-system-activity">
               <div class="card-head">
                 <div>
-                  <h3>Sync health</h3>
+                  <h3>Sync & Activity Health</h3>
                   <p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>
                 </div>
                 <span class="card-badge ${escapeHtml(activityFeed.some((item) => item.source === "real") ? "success" : "neutral")}">${escapeHtml(activityFeed.some((item) => item.source === "real") ? "Live feed" : "Derived feed")}</span>
@@ -1900,14 +1900,14 @@ export const integrationsRoute = {
         <section class="card integration-system-readiness-map">
           <div class="card-head">
             <div>
-              <h3>Coverage priorities</h3>
+              <h3>Source Coverage Priorities</h3>
               <p class="home-section-copy" style="margin:6px 0 0;">Review critical gaps, next moves, and coverage status to close launch risk.</p>
             </div>
             <span class="card-badge ${escapeHtml(criticalMissingCount || attentionTotal ? "warning" : "success")}">${escapeHtml(criticalMissingCount || attentionTotal ? "Needs review" : "Stable")}</span>
           </div>
           <div class="integration-ai-grid">
             <div>
-              <h4 class="integration-mini-heading">Critical gaps</h4>
+              <h4 class="integration-mini-heading">Critical connection gaps</h4>
               ${renderIntegrationCriticalMissing(criticalMissing)}
             </div>
             <div>
@@ -1916,7 +1916,7 @@ export const integrationsRoute = {
             </div>
           </div>
           <div class="integration-system-coverage-block">
-            <h4 class="integration-mini-heading">Coverage map</h4>
+            <h4 class="integration-mini-heading">Operating coverage map</h4>
             ${renderIntegrationCoverageMap(coverageMap)}
           </div>
         </section>

@@ -323,7 +323,7 @@ export function renderIntegrationDetailsPanel(
       </div>
 
       <div class="integration-drawer-requirements">
-        <strong>Connection requirements</strong>
+        <strong>Connector requirements</strong>
         <div class="integration-drawer-requirements-grid">
           <span class="integration-requirement-pill">${esc(
             requiredFieldSummary
