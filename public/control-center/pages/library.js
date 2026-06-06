@@ -39,6 +39,7 @@ import {
   deleteProjectAsset,
   fetchProtectedMediaBlob,
   refreshProjectLibrary,
+  reclassifyProjectAsset,
   renameProjectAsset,
   setProjectAssetSourceOfTruth,
   updateProjectAssetStatus,
@@ -2436,6 +2437,75 @@ viewToggleButtons.forEach((button) => {
           ? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."
           : (error.message || "Failed to update asset status.");
         showError?.(message);
+      }
+    };
+  });
+
+  const reclassifyButtons = Array.from(document.querySelectorAll("[data-library-reclassify]"));
+  reclassifyButtons.forEach((button) => {
+    button.onclick = async () => {
+      const id = button.getAttribute("data-library-reclassify") || "";
+      const assetId = button.getAttribute("data-asset-id") || "";
+      const currentType = String(button.getAttribute("data-current-asset-type") || "").trim().toLowerCase();
+
+      if (!assetId) {
+        showError?.("This asset cannot be reclassified because it is not linked to the project registry.");
+        return;
+      }
+
+      const allowedTypes = Object.keys(LIBRARY_UPLOAD_TYPE_LABELS);
+      const nextType = window.prompt(
+        `Reclassify asset type. Current type: ${currentType || "unknown"}\n\nAllowed types:\n${allowedTypes.join(", ")}`,
+        currentType || "logo"
+      );
+
+      if (nextType === null) {
+        return;
+      }
+
+      const normalizedType = String(nextType || "").trim().toLowerCase();
+      if (!normalizedType) {
+        showError?.("Missing asset type.");
+        return;
+      }
+
+      if (!allowedTypes.includes(normalizedType)) {
+        showError?.(`Invalid asset type. Allowed: ${allowedTypes.join(", ")}`);
+        return;
+      }
+
+      const selectedAsset = allAssets.find((asset) => asset.id === id || asset.asset_id === assetId || asset.mutation_id === assetId);
+      const assetLabel = selectedAsset?.name || selectedAsset?.filename || assetId;
+      const confirmed = window.confirm(
+        `Reclassify "${assetLabel}" from ${currentType || "unknown"} to ${normalizedType}?\n\nThis updates metadata only. It will not move or rename the physical file.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        showMessage?.(`Reclassifying asset as ${getLibraryUploadTypeLabel(normalizedType)}...`);
+        await reclassifyProjectAsset(
+          activeProjectName,
+          assetId,
+          normalizedType,
+          `Reclassified from Library action panel to ${normalizedType}.`
+        );
+
+        session.selectedType = normalizedType;
+        session.folderKey = "all_assets";
+        session.page = 1;
+
+        await reloadProjectData?.();
+        showMessage?.(`Asset reclassified as ${getLibraryUploadTypeLabel(normalizedType)}.`);
+        return;
+      } catch (error) {
+        if (error instanceof AccessKeyError) {
+          showError?.("Reclassify requires a valid Control Center write key.");
+          return;
+        }
+        showError?.(error?.message || "Failed to reclassify asset.");
       }
     };
   });

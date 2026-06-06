@@ -3,7 +3,8 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
   const selectedRegistryAssetId = escapePanelHtml(selectedAsset?.mutation_id || selectedAsset?.asset_id || "");
   const assetName = escapePanelHtml(selectedAsset?.name || selectedAsset?.filename || "No asset selected");
-  const assetType = escapePanelHtml(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a");
+  const assetTypeRaw = String(selectedAsset?.type || selectedAsset?.asset_type || selectedAsset?.category || "n/a").trim().toLowerCase();
+  const assetType = escapePanelHtml(assetTypeRaw || "n/a");
   const status = escapePanelHtml(toPanelStatusLabel(selectedAsset?.status || "n/a"));
   const sourceLabel = getPanelSourceOfTruth(selectedAsset) ? "Source of truth" : "Not source of truth";
   const isManagedMedia = selectedAsset?.kind === "managed_media";
@@ -69,6 +70,7 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
              <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve for use</button>
              <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Mark for review</button>`}
           <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename asset</button>
+          <button class="btn btn-secondary" type="button" data-library-reclassify="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"${durableDisabledAttr}>Reclassify asset</button>
           <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive asset</button>
         </div>
       </div>
