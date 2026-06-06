@@ -149,6 +149,11 @@ const REQUIRED_ASSET_REQUIREMENTS = [
   }
 ];
 
+function getCleanLibraryTypeLabel(type, fallback = "") {
+  const key = String(type || "").trim().toLowerCase();
+  return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();
+}
+
 const LIBRARY_FOLDERS = [
   { key: "all_assets", label: "All Assets" },
   { key: "logos", label: "Logos", types: ["logo"] },
@@ -1634,7 +1639,7 @@ function bindLibraryWorkspace({
     ...managedTypeOptions.map((type) => ({ value: type, label: titleCase(type) })),
     ...catalog
       .filter((item) => !managedTypeOptions.includes(item.asset_type))
-      .map((item) => ({ value: item.asset_type, label: item.display_label || item.label || item.asset_type }))
+      .map((item) => ({ value: item.asset_type, label: getCleanLibraryTypeLabel(item.asset_type, item.display_label || item.label) }))
   ];
 
   const sourceOptions = [
@@ -3177,7 +3182,7 @@ export const libraryRoute = {
               <label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>
               <select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">
                 ${getAssetCatalog(assetsData).map((item) => `
-                  <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(item.display_label || item.label)}</option>
+                  <option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(getCleanLibraryTypeLabel(item.asset_type, item.display_label || item.label))}</option>
                 `).join("")}
               </select>
               <div class="setup-helper">Upload and classify for readiness in one step.</div>
