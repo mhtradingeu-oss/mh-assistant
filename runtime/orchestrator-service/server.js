@@ -10886,6 +10886,60 @@ app.post('/media-manager/project/:project/assets/:assetId/rename', express.json(
   }
 });
 
+app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+  try {
+    const assetId = String(req.params.assetId || '').trim();
+    const requestedType = String(req.body?.asset_type || req.body?.type || '').trim().toLowerCase();
+    const note = String(req.body?.note || '').trim();
+
+    if (!assetId) {
+      return res.status(400).json({ error: 'Missing assetId.' });
+    }
+
+    if (!requestedType) {
+      return res.status(400).json({ error: 'Missing asset_type.' });
+    }
+
+    const canonicalType = getCanonicalAssetType(requestedType);
+    const catalogItem = getAssetTypeCatalog().find((item) => item.asset_type === canonicalType);
+
+    if (!canonicalType || !catalogItem) {
+      return res.status(400).json({
+        error: 'Invalid asset_type.',
+        requested_asset_type: requestedType,
+        allowed: getAssetTypeCatalog().map((item) => item.asset_type)
+      });
+    }
+
+    const result = mutateProjectAssetRegistry(req.params.project, assetId, (asset, now) => {
+      if (asset.deleted || asset.is_deleted) {
+        const error = new Error('Cannot reclassify deleted asset.');
+        error.statusCode = 409;
+        throw error;
+      }
+
+      const previousAssetType = String(asset.asset_type || asset.type || '').trim().toLowerCase();
+
+      asset.previous_asset_type = previousAssetType || asset.previous_asset_type || '';
+      asset.asset_type = canonicalType;
+      asset.type = canonicalType;
+      asset.category_label = catalogItem.category || catalogItem.label || asset.category_label || '';
+      asset.reclassified_at = now;
+      asset.reclassified_by = 'control_center';
+      asset.reclassification_note = note || `Reclassified from ${previousAssetType || 'unknown'} to ${canonicalType} from Control Center Library.`;
+      asset.updated_at = now;
+    });
+
+    return res.json({
+      ...result,
+      asset_type: canonicalType
+    });
+  } catch (error) {
+    return sendAssetMutationError(res, error, 'Failed to reclassify asset.');
+  }
+});
+
+
 app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
   try {
     const assetId = String(req.params.assetId || '').trim();
