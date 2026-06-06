@@ -2781,38 +2781,35 @@ button,
   }
 }
 
-
-/* LIB-FEATURE-5L — CSS-only move-to-group dropdown */
-[data-page="library"] .library-panel-move-checkbox {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-[data-page="library"] .library-panel-move-toggle {
-  width: 100%;
-  justify-content: space-between;
-  min-height: 36px;
-  cursor: pointer;
-}
-
-[data-page="library"] .library-panel-move-toggle::after {
-  content: "▾";
-  opacity: 0.78;
-  font-size: 0.8rem;
-}
-
-[data-page="library"] .library-panel-move-checkbox:checked + .library-panel-move-toggle::after {
-  content: "▴";
-}
-
-[data-page="library"] .library-panel-move-checkbox:not(:checked) ~ .library-panel-choice-grid {
-  display: none !important;
-}
-
-[data-page="library"] .library-panel-move-checkbox:checked ~ .library-panel-choice-grid {
+/* LIB-FEATURE-5O — Always-visible compact move-to-group choices */
+[data-page="library"] .library-panel-choice-grid {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  max-height: 172px;
+  overflow: auto;
+  padding-right: 2px;
 }
 
+[data-page="library"] .library-panel-choice-btn {
+  min-height: 32px;
+  justify-content: center;
+  padding: 7px 8px;
+  font-size: 0.72rem;
+  line-height: 1.12;
+  white-space: normal;
+}
+
+[data-page="library"] .library-panel-choice-btn.is-current {
+  border-color: rgba(45, 212, 191, 0.62);
+  background: rgba(13, 148, 136, 0.24);
+}
+
+[data-page="library"] .library-panel-current-chip {
+  margin-left: 5px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(45, 212, 191, 0.18);
+  font-size: 0.62rem;
+  font-weight: 900;
+}

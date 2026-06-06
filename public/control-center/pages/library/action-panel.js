@@ -32,7 +32,6 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
   const durableDisabledAttr = disabled || !hasSelectedAsset || !selectedRegistryAssetId ? " disabled aria-disabled=\"true\"" : "";
-  const moveGroupToggleId = `libraryMoveGroupToggle-${String(selectedRegistryAssetId || selectedAssetId || "asset").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
 
   return `
@@ -98,10 +97,6 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
             </div>
             <span class="library-panel-current-group">${escapePanelHtml(assetTypeRaw || "current")}</span>
           </div>
-          <input class="library-panel-move-checkbox" id="${escapePanelHtml(moveGroupToggleId)}" type="checkbox"${durableDisabledAttr}>
-          <label class="btn btn-secondary library-panel-move-toggle" for="${escapePanelHtml(moveGroupToggleId)}">
-            Change group
-          </label>
           <div class="library-panel-choice-grid">
             ${PANEL_ASSET_TYPE_OPTIONS.map(([value, label]) => `
               <button
