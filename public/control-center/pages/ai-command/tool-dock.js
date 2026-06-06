@@ -52,12 +52,14 @@ function tryAutoOpenDrawerAfterLibrary(projectName) {
 
   let targetButton = null;
   if (returnContext.toolId) {
-    targetButton = root.querySelector(`[data-aicmd-tool-dock="${returnContext.toolId}"]`);
+    targetButton = findToolButton(root, "data-aicmd-tool-dock", returnContext.toolId)
+      || findToolButton(root, "data-aicmdv2-tool", returnContext.toolId);
   }
 
   if (!targetButton) {
     targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
-      || root.querySelector("[data-aicmd-tool-dock]");
+      || root.querySelector("[data-aicmd-tool-dock]")
+      || root.querySelector("[data-aicmdv2-tool]");
   }
 
   if (targetButton && typeof targetButton.click === "function") {
@@ -73,16 +75,33 @@ function tryAutoOpenDrawerAfterLibrary(projectName) {
   );
 
   if (!drawerIsOpen && activeDrawer) {
-    if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;
-    if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
-    if (returnContext.modeId) activeDrawer.dataset.modeId = returnContext.modeId;
-    if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;
+    const fallbackTool = findToolMetadataById(returnContext.toolId);
+    if (fallbackTool) {
+      drawerIsOpen = openToolDrawer({
+        drawer: activeDrawer,
+        btn: createToolButtonAdapter(fallbackTool),
+        tool: fallbackTool,
+        text: fallbackTool.template || "",
+        session: {
+          modeId: returnContext.modeId || returnContext.specialistId || "",
+          teamMode: returnContext.teamMode || "solo"
+        },
+        projectName
+      });
+    }
 
-    activeDrawer.hidden = false;
-    activeDrawer.setAttribute("aria-hidden", "false");
-    activeDrawer.classList.add("is-open");
+    if (!drawerIsOpen) {
+      if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;
+      if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
+      if (returnContext.modeId) activeDrawer.dataset.modeId = returnContext.modeId;
+      if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;
 
-    drawerIsOpen = true;
+      activeDrawer.hidden = false;
+      activeDrawer.setAttribute("aria-hidden", "false");
+      activeDrawer.classList.add("is-open");
+
+      drawerIsOpen = true;
+    }
   }
 
   if (drawerIsOpen && activeDrawer) {
@@ -99,6 +118,13 @@ function tryAutoOpenDrawerAfterLibrary(projectName) {
     clearSharedAiDrawerReturn(projectName);
     clearSharedAiDrawerReturn("__default__");
   }
+}
+
+function findToolButton(root, attrName = "", attrValue = "") {
+  if (!root || !attrName || !attrValue) return null;
+  return Array.from(root.querySelectorAll(`[${attrName}]`)).find((btn) => {
+    return btn.getAttribute(attrName) === attrValue;
+  }) || null;
 }
 
 // --- Helper to build AI Drawer Return Context ---
@@ -208,7 +234,7 @@ function buildSelectedSourceContextBlock(projectName = "") {
   if (sourceOfTruth) lines.push(`- Source-of-truth flag: ${sourceOfTruth}.`);
   if (preview) lines.push(`- Text preview: ${preview}`);
 
-  lines.push("Use the selected Library source as context. Do not invent unsupported claims.");
+  lines.push("Use this Library source as trusted context. Do not add unsupported claims.");
   return lines.join("\n");
 }
 
@@ -242,7 +268,7 @@ function validateDrawerSourceRequirement(drawer, projectName = "") {
 
   setDrawerSourceWarning(
     drawer,
-    "This tool needs a source. Choose from Library or change the source type before continuing."
+    "This tool needs a source. Choose one from Library before continuing."
   );
   return false;
 }
@@ -256,10 +282,10 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
 
   if (!source || !source.name) {
     if (selectedNode) {
-      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No Library source selected yet.</span>`;
+      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No AI source selected yet.</span>`;
     }
     if (sourceInput && !sourceInput.value) {
-      sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+      sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
     }
     validateDrawerSourceRequirement(drawer, projectName);
     return;
@@ -270,13 +296,13 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
   if (selectedNode) {
     selectedNode.innerHTML = `
       <div class=\"mhos-tool-drawer-source-card\">
-        <div class=\"mhos-tool-drawer-source-eyebrow\">Selected Source</div>
+        <div class=\"mhos-tool-drawer-source-eyebrow\">AI Source</div>
         <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
         <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library</div>
         ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
         <div class=\"mhos-tool-drawer-source-actions\">
-          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change Source</button>
-          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove</button>
+          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
+          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>
         </div>
       </div>
     `;
@@ -284,7 +310,7 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
 
   // Set placeholder for Source Details if empty
   if (sourceInput && !sourceInput.value) {
-    sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+    sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
   }
 
   // Set select value if possible
@@ -309,8 +335,8 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
       removeBtn.onclick = () => {
         clearSharedAiSource(projectName || "__default__");
         clearSharedAiSource("__default__");
-        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No Library source selected yet.</span>`;
-        if (sourceInput) sourceInput.placeholder = "Optional: add audience, usage notes, product angle, claims to avoid, or context instructions...";
+        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No AI source selected yet.</span>`;
+        if (sourceInput) sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
         if (sourceSelect) sourceSelect.value = "";
         validateDrawerSourceRequirement(drawer, projectName);
       };
@@ -1180,12 +1206,50 @@ function tokenReplace(template = "", values = {}) {
 }
 
 function joinMetaList(value = []) {
-  return Array.isArray(value) ? value.filter(Boolean).join("|") : "";
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean).join("|");
+  return String(value || "").trim();
 }
 
 function getToolMetaList(tool = {}, key = "", fallback = []) {
   const value = tool?.[key];
-  return Array.isArray(value) && value.length ? value : fallback;
+  if (Array.isArray(value) && value.length) return value;
+  if (typeof value === "string" && value.trim()) return getMetaValues(value);
+  return fallback;
+}
+
+function getAllToolDockTools() {
+  return Object.values(TOOL_DOCK_BY_SPECIALIST)
+    .flat()
+    .filter(Boolean);
+}
+
+function findToolMetadataById(toolId = "") {
+  const id = String(toolId || "").trim();
+  if (!id) return null;
+  return getAllToolDockTools().find((tool) => tool?.id === id) || null;
+}
+
+function createToolButtonAdapter(tool = {}) {
+  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
+  const meta = {
+    "data-aicmd-tool-dock": tool.id || "tool",
+    "data-aicmd-tool-dock-id": tool.id || "tool",
+    "data-aicmd-tool-dock-label": tool.label || "Smart tool",
+    "data-aicmd-tool-dock-icon": tool.icon || "✦",
+    "data-aicmd-tool-dock-badge": tool.badge || "",
+    "data-aicmd-tool-dock-action": actionType,
+    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
+    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
+    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),
+    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))
+  };
+
+  return {
+    getAttribute(name) {
+      return meta[name] || "";
+    }
+  };
 }
 
 function renderSmartToolDrawerShell(safe) {
@@ -1288,7 +1352,7 @@ function renderSmartToolDrawerShell(safe) {
         </div>
 
         <div class="mhos-tool-drawer-actions">
-          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change Source</button>
+          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change source</button>
           <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
           <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
         </div>
@@ -1386,20 +1450,21 @@ function getMetaValues(rawValue = "") {
 
 function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
   if (!select) return;
-  const values = getMetaValues(rawValue);
-  select.innerHTML = "";
 
-  const fallback = document.createElement("option");
-  fallback.value = "";
-  fallback.textContent = fallbackLabel;
-  select.appendChild(fallback);
+  const values = Array.isArray(rawValue)
+    ? rawValue.map((item) => String(item || "").trim()).filter(Boolean)
+    : String(rawValue || "")
+      .split(/[|,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
 
-  values.forEach((value) => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = humanizeMeta(value);
-    select.appendChild(option);
-  });
+  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+
+  select.innerHTML = options.map((value, index) => {
+    const safeValue = escapeHtml(value);
+    const label = humanizeMeta(value || fallbackLabel || "Auto");
+    return `<option value="${index === 0 && !values.length ? "" : safeValue}">${escapeHtml(label)}</option>`;
+  }).join("");
 }
 
 function getSelectedLabel(drawer, selector, fallback = "Auto") {
@@ -1549,7 +1614,7 @@ function closeToolDrawer(drawer, fallbackTarget = null) {
   drawer.classList.remove("is-open");
 }
 
-function openToolDrawer({ drawer, btn, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
   if (!drawer || !btn) return false;
 
   drawer.dataset.pendingTemplate = text;
@@ -1569,9 +1634,23 @@ function openToolDrawer({ drawer, btn, text, input, session, projectName, persis
   );
   setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
 
-  const rawOutputs = btn.getAttribute("data-aicmd-tool-dock-outputs") || "";
-  const rawSources = btn.getAttribute("data-aicmd-tool-dock-sources") || "";
-  const rawDestinations = btn.getAttribute("data-aicmd-tool-dock-destinations") || "";
+  const toolId = btn.getAttribute("data-aicmd-tool-dock")
+    || btn.getAttribute("data-aicmd-tool-dock-id")
+    || btn.getAttribute("data-tool-id")
+    || "";
+  const tool = explicitTool || findToolMetadataById(toolId) || {};
+  const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];
+  const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
+  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+  const rawOutputs = joinMetaList(getToolMetaList(tool, "outputTypes", []))
+    || btn.getAttribute("data-aicmd-tool-dock-outputs")
+    || joinMetaList(hardOutputDefaults);
+  const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))
+    || btn.getAttribute("data-aicmd-tool-dock-sources")
+    || joinMetaList(hardSourceDefaults);
+  const rawDestinations = joinMetaList(getToolMetaList(tool, "destinations", []))
+    || btn.getAttribute("data-aicmd-tool-dock-destinations")
+    || joinMetaList(hardDestinationDefaults);
   drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";
 
 
@@ -1612,28 +1691,12 @@ export function openAiToolDrawerFromMetadata({
   updateStatus
 } = {}) {
   const drawer = root?.querySelector?.("[data-aicmd-tool-drawer]");
-  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
-  const meta = {
-    "data-aicmd-tool-dock": tool.id || "tool",
-    "data-aicmd-tool-dock-label": tool.label || "Smart tool",
-    "data-aicmd-tool-dock-icon": tool.icon || "✦",
-    "data-aicmd-tool-dock-badge": tool.badge || "",
-    "data-aicmd-tool-dock-action": actionType,
-    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
-    "data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",
-    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
-    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])),
-    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output"]))
-  };
-  const btn = {
-    getAttribute(name) {
-      return meta[name] || "";
-    }
-  };
+  const btn = createToolButtonAdapter(tool);
 
   return openToolDrawer({
     drawer,
     btn,
+    tool,
     text: template || tool.template || tool.prompt || "",
     input,
     session,
@@ -1717,7 +1780,7 @@ export function bindAiToolDock({
       const label = drawer?.dataset?.pendingTool || "tool";
       if (!template) return;
       if (!validateDrawerSourceRequirement(drawer, projectName)) {
-        updateStatus?.("This tool needs a source. Choose from Library or change the source type before continuing.");
+        updateStatus?.("This tool needs a source. Choose one from Library before continuing.");
         return;
       }
 
@@ -1756,9 +1819,11 @@ export function bindAiToolDock({
       if (!template) return;
 
       if (actionType !== "prefill") {
+        const tool = findToolMetadataById(label);
         const opened = openToolDrawer({
           drawer,
           btn,
+          tool,
           text: template,
           input,
           session,
@@ -1799,4 +1864,3 @@ export function bindAiToolDock({
   });
 
 }
-

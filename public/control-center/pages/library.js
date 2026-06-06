@@ -1346,7 +1346,11 @@ async function hydrateProtectedImageNode({
       return;
     }
 
-    showError?.(`Could not load asset preview: ${error.message || "Unknown error."}`);
+    const rawErrorMessage = String(error?.message || "").trim();
+    const isInvalidMediaPath = /invalid media path/i.test(rawErrorMessage);
+    if (!isInvalidMediaPath) {
+      showError?.(`Could not load asset preview: ${rawErrorMessage || "Unknown error."}`);
+    }
   }
 }
 
