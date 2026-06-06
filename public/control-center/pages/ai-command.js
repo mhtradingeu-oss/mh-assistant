@@ -4157,7 +4157,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				<div>
 					<span class="aicmd-room-kicker">Output Workspace</span>
 					<h2>Drafts, task previews, workflow previews, handoffs</h2>
-                                        <p>${hasPreview ? "Review the result, then route draft context to the next workspace." : "Create a preview from the conversation before routing work to another workspace."}</p>
+                                        <p>${hasPreview ? "Review the result, then route draft context to the next workspace." : "Output appears here after a response or tool setup."}</p>
 				</div>
 				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
 			</div>
@@ -4221,8 +4221,8 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				</div>
 			` : `
 				<div class="aicmd-room-output-empty">
-                                        <strong>No preview yet</strong>
-                                        <span>Choose Draft, Task Preview, Workflow Preview, or Handoff Preview, then create a review-ready preview from the conversation.</span>
+                                        <strong>Output appears after a response</strong>
+                                        <span>Run a message or use a tool to prepare a preview here.</span>
 				</div>
 			`}
 
@@ -4325,9 +4325,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
         const safetyLine = safeBridgeStatus.available
                 ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
                 : "Preview-safe. Chat tools require the protected AI chat route.";
-        const emptyBody = safeBridgeStatus.available
-                ? `Start a focused conversation with ${selectedLabel}.`
-                : "AI chat route is not connected yet. Preview tools remain available.";
+        const emptyBody = "Ask for the next decision, campaign angle, content draft, or review.";
         const bridgeContext = asObject(session.bridgeContext);
         const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
         const showBridgeContext = Boolean(
@@ -4450,7 +4448,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                 </div>
                         ` : `
                                 <div class="aicmd-v2-chat-empty aicmd-room-chat-empty">
-                                        <strong>No conversation with ${escapeHtml(selectedLabel)} yet</strong>
+                                        <strong>Start with the selected specialist</strong>
                                         <span>${escapeHtml(emptyBody)}</span>
                                 </div>
                         `}
