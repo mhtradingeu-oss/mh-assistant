@@ -27,7 +27,7 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
   const filePath = selectedAsset?.file_path || selectedAsset?.preview_url || "";
   const copyPathValue = escapePanelHtml(filePath);
   const selectedHint = hasSelectedAsset
-    ? "Use clear action groups to make trusted updates without leaving this workspace."
+    ? "Choose the next safe action."
     : "Select an asset in the workspace to activate asset actions.";
   const copyDisabledAttr = hasSelectedAsset && copyPathValue ? "" : " disabled aria-disabled=\"true\"";
   const disabledAttr = disabled || !hasSelectedAsset ? " disabled aria-disabled=\"true\"" : "";
@@ -39,7 +39,7 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
       <div class="card-head library-panel-head">
         <div>
           <p class="eyebrow">Selected Asset</p>
-          <h3>Actions</h3>
+          
         </div>
       </div>
 

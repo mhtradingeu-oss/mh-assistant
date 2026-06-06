@@ -1955,24 +1955,11 @@ function bindLibraryWorkspace({
 
         <div class="library-inspector-path">${escapeHtml(assetContextHint(selectedAsset))}</div>
 
-        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use as Review Source in AI Command" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as Review Source in AI Command</button>
+        <button type="button" class="btn btn-primary std-ai-btn" aria-label="Use this asset as an AI source" data-library-use-ai-source="${escapeHtml(selectedAsset.id)}">Use as AI Source</button>
 
         <div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">
           <span class="library-inspector-ai-source-guide-text">Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.</span>
         </div>
-
-        <details class="library-inspector-more">
-          <summary>Technical details</summary>
-          <div class="data-stack">
-            <div class="data-row"><span>Review Status</span><strong>${escapeHtml(toStatusLabel(selectedAsset.status))}</strong></div>
-            <div class="data-row"><span>Source Status</span><strong>${escapeHtml(selectedAsset.source_of_truth ? "Source of truth" : "Not source of truth")}</strong></div>
-            <div class="data-row"><span>Asset ID</span><strong>${escapeHtml(shortAssetId(selectedAsset.asset_id || selectedAsset.mutation_id || selectedAsset.id || "-"))}</strong></div>
-            <div class="data-row"><span>Full Path</span><strong>${escapeHtml(selectedAsset.file_path || "-")}</strong></div>
-            <div class="data-row"><span>Source</span><strong>${escapeHtml(selectedAsset.source_label || "Library")}</strong></div>
-            <div class="data-row"><span>Uploaded</span><strong>${escapeHtml(formatDate(selectedAsset.uploaded_at))}</strong></div>
-            <div class="data-row"><span>Version</span><strong>${escapeHtml(asString(selectedAsset.version || selectedAsset.asset_version || "-") || "-")}</strong></div>
-          </div>
-        </details>
       `
       : `<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>`;
     // Bind Use as AI Source button (inspector and grid quick action)
@@ -1984,8 +1971,8 @@ function bindLibraryWorkspace({
     }
     useBtns.forEach((useBtn) => {
       useBtn.classList.add("btn-primary", "std-ai-btn");
-      useBtn.textContent = "Use as Review Source in AI Command";
-      useBtn.setAttribute("aria-label", "Use as Review Source in AI Command");
+      useBtn.textContent = "Use as AI Source";
+      useBtn.setAttribute("aria-label", "Use this asset as an AI source");
       useBtn.onclick = () => {
         const asset = allAssets.find((a) => a.id === selectedAsset.id || a.asset_id === selectedAsset.id);
         if (!asset) {
@@ -3153,8 +3140,8 @@ export const libraryRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Required Asset Evidence</h3>
-            <p class="card-subtitle">Track the source files, product data, media, and proof needed for campaign readiness. Review here does not approve, publish, or change asset truth automatically.</p>
+            <h3>Asset Readiness</h3>
+            <p class="card-subtitle">Track the files your AI team can trust for campaigns, product content, and publishing.</p>
             <span class="card-badge warning">Readiness gaps</span>
           </div>
           <div id="libraryRequiredAssetsGrid" class="library-required-grid"></div>
@@ -3162,8 +3149,8 @@ export const libraryRoute = {
 
         <section class="card library-actions-card">
           <div class="card-head">
-            <h3>Asset Intake</h3>
-            <p class="card-subtitle">Upload, classify, and prepare asset candidates. Approval, source-of-truth status, and publishing readiness remain controlled follow-up steps.</p>
+            <h3>Upload & Classify</h3>
+            <p class="card-subtitle">Upload files, classify them, and prepare trusted assets for AI work.</p>
             <div class="library-action-toolbar">
               <button id="libraryAiClassifyBtn" class="btn btn-secondary" type="button">Classify Assets</button>
               <button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>
@@ -3268,8 +3255,8 @@ export const libraryRoute = {
               <div class="library-side-stack">
                 <section class="card library-preview-card">
                   <div class="card-head">
-                    <h3>Selected Asset Preview</h3>
-                    <p class="card-subtitle">Preview selected evidence or media. Protected files are loaded through the protected media endpoint without changing asset status.</p>
+                    <h3>Asset Preview</h3>
+                    <p class="card-subtitle">Preview the selected file or send it to AI as trusted context.</p>
                   </div>
                   <div id="libraryPreviewVisual"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
