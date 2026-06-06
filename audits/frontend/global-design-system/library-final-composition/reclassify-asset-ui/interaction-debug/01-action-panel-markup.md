@@ -1,3 +1,8 @@
+# 01 — Current Action Panel Markup
+
+Generated: Sat Jun  6 14:49:03 CEST 2026
+
+## action-panel.js around Move to group
 const PANEL_ASSET_TYPE_OPTIONS = [
   ["logo", "Logos"],
   ["brand_guideline", "Brand Guidelines"],
@@ -89,26 +94,22 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
           <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive asset</button>
         </div>
         <div class="library-panel-move-control">
-          <div class="library-panel-move-head">
-            <div>
-              <div class="library-panel-move-title">Move to group</div>
-              <p>Change the Library group only. The file path stays unchanged.</p>
+          <details class="library-panel-move-details">
+            <summary>Move to group</summary>
+            <div class="library-panel-choice-grid">
+              ${PANEL_ASSET_TYPE_OPTIONS.map(([value, label]) => `
+                <button
+                  class="btn btn-secondary btn-sm"
+                  type="button"
+                  data-library-reclassify="${selectedAssetId}"
+                  data-asset-id="${selectedRegistryAssetId}"
+                  data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"
+                  data-target-asset-type="${escapePanelHtml(value)}"
+                  ${durableDisabledAttr}
+                >${escapePanelHtml(assetTypeRaw === value ? `${label} · Current` : label)}</button>
+              `).join("")}
             </div>
-            <span class="library-panel-current-group">${escapePanelHtml(assetTypeRaw || "current")}</span>
-          </div>
-          <div class="library-panel-choice-grid">
-            ${PANEL_ASSET_TYPE_OPTIONS.map(([value, label]) => `
-              <button
-                class="btn btn-secondary btn-sm library-panel-choice-btn${assetTypeRaw === value ? " is-current" : ""}"
-                type="button"
-                data-library-reclassify="${selectedAssetId}"
-                data-asset-id="${selectedRegistryAssetId}"
-                data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"
-                data-target-asset-type="${escapePanelHtml(value)}"
-                ${durableDisabledAttr}
-              >${escapePanelHtml(label)}${assetTypeRaw === value ? '<span class="library-panel-current-chip">Current</span>' : ""}</button>
-            `).join("")}
-          </div>
+          </details>
         </div>
       </div>
 
