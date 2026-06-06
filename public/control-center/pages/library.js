@@ -2454,30 +2454,27 @@ viewToggleButtons.forEach((button) => {
       }
 
       const allowedTypes = Object.keys(LIBRARY_UPLOAD_TYPE_LABELS);
-      const nextType = window.prompt(
-        `Reclassify asset type. Current type: ${currentType || "unknown"}\n\nAllowed types:\n${allowedTypes.join(", ")}`,
-        currentType || "logo"
-      );
+      const normalizedType = String(button.getAttribute("data-target-asset-type") || "").trim().toLowerCase();
 
-      if (nextType === null) {
-        return;
-      }
-
-      const normalizedType = String(nextType || "").trim().toLowerCase();
       if (!normalizedType) {
-        showError?.("Missing asset type.");
+        showError?.("Choose a target group before moving this asset.");
         return;
       }
 
       if (!allowedTypes.includes(normalizedType)) {
-        showError?.(`Invalid asset type. Allowed: ${allowedTypes.join(", ")}`);
+        showError?.(`Invalid target group. Allowed: ${allowedTypes.join(", ")}`);
+        return;
+      }
+
+      if (currentType && normalizedType === currentType) {
+        showMessage?.(`Asset is already in ${getLibraryUploadTypeLabel(normalizedType)}.`);
         return;
       }
 
       const selectedAsset = allAssets.find((asset) => asset.id === id || asset.asset_id === assetId || asset.mutation_id === assetId);
       const assetLabel = selectedAsset?.name || selectedAsset?.filename || assetId;
       const confirmed = window.confirm(
-        `Reclassify "${assetLabel}" from ${currentType || "unknown"} to ${normalizedType}?\n\nThis updates metadata only. It will not move or rename the physical file.`
+        `Move "${assetLabel}" from ${getLibraryUploadTypeLabel(currentType) || "Unknown"} to ${getLibraryUploadTypeLabel(normalizedType)}?\n\nThis changes the Library group only. It will not move, rename, or edit the physical file.`
       );
 
       if (!confirmed) {
@@ -2485,12 +2482,12 @@ viewToggleButtons.forEach((button) => {
       }
 
       try {
-        showMessage?.(`Reclassifying asset as ${getLibraryUploadTypeLabel(normalizedType)}...`);
+        showMessage?.(`Moving asset to ${getLibraryUploadTypeLabel(normalizedType)}...`);
         await reclassifyProjectAsset(
           activeProjectName,
           assetId,
           normalizedType,
-          `Reclassified from Library action panel to ${normalizedType}.`
+          `Moved from Library action panel to ${normalizedType}. Metadata reclassification only.`
         );
 
         session.selectedType = normalizedType;
@@ -2498,7 +2495,7 @@ viewToggleButtons.forEach((button) => {
         session.page = 1;
 
         await reloadProjectData?.();
-        showMessage?.(`Asset reclassified as ${getLibraryUploadTypeLabel(normalizedType)}.`);
+        showMessage?.(`Asset moved to ${getLibraryUploadTypeLabel(normalizedType)}.`);
         return;
       } catch (error) {
         if (error instanceof AccessKeyError) {

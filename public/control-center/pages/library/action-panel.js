@@ -1,3 +1,19 @@
+const PANEL_ASSET_TYPE_OPTIONS = [
+  ["logo", "Logos"],
+  ["brand_guideline", "Brand Guidelines"],
+  ["product_csv", "Product Data / CSV"],
+  ["pricing_doc", "Pricing & Offers"],
+  ["legal_doc", "Legal Documents"],
+  ["product_photos", "Product Images"],
+  ["product_videos", "Videos"],
+  ["social_assets", "Social Assets"],
+  ["campaign_assets", "Campaign Assets"],
+  ["packaging_images", "Packaging Images"],
+  ["testimonials_reviews", "Testimonials & Reviews"],
+  ["certificates", "Certificates"],
+  ["partner_docs", "Partner Documents"]
+];
+
 export function renderLibraryActionPanel({ selectedAsset = null, disabled = false } = {}) {
   const hasSelectedAsset = Boolean(selectedAsset);
   const selectedAssetId = escapePanelHtml(selectedAsset?.id || "");
@@ -70,8 +86,25 @@ export function renderLibraryActionPanel({ selectedAsset = null, disabled = fals
              <button class="btn btn-secondary" type="button" data-asset-status-action="approved" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Approve for use</button>
              <button class="btn btn-secondary" type="button" data-asset-status-action="needs_review" data-library-asset="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Mark for review</button>`}
           <button class="btn btn-secondary" type="button" data-library-rename="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Rename asset</button>
-          <button class="btn btn-secondary" type="button" data-library-reclassify="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"${durableDisabledAttr}>Reclassify asset</button>
           <button class="btn btn-secondary" type="button" data-library-archive="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}"${durableDisabledAttr}>Archive asset</button>
+        </div>
+        <div class="library-panel-move-control">
+          <details class="library-panel-move-details">
+            <summary>Move to group</summary>
+            <div class="library-panel-choice-grid">
+              ${PANEL_ASSET_TYPE_OPTIONS.map(([value, label]) => `
+                <button
+                  class="btn btn-secondary btn-sm"
+                  type="button"
+                  data-library-reclassify="${selectedAssetId}"
+                  data-asset-id="${selectedRegistryAssetId}"
+                  data-current-asset-type="${escapePanelHtml(assetTypeRaw)}"
+                  data-target-asset-type="${escapePanelHtml(value)}"
+                  ${durableDisabledAttr}
+                >${escapePanelHtml(assetTypeRaw === value ? `${label} · Current` : label)}</button>
+              `).join("")}
+            </div>
+          </details>
         </div>
       </div>
 
