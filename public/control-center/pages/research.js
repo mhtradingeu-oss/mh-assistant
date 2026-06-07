@@ -936,7 +936,7 @@ function bindResearchActions({
         });
         navigateTo("ai-command");
         savePromptToQuickCommand($, prompt.prompt);
-        showMessage?.("Research prompt added to AI Command.");
+        showMessage?.("Research brief prompt added to AI Command.");
       } catch (error) {
         showError?.(error?.message || "Failed to hand off the research prompt to AI Command.");
       }
@@ -991,7 +991,7 @@ function bindResearchActions({
         navigateTo(action.route);
       }
 
-      showMessage?.(`Research context routed to ${action.label}.`);
+      showMessage?.(`Research handoff routed to ${action.label}.`);
     };
   });
 
@@ -1005,7 +1005,7 @@ function bindResearchActions({
         `Operationalize this opportunity for ${projectName || "this project"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.`
       );
       navigateTo(item.routeTarget.route);
-      showMessage?.(`Opportunity routed to ${item.routeTarget.label}.`);
+      showMessage?.(`Opportunity handoff routed to ${item.routeTarget.label}.`);
     };
   });
 
@@ -1104,7 +1104,7 @@ export const researchRoute = {
   meta: {
     eyebrow: "Execute & Grow",
     title: "Research",
-    description: "A premium intelligence lab for competitors, audiences, search, offers, and strategic opportunities."
+    description: "Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs."
   },
   template: `
     <section class="page is-active" data-page="research">
@@ -1220,8 +1220,8 @@ export const researchRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <h3>Research Overview</h3>
-              <p class="research-section-copy">Keep this workspace focused on what was discovered, what matters most, and what should be explored next.</p>
+              <h3>Research Evidence Overview</h3>
+              <p class="research-section-copy">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>
             </div>
             <span class="card-badge ${model.hasLiveIntelligence ? "success" : "warning"}">${escapeHtml(model.hasLiveIntelligence ? "Live intelligence" : "Context-driven")}</span>
           </div>
@@ -1283,8 +1283,8 @@ export const researchRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <h3>Competitor / Market Signals</h3>
-              <p class="research-section-copy">What the market is doing now, who is competing for attention, and where the best gaps may exist.</p>
+              <h3>Market Evidence / Competitor Signals</h3>
+              <p class="research-section-copy">Evidence about market movement, competitor pressure, positioning gaps, and signals worth validating next.</p>
             </div>
             <span class="card-badge ${competitorMarketCards.length ? "warning" : "neutral"}">${escapeHtml(competitorMarketCards.length ? `${competitorMarketCards.length} signals` : "Needs research")}</span>
           </div>
@@ -1355,8 +1355,8 @@ export const researchRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <h3>Audience / Keyword Opportunities</h3>
-              <p class="research-section-copy">Which audiences, intents, and search openings are worth exploring next.</p>
+              <h3>Audience Intent / Keyword Evidence</h3>
+              <p class="research-section-copy">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>
             </div>
             <span class="card-badge ${audienceKeywordCards.length ? "success" : "warning"}">${escapeHtml(audienceKeywordCards.length ? `${audienceKeywordCards.length} signals` : "Critical gap")}</span>
           </div>
@@ -1413,8 +1413,8 @@ export const researchRoute = {
         <section class="card">
           <div class="card-head">
             <div>
-              <h3>Findings / Saved Insights</h3>
-              <p class="research-section-copy">Capture what was discovered and keep the strongest reusable insights in one place.</p>
+              <h3>Evidence Notes / Saved Findings</h3>
+              <p class="research-section-copy">Capture research evidence, reusable findings, and proof points before routing work into execution surfaces.</p>
             </div>
             <span class="card-badge neutral">${escapeHtml(`${session.savedFindings.length} saved`)}</span>
           </div>
@@ -1559,12 +1559,12 @@ export const researchRoute = {
                 }
               </div>
               <div class="research-seo-column">
-                <h4 class="insights-subtitle">Send to execution</h4>
+                <h4 class="insights-subtitle">Destination handoffs</h4>
                 <div class="quick-actions">
-                  <button class="quick-action-btn" type="button" data-research-route="campaign">Send to Campaign Studio</button>
-                  <button class="quick-action-btn" type="button" data-research-route="content">Send to Content Studio</button>
-                  <button class="quick-action-btn" type="button" data-research-route="seo">Send to SEO Workflow</button>
-                  <button class="quick-action-btn" type="button" data-research-route="ads">Send to Ads Manager</button>
+                  <button class="quick-action-btn" type="button" data-research-route="campaign">Route to Campaign Studio</button>
+                  <button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>
+                  <button class="quick-action-btn" type="button" data-research-route="seo">Route to SEO Workflow</button>
+                  <button class="quick-action-btn" type="button" data-research-route="ads">Route to Ads Manager</button>
                 </div>
               </div>
             </div>
@@ -1575,13 +1575,13 @@ export const researchRoute = {
           <div class="card-head">
             <div>
               <h3>Research AI Assistant</h3>
-              <p class="research-section-copy">Use AI to deepen the current research, not to replace the saved findings and next-action surfaces above.</p>
+              <p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>
             </div>
             <span class="card-badge success">Active partner</span>
           </div>
           <div class="research-toolbar">
-            <button class="btn ghost" type="button" data-research-open>Open AI: Review in AI Workspace</button>
-            <button class="btn btn-secondary" type="button" data-research-route="ai">Send to AI Workspace</button>
+            <button class="btn ghost" type="button" data-research-open>Open AI Workspace Review</button>
+            <button class="btn btn-secondary" type="button" data-research-route="ai">Route to AI Workspace</button>
           </div>
           <div class="quick-actions">
             ${aiPrompts.map((item, index) => `
