@@ -1030,7 +1030,7 @@ export const insightsRoute = {
   meta: {
     eyebrow: "Execute & Grow",
     title: "Insights",
-    description: "Cross-platform marketing intelligence for performance, learning, and optimization."
+    description: "Cross-platform intelligence for signals, decisions, and next-best actions."
   },
   template: `
     <section class="page is-active" data-page="insights">
@@ -1131,7 +1131,7 @@ export const insightsRoute = {
       <div class="insights-wrapper insights-workspace">
         <section class="card">
           <div class="card-head">
-            <h3>Insights Overview</h3>
+            <h3>Intelligence Command Overview</h3>
             <div class="insights-assistant-toolbar">
               <button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>
               <span class="card-badge neutral">${escapeHtml(safeText(overview.project_name, projectName || "Project"))}</span>
@@ -1139,7 +1139,7 @@ export const insightsRoute = {
           </div>
           ${refreshState.error ? `<div class="empty-box">${escapeHtml(refreshState.error)}</div>` : ""}
           <p class="insights-section-copy">
-            Focus this page on the current signal, the biggest risks, and the next action to take across content, website, SEO, and paid performance.
+            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.
           </p>
           <div class="insights-overview-grid">
             ${executive.kpis.map((item) => `
@@ -1177,11 +1177,11 @@ export const insightsRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Performance Highlights</h3>
+            <h3>What Is Working</h3>
             <span class="card-badge neutral">${escapeHtml(topContent.length ? `${topContent.length} ranked items` : "Awaiting feed")}</span>
           </div>
           <p class="insights-section-copy">
-            What is working now, where it is working, and which patterns look strongest enough to reuse.
+            The strongest measured signals, reusable patterns, and channels worth scaling or repurposing.
           </p>
           <div class="insights-workspace-grid">
             <div>
@@ -1228,11 +1228,11 @@ export const insightsRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Risks / Weak Signals</h3>
+            <h3>What Needs Attention</h3>
             <span class="card-badge warning">${escapeHtml(weakContent.length ? `${weakContent.length} flagged` : "Monitoring")}</span>
           </div>
           <p class="insights-section-copy">
-            What is underperforming or incomplete enough to need attention before the next decision.
+            Weak signals, missing feeds, and performance gaps that should be reviewed before the next business decision.
           </p>
           <div class="insights-workspace-grid">
             <div>
@@ -1300,11 +1300,11 @@ export const insightsRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Recommendations / Next Actions</h3>
+            <h3>Decision Queue / Next Actions</h3>
             <span class="card-badge neutral">${escapeHtml(`${recommendationItems.length} priorities`)}</span>
           </div>
           <p class="insights-section-copy">
-            The next actions to take based on the current signal, without duplicating the AI prompt surface.
+            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.
           </p>
           <div class="insights-workspace-grid">
             <div>
@@ -1343,10 +1343,10 @@ export const insightsRoute = {
             </div>
           </div>
           <div class="insights-assistant-toolbar" style="margin-top: 16px;">
-            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Navigate: Open Campaign Studio</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Navigate: Open Content Studio Workspace</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Navigate: Open Ads Manager</button>
-            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Navigate: Open Publishing Workspace</button>
+            <button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+            <button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>
           </div>
         </section>
 
@@ -1390,14 +1390,14 @@ export const insightsRoute = {
 
         <section class="card">
           <div class="card-head">
-            <h3>Insights AI Assistant</h3>
+            <h3>AI Intelligence Briefs</h3>
             <span class="card-badge neutral">${escapeHtml(`${promptItems.length} prompt starters`)}</span>
           </div>
           <p class="insights-section-copy">
-            Use AI Workspace to dig deeper into the current signal. Opening AI Workspace only navigates. Sending a prompt prefills context and navigates.
+            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.
           </p>
           <div class="insights-assistant-toolbar">
-            <button class="btn ghost" type="button" data-insights-open>Open AI: Review in AI Workspace</button>
+            <button class="btn ghost" type="button" data-insights-open>Open AI Workspace Review</button>
           </div>
           <div class="insights-prompt-list">
             ${promptItems.map((item, index) => `
