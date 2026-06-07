@@ -45,29 +45,7 @@ The result is stored in:
 
 - `session.summary`
 
-The summary is then projected into:
-
-- executive governance command band
-- signal inventory
-- policy visibility
-- approval owners
-- decision queue
-- selected decision panel
-- evidence summary
-- intake panel
-- review ownership
-- AI preparation prompts
-
-## Refresh Contract
-
-Governance refresh works by:
-
-- setting `session.loaded = false`
-- calling `loadGovernance`
-- re-rendering the page
-- surfacing any load error through `showError`
-
-This is a read/refresh path and should not mutate policy by itself.
+The summary is then projected into the executive band, signal inventory, policy visibility, decision queue, evidence summary, intake panel, review ownership, and AI prompts.
 
 ## Decision Confirmation Contract
 
@@ -76,12 +54,7 @@ Governance decisions route through:
 - `confirmGovernanceDecision(decision)`
 - `getDecisionConfirmationMessage(decision)`
 
-Decision messages clarify:
-
-- decisions are backend Governance decisions
-- decisions may affect downstream readiness
-- decisions do not publish, send, or execute directly
-- overrides are high-risk and require source evidence, risk, owner, and reason
+Decision messages clarify that decisions are backend Governance decisions, may affect downstream readiness, and do not publish, send, or execute directly.
 
 ## Approval Decision Contract
 
@@ -118,20 +91,6 @@ Governance can create approval requests for selected non-approval governance ite
 The handler calls:
 
 - `createProjectApproval(projectName, payload)`
-
-The payload includes:
-
-- entity type
-- entity id
-- title
-- summary
-- reviewer
-- reviewer role
-- requested by
-- requested for
-- risk level
-- source page
-- route target
 
 This can add a new approval item to the Governance queue and must remain explicit.
 
@@ -193,18 +152,7 @@ Governance builds a unified queue from summary sections:
 - `publish_guardrails`
 - `escalation_queue`
 
-Each queue item is normalized into:
-
-- queue kind
-- selected key
-- title
-- summary
-- status
-- risk
-- owner
-- created time
-- flags
-- linked approval when available
+Each queue item is normalized into queue kind, selected key, title, summary, status, risk, owner, created time, flags, and linked approval when available.
 
 Queue filtering and selection are frontend projection only, while approval decisions and request creation are backend-authoritative.
 
@@ -216,31 +164,9 @@ Governance evidence summary collects and classifies evidence from:
 - project data
 - governance data
 
-Evidence categories include:
+Evidence categories include source of truth, legal, pricing, certificate, proof, product, brand, claim, media, content, library, and other.
 
-- source of truth
-- legal
-- pricing
-- certificate
-- proof
-- product
-- brand
-- claim
-- media
-- content
-- library
-- other
-
-The intake panel can surface incoming context from:
-
-- AI Team
-- Publishing
-- Content Studio
-- Media Studio
-- Workflows
-- Operations
-- Notifications
-- Insights
+The intake panel can surface incoming context from AI Team, Publishing, Content Studio, Media Studio, Workflows, Operations, Notifications, and Insights.
 
 Evidence/intake display is frontend projection, but it supports backend-governed decision quality.
 
@@ -251,23 +177,9 @@ Governance AI actions use:
 - `data-governance-open-ai`
 - `data-governance-ai-prompt`
 
-The AI path:
+The AI path opens AI Command, writes prompt text into the quick command input, and shows a message.
 
-- opens AI Command
-- writes prompt text into the quick command input
-- shows a message
-
-AI does not:
-
-- approve
-- reject
-- override
-- create approval requests
-- save policy
-- sync Settings rules
-- publish
-- send
-- execute backend mutations
+AI does not approve, reject, override, create approval requests, save policy, sync Settings rules, publish, send, or execute backend mutations.
 
 ## Backend / Durable Authority Boundary
 
@@ -345,16 +257,7 @@ Do not change without dedicated implementation approval:
 
 ### Patch 11C — Governance Copy Guard Only
 
-Only if needed, a future safe patch may clarify visible wording around:
-
-- backend authority
-- confirmation-required decisions
-- AI review-only boundary
-- approval request creation
-- policy save impact
-- Settings sync impact
-- publish guardrails not being direct publishing
-- overrides requiring evidence and reason
+Only if needed, a future safe patch may clarify visible wording around backend authority, confirmation-required decisions, AI review-only boundary, approval request creation, policy save impact, Settings sync impact, publish guardrails not being direct publishing, and overrides requiring evidence and reason.
 
 Allowed:
 
