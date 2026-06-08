@@ -281,6 +281,10 @@ function formatCount(value) {
   return String(Math.max(0, Math.round(parsed)));
 }
 
+function normalizeLibrarySelectionIds(value) {
+  return [...new Set(asArray(value).map((item) => asString(item).trim()).filter(Boolean))];
+}
+
 function formatDate(value) {
   if (!value) return "-";
   const date = new Date(value);
@@ -294,6 +298,14 @@ function isImageExtension(extension = "") {
 
 function isVideoExtension(extension = "") {
   return ["mp4", "mov", "webm", "m4v"].includes(extension);
+}
+
+function isOfficePreviewExtension(extension = "") {
+  return ["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(asString(extension).toLowerCase());
+}
+
+function isTextPreviewExtension(extension = "") {
+  return ["txt", "md", "csv", "json"].includes(asString(extension).toLowerCase());
 }
 
 function buildPreviewUrl(projectName, asset) {
@@ -559,6 +571,7 @@ function ensureLibrarySession(projectName) {
     librarySessionStore.set(key, normalizeLibrarySession({
       selectedCategoryKey: "all",
       selectedAssetId: "",
+      selectedAssetIds: [],
       searchQuery: "",
       selectedType: "all",
       selectedStatus: "active",
@@ -1027,6 +1040,8 @@ function getFilteredAssets(allAssets, session, bucketMap) {
         ? statusValue !== "archived"
         : statusValue === effectiveSelectedStatus;
     const matchesSource = selectedSource === "all"
+      || (selectedSource === "library" && asset.kind !== "managed_media")
+      || (selectedSource === "source-of-truth" && Boolean(asset.source_of_truth))
       || (selectedSource === "media-studio" && asset.kind === "managed_media")
       || (selectedSource === "generated-media" && asset.kind === "managed_media" && ["generated_media", "prompt_asset", "video_brief", "voice_script", "campaign_pack"].includes(asset.asset_type))
       || (selectedSource === "publishing-ready" && ["publishing_ready", "sent_to_publishing"].includes(normalizeReadinessStatus(asset.status)));
@@ -1086,16 +1101,19 @@ function getPreviewExtensionForAsset(asset = {}) {
 }
 
 function isDocumentExtension(extension = "") {
-  return ["pdf", "doc", "docx", "txt", "md", "csv", "xls", "xlsx"].includes(asString(extension).toLowerCase());
+  const value = asString(extension).toLowerCase();
+  return value === "pdf" || isOfficePreviewExtension(value) || isTextPreviewExtension(value);
 }
 
 function toDocumentPreviewLabel(extension = "") {
   const value = asString(extension).toLowerCase();
   if (value === "pdf") return "PDF Document";
   if (value === "csv") return "CSV Spreadsheet";
+  if (value === "json") return "JSON Document";
   if (value === "xls" || value === "xlsx") return "Excel Spreadsheet";
   if (value === "doc" || value === "docx") return "Word Document";
-  if (value === "txt" || value === "md") return "Text Document";
+  if (value === "ppt" || value === "pptx") return "PowerPoint Presentation";
+  if (value === "txt" || value === "md") return value === "md" ? "Markdown Document" : "Text Document";
   return "Document";
 }
 
@@ -1109,6 +1127,55 @@ function canAttemptDocumentPreview(asset = {}) {
     asset.public_url ||
     asset.url
   );
+}
+
+function getPreviewFileName(asset = {}) {
+  return asString(asset.name || asset.filename || asset.file_name || basename(asset.file_path || asset.preview_url || "") || "Selected file");
+}
+
+function getPreviewSourceLabel(asset = {}) {
+  if (asset.source_of_truth) return "Source of truth";
+  return asString(asset.source_label || asset.source || asset.origin || "Library asset");
+}
+
+function renderPreviewActionButtons(asset = {}, escapeHtml, { openLabel = "Open asset", includeCopy = true } = {}) {
+  const assetId = escapeHtml(asset.id || "");
+  const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.preview_url || "").trim();
+  const copyButton = includeCopy
+    ? `<button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(filePath)}"${filePath ? "" : " disabled aria-disabled=\"true\""}>Copy path</button>`
+    : "";
+
+  return `
+    <div class="library-document-preview-actions">
+      <button class="btn btn-primary" type="button" data-library-open="${assetId}"${assetId ? "" : " disabled aria-disabled=\"true\""}>${escapeHtml(openLabel)}</button>
+      ${copyButton}
+      <button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${assetId ? "" : " disabled aria-disabled=\"true\""}>Prepare AI review</button>
+    </div>
+  `;
+}
+
+function renderUnsupportedPreviewCard(asset = {}, escapeHtml, options = {}) {
+  const extension = asString(options.extension || getPreviewExtensionForAsset(asset) || "file").toLowerCase();
+  const label = options.label || toDocumentPreviewLabel(extension);
+  const title = options.title || "Preview not available inline";
+  const fileName = getPreviewFileName(asset);
+  const sourceLabel = getPreviewSourceLabel(asset);
+  const status = asString(asset.status || asset.readiness_status || "n/a").replace(/[_-]+/g, " ");
+
+  return `
+    <div class="library-preview-fallback library-document-preview library-preview-capability-card">
+      <div class="library-preview-extension">${escapeHtml((extension || "file").toUpperCase())}</div>
+      <strong>${escapeHtml(title)}</strong>
+      <div class="library-preview-copy">${escapeHtml(options.message || "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.")}</div>
+      <dl class="library-preview-file-facts">
+        <div><dt>File</dt><dd>${escapeHtml(fileName)}</dd></div>
+        <div><dt>Type</dt><dd>${escapeHtml(label)}</dd></div>
+        <div><dt>Source</dt><dd>${escapeHtml(sourceLabel)}</dd></div>
+        <div><dt>Status</dt><dd>${escapeHtml(status || "n/a")}</dd></div>
+      </dl>
+      ${renderPreviewActionButtons(asset, escapeHtml)}
+    </div>
+  `;
 }
 
 function renderPreview(asset, escapeHtml) {
@@ -1197,9 +1264,6 @@ function renderPreview(asset, escapeHtml) {
     const previewUrl = getAssetPreviewUrl(asset);
     const label = toDocumentPreviewLabel(previewExtension);
     const isPdf = previewExtension === "pdf";
-    const openButton = previewUrl
-      ? `<button class="btn btn-primary" type="button" data-library-open="${escapeHtml(asset.id)}">Open document</button>`
-      : `<button class="btn btn-primary" type="button" disabled>Open document</button>`;
 
     if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {
       return `
@@ -1219,15 +1283,48 @@ function renderPreview(asset, escapeHtml) {
       `;
     }
 
+    if (isTextPreviewExtension(previewExtension)) {
+      const inlineText = asString(asset.text_preview || "").trim();
+      if (inlineText) {
+        return `
+          <div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">
+            <div class="library-preview-copy">Preview shows what the browser can safely render.</div>
+            <pre>${escapeHtml(inlineText)}</pre>
+          </div>
+        `;
+      }
+
+      if (previewUrl && requiresProtectedMediaFetch(previewUrl)) {
+        return `
+          <div class="library-preview-fallback library-document-preview library-preview-capability-card" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">
+            <div class="library-preview-extension">${escapeHtml(previewExtension.toUpperCase())}</div>
+            <strong>${escapeHtml(label)}</strong>
+            <div class="library-preview-copy">Loading protected text preview...</div>
+          </div>
+        `;
+      }
+
+      return renderUnsupportedPreviewCard(asset, escapeHtml, {
+        extension: previewExtension,
+        label,
+        message: "Preview shows what the browser can safely render. Inline text preview is not available for this file source, but the asset can still be opened or sent to AI review context."
+      });
+    }
+
+    if (isOfficePreviewExtension(previewExtension)) {
+      return renderUnsupportedPreviewCard(asset, escapeHtml, {
+        extension: previewExtension,
+        label,
+        message: "Office files cannot be previewed inline in this browser panel without a document conversion service. Preview shows what the browser can safely render; this asset can still be opened or sent to AI review context."
+      });
+    }
+
     return `
       <div class="library-preview-fallback library-document-preview">
         <div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>
         <strong>${escapeHtml(label)}</strong>
-        <div class="library-preview-copy">Inline preview is not available yet for this document type. You can open the file or send it to AI extraction.</div>
-        <div class="library-document-preview-actions">
-          ${openButton}
-          <button class="btn btn-secondary" type="button" id="libraryAiExtractSelectedDocBtn">Extract with AI</button>
-        </div>
+        <div class="library-preview-copy">Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.</div>
+        ${renderPreviewActionButtons(asset, escapeHtml, { openLabel: "Open document" })}
       </div>
     `;
   }
@@ -1243,10 +1340,11 @@ function renderPreview(asset, escapeHtml) {
   }
 
   return `
-    <div class="library-preview-fallback">
-      <div class="library-preview-extension">${escapeHtml((asset.extension || "file").toUpperCase())}</div>
-      <div class="library-preview-copy">Preview not available for this file type.</div>
-    </div>
+    ${renderUnsupportedPreviewCard(asset, escapeHtml, {
+      extension: asset.extension || previewExtension || "file",
+      label: "Unknown file type",
+      message: "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context."
+    })}
   `;
 }
 
@@ -1264,15 +1362,44 @@ async function hydrateProtectedAssetPreview({
   const expectedId = asString(asset.id || asset.asset_id || "");
 
   try {
+    const currentId = previewNode.getAttribute("data-preview-asset-id") || "";
+    if (currentId && expectedId && currentId !== expectedId) {
+      return;
+    }
+
+    const previewExtension = getPreviewExtensionForAsset(asset);
+    if (isTextPreviewExtension(previewExtension)) {
+      const previewUrl = getAssetPreviewUrl(asset);
+      const { blob } = await fetchProtectedMediaBlob(previewUrl, 45000);
+      if (!previewNode.isConnected) {
+        return;
+      }
+      if (blob.size > 1024 * 1024) {
+        previewNode.outerHTML = renderUnsupportedPreviewCard(asset, escapeHtml, {
+          extension: previewExtension,
+          label: toDocumentPreviewLabel(previewExtension),
+          message: "Preview shows what the browser can safely render. This text-like file is too large for a safe inline preview, but it can still be opened or sent to AI review context."
+        });
+        return;
+      }
+
+      const text = await blob.text();
+      const previewText = text.length > 12000
+        ? `${text.slice(0, 12000)}\n\n[Preview truncated for safe browser rendering.]`
+        : text;
+      previewNode.outerHTML = `
+        <div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">
+          <div class="library-preview-copy">Preview shows what the browser can safely render.</div>
+          <pre>${escapeHtml(previewText || "This text-like file is empty.")}</pre>
+        </div>
+      `;
+      return;
+    }
+
     const resolved = await getProtectedAssetObjectUrl(projectName, asset, {
       timeoutMs: 45000
     });
     if (!previewNode.isConnected) {
-      return;
-    }
-
-    const currentId = previewNode.getAttribute("data-preview-asset-id") || "";
-    if (currentId && expectedId && currentId !== expectedId) {
       return;
     }
 
@@ -1609,13 +1736,21 @@ function bindLibraryWorkspace({
   const pageStart = (session.page - 1) * LIBRARY_PAGE_SIZE;
   const paginatedAssets = filteredAssets.slice(pageStart, pageStart + LIBRARY_PAGE_SIZE);
   const pageEnd = Math.min(pageStart + paginatedAssets.length, filteredAssets.length);
-  const selectedAssetExists = filteredAssets.some((asset) => asset.id === session.selectedAssetId);
-  if (!selectedAssetExists) {
-    session.selectedAssetId = filteredAssets[0]?.id || allAssets[0]?.id || "";
+  const visibleAssetIds = new Set(filteredAssets.map((asset) => asset.id));
+  const previousSelectedAssetId = asString(session.selectedAssetId).trim();
+  const selectedOutOfFilterAsset = previousSelectedAssetId && !visibleAssetIds.has(previousSelectedAssetId)
+    ? allAssets.find((asset) => asset.id === previousSelectedAssetId) || null
+    : null;
+  session.selectedAssetIds = normalizeLibrarySelectionIds(session.selectedAssetIds)
+    .filter((assetId) => visibleAssetIds.has(assetId));
+  const selectedAssetStillVisible = previousSelectedAssetId && visibleAssetIds.has(previousSelectedAssetId);
+  if (previousSelectedAssetId && !selectedAssetStillVisible) {
+    session.selectedAssetId = "";
+  } else if (!previousSelectedAssetId && filteredAssets.length) {
+    session.selectedAssetId = filteredAssets[0]?.id || "";
   }
 
   const selectedAsset = filteredAssets.find((asset) => asset.id === session.selectedAssetId)
-    || allAssets.find((asset) => asset.id === session.selectedAssetId)
     || null;
   const overview = buildAssetOverview({
     assets: allAssets,
@@ -1647,13 +1782,20 @@ function bindLibraryWorkspace({
   ];
 
   const sourceOptions = [
-    { value: "all", label: "All sources" },
+    { value: "all", label: "All origins" },
+    { value: "library", label: "Library uploads" },
+    { value: "source-of-truth", label: "Source of truth" },
     { value: "media-studio", label: "Media Studio" },
     { value: "generated-media", label: "Generated Media" },
     { value: "publishing-ready", label: "Publishing Ready" }
   ];
 
   const folderCounts = computeFolderCounts(allAssets, session);
+  const selectedPageCount = paginatedAssets.filter((asset) => session.selectedAssetIds.includes(asset.id)).length;
+  const allPageSelected = paginatedAssets.length > 0 && selectedPageCount === paginatedAssets.length;
+  const selectionSummaryText = session.selectedAssetIds.length
+    ? `${formatCount(session.selectedAssetIds.length)} selected on current filters`
+    : "No batch selection";
 
   // --- Library Explainer/Onboarding Block ---
   const explainerBox = $("libraryExplainerBox");
@@ -1854,6 +1996,51 @@ function bindLibraryWorkspace({
   }
 
   const gridBody = $("libraryAssetGridBody");
+  const selectedSummary = $("librarySelectedAssetSummary");
+  if (selectedSummary) {
+    selectedSummary.innerHTML = selectedAsset
+      ? `
+        <div>
+          <span class="setup-label">Selected asset</span>
+          <strong>${escapeHtml(selectedAsset.name || selectedAsset.filename || "Selected asset")}</strong>
+          <small>${escapeHtml(`${toStatusLabel(selectedAsset.status)} · ${getCleanLibraryTypeLabel(selectedAsset.asset_type, selectedAsset.type_label)} · ${selectedAsset.source_of_truth ? "Source of truth" : "Not source of truth"}`)}</small>
+        </div>
+        <button class="btn btn-secondary btn-sm" type="button" data-library-command="send-to-ai">Prepare AI review</button>
+      `
+      : selectedOutOfFilterAsset
+        ? `
+        <div>
+          <span class="setup-label">Selection hidden by filters</span>
+          <strong>${escapeHtml(selectedOutOfFilterAsset.name || selectedOutOfFilterAsset.filename || "Previous selection")}</strong>
+          <small>Change or clear filters to select this asset again. Current actions stay disabled until a visible asset is selected.</small>
+        </div>
+        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>
+      `
+      : `
+        <div>
+          <span class="setup-label">Selected asset</span>
+          <strong>No asset selected</strong>
+          <small>Select one asset to preview it and review available actions.</small>
+        </div>
+        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>
+      `;
+  }
+
+  const selectionBar = $("librarySelectionBar");
+  if (selectionBar) {
+    selectionBar.innerHTML = `
+      <div class="library-selection-copy">
+        <strong>${escapeHtml(selectionSummaryText)}</strong>
+        <span>Local selection only. Batch metadata, archive, delete, and source changes are not enabled here.</span>
+      </div>
+      <div class="library-selection-actions">
+        <button class="btn btn-secondary btn-sm" type="button" data-library-select-visible="${allPageSelected ? "clear-page" : "select-page"}"${paginatedAssets.length ? "" : " disabled"}>${allPageSelected ? "Unselect current page" : "Select current page"}</button>
+        <button class="btn btn-secondary btn-sm" type="button" data-library-clear-selection${session.selectedAssetIds.length ? "" : " disabled"}>Clear selection</button>
+        <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true" title="Batch Library mutations need an explicit backend contract.">Batch actions unavailable</button>
+      </div>
+    `;
+  }
+
   if (gridBody) {
     gridBody.innerHTML = paginatedAssets.length
       ? paginatedAssets.map((asset) => {
@@ -1869,14 +2056,21 @@ function bindLibraryWorkspace({
           : `<div class="library-grid-icon">${escapeHtml((asset.extension || "file").toUpperCase())}</div>`;
         // Add selected state and aria-selected
         const isSelected = session.selectedAssetId === asset.id;
+        const isMultiSelected = session.selectedAssetIds.includes(asset.id);
+        const typeLabel = getCleanLibraryTypeLabel(asset.asset_type, asset.type_label);
         return `
           <article class="library-grid-card${isSelected ? " is-active" : ""}" data-library-grid-select="${escapeHtml(asset.id)}" tabindex="0" aria-label="Select ${escapeHtml(asset.name)}" aria-selected="${isSelected ? "true" : "false"}">
+            <label class="library-grid-check" title="Add to local selection">
+              <input type="checkbox" data-library-multi-select="${escapeHtml(asset.id)}"${isMultiSelected ? " checked" : ""}>
+              <span>Select</span>
+            </label>
             <div class="library-grid-preview">${previewNode}</div>
             <div class="library-grid-title" title="${escapeHtml(asset.name)}">${escapeHtml(titleName)}</div>
             <div class="library-grid-meta" title="${escapeHtml(asset.filename || "-")}">${escapeHtml(fileName)}</div>
+            <div class="library-grid-context">${escapeHtml(asset.source_of_truth ? "Source of truth" : asset.source_label || "Library asset")}</div>
             <div class="library-grid-foot">
               <span class="card-badge ${tone}">${escapeHtml(statusLabel)}</span>
-              <span class="library-grid-type">${escapeHtml(asset.asset_type)}</span>
+              <span class="library-grid-type">${escapeHtml(typeLabel)}</span>
             </div>
           </article>
         `;
@@ -1928,6 +2122,11 @@ function bindLibraryWorkspace({
 
   const previewVisual = $("libraryPreviewVisual");
   if (previewVisual) {
+    previewVisual.classList.add("library-preview-visual-ready");
+    previewVisual.style.display = "grid";
+    previewVisual.style.minHeight = "220px";
+    previewVisual.style.width = "100%";
+    previewVisual.style.overflow = "hidden";
     previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);
 
     const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");
@@ -2075,13 +2274,18 @@ function bindLibraryWorkspace({
       }
 
       if (mappedFolder) {
-        const isReviewAction = action === "review";
+        const opensFinder = action === "review" || action === "classify";
         session.folderKey = mappedFolder.key;
-        session.selectedType = isReviewAction ? "all" : uploadType;
-        session.selectedStatus = isReviewAction ? "active" : session.selectedStatus;
-        session.selectedSource = isReviewAction ? "all" : session.selectedSource;
-        session.searchQuery = isReviewAction ? "" : session.searchQuery;
+        session.selectedType = opensFinder ? "all" : uploadType;
+        session.selectedStatus = opensFinder ? "active" : session.selectedStatus;
+        session.selectedSource = opensFinder ? "all" : session.selectedSource;
+        session.searchQuery = opensFinder ? "" : session.searchQuery;
+        session.sortBy = opensFinder ? "updated_desc" : session.sortBy;
         session.page = 1;
+        if (opensFinder) {
+          session.selectedAssetId = "";
+          session.selectedAssetIds = [];
+        }
 
         bindLibraryWorkspace({
           $,
@@ -2101,11 +2305,12 @@ function bindLibraryWorkspace({
 
         const uploadLabel = getLibraryUploadTypeLabel(uploadType);
 
-        if (isReviewAction) {
+        if (opensFinder) {
           showMessage?.(`Showing ${mappedFolder.label} assets. Select a file, then use the action panel.`);
           setTimeout(() => {
             const assetWorkspace = document.getElementById("libraryAssetWorkspace") || document.querySelector('[data-library-section="asset-workspace"]');
             scrollLibraryTargetIntoView(assetWorkspace);
+            document.getElementById("librarySearchInput")?.focus?.({ preventScroll: true });
           }, 120);
           return;
         }
@@ -2286,6 +2491,60 @@ function bindLibraryWorkspace({
       rerender();
     };
   });
+
+  const multiSelectInputs = Array.from(document.querySelectorAll("[data-library-multi-select]"));
+  multiSelectInputs.forEach((input) => {
+    input.onchange = (event) => {
+      event.stopPropagation();
+      const assetId = input.getAttribute("data-library-multi-select") || "";
+      if (!assetId) return;
+
+      const nextSelection = new Set(normalizeLibrarySelectionIds(session.selectedAssetIds));
+      if (input.checked) {
+        nextSelection.add(assetId);
+      } else {
+        nextSelection.delete(assetId);
+      }
+      session.selectedAssetIds = [...nextSelection].filter((id) => visibleAssetIds.has(id));
+      rerender();
+    };
+
+    input.onclick = (event) => {
+      event.stopPropagation();
+    };
+  });
+
+  const selectVisibleButton = document.querySelector("[data-library-select-visible]");
+  if (selectVisibleButton) {
+    selectVisibleButton.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const action = selectVisibleButton.getAttribute("data-library-select-visible") || "select-page";
+      const nextSelection = new Set(normalizeLibrarySelectionIds(session.selectedAssetIds));
+      paginatedAssets.forEach((asset) => {
+        if (action === "clear-page") {
+          nextSelection.delete(asset.id);
+        } else {
+          nextSelection.add(asset.id);
+        }
+      });
+      session.selectedAssetIds = [...nextSelection].filter((id) => visibleAssetIds.has(id));
+      showMessage?.(action === "clear-page" ? "Current page unselected." : "Current page selected locally.");
+      rerender();
+    };
+  }
+
+  const clearSelectionButton = document.querySelector("[data-library-clear-selection]");
+  if (clearSelectionButton) {
+    clearSelectionButton.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      session.selectedAssetIds = [];
+      showMessage?.("Local selection cleared.");
+      rerender();
+    };
+  }
 
   const folderButtons = Array.from(document.querySelectorAll("[data-library-folder-select]"));
   folderButtons.forEach((button) => {
@@ -2993,8 +3252,9 @@ viewToggleButtons.forEach((button) => {
     };
   }
 
-  const sendToAiBtn = document.querySelector("[data-library-command=\"send-to-ai\"]");
-  if (sendToAiBtn && !sendToAiBtn.disabled) {
+  const sendToAiButtons = Array.from(document.querySelectorAll("[data-library-command=\"send-to-ai\"]"));
+  sendToAiButtons.forEach((sendToAiBtn) => {
+    if (sendToAiBtn.disabled) return;
     sendToAiBtn.onclick = () => {
       if (!selectedAsset) {
         showMessage?.("Select an asset first to prepare AI context.");
@@ -3006,7 +3266,7 @@ viewToggleButtons.forEach((button) => {
       showMessage?.(`AI context prepared for ${selectedAsset.name}. Open AI Command to review recommendations.`);
       navigateTo("ai-command");
     };
-  }
+  });
 }
 
 export const libraryRoute = {
@@ -3211,6 +3471,8 @@ export const libraryRoute = {
                 <button id="libraryToolbarUploadBtn" class="btn btn-secondary btn-sm" type="button">Quick Upload</button>
               </div>
 
+              <div id="librarySelectedAssetSummary" class="library-selected-summary" aria-live="polite"></div>
+
               <div class="library-filter-bar">
                 <div class="library-filter-field">
                   <label class="setup-label" for="libraryFilterTypeSelect">Type</label>
@@ -3251,18 +3513,22 @@ export const libraryRoute = {
                 </div>
               </div>
 
+              <div id="librarySelectionBar" class="library-selection-bar" aria-live="polite"></div>
               <div id="libraryAssetGridBody" class="library-grid-body"></div>
               <div id="libraryGridPagination" class="library-grid-pagination"></div>
             </div>
 
             <aside class="library-workspace-side">
               <div class="library-side-stack">
-                <section class="card library-preview-card">
-                  <div class="card-head">
-                    <h3>Asset Preview</h3>
-                    <p class="card-subtitle">Preview the selected file or send it to AI as trusted context.</p>
+                <section class="card library-preview-card library-preview-card-v2">
+                  <div class="library-preview-card-head">
+                    <div>
+                      <p class="card-label">Selected asset preview</p>
+                      <h3>Asset Preview</h3>
+                    </div>
+                    <span class="card-badge neutral">Browser-safe</span>
                   </div>
-                  <div id="libraryPreviewVisual"></div>
+                  <div id="libraryPreviewVisual" class="library-preview-visual-ready" aria-live="polite"></div>
                   <div id="libraryPreviewMeta" class="library-preview-meta"></div>
                 </section>
                 <div id="libraryActionPanelMount" class="library-panel-mount"></div>

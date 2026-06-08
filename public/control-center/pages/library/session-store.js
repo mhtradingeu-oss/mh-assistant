@@ -1,5 +1,6 @@
 const DEFAULT_LIBRARY_SESSION = Object.freeze({
   selectedAssetId: "",
+  selectedAssetIds: [],
   searchQuery: "",
   typeFilter: "all",
   statusFilter: "all",
