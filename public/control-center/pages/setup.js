@@ -387,20 +387,20 @@ function getLaunchReadinessSummary({ missingFields, missingAssets, missingConnec
   if (totalGaps === 0) {
     return {
       tone: "success",
-      label: "Launch readiness: strong"
+      label: "Foundation readiness: strong"
     };
   }
 
   if (fieldGapCount > 0) {
     return {
       tone: "warning",
-      label: `Launch readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
+      label: `Foundation readiness: ${fieldGapCount} required field${fieldGapCount === 1 ? "" : "s"} missing`
     };
   }
 
   return {
     tone: "warning",
-    label: `Launch readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
+    label: `Foundation readiness: ${totalGaps} dependency gap${totalGaps === 1 ? "" : "s"}`
   };
 }
 
@@ -413,18 +413,18 @@ function getSetupPrimaryFocus({ missingFields = [], missingAssets = [], missingC
 
 function getNextSetupActionText(missingFields, missingAssets, missingConnectors) {
   if (missingFields.length) {
-    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}.`;
+    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? "" : "s"}, then use Save Setup for backend persistence.`;
   }
 
   if (missingAssets.length) {
-    return `Upload ${missingAssets.length} missing required asset${missingAssets.length === 1 ? "" : "s"} in Library.`;
+    return `Open Library to manage ${missingAssets.length} missing asset${missingAssets.length === 1 ? "" : "s"} after saving foundation data.`;
   }
 
   if (missingConnectors.length) {
-    return `Connect ${missingConnectors.length} missing integration${missingConnectors.length === 1 ? "" : "s"}.`;
+    return `Open Integrations to manage ${missingConnectors.length} connector gap${missingConnectors.length === 1 ? "" : "s"} after saving foundation data.`;
   }
 
-  return "Save setup, then continue to Library or Integrations.";
+  return "Save Setup to persist the foundation, then continue to the owning workspace.";
 }
 
 function compactListText(list, fallback) {
@@ -835,17 +835,17 @@ function updateWizardDashboard({
 
   if (continueLibraryBtn) {
     continueLibraryBtn.disabled = false;
-    continueLibraryBtn.textContent = hasMissing ? `Continue to Library (${warningText})` : "Continue to Library";
+    continueLibraryBtn.textContent = hasMissing ? `Open Library for assets (${warningText})` : "Open Library for assets";
   }
 
   if (continueIntegrationsBtn) {
     continueIntegrationsBtn.disabled = false;
-    continueIntegrationsBtn.textContent = hasMissing ? `Continue to Integrations (${warningText})` : "Continue to Integrations";
+    continueIntegrationsBtn.textContent = hasMissing ? `Open Integrations for connectors (${warningText})` : "Open Integrations for connectors";
   }
 
   if (continueCampaignBtn) {
     continueCampaignBtn.disabled = false;
-    continueCampaignBtn.textContent = hasMissing ? `Continue to Campaign Studio (${warningText})` : "Continue to Campaign Studio";
+    continueCampaignBtn.textContent = hasMissing ? `Open Campaign Studio for planning (${warningText})` : "Open Campaign Studio for planning";
   }
 
   const stepCounter = document.getElementById("setupStepCounter");
@@ -1043,7 +1043,7 @@ function bindSetupActions({
   const saveDraftBtn = $("setupSaveDraftBtn");
   if (saveDraftBtn) {
     saveDraftBtn.onclick = () => {
-      saveLocal(`Draft saved locally for ${draftKeyName}.`);
+      saveLocal(`Local setup draft saved for ${draftKeyName}. Use Save Setup to persist backend project foundation data.`);
     };
   }
 
@@ -1061,8 +1061,8 @@ function bindSetupActions({
       const previousLabel = saveBackendBtn.textContent;
 
       saveBackendBtn.disabled = true;
-      saveBackendBtn.textContent = "Saving...";
-      showMessage?.(`Saving setup for ${draftKeyName}...`);
+      saveBackendBtn.textContent = "Saving Setup...";
+      showMessage?.(`Saving backend setup foundation for ${draftKeyName}...`);
 
       try {
         await saveProjectSetup?.(projectName, payload);
@@ -1074,7 +1074,7 @@ function bindSetupActions({
             ? " Project name remains local-only until project rename support exists."
             : "";
 
-        showMessage?.(`Setup saved for ${draftKeyName}.${renameWarning}`);
+        showMessage?.(`Backend setup foundation saved for ${draftKeyName}.${renameWarning}`);
         saveBackendBtn.textContent = "Saved";
       } catch (error) {
         showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);
@@ -1109,7 +1109,7 @@ function bindSetupActions({
         field.value = buildPositioningSuggestion(values);
       }
       refreshSummary();
-      showMessage?.("AI draft applied to Offer positioning.");
+      showMessage?.("Local AI suggestion applied to Offer positioning. Use Save Setup to persist it.");
     };
   }
 
@@ -1122,7 +1122,7 @@ function bindSetupActions({
         field.value = buildAudienceSuggestion(values);
       }
       refreshSummary();
-      showMessage?.("AI draft applied to Primary audience.");
+      showMessage?.("Local AI suggestion applied to Primary audience. Use Save Setup to persist it.");
     };
   }
 
@@ -1135,7 +1135,7 @@ function bindSetupActions({
         field.value = buildToneSuggestion(values);
       }
       refreshSummary();
-      showMessage?.("AI draft applied to Brand voice.");
+      showMessage?.("Local AI suggestion applied to Brand voice. Use Save Setup to persist it.");
     };
   }
 
@@ -1177,7 +1177,7 @@ function bindSetupActions({
         input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(", ") : "none"}. Include positioning, audience, and tone guidance.`;
       }
       navigateTo("ai-command");
-      showMessage?.("Setup context sent to AI Command.");
+      showMessage?.("Setup guidance prompt prepared in AI Command.");
     };
   }
 
@@ -1309,7 +1309,7 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
         <div>
           <div class="setup-kicker">Business Template</div>
           <h3 class="setup-v2-title">Project Operating Model</h3>
-          <p class="setup-v2-subtitle">Select the template that sets setup defaults, checklist scope, and launch priorities.</p>
+          <p class="setup-v2-subtitle">Choose a model to load recommended defaults, checklist scope, and readiness priorities. Selection alone does not publish, connect, or execute anything.</p>
         </div>
         <span class="setup-template-current">${escapeHtml(currentLabel)}</span>
       </div>
@@ -1339,9 +1339,9 @@ function renderBusinessTemplatePanel({ values, overviewData, escapeHtml }) {
 
       <div class="setup-template-actions">
         <button id="setupApplyTemplateBtn" class="btn btn-secondary" type="button">
-          Apply Template
+          Apply Template Defaults
         </button>
-        <span id="setupTemplateStatus" class="setup-template-status"></span>
+        <span id="setupTemplateStatus" class="setup-template-status">Apply loads template guidance. Use Save Setup for foundation persistence.</span>
       </div>
     </section>
   `;
@@ -1353,8 +1353,8 @@ export const setupRoute = {
   disableStandardLayout: true,
   meta: {
     eyebrow: "Start",
-    title: "Smart Guided Setup",
-    description: "Build a complete, validated project source of truth before moving to assets, integrations, and launch execution."
+    title: "Project Foundation",
+    description: "Create the trusted project foundation before assets, connectors, campaign planning, and publishing-owned execution."
   },
   template: `
     <section class="page is-active" data-page="setup">
@@ -1427,9 +1427,9 @@ export const setupRoute = {
         <section class="card setup-smart-overview mhos-os-header">
           <div class="setup-wizard-header-top mhos-os-header-main">
             <div>
-              <p class="mhos-os-kicker">Foundation Readiness</p>
-              <h3 class="setup-v2-title mhos-os-title">Smart Guided Setup</h3>
-              <p class="setup-v2-subtitle mhos-os-subtitle">Build the trusted project foundation before assets, connectors, campaigns, and publishing execution.</p>
+              <p class="mhos-os-kicker">Project Foundation</p>
+              <h3 class="setup-v2-title mhos-os-title">Guided Setup</h3>
+              <p class="setup-v2-subtitle mhos-os-subtitle">Complete the business identity, market, audience, goals, competitors, and channels that every workspace will reference.</p>
               <p class="setup-header-project">Project: ${escapeHtml(asString(values.project_name) || projectName || "No project selected")}</p>
               <div class="setup-operating-chips mhos-os-chip-row">
                 <span class="card-badge neutral" id="setupTopCompletionBadge">Fields configured: ${escapeHtml(String(completionPercent))}%</span>
@@ -1438,7 +1438,17 @@ export const setupRoute = {
               </div>
             </div>
             <div class="setup-v2-toolbar mhos-os-action-row">
-              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup</button>
+              <button id="setupSaveBackendBtn" class="btn btn-primary" type="button">Save Setup to Backend</button>
+            </div>
+          </div>
+
+          <div class="setup-guidance-strip mhos-os-decision-card">
+            <strong>What this page does</strong>
+            <p>Setup prepares and saves project foundation data only. Local drafts stay in this browser. Save Setup writes the backend foundation through the governed setup save path.</p>
+            <div class="setup-config-intel-metrics mhos-os-chip-row">
+              <span>Does not publish, approve, send, or execute</span>
+              <span>Does not upload assets</span>
+              <span>Does not connect providers</span>
             </div>
           </div>
 
@@ -1460,7 +1470,7 @@ export const setupRoute = {
             <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Readiness signals</span>
               <strong id="setupDependencyGapCount">${escapeHtml(String(dependencyGapCount))}</strong>
-              <span class="setup-helper">Assets, connectors, and diagnostics</span>
+              <span class="setup-helper">Review here; manage assets in Library and connectors in Integrations</span>
             </article>
             <article class="setup-top-summary-item mhos-os-brief-card mhos-motion-soft">
               <span class="data-label">Validation</span>
@@ -1474,7 +1484,7 @@ export const setupRoute = {
           </div>
 
           <div class="setup-guidance-strip mhos-os-decision-card">
-            <strong>Next safest setup action</strong>
+            <strong>Next foundation step</strong>
             <p id="setupNextBestAction">${escapeHtml(nextBestAction)}</p>
             <div class="setup-config-intel-metrics mhos-os-chip-row">
               <span>Required missing: <strong id="setupReadinessMissingFields">${escapeHtml(String(missingFields.length))}</strong></span>
@@ -1486,8 +1496,8 @@ export const setupRoute = {
 
         <div class="setup-wizard-layout">
           <aside class="setup-wizard-sidebar card setup-smart-steps-panel">
-            <h4>Guided Setup Steps</h4>
-            <p class="setup-helper">Select a step to load that section in the main form.</p>
+            <h4>Foundation Steps</h4>
+            <p class="setup-helper">Work through each section. Required fields control foundation readiness; optional fields improve AI guidance.</p>
             <div class="setup-smart-recommended-inline">
               <span class="setup-smart-recommended-label">Recommended</span>
               <button id="setupRecommendedStepBtn" class="btn btn-ghost" type="button" data-setup-open-step="${escapeHtml(getRecommendedStep(values).id)}">
@@ -1513,7 +1523,7 @@ export const setupRoute = {
           <section class="setup-wizard-form card setup-smart-form-panel">
             <div class="setup-wizard-form-head">
               <div>
-                <span class="data-label">Main Setup Form</span>
+                <span class="data-label">Foundation Form</span>
                 <strong id="setupStepCounter" class="setup-wizard-step-counter">1/${STEP_DEFINITIONS.length}</strong>
               </div>
               <div class="setup-wizard-nav-actions">
@@ -1525,6 +1535,7 @@ export const setupRoute = {
             <form id="setupProjectForm" class="setup-v2-form">
               <section class="setup-wizard-step-panel is-active" data-setup-step-panel="business-basics">
                 <h4>Business Basics</h4>
+                <p class="home-section-copy">Start with the project identity used by routing, backend setup save, and cross-workspace context.</p>
                 <div class="setup-form-grid setup-form-grid-2">
                   ${renderField({ name: "project_name", label: "Project name", value: values.project_name, helper: "Canonical project identifier.", placeholder: "e.g. Hairotic Men", escapeHtml, required: true })}
                   ${renderField({ name: "project_type", label: "Project type", value: values.project_type, helper: "Broad business model.", placeholder: "e.g. Ecommerce", escapeHtml, required: true })}
@@ -1598,9 +1609,10 @@ export const setupRoute = {
         <div class="setup-wizard-side-panels">
           <section class="card setup-wizard-missing-panel setup-smart-gaps-panel">
             <div class="card-head">
-              <h4>Missing Information / Readiness Gaps</h4>
-              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Complete now</button>
+              <h4>Missing Foundation Information</h4>
+              <button id="setupCompleteNowBtn" class="btn btn-secondary" type="button">Open first missing field</button>
             </div>
+            <p class="setup-v2-subtitle">These fields must be completed before the project foundation is ready. Dependency gaps are reviewed here and completed in their owning workspace.</p>
             <div id="setupMissingActions">
               ${missingFieldInsights.length
                 ? `<div class="setup-smart-gap-list">${missingFieldInsights.map((item) => `
@@ -1612,11 +1624,11 @@ export const setupRoute = {
                       <button class="btn btn-ghost" type="button" data-setup-jump-field="${escapeHtml(item.name)}" data-setup-jump-step="${escapeHtml(item.stepId)}">Fix now</button>
                     </article>
                   `).join("")}</div>`
-                : `<div class="empty-box">All required setup fields are complete.</div>`
+                : `<div class="empty-box">All required foundation fields are complete. Use Save Setup to persist backend project foundation data.</div>`
               }
             </div>
             <div class="setup-wizard-missing-divider"></div>
-            <h5>System blockers</h5>
+            <h5>Dependency gaps owned elsewhere</h5>
             <div id="setupSystemGaps">
               ${renderIndicatorList(
                 dedupeDisplayLabels([
@@ -1632,9 +1644,10 @@ export const setupRoute = {
 
           <section class="card setup-smart-validation-panel">
             <div class="card-head">
-              <h4>Validation & Diagnostics</h4>
-              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Validate now</button>
+              <h4>Backend Save & Diagnostics</h4>
+              <button id="setupValidateNowBtn" class="btn btn-ghost" type="button">Save Setup and refresh</button>
             </div>
+            <p class="setup-v2-subtitle">Diagnostics show readiness signals. The button uses the same backend Save Setup path as the primary save control.</p>
             <div class="setup-smart-diagnostics-grid">
               <article class="setup-smart-diagnostic-card">
                 <span class="data-label">Validation status</span>
@@ -1657,29 +1670,29 @@ export const setupRoute = {
 
         <section class="card setup-smart-handoff-panel">
           <div class="card-head">
-            <h4>Handoff & Next Actions</h4>
-            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Run next best action</button>
+            <h4>Save, Draft, and Continue</h4>
+            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Focus next field or Save Setup</button>
           </div>
-          <div class="setup-handoff-note">Brand evidence and product files belong in <strong>Library</strong> or <strong>Governance</strong>.</div>
+          <div class="setup-handoff-note">Continue buttons only open the owning workspace. Library owns assets, Integrations owns connectors, Campaign Studio owns campaign planning, and AI Command owns AI review.</div>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
-            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup</button>
-            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Continue to Library</button>
-            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Continue to Integrations</button>
+            <button id="setupSaveBackendBtnBottom" class="btn btn-ghost" type="button">Save Setup to Backend</button>
+            <button id="setupContinueLibraryBtn" class="btn btn-secondary" type="button">Open Library for assets</button>
+            <button id="setupContinueIntegrationsBtn" class="btn btn-secondary" type="button">Open Integrations for connectors</button>
           </div>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-secondary">
             <div class="setup-action-group">
-              <span class="setup-action-group-label">Continue</span>
-              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Continue to Campaign Studio</button>
+              <span class="setup-action-group-label">Planning workspace</span>
+              <button id="setupContinueCampaignBtn" class="btn btn-secondary" type="button">Open Campaign Studio for planning</button>
             </div>
             <div class="setup-action-group">
               <span class="setup-action-group-label">AI and review</span>
-              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command with Setup Context</button>
+              <button id="setupAiCommandBtn" class="btn btn-ghost" type="button">Open AI Command for review</button>
               <button id="setupReviewMissingBtn" class="btn btn-ghost" type="button">Review missing setup items</button>
             </div>
             <div class="setup-action-group">
               <span class="setup-action-group-label">Local draft</span>
-              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save Draft (local only)</button>
-              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Reset Draft</button>
+              <button id="setupSaveDraftBtn" class="btn btn-ghost" type="button">Save local draft</button>
+              <button id="setupResetDraftBtn" class="btn btn-ghost" type="button">Clear local draft</button>
             </div>
           </div>
         </section>
@@ -1691,7 +1704,7 @@ export const setupRoute = {
             <h4>AI Guidance Panel</h4>
             <span class="card-badge neutral">Assistive only</span>
           </div>
-          <p class="setup-v2-subtitle">Use AI to review setup quality, missing launch inputs, and channel priorities.</p>
+          <p class="setup-v2-subtitle">AI suggestions update local form guidance or prepare an AI Command prompt. They do not save backend data, approve work, publish, send, connect, or upload.</p>
           <div class="setup-smart-handoff-actions">
             <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
             <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
