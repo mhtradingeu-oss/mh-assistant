@@ -229,10 +229,12 @@ function routeForAction(action) {
   const text = asString(action).toLowerCase();
   if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return "library";
   if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
+  if (/(setup|foundation)/.test(text)) return "setup";
   if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
   if (/(publish|schedule|queue)/.test(text)) return "publishing";
   if (/(ad|budget|paid)/.test(text)) return "ads-manager";
   if (/(content|copy)/.test(text)) return "content-studio";
+  if (/(job|operation)/.test(text)) return "operations-centers";
   return "ai-command";
 }
 
@@ -567,9 +569,9 @@ function buildExecutiveData(state) {
     ),
     headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),
     oneLineSummary: projectName
-      ? `${projectName} is at ${formatPercent(readinessScore)} readiness with ${formatPercent(connectorScore)} connector coverage and ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
-      : "Select a project to view executive status, system health, and clear next actions.",
-    primaryActionLabel: nextActionRoute === "ai-command" ? "Open AI Workspace" : `Open ${humanizeStatus(nextActionRoute)}`,
+      ? `${projectName}: ${formatPercent(readinessScore)} readiness, ${formatPercent(connectorScore)} connector confidence, ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
+      : "Select a project to see readiness, blockers, the next action, and the right AI specialist.",
+    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
     primaryActionRoute: nextActionRoute,
     secondaryActionLabel: "Review Setup Foundation",
     secondaryActionRoute: "setup",
@@ -590,7 +592,7 @@ function buildExecutiveData(state) {
       recommendation: nextAction,
       whyItMatters,
       route: nextActionRoute,
-      buttonLabel: nextActionRoute === "ai-command" ? "Start With AI" : `Fix In ${humanizeStatus(nextActionRoute)}`,
+      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
       urgencyLabel,
       workflowImpact,
       continuationSummary,
@@ -804,7 +806,7 @@ export const homeRoute = {
         <section class="mhos-os-header" aria-label="Executive Command Brief">
           <div class="mhos-os-header-main">
             <div>
-              <p class="mhos-os-kicker">AI Operations Command</p>
+              <p class="mhos-os-kicker">Project Operating Snapshot</p>
               <h1 class="mhos-os-title">${escapeHtml(dashboard.projectName || "Project Command Center")}</h1>
               <p class="mhos-os-subtitle">${escapeHtml(dashboard.oneLineSummary)}</p>
             </div>
@@ -814,6 +816,7 @@ export const homeRoute = {
                 <span class="mhos-os-live-dot"></span>
                 ${escapeHtml(dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} attention signals` : "Clear path")}
               </span>
+              <span class="mhos-os-chip">Routes and AI guidance only</span>
             </div>
           </div>
 
@@ -836,7 +839,7 @@ export const homeRoute = {
             <article class="mhos-os-brief-card mhos-motion-soft">
               <span class="mhos-os-brief-label">Primary Focus</span>
               <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
-              <span class="mhos-os-brief-hint">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+              <span class="mhos-os-brief-hint">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
             </article>
           </div>
         </section>
@@ -857,18 +860,19 @@ export const homeRoute = {
               </div>
               <div class="mhos-os-chip-row">
                 <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
-                <span class="mhos-os-chip">Next: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
+                <span class="mhos-os-chip">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
                 <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+                <span class="mhos-os-chip">No approval, publishing, sending, or record changes here</span>
               </div>
               <div class="mhos-os-action-row">
-                <button id="homeNextActionBtn" class="mhos-next-action-btn" type="button">
+                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
                   ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
                 </button>
                 <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
-                  Ask AI to explain
+                  Prepare AI Explanation
                 </button>
                 <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
-                  Operations Centers
+                  Open Operations
                 </button>
               </div>
             </section>
@@ -876,10 +880,10 @@ export const homeRoute = {
             <section class="mhos-os-section" aria-label="What Needs Attention">
               <div class="mhos-os-section-head">
                 <div>
-                  <p class="mhos-os-kicker">What needs attention</p>
-                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Top operating blockers" : "No critical blockers"}</h2>
+                  <p class="mhos-os-kicker">Attention</p>
+                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Operating blockers" : "No critical blockers"}</h2>
                   <p class="mhos-os-section-copy">
-                    ${dashboard.totalBlockers ? "The system is highlighting only the areas that affect the next operating move." : "The current path is clear. Continue with the next best action."}
+                    ${dashboard.totalBlockers ? "Only the blockers that affect the next handoff are shown here." : "The current path is clear. Continue with the recommended workspace or ask AI for guidance."}
                   </p>
                 </div>
                 ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} signals` : "Clear", escapeHtml)}
@@ -889,8 +893,8 @@ export const homeRoute = {
                 ${topAttentionCards.map((item) => `
                   <article class="mhos-os-attention-card mhos-motion-soft">
                     <span class="mhos-os-chip ${escapeHtml(item.tone)}">${escapeHtml(item.title)}</span>
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <span>${escapeHtml(item.detail)}</span>
+                    <strong>${escapeHtml(item.detail)}</strong>
+                    <span>${escapeHtml(item.tone === "is-live" ? "Ready for the current operating path." : "Review before the next handoff.")}</span>
                   </article>
                 `).join("")}
               </div>
@@ -899,9 +903,9 @@ export const homeRoute = {
             <section class="mhos-os-section" aria-label="Operating Path">
               <div class="mhos-os-section-head">
                 <div>
-                  <p class="mhos-os-kicker">Operating path</p>
-                  <h2 class="mhos-os-section-title">From readiness to execution</h2>
-                  <p class="mhos-os-section-copy">A simple guided path that keeps setup, assets, integrations, campaign, and execution in the right order.</p>
+                  <p class="mhos-os-kicker">Path</p>
+                  <h2 class="mhos-os-section-title">Readiness to execution</h2>
+                  <p class="mhos-os-section-copy">A simple view of the operating sequence. Each step opens the workspace that owns the work.</p>
                 </div>
               </div>
 
@@ -972,26 +976,22 @@ export const homeRoute = {
 
             <section class="mhos-os-action-panel">
               <div>
-                <p class="mhos-os-kicker">Navigate & execute</p>
-                <h2 class="mhos-os-panel-title">Safe next destinations</h2>
-                <p class="mhos-os-panel-copy">Use the shortest route to complete the operating path.</p>
+                <p class="mhos-os-kicker">Workspaces</p>
+                <h2 class="mhos-os-panel-title">Open the owner</h2>
+                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
               </div>
 
               <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
-                <span class="home-action-title">Review Setup Foundation</span>
-                <span class="home-action-meta">Resolve foundation issues and complete setup.</span>
+                <span class="home-action-title">Open Setup Readiness</span>
+                <span class="home-action-meta">Review foundation gaps in the Setup workspace.</span>
               </button>
-              <button id="homeQuickUploadAssetBtn" class="quick-action-btn" type="button">
-                <span class="home-action-title">Asset Library</span>
-                <span class="home-action-meta">Prepare missing brand and campaign assets.</span>
-              </button>
-              <button id="homeQuickConnectPlatformBtn" class="quick-action-btn" type="button">
-                <span class="home-action-title">Integrations</span>
-                <span class="home-action-meta">Connect required platforms and providers.</span>
+              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Asset Library</span>
+                <span class="home-action-meta">Review source assets in the Library workspace.</span>
               </button>
               <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
-                <span class="home-action-title">Campaign Studio</span>
-                <span class="home-action-meta">Build the next launch wave.</span>
+                <span class="home-action-title">Open Campaign Studio</span>
+                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
               </button>
             </section>
 
@@ -1001,19 +1001,20 @@ export const homeRoute = {
                 <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
                 <p class="mhos-os-panel-copy">
                   ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+                  AI prepares guidance only; destination workspaces own any execution.
                 </p>
               </div>
 
               ${recommendedSpecialist ? `
                 <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
-                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist.name)}</span>
-                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}</span>
+                  <span class="home-action-title">Prepare ${escapeHtml(recommendedSpecialist.name)} Guidance</span>
+                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}. Opens AI Command with context.</span>
                 </button>
               ` : ""}
 
               <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
                 <span class="home-action-title">Open AI Workspace</span>
-                <span class="home-action-meta">Get guidance on the next best action.</span>
+                <span class="home-action-meta">Prepare guidance for the next best action.</span>
               </button>
 
               <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
@@ -1026,25 +1027,26 @@ export const homeRoute = {
 
             <section class="mhos-os-ai-panel">
               <div>
-                <p class="mhos-os-kicker">AI prompts</p>
-                <h2 class="mhos-os-panel-title">Ask the system</h2>
+                <p class="mhos-os-kicker">AI guidance</p>
+                <h2 class="mhos-os-panel-title">Ask safely</h2>
+                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
               </div>
 
               <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
                 <span class="home-prompt-title">What is the next executive action?</span>
-                <span class="home-prompt-meta">Clarify why this is the focus and what to do next.</span>
+                <span class="home-prompt-meta">Prepare a short explanation and handoff path.</span>
               </button>
               <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
                 <span class="home-prompt-title">Why is readiness low?</span>
-                <span class="home-prompt-meta">Explain blockers and readiness gaps in operational terms.</span>
+                <span class="home-prompt-meta">Explain blockers and readiness gaps in simple terms.</span>
               </button>
               <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
                 <span class="home-prompt-title">Summarize launch blockers</span>
-                <span class="home-prompt-meta">Prepare a launch risk summary.</span>
+                <span class="home-prompt-meta">Prepare a launch risk summary for review.</span>
               </button>
               <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
                 <span class="home-prompt-title">Turn next action into a plan</span>
-                <span class="home-prompt-meta">Convert the next action into a stepwise operating plan.</span>
+                <span class="home-prompt-meta">Convert the next action into a reviewed plan.</span>
               </button>
             </section>
 
@@ -1094,7 +1096,7 @@ export const homeRoute = {
       showMessage?.(`${roleName} context prepared in AI Command.`);
     };
 
-    const nextBtn = $("homeNextActionBtn");
+    const nextBtn = $("homePrimaryActionBtn");
     if (nextBtn) {
       nextBtn.onclick = () => {
         if (dashboard.nextBestAction.route === "ai-command") {
@@ -1120,11 +1122,8 @@ export const homeRoute = {
     const quickCampaignBtn = $("homeQuickStartCampaignBtn");
     if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
 
-    const quickAssetBtn = $("homeQuickUploadAssetBtn");
+    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
     if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
-
-    const quickConnectBtn = $("homeQuickConnectPlatformBtn");
-    if (quickConnectBtn) quickConnectBtn.onclick = () => openRoute("integrations");
 
     const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
     if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");

@@ -25,7 +25,7 @@ export function renderBadge(tone, label, escapeHtml) {
   return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
 }
 
-export function renderCompactList(items, escapeHtml, emptyText = "Nothing to show yet.") {
+export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
   const safeItems = asArray(items).slice(0, 5);
 
   if (!safeItems.length) {
@@ -59,7 +59,7 @@ export function renderActivityItems(items, escapeHtml) {
   const safeItems = asArray(items).slice(0, 6);
 
   if (!safeItems.length) {
-    return `<p class="home-empty-note">No recent activity recorded yet.</p>`;
+    return `<p class="home-empty-note">No recent activity is recorded yet. Open the owning workspace to create the next reviewed signal.</p>`;
   }
 
   return `
@@ -84,13 +84,13 @@ export function renderAiTeamCards(cards, escapeHtml) {
   const safeCards = asArray(cards).slice(0, 7);
 
   if (!safeCards.length) {
-    return `<p class="home-empty-note">AI team status is not available yet.</p>`;
+    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
   }
 
   return `
     <div class="home-ai-team-grid">
       ${safeCards.map((agent) => `
-          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Click to open ${escapeHtml(agent.name)} workspace">
+          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
           <div class="home-ai-team-card-head">
             <strong>${escapeHtml(agent.name)}</strong>
             ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
@@ -126,16 +126,17 @@ export function renderHomeExecutiveIntro({
       </div>
 
       <div class="home-exec-hero-actions">
-        <button id="homePrimaryActionBtn" class="btn btn-primary" type="button">
+        <button id="homeExecutivePrimaryActionBtn" class="btn btn-primary" type="button">
           ${escapeHtml(dashboard.primaryActionLabel)}
         </button>
         <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
           ${escapeHtml(dashboard.secondaryActionLabel)}
         </button>
         <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
-          Ask Executive AI
+          Prepare AI Guidance
         </button>
       </div>
+      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
     </section>
 
     <section class="home-kpi-grid">
