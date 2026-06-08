@@ -268,7 +268,7 @@ function validateDrawerSourceRequirement(drawer, projectName = "") {
 
   setDrawerSourceWarning(
     drawer,
-    "This tool needs a source. Choose one from Library before continuing."
+    "This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."
   );
   return false;
 }
@@ -282,10 +282,10 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
 
   if (!source || !source.name) {
     if (selectedNode) {
-      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No AI source selected yet.</span>`;
+      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
     }
     if (sourceInput && !sourceInput.value) {
-      sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
+      sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
     }
     validateDrawerSourceRequirement(drawer, projectName);
     return;
@@ -296,9 +296,9 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
   if (selectedNode) {
     selectedNode.innerHTML = `
       <div class=\"mhos-tool-drawer-source-card\">
-        <div class=\"mhos-tool-drawer-source-eyebrow\">AI Source</div>
+        <div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>
         <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
-        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library</div>
+        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
         ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
         <div class=\"mhos-tool-drawer-source-actions\">
           <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
@@ -310,7 +310,7 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
 
   // Set placeholder for Source Details if empty
   if (sourceInput && !sourceInput.value) {
-    sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
+    sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
   }
 
   // Set select value if possible
@@ -335,8 +335,8 @@ export function applySharedAiSourceToDrawer(drawer, projectName = "") {
       removeBtn.onclick = () => {
         clearSharedAiSource(projectName || "__default__");
         clearSharedAiSource("__default__");
-        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No AI source selected yet.</span>`;
-        if (sourceInput) sourceInput.placeholder = "Optional: add usage notes, audience, angle, or claims to avoid...";
+        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+        if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";
         if (sourceSelect) sourceSelect.value = "";
         validateDrawerSourceRequirement(drawer, projectName);
       };
@@ -1256,20 +1256,20 @@ function renderSmartToolDrawerShell(safe) {
   return `
     <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
       <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
-      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="Smart tool setup">
+      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
         <div class="mhos-tool-drawer-head">
           <div class="mhos-tool-drawer-title-block">
             <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
             <div>
-              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Smart tool</p>
-              <h3 data-aicmd-tool-drawer-title>Tool setup</h3>
+              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Prompt tool</p>
+              <h3 data-aicmd-tool-drawer-title>Prompt setup</h3>
             </div>
           </div>
           <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
         </div>
 
         <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
-          Choose the output, source, and destination before preparing a review-only composer prompt.
+          Choose the output, trusted context, and destination workspace before preparing a review-only composer prompt.
         </p>
 
         <div class="mhos-tool-drawer-grid">
@@ -1279,14 +1279,14 @@ function renderSmartToolDrawerShell(safe) {
           </div>
 
           <div class="mhos-tool-drawer-section">
-            <span class="mhos-tool-drawer-section-label">2. Source / input</span>
+            <span class="mhos-tool-drawer-section-label">2. Trusted source / input</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
             <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
             <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
           </div>
 
           <div class="mhos-tool-drawer-section">
-            <span class="mhos-tool-drawer-section-label">3. Destination</span>
+            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
             <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
           </div>
 
@@ -1316,12 +1316,12 @@ function renderSmartToolDrawerShell(safe) {
             </div>
 
             <label class="mhos-tool-drawer-field">
-              <span>Source details</span>
+              <span>Source usage notes</span>
               <input
                 class="mhos-tool-drawer-input"
                 data-aicmd-tool-drawer-source-details
                 type="text"
-                placeholder="Example: use current chat only, Brand Profile folder, product file, legal docs..."
+                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
               />
             </label>
 
@@ -1344,16 +1344,16 @@ function renderSmartToolDrawerShell(safe) {
 
         <div class="mhos-tool-drawer-summary">
           <span>Setup summary</span>
-          <p data-aicmd-tool-drawer-summary>Choose output, source, destination, language, and tone.</p>
+          <p data-aicmd-tool-drawer-summary>Choose output, source context, destination handoff, language, and tone.</p>
         </div>
 
         <div class="mhos-tool-drawer-note">
-          Preparation-only: this drawer creates a composer-ready instruction. It does not publish, send, route, create CRM records, run workflows, or mutate backend data.
+          Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
         </div>
 
         <div class="mhos-tool-drawer-actions">
-          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Change source</button>
-          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Use in Composer</button>
+          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>
+          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Prepare Prompt</button>
           <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
         </div>
       </section>
@@ -1590,7 +1590,7 @@ function updateDrawerPromptSummary(drawer) {
   const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
 
   let summaryParts = [];
-  if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Library source selected");
+  if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Trusted source context selected");
   summaryParts.push(output);
   summaryParts.push(destination);
   summaryParts.push(language);
@@ -1630,7 +1630,7 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
   setDrawerText(
     drawer,
     "[data-aicmd-tool-drawer-description]",
-    `Prepare ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"} for the active project. Choose the output, source, destination, language, and tone before using it in the composer.`
+    `Prepare a structured prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted context, destination handoff, language, and tone before loading it into the composer.`
   );
   setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
 
@@ -1656,7 +1656,7 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
 
   populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
   populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");
-  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination");
+  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");
 
   Array.from(drawer.querySelectorAll("select, input, textarea")).forEach((field) => {
     field.oninput = () => {
@@ -1675,7 +1675,7 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
   drawer.hidden = false;
   drawer.setAttribute("aria-hidden", "false");
   drawer.classList.add("is-open");
-  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Tool"} setup opened. Review requirements, then use in composer.`);
+  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
   return true;
 }
 
@@ -1780,7 +1780,7 @@ export function bindAiToolDock({
       const label = drawer?.dataset?.pendingTool || "tool";
       if (!template) return;
       if (!validateDrawerSourceRequirement(drawer, projectName)) {
-        updateStatus?.("This tool needs a source. Choose one from Library before continuing.");
+        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");
         return;
       }
 
@@ -1802,7 +1802,7 @@ export function bindAiToolDock({
       }
 
       if (typeof updateStatus === "function") {
-        updateStatus(`${label} loaded into composer from smart drawer. Review it, then ask or preview.`);
+        updateStatus(`${label} prompt prepared in the composer. Review it, then ask or create a preview.`);
       }
 
       closeToolDrawer(drawer, input);

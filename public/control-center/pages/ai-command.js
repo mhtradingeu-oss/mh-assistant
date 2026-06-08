@@ -364,11 +364,11 @@ const TEAM_SUGGESTED_PROMPTS = [
 const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
 
 const AI_ROOM_FLOW_STEPS = [
-	{ id: "ask", title: "Ask", description: "Write the request and choose the team lane." },
-	{ id: "draft", title: "Draft", description: "Generate guidance, copy, task, or handoff material." },
-	{ id: "review", title: "Review", description: "Check safety, scope, language, and destination." },
-	{ id: "route", title: "Route", description: "Send context to the owning workspace." },
-	{ id: "execute", title: "Execute", description: "Execution stays gated in backend-owned surfaces." },
+	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
 	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
 ];
 
@@ -3602,6 +3602,7 @@ function renderAiRoomTeamChain(escapeHtml) {
 function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
 	const safeBridgeStatus = bridgeStatus || { available: false };
 	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
 	const languagePlan = getWorkspaceLanguagePlan(aiContext);
 	const activeFlowIndex = getAiRoomFlowIndex(session);
 	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
@@ -3611,7 +3612,7 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 			<div class="aicmd-room-title-block mhos-context-ribbon">
 				<div class="aicmd-room-eyebrow mhos-context-kicker">AI Operating Room</div>
 				<h1 class="aicmd-room-title mhos-context-title">AI Team Command Center</h1>
-				<p class="aicmd-room-subtitle mhos-context-description">One specialist or the full team turns requests into review-ready drafts, tasks, and handoffs.</p>
+				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
 			</div>
 			<div class="aicmd-v2-header-actions aicmd-room-header-actions mhos-executive-panel">
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
@@ -3633,6 +3634,10 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 				<div class="aicmd-v2-meta-chip is-project mhos-executive-summary-item">
 					<span class="mhos-executive-metric-label">Project</span>
 					<strong>${escapeHtml(projectName || "Not selected")}</strong>
+				</div>
+				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
+					<span class="mhos-executive-metric-label">Active AI</span>
+					<strong>${escapeHtml(activeSpecialist)}</strong>
 				</div>
 				<div class="aicmd-v2-meta-chip mhos-executive-summary-item">
 					<span class="mhos-executive-metric-label">Mode</span>
@@ -3680,8 +3685,8 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 	`).join("");
 	const teamBanner = session.teamMode === "team" ? `
 		<div class="aicmd-room-team-mode-card">
-			<strong>Full Team Mode</strong>
-			<span>Full Team prepares a coordinated, review-ready plan. It does <b>not</b> execute workflows or publish anything.</span>
+			<strong>Full Team Review</strong>
+			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
 			${renderAiRoomTeamChain(escapeHtml)}
 		</div>
 	` : "";
@@ -3691,9 +3696,9 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 			<div class="aicmd-room-panel-head">
 				<div>
 					<span class="aicmd-room-panel-kicker">AI Team</span>
-					<strong>Specialists</strong>
+					<strong>Choose the expert</strong>
 				</div>
-				<span class="aicmd-room-online-pill">Online</span>
+				<span class="aicmd-room-online-pill">Review-ready</span>
 			</div>
 			<div class="aicmd-v2-team-toggle aicmd-room-mode-switch" role="group" aria-label="AI team mode">
 				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
@@ -3710,8 +3715,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 					const isActive = spec.id === session.modeId && session.teamMode === "solo";
 					const isTeamActive = session.teamMode === "team";
 					const specialization = asString(spec.summary).replace(/\.$/, "");
-					const backendAlias = AI_ROOM_BACKEND_ROLE_ALIASES[roleId];
-					const roleLine = `${spec.status || "Ready"} - ${spec.position || spec.label || "Specialist"}${backendAlias ? ` - Backend: ${backendAlias}` : ""}`;
+					const roleLine = `${isActive ? "Active now" : (spec.status || "Ready")} - ${spec.position || spec.label || "Specialist"}`;
 					return `
 						<button
 							class="aicmd-v2-spec-btn aicmd-room-member${isActive ? " is-active" : ""}${isTeamActive ? " is-team-active" : ""}"
@@ -3732,7 +3736,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
 				}).join("")}
 			</div>
 			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
-				<span class="aicmd-room-planned-title">Additional specialists planned</span>
+				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
 				${plannedSpecialists}
 			</div>
 		</aside>
@@ -3908,10 +3912,10 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
 			<div class="aicmd-v2-tools-head">
 				<div>
-					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Quick Actions</h3>
-					<span class="aicmd-v2-tools-subtitle">Fast specialist actions for the current output. Review-only: prepares drafts, previews, or handoffs without backend execution.</span>
+					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
 				</div>
-				<span class="aicmd-v2-tools-count">${tools.length} tools</span>
+				<span class="aicmd-v2-tools-count">${tools.length} prompt tools</span>
 			</div>
 			<div class="aicmd-v2-tools-grid aicmd-room-tools-grid">
 				${tools.map((tool) => {
@@ -3934,14 +3938,14 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
 							<span class="aicmd-room-tool-purpose">${escapeHtml(purpose)}</span>
 							<span class="aicmd-v2-tool-meta">
 								<span>Output: ${escapeHtml(outputLabel)}</span>
-								<span>Route: ${escapeHtml(destination)}</span>
+								<span>Handoff: ${escapeHtml(destination)}</span>
 								<span>Status: ${escapeHtml(status)}</span>
 							</span>
 						</button>
 					`;
 				}).join("")}
 			</div>
-			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}</div>` : ""}
+			${projectName ? `<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>` : ""}
 		</section>
 	`;
 }
@@ -3975,7 +3979,7 @@ function renderAiCommandMainSourceIndicator(projectName, escapeHtml) {
 
 	return `
 		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
-			<span>AI Source</span>
+			<span>Trusted AI context</span>
 			<strong>${escapeHtml(name)}</strong>
 			${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
 		</div>
@@ -4006,12 +4010,14 @@ function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 
 function renderPhase1Composer(session, aiContext, escapeHtml) {
 		const spec = getPhase1SpecialistById(session.modeId);
-		const placeholder = "Message the AI specialist...";
+		const placeholder = session.teamMode === "team"
+			? "Ask the full AI team for a launch plan, content package, risk review, source-based analysis, or handoff sequence..."
+			: spec.placeholder || `Ask ${spec.label} what to review, draft, improve, or hand off next...`;
 		const isTeam = session.teamMode === "team";
 		const specLabel = isTeam ? "Team Meeting Room" : spec.label;
 		const headerText = isTeam
-			? "Coordinated Team Review — Guidance Only"
-			: `Chat with ${spec.label}`;
+			? "Ask the Full AI Team"
+			: `Ask ${spec.label}`;
 		const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";
 		const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
 		const isGenerating = Boolean(session.responseLoading);
@@ -4041,7 +4047,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 						</div>
 						<div class="aicmd-chatgpt-tools-right">
 							<span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>
-							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Send message">
+							<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
 								${isGenerating ? "…" : "➤"}
 							</button>
 						</div>
@@ -4053,7 +4059,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 					${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}
 				</div>
 
-				<div class="aicmd-v2-composer-hint">Draft/review only · suggested prompts prefill this composer · execution happens in the owning workspace after confirmation.</div>
+				<div class="aicmd-v2-composer-hint">Primary workspace: ask, refine, then create a review-ready preview. Suggested prompts prefill only. No publish, send, approval, CRM update, workflow run, or durable task creation happens here.</div>
                                 <div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
 			</div>
 		`;
@@ -4087,10 +4093,10 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 		: getPhase1SpecialistById(preview.specialistId || session.modeId);
 	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : titleCase(activeTab);
 	const routeActionLabel = destination === "Content Studio"
-		? "Send Draft to Content Studio"
+		? "Open Content Studio Handoff"
 		: destination === "Publishing"
-			? "Route Draft to Publishing"
-			: `Route Draft to ${destination}`;
+			? "Open Publishing Handoff"
+			: `Open ${destination} Handoff`;
 	const confirmationLabel = hasPreview
 		? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")
 		: "Waiting for output";
@@ -4183,8 +4189,8 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 			<div class="aicmd-room-output-head">
 				<div>
 					<span class="aicmd-room-kicker">Output Workspace</span>
-					<h2>Drafts, task previews, workflow previews, handoffs</h2>
-                                        <p>${hasPreview ? "Review the result, then route draft context to the next workspace." : "Output appears here after a response or tool setup."}</p>
+					<h2>Review drafts and handoffs</h2>
+                                        <p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
 				</div>
 				<span class="aicmd-room-output-state">${escapeHtml(confirmationLabel)}</span>
 			</div>
@@ -4208,7 +4214,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
                                 <div class="aicmd-room-output-meta">
                                         <span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
                                         <span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
-                                        <span><strong>Channel</strong>${escapeHtml(destination)}</span>
+                                        <span><strong>Destination</strong>${escapeHtml(destination)}</span>
                                         <span><strong>Target</strong>${escapeHtml(aiContext.projectName || "Current project")}</span>
                                 </div>
                         ` : ""}
@@ -4248,8 +4254,8 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 				</div>
 			` : `
 				<div class="aicmd-room-output-empty">
-                                        <strong>Output appears after a response</strong>
-                                        <span>Run a message or use a tool to prepare a preview here.</span>
+                                        <strong>No review output yet</strong>
+                                        <span>Ask the active specialist or open a Tool Drawer prompt to prepare a draft, task preview, workflow preview, or handoff package.</span>
 				</div>
 			`}
 
@@ -4262,7 +4268,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
                                 </div>
                                 <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>
                         ` : `
-                                <div class="aicmd-room-planned-note">No routed preview yet. Create a Draft, Task Preview, Workflow Preview, or Handoff Preview from the conversation first.</div>
+                                <div class="aicmd-room-planned-note">No preview yet. Start in the composer, then review the output here before opening a destination workspace.</div>
                         `}
 		</section>
 	`;
@@ -4352,7 +4358,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
         const safetyLine = safeBridgeStatus.available
                 ? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."
                 : "Preview-safe. Chat tools require the protected AI chat route.";
-        const emptyBody = "Ask for the next decision, campaign angle, content draft, or review.";
+        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
         const bridgeContext = asObject(session.bridgeContext);
         const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
         const showBridgeContext = Boolean(
@@ -4420,8 +4426,8 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                 <section class="aicmd-v2-chat aicmd-room-chat">
                         <div class="aicmd-v2-chat-head">
                                 <div>
-                                        <h3 class="aicmd-v2-chat-title">Conversation</h3>
-                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the selected specialist. Other specialist replies stay in shared room history.</p>
+                                        <h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
+                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
                                 </div>
                                 <span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
                         </div>
@@ -4447,7 +4453,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                         <small>${escapeHtml(selectedModeLabel)}</small>
                                 </div>
                                 <div class="aicmd-room-context-item">
-                                        <span>Tools / next action</span>
+                                        <span>What to ask next</span>
                                         <strong>${escapeHtml(toolHint)}</strong>
                                         <small>${escapeHtml("Next: " + nextAction)}</small>
                                 </div>
@@ -4491,7 +4497,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                                         </div>
                                         <div class="aicmd-v2-chat-actions aicmd-room-response-actions">
                                                 <button id="aicmdV3ResponseConvertBtn" class="aicmd-v2-btn-primary" type="button">Create Preview</button>
-                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Route</button>
+                                                <button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Open Handoff</button>
                                                 <button id="aicmdV3ResponseContinueBtn" class="aicmd-v2-btn-secondary" type="button">Follow Up</button>
                                                 <button id="aicmdV3ResponseCopyBtn" class="aicmd-v2-btn-ghost" type="button">Copy</button>
                                         </div>
@@ -4533,8 +4539,8 @@ function renderPhase1SuggestedPrompts(session, escapeHtml) {
 	return `
 		<div class="aicmd-v2-prompts">
 			<div class="aicmd-v2-prompts-head">
-				<span class="aicmd-v2-prompts-label">Suggested prompts</span>
-				<span class="aicmd-v2-prompts-hint">Click to prefill the composer — send when ready</span>
+				<span class="aicmd-v2-prompts-label">Ask next</span>
+				<span class="aicmd-v2-prompts-hint">Prefills only - review the wording, then ask the AI</span>
 			</div>
 			<div class="aicmd-v2-prompts-grid">
 				${prompts.map((p, idx) => `
@@ -4571,6 +4577,7 @@ function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
 		{ label: "Session state", value: sessionState, present: true },
 		{ label: "Readiness", value: readiness != null ? `${readiness}/100` : "No readiness data", present: readiness != null },
 		{ label: "Integrations", value: aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal} connected` : "No coverage data", present: aiContext.coveredCount > 0 },
+		{ label: "Library context", value: getSelectedLibrarySource(projectName)?.name ? "Trusted source selected" : "No source selected", present: Boolean(getSelectedLibrarySource(projectName)?.name) },
 		{ label: "Approved assets", value: aiContext.approvedAssets.length ? `${aiContext.approvedAssets.length} ready` : "No approved assets", present: aiContext.approvedAssets.length > 0 },
 		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
 	];
