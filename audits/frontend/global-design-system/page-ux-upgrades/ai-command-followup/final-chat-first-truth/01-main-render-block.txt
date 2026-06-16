@@ -1,0 +1,196 @@
+			session.responseHistoryLoaded = true;
+		}
+
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+		const globalInput = $("quickCommandInput");
+		const bridgeValue = asString(globalInput?.value || "").trim();
+		if (bridgeValue) {
+			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+			if (detectedSpecialist) {
+				session.modeId = detectedSpecialist;
+				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+				session.bridgeContext = {
+					source: "Home",
+					specialistId: detectedSpecialist,
+					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+					loadedAt: nowIso()
+				};
+			} else {
+				session.bridgeContext = null;
+			}
+			session.draftMessage = normalizeAiComposerPrompt(bridgeValue);
+			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+			if (globalInput) globalInput.value = "";
+		}
+		// ─────────────────────────────────────────────────────────────
+
+		const payload = asObject(selectProjectPayload(state));
+		const overview = asObject(payload.overview?.overview || payload.overview);
+		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+		const operations = asObject(selectOperationsSnapshot(state));
+		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+
+		const intelligenceStatus = session.intelligence.status || "idle";
+		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+		if (!session.workspaceTabInitialized) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+			session.workspaceTabInitialized = true;
+		}
+		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+		}
+
+		const root = $("ctrlRoomRoot");
+		if (!root) return;
+
+		// Final Room v1 renders the conversation, composer, output workspace, and tools directly.
+		// Legacy workspace tabs remain as helper functions only and are not mounted in this shell.
+
+		root.innerHTML = `
+			<div class="aicmd-v2-shell aicmd-room-shell">
+				${renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml)}
+				<div class="aicmd-v2-body aicmd-room-grid">
+					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
+
+										<main class="aicmd-v2-main aicmd-room-center">
+											<div class="aicmd-unified-chat-surface">
+												${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
+												<div class="aicmd-room-specialist-conversation">
+													${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
+												</div>
+												${renderPhase1Composer(session, aiContext, escapeHtml)}
+											</div>
+										</main>
+
+					<aside class="aicmd-room-output">
+						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
+						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
+					</aside>
+				</div>
+				${renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml)}
+				${renderAiToolDrawerShell({ escapeHtml })}
+			</div>
+		`;
+
+		const input = $("aicmdV2Input");
+		const statusEl = $("aicmdV2Status");
+
+		const updateStatus = (msg) => {
+			if (statusEl) statusEl.textContent = msg;
+		};
+
+		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+			if (!value) {
+				updateStatus("Please write your request in the composer first.");
+				input?.focus?.();
+				return null;
+			}
+
+			session.draftMessage = value;
+			session.composerText = session.draftMessage;
+			session.modeId = normalizedSessionModeId;
+			session.teamMode = "solo";
+			session.routeSuggestions = [];
+			session.inboundHandoff = null;
+			session.draftStatus = "New session started";
+			session.outputPreview = buildPhase2OutputPreview({
+				intent,
+				session,
+				prompt: value,
+				projectName
+			});
+			if (PHASE35_WORKSPACE_TABS.includes(options.switchTab)) {
+				session.workspaceTab = options.switchTab;
+			}
+			session.outputWorkspaceTab = outputTabFromIntent(intent);
+			persistSessionDraft(sessionKey, session, "Draft saved locally");
+			aiCommandRoute.render(context);
+			return session.outputPreview;
+		};
+
+		const sessionSelect = $("aicmdV2SessionSelect");
+		if (sessionSelect) {
+		        sessionSelect.onchange = () => {
+		                const selectedSessionId = asString(sessionSelect.value || "");
+		                if (!selectedSessionId) return;
+
+		                const loaded = loadAiChatSessionIntoState(sessionKey, session, selectedSessionId);
+		                if (!loaded) {
+		                        updateStatus("Selected chat session could not be loaded.");
+		                        return;
+		                }
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: session.outputPreview,
+		                        messages: session.messages,
+		                        responses: session.responseHistory,
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+		                showMessage?.("AI chat session loaded.");
+		                aiCommandRoute.render(context);
+		        };
+		}
+
+		const newSessionBtn = $("aicmdV2NewSessionBtn");
+		if (newSessionBtn) {
+		        newSessionBtn.onclick = () => {
+		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
+
+		                session.draftMessage = "";
+		                session.composerText = "";
+		                session.routeSuggestions = [];
+		                session.inboundHandoff = null;
+		                session.bridgeContext = null;
+		                session.draftStatus = "New session started";
+		                session.outputPreview = null;
+		                session.responseHistory = [];
+		                session.messages = [];
+		                session.responseError = "";
+		                session.responseLoading = false;
+		                session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+		                session.outputWorkspaceTab = "draft";
+		                session.activeChatSessionId = "";
+		                session.activeChatSessionCreatedAt = "";
+		                refreshAiChatSessions(sessionKey, session);
+
+		                saveLocalOutput(sessionKey, {
+		                        preview: null,
+		                        messages: [],
+		                        responses: [],
+		                        modeId: session.modeId,
+		                        teamMode: session.teamMode
+		                });
+
+		                persistSessionDraft(sessionKey, session, "New session started");
+		                showMessage?.("New AI session started. Previous chat saved to Recent chats.");
+		                aiCommandRoute.render(context);
+		        };
+		}
+
+		const settingsBtn = $("aicmdV2SettingsBtn");
+		if (settingsBtn) {
+			settingsBtn.onclick = () => {
+				showMessage?.("Opening Settings.");
+				navigateTo("settings");
+			};
+		}
+
+		// Legacy workspace tab handler removed from Final Room v1 shell.
+
+
+		Array.from(document.querySelectorAll("[data-aicmdv2-output-tab]")).forEach((btn) => {
+			btn.onclick = () => {
+				const nextTab = asString(btn.getAttribute("data-aicmdv2-output-tab") || "draft").trim();
+				if (!AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === nextTab)) return;
+				session.outputWorkspaceTab = nextTab;
+				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
+				aiCommandRoute.render(context);
+			};

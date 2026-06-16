@@ -1,0 +1,292 @@
+diff --git a/public/control-center/pages/ai-command.js b/public/control-center/pages/ai-command.js
+index 341e447..0b4ddc4 100644
+--- a/public/control-center/pages/ai-command.js
++++ b/public/control-center/pages/ai-command.js
+@@ -362,6 +362,15 @@ const TEAM_SUGGESTED_PROMPTS = [
+ ];
+ 
+ const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
++const AI_COMMAND_UNIVERSAL_SECTIONS = ["team", "tools", "output", "flow"];
++const AI_COMMAND_MOBILE_SECTIONS = ["team", "tools", "output", "flow"];
++
++const AI_COMMAND_MOBILE_SECTION_LABELS = {
++	team: "Team",
++	tools: "Tools",
++	output: "Output",
++	flow: "Flow"
++};
+ 
+ const AI_ROOM_FLOW_STEPS = [
+ 	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+@@ -973,6 +982,7 @@ function ensureSession(projectName) {
+ 			responseLoading: false,
+ 			responseError: "",
+ 			responseHistoryLoaded: false,
++			mobileSection: "team",
+                         chatSessions: [],
+                         activeChatSessionId: "",
+                         activeChatSessionCreatedAt: ""
+@@ -3611,7 +3621,7 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
+ 		<header class="aicmd-v2-header aicmd-room-header mhos-executive-surface">
+ 			<div class="aicmd-room-title-block mhos-context-ribbon">
+ 				<div class="aicmd-room-eyebrow mhos-context-kicker">AI Operating Room</div>
+-				<h1 class="aicmd-room-title mhos-context-title">AI Team Command Center</h1>
++				<h1 class="aicmd-room-title mhos-context-title"><span class="aicmd-room-title-full">AI Team Command Center</span><span class="aicmd-room-title-mobile">AI Command</span></h1>
+ 				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+ 			</div>
+ 			<div class="aicmd-v2-header-actions aicmd-room-header-actions mhos-executive-panel">
+@@ -3670,8 +3680,87 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
+ 	`;
+ }
+ 
++
++function renderAiCommandUniversalChatControls(session, projectName, bridgeStatus, escapeHtml) {
++        const isTeam = session.teamMode === "team";
++        const activeSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
++        const selectedId = isTeam ? "team" : getAiRoomRoleId(session.modeId);
++        const specialists = AI_ROOM_SPECIALISTS.map((item) => {
++                const selected = getAiRoomRoleId(item.id) === selectedId ? " selected" : "";
++                return `<option value="${escapeHtml(item.id)}"${selected}>${escapeHtml(item.label)}</option>`;
++        }).join("");
++        const teamSelected = isTeam ? " selected" : "";
++
++        return `
++                <div class="aicmd-universal-chat-topbar" aria-label="AI Command chat controls">
++                        <div class="aicmd-universal-chat-title">
++                                <strong>${escapeHtml(activeSpec?.label || "AI Command")}</strong>
++                                <span>${escapeHtml(projectName || "Current project")} · ${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")} · Review only</span>
++                        </div>
++                        <div class="aicmd-universal-chat-actions">
++                                <select id="aicmdUniversalSpecialistSelect" class="aicmd-universal-specialist-select" aria-label="Choose AI specialist">
++                                        ${specialists}
++                                        <option value="team"${teamSelected}>Full Team</option>
++                                </select>
++                                <button id="aicmdUniversalSourceBtn" class="aicmd-universal-icon-btn" type="button" title="Open Library source context" aria-label="Open Library source context">＋</button>
++                                <button id="aicmdUniversalVoiceBtn" class="aicmd-universal-icon-btn is-planned" type="button" title="Voice input is planned unless browser support is available" aria-label="Voice input planned">🎙</button>
++                                <button id="aicmdUniversalNewBtn" class="aicmd-universal-icon-btn" type="button" title="Start a new draft" aria-label="Start a new draft">New</button>
++                                <button id="aicmdUniversalSettingsBtn" class="aicmd-universal-icon-btn" type="button" title="AI Command settings are controlled by the current workspace" aria-label="AI Command settings">⋯</button>
++                        </div>
++                        <div class="aicmd-universal-safety-strip">
++                                Chat guidance only. No publish, send, approval, CRM update, workflow run, or durable task is created here.
++                        </div>
++                </div>
++        `;
++}
++
++
++function renderAiRoomMobileSections(session, escapeHtml) {
++	const activeSection = AI_COMMAND_MOBILE_SECTIONS.includes(session.mobileSection)
++		? session.mobileSection
++		: "team";
++
++	return `
++		<nav class="aicmd-mobile-sections" role="tablist" aria-label="AI Command mobile sections">
++			${AI_COMMAND_MOBILE_SECTIONS.map((sectionId) => `
++				<button
++					type="button"
++					class="aicmd-mobile-section-tab${activeSection === sectionId ? " is-active" : ""}"
++					data-aicmd-mobile-section="${escapeHtml(sectionId)}"
++					role="tab"
++					aria-selected="${activeSection === sectionId ? "true" : "false"}"
++				>
++					${escapeHtml(AI_COMMAND_MOBILE_SECTION_LABELS[sectionId] || titleCase(sectionId))}
++				</button>
++			`).join("")}
++		</nav>
++	`;
++}
++
++function renderAiRoomMobileFlowPanel(session, escapeHtml) {
++	const activeFlowIndex = getAiRoomFlowIndex(session);
++	return `
++		<section class="aicmd-mobile-flow-panel" data-aicmd-mobile-panel="flow" aria-label="AI operating flow">
++			<div class="aicmd-mobile-panel-head">
++				<span class="aicmd-room-kicker">Operating Flow</span>
++				<strong>Draft, review, hand off, then confirm elsewhere</strong>
++			</div>
++			<div class="aicmd-mobile-flow-list">
++				${AI_ROOM_FLOW_STEPS.map((step, index) => `
++					<div class="aicmd-mobile-flow-step${index === activeFlowIndex ? " is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
++						<span>${index + 1}</span>
++						<strong>${escapeHtml(step.title)}</strong>
++						<small>${escapeHtml(step.description)}</small>
++					</div>
++				`).join("")}
++			</div>
++		</section>
++	`;
++}
++
+ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+ 	const safeBridgeStatus = bridgeStatus || { available: false };
++	const plannedLaneLabels = AI_ROOM_PLANNED_SPECIALISTS.map((item) => item.label).join(", ");
+ 	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+ 		<div class="aicmd-room-member aicmd-room-member-planned" aria-disabled="true">
+ 			<span class="aicmd-room-member-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+@@ -3692,7 +3781,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+ 	` : "";
+ 
+ 	return `
+-		<aside class="aicmd-v2-left aicmd-room-team-panel">
++		<aside class="aicmd-v2-left aicmd-room-team-panel" data-aicmd-mobile-panel="team">
+ 			<div class="aicmd-room-panel-head">
+ 				<div>
+ 					<span class="aicmd-room-panel-kicker">AI Team</span>
+@@ -3737,6 +3826,7 @@ function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+ 			</div>
+ 			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+ 				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
++				<span class="aicmd-room-planned-mobile-summary">Planned lanes: ${escapeHtml(plannedLaneLabels)} - destination-owned, not active chat specialists yet.</span>
+ 				${plannedSpecialists}
+ 			</div>
+ 		</aside>
+@@ -3830,6 +3920,7 @@ function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+ 				<strong>${escapeHtml(safeBridgeStatus.available ? "Available" : "Preview-safe")}</strong>
+ 				<span>${escapeHtml(modeLabel)}</span>
+ 			</div>
++			<div class="aicmd-mobile-safety-summary">Guidance and review only. Publishing, sends, approvals, CRM updates, workflow runs, and durable tasks stay confirmation-gated in the owning workspace.</div>
+ 		</div>
+ 	`;
+ }
+@@ -3909,7 +4000,7 @@ function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+ 	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+ 
+ 	return `
+-		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}">
++		<section class="aicmd-v2-tools aicmd-room-tools" data-role="${escapeHtml(roleId)}" data-aicmd-mobile-panel="tools">
+ 			<div class="aicmd-v2-tools-head">
+ 				<div>
+ 					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+@@ -4185,7 +4276,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+ 		: "Waiting for output";
+ 
+ 	return `
+-		<section class="aicmd-room-output-workspace">
++		<section class="aicmd-room-output-workspace" data-aicmd-mobile-panel="output">
+ 			<div class="aicmd-room-output-head">
+ 				<div>
+ 					<span class="aicmd-room-kicker">Output Workspace</span>
+@@ -4228,7 +4319,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
+ 					<h3>${escapeHtml(!humanizeValue(preview.title, "") || humanizeValue(preview.title, "").toLowerCase() === "chat reply" ? `${outputLabel} result` : humanizeValue(preview.title, "Draft output"))}</h3>
+ 					<p class="aicmd-room-output-summary">${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+ 
+-					
++
+ 
+ 					${structuredPreview.blocks.length ? `
+ 						<div class="aicmd-v2-preview-structured-grid aicmd-room-output-blocks">
+@@ -4421,9 +4512,10 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+                 : [];
+ 
+         const conversationMessages = selectedMessages.length ? selectedMessages : fallbackSelectedResponses;
++        const hasConversationActivity = Boolean(conversationMessages.length || latestSelected || sharedResponses.length || session.responseLoading || session.responseError);
+ 
+         return `
+-                <section class="aicmd-v2-chat aicmd-room-chat">
++                <section class="aicmd-v2-chat aicmd-room-chat${hasConversationActivity ? " has-activity" : " is-empty-mobile"}">
+                         <div class="aicmd-v2-chat-head">
+                                 <div>
+                                         <h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
+@@ -4785,12 +4877,15 @@ export const aiCommandRoute = {
+ 
+ 		const root = $("ctrlRoomRoot");
+ 		if (!root) return;
++		if (!AI_COMMAND_MOBILE_SECTIONS.includes(session.mobileSection)) {
++			session.mobileSection = "team";
++		}
+ 
+ 		// Final Room v1 renders the conversation, composer, output workspace, and tools directly.
+ 		// Legacy workspace tabs remain as helper functions only and are not mounted in this shell.
+ 
+ 		root.innerHTML = `
+-			<div class="aicmd-v2-shell aicmd-room-shell">
++			<div class="aicmd-v2-shell aicmd-room-shell aicmd-universal-chat-shell" data-mobile-section="${escapeHtml(session.mobileSection)}" data-universal-section="${escapeHtml(session.mobileSection)}">
+ 				${renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml)}
+ 				<div class="aicmd-v2-body aicmd-room-grid">
+ 					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
+@@ -4805,6 +4900,9 @@ export const aiCommandRoute = {
+ 											</div>
+ 										</main>
+ 
++					${renderAiRoomMobileSections(session, escapeHtml)}
++					${renderAiRoomMobileFlowPanel(session, escapeHtml)}
++
+ 					<aside class="aicmd-room-output">
+ 						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
+ 						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
+@@ -4922,7 +5020,74 @@ export const aiCommandRoute = {
+ 			};
+ 		}
+ 
+-		// Legacy workspace tab handler removed from Final Room v1 shell.
++		Array.from(document.querySelectorAll("[data-aicmd-mobile-section]")).forEach((btn) => {
++			btn.onclick = () => {
++				const section = asString(btn.getAttribute("data-aicmd-mobile-section") || "").trim();
++				if (!AI_COMMAND_MOBILE_SECTIONS.includes(section)) return;
++				session.mobileSection = section;
++				aiCommandRoute.render(context);
++			};
++		});
++
++
++               const universalSpecialistSelect = $("aicmdUniversalSpecialistSelect");
++               if (universalSpecialistSelect) {
++                       universalSpecialistSelect.onchange = () => {
++                               const value = asString(universalSpecialistSelect.value || "").trim();
++                               if (value === "team") {
++                                       session.teamMode = "team";
++                                       persistSessionDraft(sessionKey, session, "Full Team mode selected from chat controls");
++                                       aiCommandRoute.render(context);
++                                       return;
++                               }
++                               const spec = getPhase1SpecialistById(value);
++                               if (!spec) return;
++                               session.teamMode = "solo";
++                               session.modeId = spec.id;
++                               persistSessionDraft(sessionKey, session, `${spec.label} selected from chat controls`);
++                               aiCommandRoute.render(context);
++                       };
++               }
++
++               const universalSourceBtn = $("aicmdUniversalSourceBtn");
++               if (universalSourceBtn) {
++                       universalSourceBtn.onclick = () => {
++                               updateStatus("Open Library to choose or review trusted source context.");
++                               navigateTo("library");
++                       };
++               }
++
++               const universalVoiceBtn = $("aicmdUniversalVoiceBtn");
++               if (universalVoiceBtn) {
++                       universalVoiceBtn.onclick = () => {
++                               const legacyVoiceBtn = $("aicmdV2VoiceBtn");
++                               if (legacyVoiceBtn && legacyVoiceBtn !== universalVoiceBtn && !legacyVoiceBtn.disabled) {
++                                       legacyVoiceBtn.click?.();
++                                       return;
++                               }
++                               updateStatus("Voice input is planned unless browser speech support is available. Use text input for this chat.");
++                       };
++               }
++
++               const universalNewBtn = $("aicmdUniversalNewBtn");
++               if (universalNewBtn) {
++                       universalNewBtn.onclick = () => {
++                               session.draftMessage = "";
++                               session.responseError = "";
++                               persistSessionDraft(sessionKey, session, "New chat draft started");
++                               aiCommandRoute.render(context);
++                       };
++               }
++
++               const universalSettingsBtn = $("aicmdUniversalSettingsBtn");
++               if (universalSettingsBtn) {
++                       universalSettingsBtn.onclick = () => {
++                               updateStatus("AI Command settings remain governed by the current workspace. Use Settings for platform controls.");
++                       };
++               }
++
++
++               // Legacy workspace tab handler removed from Final Room v1 shell.
+ 
+ 
+ 		Array.from(document.querySelectorAll("[data-aicmdv2-output-tab]")).forEach((btn) => {

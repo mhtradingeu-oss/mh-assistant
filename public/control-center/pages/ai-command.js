@@ -3986,6 +3986,510 @@ function renderAiCommandMainSourceIndicator(projectName, escapeHtml) {
 	`;
 }
 
+function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	return `
+		<div class="aicmd-chatfirst-shell">
+			${renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml })}
+			<main class="aicmd-chatfirst-main">
+				${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+				${renderAiCommandSecondaryTabs({ session, escapeHtml })}
+				${renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+			</main>
+			${renderAiToolDrawerShell({ escapeHtml })}
+		</div>
+	`;
+}
+
+function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const activeSpecialist = session.teamMode === "team"
+		? "Full AI Team"
+		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+	const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+
+	return `
+		<header class="aicmd-chatfirst-header">
+			<div class="aicmd-chatfirst-header-copy">
+				<span class="aicmd-chatfirst-kicker">AI Workspace</span>
+				<h1>AI Command</h1>
+				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+			</div>
+			<div class="aicmd-chatfirst-header-controls" aria-label="AI Command session controls">
+				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+				<span class="aicmd-chatfirst-active">${escapeHtml(activeSpecialist)}</span>
+				<select id="aicmdV2SessionSelect" class="aicmd-chatfirst-control" title="Recent AI chat sessions">
+					<option value="">Recent</option>
+					${asArray(session.chatSessions).slice(0, 8).map((item) => `
+						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
+							${escapeHtml(asString(item.title || "AI Team session").slice(0, 48))}
+						</option>
+					`).join("")}
+				</select>
+				<button id="aicmdV2NewSessionBtn" class="aicmd-chatfirst-control" type="button">New</button>
+				<button id="aicmdV2SettingsBtn" class="aicmd-chatfirst-control" type="button" title="Settings">Settings</button>
+				<span class="aicmd-chatfirst-project">${escapeHtml(projectName || "No project selected")}</span>
+			</div>
+		</header>
+	`;
+}
+
+function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	return `
+		<section class="aicmd-chatfirst-window" aria-label="AI Command chat">
+			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+			${renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml })}
+			${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}
+		</section>
+	`;
+}
+
+function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+	const sourceLabel = source?.name || source?.filename || source?.fileName || "";
+	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+
+	return `
+		<div class="aicmd-chatfirst-topbar">
+			<div class="aicmd-chatfirst-topbar-main">
+				${renderAiCommandSpecialistSelect({ session, escapeHtml })}
+				<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+				</div>
+			</div>
+			<div class="aicmd-chatfirst-topbar-actions">
+				<span class="aicmd-chatfirst-pill">${escapeHtml(modeLabel)}</span>
+				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+				<button id="aicmdV2SourceBtn" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "Choose source through Tool Drawer / Library")}">
+					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
+				</button>
+			</div>
+		</div>
+	`;
+}
+
+function renderAiCommandSpecialistSelect({ session, escapeHtml }) {
+	const isTeam = session.teamMode === "team";
+	const activeSpec = getPhase1SpecialistById(session.modeId);
+
+	return `
+		<details class="aicmd-chatfirst-specialist-select">
+			<summary>
+				<span>Specialist</span>
+				<strong>${escapeHtml(isTeam ? "Full AI Team" : activeSpec?.label || "Specialist")}</strong>
+			</summary>
+			<div class="aicmd-chatfirst-specialist-menu" role="list">
+				${SPECIALIST_DEFS.map((spec) => {
+					const isActive = !isTeam && spec.id === session.modeId;
+					return `
+						<button
+							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+							title="${escapeHtml(spec.summary)}"
+						>
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span>
+								<strong>${escapeHtml(spec.label)}</strong>
+								<small>${escapeHtml(spec.position || spec.summary || "Ready specialist")}</small>
+							</span>
+						</button>
+					`;
+				}).join("")}
+				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+							<span>
+								<strong>${escapeHtml(item.label)}</strong>
+								<small>${escapeHtml(item.status)} - destination-owned authority</small>
+							</span>
+						</div>
+					`).join("")}
+				</div>
+			</div>
+		</details>
+	`;
+}
+
+function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+	const isTeam = session.teamMode === "team";
+	const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+	const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
+	const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+	const allMessages = asArray(session.messages);
+	const selectedMessages = allMessages.filter((message) => {
+		const role = asString(message.role || "");
+		const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+		if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+		if (role === "assistant") return isTeam ? messageRoleId === "team" : messageRoleId === selectedRoleId;
+		return false;
+	});
+	const selectedResponses = asArray(session.responseHistory).filter((item) => {
+		const producerId = getAiRoomRoleId(item.specialistId || "");
+		return isTeam ? producerId === "team" : producerId === selectedRoleId;
+	});
+	const fallbackMessages = !selectedMessages.length && selectedResponses.length
+		? selectedResponses.slice(0, 2).flatMap((item) => ([
+			{
+				role: "user",
+				specialistId: item.specialistId || selectedRoleId,
+				specialistLabel: "You",
+				content: item.prompt || "",
+				createdAt: item.generatedAt || ""
+			},
+			{
+				role: "assistant",
+				specialistId: item.specialistId || selectedRoleId,
+				specialistLabel: item.specialistLabel || selectedLabel,
+				content: item.responseText || "",
+				createdAt: item.generatedAt || ""
+			}
+		]))
+		: [];
+	const conversationMessages = selectedMessages.length ? selectedMessages : fallbackMessages;
+	const safetyLine = safeBridgeStatus.available
+		? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action is created here."
+		: "Preview-safe. Chat requires the protected AI chat route.";
+
+	const renderMessage = (message) => {
+		const role = asString(message.role || "");
+		const isUser = role === "user";
+		const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+		const createdAt = asString(message.createdAt || "");
+		const content = asString(message.content || message.text || message.responseText || "");
+		return `
+			<div class="aicmd-chatfirst-message ${isUser ? "is-user" : "is-assistant"}">
+				<div class="aicmd-chatfirst-message-bubble">
+					<div class="aicmd-chatfirst-message-meta">
+						<strong>${escapeHtml(label)}</strong>
+						${createdAt ? `<span>${escapeHtml(formatTime(createdAt))}</span>` : ""}
+					</div>
+					<p>${escapeHtml(content)}</p>
+				</div>
+			</div>
+		`;
+	};
+
+	return `
+		<div class="aicmd-chatfirst-messages" aria-live="polite">
+			<div class="aicmd-chatfirst-safety">${escapeHtml(safetyLine)}</div>
+			${session.responseLoading ? `
+				<div class="aicmd-chatfirst-loading" role="status">
+					<strong>${escapeHtml(getAiSpecialistWorkingMessage(session))}</strong>
+					<span>Please wait while a review-ready response is prepared.</span>
+				</div>
+			` : ""}
+			${session.responseError ? `<div class="aicmd-chatfirst-error">${escapeHtml(session.responseError)}</div>` : ""}
+			${conversationMessages.length ? `
+				<div class="aicmd-chatfirst-message-stack">
+					${conversationMessages.map(renderMessage).join("")}
+				</div>
+			` : `
+				<div class="aicmd-chatfirst-empty">
+					<strong>Start with ${escapeHtml(selectedLabel)}</strong>
+					<span>Ask for guidance, a draft, source review, task preview, workflow preview, or handoff package. AI Command prepares context only.</span>
+				</div>
+			`}
+		</div>
+	`;
+}
+
+function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+	const spec = getPhase1SpecialistById(session.modeId);
+	const isTeam = session.teamMode === "team";
+	const placeholder = isTeam
+		? "Ask the full AI team for a launch plan, content package, risk review, source-based analysis, or handoff sequence..."
+		: spec.placeholder || `Ask ${spec.label} what to review, draft, improve, or hand off next...`;
+	const specLabel = isTeam ? "Full AI Team" : spec.label;
+	const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+	const isGenerating = Boolean(session.responseLoading);
+
+	return `
+		<div class="aicmd-chatfirst-composer" data-role="${escapeHtml(roleId)}">
+			<div class="aicmd-chatfirst-input-shell">
+				<textarea
+					id="aicmdV2Input"
+					class="aicmd-chatfirst-textarea"
+					rows="3"
+					placeholder="${escapeHtml(placeholder)}"
+					aria-label="Message ${escapeHtml(specLabel)}"
+				>${escapeHtml(session.draftMessage)}</textarea>
+				<div class="aicmd-chatfirst-composer-toolbar" aria-label="Composer controls">
+					<div class="aicmd-chatfirst-composer-left">
+						<button id="aicmdV2VoiceBtn" class="aicmd-chatfirst-icon-control is-planned" type="button" disabled title="Voice input coming soon">Voice planned</button>
+						${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}
+					</div>
+					<div class="aicmd-chatfirst-composer-right">
+						<span class="aicmd-chatfirst-enter-hint">Enter to send. Shift+Enter for newline.</span>
+						<button id="aicmdV2AskBtn" class="aicmd-chatfirst-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+							${isGenerating ? "Sending" : "Send"}
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="aicmd-chatfirst-composer-context">
+				${renderLanguageMarketStrip(aiContext, escapeHtml)}
+			</div>
+			<div class="aicmd-chatfirst-composer-safety">Review-ready guidance only. No publish, send, approval, CRM update, workflow run, durable task creation, or backend execution happens from this composer.</div>
+			<div id="aicmdV2Status" class="aicmd-chatfirst-status-line"></div>
+		</div>
+	`;
+}
+
+function renderAiCommandSecondaryTabs({ session, escapeHtml }) {
+	const tabs = [
+		{ id: "tools", label: "Tools" },
+		{ id: "output", label: "Output" },
+		{ id: "flow", label: "Flow" }
+	];
+	const activeTab = tabs.some((tab) => tab.id === session.chatFirstTab)
+		? session.chatFirstTab
+		: "tools";
+
+	return `
+		<nav class="aicmd-chatfirst-tabs" role="tablist" aria-label="AI Command secondary tabs">
+			${tabs.map((tab) => `
+				<button
+					class="aicmd-chatfirst-tab${activeTab === tab.id ? " is-active" : ""}"
+					type="button"
+					data-aicmd-chatfirst-tab="${escapeHtml(tab.id)}"
+					role="tab"
+					aria-selected="${activeTab === tab.id ? "true" : "false"}"
+				>
+					${escapeHtml(tab.label)}
+				</button>
+			`).join("")}
+		</nav>
+	`;
+}
+
+function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	const validTabs = ["tools", "output", "flow"];
+	const activeTab = validTabs.includes(session.chatFirstTab) ? session.chatFirstTab : "tools";
+	const panel = activeTab === "tools"
+		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+		: activeTab === "output"
+			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+
+	return `
+		<section class="aicmd-chatfirst-tab-panel" data-aicmd-chatfirst-active-tab="${escapeHtml(activeTab)}">
+			${panel}
+		</section>
+	`;
+}
+
+function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const teamActive = session.teamMode === "team";
+
+	return `
+		<div class="aicmd-chatfirst-team-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Team</h2>
+					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+			</div>
+			<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+			</div>
+			<div class="aicmd-chatfirst-specialist-grid">
+				${SPECIALIST_DEFS.map((spec) => {
+					const isActive = !teamActive && spec.id === session.modeId;
+					return `
+						<button
+							class="aicmd-chatfirst-team-card${isActive ? " is-active" : ""}${teamActive ? " is-team-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+						>
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span>
+								<strong>${escapeHtml(spec.label)}</strong>
+								<small>${escapeHtml(spec.summary)}</small>
+							</span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+						<span>
+							<strong>${escapeHtml(item.label)}</strong>
+							<small>${escapeHtml(item.status)} - ${escapeHtml(item.summary)}</small>
+						</span>
+					</div>
+				`).join("")}
+			</div>
+		</div>
+	`;
+}
+
+function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+	const tools = getPhase35ToolSet(session);
+	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+
+	return `
+		<div class="aicmd-chatfirst-tools-tab" data-role="${escapeHtml(roleId)}">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${tools.length} prompt tools</span>
+			</div>
+			<div class="aicmd-chatfirst-tools-grid">
+				${tools.map((tool) => {
+					const outputLabel = getToolOutputTypeLabel(tool);
+					const actionLabel = getToolSafeActionLabel(tool);
+					const destination = routeLabel(getToolDestinationRoute(tool, session));
+					return `
+						<button
+							type="button"
+							class="aicmd-chatfirst-tool-card"
+							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+							data-output-type="${escapeHtml(outputLabel.toLowerCase())}"
+						>
+							<strong>${escapeHtml(tool.label)}</strong>
+							<span>${escapeHtml(actionLabel)} · ${escapeHtml(outputLabel)}</span>
+							<small>Handoff: ${escapeHtml(destination)}</small>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+		</div>
+	`;
+}
+
+function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+	const preview = asObject(session.outputPreview);
+	const hasPreview = Boolean(preview.outputType && preview.title);
+	const activeTab = getOutputWorkspaceTab(session);
+	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], compactSummary: "" };
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+	const specialist = session.teamMode === "team"
+		? { id: "team", label: "Full Team" }
+		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : "Output";
+	const routeActionLabel = destination === "Content Studio"
+		? "Open Content Studio Handoff"
+		: destination === "Publishing"
+			? "Open Publishing Handoff"
+			: `Open ${destination} Handoff`;
+
+	return `
+		<div class="aicmd-chatfirst-output-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Output</h2>
+					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${escapeHtml(hasPreview ? "Review ready" : "Waiting")}</span>
+			</div>
+			${hasPreview ? `
+				<div class="aicmd-chatfirst-output-tabs" role="tablist" aria-label="Output workspace tabs">
+					${AI_ROOM_OUTPUT_TABS.map((tab) => `
+						<button
+							type="button"
+							class="aicmd-chatfirst-output-tab-btn${activeTab === tab.id ? " is-active" : ""}"
+							data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
+							role="tab"
+							aria-selected="${activeTab === tab.id ? "true" : "false"}"
+						>
+							<strong>${escapeHtml(tab.label)}</strong>
+							<span>${escapeHtml(tab.helper)}</span>
+						</button>
+					`).join("")}
+				</div>
+				<div class="aicmd-chatfirst-output-meta">
+					<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+					<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+					<span><strong>Destination</strong>${escapeHtml(destination)}</span>
+					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+				</div>
+				<article class="aicmd-chatfirst-output-card">
+					<span>${escapeHtml(outputLabel)}</span>
+					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
+					<p>${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+					${structuredPreview.blocks.length ? `
+						<div class="aicmd-chatfirst-output-blocks">
+							${structuredPreview.blocks.map((block) => `
+								<section>
+									<strong>${escapeHtml(block.label)}</strong>
+									<${block.ordered ? "ol" : "ul"}>
+										${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+									</${block.ordered ? "ol" : "ul"}>
+								</section>
+							`).join("")}
+						</div>
+					` : ""}
+					<div class="aicmd-chatfirst-output-safety">
+						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+					</div>
+				</article>
+				<div class="aicmd-chatfirst-output-actions">
+					<button id="aicmdV2PreviewSendBtn" class="aicmd-chatfirst-action-primary" type="button">${escapeHtml(routeActionLabel)}</button>
+					<button id="aicmdV2PreviewCopyBtn" class="aicmd-chatfirst-action" type="button">Copy</button>
+					<button id="aicmdV2PreviewUseBtn" class="aicmd-chatfirst-action" type="button">Use in Composer</button>
+					<button id="aicmdV2PreviewClearBtn" class="aicmd-chatfirst-action" type="button">Clear</button>
+				</div>
+				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+			` : `
+				<div class="aicmd-chatfirst-empty">
+					<strong>No review output yet</strong>
+					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+				</div>
+			`}
+		</div>
+	`;
+}
+
+function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+	const activeFlowIndex = getAiRoomFlowIndex(session);
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const preview = asObject(session.outputPreview);
+	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+
+	return `
+		<div class="aicmd-chatfirst-flow-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Flow</h2>
+					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${escapeHtml(safeBridgeStatus.available ? "Chat connected" : "Preview guarded")}</span>
+			</div>
+			<div class="aicmd-chatfirst-flow-steps" aria-label="AI Command flow">
+				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+					<div class="aicmd-chatfirst-flow-step${index === activeFlowIndex ? " is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+						<span>${index + 1}</span>
+						<strong>${escapeHtml(step.title)}</strong>
+						<small>${escapeHtml(step.description)}</small>
+					</div>
+				`).join("")}
+			</div>
+			<div class="aicmd-chatfirst-flow-summary">
+				<span><strong>Readiness</strong>${escapeHtml(readiness)}</span>
+				<span><strong>Output</strong>${escapeHtml(preview.outputType ? formatOutputTypeLabel(preview.outputType) : "No draft yet")}</span>
+				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+			</div>
+		</div>
+	`;
+}
+
 function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
 	const providerConfigured = isProviderLikelyConfigured(aiContext);
 	const readinessItems = [
@@ -4782,38 +5286,20 @@ export const aiCommandRoute = {
 		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
 			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
 		}
+		if (!["tools", "output", "flow"].includes(session.chatFirstTab)) {
+			session.chatFirstTab = asObject(session.outputPreview).outputType ? "output" : "tools";
+		}
 
 		const root = $("ctrlRoomRoot");
 		if (!root) return;
 
-		// Final Room v1 renders the conversation, composer, output workspace, and tools directly.
-		// Legacy workspace tabs remain as helper functions only and are not mounted in this shell.
-
-		root.innerHTML = `
-			<div class="aicmd-v2-shell aicmd-room-shell">
-				${renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml)}
-				<div class="aicmd-v2-body aicmd-room-grid">
-					${renderPhase1TeamRail(session, bridgeStatus, escapeHtml)}
-
-										<main class="aicmd-v2-main aicmd-room-center">
-											<div class="aicmd-unified-chat-surface">
-												${renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml)}
-												<div class="aicmd-room-specialist-conversation">
-													${renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml)}
-												</div>
-												${renderPhase1Composer(session, aiContext, escapeHtml)}
-											</div>
-										</main>
-
-					<aside class="aicmd-room-output">
-						${renderAiRoomOutputWorkspace(session, aiContext, escapeHtml)}
-						${renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml)}
-					</aside>
-				</div>
-				${renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml)}
-				${renderAiToolDrawerShell({ escapeHtml })}
-			</div>
-		`;
+		root.innerHTML = renderAiCommandChatFirstShell({
+			session,
+			projectName,
+			aiContext,
+			bridgeStatus,
+			escapeHtml
+		});
 
 		const input = $("aicmdV2Input");
 		const statusEl = $("aicmdV2Status");
@@ -4921,6 +5407,16 @@ export const aiCommandRoute = {
 				navigateTo("settings");
 			};
 		}
+
+		Array.from(document.querySelectorAll("[data-aicmd-chatfirst-tab]")).forEach((btn) => {
+			btn.onclick = () => {
+				const nextTab = asString(btn.getAttribute("data-aicmd-chatfirst-tab") || "").trim();
+				if (!["tools", "output", "flow"].includes(nextTab)) return;
+				session.chatFirstTab = nextTab;
+				persistSessionDraft(sessionKey, session, "AI Command tab: " + titleCase(nextTab));
+				aiCommandRoute.render(context);
+			};
+		});
 
 		// Legacy workspace tab handler removed from Final Room v1 shell.
 
