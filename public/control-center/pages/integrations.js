@@ -1575,6 +1575,14 @@ function bindIntegrationActions({
       }
     }
 
+    if (type === "sync" || type === "import") {
+      const actionLabel = type === "sync" ? "backend sync" : "historical import";
+      const confirmed = window.confirm(`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.`);
+      if (!confirmed) {
+        return;
+      }
+    }
+
     try {
       if (type === "test") {
         await testProjectIntegration(projectName, integrationId, {
@@ -1596,6 +1604,25 @@ function bindIntegrationActions({
       await reloadProjectData(projectName);
       render();
     } catch (error) {
+      const governanceCode = String(
+        error?.code ||
+        error?.error ||
+        error?.payload?.code ||
+        error?.payload?.error ||
+        ""
+      ).toLowerCase();
+
+      if (governanceCode === "governance_approval_required") {
+        const approvalId = asString(error?.payload?.approval?.approval_id);
+        showMessage?.(`Governance approval requested for ${integration.label}${approvalId ? ` (${approvalId})` : ""}. Review and decide it in Governance before continuing.`);
+        try {
+          await reloadProjectData(projectName);
+        } catch (_) {}
+        navigateTo("governance");
+        render();
+        return;
+      }
+
       showError?.(error.message || `Failed to ${type} ${integration.label}.`);
     }
   }
