@@ -1717,6 +1717,14 @@ function confirmWorkflowBackendRun(workflow) {
         render();
       });
 
+      const confirmed = window.confirm(
+        "Confirm Auto Mode start\n\n" +
+          "Action: Start guided workflow Auto Mode for the current project context.\n" +
+          "Risk: This may prepare workflow steps and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+          "Select Cancel to stop."
+      );
+      if (!confirmed) return;
+
       await startAutoMode(plan, {
         mode: "auto_until_approval",
         context: { getState, navigateTo, createProjectHandoff, projectName }
@@ -1736,6 +1744,13 @@ function confirmWorkflowBackendRun(workflow) {
   const autoResumeBtn = $("workflowAutoResumeBtn");
   if (autoResumeBtn) {
     autoResumeBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm Auto Mode resume\n\n" +
+          "Action: Resume the current guided workflow automation session.\n" +
+          "Risk: This may continue preparing workflow steps and handoffs from the current state.\n\n" +
+          "Select Cancel to keep Auto Mode paused."
+      );
+      if (!confirmed) return;
       await resumeAutoMode({ context: { getState, navigateTo, createProjectHandoff, projectName } });
       showMessage?.("Guided Preparation Mode resumed.");
     };
@@ -1752,6 +1767,13 @@ function confirmWorkflowBackendRun(workflow) {
   const autoApproveBtn = $("workflowAutoApproveBtn");
   if (autoApproveBtn) {
     autoApproveBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm workflow gate approval\n\n" +
+          "Action: Approve the current workflow automation gate.\n" +
+          "Risk: This advances the guided workflow state, but does not replace Governance approval for protected actions.\n\n" +
+          "Select Cancel to keep the gate pending."
+      );
+      if (!confirmed) return;
       await approveCurrentGate({ context: { getState, navigateTo, createProjectHandoff, projectName } });
       showMessage?.("Automation gate accepted. This is not a Governance approval.");
     };
@@ -1760,6 +1782,13 @@ function confirmWorkflowBackendRun(workflow) {
   const autoSkipBtn = $("workflowAutoSkipBtn");
   if (autoSkipBtn) {
     autoSkipBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm workflow step skip\n\n" +
+          "Action: Skip the current guided workflow step.\n" +
+          "Risk: Skipping may leave a workflow preparation step incomplete and should be used only when intentionally bypassing it.\n\n" +
+          "Select Cancel to keep the current step active."
+      );
+      if (!confirmed) return;
       await skipCurrentStep({ context: { getState, navigateTo, createProjectHandoff, projectName } });
       showMessage?.("Guided Preparation Mode skipped one automation step. This does not bypass Governance policy.");
     };
