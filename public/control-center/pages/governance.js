@@ -204,6 +204,29 @@ function confirmGovernanceDecision(decision) {
   return window.confirm(getDecisionConfirmationMessage(decision));
 }
 
+function confirmGovernanceApprovalRequest({ title, entityType, risk }) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const itemTitle = title || "this item";
+  const itemType = entityType || "content_item";
+  const itemRisk = risk || "medium";
+
+  return window.confirm(
+    [
+      "Create Governance approval request?",
+      "",
+      `Action: Create a backend approval request for ${itemTitle}.`,
+      `Entity: ${itemType}`,
+      `Risk: ${itemRisk}`,
+      "",
+      "Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",
+      "",
+      "Select Cancel to review evidence and ownership before continuing."
+    ].join("
+")
+  );
+}
+
 function ensureSession(projectName) {
   const key = projectName || "__default__";
   if (!governanceSessions.has(key)) {
@@ -1349,18 +1372,26 @@ function bindGovernance(context, projectName, session) {
 
   Array.from(root.querySelectorAll("[data-governance-request-approval]")).forEach((button) => {
     button.onclick = async () => {
+      const title = button.getAttribute("data-title") || "Governance item";
+      const entityType = button.getAttribute("data-entity-type") || "content_item";
+      const risk = button.getAttribute("data-risk") || "medium";
+
+      if (!confirmGovernanceApprovalRequest({ title, entityType, risk })) {
+        return;
+      }
+
       try {
         const ownership = asObject(session.summary?.review_model?.ownership);
         await createProjectApproval(projectName, {
-          entity_type: button.getAttribute("data-entity-type") || "content_item",
+          entity_type: entityType,
           entity_id: button.getAttribute("data-entity-id") || "",
-          title: `${button.getAttribute("data-title") || "Governance item"} approval`,
+          title: `${title} approval`,
           summary: button.getAttribute("data-summary") || "Governance review requested.",
           reviewer: ownership.compliance || "Compliance Reviewer",
           reviewer_role: "compliance_reviewer",
           requested_by: "governance-console",
           requested_for: ownership.compliance || "Compliance Reviewer",
-          risk_level: button.getAttribute("data-risk") || "medium",
+          risk_level: risk,
           source_page: "governance",
           route_target: "governance"
         });
