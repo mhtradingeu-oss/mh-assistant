@@ -158,6 +158,21 @@ function formatCount(value) {
   return String(Math.max(0, Math.round(parsed)));
 }
 
+function confirmContentStudioAuthorityAction(action, detail = "") {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const message = [
+    `Confirm Content Studio action: ${action}`,
+    "",
+    detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",
+    "",
+    "Authority: This does not publish, send externally, or approve anything automatically.",
+    "Select Cancel to review the draft, evidence, and destination before continuing."
+  ].join("\n");
+
+  return window.confirm(message);
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -687,6 +702,14 @@ async function persistContentRecord({ projectName, state, session, status, showM
 
   if (!projectName) {
     showMessage?.("Content draft saved locally.");
+    return localItem;
+  }
+
+  if (!confirmContentStudioAuthorityAction(
+    "Save backend content draft",
+    `This will save or update a Content Studio draft for ${projectName}.`
+  )) {
+    showMessage?.("Backend content save cancelled.");
     return localItem;
   }
 
@@ -1693,6 +1716,14 @@ async function saveToLibrary({ projectName, session, selectedItem, showMessage, 
   }
 
   if (projectName) {
+    if (!confirmContentStudioAuthorityAction(
+      "Create Library handoff",
+      "This will create a backend handoff from Content Studio to Library for review and asset preparation."
+    )) {
+      showMessage?.("Library handoff cancelled.");
+      return;
+    }
+
     try {
       const result = await createProjectHandoff(projectName, handoff);
       const saved = asObject(result?.handoff);
@@ -1749,6 +1780,14 @@ async function sendHandoff({ projectName, handoff, session, showMessage, failMes
   }
 
   if (projectName) {
+    if (!confirmContentStudioAuthorityAction(
+      "Create Content Studio handoff",
+      `This will create a backend handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+    )) {
+      showMessage?.("Content Studio handoff cancelled.");
+      return false;
+    }
+
     try {
       await createProjectHandoff(projectName, handoff);
       showMessage?.(successMessage);
@@ -1883,6 +1922,15 @@ function bindPage({
       session.draftMessage = "Draft is prompt-ready.";
 
       if (projectName) {
+        if (!confirmContentStudioAuthorityAction(
+          "Generate draft with AI backend",
+          "This will send the current brief to the AI command backend and create a review draft inside Content Studio."
+        )) {
+          session.draftMessage = "AI draft generation cancelled.";
+          rerender();
+          return;
+        }
+
         try {
           const aiResult = await executeProjectAiCommand(projectName, {
             message: buildAiPrompt(projectName, session, selected()),
@@ -1989,6 +2037,15 @@ function bindPage({
         session.form.brief = `${clean(session.form.brief)}\n\nAdaptation note: Local mode only. Translate/adapt target language = ${language}.`;
         syncVersionFromForm(session);
         session.draftMessage = "Translate/adapt prepared in local mode.";
+        rerender();
+        return;
+      }
+
+      if (!confirmContentStudioAuthorityAction(
+        "Translate/adapt brief with AI backend",
+        `This will send the current Content Studio brief to the AI command backend for ${language} adaptation.`
+      )) {
+        session.draftMessage = "Translate/adapt request cancelled.";
         rerender();
         return;
       }
