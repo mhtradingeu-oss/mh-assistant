@@ -2736,6 +2736,10 @@ function bindMediaStudio({
     rerender();
   }
 
+  function confirmMediaAuthorityAction(title, detail) {
+    return window.confirm(`${title}\n\n${detail}\n\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\n\nSelect Cancel to review before continuing.`);
+  }
+
   function generationApiForMode(mode) {
     if (mode === "video") return generateMediaVideoBrief;
     if (mode === "audio") return generateMediaVoiceScript;
@@ -2753,6 +2757,17 @@ function bindMediaStudio({
     const promptUsed = clean(session.form.prompt);
     const selectedMode = session.form.mode || session.mode || "image";
     const activeRequestType = requestTypeForMode(selectedMode);
+
+    const confirmed = confirmMediaAuthorityAction(
+      "Confirm media generation",
+      `Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`
+    );
+    if (!confirmed) {
+      session.draftMessage = "Media generation cancelled. Prompt remains ready for review.";
+      rerender();
+      return;
+    }
+
     session.form.status = "generating";
     session.validation = {};
     saveDraftToSession(projectName, state, session, "generating");
@@ -2944,6 +2959,16 @@ function bindMediaStudio({
         rerender();
         return;
       }
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm prompt improvement",
+        "Action: Improve this prompt using the media prompt service.\nRisk: This may call a configured AI provider. The result remains review-only and is not published."
+      );
+      if (!confirmed) {
+        session.draftMessage = "Prompt improvement cancelled.";
+        rerender();
+        return;
+      }
+
       try {
         const result = await improveMediaPrompt(buildGenerationRequestPayload(session));
         if (result && result.ok === false && result.status === "provider_not_configured") {
@@ -2973,6 +2998,16 @@ function bindMediaStudio({
         rerender();
         return;
       }
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm brand safety check",
+        "Action: Run media brand-safety review for this prompt.\nRisk: This may call a configured AI/provider service. The result remains review-only."
+      );
+      if (!confirmed) {
+        session.draftMessage = "Brand safety check cancelled.";
+        rerender();
+        return;
+      }
+
       try {
         const result = await brandCheckMedia(buildGenerationRequestPayload(session));
         if (result && result.ok === false && result.status === "provider_not_configured") {
@@ -3068,6 +3103,12 @@ function bindMediaStudio({
       }
 
       if (action === "approve") {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm local media approval mark",
+          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+        );
+        if (!confirmed) return;
+
         session.form.status = "approved";
         const currentVersion = selectedVersionEntry(session);
         if (currentVersion) currentVersion.readiness_status = "approved";
@@ -3077,6 +3118,12 @@ function bindMediaStudio({
       }
 
       if (action === "send-publishing") {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm publishing handoff",
+          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+        );
+        if (!confirmed) return;
+
         session.form.status = "sent_to_publishing";
         const currentVersion = selectedVersionEntry(session);
         if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";
@@ -3094,6 +3141,13 @@ function bindMediaStudio({
     approveBtn.onclick = async () => {
       sync();
       const item = selected();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm media approval decision",
+        "Action: Record this media job as approved/review-ready.\nRisk: If a pending backend approval exists, this may submit an approval decision."
+      );
+      if (!confirmed) return;
+
       session.form.status = "approved";
       const currentVersion = selectedVersionEntry(session);
       if (currentVersion) {
@@ -3128,6 +3182,13 @@ function bindMediaStudio({
   if (requestApprovalBtn) {
     requestApprovalBtn.onclick = async () => {
       sync();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm media approval request",
+        "Action: Request Governance/Compliance review for this media job.\nRisk: This may create a backend approval item for a reviewer."
+      );
+      if (!confirmed) return;
+
       const item = selected() || saveDraftToSession(projectName, state, session, "needs_review");
       saveDraftToSession(projectName, state, session, "needs_review");
 
@@ -3165,6 +3226,13 @@ function bindMediaStudio({
     rejectBtn.onclick = async () => {
       sync();
       const item = selected();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm media revision decision",
+        "Action: Return this media job to draft/revision.\nRisk: If a pending backend approval exists, this may submit a rejection/revision decision."
+      );
+      if (!confirmed) return;
+
       session.form.status = "draft";
       const currentVersion = selectedVersionEntry(session);
       if (currentVersion) currentVersion.readiness_status = "draft";
@@ -3196,6 +3264,13 @@ function bindMediaStudio({
   if (createTaskBtn) {
     createTaskBtn.onclick = async () => {
       sync();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm media task creation",
+        "Action: Create a task linked to this media job.\nRisk: This may create durable work for the media team."
+      );
+      if (!confirmed) return;
+
       const item = selected() || saveDraftToSession(projectName, state, session, "prompt_ready");
       if (backendProjectName && item && !item.localOnly) {
         try {
@@ -3267,6 +3342,13 @@ function bindMediaStudio({
   if (sendPublishingBtn) {
     sendPublishingBtn.onclick = () => {
       sync();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm publishing handoff",
+        "Action: Prepare and send this media package to Publishing.\nRisk: This creates a downstream publishing handoff. It does not publish directly."
+      );
+      if (!confirmed) return;
+
       session.form.status = "sent_to_publishing";
       const currentVersion = selectedVersionEntry(session);
       if (currentVersion) currentVersion.readiness_status = "sent_to_publishing";
@@ -3325,6 +3407,12 @@ function bindMediaStudio({
       }
 
       if (action === "approve") {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm local media approval mark",
+          "Action: Mark this media job as approved/review-ready locally.\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff."
+        );
+        if (!confirmed) return;
+
         session.form.status = "approved";
         currentVersion.readiness_status = "approved";
         currentVersion.provider_status = currentVersion.provider_status || "generated";
@@ -3364,6 +3452,12 @@ function bindMediaStudio({
         showMessage?.("Selected version saved as draft.");
       }
       if (action === "send-publishing") {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm publishing handoff",
+          "Action: Prepare and send this media package to Publishing.\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly."
+        );
+        if (!confirmed) return;
+
         session.form.status = "sent_to_publishing";
         currentVersion.readiness_status = "sent_to_publishing";
         syncOutputsFromVersioning(session);
