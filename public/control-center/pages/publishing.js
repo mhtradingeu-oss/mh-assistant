@@ -1862,6 +1862,13 @@ function bindPublishingWorkspace({
       publishingAutomationEnabled = true;
       ensurePublishingAutoModeBinding(getState, navigateTo, render);
       rerender();
+      const confirmed = window.confirm(
+        "Confirm Publishing Auto Mode start\n\n" +
+          "Action: Start guided publishing Auto Mode for the current publishing package.\n" +
+          "Risk: This may prepare publishing drafts and handoffs, but must not publish externally or approve Governance decisions without explicit approval.\n\n" +
+          "Select Cancel to stop."
+      );
+      if (!confirmed) return;
 
       const runResult = await startAutoMode(plan, {
         mode: "auto_until_approval",
@@ -1891,6 +1898,14 @@ function bindPublishingWorkspace({
   const autoApproveBtn = $("publishingAutoApproveBtn");
   if (autoApproveBtn) {
     autoApproveBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm publishing gate approval\n\n" +
+          "Action: Approve the current publishing automation gate.\n" +
+          "Risk: This advances the guided publishing state, but does not replace Governance approval for protected actions.\n\n" +
+          "Select Cancel to keep the gate pending."
+      );
+      if (!confirmed) return;
+
       await approveCurrentGate({ context: { getState, navigateTo, projectName } });
       showMessage?.("Approval gate accepted.");
     };
@@ -1899,6 +1914,14 @@ function bindPublishingWorkspace({
   const autoSkipBtn = $("publishingAutoSkipBtn");
   if (autoSkipBtn) {
     autoSkipBtn.onclick = async () => {
+      const confirmed = window.confirm(
+        "Confirm publishing step skip\n\n" +
+          "Action: Skip the current guided publishing step.\n" +
+          "Risk: Skipping may leave a publishing preparation step incomplete and should be used only when intentionally bypassing it.\n\n" +
+          "Select Cancel to keep the current step active."
+      );
+      if (!confirmed) return;
+
       await skipCurrentStep({ context: { getState, navigateTo, projectName } });
       showMessage?.("Gated step skipped.");
     };
