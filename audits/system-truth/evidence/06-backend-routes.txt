@@ -1,0 +1,232 @@
+===== ROUTES / ENDPOINTS =====
+9359:app.get('/health', (req, res) => {
+9367:app.get('/healthz', (req, res) => {
+9375:app.get('/readyz', (req, res) => {
+9380:app.get('/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9391:app.get('/public/media-manager/project/:project/storage/parity-readiness', (req, res) => {
+9402:app.get('/media-manager/storage/parity-readiness', (req, res) => {
+9413:app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
+9424:app.post('/task', (req, res) => {
+9432:app.get('/today', (req, res) => {
+9448:app.get('/next', (req, res) => {
+9464:app.post('/ingest', (req, res) => {
+9480:app.post('/execute_publish_package', async (req, res) => {
+9568:app.post('/execute_email_package', async (req, res) => {
+9656:app.post('/generate_media_from_prompt', async (req, res) => {
+9737:app.post('/build_ad_execution_package', async (req, res) => {
+9823:app.get('/products', async (req, res) => {
+9842:app.get('/optimize-product/:id', async (req, res) => {
+9887:app.get('/prepare-product-update/:id', async (req, res) => {
+9973:app.post('/backup-and-clone-product/:id', async (req, res) => {
+10057:app.post('/apply-prepared-copy-to-clone/:originalId/:cloneId', async (req, res) => {
+10175:  app.get('/media/projects', (req, res) => {
+10180:app.get('/media/tree/:project', (req, res) => {
+10206:app.post('/media/upload', applySingleMediaUpload, (req, res) => {
+10276:app.get('/media/registry/:project', (req, res) => {
+10280:app.get('/media/file/:project/:type/:filename', (req, res) => {
+10609:app.post('/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10611:app.post('/public/media-manager/project/:project/rename', express.json({ limit: '1mb' }), handleRenameMediaManagerProject);
+10613:app.post('/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10615:app.post('/public/media-manager/project/:project/apply-template', express.json({ limit: '1mb' }), handleApplyBusinessTemplateToProject);
+10617:app.post('/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10619:app.post('/public/media-manager/projects', express.json({ limit: '1mb' }), handleCreateMediaManagerProject);
+10621:app.get('/media-manager/projects', (req, res) => {
+10625:app.get('/public/media-manager/projects', (req, res) => {
+10629:app.get('/media-manager/asset-catalog', (req, res) => {
+10635:app.get('/public/media-manager/asset-catalog', (req, res) => {
+10641:app.get('/media-manager/project/:project/startup', (req, res) => {
+10651:app.get('/public/media-manager/project/:project/startup', (req, res) => {
+10661:app.get('/media-manager/project/:project', (req, res) => {
+10671:app.get('/public/media-manager/project/:project', (req, res) => {
+10808:app.post('/media-manager/project/:project/assets/:assetId/status', express.json({ limit: '1mb' }), (req, res) => {
+10862:app.post('/media-manager/project/:project/assets/:assetId/rename', express.json({ limit: '1mb' }), (req, res) => {
+10892:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+10946:app.post('/media-manager/project/:project/assets/:assetId/source-of-truth', express.json({ limit: '1mb' }), (req, res) => {
+10971:app.post('/media-manager/project/:project/assets/:assetId/archive', express.json({ limit: '1mb' }), (req, res) => {
+10999:app.post('/media-manager/project/:project/assets/:assetId/delete', express.json({ limit: '1mb' }), (req, res) => {
+11030:app.delete('/media-manager/project/:project/assets/:assetId', express.json({ limit: '1mb' }), (req, res) => {
+11061:app.post('/media-manager/project/:project/library/refresh', (req, res) => {
+11071:app.post('/media-manager/project/:project/setup', (req, res) => {
+11110:app.post('/public/media-manager/project/:project/setup', (req, res) => {
+11159:app.get('/media-manager/project/:project/operations', handleGetProjectOperations);
+11160:app.get('/public/media-manager/project/:project/operations', handleGetProjectOperations);
+11218:app.get('/media-manager/project/:project/task-center', handleGetTaskCenter);
+11219:app.get('/public/media-manager/project/:project/task-center', handleGetTaskCenter);
+11220:app.get('/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11221:app.get('/public/media-manager/project/:project/queue-center', handleGetQueueCenter);
+11222:app.get('/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11223:app.get('/public/media-manager/project/:project/job-monitor', handleGetJobMonitor);
+11224:app.get('/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11225:app.get('/public/media-manager/project/:project/notification-center', handleGetNotificationCenter);
+11234:app.get('/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11235:app.get('/public/media-manager/project/:project/operations/schema', handleGetOperationsSchema);
+11291:app.get('/media-manager/project/:project/team', handleGetProjectTeam);
+11292:app.get('/public/media-manager/project/:project/team', handleGetProjectTeam);
+11293:app.post('/media-manager/project/:project/team', handleUpdateProjectTeam);
+11294:app.post('/public/media-manager/project/:project/team', handleUpdateProjectTeam);
+11339:app.get('/media-manager/project/:project/campaigns', handleListCampaigns);
+11340:app.get('/public/media-manager/project/:project/campaigns', handleListCampaigns);
+11341:app.post('/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11342:app.post('/public/media-manager/project/:project/campaigns', handleUpsertCampaign);
+11343:app.patch('/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11350:app.patch('/public/media-manager/project/:project/campaigns/:campaignId', (req, res) => {
+11357:app.get('/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11358:app.get('/public/media-manager/project/:project/campaigns/:campaignId', handleGetCampaign);
+11404:app.get('/media-manager/project/:project/content-items', handleListContentItems);
+11405:app.get('/public/media-manager/project/:project/content-items', handleListContentItems);
+11406:app.post('/media-manager/project/:project/content-items', handleUpsertContentItem);
+11407:app.post('/public/media-manager/project/:project/content-items', handleUpsertContentItem);
+11408:app.patch('/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11415:app.patch('/public/media-manager/project/:project/content-items/:contentItemId', (req, res) => {
+11422:app.get('/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11423:app.get('/public/media-manager/project/:project/content-items/:contentItemId', handleGetContentItem);
+11470:app.get('/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11471:app.get('/public/media-manager/project/:project/media-jobs', handleListMediaJobs);
+11472:app.post('/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11473:app.post('/public/media-manager/project/:project/media-jobs', handleUpsertMediaJob);
+11474:app.patch('/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11481:app.patch('/public/media-manager/project/:project/media-jobs/:mediaJobId', (req, res) => {
+11488:app.get('/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11489:app.get('/public/media-manager/project/:project/media-jobs/:mediaJobId', handleGetMediaJob);
+11506:app.get('/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11507:app.get('/public/media-manager/project/:project/workflows/runs', handleListWorkflowRuns);
+11523:app.get('/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11524:app.get('/public/media-manager/project/:project/workflows/runs/:runId', handleGetWorkflowRun);
+11593:app.post('/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11594:app.post('/public/media-manager/project/:project/workflows/:workflowId/run', handleRunWorkflow);
+11933:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+11934:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+11935:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+11936:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+11937:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+11938:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+11939:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+11940:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+11941:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+11942:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+11943:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+11944:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+11945:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+11946:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+11947:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+11948:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+11949:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+11950:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+11981:app.get('/media-manager/project/:project/tasks', handleListTasks);
+11982:app.get('/public/media-manager/project/:project/tasks', handleListTasks);
+11983:app.post('/media-manager/project/:project/tasks', handleCreateTask);
+11984:app.post('/public/media-manager/project/:project/tasks', handleCreateTask);
+11985:app.get('/media-manager/project/:project/tasks/:taskId', (req, res) => {
+11998:app.get('/public/media-manager/project/:project/tasks/:taskId', (req, res) => {
+12072:app.get('/media-manager/project/:project/approvals', handleListApprovals);
+12073:app.get('/public/media-manager/project/:project/approvals', handleListApprovals);
+12074:app.post('/media-manager/project/:project/approvals', handleCreateApproval);
+12075:app.post('/public/media-manager/project/:project/approvals', handleCreateApproval);
+12076:app.post('/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12077:app.post('/public/media-manager/project/:project/approvals/:approvalId/decision', handleApprovalDecision);
+12130:app.get('/media-manager/project/:project/governance', handleGetGovernance);
+12131:app.get('/public/media-manager/project/:project/governance', handleGetGovernance);
+12132:app.get('/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12133:app.get('/public/media-manager/project/:project/governance/policy', handleGetGovernancePolicy);
+12134:app.post('/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12135:app.post('/public/media-manager/project/:project/governance/policy', handleUpdateGovernancePolicy);
+12152:app.get('/media-manager/project/:project/notifications', handleListNotifications);
+12153:app.get('/public/media-manager/project/:project/notifications', handleListNotifications);
+12154:app.patch('/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12167:app.patch('/public/media-manager/project/:project/notifications/:notificationId', (req, res) => {
+12227:app.get('/media-manager/project/:project/handoffs', handleListHandoffs);
+12228:app.get('/public/media-manager/project/:project/handoffs', handleListHandoffs);
+12229:app.post('/media-manager/project/:project/handoffs', handleCreateHandoff);
+12230:app.post('/public/media-manager/project/:project/handoffs', handleCreateHandoff);
+12231:app.post('/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12232:app.post('/public/media-manager/project/:project/handoffs/:handoffId/consume', handleConsumeHandoff);
+12249:app.get('/media-manager/project/:project/events', handleListEvents);
+12250:app.get('/public/media-manager/project/:project/events', handleListEvents);
+12272:app.get('/api/insights/:project', handleGetProjectInsights);
+12273:app.get('/public/api/insights/:project', handleGetProjectInsights);
+12274:app.get('/api/learning/:project', handleGetProjectLearning);
+12275:app.get('/public/api/learning/:project', handleGetProjectLearning);
+12277:app.post('/media-manager/project/:project/sources', (req, res) => {
+12331:app.post('/public/media-manager/project/:project/sources', (req, res) => {
+12385:app.delete('/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12424:app.delete('/public/media-manager/project/:project/sources/:sourceType', (req, res) => {
+12656:app.get('/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+12770:app.get('/api/projects/:project/customer-operations/readiness', (req, res) => {
+12776:app.get('/api/projects/:project/customer-operations/inbox', (req, res) => {
+12782:app.get('/api/projects/:project/customer-operations/conversations', (req, res) => {
+12788:app.get('/api/projects/:project/customer-operations/conversations/:conversationId', (req, res) => {
+12794:app.get('/api/projects/:project/customer-operations/conversations/:conversationId/messages', (req, res) => {
+12800:app.get('/api/projects/:project/customer-operations/customers/:customerId', (req, res) => {
+12806:app.get('/api/projects/:project/customer-operations/tickets', (req, res) => {
+12812:app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
+12819:app.get(
+12824:app.get(
+12829:app.get(
+12834:app.get(
+12839:app.get(
+12844:app.get(
+12849:app.get(
+12854:app.get(
+12932:app.get(
+12937:app.get(
+12942:app.get(
+12947:app.get(
+12952:app.get(
+12957:app.get(
+12962:app.get(
+12967:app.get(
+12972:app.get(
+12977:app.get(
+12983:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+12984:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+12985:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+12986:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13028:app.post('/media-manager/project/:project/native-media/generate', handleNativeMediaGenerate);
+13032:app.get('/public/media-manager/project/:project/integrations/control-center', handleGetProjectIntegrationControlCenter);
+13034:app.post('/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13040:app.post('/public/media-manager/project/:project/integrations/:integrationId/connect', async (req, res) => {
+13046:app.post('/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13052:app.post('/public/media-manager/project/:project/integrations/:integrationId', async (req, res) => {
+13058:app.post('/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13064:app.post('/public/media-manager/project/:project/integrations/:integrationId/reconnect', async (req, res) => {
+13070:app.post('/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13074:app.post('/public/media-manager/project/:project/integrations/:integrationId/test', async (req, res) => {
+13078:app.post('/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13082:app.post('/public/media-manager/project/:project/integrations/:integrationId/sync', async (req, res) => {
+13086:app.post('/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13090:app.post('/public/media-manager/project/:project/integrations/:integrationId/import-history', async (req, res) => {
+13094:app.post('/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13098:app.post('/public/media-manager/project/:project/integrations/:integrationId/disconnect', async (req, res) => {
+13104:app.post('/media-manager/project/:project/publishing/schedule', (req, res) => {
+13147:app.post('/public/media-manager/project/:project/publishing/schedule', (req, res) => {
+13190:app.post('/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13229:app.post('/public/media-manager/project/:project/publishing/:jobId/reschedule', (req, res) => {
+13268:app.post('/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13300:app.post('/public/media-manager/project/:project/publishing/:jobId/ready', (req, res) => {
+13332:app.post('/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13374:app.post('/public/media-manager/project/:project/publishing/:jobId/publish', (req, res) => {
+13416:app.post('/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13458:app.post('/public/media-manager/project/:project/publishing/:jobId/fail', (req, res) => {
+13500:app.get('/media-manager', (req, res) => {
+13504:app.get('/media-manager/', (req, res) => {
+13508:app.get(/^\/control-center$/, (req, res) => {
+13578:app.get('/generated-output/:project/:filename', (req, res) => {
+15786:app.post('/telegram-command', async (req, res) => {
+21730:app.post('/publish-clone/:cloneId', async (req, res) => {
+21773:app.post('/replace-original-product/:originalId/:cloneId', async (req, res) => {
+21862:app.post('/cleanup-clone/:cloneId', async (req, res) => {
+21909:app.post('/publish-blog/:draftId', async (req, res) => {
+22015:app.post('/rollback-product/:productId', async (req, res) => {
+22526:app.post('/schedule_execution_job', (req, res) => {
+22620:app.get('/scheduler_queue', (req, res) => {
+22697:app.post('/run_scheduler_worker_once', async (req, res) => {
+22827:app.post('/record_execution_feedback', (req, res) => {
+22899:app.get('/get_performance_summary', (req, res) => {
+22918:app.post('/generate_optimization_recommendations', (req, res) => {
+22946:app.post('/api/media/improve-prompt', async (req, res) => {
+22976:app.post('/api/media/brand-check', async (req, res) => {
+23006:app.post('/api/media/generate-image', async (req, res) => {
+23036:app.post('/api/media/generate-video-brief', async (req, res) => {
+23066:app.post('/api/media/generate-voice-script', async (req, res) => {
+23096:app.post('/api/media/generate-campaign-pack', async (req, res) => {
+23126:app.get('/get_smart_suggestions', (req, res) => {
