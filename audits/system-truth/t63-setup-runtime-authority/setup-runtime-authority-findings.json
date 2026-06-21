@@ -1,0 +1,1051 @@
+{
+  "file": "public/control-center/pages/setup.js",
+  "total_lines": 1787,
+  "render_writes": [
+    {
+      "line": 746,
+      "text": "    missingActionList.innerHTML = missingInsights.length"
+    },
+    {
+      "line": 761,
+      "text": "    blockerList.innerHTML = renderIndicatorList("
+    },
+    {
+      "line": 1425,
+      "text": "    root.innerHTML = `"
+    }
+  ],
+  "event_bindings": [
+    {
+      "line": 775,
+      "text": "    completeNowBtn.onclick = () => {"
+    },
+    {
+      "line": 914,
+      "text": "    button.onclick = () => activateStep(button.getAttribute(\"data-setup-step\") || STEP_DEFINITIONS[0].id);"
+    },
+    {
+      "line": 918,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 928,
+      "text": "    prevBtn.onclick = () => {"
+    },
+    {
+      "line": 936,
+      "text": "    nextBtn.onclick = () => {"
+    },
+    {
+      "line": 995,
+      "text": "  form.oninput = refreshAndPersistDraft;"
+    },
+    {
+      "line": 996,
+      "text": "  form.onchange = refreshAndPersistDraft;"
+    },
+    {
+      "line": 1012,
+      "text": "  // The old interaction model caused typing/click instability."
+    },
+    {
+      "line": 1016,
+      "text": "  setupRoot.onclick = (event) => {"
+    },
+    {
+      "line": 1045,
+      "text": "    saveDraftBtn.onclick = () => {"
+    },
+    {
+      "line": 1052,
+      "text": "    saveBackendBtn.onclick = async () => {"
+    },
+    {
+      "line": 1094,
+      "text": "    resetBtn.onclick = () => {"
+    },
+    {
+      "line": 1105,
+      "text": "    aiPositioningBtn.onclick = () => {"
+    },
+    {
+      "line": 1118,
+      "text": "    aiAudienceBtn.onclick = () => {"
+    },
+    {
+      "line": 1131,
+      "text": "    aiToneBtn.onclick = () => {"
+    },
+    {
+      "line": 1144,
+      "text": "    aiFillBtn.onclick = () => {"
+    },
+    {
+      "line": 1172,
+      "text": "    aiCommandBtn.onclick = () => {"
+    },
+    {
+      "line": 1186,
+      "text": "    validateNowBtn.onclick = () => {"
+    },
+    {
+      "line": 1189,
+      "text": "        target.click();"
+    },
+    {
+      "line": 1196,
+      "text": "    continueLibraryBtn.onclick = () => {"
+    },
+    {
+      "line": 1203,
+      "text": "    continueIntegrationsBtn.onclick = () => {"
+    },
+    {
+      "line": 1210,
+      "text": "    continueCampaignBtn.onclick = () => {"
+    },
+    {
+      "line": 1217,
+      "text": "    reviewMissingBtn.onclick = () => {"
+    },
+    {
+      "line": 1237,
+      "text": "    reviewReadinessBtn.onclick = () => {"
+    },
+    {
+      "line": 1244,
+      "text": "    smartActionBtn.onclick = () => {"
+    },
+    {
+      "line": 1263,
+      "text": "        saveBackendBtn.click();"
+    },
+    {
+      "line": 1740,
+      "text": "      templateApplyBtn.onclick = async () => {"
+    },
+    {
+      "line": 1783,
+      "text": "      saveBottomBtn.onclick = () => saveTopBtn.click();"
+    }
+  ],
+  "save_write_signals": [
+    {
+      "line": 3,
+      "text": "import { patchState } from \"../state.js\";"
+    },
+    {
+      "line": 75,
+      "text": "  project_name: \"Used across routing, saves, and system context labels.\","
+    },
+    {
+      "line": 81,
+      "text": "  currency: \"Required for pricing context and paid/media planning outputs.\","
+    },
+    {
+      "line": 92,
+      "text": "  brand_promise: \"Defines the core value AI should protect in every output.\","
+    },
+    {
+      "line": 94,
+      "text": "  language: \"Sets the default language for content, AI suggestions, and campaign outputs.\","
+    },
+    {
+      "line": 214,
+      "text": "function saveSetupDraft(projectName, data) {"
+    },
+    {
+      "line": 416,
+      "text": "    return `Complete ${missingFields.length} required setup field${missingFields.length === 1 ? \"\" : \"s\"}, then use Save Setup for backend persistence.`;"
+    },
+    {
+      "line": 427,
+      "text": "  return \"Save Setup to persist the foundation, then continue to the owning workspace.\";"
+    },
+    {
+      "line": 464,
+      "text": "          ? `<textarea id=\"setup-${escapeHtml(name)}\" name=\"${escapeHtml(name)}\" class=\"setup-input setup-textarea\" rows=\"${rows}\" placeholder=\"${escapeHtml(placeholder || \"\")}\">${escapeHtml(asString(value))}</textarea>`"
+    },
+    {
+      "line": 465,
+      "text": "          : `<input id=\"setup-${escapeHtml(name)}\" name=\"${escapeHtml(name)}\" class=\"setup-input\" type=\"${escapeHtml(type)}\" value=\"${escapeHtml(asString(value))}\" placeholder=\"${escapeHtml(placeholder || \"\")}\">`"
+    },
+    {
+      "line": 516,
+      "text": "function buildSetupPersistencePayload(values) {"
+    },
+    {
+      "line": 600,
+      "text": "  if (audience) audience.textContent = compactListText([buildAudienceSuggestion(values)], \"Identify missing launch inputs for audience targeting.\");"
+    },
+    {
+      "line": 642,
+      "text": "  // Compute status variables for statusMap"
+    },
+    {
+      "line": 780,
+      "text": "      const input = form.querySelector(`[name=\"${first.name}\"]`);"
+    },
+    {
+      "line": 781,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 782,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 868,
+      "text": "  saveProjectSetup,"
+    },
+    {
+      "line": 959,
+      "text": "  const saveLocal = (message) => {"
+    },
+    {
+      "line": 961,
+      "text": "    const saved = saveSetupDraft(projectName, values);"
+    },
+    {
+      "line": 963,
+      "text": "      showMessage(saved ? message : \"Local draft storage is not available in this browser.\");"
+    },
+    {
+      "line": 967,
+      "text": "  let draftAutoSaveTimer = null;"
+    },
+    {
+      "line": 969,
+      "text": "  const refreshAndPersistDraft = () => {"
+    },
+    {
+      "line": 972,
+      "text": "    patchState("
+    },
+    {
+      "line": 984,
+      "text": "    if (draftAutoSaveTimer) {"
+    },
+    {
+      "line": 985,
+      "text": "      clearTimeout(draftAutoSaveTimer);"
+    },
+    {
+      "line": 988,
+      "text": "    draftAutoSaveTimer = setTimeout(() => {"
+    },
+    {
+      "line": 989,
+      "text": "      saveSetupDraft(projectName, values);"
+    },
+    {
+      "line": 995,
+      "text": "  form.oninput = refreshAndPersistDraft;"
+    },
+    {
+      "line": 996,
+      "text": "  form.onchange = refreshAndPersistDraft;"
+    },
+    {
+      "line": 999,
+      "text": "    const field = event.target?.closest?.(\".setup-input, .setup-textarea\");"
+    },
+    {
+      "line": 1030,
+      "text": "      const input = form.querySelector(`[name=\"${fieldName}\"]`);"
+    },
+    {
+      "line": 1032,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1033,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 1043,
+      "text": "  const saveDraftBtn = $(\"setupSaveDraftBtn\");"
+    },
+    {
+      "line": 1044,
+      "text": "  if (saveDraftBtn) {"
+    },
+    {
+      "line": 1045,
+      "text": "    saveDraftBtn.onclick = () => {"
+    },
+    {
+      "line": 1046,
+      "text": "      saveLocal(`Local setup draft saved for ${draftKeyName}. Use Save Setup to persist backend project foundation data.`);"
+    },
+    {
+      "line": 1050,
+      "text": "  const saveBackendBtn = $(\"setupSaveBackendBtn\");"
+    },
+    {
+      "line": 1051,
+      "text": "  if (saveBackendBtn) {"
+    },
+    {
+      "line": 1052,
+      "text": "    saveBackendBtn.onclick = async () => {"
+    },
+    {
+      "line": 1060,
+      "text": "      const payload = buildSetupPersistencePayload(values);"
+    },
+    {
+      "line": 1061,
+      "text": "      const previousLabel = saveBackendBtn.textContent;"
+    },
+    {
+      "line": 1063,
+      "text": "      saveBackendBtn.disabled = true;"
+    },
+    {
+      "line": 1064,
+      "text": "      saveBackendBtn.textContent = \"Saving Setup...\";"
+    },
+    {
+      "line": 1068,
+      "text": "        await saveProjectSetup?.(projectName, payload);"
+    },
+    {
+      "line": 1077,
+      "text": "        showMessage?.(`Backend setup foundation saved for ${draftKeyName}.${renameWarning}`);"
+    },
+    {
+      "line": 1078,
+      "text": "        saveBackendBtn.textContent = \"Saved\";"
+    },
+    {
+      "line": 1080,
+      "text": "        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);"
+    },
+    {
+      "line": 1082,
+      "text": "        saveBackendBtn.disabled = false;"
+    },
+    {
+      "line": 1084,
+      "text": "          if (saveBackendBtn && saveBackendBtn.textContent !== previousLabel) {"
+    },
+    {
+      "line": 1085,
+      "text": "            saveBackendBtn.textContent = previousLabel;"
+    },
+    {
+      "line": 1112,
+      "text": "      showMessage?.(\"Local AI suggestion applied to Offer positioning. Use Save Setup to persist it.\");"
+    },
+    {
+      "line": 1125,
+      "text": "      showMessage?.(\"Local AI suggestion applied to Primary audience. Use Save Setup to persist it.\");"
+    },
+    {
+      "line": 1138,
+      "text": "      showMessage?.(\"Local AI suggestion applied to Brand voice. Use Save Setup to persist it.\");"
+    },
+    {
+      "line": 1147,
+      "text": "        const input = form.querySelector(`[name=\"${name}\"]`);"
+    },
+    {
+      "line": 1148,
+      "text": "        if (input && !asString(input.value).trim()) {"
+    },
+    {
+      "line": 1149,
+      "text": "          input.value = nextValue;"
+    },
+    {
+      "line": 1175,
+      "text": "      const input = $(\"quickCommandInput\");"
+    },
+    {
+      "line": 1176,
+      "text": "      if (input) {"
+    },
+    {
+      "line": 1177,
+      "text": "        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(\", \") : \"none\"}. Include positioning, audience, and tone guidance.`;"
+    },
+    {
+      "line": 1187,
+      "text": "      const target = $(\"setupSaveBackendBtn\");"
+    },
+    {
+      "line": 1227,
+      "text": "      const input = form.querySelector(`[name=\"${first.name}\"]`);"
+    },
+    {
+      "line": 1228,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1229,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 1251,
+      "text": "        const input = form.querySelector(`[name=\"${first.name}\"]`);"
+    },
+    {
+      "line": 1252,
+      "text": "        if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1253,
+      "text": "          input.focus();"
+    },
+    {
+      "line": 1254,
+      "text": "          if (typeof input.scrollIntoView === \"function\") {"
+    },
+    {
+      "line": 1255,
+      "text": "            input.scrollIntoView({ behavior: \"smooth\", block: \"center\" });"
+    },
+    {
+      "line": 1262,
+      "text": "      if (saveBackendBtn && !saveBackendBtn.disabled) {"
+    },
+    {
+      "line": 1263,
+      "text": "        saveBackendBtn.click();"
+    },
+    {
+      "line": 1344,
+      "text": "        <span id=\"setupTemplateStatus\" class=\"setup-template-status\">Apply loads template guidance. Use Save Setup for foundation persistence.</span>"
+    },
+    {
+      "line": 1372,
+      "text": "    saveProjectSetup"
+    },
+    {
+      "line": 1415,
+      "text": "    const lastSavedAt = formatUpdatedAt("
+    },
+    {
+      "line": 1417,
+      "text": "      readinessDashboard.last_saved_at ||"
+    },
+    {
+      "line": 1441,
+      "text": "              <button id=\"setupSaveBackendBtn\" class=\"btn btn-primary\" type=\"button\">Save Setup to Backend</button>"
+    },
+    {
+      "line": 1447,
+      "text": "            <p>Setup prepares and saves project foundation data only. Local drafts stay in this browser. Save Setup writes the backend foundation through the governed setup save path.</p>"
+    },
+    {
+      "line": 1482,
+      "text": "              <span class=\"setup-helper\">Updated ${escapeHtml(lastSavedAt)}</span>"
+    },
+    {
+      "line": 1538,
+      "text": "                <p class=\"home-section-copy\">Start with the project identity used by routing, backend setup save, and cross-workspace context.</p>"
+    },
+    {
+      "line": 1549,
+      "text": "                <p class=\"home-section-copy\">Core message and tone rules for consistent output.</p>"
+    },
+    {
+      "line": 1627,
+      "text": "                : `<div class=\"empty-box\">All required foundation fields are complete. Use Save Setup to persist backend project foundation data.</div>`"
+    },
+    {
+      "line": 1647,
+      "text": "              <h4>Backend Save & Diagnostics</h4>"
+    },
+    {
+      "line": 1648,
+      "text": "              <button id=\"setupValidateNowBtn\" class=\"btn btn-ghost\" type=\"button\">Save Setup and refresh</button>"
+    },
+    {
+      "line": 1650,
+      "text": "            <p class=\"setup-v2-subtitle\">Diagnostics show readiness signals. The button uses the same backend Save Setup path as the primary save control.</p>"
+    },
+    {
+      "line": 1673,
+      "text": "            <h4>Save, Draft, and Continue</h4>"
+    },
+    {
+      "line": 1674,
+      "text": "            <button id=\"setupSmartActionBtn\" class=\"btn btn-secondary\" type=\"button\">Focus next field or Save Setup</button>"
+    },
+    {
+      "line": 1678,
+      "text": "            <button id=\"setupSaveBackendBtnBottom\" class=\"btn btn-ghost\" type=\"button\">Save Setup to Backend</button>"
+    },
+    {
+      "line": 1694,
+      "text": "              <button id=\"setupSaveDraftBtn\" class=\"btn btn-ghost\" type=\"button\">Save local draft</button>"
+    },
+    {
+      "line": 1707,
+      "text": "          <p class=\"setup-v2-subtitle\">AI suggestions update local form guidance or prepare an AI Command prompt. They do not save backend data, approve work, publish, send, connect, or upload.</p>"
+    },
+    {
+      "line": 1710,
+      "text": "            <button id=\"setupAiAudienceBtn\" class=\"btn btn-ghost\" type=\"button\">Find missing launch inputs</button>"
+    },
+    {
+      "line": 1726,
+      "text": "      saveProjectSetup,"
+    },
+    {
+      "line": 1780,
+      "text": "    const saveBottomBtn = $(\"setupSaveBackendBtnBottom\");"
+    },
+    {
+      "line": 1781,
+      "text": "    const saveTopBtn = $(\"setupSaveBackendBtn\");"
+    },
+    {
+      "line": 1782,
+      "text": "    if (saveBottomBtn && saveTopBtn) {"
+    },
+    {
+      "line": 1783,
+      "text": "      saveBottomBtn.onclick = () => saveTopBtn.click();"
+    }
+  ],
+  "backend_api_signals": [
+    {
+      "line": 2,
+      "text": "import { applyProjectBusinessTemplate } from \"../api.js\";"
+    },
+    {
+      "line": 197,
+      "text": "function getSetupDraftKey(projectName) {"
+    },
+    {
+      "line": 198,
+      "text": "  return `mh-control-center:setup-draft:${projectName || \"default\"}`;"
+    },
+    {
+      "line": 201,
+      "text": "function loadSetupDraft(projectName) {"
+    },
+    {
+      "line": 205,
+      "text": "    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));"
+    },
+    {
+      "line": 214,
+      "text": "function saveSetupDraft(projectName, data) {"
+    },
+    {
+      "line": 218,
+      "text": "    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));"
+    },
+    {
+      "line": 225,
+      "text": "function clearSetupDraft(projectName) {"
+    },
+    {
+      "line": 229,
+      "text": "    window.localStorage.removeItem(getSetupDraftKey(projectName));"
+    },
+    {
+      "line": 240,
+      "text": "  const projectName = context.currentProject || overviewData.project_name || \"\";"
+    },
+    {
+      "line": 243,
+      "text": "    project_name: projectName,"
+    },
+    {
+      "line": 247,
+      "text": "    execution_mode: context.executionMode || overviewData.execution_mode || \"\","
+    },
+    {
+      "line": 248,
+      "text": "    brand_name: overviewData.brand_name || projectName,"
+    },
+    {
+      "line": 253,
+      "text": "    market: context.currentMarket || overviewData.market || \"\","
+    },
+    {
+      "line": 254,
+      "text": "    language: context.currentLanguage || overviewData.language || \"\","
+    },
+    {
+      "line": 258,
+      "text": "    launch_window: overviewData.launch_window || context.activeCampaign || \"\","
+    },
+    {
+      "line": 261,
+      "text": "    audience_geography: overviewData.audience_geography || context.currentMarket || \"\","
+    },
+    {
+      "line": 597,
+      "text": "  if (positioning) positioning.textContent = compactListText([buildPositioningSuggestion(values)], \"Generate positioning guidance from setup context.\");"
+    },
+    {
+      "line": 866,
+      "text": "  projectName,"
+    },
+    {
+      "line": 867,
+      "text": "  reloadProjectData,"
+    },
+    {
+      "line": 868,
+      "text": "  saveProjectSetup,"
+    },
+    {
+      "line": 881,
+      "text": "  const draftKeyName = projectName || \"current project\";"
+    },
+    {
+      "line": 961,
+      "text": "    const saved = saveSetupDraft(projectName, values);"
+    },
+    {
+      "line": 976,
+      "text": "          project: projectName || \"\","
+    },
+    {
+      "line": 989,
+      "text": "      saveSetupDraft(projectName, values);"
+    },
+    {
+      "line": 1053,
+      "text": "      if (!projectName) {"
+    },
+    {
+      "line": 1059,
+      "text": "      const requestedProjectName = asString(values.project_name).trim().toLowerCase();"
+    },
+    {
+      "line": 1068,
+      "text": "        await saveProjectSetup?.(projectName, payload);"
+    },
+    {
+      "line": 1069,
+      "text": "        clearSetupDraft(projectName);"
+    },
+    {
+      "line": 1070,
+      "text": "        await reloadProjectData?.(projectName);"
+    },
+    {
+      "line": 1073,
+      "text": "          requestedProjectName && requestedProjectName !== asString(projectName).trim().toLowerCase()"
+    },
+    {
+      "line": 1095,
+      "text": "      clearSetupDraft(projectName);"
+    },
+    {
+      "line": 1371,
+      "text": "    reloadProjectData,"
+    },
+    {
+      "line": 1372,
+      "text": "    saveProjectSetup"
+    },
+    {
+      "line": 1381,
+      "text": "    const projectName = state.context.currentProject || overviewData.project_name || \"\";"
+    },
+    {
+      "line": 1382,
+      "text": "    const draft = loadSetupDraft(projectName);"
+    },
+    {
+      "line": 1433,
+      "text": "              <p class=\"setup-header-project\">Project: ${escapeHtml(asString(values.project_name) || projectName || \"No project selected\")}</p>"
+    },
+    {
+      "line": 1538,
+      "text": "                <p class=\"home-section-copy\">Start with the project identity used by routing, backend setup save, and cross-workspace context.</p>"
+    },
+    {
+      "line": 1724,
+      "text": "      projectName,"
+    },
+    {
+      "line": 1725,
+      "text": "      reloadProjectData,"
+    },
+    {
+      "line": 1726,
+      "text": "      saveProjectSetup,"
+    },
+    {
+      "line": 1759,
+      "text": "          await applyProjectBusinessTemplate(projectName, selectedType);"
+    },
+    {
+      "line": 1767,
+      "text": "          await reloadProjectData?.(projectName);"
+    }
+  ],
+  "confirmation_signals": [],
+  "storage_signals": [
+    {
+      "line": 202,
+      "text": "  if (typeof window === \"undefined\" || !window.localStorage) return null;"
+    },
+    {
+      "line": 205,
+      "text": "    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));"
+    },
+    {
+      "line": 215,
+      "text": "  if (typeof window === \"undefined\" || !window.localStorage) return false;"
+    },
+    {
+      "line": 218,
+      "text": "    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));"
+    },
+    {
+      "line": 226,
+      "text": "  if (typeof window === \"undefined\" || !window.localStorage) return false;"
+    },
+    {
+      "line": 229,
+      "text": "    window.localStorage.removeItem(getSetupDraftKey(projectName));"
+    }
+  ],
+  "focus_workaround_signals": [
+    {
+      "line": 407,
+      "text": "function getSetupPrimaryFocus({ missingFields = [], missingAssets = [], missingConnectors = [] }) {"
+    },
+    {
+      "line": 565,
+      "text": "  const audience = asString(values.audience_primary).trim() || \"a focused customer segment\";"
+    },
+    {
+      "line": 589,
+      "text": "    return \"Direct, helpful, and conversion-focused with concrete benefits.\";"
+    },
+    {
+      "line": 592,
+      "text": "  return \"Clear, practical, and trustworthy with a human and outcome-focused tone.\";"
+    },
+    {
+      "line": 781,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 782,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 784,
+      "text": "        // Keep focus stable without forcing scrollIntoView during editing."
+    },
+    {
+      "line": 826,
+      "text": "    recommendedBtn.setAttribute(\"aria-label\", `Focus recommended step: ${recommendedStep.title}`);"
+    },
+    {
+      "line": 998,
+      "text": "  const keepSetupFieldFocused = (event) => {"
+    },
+    {
+      "line": 1005,
+      "text": "      if (document.activeElement !== field && typeof field.focus === \"function\") {"
+    },
+    {
+      "line": 1006,
+      "text": "        field.focus();"
+    },
+    {
+      "line": 1011,
+      "text": "  // Legacy focus forcing disabled after frontend shell rebuild."
+    },
+    {
+      "line": 1032,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1033,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 1036,
+      "text": "        // Keep focus stable without forcing scrollIntoView during editing."
+    },
+    {
+      "line": 1228,
+      "text": "      if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1229,
+      "text": "        input.focus();"
+    },
+    {
+      "line": 1252,
+      "text": "        if (input && typeof input.focus === \"function\") {"
+    },
+    {
+      "line": 1253,
+      "text": "          input.focus();"
+    },
+    {
+      "line": 1258,
+      "text": "        showMessage?.(`Focus moved to ${first.label}.`);"
+    },
+    {
+      "line": 1312,
+      "text": "          <p class=\"setup-v2-subtitle\">Choose a model to load recommended defaults, checklist scope, and readiness priorities. Selection alone does not publish, connect, or execute anything.</p>"
+    },
+    {
+      "line": 1401,
+      "text": "    const primaryFocus = getSetupPrimaryFocus({ missingFields, missingAssets, missingConnectors });"
+    },
+    {
+      "line": 1437,
+      "text": "                <span class=\"mhos-os-chip ${missingFields.length || missingAssets.length || missingConnectors.length ? \"is-warning\" : \"is-live\"}\">Focus: ${escapeHtml(primaryFocus)}</span>"
+    },
+    {
+      "line": 1674,
+      "text": "            <button id=\"setupSmartActionBtn\" class=\"btn btn-secondary\" type=\"button\">Focus next field or Save Setup</button>"
+    }
+  ],
+  "navigation_signals": [
+    {
+      "line": 862,
+      "text": "  navigateTo,"
+    },
+    {
+      "line": 1096,
+      "text": "      navigateTo(\"setup\");"
+    },
+    {
+      "line": 1179,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 1197,
+      "text": "      navigateTo(\"library\");"
+    },
+    {
+      "line": 1204,
+      "text": "      navigateTo(\"integrations\");"
+    },
+    {
+      "line": 1211,
+      "text": "      navigateTo(\"campaign-studio\");"
+    },
+    {
+      "line": 1238,
+      "text": "      navigateTo(\"home\");"
+    },
+    {
+      "line": 1351,
+      "text": "export const setupRoute = {"
+    },
+    {
+      "line": 1368,
+      "text": "    navigateTo,"
+    },
+    {
+      "line": 1720,
+      "text": "      navigateTo,"
+    }
+  ],
+  "disabled_or_future_signals": [
+    {
+      "line": 137,
+      "text": "  if (!value) return \"Not available\";"
+    },
+    {
+      "line": 139,
+      "text": "  if (Number.isNaN(date.getTime())) return \"Not available\";"
+    },
+    {
+      "line": 774,
+      "text": "    completeNowBtn.disabled = missingFields.length === 0;"
+    },
+    {
+      "line": 783,
+      "text": "        // Disabled: automatic field scrolling caused form interaction jump."
+    },
+    {
+      "line": 837,
+      "text": "    continueLibraryBtn.disabled = false;"
+    },
+    {
+      "line": 842,
+      "text": "    continueIntegrationsBtn.disabled = false;"
+    },
+    {
+      "line": 847,
+      "text": "    continueCampaignBtn.disabled = false;"
+    },
+    {
+      "line": 922,
+      "text": "      // Disabled: wizard panel auto-scroll caused workspace jump during interaction."
+    },
+    {
+      "line": 963,
+      "text": "      showMessage(saved ? message : \"Local draft storage is not available in this browser.\");"
+    },
+    {
+      "line": 1011,
+      "text": "  // Legacy focus forcing disabled after frontend shell rebuild."
+    },
+    {
+      "line": 1035,
+      "text": "        // Disabled: automatic field scrolling caused form interaction jump."
+    },
+    {
+      "line": 1063,
+      "text": "      saveBackendBtn.disabled = true;"
+    },
+    {
+      "line": 1082,
+      "text": "        saveBackendBtn.disabled = false;"
+    },
+    {
+      "line": 1188,
+      "text": "      if (target && !target.disabled) {"
+    },
+    {
+      "line": 1262,
+      "text": "      if (saveBackendBtn && !saveBackendBtn.disabled) {"
+    },
+    {
+      "line": 1751,
+      "text": "        templateApplyBtn.disabled = true;"
+    },
+    {
+      "line": 1775,
+      "text": "          templateApplyBtn.disabled = false;"
+    }
+  ],
+  "risky_terms": [
+    {
+      "line": 1,
+      "text": "import { getMissingAssetLabels } from \"../asset-library.js\";"
+    },
+    {
+      "line": 2,
+      "text": "import { applyProjectBusinessTemplate } from \"../api.js\";"
+    },
+    {
+      "line": 3,
+      "text": "import { patchState } from \"../state.js\";"
+    },
+    {
+      "line": 74,
+      "text": "const FIELD_IMPORTANCE_REASON = {"
+    },
+    {
+      "line": 85,
+      "text": "  social_channels: \"Defines where campaign and publishing workflows should execute.\""
+    },
+    {
+      "line": 99,
+      "text": "  social_channels: \"Defines where campaigns and publishing workflows should prepare content.\""
+    },
+    {
+      "line": 173,
+      "text": "    const key = label"
+    },
+    {
+      "line": 182,
+      "text": "    if (!label || seen.has(key)) return false;"
+    },
+    {
+      "line": 183,
+      "text": "    seen.add(key);"
+    },
+    {
+      "line": 192,
+      "text": "    reason: FIELD_IMPORTANCE_REASON[field.name] || \"Required to improve setup quality and downstream reliability.\","
+    },
+    {
+      "line": 197,
+      "text": "function getSetupDraftKey(projectName) {"
+    },
+    {
+      "line": 205,
+      "text": "    const raw = window.localStorage.getItem(getSetupDraftKey(projectName));"
+    },
+    {
+      "line": 218,
+      "text": "    window.localStorage.setItem(getSetupDraftKey(projectName), JSON.stringify(data));"
+    },
+    {
+      "line": 229,
+      "text": "    window.localStorage.removeItem(getSetupDraftKey(projectName));"
+    },
+    {
+      "line": 509,
+      "text": "  for (const [key, value] of formData.entries()) {"
+    },
+    {
+      "line": 510,
+      "text": "    values[key] = asString(value);"
+    },
+    {
+      "line": 881,
+      "text": "  const draftKeyName = projectName || \"current project\";"
+    },
+    {
+      "line": 1046,
+      "text": "      saveLocal(`Local setup draft saved for ${draftKeyName}. Use Save Setup to persist backend project foundation data.`);"
+    },
+    {
+      "line": 1052,
+      "text": "    saveBackendBtn.onclick = async () => {"
+    },
+    {
+      "line": 1065,
+      "text": "      showMessage?.(`Saving backend setup foundation for ${draftKeyName}...`);"
+    },
+    {
+      "line": 1077,
+      "text": "        showMessage?.(`Backend setup foundation saved for ${draftKeyName}.${renameWarning}`);"
+    },
+    {
+      "line": 1080,
+      "text": "        showError?.(error.message || `Failed to save Setup changes for ${draftKeyName}.`);"
+    },
+    {
+      "line": 1098,
+      "text": "        showMessage(`Local setup draft cleared for ${draftKeyName}.`);"
+    },
+    {
+      "line": 1177,
+      "text": "        input.value = `Suggest final setup completion for ${draftKeyName}. Missing fields: ${missingFields.length ? missingFields.join(\", \") : \"none\"}. Include positioning, audience, and tone guidance.`;"
+    },
+    {
+      "line": 1312,
+      "text": "          <p class=\"setup-v2-subtitle\">Choose a model to load recommended defaults, checklist scope, and readiness priorities. Selection alone does not publish, connect, or execute anything.</p>"
+    },
+    {
+      "line": 1357,
+      "text": "    description: \"Create the trusted project foundation before assets, connectors, campaign planning, and publishing-owned execution.\""
+    },
+    {
+      "line": 1449,
+      "text": "              <span>Does not publish, approve, send, or execute</span>"
+    },
+    {
+      "line": 1561,
+      "text": "                <p class=\"home-section-copy\">Localization defaults used by planning and publishing.</p>"
+    },
+    {
+      "line": 1602,
+      "text": "                  ${renderField({ name: \"operator_notes\", label: \"Operator notes\", value: values.operator_notes, helper: \"Important setup notes for the next operator.\", placeholder: \"Any constraints, watchouts, or handoff notes\", escapeHtml, multiline: true, rows: 4 })}"
+    },
+    {
+      "line": 1707,
+      "text": "          <p class=\"setup-v2-subtitle\">AI suggestions update local form guidance or prepare an AI Command prompt. They do not save backend data, approve work, publish, send, connect, or upload.</p>"
+    },
+    {
+      "line": 1740,
+      "text": "      templateApplyBtn.onclick = async () => {"
+    }
+  ]
+}
