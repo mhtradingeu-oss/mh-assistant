@@ -1,0 +1,1572 @@
+# T93 — AI Command Tool Dock Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/ai-command/tool-dock.js`.
+
+## Why Tool Dock Is Separate
+T92 closed `ai-command.js` but explicitly excluded Tool Dock. T88 ranked Tool Dock separately as an open AI Command sub-surface.
+
+Tool Dock can prepare tool prompts, require selected sources, open drawers, suggest destinations, and may look like execution. It must be proven preview-only or patched if it mutates backend state.
+
+## File Summary
+- File: `public/control-center/pages/ai-command/tool-dock.js`
+- Lines: 1867
+- Imports: 1
+- Exports: 8
+- Render writes: 4
+- Event bindings: 13
+- Backend/API signals: 187
+- AI/tool execution signals: 448
+- Handoff signals: 89
+- Task signals: 26
+- Approval/governance signals: 187
+- Save/storage/history signals: 59
+- Source/library/reference signals: 247
+- Destructive/execution signals: 58
+- Confirmation signals: 0
+- Navigation signals: 9
+- Disabled/read-only/draft/guard signals: 120
+- Risky terms: 440
+
+## Initial Risk Notes
+- Tool Dock contains backend/API-like signals. Need exact action path classification.
+- Tool Dock contains AI/tool/generation signals. Need classify preview-only vs execution.
+- Tool Dock contains source/library/reference signals. Need classify source-required tools and whether they only prepare prompts.
+- No confirmation dialogs found. This is acceptable only if Tool Dock is preview/local-only or delegates execution elsewhere.
+
+## Imports
+- L2: `import {`
+
+## Exports
+- L194: `export function getSelectedLibrarySource(projectName = "") {`
+- L276: `export function applySharedAiSourceToDrawer(drawer, projectName = "") {`
+- L372: `export const TOOL_DOCK_BY_SPECIALIST = {`
+- L1177: `export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {`
+- L1364: `export function renderAiToolDrawerShell({ escapeHtml } = {}) {`
+- L1371: `export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {`
+- L1682: `export function openAiToolDrawerFromMetadata({`
+- L1710: `export function bindAiToolDock({`
+
+## Render Writes
+- L285: `selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L297: `selectedNode.innerHTML = \``
+- L338: `if (selectedNode) selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L1463: `select.innerHTML = options.map((value, index) => {`
+
+## Event Bindings
+- L65: `if (targetButton && typeof targetButton.click === "function") {`
+- L66: `targetButton.click();`
+- L159: `// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---`
+- L329: `changeBtn.onclick = () => {`
+- L330: `drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();`
+- L335: `removeBtn.onclick = () => {`
+- L1662: `field.oninput = () => {`
+- L1666: `field.onchange = () => {`
+- L1726: `btn.onclick = () => closeToolDrawer(drawer);`
+- L1731: `openLibraryBtn.onclick = () => {`
+- L1764: `updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");`
+- L1778: `useBtn.onclick = () => {`
+- L1815: `btn.onclick = () => {`
+
+## Backend / API Signals
+- L3: `setSharedLibrarySourceBridge,`
+- L46: `function tryAutoOpenDrawerAfterLibrary(projectName) {`
+- L159: `// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---`
+- L160: `function handleOpenLibraryFromDrawer({`
+- L182: `// Also set library source bridge context if needed (existing logic)`
+- L194: `export function getSelectedLibrarySource(projectName = "") {`
+- L214: `const source = getSelectedLibrarySource(projectName);`
+- L217: `const name = source.name || source.filename || source.fileName || "Selected Library source";`
+- L218: `const type = source.asset_type || source.type || source.source_type || "Library asset";`
+- L227: `"Selected Library source context:",`
+- L237: `lines.push("Use this Library source as trusted context. Do not add unsupported claims.");`
+- L249: `function sourceMetadataNeedsLibrarySource(rawValue = "") {`
+- L263: `const source = getSelectedLibrarySource(projectName);`
+- L271: `"This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."`
+- L278: `const source = getSelectedLibrarySource(projectName);`
+- L285: `selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L318: `const libraryOption = Array.from(sourceSelect.options || []).find((option) => {`
+- L320: `return /library|source|asset|brand|product/i.test(value);`
+- L322: `if (libraryOption) sourceSelect.value = libraryOption.value;`
+- L330: `drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();`
+- L338: `if (selectedNode) selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L375: `id: "campaign-plan",`
+- L377: `label: "Campaign",`
+- L381: `frontendOwnerPage: "campaign-studio",`
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L383: `sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],`
+- L384: `outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],`
+- L385: `template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."`
+- L394: `frontendOwnerPage: "campaign-studio",`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L396: `sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],`
+- L407: `frontendOwnerPage: "campaign-studio",`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L409: `sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],`
+- L420: `frontendOwnerPage: "campaign-studio",`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L422: `sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],`
+- L433: `frontendOwnerPage: "campaign-studio",`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L435: `sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],`
+- L436: `outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],`
+- L437: `template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L448: `sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L464: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],`
+- L527: `frontendOwnerPage: "library",`
+- L528: `destinations: ["library", "ai-command", "content-studio"],`
+- L529: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],`
+- L531: `template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."`
+- L541: `destinations: ["content-studio", "insights", "library"],`
+- L542: `sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L555: `sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],`
+- L567: `destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L573: `media: [`
+- L581: `frontendOwnerPage: "media-studio",`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L583: `sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],`
+- L594: `frontendOwnerPage: "media-studio",`
+- L595: `destinations: ["chat-preview", "media-studio", "library"],`
+- L596: `sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],`
+- L607: `frontendOwnerPage: "media-studio",`
+- L608: `destinations: ["chat-preview", "media-studio", "library"],`
+- L620: `frontendOwnerPage: "media-studio",`
+- L621: `destinations: ["chat-preview", "media-studio", "library", "workflows"],`
+- L622: `sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],`
+- L633: `frontendOwnerPage: "media-studio",`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L646: `frontendOwnerPage: "media-studio",`
+- L647: `destinations: ["chat-preview", "media-studio", "governance", "library"],`
+- L648: `sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],`
+- L662: `frontendOwnerPage: "media-studio",`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L675: `frontendOwnerPage: "media-studio",`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L688: `frontendOwnerPage: "media-studio",`
+- L689: `destinations: ["chat-preview", "media-studio", "workflows", "library"],`
+- L701: `frontendOwnerPage: "media-studio",`
+- L702: `destinations: ["chat-preview", "media-studio", "content-studio"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L714: `frontendOwnerPage: "media-studio",`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L716: `sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],`
+- L718: `template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."`
+- L730: `frontendOwnerPage: "publishing",`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L733: `outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],`
+- L734: `template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."`
+- L743: `frontendOwnerPage: "publishing",`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L746: `outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],`
+- L747: `template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."`
+- L756: `frontendOwnerPage: "publishing",`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L769: `frontendOwnerPage: "publishing",`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L776: `id: "approval-pack",`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L785: `outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],`
+- L786: `template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."`
+- L800: `sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L813: `sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L826: `sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],`
+- L838: `destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],`
+- L839: `sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],`
+- L852: `sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L867: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L868: `sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],`
+- L880: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L893: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L894: `sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],`
+- L906: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L907: `sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],`
+- L919: `destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],`
+- L920: `sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],`
+- L935: `destinations: ["chat-preview", "governance", "content-studio", "publishing"],`
+- L938: `template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."`
+- L961: `destinations: ["chat-preview", "governance", "library", "workflows"],`
+- L974: `destinations: ["chat-preview", "governance", "workflows", "publishing"],`
+- L980: `id: "approval-notes",`
+- L987: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L988: `sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],`
+- L989: `outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],`
+- L990: `template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."`
+- L996: `id: "task-plan",`
+- L998: `label: "Task Plan",`
+- L1003: `destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1005: `outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],`
+- L1006: `template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."`
+- L1016: `destinations: ["chat-preview", "workflows", "task", "handoff"],`
+- L1017: `sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],`
+- L1022: `id: "handoff",`
+- L1024: `label: "Prepare Handoff",`
+- L1029: `destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1031: `outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],`
+- L1032: `template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1043: `sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],`
+- L1055: `destinations: ["chat-preview", "workflows", "governance", "publishing"],`
+- L1056: `sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],`
+- L1057: `outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],`
+- L1058: `template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."`
+- L1071: `destinations: ["chat-preview", "operations-centers", "task", "governance"],`
+- L1084: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1097: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1204: `.replace(/\{campaign\}/g, values.campaign || "the active campaign")`
+- L1244: `"data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),`
+- L1289: `<span class="mhos-tool-drawer-section-label">3. Destination handoff</span>`
+- L1324: `placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."`
+- L1347: `<p data-aicmd-tool-drawer-summary>Choose output, source context, destination handoff, language, and tone.</p>`
+- L1351: `Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.`
+- L1355: `<button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>`
+- L1548: `"Task:",`
+- L1633: `\`Prepare a structured prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted context, destination handoff, language, and tone before loading it into the composer.\``
+- L1643: `const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];`
+- L1644: `const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];`
+- L1654: `drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";`
+- L1659: `populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");`
+- L1678: `updateStatus?.(\`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.\`);`
+- L1729: `const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");`
+- L1730: `if (openLibraryBtn) {`
+- L1731: `openLibraryBtn.onclick = () => {`
+- L1732: `// Library Source Bridge workflow`
+- L1750: `type: "library_source_selection",`
+- L1754: `libraryFilter: mapping.libraryFilter,`
+- L1759: `setSharedLibrarySourceBridge(project, payload);`
+- L1760: `setSharedLibrarySourceBridge("__default__", payload);`
+- L1764: `updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");`
+- L1766: `window.location.hash = "#library";`
+- L1783: `updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");`
+- L1791: `campaign: aiContext.campaign,`
+- L1840: `campaign: aiContext.campaign,`
+- L1860: `// --- Ensure drawer is restored after navigation from Library ---`
+- L1863: `setTimeout(() => tryAutoOpenDrawerAfterLibrary(restoreProjectName), delay);`
+
+## AI / Tool Execution Signals
+- L4: `getSharedAiSource,`
+- L5: `clearSharedAiSource,`
+- L7: `setSharedAiDrawerReturn,`
+- L8: `getSharedAiDrawerReturn,`
+- L9: `clearSharedAiDrawerReturn`
+- L14: `function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {`
+- L15: `if (!drawer || typeof document === "undefined") return;`
+- L18: `if (active && drawer.contains(active)) {`
+- L24: `const composer = document.querySelector("[data-aicmd-composer-input], textarea, input");`
+- L46: `function tryAutoOpenDrawerAfterLibrary(projectName) {`
+- L47: `const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");`
+- L48: `if (!returnContext?.drawerOpen) return;`
+- L50: `const drawer = document.querySelector("[data-aicmd-tool-drawer]");`
+- L51: `const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;`
+- L54: `if (returnContext.toolId) {`
+- L55: `targetButton = findToolButton(root, "data-aicmd-tool-dock", returnContext.toolId)`
+- L56: `|| findToolButton(root, "data-aicmdv2-tool", returnContext.toolId);`
+- L60: `targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")`
+- L61: `|| root.querySelector("[data-aicmd-tool-dock]")`
+- L62: `|| root.querySelector("[data-aicmdv2-tool]");`
+- L69: `const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");`
+- L70: `let drawerIsOpen = Boolean(`
+- L71: `activeDrawer &&`
+- L72: `activeDrawer.hidden === false &&`
+- L73: `activeDrawer.getAttribute("aria-hidden") === "false" &&`
+- L74: `activeDrawer.classList.contains("is-open")`
+- L77: `if (!drawerIsOpen && activeDrawer) {`
+- L78: `const fallbackTool = findToolMetadataById(returnContext.toolId);`
+- L79: `if (fallbackTool) {`
+- L80: `drawerIsOpen = openToolDrawer({`
+- L81: `drawer: activeDrawer,`
+- L82: `btn: createToolButtonAdapter(fallbackTool),`
+- L83: `tool: fallbackTool,`
+- L84: `text: fallbackTool.template || "",`
+- L93: `if (!drawerIsOpen) {`
+- L94: `if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;`
+- L95: `if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;`
+- L96: `if (returnContext.modeId) activeDrawer.dataset.modeId = returnContext.modeId;`
+- L97: `if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;`
+- L99: `activeDrawer.hidden = false;`
+- L100: `activeDrawer.setAttribute("aria-hidden", "false");`
+- L101: `activeDrawer.classList.add("is-open");`
+- L103: `drawerIsOpen = true;`
+- L107: `if (drawerIsOpen && activeDrawer) {`
+- L108: `applySharedAiSourceToDrawer(activeDrawer, projectName);`
+- L110: `const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L111: `const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");`
+- L114: `? "Source added to drawer."`
+- L115: `: "Returned to drawer. No source selected.";`
+- L118: `clearSharedAiDrawerReturn(projectName);`
+- L119: `clearSharedAiDrawerReturn("__default__");`
+- L123: `function findToolButton(root, attrName = "", attrValue = "") {`
+- L130: `// --- Helper to build AI Drawer Return Context ---`
+- L131: `function buildAiDrawerReturnContext({`
+- L133: `origin = "ai-command",`
+- L134: `drawerOpen = true,`
+- L137: `toolId = "",`
+- L145: `type: "ai_drawer_return",`
+- L147: `drawerOpen,`
+- L150: `toolId,`
+- L159: `// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---`
+- L160: `function handleOpenLibraryFromDrawer({`
+- L164: `toolId = "",`
+- L169: `// Build and store drawer return context`
+- L170: `const payload = buildAiDrawerReturnContext({`
+- L172: `origin: "ai-command",`
+- L173: `drawerOpen: true,`
+- L176: `toolId,`
+- L181: `setSharedAiDrawerReturn(projectName || "__default__", payload);`
+- L186: `function formatSharedAiSource(source = {}) {`
+- L195: `return getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L198: `function truncatePromptText(value = "", maxLength = 900) {`
+- L208: `const tail = parts.slice(-2).join("/");`
+- L209: `if (tail && tail.length < maxLength) return \`.../${tail}\`;`
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L237: `lines.push("Use this Library source as trusted context. Do not add unsupported claims.");`
+- L241: `function setDrawerSourceWarning(drawer, message = "") {`
+- L242: `const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");`
+- L253: `function isDrawerSourceRequired(drawer) {`
+- L254: `return drawer?.dataset?.sourceRequired === "true";`
+- L257: `function validateDrawerSourceRequirement(drawer, projectName = "") {`
+- L258: `if (!isDrawerSourceRequired(drawer)) {`
+- L259: `setDrawerSourceWarning(drawer, "");`
+- L265: `setDrawerSourceWarning(drawer, "");`
+- L269: `setDrawerSourceWarning(`
+- L270: `drawer,`
+- L271: `"This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."`
+- L276: `export function applySharedAiSourceToDrawer(drawer, projectName = "") {`
+- L277: `if (!drawer) return;`
+- L279: `const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");`
+- L280: `const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");`
+- L281: `const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");`
+- L285: `selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L288: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L290: `validateDrawerSourceRequirement(drawer, projectName);`
+- L295: `const { name, type, path } = formatSharedAiSource(source);`
+- L298: `<div class=\"mhos-tool-drawer-source-card\">`
+- L299: `<div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>`
+- L300: `<div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L302: `${path && path !== name ? \`<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>\` : ""}`
+- L303: `<div class=\"mhos-tool-drawer-source-actions\">`
+- L304: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>`
+- L305: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>`
+- L311: `// Set placeholder for Source Details if empty`
+- L313: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L327: `const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');`
+- L330: `drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();`
+- L333: `const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');`
+- L336: `clearSharedAiSource(projectName || "__default__");`
+- L337: `clearSharedAiSource("__default__");`
+- L338: `if (selectedNode) selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L339: `if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L341: `validateDrawerSourceRequirement(drawer, projectName);`
+- L346: `validateDrawerSourceRequirement(drawer, projectName);`
+- L348: `const BASE_TOOL_DOCK_TOOLS = [`
+- L354: `template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."`
+- L367: `badge: "AI",`
+- L372: `export const TOOL_DOCK_BY_SPECIALIST = {`
+- L375: `id: "campaign-plan",`
+- L377: `label: "Campaign",`
+- L381: `frontendOwnerPage: "campaign-studio",`
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L383: `sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],`
+- L384: `outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],`
+- L385: `template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."`
+- L394: `frontendOwnerPage: "campaign-studio",`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L396: `sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],`
+- L407: `frontendOwnerPage: "campaign-studio",`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L420: `frontendOwnerPage: "campaign-studio",`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L433: `frontendOwnerPage: "campaign-studio",`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L435: `sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L448: `sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],`
+- L465: `outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L475: `frontendOwnerPage: "ai-command",`
+- L501: `frontendOwnerPage: "ai-command",`
+- L514: `frontendOwnerPage: "ai-command",`
+- L517: `outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],`
+- L518: `template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."`
+- L528: `destinations: ["library", "ai-command", "content-studio"],`
+- L556: `outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],`
+- L557: `template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."`
+- L566: `frontendOwnerPage: "ai-command",`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L583: `sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],`
+- L596: `sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],`
+- L601: `id: "image-prompt",`
+- L604: `badge: "Prompt",`
+- L610: `outputTypes: ["image_prompt", "prompt_variants", "negative_prompt", "style_prompt"],`
+- L611: `template: "Create image generation prompts for {projectName}. Include scene, subject, lighting, style, composition, negative constraints, and brand notes."`
+- L622: `sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L716: `sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],`
+- L718: `template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L795: `badge: "Paid",`
+- L800: `sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L801: `outputTypes: ["ad_angle", "angle_variants", "pain_benefit_map", "compliance_risks"],`
+- L802: `template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."`
+- L813: `sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],`
+- L815: `template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L826: `sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],`
+- L839: `sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],`
+- L854: `template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."`
+- L880: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L906: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L907: `sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],`
+- L919: `destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],`
+- L928: `id: "claims-check",`
+- L930: `label: "Claims",`
+- L936: `sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],`
+- L937: `outputTypes: ["claims_check", "risk_flags", "proof_requirements", "safe_wording_notes"],`
+- L938: `template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."`
+- L949: `sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],`
+- L950: `outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],`
+- L951: `template: "Rewrite this content in a safer compliant way. Keep the value clear while reducing unsupported or risky claims."`
+- L962: `sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],`
+- L988: `sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1043: `sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],`
+- L1128: `outputTypes: ["sales_pitch", "value_proposition", "pain_solution_map", "cta_note"],`
+- L1129: `template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."`
+- L1135: `badge: "Email",`
+- L1141: `outputTypes: ["follow_up_email", "follow_up_sequence", "value_reminder", "next_step_prompt"],`
+- L1173: `function getSpecialistTools(specialistId = "") {`
+- L1174: `return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;`
+- L1177: `export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {`
+- L1178: `const tools = teamMode === "team"`
+- L1180: `...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),`
+- L1181: `...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),`
+- L1182: `...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)`
+- L1184: `: getSpecialistTools(specialistId);`
+- L1186: `return Number.isFinite(limit) ? tools.slice(0, limit) : tools.slice();`
+- L1189: `function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {`
+- L1192: `...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),`
+- L1193: `...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),`
+- L1194: `...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)`
+- L1198: `return getSpecialistTools(specialistId).slice(0, 9);`
+- L1204: `.replace(/\{campaign\}/g, values.campaign || "the active campaign")`
+- L1213: `function getToolMetaList(tool = {}, key = "", fallback = []) {`
+- L1214: `const value = tool?.[key];`
+- L1220: `function getAllToolDockTools() {`
+- L1221: `return Object.values(TOOL_DOCK_BY_SPECIALIST)`
+- L1226: `function findToolMetadataById(toolId = "") {`
+- L1227: `const id = String(toolId || "").trim();`
+- L1229: `return getAllToolDockTools().find((tool) => tool?.id === id) || null;`
+- L1232: `function createToolButtonAdapter(tool = {}) {`
+- L1233: `const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");`
+- L1235: `"data-aicmd-tool-dock": tool.id || "tool",`
+- L1236: `"data-aicmd-tool-dock-id": tool.id || "tool",`
+- L1237: `"data-aicmd-tool-dock-label": tool.label || "Smart tool",`
+- L1238: `"data-aicmd-tool-dock-icon": tool.icon || "✦",`
+- L1239: `"data-aicmd-tool-dock-badge": tool.badge || "",`
+- L1240: `"data-aicmd-tool-dock-action": actionType,`
+- L1241: `"data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",`
+- L1242: `"data-aicmd-tool-dock-owner": tool.frontendOwnerPage || tool.owner || "ai-command",`
+- L1243: `"data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),`
+- L1244: `"data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),`
+- L1245: `"data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))`
+- L1255: `function renderSmartToolDrawerShell(safe) {`
+- L1257: `<aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">`
+- L1258: `<div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>`
+- L1259: `<section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">`
+- L1260: `<div class="mhos-tool-drawer-head">`
+- L1261: `<div class="mhos-tool-drawer-title-block">`
+- L1262: `<span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>`
+- L1264: `<p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Prompt tool</p>`
+- L1265: `<h3 data-aicmd-tool-drawer-title>Prompt setup</h3>`
+
+## Handoff Signals
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L436: `outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],`
+- L437: `template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L476: `destinations: ["composer", "content-studio"],`
+- L489: `destinations: ["composer", "content-studio"],`
+- L502: `destinations: ["composer", "content-studio"],`
+- L515: `destinations: ["preview", "content-studio", "compliance"],`
+- L528: `destinations: ["library", "ai-command", "content-studio"],`
+- L541: `destinations: ["content-studio", "insights", "library"],`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L567: `destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L595: `destinations: ["chat-preview", "media-studio", "library"],`
+- L608: `destinations: ["chat-preview", "media-studio", "library"],`
+- L621: `destinations: ["chat-preview", "media-studio", "library", "workflows"],`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L647: `destinations: ["chat-preview", "media-studio", "governance", "library"],`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L689: `destinations: ["chat-preview", "media-studio", "workflows", "library"],`
+- L702: `destinations: ["chat-preview", "media-studio", "content-studio"],`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L799: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L812: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L838: `destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],`
+- L851: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L867: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L880: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L893: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L906: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L919: `destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],`
+- L935: `destinations: ["chat-preview", "governance", "content-studio", "publishing"],`
+- L948: `destinations: ["chat-preview", "governance", "content-studio"],`
+- L961: `destinations: ["chat-preview", "governance", "library", "workflows"],`
+- L974: `destinations: ["chat-preview", "governance", "workflows", "publishing"],`
+- L987: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L1003: `destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],`
+- L1016: `destinations: ["chat-preview", "workflows", "task", "handoff"],`
+- L1017: `sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],`
+- L1022: `id: "handoff",`
+- L1024: `label: "Prepare Handoff",`
+- L1029: `destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],`
+- L1031: `outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],`
+- L1032: `template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1055: `destinations: ["chat-preview", "workflows", "governance", "publishing"],`
+- L1071: `destinations: ["chat-preview", "operations-centers", "task", "governance"],`
+- L1084: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1097: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1110: `destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],`
+- L1126: `destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],`
+- L1139: `destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],`
+- L1152: `destinations: ["chat-preview", "workflows", "content-studio", "governance"],`
+- L1165: `destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],`
+- L1243: `"data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),`
+- L1272: `Choose the output, trusted context, and destination workspace before preparing a review-only composer prompt.`
+- L1289: `<span class="mhos-tool-drawer-section-label">3. Destination handoff</span>`
+- L1290: `<select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>`
+- L1347: `<p data-aicmd-tool-drawer-summary>Choose output, source context, destination handoff, language, and tone.</p>`
+- L1351: `Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.`
+- L1382: `<span class="mhos-tool-dock-copy">Guided setup · output, source, destination, then use in composer</span>`
+- L1396: `data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"`
+- L1511: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1529: `\`- Destination: ${destination}.\`,`
+- L1567: `"Destination rule:",`
+- L1568: `\`Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.\`,`
+- L1586: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1595: `summaryParts.push(destination);`
+- L1633: `\`Prepare a structured prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted context, destination handoff, language, and tone before loading it into the composer.\``
+- L1644: `const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];`
+- L1651: `const rawDestinations = joinMetaList(getToolMetaList(tool, "destinations", []))`
+- L1652: `|| btn.getAttribute("data-aicmd-tool-dock-destinations")`
+- L1653: `|| joinMetaList(hardDestinationDefaults);`
+- L1659: `populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-destination-select]"), rawDestinations, "Choose destination handoff");`
+- L1678: `updateStatus?.(\`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.\`);`
+
+## Task Signals
+- L398: `template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L531: `template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."`
+- L567: `destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L841: `template: "Create a creative testing plan for {projectName}. Include hypotheses, variants, success signals, and next actions."`
+- L990: `template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."`
+- L996: `id: "task-plan",`
+- L998: `label: "Task Plan",`
+- L1003: `destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],`
+- L1005: `outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],`
+- L1006: `template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."`
+- L1016: `destinations: ["chat-preview", "workflows", "task", "handoff"],`
+- L1071: `destinations: ["chat-preview", "operations-centers", "task", "governance"],`
+- L1084: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1097: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1100: `template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."`
+- L1129: `template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."`
+- L1132: `id: "follow-up",`
+- L1134: `label: "Follow-up",`
+- L1142: `template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."`
+- L1155: `template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."`
+- L1548: `"Task:",`
+- L1551: `"If required facts are missing, ask concise follow-up questions before writing the final version.",`
+
+## Approval / Governance Signals
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L235: `if (preview) lines.push(\`- Text preview: ${preview}\`);`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L361: `template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."`
+- L368: `template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."`
+- L380: `safetyLevel: "review_only",`
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L385: `template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."`
+- L393: `safetyLevel: "review_only",`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L406: `safetyLevel: "review_only",`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L419: `safetyLevel: "review_only",`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L432: `safetyLevel: "review_only",`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L444: `actionType: "preview",`
+- L445: `safetyLevel: "review_only",`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L461: `safetyLevel: "review_only",`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L474: `safetyLevel: "review_only",`
+- L487: `safetyLevel: "review_only",`
+- L492: `template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."`
+- L500: `safetyLevel: "review_only",`
+- L511: `badge: "Review",`
+- L512: `actionType: "preview",`
+- L513: `safetyLevel: "review_only",`
+- L515: `destinations: ["preview", "content-studio", "compliance"],`
+- L518: `template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."`
+- L539: `safetyLevel: "review_only",`
+- L552: `safetyLevel: "review_only",`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L568: `sourceTypes: ["current_draft", "preview", "current_chat"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L580: `safetyLevel: "review_only",`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L593: `safetyLevel: "review_only",`
+- L595: `destinations: ["chat-preview", "media-studio", "library"],`
+- L606: `safetyLevel: "review_only",`
+- L608: `destinations: ["chat-preview", "media-studio", "library"],`
+- L619: `safetyLevel: "review_only",`
+- L621: `destinations: ["chat-preview", "media-studio", "library", "workflows"],`
+- L632: `safetyLevel: "review_only",`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L643: `badge: "Review",`
+- L645: `safetyLevel: "review_only",`
+- L647: `destinations: ["chat-preview", "media-studio", "governance", "library"],`
+- L650: `template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."`
+- L661: `safetyLevel: "review_only",`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L674: `safetyLevel: "review_only",`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L687: `safetyLevel: "review_only",`
+- L689: `destinations: ["chat-preview", "media-studio", "workflows", "library"],`
+- L700: `safetyLevel: "review_only",`
+- L702: `destinations: ["chat-preview", "media-studio", "content-studio"],`
+- L713: `safetyLevel: "review_only",`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L728: `actionType: "preview",`
+- L729: `safetyLevel: "review_only",`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L733: `outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],`
+- L734: `template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."`
+- L742: `safetyLevel: "review_only",`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L746: `outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],`
+- L747: `template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L759: `outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L768: `safetyLevel: "review_only",`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L776: `id: "approval-pack",`
+- L778: `label: "Governance Review",`
+- L782: `frontendOwnerPage: "governance",`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L785: `outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],`
+- L786: `template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."`
+- L797: `safetyLevel: "review_only",`
+- L799: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L810: `safetyLevel: "review_only",`
+- L812: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L823: `safetyLevel: "review_only",`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L836: `safetyLevel: "review_only",`
+- L838: `destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],`
+- L849: `safetyLevel: "review_only",`
+- L851: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L853: `outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],`
+- L854: `template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."`
+- L865: `safetyLevel: "review_only",`
+- L867: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L878: `safetyLevel: "review_only",`
+- L880: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L891: `safetyLevel: "review_only",`
+- L893: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L902: `badge: "Review",`
+- L904: `safetyLevel: "review_only",`
+- L906: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L908: `outputTypes: ["performance_review", "wins", "risks", "experiment_recommendations"],`
+- L909: `template: "Review performance signals for {projectName}. Identify wins, risks, gaps, and recommended next experiments."`
+- L917: `safetyLevel: "review_only",`
+- L919: `destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],`
+- L926: `compliance_reviewer: [`
+- L933: `safetyLevel: "review_only",`
+- L934: `frontendOwnerPage: "governance",`
+- L935: `destinations: ["chat-preview", "governance", "content-studio", "publishing"],`
+- L938: `template: "Review claims for {projectName}. Flag unsupported, risky, health/performance, legal, or approval-sensitive statements."`
+- L946: `safetyLevel: "review_only",`
+- L947: `frontendOwnerPage: "governance",`
+- L948: `destinations: ["chat-preview", "governance", "content-studio"],`
+- L950: `outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],`
+- L959: `safetyLevel: "review_only",`
+- L960: `frontendOwnerPage: "governance",`
+- L961: `destinations: ["chat-preview", "governance", "library", "workflows"],`
+- L964: `template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."`
+- L970: `badge: "Review",`
+- L972: `safetyLevel: "review_only",`
+- L973: `frontendOwnerPage: "governance",`
+- L974: `destinations: ["chat-preview", "governance", "workflows", "publishing"],`
+- L976: `outputTypes: ["gdpr_review", "consent_risks", "tracking_notes", "disclosure_requirements"],`
+- L977: `template: "Review GDPR/privacy considerations for this content or workflow. Flag consent, tracking, data use, and disclosure risks."`
+- L980: `id: "approval-notes",`
+- L982: `label: "Governance Notes",`
+- L986: `frontendOwnerPage: "governance",`
+- L987: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L988: `sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],`
+- L989: `outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],`
+- L990: `template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."`
+- L1001: `safetyLevel: "review_only",`
+- L1003: `destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1016: `destinations: ["chat-preview", "workflows", "task", "handoff"],`
+- L1017: `sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],`
+- L1018: `outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],`
+- L1019: `template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."`
+- L1029: `destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1031: `outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],`
+- L1032: `template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."`
+- L1040: `safetyLevel: "review_only",`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1053: `safetyLevel: "review_only",`
+- L1055: `destinations: ["chat-preview", "workflows", "governance", "publishing"],`
+- L1056: `sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],`
+- L1057: `outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],`
+- L1058: `template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."`
+- L1071: `destinations: ["chat-preview", "operations-centers", "task", "governance"],`
+- L1084: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1094: `actionType: "preview",`
+- L1095: `safetyLevel: "review_only",`
+- L1097: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1099: `outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],`
+- L1100: `template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."`
+- L1108: `safetyLevel: "review_only",`
+- L1110: `destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],`
+- L1112: `outputTypes: ["thread_summary", "sentiment_review", "open_questions", "response_context"],`
+- L1124: `safetyLevel: "review_only",`
+- L1126: `destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],`
+- L1139: `destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],`
+- L1150: `safetyLevel: "review_only",`
+- L1152: `destinations: ["chat-preview", "workflows", "content-studio", "governance"],`
+- L1165: `destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],`
+- L1241: `"data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",`
+- L1243: `"data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),`
+- L1245: `"data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))`
+- L1272: `Choose the output, trusted context, and destination workspace before preparing a review-only composer prompt.`
+- L1341: `<div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>`
+- L1351: `Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.`
+- L1394: `data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"`
+- L1396: `data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"`
+- L1511: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1549: `\`Create the requested ${output.toLowerCase()} as review-ready content.\`,`
+- L1571: `"- Prepare review-ready output only.",`
+- L1586: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1635: `setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));`
+- L1642: `const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];`
+- L1644: `const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];`
+- L1678: `updateStatus?.(\`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.\`);`
+- L1805: `updateStatus(\`${label} prompt prepared in the composer. Review it, then ask or create a preview.\`);`
+- L1853: `updateStatus(\`${label} loaded into composer. Review it, then ask or preview.\`);`
+
+## Save / Storage / History Signals
+- L368: `template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."`
+- L465: `outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L505: `template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."`
+- L516: `sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],`
+- L555: `sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],`
+- L568: `sourceTypes: ["current_draft", "preview", "current_chat"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L635: `sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L677: `sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L705: `template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L752: `label: "Draft Schedule",`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L771: `sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],`
+- L808: `badge: "Draft",`
+- L815: `template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."`
+- L936: `sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],`
+- L949: `sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],`
+- L962: `sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],`
+- L975: `sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1011: `label: "Draft Workflow",`
+- L1012: `badge: "Draft",`
+- L1018: `outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],`
+- L1019: `template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1064: `id: "reply-draft",`
+- L1067: `badge: "Draft",`
+- L1073: `outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],`
+- L1074: `template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."`
+- L1079: `label: "Draft Ticket",`
+- L1080: `badge: "Draft",`
+- L1086: `outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],`
+- L1087: `template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."`
+- L1110: `destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],`
+- L1126: `destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],`
+- L1139: `destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],`
+- L1142: `template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."`
+- L1165: `destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],`
+- L1245: `"data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))`
+- L1568: `\`Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.\`,`
+- L1572: `"- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",`
+- L1617: `function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {`
+- L1642: `const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];`
+- L1689: `persistSessionDraft,`
+- L1704: `persistSessionDraft,`
+- L1717: `persistSessionDraft,`
+- L1796: `session.draftMessage = text;`
+- L1800: `if (typeof persistSessionDraft === "function") {`
+- L1801: `persistSessionDraft(sessionKey, session, \`${label} drawer tool loaded\`);`
+- L1831: `persistSessionDraft,`
+- L1844: `session.draftMessage = text;`
+- L1848: `if (typeof persistSessionDraft === "function") {`
+- L1849: `persistSessionDraft(sessionKey, session, \`${label} dock tool loaded\`);`
+
+## Source / Library / Reference Signals
+- L3: `setSharedLibrarySourceBridge,`
+- L4: `getSharedAiSource,`
+- L5: `clearSharedAiSource,`
+- L6: `getSourceTypeMapping,`
+- L15: `if (!drawer || typeof document === "undefined") return;`
+- L17: `const active = document.activeElement;`
+- L24: `const composer = document.querySelector("[data-aicmd-composer-input], textarea, input");`
+- L50: `const drawer = document.querySelector("[data-aicmd-tool-drawer]");`
+- L51: `const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;`
+- L69: `const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");`
+- L108: `applySharedAiSourceToDrawer(activeDrawer, projectName);`
+- L110: `const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L111: `const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");`
+- L113: `msg.textContent = selectedSource?.name`
+- L114: `? "Source added to drawer."`
+- L115: `: "Returned to drawer. No source selected.";`
+- L139: `sourceType = "",`
+- L152: `sourceType,`
+- L166: `sourceType = "",`
+- L178: `sourceType,`
+- L182: `// Also set library source bridge context if needed (existing logic)`
+- L186: `function formatSharedAiSource(source = {}) {`
+- L187: `if (!source || !source.name) return null;`
+- L188: `const name = source.name || "(no name)";`
+- L189: `const type = source.asset_type || source.type || "asset";`
+- L190: `const path = source.file_path || source.filename || source.fileName || "";`
+- L194: `export function getSelectedLibrarySource(projectName = "") {`
+- L195: `return getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L204: `function compactSourceReference(value = "", maxLength = 120) {`
+- L213: `function buildSelectedSourceContextBlock(projectName = "") {`
+- L214: `const source = getSelectedLibrarySource(projectName);`
+- L215: `if (!source?.name) return "";`
+- L217: `const name = source.name || source.filename || source.fileName || "Selected Library source";`
+- L218: `const type = source.asset_type || source.type || source.source_type || "Library asset";`
+- L219: `const sourceId = source.asset_id || source.id || source.mutation_id || "";`
+- L220: `const path = source.file_path || source.path || source.filename || source.fileName || "";`
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L222: `const sourceOfTruth = typeof source.source_of_truth === "boolean"`
+- L223: `? (source.source_of_truth ? "yes" : "no")`
+- L224: `: (source.source_of_truth || "");`
+- L227: `"Selected Library source context:",`
+- L228: `\`- Source name: ${name}.\`,`
+- L229: `\`- Source type: ${type}.\``
+- L232: `if (sourceId) lines.push(\`- Source id: ${compactSourceReference(sourceId, 80)}.\`);`
+- L233: `if (path) lines.push(\`- Source path: ${compactSourceReference(path, 120)}.\`);`
+- L234: `if (sourceOfTruth) lines.push(\`- Source-of-truth flag: ${sourceOfTruth}.\`);`
+- L237: `lines.push("Use this Library source as trusted context. Do not add unsupported claims.");`
+- L241: `function setDrawerSourceWarning(drawer, message = "") {`
+- L242: `const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");`
+- L249: `function sourceMetadataNeedsLibrarySource(rawValue = "") {`
+- L250: `return /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(String(rawValue || ""));`
+- L253: `function isDrawerSourceRequired(drawer) {`
+- L254: `return drawer?.dataset?.sourceRequired === "true";`
+- L257: `function validateDrawerSourceRequirement(drawer, projectName = "") {`
+- L258: `if (!isDrawerSourceRequired(drawer)) {`
+- L259: `setDrawerSourceWarning(drawer, "");`
+- L263: `const source = getSelectedLibrarySource(projectName);`
+- L264: `if (source?.name) {`
+- L265: `setDrawerSourceWarning(drawer, "");`
+- L269: `setDrawerSourceWarning(`
+- L271: `"This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."`
+- L276: `export function applySharedAiSourceToDrawer(drawer, projectName = "") {`
+- L278: `const source = getSelectedLibrarySource(projectName);`
+- L279: `const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");`
+- L280: `const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");`
+- L281: `const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");`
+- L283: `if (!source || !source.name) {`
+- L285: `selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L287: `if (sourceInput && !sourceInput.value) {`
+- L288: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L290: `validateDrawerSourceRequirement(drawer, projectName);`
+- L294: `// Render compact selected source card`
+- L295: `const { name, type, path } = formatSharedAiSource(source);`
+- L298: `<div class=\"mhos-tool-drawer-source-card\">`
+- L299: `<div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>`
+- L300: `<div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L302: `${path && path !== name ? \`<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>\` : ""}`
+- L303: `<div class=\"mhos-tool-drawer-source-actions\">`
+- L304: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>`
+- L305: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>`
+- L311: `// Set placeholder for Source Details if empty`
+- L312: `if (sourceInput && !sourceInput.value) {`
+- L313: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L317: `if (sourceSelect) {`
+- L318: `const libraryOption = Array.from(sourceSelect.options || []).find((option) => {`
+- L320: `return /library|source|asset|brand|product/i.test(value);`
+- L322: `if (libraryOption) sourceSelect.value = libraryOption.value;`
+- L327: `const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');`
+- L333: `const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');`
+- L336: `clearSharedAiSource(projectName || "__default__");`
+- L337: `clearSharedAiSource("__default__");`
+- L338: `if (selectedNode) selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L339: `if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L340: `if (sourceSelect) sourceSelect.value = "";`
+- L341: `validateDrawerSourceRequirement(drawer, projectName);`
+- L346: `validateDrawerSourceRequirement(drawer, projectName);`
+- L383: `sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],`
+- L396: `sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],`
+- L398: `template: "Build a launch plan for {projectName}. Include timeline, required assets, owners, channels, readiness gaps, and safe next actions."`
+- L409: `sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],`
+- L422: `sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],`
+- L435: `sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],`
+- L448: `sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],`
+- L464: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L477: `sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],`
+- L490: `sourceTypes: ["composer_text", "selected_text", "current_chat"],`
+- L503: `sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],`
+- L516: `sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],`
+- L521: `id: "sources",`
+- L523: `label: "Sources",`
+- L525: `actionType: "source_required",`
+- L529: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],`
+- L530: `outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],`
+- L531: `template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."`
+- L542: `sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],`
+- L555: `sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],`
+- L557: `template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."`
+- L568: `sourceTypes: ["current_draft", "preview", "current_chat"],`
+- L583: `sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],`
+- L584: `outputTypes: ["visual_brief", "creative_direction", "format_brief", "asset_requirements"],`
+- L585: `template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."`
+- L596: `sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],`
+- L597: `outputTypes: ["moodboard_direction", "style_notes", "reference_list", "brand_alignment_notes"],`
+- L598: `template: "Define a moodboard direction for {projectName}. Include visual references, atmosphere, color feel, texture, layout mood, and brand alignment."`
+- L609: `sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],`
+- L614: `id: "asset-list",`
+- L616: `label: "Assets",`
+- L618: `actionType: "source_required",`
+- L622: `sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],`
+- L623: `outputTypes: ["asset_checklist", "missing_assets", "asset_request_brief", "production_requirements"],`
+- L624: `template: "Create an asset checklist for {projectName}. Include logos, product shots, lifestyle images, certificates, icons, testimonials, and missing assets."`
+- L635: `sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],`
+- L644: `actionType: "source_required",`
+- L648: `sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],`
+- L649: `outputTypes: ["brand_check_report", "style_risks", "missing_assets", "improvement_actions"],`
+- L650: `template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L677: `sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],`
+- L678: `outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],`
+- L679: `template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."`
+- L690: `sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L716: `sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L734: `template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L747: `template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L771: `sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],`
+- L780: `actionType: "source_required",`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L785: `outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],`
+- L786: `template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."`
+- L800: `sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L813: `sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],`
+- L826: `sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],`
+- L839: `sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],`
+- L848: `actionType: "source_required",`
+- L852: `sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L868: `sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],`
+- L877: `actionType: "source_required",`
+- L881: `sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],`
+- L894: `sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],`
+- L903: `actionType: "source_required",`
+- L907: `sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],`
+- L920: `sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],`
+- L932: `actionType: "source_required",`
+- L936: `sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],`
+- L949: `sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],`
+- L958: `actionType: "source_required",`
+- L962: `sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],`
+- L971: `actionType: "source_required",`
+- L975: `sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],`
+- L984: `actionType: "source_required",`
+- L988: `sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1017: `sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1043: `sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],`
+- L1056: `sourceTypes: ["current_chat", "readiness_gaps", "asset_requirements", "approval_notes", "manual_input"],`
+- L1057: `outputTypes: ["execution_checklist", "approval_checklist", "asset_checklist", "qa_steps"],`
+- L1058: `template: "Create an execution checklist for {projectName}. Include required approvals, assets, content, integrations, and QA steps."`
+- L1072: `sourceTypes: ["customer_thread", "support_notes", "policy_doc", "faq_source", "current_chat", "manual_input"],`
+- L1085: `sourceTypes: ["customer_thread", "support_notes", "order_case_summary", "current_chat", "manual_input"],`
+- L1098: `sourceTypes: ["customer_thread", "sla_policy", "support_notes", "current_chat", "manual_input"],`
+- L1111: `sourceTypes: ["customer_thread", "support_notes", "current_chat", "manual_input"],`
+- L1127: `sourceTypes: ["lead_context", "sales_notes", "product_data", "offer_data", "proof_points", "manual_input"],`
+- L1140: `sourceTypes: ["lead_context", "meeting_notes", "sales_notes", "offer_data", "manual_input"],`
+- L1153: `sourceTypes: ["lead_context", "sales_notes", "product_data", "proof_points", "objection_notes", "manual_input"],`
+- L1166: `sourceTypes: ["lead_context", "crm_profile_summary", "sales_notes", "customer_notes", "manual_input"],`
+- L1233: `const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");`
+- L1244: `"data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),`
+- L1282: `<span class="mhos-tool-drawer-section-label">2. Trusted source / input</span>`
+- L1283: `<select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>`
+- L1284: `<div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>`
+- L1285: `<div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>`
+- L1319: `<span>Source usage notes</span>`
+- L1322: `data-aicmd-tool-drawer-source-details`
+- L1324: `placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."`
+- L1347: `<p data-aicmd-tool-drawer-summary>Choose output, source context, destination handoff, language, and tone.</p>`
+- L1355: `<button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>`
+- L1382: `<span class="mhos-tool-dock-copy">Guided setup · output, source, destination, then use in composer</span>`
+- L1397: `data-aicmd-tool-dock-sources="${safe(joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat"])))}"`
+- L1502: `"- Do not invent certifications, claims, ingredients, prices, guarantees, or statistics without source evidence."`
+- L1510: `const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");`
+- L1514: `const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");`
+- L1517: `const sourceInstruction = sourceDetails`
+- L1518: `? \`${source}. Source details: ${sourceDetails}.\``
+- L1519: `: \`${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.\`;`
+- L1520: `const selectedSourceContext = buildSelectedSourceContextBlock(projectName);`
+- L1528: `\`- Source/input: ${sourceInstruction}\`,`
+- L1538: `if (selectedSourceContext) {`
+- L1539: `lines.push("", selectedSourceContext);`
+- L1550: `"Use only the available context and selected source details.",`
+- L1585: `const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");`
+- L1589: `const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");`
+- L1593: `if (source !== "Auto" && source !== "Current chat or ask if source is needed") summaryParts.push("Trusted source context selected");`
+- L1643: `const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];`
+- L1648: `const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))`
+- L1649: `|| btn.getAttribute("data-aicmd-tool-dock-sources")`
+- L1650: `|| joinMetaList(hardSourceDefaults);`
+- L1654: `drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";`
+- L1658: `populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-source-select]"), rawSources, "Choose source / input");`
+- L1664: `validateDrawerSourceRequirement(drawer, projectName);`
+- L1668: `validateDrawerSourceRequirement(drawer, projectName);`
+- L1671: `applySharedAiSourceToDrawer(drawer, projectName);`
+- L1673: `validateDrawerSourceRequirement(drawer, projectName);`
+- L1678: `updateStatus?.(\`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.\`);`
+- L1683: `root = typeof document !== "undefined" ? document : null,`
+- L1711: `root = document,`
+- L1732: `// Library Source Bridge workflow`
+- L1734: `const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");`
+- L1735: `const selectedSourceType = drawerSourceSelect?.value || "auto";`
+- L1736: `const mapping = getSourceTypeMapping(selectedSourceType);`
+- L1745: `sourceType: selectedSourceType,`
+- L1750: `type: "library_source_selection",`
+- L1753: `sourceType: selectedSourceType,`
+- L1755: `targetSection: "asset-workspace",`
+
+## Destructive / Execution Signals
+- L2: `import {`
+- L198: `function truncatePromptText(value = "", maxLength = 900) {`
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L354: `template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L411: `template: "Map the target audience for {projectName}. Include segments, needs, objections, buying triggers, and message angles."`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L450: `template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L479: `template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L560: `id: "send",`
+- L562: `label: "Prepare Send-Off",`
+- L567: `destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L722: `publisher: [`
+- L724: `id: "publish-check",`
+- L726: `label: "Publish Check",`
+- L730: `frontendOwnerPage: "publishing",`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L733: `outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],`
+- L734: `template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."`
+- L743: `frontendOwnerPage: "publishing",`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L756: `frontendOwnerPage: "publishing",`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L769: `frontendOwnerPage: "publishing",`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L935: `destinations: ["chat-preview", "governance", "content-studio", "publishing"],`
+- L964: `template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."`
+- L974: `destinations: ["chat-preview", "governance", "workflows", "publishing"],`
+- L987: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L1018: `outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],`
+- L1019: `template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."`
+- L1029: `destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1055: `destinations: ["chat-preview", "workflows", "governance", "publishing"],`
+- L1074: `template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."`
+- L1351: `Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.`
+- L1495: `"- Start with a clear SEO title/H1.",`
+- L1556: `"- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",`
+- L1557: `"- Do not mix languages inside the publishable content unless the user asks for bilingual output."`
+- L1568: `\`Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.\`,`
+- L1572: `"- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",`
+
+## Confirmation Signals
+- none
+
+## Navigation Signals
+- L563: `badge: "Route",`
+- L564: `actionType: "route",`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L1025: `badge: "Route",`
+- L1243: `"data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),`
+- L1351: `Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.`
+- L1568: `\`Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.\`,`
+- L1572: `"- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",`
+- L1766: `window.location.hash = "#library";`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L235: `if (preview) lines.push(\`- Text preview: ${preview}\`);`
+- L368: `template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."`
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L444: `actionType: "preview",`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L450: `template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L465: `outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L505: `template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."`
+- L512: `actionType: "preview",`
+- L515: `destinations: ["preview", "content-studio", "compliance"],`
+- L516: `sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L555: `sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],`
+- L568: `sourceTypes: ["current_draft", "preview", "current_chat"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L595: `destinations: ["chat-preview", "media-studio", "library"],`
+- L608: `destinations: ["chat-preview", "media-studio", "library"],`
+- L621: `destinations: ["chat-preview", "media-studio", "library", "workflows"],`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L635: `sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],`
+- L647: `destinations: ["chat-preview", "media-studio", "governance", "library"],`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L677: `sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],`
+- L689: `destinations: ["chat-preview", "media-studio", "workflows", "library"],`
+- L702: `destinations: ["chat-preview", "media-studio", "content-studio"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L705: `template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L728: `actionType: "preview",`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L752: `label: "Draft Schedule",`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L771: `sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L799: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L808: `badge: "Draft",`
+- L812: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L815: `template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L838: `destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],`
+- L851: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L867: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L880: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L893: `destinations: ["chat-preview", "insights", "content-studio", "library"],`
+- L906: `destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],`
+- L919: `destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],`
+- L935: `destinations: ["chat-preview", "governance", "content-studio", "publishing"],`
+- L936: `sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],`
+- L948: `destinations: ["chat-preview", "governance", "content-studio"],`
+- L949: `sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],`
+- L961: `destinations: ["chat-preview", "governance", "library", "workflows"],`
+- L962: `sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],`
+- L974: `destinations: ["chat-preview", "governance", "workflows", "publishing"],`
+- L975: `sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],`
+- L987: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L1003: `destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],`
+- L1004: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],`
+- L1011: `label: "Draft Workflow",`
+- L1012: `badge: "Draft",`
+- L1016: `destinations: ["chat-preview", "workflows", "task", "handoff"],`
+- L1018: `outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],`
+- L1019: `template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."`
+- L1029: `destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],`
+- L1030: `sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],`
+- L1042: `destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],`
+- L1055: `destinations: ["chat-preview", "workflows", "governance", "publishing"],`
+- L1064: `id: "reply-draft",`
+- L1067: `badge: "Draft",`
+- L1071: `destinations: ["chat-preview", "operations-centers", "task", "governance"],`
+- L1073: `outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],`
+- L1074: `template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."`
+- L1079: `label: "Draft Ticket",`
+- L1080: `badge: "Draft",`
+- L1084: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1086: `outputTypes: ["ticket_draft", "issue_summary", "priority_note", "missing_information"],`
+- L1087: `template: "Prepare a ticket draft for {projectName}. Include issue summary, priority, owner, customer impact, and missing information."`
+- L1094: `actionType: "preview",`
+- L1097: `destinations: ["chat-preview", "operations-centers", "task", "workflows"],`
+- L1110: `destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],`
+- L1126: `destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],`
+- L1139: `destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],`
+- L1142: `template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."`
+- L1152: `destinations: ["chat-preview", "workflows", "content-studio", "governance"],`
+- L1165: `destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],`
+- L1233: `const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");`
+- L1243: `"data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),`
+- L1245: `"data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))`
+- L1396: `data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"`
+- L1511: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1586: `const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");`
+- L1617: `function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {`
+- L1642: `const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];`
+- L1644: `const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];`
+- L1689: `persistSessionDraft,`
+- L1704: `persistSessionDraft,`
+- L1717: `persistSessionDraft,`
+- L1796: `session.draftMessage = text;`
+- L1800: `if (typeof persistSessionDraft === "function") {`
+- L1801: `persistSessionDraft(sessionKey, session, \`${label} drawer tool loaded\`);`
+- L1805: `updateStatus(\`${label} prompt prepared in the composer. Review it, then ask or create a preview.\`);`
+- L1831: `persistSessionDraft,`
+- L1844: `session.draftMessage = text;`
+- L1848: `if (typeof persistSessionDraft === "function") {`
+- L1849: `persistSessionDraft(sessionKey, session, \`${label} dock tool loaded\`);`
+- L1853: `updateStatus(\`${label} loaded into composer. Review it, then ask or preview.\`);`
+
+## Risky Terms
+- L2: `import {`
+- L3: `setSharedLibrarySourceBridge,`
+- L4: `getSharedAiSource,`
+- L5: `clearSharedAiSource,`
+- L6: `getSourceTypeMapping,`
+- L46: `function tryAutoOpenDrawerAfterLibrary(projectName) {`
+- L108: `applySharedAiSourceToDrawer(activeDrawer, projectName);`
+- L110: `const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L113: `msg.textContent = selectedSource?.name`
+- L114: `? "Source added to drawer."`
+- L115: `: "Returned to drawer. No source selected.";`
+- L139: `sourceType = "",`
+- L152: `sourceType,`
+- L159: `// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---`
+- L160: `function handleOpenLibraryFromDrawer({`
+- L166: `sourceType = "",`
+- L178: `sourceType,`
+- L182: `// Also set library source bridge context if needed (existing logic)`
+- L186: `function formatSharedAiSource(source = {}) {`
+- L187: `if (!source || !source.name) return null;`
+- L188: `const name = source.name || "(no name)";`
+- L189: `const type = source.asset_type || source.type || "asset";`
+- L190: `const path = source.file_path || source.filename || source.fileName || "";`
+- L194: `export function getSelectedLibrarySource(projectName = "") {`
+- L195: `return getSharedAiSource(projectName) || getSharedAiSource("__default__");`
+- L204: `function compactSourceReference(value = "", maxLength = 120) {`
+- L213: `function buildSelectedSourceContextBlock(projectName = "") {`
+- L214: `const source = getSelectedLibrarySource(projectName);`
+- L215: `if (!source?.name) return "";`
+- L217: `const name = source.name || source.filename || source.fileName || "Selected Library source";`
+- L218: `const type = source.asset_type || source.type || source.source_type || "Library asset";`
+- L219: `const sourceId = source.asset_id || source.id || source.mutation_id || "";`
+- L220: `const path = source.file_path || source.path || source.filename || source.fileName || "";`
+- L221: `const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");`
+- L222: `const sourceOfTruth = typeof source.source_of_truth === "boolean"`
+- L223: `? (source.source_of_truth ? "yes" : "no")`
+- L224: `: (source.source_of_truth || "");`
+- L227: `"Selected Library source context:",`
+- L228: `\`- Source name: ${name}.\`,`
+- L229: `\`- Source type: ${type}.\``
+- L232: `if (sourceId) lines.push(\`- Source id: ${compactSourceReference(sourceId, 80)}.\`);`
+- L233: `if (path) lines.push(\`- Source path: ${compactSourceReference(path, 120)}.\`);`
+- L234: `if (sourceOfTruth) lines.push(\`- Source-of-truth flag: ${sourceOfTruth}.\`);`
+- L235: `if (preview) lines.push(\`- Text preview: ${preview}\`);`
+- L237: `lines.push("Use this Library source as trusted context. Do not add unsupported claims.");`
+- L241: `function setDrawerSourceWarning(drawer, message = "") {`
+- L242: `const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");`
+- L249: `function sourceMetadataNeedsLibrarySource(rawValue = "") {`
+- L250: `return /source_of_truth_assets|selected_asset|proof_doc|legal_doc|privacy_policy/i.test(String(rawValue || ""));`
+- L253: `function isDrawerSourceRequired(drawer) {`
+- L254: `return drawer?.dataset?.sourceRequired === "true";`
+- L257: `function validateDrawerSourceRequirement(drawer, projectName = "") {`
+- L258: `if (!isDrawerSourceRequired(drawer)) {`
+- L259: `setDrawerSourceWarning(drawer, "");`
+- L263: `const source = getSelectedLibrarySource(projectName);`
+- L264: `if (source?.name) {`
+- L265: `setDrawerSourceWarning(drawer, "");`
+- L269: `setDrawerSourceWarning(`
+- L271: `"This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."`
+- L276: `export function applySharedAiSourceToDrawer(drawer, projectName = "") {`
+- L278: `const source = getSelectedLibrarySource(projectName);`
+- L279: `const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");`
+- L280: `const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");`
+- L281: `const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");`
+- L283: `if (!source || !source.name) {`
+- L285: `selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L287: `if (sourceInput && !sourceInput.value) {`
+- L288: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L290: `validateDrawerSourceRequirement(drawer, projectName);`
+- L294: `// Render compact selected source card`
+- L295: `const { name, type, path } = formatSharedAiSource(source);`
+- L298: `<div class=\"mhos-tool-drawer-source-card\">`
+- L299: `<div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>`
+- L300: `<div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>`
+- L301: `<div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>`
+- L302: `${path && path !== name ? \`<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>\` : ""}`
+- L303: `<div class=\"mhos-tool-drawer-source-actions\">`
+- L304: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>`
+- L305: `<button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>`
+- L311: `// Set placeholder for Source Details if empty`
+- L312: `if (sourceInput && !sourceInput.value) {`
+- L313: `sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L317: `if (sourceSelect) {`
+- L318: `const libraryOption = Array.from(sourceSelect.options || []).find((option) => {`
+- L320: `return /library|source|asset|brand|product/i.test(value);`
+- L322: `if (libraryOption) sourceSelect.value = libraryOption.value;`
+- L327: `const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');`
+- L330: `drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();`
+- L333: `const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');`
+- L336: `clearSharedAiSource(projectName || "__default__");`
+- L337: `clearSharedAiSource("__default__");`
+- L338: `if (selectedNode) selectedNode.innerHTML = \`<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>\`;`
+- L339: `if (sourceInput) sourceInput.placeholder = "Optional: add source usage notes, audience, angle, or claims to avoid...";`
+- L340: `if (sourceSelect) sourceSelect.value = "";`
+- L341: `validateDrawerSourceRequirement(drawer, projectName);`
+- L346: `validateDrawerSourceRequirement(drawer, projectName);`
+- L354: `template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."`
+- L361: `template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."`
+- L368: `template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."`
+- L380: `safetyLevel: "review_only",`
+- L382: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],`
+- L383: `sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],`
+- L385: `template: "Create a campaign plan for {projectName}. Include objective, audience, offer, channels, phases, risks, and next best actions. Keep it review-ready only."`
+- L393: `safetyLevel: "review_only",`
+- L395: `destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],`
+- L396: `sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],`
+- L406: `safetyLevel: "review_only",`
+- L408: `destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],`
+- L409: `sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],`
+- L419: `safetyLevel: "review_only",`
+- L421: `destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],`
+- L422: `sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],`
+- L432: `safetyLevel: "review_only",`
+- L434: `destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],`
+- L435: `sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],`
+- L436: `outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],`
+- L437: `template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."`
+- L444: `actionType: "preview",`
+- L445: `safetyLevel: "review_only",`
+- L447: `destinations: ["chat-preview", "workflows", "task", "campaign-studio"],`
+- L448: `sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],`
+- L450: `template: "Prioritize the next best actions for {projectName}. Separate urgent, important, blocked, and later work."`
+- L461: `safetyLevel: "review_only",`
+- L463: `destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],`
+- L464: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],`
+- L466: `template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."`
+- L474: `safetyLevel: "review_only",`
+- L477: `sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],`
+- L479: `template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."`
+- L487: `safetyLevel: "review_only",`
+- L490: `sourceTypes: ["composer_text", "selected_text", "current_chat"],`
+- L492: `template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."`
+- L500: `safetyLevel: "review_only",`
+- L503: `sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],`
+- L511: `badge: "Review",`
+- L512: `actionType: "preview",`
+- L513: `safetyLevel: "review_only",`
+- L515: `destinations: ["preview", "content-studio", "compliance"],`
+- L516: `sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],`
+- L518: `template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."`
+- L521: `id: "sources",`
+- L523: `label: "Sources",`
+- L525: `actionType: "source_required",`
+- L527: `frontendOwnerPage: "library",`
+- L528: `destinations: ["library", "ai-command", "content-studio"],`
+- L529: `sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],`
+- L530: `outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],`
+- L531: `template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."`
+- L539: `safetyLevel: "review_only",`
+- L541: `destinations: ["content-studio", "insights", "library"],`
+- L542: `sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],`
+- L552: `safetyLevel: "review_only",`
+- L554: `destinations: ["chat-preview", "content-studio", "publishing"],`
+- L555: `sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],`
+- L557: `template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."`
+- L560: `id: "send",`
+- L562: `label: "Prepare Send-Off",`
+- L567: `destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],`
+- L568: `sourceTypes: ["current_draft", "preview", "current_chat"],`
+- L569: `outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],`
+- L570: `template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."`
+- L580: `safetyLevel: "review_only",`
+- L582: `destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],`
+- L583: `sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],`
+- L593: `safetyLevel: "review_only",`
+- L595: `destinations: ["chat-preview", "media-studio", "library"],`
+- L596: `sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],`
+- L606: `safetyLevel: "review_only",`
+- L608: `destinations: ["chat-preview", "media-studio", "library"],`
+- L609: `sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],`
+- L618: `actionType: "source_required",`
+- L619: `safetyLevel: "review_only",`
+- L621: `destinations: ["chat-preview", "media-studio", "library", "workflows"],`
+- L622: `sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],`
+- L632: `safetyLevel: "review_only",`
+- L634: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L635: `sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],`
+- L643: `badge: "Review",`
+- L644: `actionType: "source_required",`
+- L645: `safetyLevel: "review_only",`
+- L647: `destinations: ["chat-preview", "media-studio", "governance", "library"],`
+- L648: `sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],`
+- L650: `template: "Review the visual direction for brand consistency. Flag risks, missing assets, style mismatches, and improvement actions."`
+- L661: `safetyLevel: "review_only",`
+- L663: `destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],`
+- L664: `sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],`
+- L674: `safetyLevel: "review_only",`
+- L676: `destinations: ["chat-preview", "media-studio", "library", "publishing"],`
+- L677: `sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],`
+- L687: `safetyLevel: "review_only",`
+- L689: `destinations: ["chat-preview", "media-studio", "workflows", "library"],`
+- L690: `sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],`
+- L700: `safetyLevel: "review_only",`
+- L702: `destinations: ["chat-preview", "media-studio", "content-studio"],`
+- L703: `sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],`
+- L713: `safetyLevel: "review_only",`
+- L715: `destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],`
+- L716: `sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],`
+- L722: `publisher: [`
+- L724: `id: "publish-check",`
+- L726: `label: "Publish Check",`
+- L728: `actionType: "preview",`
+- L729: `safetyLevel: "review_only",`
+- L730: `frontendOwnerPage: "publishing",`
+- L731: `destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],`
+- L732: `sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],`
+- L733: `outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],`
+- L734: `template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."`
+- L742: `safetyLevel: "review_only",`
+- L743: `frontendOwnerPage: "publishing",`
+- L744: `destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],`
+- L745: `sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],`
+- L746: `outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],`
+- L747: `template: "Prepare a channel package for {projectName}. Include caption, hashtags, format notes, asset needs, schedule notes, and approval checklist."`
+- L756: `frontendOwnerPage: "publishing",`
+- L757: `destinations: ["chat-preview", "publishing", "workflows"],`
+- L758: `sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],`
+- L759: `outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],`
+- L760: `template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."`
+- L768: `safetyLevel: "review_only",`
+- L769: `frontendOwnerPage: "publishing",`
+- L770: `destinations: ["chat-preview", "publishing", "content-studio", "insights"],`
+- L771: `sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],`
+- L776: `id: "approval-pack",`
+- L778: `label: "Governance Review",`
+- L780: `actionType: "source_required",`
+- L782: `frontendOwnerPage: "governance",`
+- L783: `destinations: ["chat-preview", "governance", "publishing", "workflows"],`
+- L784: `sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],`
+- L785: `outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],`
+- L786: `template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."`
+- L797: `safetyLevel: "review_only",`
+- L799: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L800: `sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],`
+- L810: `safetyLevel: "review_only",`
+- L812: `destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],`
+- L813: `sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],`
+- L823: `safetyLevel: "review_only",`
+- L825: `destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],`
+- L826: `sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],`
+
+## Required Manual Classification
+Before any patch, classify exact paths into:
+
+1. Tool list rendering only
+2. Drawer open/close only
+3. Prompt/template preparation
+4. Source-required prompt preparation
+5. Navigation only
+6. Shared context handoff only
+7. Backend AI/tool execution
+8. Backend task/handoff/approval creation
+9. Local save/history only
+10. Unknown / needs deeper inspection
+
+## Decision Rule
+- If Tool Dock is render/drawer/prompt-prep only, close without patch.
+- If it creates backend task/handoff/approval records, require confirmation or patch.
+- If it executes AI/provider/tool backend, require explicit operator action and safety classification.
+- Do not redesign Tool Dock in this pass.
