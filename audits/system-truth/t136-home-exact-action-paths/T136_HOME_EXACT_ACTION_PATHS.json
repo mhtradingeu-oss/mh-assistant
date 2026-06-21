@@ -1,0 +1,3558 @@
+{
+  "summary": {
+    "file": "public/control-center/pages/home.js",
+    "total_lines": 1164,
+    "imported_authority_calls": [
+      {
+        "term": "createProjectHandoff",
+        "count": 0
+      },
+      {
+        "term": "createProjectApproval",
+        "count": 0
+      },
+      {
+        "term": "createProjectTask",
+        "count": 0
+      },
+      {
+        "term": "executeProjectAiCommand",
+        "count": 0
+      },
+      {
+        "term": "saveProject",
+        "count": 0
+      },
+      {
+        "term": "setSharedHandoff",
+        "count": 0
+      },
+      {
+        "term": "setSharedAiDraft",
+        "count": 0
+      }
+    ],
+    "event_binding_count": 28,
+    "navigateTo_count": 3,
+    "publish_mentions": 17,
+    "approval_mentions": 11,
+    "handoff_mentions": 5,
+    "confirm_mentions": 1
+  },
+  "results": {
+    "publish": [
+      {
+        "term": "publish",
+        "line": 200,
+        "excerpt": [
+          {
+            "line": 196,
+            "text": "      status: campaign.name ? \"Active\" : \"Missing\""
+          },
+          {
+            "line": 197,
+            "text": "    },"
+          },
+          {
+            "line": 198,
+            "text": "    {"
+          },
+          {
+            "line": 199,
+            "text": "      title: \"Publish / execute\","
+          },
+          {
+            "line": 200,
+            "text": "      meta: launch.campaignReadiness === \"Ready\" ? \"Execution path looks clear\" : \"Resolve blockers before publishing\","
+          },
+          {
+            "line": 201,
+            "text": "      tone: launch.campaignReadiness === \"Ready\" ? \"is-live\" : \"is-warning\","
+          },
+          {
+            "line": 202,
+            "text": "      status: launch.campaignReadiness || \"At risk\""
+          },
+          {
+            "line": 203,
+            "text": "    }"
+          },
+          {
+            "line": 204,
+            "text": "  ];"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 234,
+        "excerpt": [
+          {
+            "line": 230,
+            "text": "  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return \"library\";"
+          },
+          {
+            "line": 231,
+            "text": "  if (/(connector|integration|sync|platform)/.test(text)) return \"integrations\";"
+          },
+          {
+            "line": 232,
+            "text": "  if (/(setup|foundation)/.test(text)) return \"setup\";"
+          },
+          {
+            "line": 233,
+            "text": "  if (/(campaign|launch wave|brief)/.test(text)) return \"campaign-studio\";"
+          },
+          {
+            "line": 234,
+            "text": "  if (/(publish|schedule|queue)/.test(text)) return \"publishing\";"
+          },
+          {
+            "line": 235,
+            "text": "  if (/(ad|budget|paid)/.test(text)) return \"ads-manager\";"
+          },
+          {
+            "line": 236,
+            "text": "  if (/(content|copy)/.test(text)) return \"content-studio\";"
+          },
+          {
+            "line": 237,
+            "text": "  if (/(job|operation)/.test(text)) return \"operations-centers\";"
+          },
+          {
+            "line": 238,
+            "text": "  return \"ai-command\";"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 272,
+        "excerpt": [
+          {
+            "line": 268,
+            "text": "    { id: \"strategist\", name: \"Strategist\", fallback: \"Align campaign priorities and launch sequencing.\" },"
+          },
+          {
+            "line": 269,
+            "text": "    { id: \"writer\", name: \"Content Writer\", fallback: \"Prepare high-conversion messaging for active channels.\" },"
+          },
+          {
+            "line": 270,
+            "text": "    { id: \"designer\", name: \"Media Director\", fallback: \"Polish visual direction and creative consistency.\" },"
+          },
+          {
+            "line": 271,
+            "text": "    { id: \"video_lead\", name: \"Video Lead\", fallback: \"Queue the next motion and short-form variants.\" },"
+          },
+          {
+            "line": 272,
+            "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+          },
+          {
+            "line": 273,
+            "text": "    { id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+          },
+          {
+            "line": 274,
+            "text": "    { id: \"analyst\", name: \"SEO & Insights Analyst\", fallback: \"Read weak signals and recommend measurable improvements.\" },"
+          },
+          {
+            "line": 275,
+            "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 276,
+            "text": "    { id: \"admin\", name: \"Operations Lead\", fallback: \"Clear blockers and keep execution flow healthy.\" }"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 275,
+        "excerpt": [
+          {
+            "line": 271,
+            "text": "    { id: \"video_lead\", name: \"Video Lead\", fallback: \"Queue the next motion and short-form variants.\" },"
+          },
+          {
+            "line": 272,
+            "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+          },
+          {
+            "line": 273,
+            "text": "    { id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+          },
+          {
+            "line": 274,
+            "text": "    { id: \"analyst\", name: \"SEO & Insights Analyst\", fallback: \"Read weak signals and recommend measurable improvements.\" },"
+          },
+          {
+            "line": 275,
+            "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 276,
+            "text": "    { id: \"admin\", name: \"Operations Lead\", fallback: \"Clear blockers and keep execution flow healthy.\" }"
+          },
+          {
+            "line": 277,
+            "text": "  ];"
+          },
+          {
+            "line": 278,
+            "text": ""
+          },
+          {
+            "line": 279,
+            "text": "  return roles.map((role) => {"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 459,
+        "excerpt": [
+          {
+            "line": 455,
+            "text": ""
+          },
+          {
+            "line": 456,
+            "text": "  const mediaJobs = asArray(operations.media_jobs?.items);"
+          },
+          {
+            "line": 457,
+            "text": "  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === \"success\").length;"
+          },
+          {
+            "line": 458,
+            "text": ""
+          },
+          {
+            "line": 459,
+            "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+          },
+          {
+            "line": 460,
+            "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+          },
+          {
+            "line": 461,
+            "text": "  );"
+          },
+          {
+            "line": 462,
+            "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+          },
+          {
+            "line": 463,
+            "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 460,
+        "excerpt": [
+          {
+            "line": 456,
+            "text": "  const mediaJobs = asArray(operations.media_jobs?.items);"
+          },
+          {
+            "line": 457,
+            "text": "  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === \"success\").length;"
+          },
+          {
+            "line": 458,
+            "text": ""
+          },
+          {
+            "line": 459,
+            "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+          },
+          {
+            "line": 460,
+            "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+          },
+          {
+            "line": 461,
+            "text": "  );"
+          },
+          {
+            "line": 462,
+            "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+          },
+          {
+            "line": 463,
+            "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+          },
+          {
+            "line": 464,
+            "text": "    return [\"ready\", \"manual_publish_ready\", \"scheduled\", \"queued\"].includes(status);"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 462,
+        "excerpt": [
+          {
+            "line": 458,
+            "text": ""
+          },
+          {
+            "line": 459,
+            "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+          },
+          {
+            "line": 460,
+            "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+          },
+          {
+            "line": 461,
+            "text": "  );"
+          },
+          {
+            "line": 462,
+            "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+          },
+          {
+            "line": 463,
+            "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+          },
+          {
+            "line": 464,
+            "text": "    return [\"ready\", \"manual_publish_ready\", \"scheduled\", \"queued\"].includes(status);"
+          },
+          {
+            "line": 465,
+            "text": "  }).length + scheduledJobs.length;"
+          },
+          {
+            "line": 466,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 463,
+        "excerpt": [
+          {
+            "line": 459,
+            "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+          },
+          {
+            "line": 460,
+            "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+          },
+          {
+            "line": 461,
+            "text": "  );"
+          },
+          {
+            "line": 462,
+            "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+          },
+          {
+            "line": 463,
+            "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+          },
+          {
+            "line": 464,
+            "text": "    return [\"ready\", \"manual_publish_ready\", \"scheduled\", \"queued\"].includes(status);"
+          },
+          {
+            "line": 465,
+            "text": "  }).length + scheduledJobs.length;"
+          },
+          {
+            "line": 466,
+            "text": ""
+          },
+          {
+            "line": 467,
+            "text": "  const emailConnected = Boolean("
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 464,
+        "excerpt": [
+          {
+            "line": 460,
+            "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+          },
+          {
+            "line": 461,
+            "text": "  );"
+          },
+          {
+            "line": 462,
+            "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+          },
+          {
+            "line": 463,
+            "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+          },
+          {
+            "line": 464,
+            "text": "    return [\"ready\", \"manual_publish_ready\", \"scheduled\", \"queued\"].includes(status);"
+          },
+          {
+            "line": 465,
+            "text": "  }).length + scheduledJobs.length;"
+          },
+          {
+            "line": 466,
+            "text": ""
+          },
+          {
+            "line": 467,
+            "text": "  const emailConnected = Boolean("
+          },
+          {
+            "line": 468,
+            "text": "    connectorChecks.email || connectorChecks.mailer || connectorChecks.smtp || connectorChecks.mailchimp"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 692,
+        "excerpt": [
+          {
+            "line": 688,
+            "text": "    recentExecutionSummary,"
+          },
+          {
+            "line": 689,
+            "text": "    recentActivity,"
+          },
+          {
+            "line": 690,
+            "text": ""
+          },
+          {
+            "line": 691,
+            "text": "    launchSnapshot: {"
+          },
+          {
+            "line": 692,
+            "text": "      publishReadiness: publishReadyCount,"
+          },
+          {
+            "line": 693,
+            "text": "      mediaReadiness: mediaReadyCount,"
+          },
+          {
+            "line": 694,
+            "text": "      emailReadiness: emailConnected ? \"Connected\" : \"Missing\","
+          },
+          {
+            "line": 695,
+            "text": "      scheduledJobs: scheduledJobs.length,"
+          },
+          {
+            "line": 696,
+            "text": "      campaignReadiness: campaignReadinessTone === \"success\" ? \"Ready\" : \"At risk\""
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 713,
+        "excerpt": [
+          {
+            "line": 709,
+            "text": ""
+          },
+          {
+            "line": 710,
+            "text": "    recent: {"
+          },
+          {
+            "line": 711,
+            "text": "      execution: latestExecution"
+          },
+          {
+            "line": 712,
+            "text": "        ? `${humanizeStatus(latestExecution.execution_status, \"Completed\")} on ${humanizeStatus(latestExecution.channel, \"Channel\")}`"
+          },
+          {
+            "line": 713,
+            "text": "        : \"No execution recorded yet — start with a campaign or publishing package to create the first signal.\","
+          },
+          {
+            "line": 714,
+            "text": "      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || \"Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.\","
+          },
+          {
+            "line": 715,
+            "text": "      feedback: asString(learningLessons[0]).trim() || \"Connect insights or run a reviewed campaign so the learning engine can capture feedback.\""
+          },
+          {
+            "line": 716,
+            "text": "    },"
+          },
+          {
+            "line": 717,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 865,
+        "excerpt": [
+          {
+            "line": 861,
+            "text": "              <div class=\"mhos-os-chip-row\">"
+          },
+          {
+            "line": 862,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>"
+          },
+          {
+            "line": 863,
+            "text": "                <span class=\"mhos-os-chip\">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>"
+          },
+          {
+            "line": 864,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>"
+          },
+          {
+            "line": 865,
+            "text": "                <span class=\"mhos-os-chip\">No approval, publishing, sending, or record changes here</span>"
+          },
+          {
+            "line": 866,
+            "text": "              </div>"
+          },
+          {
+            "line": 867,
+            "text": "              <div class=\"mhos-os-action-row\">"
+          },
+          {
+            "line": 868,
+            "text": "                <button id=\"homePrimaryActionBtn\" class=\"mhos-next-action-btn\" type=\"button\">"
+          },
+          {
+            "line": 869,
+            "text": "                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 931,
+        "excerpt": [
+          {
+            "line": 927,
+            "text": "              <summary class=\"mhos-os-panel-title\">System details and evidence</summary>"
+          },
+          {
+            "line": 928,
+            "text": "              <div class=\"home-status-grid\">"
+          },
+          {
+            "line": 929,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 930,
+            "text": "                  <span class=\"data-label\">Publish Ready</span>"
+          },
+          {
+            "line": 931,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>"
+          },
+          {
+            "line": 932,
+            "text": "                </div>"
+          },
+          {
+            "line": 933,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 934,
+            "text": "                  <span class=\"data-label\">Media Ready</span>"
+          },
+          {
+            "line": 935,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 981,
+        "excerpt": [
+          {
+            "line": 977,
+            "text": "            <section class=\"mhos-os-action-panel\">"
+          },
+          {
+            "line": 978,
+            "text": "              <div>"
+          },
+          {
+            "line": 979,
+            "text": "                <p class=\"mhos-os-kicker\">Workspaces</p>"
+          },
+          {
+            "line": 980,
+            "text": "                <h2 class=\"mhos-os-panel-title\">Open the owner</h2>"
+          },
+          {
+            "line": 981,
+            "text": "                <p class=\"mhos-os-panel-copy\">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>"
+          },
+          {
+            "line": 982,
+            "text": "              </div>"
+          },
+          {
+            "line": 983,
+            "text": ""
+          },
+          {
+            "line": 984,
+            "text": "              <button id=\"homeQuickReviewReadinessBtn\" class=\"quick-action-btn\" type=\"button\">"
+          },
+          {
+            "line": 985,
+            "text": "                <span class=\"home-action-title\">Open Setup Readiness</span>"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 1087,
+        "excerpt": [
+          {
+            "line": 1083,
+            "text": "        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1084,
+            "text": "        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1085,
+            "text": "        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1086,
+            "text": "        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1087,
+            "text": "        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1088,
+            "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1089,
+            "text": "        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1090,
+            "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1091,
+            "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 1090,
+        "excerpt": [
+          {
+            "line": 1086,
+            "text": "        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1087,
+            "text": "        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1088,
+            "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1089,
+            "text": "        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1090,
+            "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1091,
+            "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+          },
+          {
+            "line": 1092,
+            "text": "      };"
+          },
+          {
+            "line": 1093,
+            "text": ""
+          },
+          {
+            "line": 1094,
+            "text": "      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;"
+          }
+        ]
+      },
+      {
+        "term": "publish",
+        "line": 1148,
+        "excerpt": [
+          {
+            "line": 1144,
+            "text": "    }"
+          },
+          {
+            "line": 1145,
+            "text": ""
+          },
+          {
+            "line": 1146,
+            "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+          },
+          {
+            "line": 1147,
+            "text": "    if (promptLaunchBtn) {"
+          },
+          {
+            "line": 1148,
+            "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+          },
+          {
+            "line": 1149,
+            "text": "    }"
+          },
+          {
+            "line": 1150,
+            "text": ""
+          },
+          {
+            "line": 1151,
+            "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+          },
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          }
+        ]
+      }
+    ],
+    "approval": [
+      {
+        "term": "approval",
+        "line": 245,
+        "excerpt": [
+          {
+            "line": 241,
+            "text": "function buildAiTeamCards(state) {"
+          },
+          {
+            "line": 242,
+            "text": "  const operations = asObject(selectOperationsSnapshot(state));"
+          },
+          {
+            "line": 243,
+            "text": "  const notifications = asArray(operations.notifications?.items);"
+          },
+          {
+            "line": 244,
+            "text": "  const tasks = asArray(operations.tasks?.items);"
+          },
+          {
+            "line": 245,
+            "text": "  const approvals = asArray(operations.approvals?.items);"
+          },
+          {
+            "line": 246,
+            "text": ""
+          },
+          {
+            "line": 247,
+            "text": "  const projectedMembers = getProjectedTeamMembers(state);"
+          },
+          {
+            "line": 248,
+            "text": "  const projectedActiveRole = asString("
+          },
+          {
+            "line": 249,
+            "text": "    getProjectedActiveRole(state)"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 275,
+        "excerpt": [
+          {
+            "line": 271,
+            "text": "    { id: \"video_lead\", name: \"Video Lead\", fallback: \"Queue the next motion and short-form variants.\" },"
+          },
+          {
+            "line": 272,
+            "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+          },
+          {
+            "line": 273,
+            "text": "    { id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+          },
+          {
+            "line": 274,
+            "text": "    { id: \"analyst\", name: \"SEO & Insights Analyst\", fallback: \"Read weak signals and recommend measurable improvements.\" },"
+          },
+          {
+            "line": 275,
+            "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 276,
+            "text": "    { id: \"admin\", name: \"Operations Lead\", fallback: \"Clear blockers and keep execution flow healthy.\" }"
+          },
+          {
+            "line": 277,
+            "text": "  ];"
+          },
+          {
+            "line": 278,
+            "text": ""
+          },
+          {
+            "line": 279,
+            "text": "  return roles.map((role) => {"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 282,
+        "excerpt": [
+          {
+            "line": 278,
+            "text": ""
+          },
+          {
+            "line": 279,
+            "text": "  return roles.map((role) => {"
+          },
+          {
+            "line": 280,
+            "text": "    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);"
+          },
+          {
+            "line": 281,
+            "text": "    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);"
+          },
+          {
+            "line": 282,
+            "text": "    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);"
+          },
+          {
+            "line": 283,
+            "text": ""
+          },
+          {
+            "line": 284,
+            "text": "    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;"
+          },
+          {
+            "line": 285,
+            "text": "    const statusRaw = asString(latest?.status || latest?.level || \"idle\");"
+          },
+          {
+            "line": 286,
+            "text": "    const tone = statusTone(statusRaw);"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 374,
+        "excerpt": [
+          {
+            "line": 370,
+            "text": ""
+          },
+          {
+            "line": 371,
+            "text": "  const insightsRecommendations = asArray(insights.recommendations);"
+          },
+          {
+            "line": 372,
+            "text": "  const learningLessons = asArray(learning.system_lessons);"
+          },
+          {
+            "line": 373,
+            "text": "  const tasks = asArray(operations.tasks?.items);"
+          },
+          {
+            "line": 374,
+            "text": "  const approvals = asArray(operations.approvals?.items);"
+          },
+          {
+            "line": 375,
+            "text": ""
+          },
+          {
+            "line": 376,
+            "text": "  const automationTone = failedExecutions.length"
+          },
+          {
+            "line": 377,
+            "text": "    ? \"danger\""
+          },
+          {
+            "line": 378,
+            "text": "    : scheduledJobs.length"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 427,
+        "excerpt": [
+          {
+            "line": 423,
+            "text": "    const text = asString(item?.status || \"\").toLowerCase();"
+          },
+          {
+            "line": 424,
+            "text": "    return text.includes(\"pending\") || text.includes(\"in_progress\") || text.includes(\"review\");"
+          },
+          {
+            "line": 425,
+            "text": "  });"
+          },
+          {
+            "line": 426,
+            "text": ""
+          },
+          {
+            "line": 427,
+            "text": "  const pendingApprovals = approvals.filter((item) => {"
+          },
+          {
+            "line": 428,
+            "text": "    const text = asString(item?.status || \"\").toLowerCase();"
+          },
+          {
+            "line": 429,
+            "text": "    return !text || text.includes(\"pending\") || text.includes(\"requested\");"
+          },
+          {
+            "line": 430,
+            "text": "  });"
+          },
+          {
+            "line": 431,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 453,
+        "excerpt": [
+          {
+            "line": 449,
+            "text": "    ? `Signals: ${formatCount(intelligenceScore)}`"
+          },
+          {
+            "line": 450,
+            "text": "    : \"Needs input\";"
+          },
+          {
+            "line": 451,
+            "text": ""
+          },
+          {
+            "line": 452,
+            "text": "  const escalationSummary = pendingApprovals.length"
+          },
+          {
+            "line": 453,
+            "text": "    ? `${formatCount(pendingApprovals.length)} approval${pendingApprovals.length === 1 ? \"\" : \"s\"} required`"
+          },
+          {
+            "line": 454,
+            "text": "    : \"No escalations\";"
+          },
+          {
+            "line": 455,
+            "text": ""
+          },
+          {
+            "line": 456,
+            "text": "  const mediaJobs = asArray(operations.media_jobs?.items);"
+          },
+          {
+            "line": 457,
+            "text": "  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === \"success\").length;"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 560,
+        "excerpt": [
+          {
+            "line": 556,
+            "text": "        executiveHealthStrip: {"
+          },
+          {
+            "line": 557,
+            "text": "          statusLabel: campaignReadinessTone === \"success\" ? \"Healthy\" : totalBlockers ? \"Attention\" : \"Unknown\","
+          },
+          {
+            "line": 558,
+            "text": "          confidenceLabel: intelligenceTone === \"success\" ? `Signals: ${formatCount(intelligenceScore)}` : \"Needs Input\","
+          },
+          {
+            "line": 559,
+            "text": "          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : \"None\","
+          },
+          {
+            "line": 560,
+            "text": "          approvals: formatCount(pendingApprovals.length),"
+          },
+          {
+            "line": 561,
+            "text": "          confidence: formatPercent(systemScore),"
+          },
+          {
+            "line": 562,
+            "text": "          escalations: formatCount(failedExecutions.length),"
+          },
+          {
+            "line": 563,
+            "text": "          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`"
+          },
+          {
+            "line": 564,
+            "text": "        },"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 563,
+        "excerpt": [
+          {
+            "line": 559,
+            "text": "          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : \"None\","
+          },
+          {
+            "line": 560,
+            "text": "          approvals: formatCount(pendingApprovals.length),"
+          },
+          {
+            "line": 561,
+            "text": "          confidence: formatPercent(systemScore),"
+          },
+          {
+            "line": 562,
+            "text": "          escalations: formatCount(failedExecutions.length),"
+          },
+          {
+            "line": 563,
+            "text": "          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`"
+          },
+          {
+            "line": 564,
+            "text": "        },"
+          },
+          {
+            "line": 565,
+            "text": "    projectName,"
+          },
+          {
+            "line": 566,
+            "text": "    headerStatus: humanizeStatus("
+          },
+          {
+            "line": 567,
+            "text": "      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 658,
+        "excerpt": [
+          {
+            "line": 654,
+            "text": "      },"
+          },
+          {
+            "line": 655,
+            "text": "      {"
+          },
+          {
+            "line": 656,
+            "text": "        label: \"Needs Attention\","
+          },
+          {
+            "line": 657,
+            "text": "        value: formatCount(unreadNotifications.length + pendingTasks.length + pendingApprovals.length),"
+          },
+          {
+            "line": 658,
+            "text": "        hint: \"Notifications, tasks, approvals\","
+          },
+          {
+            "line": 659,
+            "text": "        tone: unreadNotifications.length + pendingTasks.length + pendingApprovals.length ? \"warning\" : \"success\""
+          },
+          {
+            "line": 660,
+            "text": "      },"
+          },
+          {
+            "line": 661,
+            "text": "      {"
+          },
+          {
+            "line": 662,
+            "text": "        label: \"Completed\","
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 865,
+        "excerpt": [
+          {
+            "line": 861,
+            "text": "              <div class=\"mhos-os-chip-row\">"
+          },
+          {
+            "line": 862,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>"
+          },
+          {
+            "line": 863,
+            "text": "                <span class=\"mhos-os-chip\">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>"
+          },
+          {
+            "line": 864,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>"
+          },
+          {
+            "line": 865,
+            "text": "                <span class=\"mhos-os-chip\">No approval, publishing, sending, or record changes here</span>"
+          },
+          {
+            "line": 866,
+            "text": "              </div>"
+          },
+          {
+            "line": 867,
+            "text": "              <div class=\"mhos-os-action-row\">"
+          },
+          {
+            "line": 868,
+            "text": "                <button id=\"homePrimaryActionBtn\" class=\"mhos-next-action-btn\" type=\"button\">"
+          },
+          {
+            "line": 869,
+            "text": "                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}"
+          }
+        ]
+      },
+      {
+        "term": "approval",
+        "line": 1090,
+        "excerpt": [
+          {
+            "line": 1086,
+            "text": "        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1087,
+            "text": "        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1088,
+            "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1089,
+            "text": "        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1090,
+            "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+          },
+          {
+            "line": 1091,
+            "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+          },
+          {
+            "line": 1092,
+            "text": "      };"
+          },
+          {
+            "line": 1093,
+            "text": ""
+          },
+          {
+            "line": 1094,
+            "text": "      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;"
+          }
+        ]
+      }
+    ],
+    "handoff": [
+      {
+        "term": "handoff",
+        "line": 272,
+        "excerpt": [
+          {
+            "line": 268,
+            "text": "    { id: \"strategist\", name: \"Strategist\", fallback: \"Align campaign priorities and launch sequencing.\" },"
+          },
+          {
+            "line": 269,
+            "text": "    { id: \"writer\", name: \"Content Writer\", fallback: \"Prepare high-conversion messaging for active channels.\" },"
+          },
+          {
+            "line": 270,
+            "text": "    { id: \"designer\", name: \"Media Director\", fallback: \"Polish visual direction and creative consistency.\" },"
+          },
+          {
+            "line": 271,
+            "text": "    { id: \"video_lead\", name: \"Video Lead\", fallback: \"Queue the next motion and short-form variants.\" },"
+          },
+          {
+            "line": 272,
+            "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+          },
+          {
+            "line": 273,
+            "text": "    { id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+          },
+          {
+            "line": 274,
+            "text": "    { id: \"analyst\", name: \"SEO & Insights Analyst\", fallback: \"Read weak signals and recommend measurable improvements.\" },"
+          },
+          {
+            "line": 275,
+            "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+          },
+          {
+            "line": 276,
+            "text": "    { id: \"admin\", name: \"Operations Lead\", fallback: \"Clear blockers and keep execution flow healthy.\" }"
+          }
+        ]
+      },
+      {
+        "term": "handoff",
+        "line": 842,
+        "excerpt": [
+          {
+            "line": 838,
+            "text": "            </article>"
+          },
+          {
+            "line": 839,
+            "text": "            <article class=\"mhos-os-brief-card mhos-motion-soft\">"
+          },
+          {
+            "line": 840,
+            "text": "              <span class=\"mhos-os-brief-label\">Primary Focus</span>"
+          },
+          {
+            "line": 841,
+            "text": "              <strong class=\"mhos-os-brief-value\">${escapeHtml(dashboard.nextBestAction.route === \"ai-command\" ? \"AI Guidance\" : humanizeStatus(dashboard.nextBestAction.route))}</strong>"
+          },
+          {
+            "line": 842,
+            "text": "              <span class=\"mhos-os-brief-hint\">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>"
+          },
+          {
+            "line": 843,
+            "text": "            </article>"
+          },
+          {
+            "line": 844,
+            "text": "          </div>"
+          },
+          {
+            "line": 845,
+            "text": "        </section>"
+          },
+          {
+            "line": 846,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "handoff",
+        "line": 886,
+        "excerpt": [
+          {
+            "line": 882,
+            "text": "                <div>"
+          },
+          {
+            "line": 883,
+            "text": "                  <p class=\"mhos-os-kicker\">Attention</p>"
+          },
+          {
+            "line": 884,
+            "text": "                  <h2 class=\"mhos-os-section-title\">${dashboard.totalBlockers ? \"Operating blockers\" : \"No critical blockers\"}</h2>"
+          },
+          {
+            "line": 885,
+            "text": "                  <p class=\"mhos-os-section-copy\">"
+          },
+          {
+            "line": 886,
+            "text": "                    ${dashboard.totalBlockers ? \"Only the blockers that affect the next handoff are shown here.\" : \"The current path is clear. Continue with the recommended workspace or ask AI for guidance.\"}"
+          },
+          {
+            "line": 887,
+            "text": "                  </p>"
+          },
+          {
+            "line": 888,
+            "text": "                </div>"
+          },
+          {
+            "line": 889,
+            "text": "                ${renderBadge(dashboard.totalBlockers ? \"warning\" : \"success\", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} signals` : \"Clear\", escapeHtml)}"
+          },
+          {
+            "line": 890,
+            "text": "              </div>"
+          }
+        ]
+      },
+      {
+        "term": "handoff",
+        "line": 897,
+        "excerpt": [
+          {
+            "line": 893,
+            "text": "                ${topAttentionCards.map((item) => `"
+          },
+          {
+            "line": 894,
+            "text": "                  <article class=\"mhos-os-attention-card mhos-motion-soft\">"
+          },
+          {
+            "line": 895,
+            "text": "                    <span class=\"mhos-os-chip ${escapeHtml(item.tone)}\">${escapeHtml(item.title)}</span>"
+          },
+          {
+            "line": 896,
+            "text": "                    <strong>${escapeHtml(item.detail)}</strong>"
+          },
+          {
+            "line": 897,
+            "text": "                    <span>${escapeHtml(item.tone === \"is-live\" ? \"Ready for the current operating path.\" : \"Review before the next handoff.\")}</span>"
+          },
+          {
+            "line": 898,
+            "text": "                  </article>"
+          },
+          {
+            "line": 899,
+            "text": "                `).join(\"\")}"
+          },
+          {
+            "line": 900,
+            "text": "              </div>"
+          },
+          {
+            "line": 901,
+            "text": "            </section>"
+          }
+        ]
+      },
+      {
+        "term": "handoff",
+        "line": 1037,
+        "excerpt": [
+          {
+            "line": 1033,
+            "text": "              </div>"
+          },
+          {
+            "line": 1034,
+            "text": ""
+          },
+          {
+            "line": 1035,
+            "text": "              <button id=\"homePromptNextBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+          },
+          {
+            "line": 1036,
+            "text": "                <span class=\"home-prompt-title\">What is the next executive action?</span>"
+          },
+          {
+            "line": 1037,
+            "text": "                <span class=\"home-prompt-meta\">Prepare a short explanation and handoff path.</span>"
+          },
+          {
+            "line": 1038,
+            "text": "              </button>"
+          },
+          {
+            "line": 1039,
+            "text": "              <button id=\"homePromptReadinessBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+          },
+          {
+            "line": 1040,
+            "text": "                <span class=\"home-prompt-title\">Why is readiness low?</span>"
+          },
+          {
+            "line": 1041,
+            "text": "                <span class=\"home-prompt-meta\">Explain blockers and readiness gaps in simple terms.</span>"
+          }
+        ]
+      }
+    ],
+    "navigateTo": [
+      {
+        "term": "navigateTo",
+        "line": 757,
+        "excerpt": [
+          {
+            "line": 753,
+            "text": "    <section class=\"page is-active\" data-page=\"home\">"
+          },
+          {
+            "line": 754,
+            "text": "      <div id=\"homeExecRoot\"></div>"
+          },
+          {
+            "line": 755,
+            "text": "    </section>"
+          },
+          {
+            "line": 756,
+            "text": "  `,"
+          },
+          {
+            "line": 757,
+            "text": "  render({ getState, $, escapeHtml, navigateTo, showMessage }) {"
+          },
+          {
+            "line": 758,
+            "text": "    const state = getState();"
+          },
+          {
+            "line": 759,
+            "text": "    const dashboard = buildExecutiveData(state);"
+          },
+          {
+            "line": 760,
+            "text": "    const root = $(\"homeExecRoot\");"
+          },
+          {
+            "line": 761,
+            "text": "    if (!root) return;"
+          }
+        ]
+      },
+      {
+        "term": "navigateTo",
+        "line": 1069,
+        "excerpt": [
+          {
+            "line": 1065,
+            "text": "      </div>"
+          },
+          {
+            "line": 1066,
+            "text": "    `;"
+          },
+          {
+            "line": 1067,
+            "text": "    "
+          },
+          {
+            "line": 1068,
+            "text": "    const openRoute = (route, message = \"\") => {"
+          },
+          {
+            "line": 1069,
+            "text": "      navigateTo(route);"
+          },
+          {
+            "line": 1070,
+            "text": "      if (message) showMessage?.(message);"
+          },
+          {
+            "line": 1071,
+            "text": "    };"
+          },
+          {
+            "line": 1072,
+            "text": ""
+          },
+          {
+            "line": 1073,
+            "text": "    const openAiWithPrompt = (prompt) => {"
+          }
+        ]
+      },
+      {
+        "term": "navigateTo",
+        "line": 1075,
+        "excerpt": [
+          {
+            "line": 1071,
+            "text": "    };"
+          },
+          {
+            "line": 1072,
+            "text": ""
+          },
+          {
+            "line": 1073,
+            "text": "    const openAiWithPrompt = (prompt) => {"
+          },
+          {
+            "line": 1074,
+            "text": "      setGlobalAiPrompt($, prompt);"
+          },
+          {
+            "line": 1075,
+            "text": "      navigateTo(\"ai-command\");"
+          },
+          {
+            "line": 1076,
+            "text": "      showMessage?.(\"Prompt prepared in AI Command.\");"
+          },
+          {
+            "line": 1077,
+            "text": "    };"
+          },
+          {
+            "line": 1078,
+            "text": ""
+          },
+          {
+            "line": 1079,
+            "text": ""
+          }
+        ]
+      }
+    ],
+    "confirm": [
+      {
+        "term": "confirm",
+        "line": 390,
+        "excerpt": [
+          {
+            "line": 386,
+            "text": "    criticalGaps[0]"
+          },
+          {
+            "line": 387,
+            "text": "      ? `Resolve: ${criticalGaps[0]}`"
+          },
+          {
+            "line": 388,
+            "text": "      : failedExecutions.length"
+          },
+          {
+            "line": 389,
+            "text": "        ? \"Recover failed execution items\""
+          },
+          {
+            "line": 390,
+            "text": "        : \"Review and confirm next launch move\";"
+          },
+          {
+            "line": 391,
+            "text": ""
+          },
+          {
+            "line": 392,
+            "text": "  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;"
+          },
+          {
+            "line": 393,
+            "text": "  const nextAction = humanizeExecutiveAction(rawNextAction, \"Ask AI Command\");"
+          },
+          {
+            "line": 394,
+            "text": "  const nextActionRoute = routeForAction(rawNextAction || nextAction);"
+          }
+        ]
+      }
+    ],
+    "window.confirm": [],
+    "createProjectHandoff": [],
+    "createProjectApproval": [],
+    "createProjectTask": [],
+    "executeProjectAiCommand": [],
+    "setSharedHandoff": [],
+    "setSharedAiDraft": [],
+    "saveProject": [],
+    "addEventListener": [],
+    ".onclick": [
+      {
+        "term": ".onclick",
+        "line": 1101,
+        "excerpt": [
+          {
+            "line": 1097,
+            "text": "    };"
+          },
+          {
+            "line": 1098,
+            "text": ""
+          },
+          {
+            "line": 1099,
+            "text": "    const nextBtn = $(\"homePrimaryActionBtn\");"
+          },
+          {
+            "line": 1100,
+            "text": "    if (nextBtn) {"
+          },
+          {
+            "line": 1101,
+            "text": "      nextBtn.onclick = () => {"
+          },
+          {
+            "line": 1102,
+            "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+          },
+          {
+            "line": 1103,
+            "text": "          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1104,
+            "text": "        }"
+          },
+          {
+            "line": 1105,
+            "text": "        openRoute(dashboard.nextBestAction.route, \"Next best action opened.\");"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1111,
+        "excerpt": [
+          {
+            "line": 1107,
+            "text": "    }"
+          },
+          {
+            "line": 1108,
+            "text": ""
+          },
+          {
+            "line": 1109,
+            "text": "    const askNextActionBtn = $(\"homeAskNextActionBtn\");"
+          },
+          {
+            "line": 1110,
+            "text": "    if (askNextActionBtn) {"
+          },
+          {
+            "line": 1111,
+            "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+          },
+          {
+            "line": 1112,
+            "text": "    }"
+          },
+          {
+            "line": 1113,
+            "text": ""
+          },
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1115,
+        "excerpt": [
+          {
+            "line": 1111,
+            "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+          },
+          {
+            "line": 1112,
+            "text": "    }"
+          },
+          {
+            "line": 1113,
+            "text": ""
+          },
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          },
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1118,
+        "excerpt": [
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          },
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1120,
+        "excerpt": [
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1123,
+        "excerpt": [
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          },
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1126,
+        "excerpt": [
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          },
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          },
+          {
+            "line": 1128,
+            "text": "    const quickReadinessBtn = $(\"homeQuickReviewReadinessBtn\");"
+          },
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1129,
+        "excerpt": [
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          },
+          {
+            "line": 1128,
+            "text": "    const quickReadinessBtn = $(\"homeQuickReviewReadinessBtn\");"
+          },
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          },
+          {
+            "line": 1131,
+            "text": "    const quickAiBtn = $(\"homeQuickOpenAiBtn\");"
+          },
+          {
+            "line": 1132,
+            "text": "    if (quickAiBtn) {"
+          },
+          {
+            "line": 1133,
+            "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1133,
+        "excerpt": [
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          },
+          {
+            "line": 1131,
+            "text": "    const quickAiBtn = $(\"homeQuickOpenAiBtn\");"
+          },
+          {
+            "line": 1132,
+            "text": "    if (quickAiBtn) {"
+          },
+          {
+            "line": 1133,
+            "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1134,
+            "text": "    }"
+          },
+          {
+            "line": 1135,
+            "text": ""
+          },
+          {
+            "line": 1136,
+            "text": "    const promptNextBtn = $(\"homePromptNextBtn\");"
+          },
+          {
+            "line": 1137,
+            "text": "    if (promptNextBtn) {"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1138,
+        "excerpt": [
+          {
+            "line": 1134,
+            "text": "    }"
+          },
+          {
+            "line": 1135,
+            "text": ""
+          },
+          {
+            "line": 1136,
+            "text": "    const promptNextBtn = $(\"homePromptNextBtn\");"
+          },
+          {
+            "line": 1137,
+            "text": "    if (promptNextBtn) {"
+          },
+          {
+            "line": 1138,
+            "text": "      promptNextBtn.onclick = () => openAiWithPrompt(\"What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.\");"
+          },
+          {
+            "line": 1139,
+            "text": "    }"
+          },
+          {
+            "line": 1140,
+            "text": ""
+          },
+          {
+            "line": 1141,
+            "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+          },
+          {
+            "line": 1142,
+            "text": "    if (promptReadinessBtn) {"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1143,
+        "excerpt": [
+          {
+            "line": 1139,
+            "text": "    }"
+          },
+          {
+            "line": 1140,
+            "text": ""
+          },
+          {
+            "line": 1141,
+            "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+          },
+          {
+            "line": 1142,
+            "text": "    if (promptReadinessBtn) {"
+          },
+          {
+            "line": 1143,
+            "text": "      promptReadinessBtn.onclick = () => openAiWithPrompt(\"Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.\");"
+          },
+          {
+            "line": 1144,
+            "text": "    }"
+          },
+          {
+            "line": 1145,
+            "text": ""
+          },
+          {
+            "line": 1146,
+            "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+          },
+          {
+            "line": 1147,
+            "text": "    if (promptLaunchBtn) {"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1148,
+        "excerpt": [
+          {
+            "line": 1144,
+            "text": "    }"
+          },
+          {
+            "line": 1145,
+            "text": ""
+          },
+          {
+            "line": 1146,
+            "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+          },
+          {
+            "line": 1147,
+            "text": "    if (promptLaunchBtn) {"
+          },
+          {
+            "line": 1148,
+            "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+          },
+          {
+            "line": 1149,
+            "text": "    }"
+          },
+          {
+            "line": 1150,
+            "text": ""
+          },
+          {
+            "line": 1151,
+            "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+          },
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1153,
+        "excerpt": [
+          {
+            "line": 1149,
+            "text": "    }"
+          },
+          {
+            "line": 1150,
+            "text": ""
+          },
+          {
+            "line": 1151,
+            "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+          },
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          },
+          {
+            "line": 1153,
+            "text": "      promptPlanBtn.onclick = () => openAiWithPrompt(\"Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.\");"
+          },
+          {
+            "line": 1154,
+            "text": "    }"
+          },
+          {
+            "line": 1155,
+            "text": ""
+          },
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          }
+        ]
+      },
+      {
+        "term": ".onclick",
+        "line": 1160,
+        "excerpt": [
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          },
+          {
+            "line": 1158,
+            "text": "      const roleId = card.getAttribute(\"data-role-id\");"
+          },
+          {
+            "line": 1159,
+            "text": "      const roleName = card.querySelector(\"strong\")?.textContent || \"AI Specialist\";"
+          },
+          {
+            "line": 1160,
+            "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+          },
+          {
+            "line": 1161,
+            "text": "    });"
+          },
+          {
+            "line": 1162,
+            "text": "  }"
+          },
+          {
+            "line": 1163,
+            "text": "};"
+          },
+          {
+            "line": 1164,
+            "text": ""
+          }
+        ]
+      }
+    ],
+    "onclick": [
+      {
+        "term": "onclick",
+        "line": 1101,
+        "excerpt": [
+          {
+            "line": 1097,
+            "text": "    };"
+          },
+          {
+            "line": 1098,
+            "text": ""
+          },
+          {
+            "line": 1099,
+            "text": "    const nextBtn = $(\"homePrimaryActionBtn\");"
+          },
+          {
+            "line": 1100,
+            "text": "    if (nextBtn) {"
+          },
+          {
+            "line": 1101,
+            "text": "      nextBtn.onclick = () => {"
+          },
+          {
+            "line": 1102,
+            "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+          },
+          {
+            "line": 1103,
+            "text": "          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1104,
+            "text": "        }"
+          },
+          {
+            "line": 1105,
+            "text": "        openRoute(dashboard.nextBestAction.route, \"Next best action opened.\");"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1111,
+        "excerpt": [
+          {
+            "line": 1107,
+            "text": "    }"
+          },
+          {
+            "line": 1108,
+            "text": ""
+          },
+          {
+            "line": 1109,
+            "text": "    const askNextActionBtn = $(\"homeAskNextActionBtn\");"
+          },
+          {
+            "line": 1110,
+            "text": "    if (askNextActionBtn) {"
+          },
+          {
+            "line": 1111,
+            "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+          },
+          {
+            "line": 1112,
+            "text": "    }"
+          },
+          {
+            "line": 1113,
+            "text": ""
+          },
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1115,
+        "excerpt": [
+          {
+            "line": 1111,
+            "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+          },
+          {
+            "line": 1112,
+            "text": "    }"
+          },
+          {
+            "line": 1113,
+            "text": ""
+          },
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          },
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1118,
+        "excerpt": [
+          {
+            "line": 1114,
+            "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+          },
+          {
+            "line": 1115,
+            "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+          },
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1120,
+        "excerpt": [
+          {
+            "line": 1116,
+            "text": ""
+          },
+          {
+            "line": 1117,
+            "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+          },
+          {
+            "line": 1118,
+            "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1123,
+        "excerpt": [
+          {
+            "line": 1119,
+            "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+          },
+          {
+            "line": 1120,
+            "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+          },
+          {
+            "line": 1121,
+            "text": ""
+          },
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          },
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1126,
+        "excerpt": [
+          {
+            "line": 1122,
+            "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+          },
+          {
+            "line": 1123,
+            "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+          },
+          {
+            "line": 1124,
+            "text": ""
+          },
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          },
+          {
+            "line": 1128,
+            "text": "    const quickReadinessBtn = $(\"homeQuickReviewReadinessBtn\");"
+          },
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1129,
+        "excerpt": [
+          {
+            "line": 1125,
+            "text": "    const quickAssetBtn = $(\"homeQuickAssetLibraryBtn\") || $(\"homeQuickUploadAssetBtn\");"
+          },
+          {
+            "line": 1126,
+            "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+          },
+          {
+            "line": 1127,
+            "text": ""
+          },
+          {
+            "line": 1128,
+            "text": "    const quickReadinessBtn = $(\"homeQuickReviewReadinessBtn\");"
+          },
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          },
+          {
+            "line": 1131,
+            "text": "    const quickAiBtn = $(\"homeQuickOpenAiBtn\");"
+          },
+          {
+            "line": 1132,
+            "text": "    if (quickAiBtn) {"
+          },
+          {
+            "line": 1133,
+            "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1133,
+        "excerpt": [
+          {
+            "line": 1129,
+            "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+          },
+          {
+            "line": 1130,
+            "text": ""
+          },
+          {
+            "line": 1131,
+            "text": "    const quickAiBtn = $(\"homeQuickOpenAiBtn\");"
+          },
+          {
+            "line": 1132,
+            "text": "    if (quickAiBtn) {"
+          },
+          {
+            "line": 1133,
+            "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1134,
+            "text": "    }"
+          },
+          {
+            "line": 1135,
+            "text": ""
+          },
+          {
+            "line": 1136,
+            "text": "    const promptNextBtn = $(\"homePromptNextBtn\");"
+          },
+          {
+            "line": 1137,
+            "text": "    if (promptNextBtn) {"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1138,
+        "excerpt": [
+          {
+            "line": 1134,
+            "text": "    }"
+          },
+          {
+            "line": 1135,
+            "text": ""
+          },
+          {
+            "line": 1136,
+            "text": "    const promptNextBtn = $(\"homePromptNextBtn\");"
+          },
+          {
+            "line": 1137,
+            "text": "    if (promptNextBtn) {"
+          },
+          {
+            "line": 1138,
+            "text": "      promptNextBtn.onclick = () => openAiWithPrompt(\"What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.\");"
+          },
+          {
+            "line": 1139,
+            "text": "    }"
+          },
+          {
+            "line": 1140,
+            "text": ""
+          },
+          {
+            "line": 1141,
+            "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+          },
+          {
+            "line": 1142,
+            "text": "    if (promptReadinessBtn) {"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1143,
+        "excerpt": [
+          {
+            "line": 1139,
+            "text": "    }"
+          },
+          {
+            "line": 1140,
+            "text": ""
+          },
+          {
+            "line": 1141,
+            "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+          },
+          {
+            "line": 1142,
+            "text": "    if (promptReadinessBtn) {"
+          },
+          {
+            "line": 1143,
+            "text": "      promptReadinessBtn.onclick = () => openAiWithPrompt(\"Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.\");"
+          },
+          {
+            "line": 1144,
+            "text": "    }"
+          },
+          {
+            "line": 1145,
+            "text": ""
+          },
+          {
+            "line": 1146,
+            "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+          },
+          {
+            "line": 1147,
+            "text": "    if (promptLaunchBtn) {"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1148,
+        "excerpt": [
+          {
+            "line": 1144,
+            "text": "    }"
+          },
+          {
+            "line": 1145,
+            "text": ""
+          },
+          {
+            "line": 1146,
+            "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+          },
+          {
+            "line": 1147,
+            "text": "    if (promptLaunchBtn) {"
+          },
+          {
+            "line": 1148,
+            "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+          },
+          {
+            "line": 1149,
+            "text": "    }"
+          },
+          {
+            "line": 1150,
+            "text": ""
+          },
+          {
+            "line": 1151,
+            "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+          },
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1153,
+        "excerpt": [
+          {
+            "line": 1149,
+            "text": "    }"
+          },
+          {
+            "line": 1150,
+            "text": ""
+          },
+          {
+            "line": 1151,
+            "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+          },
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          },
+          {
+            "line": 1153,
+            "text": "      promptPlanBtn.onclick = () => openAiWithPrompt(\"Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.\");"
+          },
+          {
+            "line": 1154,
+            "text": "    }"
+          },
+          {
+            "line": 1155,
+            "text": ""
+          },
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          }
+        ]
+      },
+      {
+        "term": "onclick",
+        "line": 1160,
+        "excerpt": [
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          },
+          {
+            "line": 1158,
+            "text": "      const roleId = card.getAttribute(\"data-role-id\");"
+          },
+          {
+            "line": 1159,
+            "text": "      const roleName = card.querySelector(\"strong\")?.textContent || \"AI Specialist\";"
+          },
+          {
+            "line": 1160,
+            "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+          },
+          {
+            "line": 1161,
+            "text": "    });"
+          },
+          {
+            "line": 1162,
+            "text": "  }"
+          },
+          {
+            "line": 1163,
+            "text": "};"
+          },
+          {
+            "line": 1164,
+            "text": ""
+          }
+        ]
+      }
+    ],
+    "data-": [
+      {
+        "term": "data-",
+        "line": 753,
+        "excerpt": [
+          {
+            "line": 749,
+            "text": "    title: \"Executive Command Center\","
+          },
+          {
+            "line": 750,
+            "text": "    description: \"Understand the whole system in seconds and take the most important action now.\""
+          },
+          {
+            "line": 751,
+            "text": "  },"
+          },
+          {
+            "line": 752,
+            "text": "  template: `"
+          },
+          {
+            "line": 753,
+            "text": "    <section class=\"page is-active\" data-page=\"home\">"
+          },
+          {
+            "line": 754,
+            "text": "      <div id=\"homeExecRoot\"></div>"
+          },
+          {
+            "line": 755,
+            "text": "    </section>"
+          },
+          {
+            "line": 756,
+            "text": "  `,"
+          },
+          {
+            "line": 757,
+            "text": "  render({ getState, $, escapeHtml, navigateTo, showMessage }) {"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 930,
+        "excerpt": [
+          {
+            "line": 926,
+            "text": "            <details class=\"mhos-os-evidence-panel\">"
+          },
+          {
+            "line": 927,
+            "text": "              <summary class=\"mhos-os-panel-title\">System details and evidence</summary>"
+          },
+          {
+            "line": 928,
+            "text": "              <div class=\"home-status-grid\">"
+          },
+          {
+            "line": 929,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 930,
+            "text": "                  <span class=\"data-label\">Publish Ready</span>"
+          },
+          {
+            "line": 931,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>"
+          },
+          {
+            "line": 932,
+            "text": "                </div>"
+          },
+          {
+            "line": 933,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 934,
+            "text": "                  <span class=\"data-label\">Media Ready</span>"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 934,
+        "excerpt": [
+          {
+            "line": 930,
+            "text": "                  <span class=\"data-label\">Publish Ready</span>"
+          },
+          {
+            "line": 931,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>"
+          },
+          {
+            "line": 932,
+            "text": "                </div>"
+          },
+          {
+            "line": 933,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 934,
+            "text": "                  <span class=\"data-label\">Media Ready</span>"
+          },
+          {
+            "line": 935,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>"
+          },
+          {
+            "line": 936,
+            "text": "                </div>"
+          },
+          {
+            "line": 937,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 938,
+            "text": "                  <span class=\"data-label\">Email</span>"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 938,
+        "excerpt": [
+          {
+            "line": 934,
+            "text": "                  <span class=\"data-label\">Media Ready</span>"
+          },
+          {
+            "line": 935,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>"
+          },
+          {
+            "line": 936,
+            "text": "                </div>"
+          },
+          {
+            "line": 937,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 938,
+            "text": "                  <span class=\"data-label\">Email</span>"
+          },
+          {
+            "line": 939,
+            "text": "                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>"
+          },
+          {
+            "line": 940,
+            "text": "                </div>"
+          },
+          {
+            "line": 941,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 942,
+            "text": "                  <span class=\"data-label\">Scheduled Jobs</span>"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 942,
+        "excerpt": [
+          {
+            "line": 938,
+            "text": "                  <span class=\"data-label\">Email</span>"
+          },
+          {
+            "line": 939,
+            "text": "                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>"
+          },
+          {
+            "line": 940,
+            "text": "                </div>"
+          },
+          {
+            "line": 941,
+            "text": "                <div class=\"home-status-item\">"
+          },
+          {
+            "line": 942,
+            "text": "                  <span class=\"data-label\">Scheduled Jobs</span>"
+          },
+          {
+            "line": 943,
+            "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>"
+          },
+          {
+            "line": 944,
+            "text": "                </div>"
+          },
+          {
+            "line": 945,
+            "text": "              </div>"
+          },
+          {
+            "line": 946,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 960,
+        "excerpt": [
+          {
+            "line": 956,
+            "text": ""
+          },
+          {
+            "line": 957,
+            "text": "              <div class=\"home-status-board\">"
+          },
+          {
+            "line": 958,
+            "text": "                ${statusItems.map((item) => `"
+          },
+          {
+            "line": 959,
+            "text": "                  <article class=\"home-status-board-card\">"
+          },
+          {
+            "line": 960,
+            "text": "                    <span class=\"data-label\">${escapeHtml(item.label)}</span>"
+          },
+          {
+            "line": 961,
+            "text": "                    <strong>${escapeHtml(item.value)}</strong>"
+          },
+          {
+            "line": 962,
+            "text": "                    <p>${escapeHtml(item.hint)}</p>"
+          },
+          {
+            "line": 963,
+            "text": "                  </article>"
+          },
+          {
+            "line": 964,
+            "text": "                `).join(\"\")}"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 1009,
+        "excerpt": [
+          {
+            "line": 1005,
+            "text": "                </p>"
+          },
+          {
+            "line": 1006,
+            "text": "              </div>"
+          },
+          {
+            "line": 1007,
+            "text": ""
+          },
+          {
+            "line": 1008,
+            "text": "              ${recommendedSpecialist ? `"
+          },
+          {
+            "line": 1009,
+            "text": "                <button class=\"quick-action-btn mhos-motion-soft\" type=\"button\" data-role-id=\"${escapeHtml(recommendedSpecialist.id)}\">"
+          },
+          {
+            "line": 1010,
+            "text": "                  <span class=\"home-action-title\">Prepare ${escapeHtml(recommendedSpecialist.name)} Guidance</span>"
+          },
+          {
+            "line": 1011,
+            "text": "                  <span class=\"home-action-meta\">${escapeHtml(recommendedSpecialist.status || \"Ready to guide\")}. Opens AI Command with context.</span>"
+          },
+          {
+            "line": 1012,
+            "text": "                </button>"
+          },
+          {
+            "line": 1013,
+            "text": "              ` : \"\"}"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 1156,
+        "excerpt": [
+          {
+            "line": 1152,
+            "text": "    if (promptPlanBtn) {"
+          },
+          {
+            "line": 1153,
+            "text": "      promptPlanBtn.onclick = () => openAiWithPrompt(\"Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.\");"
+          },
+          {
+            "line": 1154,
+            "text": "    }"
+          },
+          {
+            "line": 1155,
+            "text": ""
+          },
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          },
+          {
+            "line": 1158,
+            "text": "      const roleId = card.getAttribute(\"data-role-id\");"
+          },
+          {
+            "line": 1159,
+            "text": "      const roleName = card.querySelector(\"strong\")?.textContent || \"AI Specialist\";"
+          },
+          {
+            "line": 1160,
+            "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+          }
+        ]
+      },
+      {
+        "term": "data-",
+        "line": 1158,
+        "excerpt": [
+          {
+            "line": 1154,
+            "text": "    }"
+          },
+          {
+            "line": 1155,
+            "text": ""
+          },
+          {
+            "line": 1156,
+            "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+          },
+          {
+            "line": 1157,
+            "text": "    aiRoleCards.forEach((card) => {"
+          },
+          {
+            "line": 1158,
+            "text": "      const roleId = card.getAttribute(\"data-role-id\");"
+          },
+          {
+            "line": 1159,
+            "text": "      const roleName = card.querySelector(\"strong\")?.textContent || \"AI Specialist\";"
+          },
+          {
+            "line": 1160,
+            "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+          },
+          {
+            "line": 1161,
+            "text": "    });"
+          },
+          {
+            "line": 1162,
+            "text": "  }"
+          }
+        ]
+      }
+    ],
+    "href": [],
+    "route": [
+      {
+        "term": "route",
+        "line": 228,
+        "excerpt": [
+          {
+            "line": 224,
+            "text": "  return aiTeamCards.find((card) => card.status === \"Active role\") || aiTeamCards[0] || null;"
+          },
+          {
+            "line": 225,
+            "text": "}"
+          },
+          {
+            "line": 226,
+            "text": ""
+          },
+          {
+            "line": 227,
+            "text": ""
+          },
+          {
+            "line": 228,
+            "text": "function routeForAction(action) {"
+          },
+          {
+            "line": 229,
+            "text": "  const text = asString(action).toLowerCase();"
+          },
+          {
+            "line": 230,
+            "text": "  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return \"library\";"
+          },
+          {
+            "line": 231,
+            "text": "  if (/(connector|integration|sync|platform)/.test(text)) return \"integrations\";"
+          },
+          {
+            "line": 232,
+            "text": "  if (/(setup|foundation)/.test(text)) return \"setup\";"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 394,
+        "excerpt": [
+          {
+            "line": 390,
+            "text": "        : \"Review and confirm next launch move\";"
+          },
+          {
+            "line": 391,
+            "text": ""
+          },
+          {
+            "line": 392,
+            "text": "  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;"
+          },
+          {
+            "line": 393,
+            "text": "  const nextAction = humanizeExecutiveAction(rawNextAction, \"Ask AI Command\");"
+          },
+          {
+            "line": 394,
+            "text": "  const nextActionRoute = routeForAction(rawNextAction || nextAction);"
+          },
+          {
+            "line": 395,
+            "text": ""
+          },
+          {
+            "line": 396,
+            "text": "  const whyItMatters = criticalGaps.length"
+          },
+          {
+            "line": 397,
+            "text": "    ? \"Removing this blocker increases launch confidence and prevents avoidable delays.\""
+          },
+          {
+            "line": 398,
+            "text": "    : failedExecutions.length"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 594,
+        "excerpt": [
+          {
+            "line": 590,
+            "text": ""
+          },
+          {
+            "line": 591,
+            "text": "    nextBestAction: {"
+          },
+          {
+            "line": 592,
+            "text": "      recommendation: nextAction,"
+          },
+          {
+            "line": 593,
+            "text": "      whyItMatters,"
+          },
+          {
+            "line": 594,
+            "text": "      route: nextActionRoute,"
+          },
+          {
+            "line": 595,
+            "text": "      buttonLabel: nextActionRoute === \"ai-command\" ? \"Prepare AI Guidance\" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,"
+          },
+          {
+            "line": 596,
+            "text": "      urgencyLabel,"
+          },
+          {
+            "line": 597,
+            "text": "      workflowImpact,"
+          },
+          {
+            "line": 598,
+            "text": "      continuationSummary,"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 841,
+        "excerpt": [
+          {
+            "line": 837,
+            "text": "              <span class=\"mhos-os-brief-hint\">${escapeHtml(dashboard.blockers.integrations.length ? \"Connections need attention\" : \"Core platforms connected\")}</span>"
+          },
+          {
+            "line": 838,
+            "text": "            </article>"
+          },
+          {
+            "line": 839,
+            "text": "            <article class=\"mhos-os-brief-card mhos-motion-soft\">"
+          },
+          {
+            "line": 840,
+            "text": "              <span class=\"mhos-os-brief-label\">Primary Focus</span>"
+          },
+          {
+            "line": 841,
+            "text": "              <strong class=\"mhos-os-brief-value\">${escapeHtml(dashboard.nextBestAction.route === \"ai-command\" ? \"AI Guidance\" : humanizeStatus(dashboard.nextBestAction.route))}</strong>"
+          },
+          {
+            "line": 842,
+            "text": "              <span class=\"mhos-os-brief-hint\">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>"
+          },
+          {
+            "line": 843,
+            "text": "            </article>"
+          },
+          {
+            "line": 844,
+            "text": "          </div>"
+          },
+          {
+            "line": 845,
+            "text": "        </section>"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 863,
+        "excerpt": [
+          {
+            "line": 859,
+            "text": "                <p class=\"mhos-os-decision-copy\">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>"
+          },
+          {
+            "line": 860,
+            "text": "              </div>"
+          },
+          {
+            "line": 861,
+            "text": "              <div class=\"mhos-os-chip-row\">"
+          },
+          {
+            "line": 862,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>"
+          },
+          {
+            "line": 863,
+            "text": "                <span class=\"mhos-os-chip\">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>"
+          },
+          {
+            "line": 864,
+            "text": "                <span class=\"mhos-os-chip\">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>"
+          },
+          {
+            "line": 865,
+            "text": "                <span class=\"mhos-os-chip\">No approval, publishing, sending, or record changes here</span>"
+          },
+          {
+            "line": 866,
+            "text": "              </div>"
+          },
+          {
+            "line": 867,
+            "text": "              <div class=\"mhos-os-action-row\">"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 1068,
+        "excerpt": [
+          {
+            "line": 1064,
+            "text": ""
+          },
+          {
+            "line": 1065,
+            "text": "      </div>"
+          },
+          {
+            "line": 1066,
+            "text": "    `;"
+          },
+          {
+            "line": 1067,
+            "text": "    "
+          },
+          {
+            "line": 1068,
+            "text": "    const openRoute = (route, message = \"\") => {"
+          },
+          {
+            "line": 1069,
+            "text": "      navigateTo(route);"
+          },
+          {
+            "line": 1070,
+            "text": "      if (message) showMessage?.(message);"
+          },
+          {
+            "line": 1071,
+            "text": "    };"
+          },
+          {
+            "line": 1072,
+            "text": ""
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 1069,
+        "excerpt": [
+          {
+            "line": 1065,
+            "text": "      </div>"
+          },
+          {
+            "line": 1066,
+            "text": "    `;"
+          },
+          {
+            "line": 1067,
+            "text": "    "
+          },
+          {
+            "line": 1068,
+            "text": "    const openRoute = (route, message = \"\") => {"
+          },
+          {
+            "line": 1069,
+            "text": "      navigateTo(route);"
+          },
+          {
+            "line": 1070,
+            "text": "      if (message) showMessage?.(message);"
+          },
+          {
+            "line": 1071,
+            "text": "    };"
+          },
+          {
+            "line": 1072,
+            "text": ""
+          },
+          {
+            "line": 1073,
+            "text": "    const openAiWithPrompt = (prompt) => {"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 1102,
+        "excerpt": [
+          {
+            "line": 1098,
+            "text": ""
+          },
+          {
+            "line": 1099,
+            "text": "    const nextBtn = $(\"homePrimaryActionBtn\");"
+          },
+          {
+            "line": 1100,
+            "text": "    if (nextBtn) {"
+          },
+          {
+            "line": 1101,
+            "text": "      nextBtn.onclick = () => {"
+          },
+          {
+            "line": 1102,
+            "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+          },
+          {
+            "line": 1103,
+            "text": "          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1104,
+            "text": "        }"
+          },
+          {
+            "line": 1105,
+            "text": "        openRoute(dashboard.nextBestAction.route, \"Next best action opened.\");"
+          },
+          {
+            "line": 1106,
+            "text": "      };"
+          }
+        ]
+      },
+      {
+        "term": "route",
+        "line": 1105,
+        "excerpt": [
+          {
+            "line": 1101,
+            "text": "      nextBtn.onclick = () => {"
+          },
+          {
+            "line": 1102,
+            "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+          },
+          {
+            "line": 1103,
+            "text": "          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);"
+          },
+          {
+            "line": 1104,
+            "text": "        }"
+          },
+          {
+            "line": 1105,
+            "text": "        openRoute(dashboard.nextBestAction.route, \"Next best action opened.\");"
+          },
+          {
+            "line": 1106,
+            "text": "      };"
+          },
+          {
+            "line": 1107,
+            "text": "    }"
+          },
+          {
+            "line": 1108,
+            "text": ""
+          },
+          {
+            "line": 1109,
+            "text": "    const askNextActionBtn = $(\"homeAskNextActionBtn\");"
+          }
+        ]
+      }
+    ]
+  }
+}
