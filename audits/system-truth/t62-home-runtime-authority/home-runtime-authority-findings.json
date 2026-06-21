@@ -1,0 +1,1702 @@
+{
+  "file": "public/control-center/pages/home.js",
+  "total_lines": 1164,
+  "render_writes": [
+    {
+      "line": 803,
+      "text": "    root.innerHTML = `"
+    }
+  ],
+  "event_bindings": [
+    {
+      "line": 1101,
+      "text": "      nextBtn.onclick = () => {"
+    },
+    {
+      "line": 1111,
+      "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+    },
+    {
+      "line": 1115,
+      "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+    },
+    {
+      "line": 1118,
+      "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1120,
+      "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1123,
+      "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+    },
+    {
+      "line": 1126,
+      "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+    },
+    {
+      "line": 1129,
+      "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+    },
+    {
+      "line": 1133,
+      "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+    },
+    {
+      "line": 1138,
+      "text": "      promptNextBtn.onclick = () => openAiWithPrompt(\"What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.\");"
+    },
+    {
+      "line": 1143,
+      "text": "      promptReadinessBtn.onclick = () => openAiWithPrompt(\"Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.\");"
+    },
+    {
+      "line": 1148,
+      "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+    },
+    {
+      "line": 1153,
+      "text": "      promptPlanBtn.onclick = () => openAiWithPrompt(\"Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.\");"
+    },
+    {
+      "line": 1160,
+      "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+    }
+  ],
+  "backend_write_signals": [
+    {
+      "line": 45,
+      "text": "function statusTone(input, score) {"
+    },
+    {
+      "line": 46,
+      "text": "  const text = asString(input).toLowerCase();"
+    },
+    {
+      "line": 103,
+      "text": "  const fields = [\"updated_at\", \"completed_at\", \"executed_at\", \"scheduled_for\", \"created_at\"];"
+    },
+    {
+      "line": 199,
+      "text": "      title: \"Publish / execute\","
+    },
+    {
+      "line": 200,
+      "text": "      meta: launch.campaignReadiness === \"Ready\" ? \"Execution path looks clear\" : \"Resolve blockers before publishing\","
+    },
+    {
+      "line": 234,
+      "text": "  if (/(publish|schedule|queue)/.test(text)) return \"publishing\";"
+    },
+    {
+      "line": 272,
+      "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+    },
+    {
+      "line": 275,
+      "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+    },
+    {
+      "line": 400,
+      "text": "      : \"Acting now keeps momentum and converts current readiness into measurable output.\";"
+    },
+    {
+      "line": 450,
+      "text": "    : \"Needs input\";"
+    },
+    {
+      "line": 459,
+      "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+    },
+    {
+      "line": 460,
+      "text": "    asString(item.entity_type) === \"publishing_job\" || asString(item.queue_type) === \"publishing\""
+    },
+    {
+      "line": 462,
+      "text": "  const publishReadyCount = publishingQueue.filter((item) => {"
+    },
+    {
+      "line": 463,
+      "text": "    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();"
+    },
+    {
+      "line": 464,
+      "text": "    return [\"ready\", \"manual_publish_ready\", \"scheduled\", \"queued\"].includes(status);"
+    },
+    {
+      "line": 487,
+      "text": "    const when = formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at);"
+    },
+    {
+      "line": 513,
+      "text": "      when: formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at),"
+    },
+    {
+      "line": 558,
+      "text": "          confidenceLabel: intelligenceTone === \"success\" ? `Signals: ${formatCount(intelligenceScore)}` : \"Needs Input\","
+    },
+    {
+      "line": 586,
+      "text": "      intelligenceStatus: intelligenceScore > 0 ? \"Active\" : \"Needs input\","
+    },
+    {
+      "line": 682,
+      "text": "        : \"No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step.\""
+    },
+    {
+      "line": 692,
+      "text": "      publishReadiness: publishReadyCount,"
+    },
+    {
+      "line": 713,
+      "text": "        : \"No execution recorded yet — start with a campaign or publishing package to create the first signal.\","
+    },
+    {
+      "line": 714,
+      "text": "      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || \"Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.\","
+    },
+    {
+      "line": 726,
+      "text": "      lastExecution: latestExecution ? formatRelativeDate(latestExecution.executed_at || latestExecution.updated_at) : \"Not available\""
+    },
+    {
+      "line": 737,
+      "text": "  const input = $(\"quickCommandInput\");"
+    },
+    {
+      "line": 738,
+      "text": "  if (input) {"
+    },
+    {
+      "line": 739,
+      "text": "    input.value = prompt;"
+    },
+    {
+      "line": 740,
+      "text": "    input.focus?.();"
+    },
+    {
+      "line": 865,
+      "text": "                <span class=\"mhos-os-chip\">No approval, publishing, sending, or record changes here</span>"
+    },
+    {
+      "line": 930,
+      "text": "                  <span class=\"data-label\">Publish Ready</span>"
+    },
+    {
+      "line": 931,
+      "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>"
+    },
+    {
+      "line": 981,
+      "text": "                <p class=\"mhos-os-panel-copy\">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>"
+    },
+    {
+      "line": 1032,
+      "text": "                <p class=\"mhos-os-panel-copy\">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>"
+    },
+    {
+      "line": 1083,
+      "text": "        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1084,
+      "text": "        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1085,
+      "text": "        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1086,
+      "text": "        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1087,
+      "text": "        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1088,
+      "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1089,
+      "text": "        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1090,
+      "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1091,
+      "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+    },
+    {
+      "line": 1094,
+      "text": "      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;"
+    },
+    {
+      "line": 1148,
+      "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+    }
+  ],
+  "navigation_signals": [
+    {
+      "line": 228,
+      "text": "function routeForAction(action) {"
+    },
+    {
+      "line": 394,
+      "text": "  const nextActionRoute = routeForAction(rawNextAction || nextAction);"
+    },
+    {
+      "line": 574,
+      "text": "    primaryActionLabel: nextActionRoute === \"ai-command\" ? \"Prepare AI Guidance\" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,"
+    },
+    {
+      "line": 575,
+      "text": "    primaryActionRoute: nextActionRoute,"
+    },
+    {
+      "line": 577,
+      "text": "    secondaryActionRoute: \"setup\","
+    },
+    {
+      "line": 594,
+      "text": "      route: nextActionRoute,"
+    },
+    {
+      "line": 595,
+      "text": "      buttonLabel: nextActionRoute === \"ai-command\" ? \"Prepare AI Guidance\" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,"
+    },
+    {
+      "line": 669,
+      "text": "        value: humanizeStatus(nextActionRoute),"
+    },
+    {
+      "line": 744,
+      "text": "export const homeRoute = {"
+    },
+    {
+      "line": 757,
+      "text": "  render({ getState, $, escapeHtml, navigateTo, showMessage }) {"
+    },
+    {
+      "line": 819,
+      "text": "              <span class=\"mhos-os-chip\">Routes and AI guidance only</span>"
+    },
+    {
+      "line": 841,
+      "text": "              <strong class=\"mhos-os-brief-value\">${escapeHtml(dashboard.nextBestAction.route === \"ai-command\" ? \"AI Guidance\" : humanizeStatus(dashboard.nextBestAction.route))}</strong>"
+    },
+    {
+      "line": 863,
+      "text": "                <span class=\"mhos-os-chip\">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>"
+    },
+    {
+      "line": 1068,
+      "text": "    const openRoute = (route, message = \"\") => {"
+    },
+    {
+      "line": 1069,
+      "text": "      navigateTo(route);"
+    },
+    {
+      "line": 1075,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 1102,
+      "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+    },
+    {
+      "line": 1105,
+      "text": "        openRoute(dashboard.nextBestAction.route, \"Next best action opened.\");"
+    },
+    {
+      "line": 1115,
+      "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+    },
+    {
+      "line": 1118,
+      "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1120,
+      "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1123,
+      "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+    },
+    {
+      "line": 1126,
+      "text": "    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute(\"library\");"
+    },
+    {
+      "line": 1129,
+      "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+    }
+  ],
+  "ai_handoff_signals": [
+    {
+      "line": 3,
+      "text": "  renderAiTeamCards,"
+    },
+    {
+      "line": 11,
+      "text": "  getProjectedTeamMembers"
+    },
+    {
+      "line": 50,
+      "text": "    text.includes(\"failed\") ||"
+    },
+    {
+      "line": 117,
+      "text": "  if (!Number.isFinite(stamp)) return \"Not available\";"
+    },
+    {
+      "line": 149,
+      "text": "    \"campaign studio\": \"Prepare the next campaign wave\""
+    },
+    {
+      "line": 169,
+      "text": "  const campaign = asObject(dashboard.campaign);"
+    },
+    {
+      "line": 193,
+      "text": "      title: \"Build campaign\","
+    },
+    {
+      "line": 194,
+      "text": "      meta: campaign.name ? `Active: ${campaign.name}` : \"No active campaign selected\","
+    },
+    {
+      "line": 195,
+      "text": "      tone: campaign.name ? \"is-live\" : \"is-warning\","
+    },
+    {
+      "line": 196,
+      "text": "      status: campaign.name ? \"Active\" : \"Missing\""
+    },
+    {
+      "line": 200,
+      "text": "      meta: launch.campaignReadiness === \"Ready\" ? \"Execution path looks clear\" : \"Resolve blockers before publishing\","
+    },
+    {
+      "line": 201,
+      "text": "      tone: launch.campaignReadiness === \"Ready\" ? \"is-live\" : \"is-warning\","
+    },
+    {
+      "line": 202,
+      "text": "      status: launch.campaignReadiness || \"At risk\""
+    },
+    {
+      "line": 207,
+      "text": "function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {"
+    },
+    {
+      "line": 213,
+      "text": "      aiTeamCards.find((card) => /video/i.test(card.name || card.id || \"\")) ||"
+    },
+    {
+      "line": 214,
+      "text": "      aiTeamCards.find((card) => /media/i.test(card.name || card.id || \"\")) ||"
+    },
+    {
+      "line": 215,
+      "text": "      aiTeamCards.find((card) => /creative|brand|content/i.test(card.name || card.id || \"\")) ||"
+    },
+    {
+      "line": 216,
+      "text": "      aiTeamCards[0]"
+    },
+    {
+      "line": 221,
+      "text": "    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || \"\")) || aiTeamCards[0];"
+    },
+    {
+      "line": 224,
+      "text": "  return aiTeamCards.find((card) => card.status === \"Active role\") || aiTeamCards[0] || null;"
+    },
+    {
+      "line": 233,
+      "text": "  if (/(campaign|launch wave|brief)/.test(text)) return \"campaign-studio\";"
+    },
+    {
+      "line": 235,
+      "text": "  if (/(ad|budget|paid)/.test(text)) return \"ads-manager\";"
+    },
+    {
+      "line": 238,
+      "text": "  return \"ai-command\";"
+    },
+    {
+      "line": 241,
+      "text": "function buildAiTeamCards(state) {"
+    },
+    {
+      "line": 247,
+      "text": "  const projectedMembers = getProjectedTeamMembers(state);"
+    },
+    {
+      "line": 259,
+      "text": "          \"AI Specialist\""
+    },
+    {
+      "line": 268,
+      "text": "    { id: \"strategist\", name: \"Strategist\", fallback: \"Align campaign priorities and launch sequencing.\" },"
+    },
+    {
+      "line": 272,
+      "text": "    { id: \"publisher\", name: \"Publisher\", fallback: \"Prepare publishing packages, schedules, and manual handoffs.\" },"
+    },
+    {
+      "line": 273,
+      "text": "    { id: \"ads_operator\", name: \"Ads Optimizer\", fallback: \"Optimize paid testing, creative variants, and budget decisions.\" },"
+    },
+    {
+      "line": 275,
+      "text": "    { id: \"compliance_reviewer\", name: \"Compliance Reviewer\", fallback: \"Review claims, approvals, and publish safety before release.\" },"
+    },
+    {
+      "line": 349,
+      "text": "  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === \"danger\");"
+    },
+    {
+      "line": 376,
+      "text": "  const automationTone = failedExecutions.length"
+    },
+    {
+      "line": 388,
+      "text": "      : failedExecutions.length"
+    },
+    {
+      "line": 389,
+      "text": "        ? \"Recover failed execution items\""
+    },
+    {
+      "line": 393,
+      "text": "  const nextAction = humanizeExecutiveAction(rawNextAction, \"Ask AI Command\");"
+    },
+    {
+      "line": 398,
+      "text": "    : failedExecutions.length"
+    },
+    {
+      "line": 402,
+      "text": "  const activeCampaignName ="
+    },
+    {
+      "line": 403,
+      "text": "    asString(state.context.activeCampaign) ||"
+    },
+    {
+      "line": 434,
+      "text": "    : failedExecutions.length"
+    },
+    {
+      "line": 440,
+      "text": "    : failedExecutions.length"
+    },
+    {
+      "line": 441,
+      "text": "      ? `Stabilizes ${formatCount(failedExecutions.length)} failed job${failedExecutions.length === 1 ? \"\" : \"s\"}`"
+    },
+    {
+      "line": 442,
+      "text": "      : \"Maintains operational flow\";"
+    },
+    {
+      "line": 467,
+      "text": "  const emailConnected = Boolean("
+    },
+    {
+      "line": 468,
+      "text": "    connectorChecks.email || connectorChecks.mailer || connectorChecks.smtp || connectorChecks.mailchimp"
+    },
+    {
+      "line": 481,
+      "text": "    failedExecutions.length === 0 ? 1 : 0"
+    },
+    {
+      "line": 512,
+      "text": "      detail: compact(item?.wave_name, \"Execution result\"),"
+    },
+    {
+      "line": 520,
+      "text": "      detail: compact(item?.wave_name, \"Scheduled job\"),"
+    },
+    {
+      "line": 528,
+      "text": "      detail: compact(item?.action || item?.status || item?.level, \"Review required\"),"
+    },
+    {
+      "line": 538,
+      "text": "    failedJobs: failedExecutions.slice(0, 8).map((item) =>"
+    },
+    {
+      "line": 539,
+      "text": "      `${humanizeStatus(item?.channel, \"Channel\")}: ${humanizeStatus(item?.execution_status, \"Failed\")}`"
+    },
+    {
+      "line": 550,
+      "text": "    blockers.failedJobs.length +"
+    },
+    {
+      "line": 553,
+      "text": "  const campaignReadinessTone = totalBlockers ? \"warning\" : \"success\";"
+    },
+    {
+      "line": 557,
+      "text": "          statusLabel: campaignReadinessTone === \"success\" ? \"Healthy\" : totalBlockers ? \"Attention\" : \"Unknown\","
+    },
+    {
+      "line": 559,
+      "text": "          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : \"None\","
+    },
+    {
+      "line": 562,
+      "text": "          escalations: formatCount(failedExecutions.length),"
+    },
+    {
+      "line": 563,
+      "text": "          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`"
+    },
+    {
+      "line": 573,
+      "text": "      : \"Select a project to see readiness, blockers, the next action, and the right AI specialist.\","
+    },
+    {
+      "line": 574,
+      "text": "    primaryActionLabel: nextActionRoute === \"ai-command\" ? \"Prepare AI Guidance\" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,"
+    },
+    {
+      "line": 588,
+      "text": "      criticalAlerts: criticalGaps.length + failedExecutions.length + unreadNotifications.length"
+    },
+    {
+      "line": 595,
+      "text": "      buttonLabel: nextActionRoute === \"ai-command\" ? \"Prepare AI Guidance\" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,"
+    },
+    {
+      "line": 607,
+      "text": "        detail: dashboardLabelFromScore(systemScore),"
+    },
+    {
+      "line": 613,
+      "text": "        detail: criticalGaps.length ? `${formatCount(criticalGaps.length)} blockers` : \"Ready for scale\","
+    },
+    {
+      "line": 619,
+      "text": "        detail: `${formatCount(failedExecutions.length)} failed jobs`,"
+    },
+    {
+      "line": 625,
+      "text": "        detail: intelligenceScore ? \"Signals captured\" : \"Needs fresh feedback\","
+    },
+    {
+      "line": 629,
+      "text": "        title: \"Active Campaign\","
+    },
+    {
+      "line": 630,
+      "text": "        value: activeCampaignName ? \"Live\" : \"Missing\","
+    },
+    {
+      "line": 631,
+      "text": "        detail: activeCampaignName || \"No campaign selected\","
+    },
+    {
+      "line": 632,
+      "text": "        tone: activeCampaignName ? \"success\" : \"warning\""
+    },
+    {
+      "line": 650,
+      "text": "        label: \"Failed\","
+    },
+    {
+      "line": 651,
+      "text": "        value: formatCount(failedExecutions.length),"
+    },
+    {
+      "line": 652,
+      "text": "        hint: \"Execution failures\","
+    },
+    {
+      "line": 653,
+      "text": "        tone: failedExecutions.length ? \"danger\" : \"success\""
+    },
+    {
+      "line": 675,
+      "text": "    campaign: {"
+    },
+    {
+      "line": 676,
+      "text": "      name: activeCampaignName,"
+    },
+    {
+      "line": 682,
+      "text": "        : \"No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step.\""
+    },
+    {
+      "line": 694,
+      "text": "      emailReadiness: emailConnected ? \"Connected\" : \"Missing\","
+    },
+    {
+      "line": 696,
+      "text": "      campaignReadiness: campaignReadinessTone === \"success\" ? \"Ready\" : \"At risk\""
+    },
+    {
+      "line": 713,
+      "text": "        : \"No execution recorded yet — start with a campaign or publishing package to create the first signal.\","
+    },
+    {
+      "line": 714,
+      "text": "      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || \"Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.\","
+    },
+    {
+      "line": 715,
+      "text": "      feedback: asString(learningLessons[0]).trim() || \"Connect insights or run a reviewed campaign so the learning engine can capture feedback.\""
+    },
+    {
+      "line": 725,
+      "text": "      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : \"Not available\","
+    },
+    {
+      "line": 726,
+      "text": "      lastExecution: latestExecution ? formatRelativeDate(latestExecution.executed_at || latestExecution.updated_at) : \"Not available\""
+    },
+    {
+      "line": 736,
+      "text": "function setGlobalAiPrompt($, prompt) {"
+    },
+    {
+      "line": 737,
+      "text": "  const input = $(\"quickCommandInput\");"
+    },
+    {
+      "line": 739,
+      "text": "    input.value = prompt;"
+    },
+    {
+      "line": 749,
+      "text": "    title: \"Executive Command Center\","
+    },
+    {
+      "line": 762,
+      "text": "    const aiTeamCards = buildAiTeamCards(state);"
+    },
+    {
+      "line": 766,
+      "text": "    const campaignChannels = asArray(dashboard.campaign.channels);"
+    },
+    {
+      "line": 770,
+      "text": "      { title: \"Failed Jobs\", items: dashboard.blockers.failedJobs, tone: \"danger\" },"
+    },
+    {
+      "line": 778,
+      "text": "        detail: dashboard.blockers.assets.length"
+    },
+    {
+      "line": 785,
+      "text": "        detail: dashboard.blockers.integrations.length"
+    },
+    {
+      "line": 792,
+      "text": "        detail: dashboard.blockers.readinessGaps.length"
+    },
+    {
+      "line": 794,
+      "text": "          : \"No critical readiness gaps are currently blocking the main path.\","
+    },
+    {
+      "line": 800,
+      "text": "    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);"
+    },
+    {
+      "line": 804,
+      "text": "      <div class=\"home-command-center mhos-os-page\">"
+    },
+    {
+      "line": 806,
+      "text": "        <section class=\"mhos-os-header\" aria-label=\"Executive Command Brief\">"
+    },
+    {
+      "line": 807,
+      "text": "          <div class=\"mhos-os-header-main\">"
+    },
+    {
+      "line": 810,
+      "text": "              <h1 class=\"mhos-os-title\">${escapeHtml(dashboard.projectName || \"Project Command Center\")}</h1>"
+    },
+    {
+      "line": 819,
+      "text": "              <span class=\"mhos-os-chip\">Routes and AI guidance only</span>"
+    },
+    {
+      "line": 841,
+      "text": "              <strong class=\"mhos-os-brief-value\">${escapeHtml(dashboard.nextBestAction.route === \"ai-command\" ? \"AI Guidance\" : humanizeStatus(dashboard.nextBestAction.route))}</strong>"
+    },
+    {
+      "line": 842,
+      "text": "              <span class=\"mhos-os-brief-hint\">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>"
+    },
+    {
+      "line": 848,
+      "text": "          <main class=\"mhos-os-main\">"
+    },
+    {
+      "line": 872,
+      "text": "                  Prepare AI Explanation"
+    },
+    {
+      "line": 886,
+      "text": "                    ${dashboard.totalBlockers ? \"Only the blockers that affect the next handoff are shown here.\" : \"The current path is clear. Continue with the recommended workspace or ask AI for guidance.\"}"
+    },
+    {
+      "line": 896,
+      "text": "                    <strong>${escapeHtml(item.detail)}</strong>"
+    },
+    {
+      "line": 897,
+      "text": "                    <span>${escapeHtml(item.tone === \"is-live\" ? \"Ready for the current operating path.\" : \"Review before the next handoff.\")}</span>"
+    },
+    {
+      "line": 926,
+      "text": "            <details class=\"mhos-os-evidence-panel\">"
+    },
+    {
+      "line": 927,
+      "text": "              <summary class=\"mhos-os-panel-title\">System details and evidence</summary>"
+    },
+    {
+      "line": 938,
+      "text": "                  <span class=\"data-label\">Email</span>"
+    },
+    {
+      "line": 939,
+      "text": "                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>"
+    },
+    {
+      "line": 954,
+      "text": "                <p class=\"mhos-os-panel-copy\">No detailed blockers are currently available for this project.</p>"
+    },
+    {
+      "line": 966,
+      "text": "            </details>"
+    },
+    {
+      "line": 968,
+      "text": "            <details class=\"mhos-os-evidence-panel\">"
+    },
+    {
+      "line": 971,
+      "text": "            </details>"
+    },
+    {
+      "line": 973,
+      "text": "          </main>"
+    },
+    {
+      "line": 975,
+      "text": "          <aside class=\"mhos-os-rail\" aria-label=\"Action and AI Guidance\">"
+    },
+    {
+      "line": 992,
+      "text": "              <button id=\"homeQuickStartCampaignBtn\" class=\"quick-action-btn\" type=\"button\">"
+    },
+    {
+      "line": 993,
+      "text": "                <span class=\"home-action-title\">Open Campaign Studio</span>"
+    },
+    {
+      "line": 994,
+      "text": "                <span class=\"home-action-meta\">Plan the next campaign wave in its workspace.</span>"
+    },
+    {
+      "line": 998,
+      "text": "            <section class=\"mhos-os-ai-panel\">"
+    },
+    {
+      "line": 1000,
+      "text": "                <p class=\"mhos-os-kicker\">Recommended AI Specialist</p>"
+    },
+    {
+      "line": 1001,
+      "text": "                <h2 class=\"mhos-os-panel-title\">${escapeHtml(recommendedSpecialist?.name || \"Executive AI\")}</h2>"
+    },
+    {
+      "line": 1003,
+      "text": "                  ${escapeHtml(recommendedSpecialist?.summary || \"Use AI Command to turn the current state into a clear operating plan.\")}"
+    },
+    {
+      "line": 1004,
+      "text": "                  AI prepares guidance only; destination workspaces own any execution."
+    },
+    {
+      "line": 1011,
+      "text": "                  <span class=\"home-action-meta\">${escapeHtml(recommendedSpecialist.status || \"Ready to guide\")}. Opens AI Command with context.</span>"
+    },
+    {
+      "line": 1015,
+      "text": "              <button id=\"homeQuickOpenAiBtn\" class=\"quick-action-btn\" type=\"button\">"
+    },
+    {
+      "line": 1016,
+      "text": "                <span class=\"home-action-title\">Open AI Workspace</span>"
+    },
+    {
+      "line": 1020,
+      "text": "              <button id=\"homeOpenAiTeamBtn\" class=\"btn btn-ghost btn-sm\" type=\"button\">"
+    },
+    {
+      "line": 1021,
+      "text": "                Open AI Command"
+    },
+    {
+      "line": 1023,
+      "text": "              <button id=\"homeOpenFullAiTeamBtn\" class=\"btn btn-ghost btn-sm\" type=\"button\">"
+    },
+    {
+      "line": 1024,
+      "text": "                Open Full Team"
+    },
+    {
+      "line": 1028,
+      "text": "            <section class=\"mhos-os-ai-panel\">"
+    },
+    {
+      "line": 1030,
+      "text": "                <p class=\"mhos-os-kicker\">AI guidance</p>"
+    },
+    {
+      "line": 1032,
+      "text": "                <p class=\"mhos-os-panel-copy\">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>"
+    },
+    {
+      "line": 1035,
+      "text": "              <button id=\"homePromptNextBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+    },
+    {
+      "line": 1036,
+      "text": "                <span class=\"home-prompt-title\">What is the next executive action?</span>"
+    },
+    {
+      "line": 1037,
+      "text": "                <span class=\"home-prompt-meta\">Prepare a short explanation and handoff path.</span>"
+    },
+    {
+      "line": 1039,
+      "text": "              <button id=\"homePromptReadinessBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+    },
+    {
+      "line": 1040,
+      "text": "                <span class=\"home-prompt-title\">Why is readiness low?</span>"
+    },
+    {
+      "line": 1041,
+      "text": "                <span class=\"home-prompt-meta\">Explain blockers and readiness gaps in simple terms.</span>"
+    },
+    {
+      "line": 1043,
+      "text": "              <button id=\"homePromptLaunchBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+    },
+    {
+      "line": 1044,
+      "text": "                <span class=\"home-prompt-title\">Summarize launch blockers</span>"
+    },
+    {
+      "line": 1045,
+      "text": "                <span class=\"home-prompt-meta\">Prepare a launch risk summary for review.</span>"
+    },
+    {
+      "line": 1047,
+      "text": "              <button id=\"homePromptPlanBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+    },
+    {
+      "line": 1048,
+      "text": "                <span class=\"home-prompt-title\">Turn next action into a plan</span>"
+    },
+    {
+      "line": 1049,
+      "text": "                <span class=\"home-prompt-meta\">Convert the next action into a reviewed plan.</span>"
+    },
+    {
+      "line": 1073,
+      "text": "    const openAiWithPrompt = (prompt) => {"
+    },
+    {
+      "line": 1074,
+      "text": "      setGlobalAiPrompt($, prompt);"
+    },
+    {
+      "line": 1075,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 1076,
+      "text": "      showMessage?.(\"Prompt prepared in AI Command.\");"
+    },
+    {
+      "line": 1080,
+      "text": "    const handleAiRoleClick = (roleId, roleName) => {"
+    },
+    {
+      "line": 1082,
+      "text": "      const rolePrompts = {"
+    },
+    {
+      "line": 1083,
+      "text": "        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1088,
+      "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1090,
+      "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1091,
+      "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+    },
+    {
+      "line": 1094,
+      "text": "      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;"
+    },
+    {
+      "line": 1095,
+      "text": "      openAiWithPrompt(prompt);"
+    },
+    {
+      "line": 1096,
+      "text": "      showMessage?.(`${roleName} context prepared in AI Command.`);"
+    },
+    {
+      "line": 1102,
+      "text": "        if (dashboard.nextBestAction.route === \"ai-command\") {"
+    },
+    {
+      "line": 1103,
+      "text": "          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);"
+    },
+    {
+      "line": 1111,
+      "text": "      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);"
+    },
+    {
+      "line": 1117,
+      "text": "    const aiTeamBtn = $(\"homeOpenAiTeamBtn\");"
+    },
+    {
+      "line": 1118,
+      "text": "    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1119,
+      "text": "    const fullAiTeamBtn = $(\"homeOpenFullAiTeamBtn\");"
+    },
+    {
+      "line": 1120,
+      "text": "    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute(\"ai-command\");"
+    },
+    {
+      "line": 1122,
+      "text": "    const quickCampaignBtn = $(\"homeQuickStartCampaignBtn\");"
+    },
+    {
+      "line": 1123,
+      "text": "    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute(\"campaign-studio\");"
+    },
+    {
+      "line": 1131,
+      "text": "    const quickAiBtn = $(\"homeQuickOpenAiBtn\");"
+    },
+    {
+      "line": 1132,
+      "text": "    if (quickAiBtn) {"
+    },
+    {
+      "line": 1133,
+      "text": "      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);"
+    },
+    {
+      "line": 1136,
+      "text": "    const promptNextBtn = $(\"homePromptNextBtn\");"
+    },
+    {
+      "line": 1137,
+      "text": "    if (promptNextBtn) {"
+    },
+    {
+      "line": 1138,
+      "text": "      promptNextBtn.onclick = () => openAiWithPrompt(\"What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.\");"
+    },
+    {
+      "line": 1141,
+      "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+    },
+    {
+      "line": 1142,
+      "text": "    if (promptReadinessBtn) {"
+    },
+    {
+      "line": 1143,
+      "text": "      promptReadinessBtn.onclick = () => openAiWithPrompt(\"Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.\");"
+    },
+    {
+      "line": 1146,
+      "text": "    const promptLaunchBtn = $(\"homePromptLaunchBtn\");"
+    },
+    {
+      "line": 1147,
+      "text": "    if (promptLaunchBtn) {"
+    },
+    {
+      "line": 1148,
+      "text": "      promptLaunchBtn.onclick = () => openAiWithPrompt(\"Summarize the launch blockers and tell me what must be fixed before publishing.\");"
+    },
+    {
+      "line": 1151,
+      "text": "    const promptPlanBtn = $(\"homePromptPlanBtn\");"
+    },
+    {
+      "line": 1152,
+      "text": "    if (promptPlanBtn) {"
+    },
+    {
+      "line": 1153,
+      "text": "      promptPlanBtn.onclick = () => openAiWithPrompt(\"Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.\");"
+    },
+    {
+      "line": 1156,
+      "text": "    const aiRoleCards = document.querySelectorAll(\".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]\");"
+    },
+    {
+      "line": 1157,
+      "text": "    aiRoleCards.forEach((card) => {"
+    },
+    {
+      "line": 1159,
+      "text": "      const roleName = card.querySelector(\"strong\")?.textContent || \"AI Specialist\";"
+    },
+    {
+      "line": 1160,
+      "text": "      card.onclick = () => handleAiRoleClick(roleId, roleName);"
+    }
+  ],
+  "storage_signals": [],
+  "confirmation_signals": [],
+  "projection_signals": [
+    {
+      "line": 10,
+      "text": "  getProjectedActiveRole,"
+    },
+    {
+      "line": 11,
+      "text": "  getProjectedTeamMembers"
+    },
+    {
+      "line": 12,
+      "text": "} from \"../runtime/authority/authority-projection.js\";"
+    },
+    {
+      "line": 15,
+      "text": "  selectCurrentProject,"
+    },
+    {
+      "line": 16,
+      "text": "  selectOperationsSnapshot"
+    },
+    {
+      "line": 17,
+      "text": "} from \"../state.js\";"
+    },
+    {
+      "line": 140,
+      "text": "    \"product videos\": \"Create product videos to unblock launch readiness\","
+    },
+    {
+      "line": 144,
+      "text": "    \"amazon\": \"Review Amazon connector readiness\","
+    },
+    {
+      "line": 145,
+      "text": "    \"ebay\": \"Review eBay connector readiness\","
+    },
+    {
+      "line": 158,
+      "text": "function compactModuleState(value, fallback = \"Not enabled yet\") {"
+    },
+    {
+      "line": 170,
+      "text": "  const launch = asObject(dashboard.launchSnapshot);"
+    },
+    {
+      "line": 176,
+      "text": "      meta: health.projectReadiness >= 80 ? \"Foundation is mostly ready\" : \"Review setup and readiness gaps\","
+    },
+    {
+      "line": 177,
+      "text": "      tone: health.projectReadiness >= 80 ? \"is-live\" : \"is-warning\","
+    },
+    {
+      "line": 178,
+      "text": "      status: health.projectReadiness >= 80 ? \"Ready\" : \"Needs review\""
+    },
+    {
+      "line": 200,
+      "text": "      meta: launch.campaignReadiness === \"Ready\" ? \"Execution path looks clear\" : \"Resolve blockers before publishing\","
+    },
+    {
+      "line": 201,
+      "text": "      tone: launch.campaignReadiness === \"Ready\" ? \"is-live\" : \"is-warning\","
+    },
+    {
+      "line": 202,
+      "text": "      status: launch.campaignReadiness || \"At risk\""
+    },
+    {
+      "line": 221,
+      "text": "    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || \"\")) || aiTeamCards[0];"
+    },
+    {
+      "line": 237,
+      "text": "  if (/(job|operation)/.test(text)) return \"operations-centers\";"
+    },
+    {
+      "line": 241,
+      "text": "function buildAiTeamCards(state) {"
+    },
+    {
+      "line": 242,
+      "text": "  const operations = asObject(selectOperationsSnapshot(state));"
+    },
+    {
+      "line": 243,
+      "text": "  const notifications = asArray(operations.notifications?.items);"
+    },
+    {
+      "line": 244,
+      "text": "  const tasks = asArray(operations.tasks?.items);"
+    },
+    {
+      "line": 245,
+      "text": "  const approvals = asArray(operations.approvals?.items);"
+    },
+    {
+      "line": 247,
+      "text": "  const projectedMembers = getProjectedTeamMembers(state);"
+    },
+    {
+      "line": 248,
+      "text": "  const projectedActiveRole = asString("
+    },
+    {
+      "line": 249,
+      "text": "    getProjectedActiveRole(state)"
+    },
+    {
+      "line": 252,
+      "text": "  const roles = projectedMembers.length"
+    },
+    {
+      "line": 253,
+      "text": "    ? projectedMembers.map((member) => ({"
+    },
+    {
+      "line": 264,
+      "text": "          \"Ready to support this project.\""
+    },
+    {
+      "line": 276,
+      "text": "    { id: \"admin\", name: \"Operations Lead\", fallback: \"Clear blockers and keep execution flow healthy.\" }"
+    },
+    {
+      "line": 292,
+      "text": "        role.id === projectedActiveRole"
+    },
+    {
+      "line": 302,
+      "text": "function buildExecutiveData(state) {"
+    },
+    {
+      "line": 303,
+      "text": "  const overview = asObject(state.data.overview);"
+    },
+    {
+      "line": 304,
+      "text": "  const readiness = asObject(state.data.readiness);"
+    },
+    {
+      "line": 305,
+      "text": "  const integrations = asObject(state.data.integrations);"
+    },
+    {
+      "line": 306,
+      "text": "  const activity = asObject(state.data.activity);"
+    },
+    {
+      "line": 307,
+      "text": "  const assets = asObject(state.data.assets);"
+    },
+    {
+      "line": 308,
+      "text": "  const operations = asObject(selectOperationsSnapshot(state));"
+    },
+    {
+      "line": 310,
+      "text": "  const overviewData = asObject(overview.overview);"
+    },
+    {
+      "line": 311,
+      "text": "  const readinessData = asObject(readiness.dashboard);"
+    },
+    {
+      "line": 312,
+      "text": "  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);"
+    },
+    {
+      "line": 316,
+      "text": "  const recommendations = asArray(readinessData.next_best_actions).length"
+    },
+    {
+      "line": 317,
+      "text": "    ? asArray(readinessData.next_best_actions)"
+    },
+    {
+      "line": 318,
+      "text": "    : asArray(overview.next_best_actions);"
+    },
+    {
+      "line": 322,
+      "text": "  const notifications = asArray(operations.notifications?.items);"
+    },
+    {
+      "line": 334,
+      "text": "  const projectName ="
+    },
+    {
+      "line": 335,
+      "text": "    asString(selectCurrentProject(state)) ||"
+    },
+    {
+      "line": 336,
+      "text": "    asString(overviewData.project_name);"
+    },
+    {
+      "line": 338,
+      "text": "  const readinessScore ="
+    },
+    {
+      "line": 339,
+      "text": "    readinessData.readiness_score ??"
+    },
+    {
+      "line": 340,
+      "text": "    overviewData.readiness_score ??"
+    },
+    {
+      "line": 344,
+      "text": "    integrations.readiness?.readiness_score ??"
+    },
+    {
+      "line": 345,
+      "text": "    overviewData.connector_readiness_score ??"
+    },
+    {
+      "line": 348,
+      "text": "  const criticalGaps = asArray(readinessPriorities.critical);"
+    },
+    {
+      "line": 352,
+      "text": "  const connectorChecks = asObject(integrations.readiness?.checks);"
+    },
+    {
+      "line": 355,
+      "text": "  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);"
+    },
+    {
+      "line": 357,
+      "text": "  const categoryReadiness = asArray(assets.category_readiness?.categories);"
+    },
+    {
+      "line": 362,
+      "text": "    ...categoryReadiness"
+    },
+    {
+      "line": 373,
+      "text": "  const tasks = asArray(operations.tasks?.items);"
+    },
+    {
+      "line": 374,
+      "text": "  const approvals = asArray(operations.approvals?.items);"
+    },
+    {
+      "line": 400,
+      "text": "      : \"Acting now keeps momentum and converts current readiness into measurable output.\";"
+    },
+    {
+      "line": 403,
+      "text": "    asString(state.context.activeCampaign) ||"
+    },
+    {
+      "line": 415,
+      "text": "    readinessData.readiness_status ||"
+    },
+    {
+      "line": 416,
+      "text": "    overviewData.readiness_status,"
+    },
+    {
+      "line": 420,
+      "text": "  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);"
+    },
+    {
+      "line": 456,
+      "text": "  const mediaJobs = asArray(operations.media_jobs?.items);"
+    },
+    {
+      "line": 459,
+      "text": "  const publishingQueue = asArray(operations.queues?.items).filter((item) =>"
+    },
+    {
+      "line": 471,
+      "text": "  const readinessMissing = ["
+    },
+    {
+      "line": 472,
+      "text": "    ...asArray(readinessData.missing),"
+    },
+    {
+      "line": 473,
+      "text": "    ...asArray(readiness.missing_fields)"
+    },
+    {
+      "line": 479,
+      "text": "    asNumber(readinessScore) >= 80 ? 1 : 0,"
+    },
+    {
+      "line": 541,
+      "text": "    readinessGaps: dedupe(["
+    },
+    {
+      "line": 543,
+      "text": "      ...readinessMissing"
+    },
+    {
+      "line": 551,
+      "text": "    blockers.readinessGaps.length;"
+    },
+    {
+      "line": 553,
+      "text": "  const campaignReadinessTone = totalBlockers ? \"warning\" : \"success\";"
+    },
+    {
+      "line": 557,
+      "text": "          statusLabel: campaignReadinessTone === \"success\" ? \"Healthy\" : totalBlockers ? \"Attention\" : \"Unknown\","
+    },
+    {
+      "line": 565,
+      "text": "    projectName,"
+    },
+    {
+      "line": 567,
+      "text": "      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,"
+    },
+    {
+      "line": 570,
+      "text": "    headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),"
+    },
+    {
+      "line": 571,
+      "text": "    oneLineSummary: projectName"
+    },
+    {
+      "line": 572,
+      "text": "      ? `${projectName}: ${formatPercent(readinessScore)} readiness, ${formatPercent(connectorScore)} connector confidence, ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? \"\" : \"s\"}.`"
+    },
+    {
+      "line": 573,
+      "text": "      : \"Select a project to see readiness, blockers, the next action, and the right AI specialist.\","
+    },
+    {
+      "line": 581,
+      "text": "      projectReadiness: asNumber(readinessScore),"
+    },
+    {
+      "line": 582,
+      "text": "      connectorReadiness: asNumber(connectorScore),"
+    },
+    {
+      "line": 611,
+      "text": "        title: \"Project Readiness\","
+    },
+    {
+      "line": 612,
+      "text": "        value: formatPercent(readinessScore),"
+    },
+    {
+      "line": 614,
+      "text": "        tone: statusTone(\"score\", readinessScore)"
+    },
+    {
+      "line": 679,
+      "text": "      executionMode: compact(state.context.executionMode || overviewData.execution_mode, \"Not set\"),"
+    },
+    {
+      "line": 691,
+      "text": "    launchSnapshot: {"
+    },
+    {
+      "line": 692,
+      "text": "      publishReadiness: publishReadyCount,"
+    },
+    {
+      "line": 693,
+      "text": "      mediaReadiness: mediaReadyCount,"
+    },
+    {
+      "line": 694,
+      "text": "      emailReadiness: emailConnected ? \"Connected\" : \"Missing\","
+    },
+    {
+      "line": 696,
+      "text": "      campaignReadiness: campaignReadinessTone === \"success\" ? \"Ready\" : \"At risk\""
+    },
+    {
+      "line": 700,
+      "text": "      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? \"Operational\" : \"Partial\","
+    },
+    {
+      "line": 706,
+      "text": "        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)"
+    },
+    {
+      "line": 714,
+      "text": "      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || \"Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.\","
+    },
+    {
+      "line": 719,
+      "text": "      projectName: projectName || \"Project not selected yet\","
+    },
+    {
+      "line": 732,
+      "text": "  if (score >= 85) return \"Strong operating state\";"
+    },
+    {
+      "line": 757,
+      "text": "  render({ getState, $, escapeHtml, navigateTo, showMessage }) {"
+    },
+    {
+      "line": 758,
+      "text": "    const state = getState();"
+    },
+    {
+      "line": 759,
+      "text": "    const dashboard = buildExecutiveData(state);"
+    },
+    {
+      "line": 762,
+      "text": "    const aiTeamCards = buildAiTeamCards(state);"
+    },
+    {
+      "line": 771,
+      "text": "      { title: \"Readiness Gaps\", items: dashboard.blockers.readinessGaps, tone: \"warning\" }"
+    },
+    {
+      "line": 791,
+      "text": "        title: \"Readiness gaps\","
+    },
+    {
+      "line": 792,
+      "text": "        detail: dashboard.blockers.readinessGaps.length"
+    },
+    {
+      "line": 793,
+      "text": "          ? `${formatCount(dashboard.blockers.readinessGaps.length)} readiness gap${dashboard.blockers.readinessGaps.length === 1 ? \"\" : \"s\"} still affect confidence.`"
+    },
+    {
+      "line": 794,
+      "text": "          : \"No critical readiness gaps are currently blocking the main path.\","
+    },
+    {
+      "line": 795,
+      "text": "        tone: dashboard.blockers.readinessGaps.length ? \"is-warning\" : \"is-live\""
+    },
+    {
+      "line": 809,
+      "text": "              <p class=\"mhos-os-kicker\">Project Operating Snapshot</p>"
+    },
+    {
+      "line": 810,
+      "text": "              <h1 class=\"mhos-os-title\">${escapeHtml(dashboard.projectName || \"Project Command Center\")}</h1>"
+    },
+    {
+      "line": 830,
+      "text": "              <span class=\"mhos-os-brief-label\">Readiness</span>"
+    },
+    {
+      "line": 831,
+      "text": "              <strong class=\"mhos-os-brief-value\">${escapeHtml(formatPercent(dashboard.health?.projectReadiness))}</strong>"
+    },
+    {
+      "line": 874,
+      "text": "                <button id=\"homeOpenOperationsBtn\" class=\"btn btn-secondary btn-sm\" type=\"button\">"
+    },
+    {
+      "line": 875,
+      "text": "                  Open Operations"
+    },
+    {
+      "line": 907,
+      "text": "                  <h2 class=\"mhos-os-section-title\">Readiness to execution</h2>"
+    },
+    {
+      "line": 931,
+      "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>"
+    },
+    {
+      "line": 935,
+      "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>"
+    },
+    {
+      "line": 939,
+      "text": "                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>"
+    },
+    {
+      "line": 943,
+      "text": "                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>"
+    },
+    {
+      "line": 954,
+      "text": "                <p class=\"mhos-os-panel-copy\">No detailed blockers are currently available for this project.</p>"
+    },
+    {
+      "line": 984,
+      "text": "              <button id=\"homeQuickReviewReadinessBtn\" class=\"quick-action-btn\" type=\"button\">"
+    },
+    {
+      "line": 985,
+      "text": "                <span class=\"home-action-title\">Open Setup Readiness</span>"
+    },
+    {
+      "line": 1003,
+      "text": "                  ${escapeHtml(recommendedSpecialist?.summary || \"Use AI Command to turn the current state into a clear operating plan.\")}"
+    },
+    {
+      "line": 1011,
+      "text": "                  <span class=\"home-action-meta\">${escapeHtml(recommendedSpecialist.status || \"Ready to guide\")}. Opens AI Command with context.</span>"
+    },
+    {
+      "line": 1039,
+      "text": "              <button id=\"homePromptReadinessBtn\" class=\"home-ai-prompt-card\" type=\"button\">"
+    },
+    {
+      "line": 1040,
+      "text": "                <span class=\"home-prompt-title\">Why is readiness low?</span>"
+    },
+    {
+      "line": 1041,
+      "text": "                <span class=\"home-prompt-meta\">Explain blockers and readiness gaps in simple terms.</span>"
+    },
+    {
+      "line": 1054,
+      "text": "              <p class=\"mhos-os-kicker\">Customer operations</p>"
+    },
+    {
+      "line": 1057,
+      "text": "                ${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, \"Customer Ops activates when CRM/live channels are connected.\"))}"
+    },
+    {
+      "line": 1059,
+      "text": "              <span class=\"mhos-os-chip\">${escapeHtml(compactModuleState(dashboard.health?.commReadiness, \"Communication readiness activates when live channels are connected.\"))}</span>"
+    },
+    {
+      "line": 1081,
+      "text": "      const projectLabel = dashboard.projectName || \"this project\";"
+    },
+    {
+      "line": 1083,
+      "text": "        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1084,
+      "text": "        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1085,
+      "text": "        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1086,
+      "text": "        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1087,
+      "text": "        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1088,
+      "text": "        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1089,
+      "text": "        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1090,
+      "text": "        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,"
+    },
+    {
+      "line": 1091,
+      "text": "        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`"
+    },
+    {
+      "line": 1094,
+      "text": "      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;"
+    },
+    {
+      "line": 1096,
+      "text": "      showMessage?.(`${roleName} context prepared in AI Command.`);"
+    },
+    {
+      "line": 1114,
+      "text": "    const operationsBtn = $(\"homeOpenOperationsBtn\");"
+    },
+    {
+      "line": 1115,
+      "text": "    if (operationsBtn) operationsBtn.onclick = () => openRoute(\"operations-centers\");"
+    },
+    {
+      "line": 1128,
+      "text": "    const quickReadinessBtn = $(\"homeQuickReviewReadinessBtn\");"
+    },
+    {
+      "line": 1129,
+      "text": "    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute(\"setup\");"
+    },
+    {
+      "line": 1138,
+      "text": "      promptNextBtn.onclick = () => openAiWithPrompt(\"What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.\");"
+    },
+    {
+      "line": 1141,
+      "text": "    const promptReadinessBtn = $(\"homePromptReadinessBtn\");"
+    },
+    {
+      "line": 1142,
+      "text": "    if (promptReadinessBtn) {"
+    },
+    {
+      "line": 1143,
+      "text": "      promptReadinessBtn.onclick = () => openAiWithPrompt(\"Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.\");"
+    }
+  ]
+}
