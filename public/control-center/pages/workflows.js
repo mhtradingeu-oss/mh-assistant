@@ -960,10 +960,10 @@ function applyDurableWorkflowHandoff({ projectName, session, operations, consume
   }
 
   session.lastAppliedHandoffId = handoffId;
-  consumeProjectHandoff?.(projectName, handoffId, { actor: "mh-assistant" }).catch((error) => {
-    console.warn("Failed to consume workflow handoff:", error.message);
-  });
-  showMessage?.("Workflow context restored from shared handoff.");
+  if (typeof consumeProjectHandoff === "function") {
+    console.info("Workflow handoff restored without automatic durable consume; operator-owned surfaces keep handoff lifecycle authority.");
+  }
+  showMessage?.("Workflow context restored from shared handoff without consuming the durable handoff automatically.");
 }
 
 async function ensureWorkflowIntelligenceLoaded({
@@ -1170,6 +1170,18 @@ function registerWorkflowBridge(context) {
       });
       const contextModel = buildWorkflowContext(getState(), session);
       const createdAt = nowIso();
+      const confirmed = window.confirm(
+        "Confirm workflow bridge preparation\n\n" +
+          `Action: Prepare workflow review package for ${workflow.title} from an external workflow event.\n` +
+          "Risk: This may call the backend workflow preparation endpoint and update workflow run history. It does not publish, send messages, create CRM records, bypass Governance, or perform destructive actions.\n\n" +
+          "Select Cancel to ignore this workflow event."
+      );
+
+      if (!confirmed) {
+        showMessage?.("Workflow event ignored before backend preparation.");
+        return;
+      }
+
       const result = await (runProjectAiWorkflow || runProjectWorkflow)?.(projectName, workflow.id, {
         title: workflow.title,
         status: "completed",
