@@ -944,6 +944,21 @@ function renderKeyValueList(items, type, escapeHtml) {
   `;
 }
 
+function confirmInsightsAuthorityAction(action, detail = "") {
+  const message = [
+    `Insights action: ${action}`,
+    detail,
+    "This prepares review handoff context only. It does not publish, approve, send externally, or execute AI automatically.",
+    "Continue?"
+  ].filter(Boolean).join("\n\n");
+
+  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+    return true;
+  }
+
+  return window.confirm(message);
+}
+
 function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {
   Array.from(document.querySelectorAll("[data-insights-open]")).forEach((button) => {
     button.onclick = () => {
@@ -957,6 +972,12 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
       if (!route) return;
 
       if (projectName) {
+        const confirmed = confirmInsightsAuthorityAction(
+          "Create Insights route handoff",
+          `This will attach Insights handoff context and open ${route} for review.`
+        );
+        if (!confirmed) return;
+
         setSharedHandoff(projectName, route, {
           source_page: "insights",
           destination_page: route,
@@ -994,6 +1015,12 @@ function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName,
       }
 
       if (projectName && item.prompt) {
+        const confirmed = confirmInsightsAuthorityAction(
+          "Create Insights AI Command handoff",
+          `This will attach the "${item.label}" insight prompt to AI Command for review.`
+        );
+        if (!confirmed) return;
+
         const handoff = {
           source_page: "insights",
           destination_page: "ai-command",
