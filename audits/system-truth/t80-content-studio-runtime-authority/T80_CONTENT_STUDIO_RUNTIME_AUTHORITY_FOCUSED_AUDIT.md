@@ -1,0 +1,1478 @@
+# T80 — Content Studio Runtime Authority Focused Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/content-studio-workspace.js`.
+
+## Why Content Studio Is High Risk
+Content Studio is an active routed content execution surface. It may include AI command execution, content persistence, approval requests/decisions, task creation, Library/Publishing/Media handoffs, and local draft flows. These must be classified before any patch.
+
+## File Summary
+- File: `public/control-center/pages/content-studio-workspace.js`
+- Lines: 2461
+- Imports: 3
+- Render writes: 1
+- Event bindings: 15
+- API imports/calls: 23
+- AI execution signals: 233
+- Content save/storage signals: 348
+- Approval signals: 133
+- Handoff signals: 257
+- Task signals: 8
+- Destructive/execution signals: 93
+- Confirmation signals: 1
+- Access-key signals: 0
+- Navigation signals: 19
+- Disabled/read-only/draft/guard signals: 211
+- Risky terms: 428
+
+## Initial Risk Notes
+- Content Studio contains AI execution/generation signals. Exact action paths must classify whether these call backend execution or only prepare prompts.
+- Content Studio contains content save/draft signals. These must be separated into local draft and backend content item save.
+- Content Studio contains approval signals. Approval request/decision paths must be checked for explicit operator confirmation.
+- Content Studio contains handoff signals. Publishing, Library, Media, or Campaign handoffs must be confirmed if they create backend records.
+- Confirmation dialogs exist and must be mapped to exact authority-sensitive actions.
+
+## Imports
+- L1: `import {`
+- L15: `import { getAssetNextAction, renderAssetDependencyRows } from "../asset-library.js";`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+
+## Render Writes
+- L2422: `root.innerHTML = \``
+
+## Event Bindings
+- L93: `purpose: "Create subject, preheader, and body copy that improves open and click-through.",`
+- L1849: `form.oninput = () => {`
+- L1856: `button.onclick = () => {`
+- L1864: `button.onclick = () => {`
+- L1875: `loadHandoffBtn.onclick = () => {`
+- L1913: `generateBtn.onclick = async () => {`
+- L2011: `improveBtn.onclick = () => {`
+- L2027: `translateBtn.onclick = async () => {`
+- L2073: `saveBtn.onclick = async () => {`
+- L2087: `sendAiBtn.onclick = () => {`
+- L2122: `sendMediaBtn.onclick = async () => {`
+- L2154: `sendPublishingBtn.onclick = async () => {`
+- L2185: `button.onclick = () => {`
+- L2194: `button.onclick = async () => {`
+- L2257: `button.onclick = async () => {`
+
+## API Imports / Calls
+- L2: `createProjectApproval,`
+- L3: `createProjectHandoff,`
+- L4: `createProjectTask,`
+- L5: `decideProjectApproval,`
+- L6: `executeProjectAiCommand,`
+- L7: `fetchProjectOperations,`
+- L8: `listProjectApprovals,`
+- L9: `listProjectContentItems,`
+- L10: `listProjectEvents,`
+- L11: `listProjectHandoffs,`
+- L12: `listProjectTasks,`
+- L13: `saveProjectContentItem`
+- L717: `const result = await saveProjectContentItem(projectName, payload);`
+- L805: `listProjectContentItems(projectName, { limit: 120 }),`
+- L806: `listProjectTasks(projectName, 120),`
+- L807: `listProjectApprovals(projectName, 120),`
+- L808: `listProjectHandoffs(projectName, { limit: 120 }),`
+- L809: `listProjectEvents(projectName, 120),`
+- L810: `fetchProjectOperations(projectName)`
+- L1728: `const result = await createProjectHandoff(projectName, handoff);`
+- L1792: `await createProjectHandoff(projectName, handoff);`
+- L1935: `const aiResult = await executeProjectAiCommand(projectName, {`
+- L2054: `await executeProjectAiCommand(projectName, {`
+
+## AI Execution Signals
+- L6: `executeProjectAiCommand,`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L28: `"email",`
+- L39: `email: "Email",`
+- L46: `"prompt_ready",`
+- L54: `serviceDomain: "content",`
+- L65: `purpose: "Plan message angles and format mix that moves campaign readiness quickly.",`
+- L66: `bestUse: "When choosing what to write first across social, email, and marketplace.",`
+- L67: `suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."`
+- L74: `suggestedPrompt: "Act as Copywriter. Produce high-conversion copy with a strong hook, body value stack, and clear CTA."`
+- L81: `suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."`
+- L88: `suggestedPrompt: "Act as Social Media Writer. Write platform-native content variants with hook lines, scroll-stopping openings, and CTA endings."`
+- L91: `id: "email-writer",`
+- L92: `title: "Email Writer",`
+- L94: `bestUse: "When building campaign newsletters, launch emails, and promos.",`
+- L95: `suggestedPrompt: "Act as Email Writer. Generate subject, preheader, and body with clear structure, benefit-led copy, and CTA clarity."`
+- L102: `suggestedPrompt: "Act as Script Writer. Create a short-form script with opening hook, scene beats, voiceover-friendly lines, and CTA close."`
+- L109: `suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."`
+- L114: `purpose: "Validate tone, claims, and compliance before downstream handoffs.",`
+- L116: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."`
+- L161: `function confirmContentStudioAuthorityAction(action, detail = "") {`
+- L167: `detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",`
+- L199: `if (["prompt_ready", "ready", "prompt ready"].includes(normalized)) return "prompt_ready";`
+- L209: `if (["prompt_ready", "needs_review"].includes(status)) return "warning";`
+- L222: `if (mode === "email") return "email";`
+- L232: `campaign: firstText(context.activeCampaign, overview.active_campaign),`
+- L329: `prompt = "",`
+- L343: `prompt: asString(prompt),`
+- L361: `prompt: firstText(raw.prompt, raw.input_prompt),`
+- L378: `prompt: firstText(seed.prompt),`
+- L400: `prompt: session.form?.brief,`
+- L448: `selected.prompt = clean(session.form.brief);`
+- L459: `session.form.brief = selected.prompt || session.form.brief || "";`
+- L481: `prompt: firstText(raw.prompt, raw.brief),`
+- L499: `campaign: firstText(raw.campaign, raw.campaign_id, raw.campaign_name),`
+- L505: `brief: firstText(raw.prompt, raw.brief),`
+- L528: `prompt_ready: 4,`
+- L567: `aiPromptDraft: ""`
+- L582: `campaign: item.campaign || "",`
+- L602: `prompt: "",`
+- L629: `if (!clean(form.campaign)) errors.campaign = "Campaign is required.";`
+- L635: `if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";`
+- L650: `title: firstText(session.form.title, \`${modeLabel(session.form.mode)} for ${session.form.campaign || session.form.project || "campaign"}\`),`
+- L654: `campaign: session.form.campaign,`
+- L660: `prompt: session.form.brief,`
+- L668: `service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,`
+- L672: `prompt: version.prompt,`
+- L717: `const result = await saveProjectContentItem(projectName, payload);`
+- L728: `showMessage?.("Backend content save unavailable; local draft kept.");`
+- L736: `const promptChanged = Boolean(previous && clean(previous.prompt) !== clean(selected?.prompt));`
+- L739: `return { selected, previous, promptChanged, contentChanged, statusChanged };`
+- L747: `const content = firstText(version?.output_content, version?.prompt, form.brief);`
+- L753: `"Output target: product-visible, publishing-safe, and campaign-consistent creative."`
+- L766: `campaign: firstText(payload.campaign, output.campaign, payload.campaign_id),`
+- L773: `brief: firstText(selectedVersion.prompt, payload.prompt, output.summary, payload.brief),`
+- L784: `getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||`
+- L804: `const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([`
+- L825: `session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";`
+- L839: `ready: items.filter((item) => ["prompt_ready"].includes(item.status)).length,`
+- L850: `action: "Start a draft from the main brief",`
+- L872: `why: "Version expansion keeps campaign momentum while existing content moves downstream."`
+- L877: `action: "Improve brief and generate next version",`
+- L878: `why: "Higher-quality prompt context improves draft quality and handoff readiness."`
+- L897: `.content-main,`
+- L1040: `.content-preview-email,`
+- L1054: `.content-preview-email .headline,`
+- L1066: `.content-preview-email .segment,`
+- L1118: `["Campaign readiness", selectedItem ? "Active" : "Initialize"],`
+- L1122: `["Social", ["social-post", "caption", "reel-script"].includes(selectedItem?.mode) ? "Focused" : "Available"],`
+- L1123: `["Email", selectedItem?.mode === "email" ? "Focused" : "Available"],`
+- L1124: `["Marketplace", selectedItem?.mode === "marketplace-copy" ? "Focused" : "Available"]`
+- L1206: `<div class="setup-field-head"><label class="setup-label" for="contentCampaignInput">Campaign</label></div>`
+- L1207: `<input id="contentCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(form.campaign || "")}">`
+- L1208: `${fieldError(session, "campaign", escapeHtml)}`
+- L1239: `<div class="setup-field-head"><label class="setup-label" for="contentBriefInput">Main prompt / brief</label></div>`
+- L1251: `<button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>`
+- L1257: `<button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>`
+- L1260: `${handoff ? \`<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>\` : ""}`
+- L1305: `function previewEmail(content, escapeHtml) {`
+- L1309: `const body = lines.slice(2).join("\n") || content || "Email body missing";`
+- L1311: `<div class="content-preview-email">`
+- L1312: `<div class="headline">Email Preview</div>`
+- L1358: `if (mode === "email") body = previewEmail(content, escapeHtml);`
+- L1373: `${!clean(content) ? \`<div class="content-text-box" style="margin-top:10px;">${escapeHtml("No generated output yet. Draft is in prompt-ready state until content output is produced.")}</div>\` : ""}`
+- L1380: `const { selected, previous, promptChanged, contentChanged, statusChanged } = getVersionMetrics(session);`
+- L1399: `<div class="content-data-item"><span>Prompt used</span><strong>${escapeHtml(selected?.prompt || "-")}</strong></div>`
+- L1400: `<div class="content-data-item"><span>Content output</span><strong>${escapeHtml(selected?.output_content ? "Generated" : "Not generated")}</strong></div>`
+- L1417: `<div class="content-data-item"><span>Prompt difference</span><strong>${escapeHtml(previous ? (promptChanged ? "Changed" : "Unchanged") : "N/A")}</strong></div>`
+- L1426: `<button class="btn btn-secondary" type="button" data-content-version-action="regenerate">Regenerate</button>`
+- L1451: `<div class="content-text-box">${escapeHtml(agent.suggestedPrompt)}</div>`
+- L1453: `<button class="btn btn-secondary" type="button" data-content-agent-use="${escapeHtml(agent.id)}">Use Prompt</button>`
+- L1455: `<button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>`
+- L1470: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1471: `<h3>No inbound handoff available</h3>`
+- L1475: `<div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>`
+- L1484: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1488: `<span class="card-badge success">Available</span>`
+- L1492: `<div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>`
+- L1504: `function buildAiPrompt(projectName, session, selectedItem) {`
+- L1509: `\`Campaign: ${firstText(session.form.campaign, selectedItem?.campaign, "not set")}\`,`
+- L1513: `"Prompt:",`
+- L1514: `firstText(selected?.prompt, session.form.brief, "not set"),`
+- L1531: `source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,`
+- L1532: `destination_service_domain: "media",`
+- L1541: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1547: `prompt: selected?.prompt || session.form.brief,`
+- L1562: `status: "available",`
+- L1578: `source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,`
+- L1579: `destination_service_domain: "publishing",`
+- L1588: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1596: `prompt: selected?.prompt || session.form.brief,`
+- L1609: `status: "available",`
+- L1627: `if (mode === "email") return "email";`
+- L1641: `const hasPayload = Boolean(clean(selected.prompt) || clean(selected.output_content));`
+- L1643: `session.validation = { ...session.validation, version: "Version needs prompt or content output before Library save." };`
+- L1653: `clean(selected.prompt)`
+- L1667: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1673: `prompt: selected.prompt,`
+- L1694: `source_service_domain: CONTENT_ROLE_DEFAULTS.serviceDomain,`
+- L1695: `destination_service_domain: "library",`
+- L1705: `campaign: libraryAsset.campaign,`
+- L1709: `status: "available",`
+- L1728: `const result = await createProjectHandoff(projectName, handoff);`
+- L1756: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1776: `async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {`
+- L1792: `await createProjectHandoff(projectName, handoff);`
+- L1796: `showMessage?.(failMessage);`
+- L1877: `session.draftMessage = "No inbound handoff is available.";`
+- L1885: `campaign: firstText(handoff.campaign, session.form.campaign),`
+- L1897: `prompt: session.form.brief,`
+- L1911: `const generateBtn = document.getElementById("contentGenerateDraftBtn");`
+- L1912: `if (generateBtn) {`
+- L1913: `generateBtn.onclick = async () => {`
+- L1915: `if (!validateComposer(session, "generate")) {`
+- L1920: `const promptUsed = clean(session.form.brief);`
+- L1921: `session.form.status = "prompt_ready";`
+- L1922: `session.draftMessage = "Draft is prompt-ready.";`
+- L1926: `"Generate draft with AI backend",`
+- L1927: `"This will send the current brief to the AI command backend and create a review draft inside Content Studio."`
+- L1929: `session.draftMessage = "AI draft generation cancelled.";`
+- L1935: `const aiResult = await executeProjectAiCommand(projectName, {`
+- L1936: `message: buildAiPrompt(projectName, session, selected()),`
+- L1940: `const generatedText = firstText(`
+- L1941: `aiResult?.response?.answer,`
+- L1942: `aiResult?.response?.summary,`
+- L1943: `aiResult?.response?.content,`
+- L1944: `aiResult?.summary`
+- L1947: `if (clean(generatedText)) {`
+- L1950: `prompt: promptUsed,`
+- L1951: `outputContent: generatedText,`
+- L1957: `notes: "Generated via AI command backend."`
+- L1960: `session.draftMessage = "Draft generated and queued for review.";`
+- L1964: `prompt: promptUsed,`
+- L1969: `readinessStatus: "prompt_ready",`
+- L1971: `notes: "No model output returned. Prompt-ready state kept."`
+- L1973: `session.draftMessage = "No generated output returned. Draft kept as prompt-ready.";`
+- L1978: `prompt: promptUsed,`
+- L1983: `readinessStatus: "prompt_ready",`
+- L1985: `notes: "Generation backend unavailable. Prompt-ready state only."`
+- L1987: `session.draftMessage = "Generation backend unavailable. Prompt-ready state only.";`
+- L1992: `prompt: promptUsed,`
+- L1997: `readinessStatus: "prompt_ready",`
+- L1999: `notes: "No backend project selected. Prompt-ready state only."`
+- L2001: `session.draftMessage = "No backend project selected. Draft is prompt-ready.";`
+- L2004: `await persistContentRecord({ projectName, state, session, status: session.form.status, showMessage });`
+- L2014: `session.validation = { ...session.validation, brief: "Main prompt / brief is required." };`
+- L2030: `session.validation = { ...session.validation, brief: "Main prompt / brief is required." };`
+- L2045: `"Translate/adapt brief with AI backend",`
+- L2046: `\`This will send the current Content Studio brief to the AI command backend for ${language} adaptation.\``
+- L2054: `await executeProjectAiCommand(projectName, {`
+- L2055: `message: \`Adapt this content brief to ${language} while preserving brand tone and campaign intent:\n\n${session.form.brief}\`,`
+- L2063: `session.form.brief = \`${clean(session.form.brief)}\n\nAdaptation note: backend unavailable for ${language}; prompt-ready adaptation added.\`;`
+- L2065: `session.draftMessage = "Translate/adapt backend unavailable. Prompt-ready adaptation saved.";`
+- L2080: `await persistContentRecord({ projectName, state, session, status: session.form.status, showMessage });`
+- L2085: `const sendAiBtn = document.getElementById("contentSendAiBtn");`
+- L2086: `if (sendAiBtn) {`
+- L2087: `sendAiBtn.onclick = () => {`
+- L2090: `const prompt = buildAiPrompt(projectName, session, selectedItem);`
+- L2091: `const aiDraft = {`
+- L2094: `lastCommand: prompt,`
+- L2098: `setSharedAiDraft(projectName || "__default__", aiDraft);`
+- L2099: `setSharedHandoff(projectName || "__default__", "ai-command", {`
+- L2101: `destination_page: "ai-command",`
+- L2107: `prompt,`
+- L2110: `draft_context: aiDraft,`
+- L2113: `status: "available"`
+- L2115: `navigateTo("ai-command");`
+- L2116: `showMessage?.("Content context sent to AI Command.");`
+- L2130: `const ok = await sendHandoff({`
+- L2135: `failMessage: "Design brief kept locally because backend handoff save is unavailable.",`
+- L2145: `await persistContentRecord({ projectName, state, session, status: "sent_to_media", showMessage });`
+- L2162: `const ok = await sendHandoff({`
+- L2167: `failMessage: "Publishing handoff kept locally because backend save is unavailable.",`
+- L2177: `await persistContentRecord({ projectName, state, session, status: "sent_to_publishing", showMessage });`
+- L2212: `await persistContentRecord({ projectName, state, session, status: "approved", showMessage });`
+- L2220: `await persistContentRecord({ projectName, state, session, status: "draft", showMessage });`
+- L2223: `if (action === "regenerate") {`
+- L2224: `const nextPrompt = \`${clean(current.prompt || session.form.brief)}\n\nRegenerate with stronger opening and clearer CTA while preserving tone.\`;`
+- L2227: `prompt: nextPrompt,`
+- L2232: `readinessStatus: "prompt_ready",`
+- L2234: `notes: \`Regenerated from ${current.id}.\``
+- L2236: `session.form.brief = nextPrompt;`
+- L2237: `session.form.status = "prompt_ready";`
+- L2238: `session.draftMessage = "New prompt-ready version created.";`
+- L2239: `await persistContentRecord({ projectName, state, session, status: "prompt_ready", showMessage });`
+- L2243: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });`
+- L2248: `await saveToLibrary({ projectName, session, selectedItem: selected(), showMessage, rerender });`
+- L2249: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });`
+- L2256: `Array.from(document.querySelectorAll("[data-content-agent-use], [data-content-agent-save], [data-content-agent-ai]")).forEach((button) => {`
+- L2258: `const id = button.getAttribute("data-content-agent-use") || button.getAttribute("data-content-agent-save") || button.getAttribute("data-content-agent-ai") || "";`
+- L2262: `session.form.brief = [agent.suggestedPrompt, session.form.brief].filter(Boolean).join("\n\n");`
+- L2264: `session.draftMessage = \`${agent.title} prompt added.\`;`
+- L2267: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || "draft", "draft"), showMessage });`
+- L2270: `if (button.hasAttribute("data-content-agent-ai")) {`
+- L2271: `const prompt = buildAiPrompt(projectName, session, selected());`
+- L2272: `const aiDraft = {`
+- L2275: `lastCommand: prompt,`
+- L2279: `setSharedAiDraft(projectName || "__default__", aiDraft);`
+- L2280: `setSharedHandoff(projectName || "__default__", "ai-command", {`
+- L2282: `destination_page: "ai-command",`
+
+## Content Save / Storage Signals
+- L13: `saveProjectContentItem`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L19: `const CONTENT_LOCAL_DRAFTS_KEY = "mh-content-studio-local-drafts-v1";`
+- L27: `"blog-draft",`
+- L38: `"blog-draft": "Blog Draft",`
+- L45: `"draft",`
+- L72: `purpose: "Write concise, conversion-focused copy with clear value framing.",`
+- L74: `suggestedPrompt: "Act as Copywriter. Produce high-conversion copy with a strong hook, body value stack, and clear CTA."`
+- L79: `purpose: "Draft discoverable long-form content with search intent alignment.",`
+- L80: `bestUse: "When creating blog drafts and landing content for organic traffic.",`
+- L81: `suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."`
+- L107: `purpose: "Write listing-optimized product copy for conversion and clarity.",`
+- L108: `bestUse: "When drafting marketplace titles, bullets, and descriptions.",`
+- L109: `suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L116: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."`
+- L167: `detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",`
+- L170: `"Select Cancel to review the draft, evidence, and destination before continuing."`
+- L195: `function normalizeStatus(value, fallback = "draft") {`
+- L198: `if (["draft"].includes(normalized)) return "draft";`
+- L219: `if (mode === "blog-draft") return "blog";`
+- L237: `objective: firstText(overview.primary_goal, "Create conversion-ready content"),`
+- L240: `status: "draft"`
+- L244: `function readDraftMap() {`
+- L247: `const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LOCAL_DRAFTS_KEY) || "{}");`
+- L254: `function writeDraftMap(map) {`
+- L257: `window.localStorage?.setItem(CONTENT_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L261: `function loadLocalDrafts(projectName) {`
+- L262: `return asArray(readDraftMap()[projectKey(projectName)]);`
+- L265: `function saveLocalDraft(projectName, draft) {`
+- L266: `const map = readDraftMap();`
+- L269: `...asObject(draft),`
+- L270: `id: asString(draft.id || \`local-content-${Date.now()}\`),`
+- L271: `source: "Local draft",`
+- L277: `writeDraftMap(map);`
+- L284: `const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L294: `window.localStorage?.setItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L322: `function nextVersionId(versions = []) {`
+- L323: `return \`v${asArray(versions).length + 1}\`;`
+- L326: `function createVersionEntry({`
+- L334: `readinessStatus = "draft",`
+- L335: `approvalStatus = "draft",`
+- L341: `id: asString(id || nextVersionId(existing)),`
+- L348: `readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),`
+- L349: `approval_status: asString(approvalStatus || "draft"),`
+- L356: `function normalizeVersionEntry(rawVersion, index = 0) {`
+- L357: `const raw = asObject(rawVersion);`
+- L358: `return createVersionEntry({`
+- L359: `id: firstText(raw.id, raw.version_id, \`v${index + 1}\`),`
+- L362: `outputContent: firstText(raw.output_content, raw.content, raw.body, raw.draft),`
+- L366: `readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),`
+- L367: `approvalStatus: firstText(raw.approval_status, "draft"),`
+- L374: `function createVersioningState(seed = {}) {`
+- L375: `const base = createVersionEntry({`
+- L383: `readinessStatus: firstText(seed.readinessStatus, "draft"),`
+- L384: `approvalStatus: firstText(seed.approvalStatus, "draft"),`
+- L389: `selectedVersionId: base.id,`
+- L392: `versions: [base]`
+- L396: `function ensureVersioning(session) {`
+- L397: `if (!session.versioning) {`
+- L398: `session.versioning = createVersioningState({`
+- L404: `readinessStatus: session.form?.status || "draft"`
+- L407: `if (!asArray(session.versioning.versions).length) {`
+- L408: `session.versioning.versions = createVersioningState().versions;`
+- L410: `if (!session.versioning.selectedVersionId) {`
+- L411: `session.versioning.selectedVersionId = session.versioning.versions[session.versioning.versions.length - 1]?.id || "v1";`
+- L413: `return session.versioning;`
+- L416: `function selectedVersionEntry(session) {`
+- L417: `const versioning = ensureVersioning(session);`
+- L418: `const selected = versioning.versions.find((item) => item.id === versioning.selectedVersionId);`
+- L420: `const fallback = versioning.versions[versioning.versions.length - 1] || null;`
+- L421: `versioning.selectedVersionId = fallback?.id || "v1";`
+- L425: `function previousVersionEntry(session) {`
+- L426: `const versioning = ensureVersioning(session);`
+- L427: `const current = selectedVersionEntry(session);`
+- L428: `const index = versioning.versions.findIndex((item) => item.id === current?.id);`
+- L430: `return versioning.versions[index - 1] || null;`
+- L433: `function appendVersion(session, versionInput) {`
+- L434: `const versioning = ensureVersioning(session);`
+- L435: `const next = createVersionEntry({`
+- L436: `...asObject(versionInput),`
+- L437: `id: nextVersionId(versioning.versions)`
+- L438: `}, versioning.versions);`
+- L439: `versioning.versions = [...versioning.versions, next];`
+- L440: `versioning.selectedVersionId = next.id;`
+- L444: `function syncVersionFromForm(session) {`
+- L445: `const selected = selectedVersionEntry(session);`
+- L452: `selected.readiness_status = normalizeStatus(session.form.status || selected.readiness_status || "draft", "draft");`
+- L455: `function applySelectedVersionToForm(session) {`
+- L456: `const selected = selectedVersionEntry(session);`
+- L463: `session.form.status = normalizeStatus(selected.readiness_status || session.form.status || "draft", "draft");`
+- L466: `function hydrateVersioningFromItem(item) {`
+- L468: `const versions = asArray(raw.content_versions || raw.output_versions || raw.versions)`
+- L469: `.map((entry, index) => normalizeVersionEntry(entry, index))`
+- L471: `if (versions.length) {`
+- L473: `selectedVersionId: versions[versions.length - 1].id,`
+- L476: `versions`
+- L479: `return createVersioningState({`
+- L482: `outputContent: firstText(raw.draft),`
+- L486: `readinessStatus: firstText(raw.status, "draft"),`
+- L487: `approvalStatus: firstText(raw.approval_status, "draft")`
+- L496: `title: firstText(raw.title, \`${modeLabel(mode)} draft\`),`
+- L506: `draft: firstText(raw.draft, raw.body),`
+- L507: `status: normalizeStatus(raw.status, "draft"),`
+- L508: `approval_status: asString(raw.approval_status || "draft"),`
+- L514: `content_versions: asArray(raw.content_versions || raw.output_versions || []),`
+- L515: `source: firstText(raw.source, raw.localOnly ? "Local draft" : "Backend"),`
+- L529: `draft: 5`
+- L561: `versioning: createVersioningState(),`
+- L563: `draftMessage: "",`
+- L567: `aiPromptDraft: ""`
+- L588: `brief: item.brief || item.draft || "",`
+- L590: `status: item.status || "draft"`
+- L592: `session.versioning = hydrateVersioningFromItem(item);`
+- L600: `session.versioning = createVersioningState({`
+- L607: `readinessStatus: "draft"`
+- L613: `session.draftMessage = "";`
+- L622: `syncVersionFromForm(session);`
+- L625: `function validateComposer(session, intent = "save") {`
+- L645: `function buildContentPayload(session, status = "draft") {`
+- L646: `const versioning = ensureVersioning(session);`
+- L647: `const selected = selectedVersionEntry(session);`
+- L662: `draft: firstText(selected?.output_content, ""),`
+- L664: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L669: `content_versions: asArray(versioning.versions).map((version) => ({`
+- L670: `id: version.id,`
+- L671: `mode: version.mode,`
+- L672: `prompt: version.prompt,`
+- L673: `output_content: version.output_content,`
+- L674: `language: version.language,`
+- L675: `tone: version.tone,`
+- L676: `channel: version.channel,`
+- L677: `readiness_status: version.readiness_status,`
+- L678: `approval_status: version.approval_status,`
+- L679: `notes: version.notes,`
+- L680: `library_asset_ref: version.library_asset_ref || null,`
+- L681: `timestamp: version.timestamp`
+- L687: `function syncItemsWithLocalSave(session, projectName, payload) {`
+- L688: `const saved = saveLocalDraft(projectName, payload);`
+- L689: `const normalized = normalizeContentItem(saved);`
+- L701: `const localItem = syncItemsWithLocalSave(session, projectName, payload);`
+- L704: `showMessage?.("Content draft saved locally.");`
+- L709: `"Save backend content draft",`
+- L710: `\`This will save or update a Content Studio draft for ${projectName}.\``
+- L712: `showMessage?.("Backend content save cancelled.");`
+- L717: `const result = await saveProjectContentItem(projectName, payload);`
+- L725: `showMessage?.("Content draft saved.");`
+- L728: `showMessage?.("Backend content save unavailable; local draft kept.");`
+- L733: `function getVersionMetrics(session) {`
+- L734: `const selected = selectedVersionEntry(session);`
+- L735: `const previous = previousVersionEntry(session);`
+- L746: `function computeSuggestedMediaBrief(mode, version, form) {`
+- L747: `const content = firstText(version?.output_content, version?.prompt, form.brief);`
+- L751: `\`Language/Tone: ${firstText(form.language, version?.language, "English")} / ${firstText(form.tone, version?.tone, "not set")}\`,`
+- L760: `const selectedVersion = asObject(payload.selected_version);`
+- L764: `title: firstText(payload.title, output.title, selectedVersion.title),`
+- L769: `mode: firstText(payload.content_type, selectedVersion.mode, payload.type),`
+- L770: `language: firstText(payload.language, selectedVersion.language),`
+- L771: `tone: firstText(payload.tone, selectedVersion.tone),`
+- L773: `brief: firstText(selectedVersion.prompt, payload.prompt, output.summary, payload.brief),`
+- L774: `contentBody: firstText(selectedVersion.output_content, payload.content, payload.body, output.content_item),`
+- L775: `readinessStatus: firstText(selectedVersion.readiness_status, payload.readiness_status, "draft"),`
+- L776: `approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")`
+- L814: `const localItems = loadLocalDrafts(projectName).map((item) => normalizeContentItem(item));`
+- L825: `session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";`
+- L826: `session.items = mergeItems([], loadLocalDrafts(projectName).map((item) => normalizeContentItem(item)));`
+- L850: `action: "Start a draft from the main brief",`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L857: `action: "Approve or request revision on the selected draft",`
+- L872: `why: "Version expansion keeps campaign momentum while existing content moves downstream."`
+- L877: `action: "Improve brief and generate next version",`
+- L878: `why: "Higher-quality prompt context improves draft quality and handoff readiness."`
+- L913: `.content-version-grid,`
+- L952: `.content-version-tabs,`
+- L961: `.content-version-tab {`
+- L972: `.content-version-tab.is-active {`
+- L1081: `.content-version-grid,`
+- L1102: `<span class="card-badge neutral">${escapeHtml(formatCount(metrics.total))} drafts</span>`
+- L1105: `<div class="content-overview-item"><span>Total content drafts</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>`
+- L1121: `["SEO", ["blog-draft"].includes(selectedItem?.mode) ? "Priority" : "Optional"],`
+- L1135: `<span class="card-badge ${statusTone(normalizeStatus(selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(selectedItem?.status || "draft"))}</span>`
+- L1150: `<div class="setup-kicker">Draft Queue</div>`
+- L1151: `<h3>Saved content records</h3>`
+- L1154: `<div class="empty-box">No drafts yet. Start from composer and save the first draft.</div>`
+- L1163: `<div class="setup-kicker">Draft Queue</div>`
+- L1164: `<h3>Saved content records</h3>`
+- L1192: `<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>`
+- L1194: `<span class="card-badge ${statusTone(normalizeStatus(form.status || "draft", "draft"))}">${escapeHtml(titleCase(form.status || "draft"))}</span>`
+- L1245: `<div class="setup-field-head"><label class="setup-label" for="contentTitleInput">Draft title</label></div>`
+- L1251: `<button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>`
+- L1254: `<button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1261: `${session.draftMessage ? \`<div class="simple-banner" style="margin-top:12px;">${escapeHtml(session.draftMessage)}</div>\` : ""}`
+- L1351: `const selected = selectedVersionEntry(session);`
+- L1353: `const content = firstText(selected?.output_content, selectedItem?.draft);`
+- L1357: `if (mode === "blog-draft") body = previewBlog(content, escapeHtml);`
+- L1368: `<p class="content-copy">Selected version rendering by content type with fallback-safe formatting.</p>`
+- L1370: `<span class="card-badge ${statusTone(normalizeStatus(selected?.readiness_status || session.form.status || "draft", "draft"))}">${escapeHtml(titleCase(selected?.readiness_status || session.form.status || "draft"))}</span>`
+- L1373: `${!clean(content) ? \`<div class="content-text-box" style="margin-top:10px;">${escapeHtml("No generated output yet. Draft is in prompt-ready state until content output is produced.")}</div>\` : ""}`
+- L1378: `function renderVersioning(session, escapeHtml) {`
+- L1379: `const versioning = ensureVersioning(session);`
+- L1380: `const { selected, previous, promptChanged, contentChanged, statusChanged } = getVersionMetrics(session);`
+- L1383: `<section class="card content-card" id="contentVersioningPanel">`
+- L1386: `<div class="setup-kicker">Draft / Versioning</div>`
+- L1387: `<h3>Version controls and review actions</h3>`
+- L1389: `<span class="card-badge neutral">${escapeHtml(selected?.id ? \`${titleCase(selected.id)} selected\` : "No version")}</span>`
+- L1392: `<div class="content-version-tabs">`
+- L1393: `${asArray(versioning.versions).map((version) => \``
+- L1394: `<button class="content-version-tab${selected?.id === version.id ? " is-active" : ""}" type="button" data-content-version="${escapeHtml(version.id)}">${escapeHtml(titleCase(version.id))}</button>`
+- L1398: `<div class="content-version-grid" style="margin-top:12px;">`
+- L1404: `<div class="content-data-item"><span>Readiness status</span><strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong></div>`
+- L1405: `<div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>`
+- L1410: `<button class="btn btn-secondary" type="button" data-content-version-action="compare-toggle">${escapeHtml(versioning.compareMode ? "Hide Compare" : "Compare version")}</button>`
+- L1413: `${versioning.compareMode ? \``
+- L1414: `<div class="content-version-grid" style="margin-top:10px;">`
+- L1415: `<div class="content-data-item"><span>Current version</span><strong>${escapeHtml(selected?.id ? titleCase(selected.id) : "None")}</strong></div>`
+- L1416: `<div class="content-data-item"><span>Previous version</span><strong>${escapeHtml(previous?.id ? titleCase(previous.id) : "None")}</strong></div>`
+- L1424: `<button class="btn btn-secondary" type="button" data-content-version-action="approve">Approve</button>`
+- L1425: `<button class="btn btn-secondary" type="button" data-content-version-action="reject">Reject</button>`
+- L1426: `<button class="btn btn-secondary" type="button" data-content-version-action="regenerate">Regenerate</button>`
+- L1427: `<button class="btn btn-secondary" type="button" data-content-version-action="save-draft">Save Draft</button>`
+
+## Approval Signals
+- L2: `createProjectApproval,`
+- L5: `decideProjectApproval,`
+- L8: `listProjectApprovals,`
+- L47: `"needs_review",`
+- L48: `"approved",`
+- L56: `reviewRole: "compliance_reviewer",`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L169: `"Authority: This does not publish, send externally, or approve anything automatically.",`
+- L170: `"Select Cancel to review the draft, evidence, and destination before continuing."`
+- L200: `if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";`
+- L201: `if (["approved", "complete", "completed"].includes(normalized)) return "approved";`
+- L208: `if (["approved", "sent_to_media", "sent_to_publishing"].includes(status)) return "success";`
+- L209: `if (["prompt_ready", "needs_review"].includes(status)) return "warning";`
+- L335: `approvalStatus = "draft",`
+- L349: `approval_status: asString(approvalStatus || "draft"),`
+- L367: `approvalStatus: firstText(raw.approval_status, "draft"),`
+- L384: `approvalStatus: firstText(seed.approvalStatus, "draft"),`
+- L487: `approvalStatus: firstText(raw.approval_status, "draft")`
+- L508: `approval_status: asString(raw.approval_status || "draft"),`
+- L512: `linked_approvals: asArray(raw.linked_approvals),`
+- L524: `needs_review: 0,`
+- L525: `approved: 1,`
+- L554: `approvals: [],`
+- L664: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L667: `review_role: CONTENT_ROLE_DEFAULTS.reviewRole,`
+- L678: `approval_status: version.approval_status,`
+- L776: `approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")`
+- L804: `const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([`
+- L807: `listProjectApprovals(projectName, 120),`
+- L817: `session.approvals = asArray(approvals.items);`
+- L840: `needsReview: items.filter((item) => item.status === "needs_review").length,`
+- L841: `approved: items.filter((item) => item.status === "approved").length,`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L855: `if (selectedItem.status === "needs_review") {`
+- L857: `action: "Approve or request revision on the selected draft",`
+- L858: `why: "Review decisions reduce production delay and move content into executable lanes."`
+- L862: `if (selectedItem.status === "approved") {`
+- L864: `action: "Send approved content to Media Studio",`
+- L865: `why: "Approved copy can now drive structured media generation with fewer revisions."`
+- L912: `.content-preview-grid,`
+- L1039: `.content-preview-social,`
+- L1040: `.content-preview-email,`
+- L1041: `.content-preview-marketplace,`
+- L1042: `.content-preview-ad,`
+- L1043: `.content-preview-script,`
+- L1044: `.content-preview-blog {`
+- L1052: `.content-preview-social .headline,`
+- L1053: `.content-preview-blog .headline,`
+- L1054: `.content-preview-email .headline,`
+- L1055: `.content-preview-marketplace .headline,`
+- L1056: `.content-preview-ad .headline,`
+- L1057: `.content-preview-script .headline {`
+- L1063: `.content-preview-script .scene,`
+- L1064: `.content-preview-marketplace .bullet,`
+- L1065: `.content-preview-blog .section,`
+- L1066: `.content-preview-email .segment,`
+- L1067: `.content-preview-ad .segment {`
+- L1080: `.content-preview-grid,`
+- L1107: `<div class="content-overview-item"><span>Needs review</span><strong>${escapeHtml(formatCount(metrics.needsReview))}</strong></div>`
+- L1108: `<div class="content-overview-item"><span>Approved content</span><strong>${escapeHtml(formatCount(metrics.approved))}</strong></div>`
+- L1119: `["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],`
+- L1192: `<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>`
+- L1199: `<div class="content-preview-grid">`
+- L1266: `function previewPost(content, escapeHtml) {`
+- L1268: `<div class="content-preview-social">`
+- L1269: `<div class="headline">Social Preview</div>`
+- L1275: `function previewScript(content, escapeHtml) {`
+- L1281: `<div class="content-preview-script">`
+- L1282: `<div class="headline">Script Preview</div>`
+- L1290: `function previewBlog(content, escapeHtml) {`
+- L1296: `<div class="content-preview-blog">`
+- L1297: `<div class="headline">Blog Preview</div>`
+- L1305: `function previewEmail(content, escapeHtml) {`
+- L1311: `<div class="content-preview-email">`
+- L1312: `<div class="headline">Email Preview</div>`
+- L1320: `function previewMarketplace(content, escapeHtml) {`
+- L1326: `<div class="content-preview-marketplace">`
+- L1327: `<div class="headline">Marketplace Preview</div>`
+- L1335: `function previewAd(content, escapeHtml) {`
+- L1341: `<div class="content-preview-ad">`
+- L1342: `<div class="headline">Ad Preview</div>`
+- L1350: `function renderPreview(session, selectedItem, escapeHtml) {`
+- L1355: `let body = previewPost(content, escapeHtml);`
+- L1356: `if (["reel-script", "video-script"].includes(mode)) body = previewScript(content, escapeHtml);`
+- L1357: `if (mode === "blog-draft") body = previewBlog(content, escapeHtml);`
+- L1358: `if (mode === "email") body = previewEmail(content, escapeHtml);`
+- L1359: `if (mode === "marketplace-copy") body = previewMarketplace(content, escapeHtml);`
+- L1360: `if (mode === "ad-copy") body = previewAd(content, escapeHtml);`
+- L1363: `<section class="card content-card" id="contentPreviewPanel">`
+- L1366: `<div class="setup-kicker">Content Preview</div>`
+- L1387: `<h3>Version controls and review actions</h3>`
+- L1405: `<div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>`
+- L1424: `<button class="btn btn-secondary" type="button" data-content-version-action="approve">Approve</button>`
+- L1425: `<button class="btn btn-secondary" type="button" data-content-version-action="reject">Reject</button>`
+- L1553: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L1570: `const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");`
+- L1591: `approval_status: approvalStatus,`
+- L1600: `approval_status: approvalStatus,`
+- L1682: `approval_status: firstText(selected.approval_status, "draft"),`
+- L1693: `destination_role: CONTENT_ROLE_DEFAULTS.reviewRole,`
+- L1721: `"This will create a backend handoff from Content Studio to Library for review and asset preparation."`
+- L1785: `\`This will create a backend handoff to ${handoff.destination_page || "the selected workspace"} for review.\``
+- L1806: `const keys = ["brand_guideline", "product_csv", "product_photos", "product_videos", "testimonials_reviews", "legal_doc"];`
+- L1903: `approvalStatus: firstText(handoff.approvalStatus, "draft"),`
+- L1927: `"This will send the current brief to the AI command backend and create a review draft inside Content Studio."`
+- L1955: `readinessStatus: "needs_review",`
+- L1956: `approvalStatus: "needs_review",`
+- L1959: `session.form.status = "needs_review";`
+- L1960: `session.draftMessage = "Draft generated and queued for review.";`
+- L1970: `approvalStatus: "draft",`
+- L1984: `approvalStatus: "draft",`
+- L1998: `approvalStatus: "draft",`
+- L2207: `if (action === "approve") {`
+- L2208: `current.readiness_status = "approved";`
+- L2209: `current.approval_status = "approved";`
+- L2210: `session.form.status = "approved";`
+- L2211: `session.draftMessage = "Selected version approved.";`
+- L2212: `await persistContentRecord({ projectName, state, session, status: "approved", showMessage });`
+- L2215: `if (action === "reject") {`
+- L2217: `current.approval_status = "rejected";`
+- L2233: `approvalStatus: "draft",`
+- L2310: `description: "Smart content production hub for draft generation, review, and routing to Media Studio and Publishing."`
+- L2386: `sourceLines.push(\`<div class="content-hint content-readiness-hint">Source context helps the reviewer verify claims before routing.</div>\`);`
+- L2403: `</ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>\`;`
+- L2406: `// --- Governance Risk / Approval Readiness Panel ---`
+- L2408: `const ariaLabel = "Governance risk and approval readiness panel";`
+- L2409: `return \`<section class="card content-card" aria-label="${ariaLabel}"><div class="card-head"><div><div class="setup-kicker">Governance Risk</div><h3>Approval Readiness</h3></div></div><ul class="content-governance-checklist content-readiness-list">`
+- L2414: `<li><strong>Approval recommended before routing</strong></li>`
+- L2415: `<li>Route to Governance Review if needed</li>`
+- L2416: `</ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>\`;`
+- L2420: `// No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.`
+- L2431: `${session.loading ? \`<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>\` : ""}`
+- L2437: `${renderPreview(session, selectedItem, escapeHtml)}`
+
+## Handoff Signals
+- L3: `createProjectHandoff,`
+- L11: `listProjectHandoffs,`
+- L15: `import { getAssetNextAction, renderAssetDependencyRows } from "../asset-library.js";`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L20: `const CONTENT_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L49: `"sent_to_media",`
+- L50: `"sent_to_publishing"`
+- L57: `mediaRole: "designer",`
+- L58: `handoffRole: "publisher"`
+- L65: `purpose: "Plan message angles and format mix that moves campaign readiness quickly.",`
+- L67: `suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."`
+- L85: `title: "Social Media Writer",`
+- L88: `suggestedPrompt: "Act as Social Media Writer. Write platform-native content variants with hook lines, scroll-stopping openings, and CTA endings."`
+- L94: `bestUse: "When building campaign newsletters, launch emails, and promos.",`
+- L101: `bestUse: "When creating reel/video scripts that will feed Media Studio production.",`
+- L114: `purpose: "Validate tone, claims, and compliance before downstream handoffs.",`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L116: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."`
+- L167: `detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",`
+- L202: `if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";`
+- L203: `if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";`
+- L208: `if (["approved", "sent_to_media", "sent_to_publishing"].includes(status)) return "success";`
+- L232: `campaign: firstText(context.activeCampaign, overview.active_campaign),`
+- L281: `function readContentLibraryMap() {`
+- L284: `const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L291: `function writeContentLibraryMap(map) {`
+- L294: `window.localStorage?.setItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L298: `function loadLocalLibraryAssets(projectName) {`
+- L299: `const map = readContentLibraryMap();`
+- L303: `function upsertLocalLibraryAsset(projectName, asset) {`
+- L304: `const map = readContentLibraryMap();`
+- L308: `id: asString(asset.id || \`content-library-${Date.now()}\`),`
+- L318: `writeContentLibraryMap(map);`
+- L337: `libraryAssetRef = null,`
+- L351: `library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),`
+- L369: `libraryAssetRef: raw.library_asset_ref || null,`
+- L499: `campaign: firstText(raw.campaign, raw.campaign_id, raw.campaign_name),`
+- L509: `destination: firstText(raw.destination, raw.publishing_destination),`
+- L513: `linked_handoffs: asArray(raw.linked_handoffs),`
+- L526: `sent_to_media: 2,`
+- L527: `sent_to_publishing: 3,`
+- L555: `handoffs: [],`
+- L564: `loadedHandoffId: "",`
+- L582: `campaign: item.campaign || "",`
+- L629: `if (!clean(form.campaign)) errors.campaign = "Campaign is required.";`
+- L635: `if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";`
+- L650: `title: firstText(session.form.title, \`${modeLabel(session.form.mode)} for ${session.form.campaign || session.form.project || "campaign"}\`),`
+- L654: `campaign: session.form.campaign,`
+- L680: `library_asset_ref: version.library_asset_ref || null,`
+- L746: `function computeSuggestedMediaBrief(mode, version, form) {`
+- L749: `\`Create media assets for ${modeLabel(mode)} content.\`,`
+- L753: `"Output target: product-visible, publishing-safe, and campaign-consistent creative."`
+- L757: `function buildInboundSummary(handoff) {`
+- L758: `const payload = asObject(handoff?.payload);`
+- L762: `id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),`
+- L763: `sourcePage: asString(handoff?.source_page || "workflows"),`
+- L766: `campaign: firstText(payload.campaign, output.campaign, payload.campaign_id),`
+- L780: `function getInboundHandoff(projectName, session) {`
+- L783: `getSharedHandoff(projectName, "content-studio", operations, "workflows") ||`
+- L784: `getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||`
+- L785: `getSharedHandoff(projectName, "content-studio", operations)`
+- L789: `function applyInboundHandoff(projectName, session) {`
+- L790: `const handoff = getInboundHandoff(projectName, session);`
+- L791: `if (!handoff) return;`
+- L792: `const summary = buildInboundSummary(handoff);`
+- L793: `if (!summary.id || summary.id === session.loadedHandoffId) return;`
+- L794: `session.loadedHandoffId = summary.id;`
+- L804: `const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([`
+- L808: `listProjectHandoffs(projectName, { limit: 120 }),`
+- L818: `session.handoffs = asArray(handoffs.items);`
+- L822: `applyInboundHandoff(projectName, session);`
+- L828: `applyInboundHandoff(projectName, session);`
+- L842: `sentMedia: items.filter((item) => item.status === "sent_to_media").length,`
+- L843: `sentPublishing: items.filter((item) => item.status === "sent_to_publishing").length`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L864: `action: "Send approved content to Media Studio",`
+- L865: `why: "Approved copy can now drive structured media generation with fewer revisions."`
+- L869: `if (metrics.sentMedia + metrics.sentPublishing > 0) {`
+- L872: `why: "Version expansion keeps campaign momentum while existing content moves downstream."`
+- L878: `why: "Higher-quality prompt context improves draft quality and handoff readiness."`
+- L914: `.content-handoff-grid {`
+- L1072: `@media (min-width: 980px) {`
+- L1082: `.content-handoff-grid {`
+- L1109: `<div class="content-overview-item"><span>Sent to Media</span><strong>${escapeHtml(formatCount(metrics.sentMedia))}</strong></div>`
+- L1110: `<div class="content-overview-item"><span>Sent to Publishing</span><strong>${escapeHtml(formatCount(metrics.sentPublishing))}</strong></div>`
+- L1118: `["Campaign readiness", selectedItem ? "Active" : "Initialize"],`
+- L1119: `["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],`
+- L1120: `["Publishing", selectedItem?.status === "sent_to_publishing" ? "Sent" : "Pending"],`
+- L1181: `function renderComposer(session, state, handoff, escapeHtml) {`
+- L1206: `<div class="setup-field-head"><label class="setup-label" for="contentCampaignInput">Campaign</label></div>`
+- L1207: `<input id="contentCampaignInput" name="campaign" class="setup-input" type="text" value="${escapeHtml(form.campaign || "")}">`
+- L1208: `${fieldError(session, "campaign", escapeHtml)}`
+- L1255: `<button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>`
+- L1256: `<button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>`
+- L1260: `${handoff ? \`<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>\` : ""}`
+- L1428: `<button class="btn btn-secondary" type="button" data-content-version-action="save-library">Save to Library</button>`
+- L1464: `function renderInboundHandoff(handoff, session, escapeHtml) {`
+- L1465: `if (!handoff) {`
+- L1467: `<section class="card content-card" id="contentHandoffPanel">`
+- L1470: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1471: `<h3>No inbound handoff available</h3>`
+- L1481: `<section class="card content-card" id="contentHandoffPanel">`
+- L1484: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1485: `<h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>`
+- L1486: `<p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>`
+- L1490: `<div class="content-handoff-grid">`
+- L1491: `<div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>`
+- L1492: `<div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>`
+- L1493: `<div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>`
+- L1494: `<div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>`
+- L1496: `<div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>`
+- L1498: `<button id="contentLoadHandoffBtn" class="btn btn-secondary" type="button">Load into Composer</button>`
+- L1509: `\`Campaign: ${firstText(session.form.campaign, selectedItem?.campaign, "not set")}\`,`
+- L1521: `function buildMediaHandoff(projectName, session, selectedItem) {`
+- L1528: `destination_page: "media-studio",`
+- L1530: `destination_role: CONTENT_ROLE_DEFAULTS.mediaRole,`
+- L1532: `destination_service_domain: "media",`
+- L1541: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1557: `suggested_media_brief: computeSuggestedMediaBrief(firstText(selected?.mode, session.form.mode), selected, session.form),`
+- L1567: `function buildPublishingHandoff(projectName, session, selectedItem) {`
+- L1575: `destination_page: "publishing",`
+- L1577: `destination_role: CONTENT_ROLE_DEFAULTS.handoffRole,`
+- L1579: `destination_service_domain: "publishing",`
+- L1588: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1607: `title: firstText(selectedItem?.title, session.form.title, "Content handoff")`
+- L1614: `function findExistingLibraryAssetSave(session, projectName, signature) {`
+- L1615: `const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(signature));`
+- L1616: `const backend = asArray(session.handoffs).find((item) => {`
+- L1618: `const asset = asObject(payload.library_asset);`
+- L1619: `return asString(item.destination_page) === "library" && asString(asset.source_signature) === asString(signature);`
+- L1624: `function mapLibraryAssetType(mode) {`
+- L1633: `async function saveToLibrary({ projectName, session, selectedItem, showMessage, rerender }) {`
+- L1636: `session.validation = { ...session.validation, version: "Select a version before saving to Library." };`
+- L1643: `session.validation = { ...session.validation, version: "Version needs prompt or content output before Library save." };`
+- L1656: `const existing = findExistingLibraryAssetSave(session, projectName, signature);`
+- L1658: `showMessage?.("Already saved to Library (local reference).");`
+- L1662: `const libraryAsset = {`
+- L1667: `campaign: firstText(session.form.campaign, selectedItem?.campaign),`
+- L1670: `media_type: firstText(selected.mode, session.form.mode),`
+- L1671: `asset_type: mapLibraryAssetType(firstText(selected.mode, session.form.mode)),`
+- L1688: `const handoff = {`
+- L1691: `destination_page: "library",`
+- L1695: `destination_service_domain: "library",`
+- L1703: `library_asset: libraryAsset,`
+- L1704: `project: libraryAsset.project,`
+- L1705: `campaign: libraryAsset.campaign,`
+- L1706: `asset_type: libraryAsset.asset_type,`
+- L1707: `content_type: libraryAsset.media_type`
+- L1713: `setSharedHandoff(projectName || "__default__", "library", handoff);`
+- L1715: `setSharedHandoff("__default__", "library", handoff);`
+- L1720: `"Create Library handoff",`
+- L1721: `"This will create a backend handoff from Content Studio to Library for review and asset preparation."`
+- L1723: `showMessage?.("Library handoff cancelled.");`
+- L1728: `const result = await createProjectHandoff(projectName, handoff);`
+- L1729: `const saved = asObject(result?.handoff);`
+- L1730: `const handoffId = asString(saved.id || handoff.id);`
+- L1731: `upsertLocalLibraryAsset(projectName, {`
+- L1732: `...libraryAsset,`
+- L1733: `id: handoffId || libraryAsset.id,`
+- L1734: `handoff_id: handoffId,`
+- L1737: `selected.library_asset_ref = {`
+- L1738: `handoff_id: handoffId,`
+- L1743: `showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Content draft saved to Library.");`
+- L1745: `upsertLocalLibraryAsset(projectName, {`
+- L1746: `...libraryAsset,`
+- L1747: `id: libraryAsset.id,`
+- L1750: `selected.library_asset_ref = {`
+- L1751: `handoff_id: "",`
+- L1756: `showMessage?.("Library backend unavailable. Saved as local library handoff.");`
+- L1759: `upsertLocalLibraryAsset(projectName, {`
+- L1760: `...libraryAsset,`
+- L1761: `id: libraryAsset.id,`
+- L1764: `selected.library_asset_ref = {`
+- L1765: `handoff_id: "",`
+- L1770: `showMessage?.("Content draft saved to Library (local handoff).");`
+- L1776: `async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {`
+- L1777: `setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);`
+- L1779: `setSharedHandoff("__default__", handoff.destination_page, handoff);`
+- L1784: `"Create Content Studio handoff",`
+- L1785: `\`This will create a backend handoff to ${handoff.destination_page || "the selected workspace"} for review.\``
+- L1787: `showMessage?.("Content Studio handoff cancelled.");`
+- L1792: `await createProjectHandoff(projectName, handoff);`
+- L1814: `<h3>Library dependency gate</h3>`
+- L1828: `handoff,`
+- L1873: `const loadHandoffBtn = document.getElementById("contentLoadHandoffBtn");`
+- L1874: `if (loadHandoffBtn) {`
+- L1875: `loadHandoffBtn.onclick = () => {`
+- L1876: `if (!handoff) {`
+- L1877: `session.draftMessage = "No inbound handoff is available.";`
+- L1883: `mode: firstText(handoff.mode, session.form.mode, "social-post"),`
+- L1884: `project: firstText(handoff.project, session.form.project, projectName),`
+- L1885: `campaign: firstText(handoff.campaign, session.form.campaign),`
+- L1886: `product: firstText(handoff.product, session.form.product),`
+- L1887: `channel: firstText(handoff.channel, session.form.channel),`
+- L1888: `language: firstText(handoff.language, session.form.language),`
+- L1889: `tone: firstText(handoff.tone, session.form.tone),`
+- L1890: `objective: firstText(handoff.objective, session.form.objective),`
+- L1891: `brief: firstText(handoff.brief, handoff.contentBody, session.form.brief),`
+- L1892: `title: firstText(handoff.title, session.form.title),`
+- L1893: `status: normalizeStatus(handoff.readinessStatus || "draft", "draft")`
+- L1898: `outputContent: firstText(handoff.contentBody),`
+- L1903: `approvalStatus: firstText(handoff.approvalStatus, "draft"),`
+- L1904: `notes: \`Loaded from ${titleCase(handoff.sourcePage || "handoff")}.\``
+- L1906: `session.draftMessage = "Handoff loaded into composer.";`
+- L2055: `message: \`Adapt this content brief to ${language} while preserving brand tone and campaign intent:\n\n${session.form.brief}\`,`
+- L2099: `setSharedHandoff(projectName || "__default__", "ai-command", {`
+- L2120: `const sendMediaBtn = document.getElementById("contentSendMediaBtn");`
+- L2121: `if (sendMediaBtn) {`
+- L2122: `sendMediaBtn.onclick = async () => {`
+- L2129: `const handoffPayload = buildMediaHandoff(projectName, session, selectedItem);`
+- L2130: `const ok = await sendHandoff({`
+- L2132: `handoff: handoffPayload,`
+- L2135: `failMessage: "Design brief kept locally because backend handoff save is unavailable.",`
+- L2136: `successMessage: "Design brief sent to Media Studio.",`
+- L2137: `localMessage: "Design brief prepared for Media Studio locally."`
+- L2142: `selectedVersion.readiness_status = "sent_to_media";`
+- L2144: `session.form.status = "sent_to_media";`
+- L2145: `await persistContentRecord({ projectName, state, session, status: "sent_to_media", showMessage });`
+- L2146: `navigateTo("media-studio");`
+- L2152: `const sendPublishingBtn = document.getElementById("contentSendPublishingBtn");`
+
+## Task Signals
+- L4: `createProjectTask,`
+- L12: `listProjectTasks,`
+- L511: `linked_tasks: asArray(raw.linked_tasks),`
+- L553: `tasks: [],`
+- L804: `const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([`
+- L806: `listProjectTasks(projectName, 120),`
+- L816: `session.tasks = asArray(tasks.items);`
+- L2431: `${session.loading ? \`<div class="empty-box">Loading content records, approvals, tasks, handoffs, and events...</div>\` : ""}`
+
+## Destructive / Execution Signals
+- L1: `import {`
+- L6: `executeProjectAiCommand,`
+- L15: `import { getAssetNextAction, renderAssetDependencyRows } from "../asset-library.js";`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L50: `"sent_to_publishing"`
+- L58: `handoffRole: "publisher"`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L169: `"Authority: This does not publish, send externally, or approve anything automatically.",`
+- L203: `if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";`
+- L208: `if (["approved", "sent_to_media", "sent_to_publishing"].includes(status)) return "success";`
+- L444: `function syncVersionFromForm(session) {`
+- L509: `destination: firstText(raw.destination, raw.publishing_destination),`
+- L527: `sent_to_publishing: 3,`
+- L577: `function syncFormFromItem(session, item) {`
+- L616: `function syncSessionForm(session, form) {`
+- L622: `syncVersionFromForm(session);`
+- L687: `function syncItemsWithLocalSave(session, projectName, payload) {`
+- L699: `async function persistContentRecord({ projectName, state, session, status, showMessage }) {`
+- L701: `const localItem = syncItemsWithLocalSave(session, projectName, payload);`
+- L753: `"Output target: product-visible, publishing-safe, and campaign-consistent creative."`
+- L797: `async function loadWorkspace(projectName, state, session, rerender) {`
+- L825: `session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";`
+- L843: `sentPublishing: items.filter((item) => item.status === "sent_to_publishing").length`
+- L850: `action: "Start a draft from the main brief",`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L864: `action: "Send approved content to Media Studio",`
+- L869: `if (metrics.sentMedia + metrics.sentPublishing > 0) {`
+- L902: `align-content: start;`
+- L1075: `align-items: start;`
+- L1110: `<div class="content-overview-item"><span>Sent to Publishing</span><strong>${escapeHtml(formatCount(metrics.sentPublishing))}</strong></div>`
+- L1120: `["Publishing", selectedItem?.status === "sent_to_publishing" ? "Sent" : "Pending"],`
+- L1154: `<div class="empty-box">No drafts yet. Start from composer and save the first draft.</div>`
+- L1192: `<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>`
+- L1255: `<button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>`
+- L1256: `<button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>`
+- L1257: `<button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>`
+- L1455: `<button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>`
+- L1475: `<div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>`
+- L1567: `function buildPublishingHandoff(projectName, session, selectedItem) {`
+- L1575: `destination_page: "publishing",`
+- L1579: `destination_service_domain: "publishing",`
+- L1633: `async function saveToLibrary({ projectName, session, selectedItem, showMessage, rerender }) {`
+- L1776: `async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {`
+- L1840: `function sync() {`
+- L1841: `syncSessionForm(session, form);`
+- L1850: `sync();`
+- L1868: `syncFormFromItem(session, item);`
+- L1913: `generateBtn.onclick = async () => {`
+- L1914: `sync();`
+- L1927: `"This will send the current brief to the AI command backend and create a review draft inside Content Studio."`
+- L1935: `const aiResult = await executeProjectAiCommand(projectName, {`
+- L2012: `sync();`
+- L2019: `syncVersionFromForm(session);`
+- L2027: `translateBtn.onclick = async () => {`
+- L2028: `sync();`
+- L2038: `syncVersionFromForm(session);`
+- L2046: `\`This will send the current Content Studio brief to the AI command backend for ${language} adaptation.\``
+- L2054: `await executeProjectAiCommand(projectName, {`
+- L2060: `syncVersionFromForm(session);`
+- L2064: `syncVersionFromForm(session);`
+- L2073: `saveBtn.onclick = async () => {`
+- L2074: `sync();`
+- L2085: `const sendAiBtn = document.getElementById("contentSendAiBtn");`
+- L2086: `if (sendAiBtn) {`
+- L2087: `sendAiBtn.onclick = () => {`
+- L2088: `sync();`
+- L2120: `const sendMediaBtn = document.getElementById("contentSendMediaBtn");`
+- L2121: `if (sendMediaBtn) {`
+- L2122: `sendMediaBtn.onclick = async () => {`
+- L2123: `sync();`
+- L2130: `const ok = await sendHandoff({`
+- L2152: `const sendPublishingBtn = document.getElementById("contentSendPublishingBtn");`
+- L2153: `if (sendPublishingBtn) {`
+- L2154: `sendPublishingBtn.onclick = async () => {`
+- L2155: `sync();`
+- L2161: `const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);`
+- L2162: `const ok = await sendHandoff({`
+- L2167: `failMessage: "Publishing handoff kept locally because backend save is unavailable.",`
+- L2168: `successMessage: "Publishing handoff created.",`
+- L2169: `localMessage: "Publishing handoff created locally."`
+- L2174: `selectedVersion.readiness_status = "sent_to_publishing";`
+- L2176: `session.form.status = "sent_to_publishing";`
+- L2177: `await persistContentRecord({ projectName, state, session, status: "sent_to_publishing", showMessage });`
+- L2178: `navigateTo("publishing");`
+- L2194: `button.onclick = async () => {`
+- L2195: `sync();`
+- L2257: `button.onclick = async () => {`
+- L2263: `syncVersionFromForm(session);`
+- L2310: `description: "Smart content production hub for draft generation, review, and routing to Media Studio and Publishing."`
+- L2350: `syncFormFromItem(session, selectedItem);`
+- L2403: `</ul><div class="content-hint content-readiness-hint">Review these before routing for publishing or governance.</div></section>\`;`
+- L2416: `</ul><div class="content-hint content-readiness-hint">Prepare Governance Review before publishing or campaign use.</div></section>\`;`
+- L2420: `// No direct publish/approve/send labels found in action rows; all routing is review/handoff-based.`
+
+## Confirmation Signals
+- L173: `return window.confirm(message);`
+
+## Access-Key Signals
+- none
+
+## Navigation Signals
+- L1475: `<div class="empty-box">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>`
+- L1536: `route: "content-studio",`
+- L1583: `route: "content-studio",`
+- L1699: `route: "content-studio",`
+- L1829: `navigateTo,`
+- L1937: `route_target: "content-studio",`
+- L2056: `route_target: "content-studio",`
+- L2096: `routeSuggestions: []`
+- L2115: `navigateTo("ai-command");`
+- L2146: `navigateTo("media-studio");`
+- L2178: `navigateTo("publishing");`
+- L2277: `routeSuggestions: []`
+- L2295: `navigateTo("ai-command");`
+- L2304: `export const contentStudioRoute = {`
+- L2321: `navigateTo,`
+- L2331: `const rerender = () => contentStudioRoute.render({`
+- L2335: `navigateTo,`
+- L2415: `<li>Route to Governance Review if needed</li>`
+- L2454: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L19: `const CONTENT_LOCAL_DRAFTS_KEY = "mh-content-studio-local-drafts-v1";`
+- L27: `"blog-draft",`
+- L38: `"blog-draft": "Blog Draft",`
+- L45: `"draft",`
+- L79: `purpose: "Draft discoverable long-form content with search intent alignment.",`
+- L80: `bestUse: "When creating blog drafts and landing content for organic traffic.",`
+- L81: `suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."`
+- L108: `bestUse: "When drafting marketplace titles, bullets, and descriptions.",`
+- L109: `suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."`
+- L112: `id: "brand-guardian",`
+- L113: `title: "Brand Guardian",`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L116: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."`
+- L167: `detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",`
+- L170: `"Select Cancel to review the draft, evidence, and destination before continuing."`
+- L195: `function normalizeStatus(value, fallback = "draft") {`
+- L198: `if (["draft"].includes(normalized)) return "draft";`
+- L219: `if (mode === "blog-draft") return "blog";`
+- L240: `status: "draft"`
+- L244: `function readDraftMap() {`
+- L247: `const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LOCAL_DRAFTS_KEY) || "{}");`
+- L254: `function writeDraftMap(map) {`
+- L257: `window.localStorage?.setItem(CONTENT_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L261: `function loadLocalDrafts(projectName) {`
+- L262: `return asArray(readDraftMap()[projectKey(projectName)]);`
+- L265: `function saveLocalDraft(projectName, draft) {`
+- L266: `const map = readDraftMap();`
+- L269: `...asObject(draft),`
+- L270: `id: asString(draft.id || \`local-content-${Date.now()}\`),`
+- L271: `source: "Local draft",`
+- L277: `writeDraftMap(map);`
+- L334: `readinessStatus = "draft",`
+- L335: `approvalStatus = "draft",`
+- L348: `readiness_status: normalizeStatus(readinessStatus || "draft", "draft"),`
+- L349: `approval_status: asString(approvalStatus || "draft"),`
+- L362: `outputContent: firstText(raw.output_content, raw.content, raw.body, raw.draft),`
+- L366: `readinessStatus: firstText(raw.readiness_status, raw.status, "draft"),`
+- L367: `approvalStatus: firstText(raw.approval_status, "draft"),`
+- L383: `readinessStatus: firstText(seed.readinessStatus, "draft"),`
+- L384: `approvalStatus: firstText(seed.approvalStatus, "draft"),`
+- L404: `readinessStatus: session.form?.status || "draft"`
+- L452: `selected.readiness_status = normalizeStatus(session.form.status || selected.readiness_status || "draft", "draft");`
+- L463: `session.form.status = normalizeStatus(selected.readiness_status || session.form.status || "draft", "draft");`
+- L482: `outputContent: firstText(raw.draft),`
+- L486: `readinessStatus: firstText(raw.status, "draft"),`
+- L487: `approvalStatus: firstText(raw.approval_status, "draft")`
+- L496: `title: firstText(raw.title, \`${modeLabel(mode)} draft\`),`
+- L506: `draft: firstText(raw.draft, raw.body),`
+- L507: `status: normalizeStatus(raw.status, "draft"),`
+- L508: `approval_status: asString(raw.approval_status || "draft"),`
+- L515: `source: firstText(raw.source, raw.localOnly ? "Local draft" : "Backend"),`
+- L529: `draft: 5`
+- L563: `draftMessage: "",`
+- L567: `aiPromptDraft: ""`
+- L588: `brief: item.brief || item.draft || "",`
+- L590: `status: item.status || "draft"`
+- L607: `readinessStatus: "draft"`
+- L613: `session.draftMessage = "";`
+- L645: `function buildContentPayload(session, status = "draft") {`
+- L662: `draft: firstText(selected?.output_content, ""),`
+- L664: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L688: `const saved = saveLocalDraft(projectName, payload);`
+- L704: `showMessage?.("Content draft saved locally.");`
+- L709: `"Save backend content draft",`
+- L710: `\`This will save or update a Content Studio draft for ${projectName}.\``
+- L725: `showMessage?.("Content draft saved.");`
+- L728: `showMessage?.("Backend content save unavailable; local draft kept.");`
+- L775: `readinessStatus: firstText(selectedVersion.readiness_status, payload.readiness_status, "draft"),`
+- L776: `approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")`
+- L814: `const localItems = loadLocalDrafts(projectName).map((item) => normalizeContentItem(item));`
+- L825: `session.error = "Backend content data unavailable. Content Studio is running in local draft mode.";`
+- L826: `session.items = mergeItems([], loadLocalDrafts(projectName).map((item) => normalizeContentItem(item)));`
+- L850: `action: "Start a draft from the main brief",`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L857: `action: "Approve or request revision on the selected draft",`
+- L878: `why: "Higher-quality prompt context improves draft quality and handoff readiness."`
+- L912: `.content-preview-grid,`
+- L1039: `.content-preview-social,`
+- L1040: `.content-preview-email,`
+- L1041: `.content-preview-marketplace,`
+- L1042: `.content-preview-ad,`
+- L1043: `.content-preview-script,`
+- L1044: `.content-preview-blog {`
+- L1052: `.content-preview-social .headline,`
+- L1053: `.content-preview-blog .headline,`
+- L1054: `.content-preview-email .headline,`
+- L1055: `.content-preview-marketplace .headline,`
+- L1056: `.content-preview-ad .headline,`
+- L1057: `.content-preview-script .headline {`
+- L1063: `.content-preview-script .scene,`
+- L1064: `.content-preview-marketplace .bullet,`
+- L1065: `.content-preview-blog .section,`
+- L1066: `.content-preview-email .segment,`
+- L1067: `.content-preview-ad .segment {`
+- L1080: `.content-preview-grid,`
+- L1102: `<span class="card-badge neutral">${escapeHtml(formatCount(metrics.total))} drafts</span>`
+- L1105: `<div class="content-overview-item"><span>Total content drafts</span><strong>${escapeHtml(formatCount(metrics.total))}</strong></div>`
+- L1121: `["SEO", ["blog-draft"].includes(selectedItem?.mode) ? "Priority" : "Optional"],`
+- L1135: `<span class="card-badge ${statusTone(normalizeStatus(selectedItem?.status || "draft", "draft"))}">${escapeHtml(titleCase(selectedItem?.status || "draft"))}</span>`
+- L1150: `<div class="setup-kicker">Draft Queue</div>`
+- L1154: `<div class="empty-box">No drafts yet. Start from composer and save the first draft.</div>`
+- L1163: `<div class="setup-kicker">Draft Queue</div>`
+- L1192: `<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>`
+- L1194: `<span class="card-badge ${statusTone(normalizeStatus(form.status || "draft", "draft"))}">${escapeHtml(titleCase(form.status || "draft"))}</span>`
+- L1199: `<div class="content-preview-grid">`
+- L1245: `<div class="setup-field-head"><label class="setup-label" for="contentTitleInput">Draft title</label></div>`
+- L1251: `<button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>`
+- L1254: `<button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1261: `${session.draftMessage ? \`<div class="simple-banner" style="margin-top:12px;">${escapeHtml(session.draftMessage)}</div>\` : ""}`
+- L1266: `function previewPost(content, escapeHtml) {`
+- L1268: `<div class="content-preview-social">`
+- L1269: `<div class="headline">Social Preview</div>`
+- L1275: `function previewScript(content, escapeHtml) {`
+- L1281: `<div class="content-preview-script">`
+- L1282: `<div class="headline">Script Preview</div>`
+- L1290: `function previewBlog(content, escapeHtml) {`
+- L1296: `<div class="content-preview-blog">`
+- L1297: `<div class="headline">Blog Preview</div>`
+- L1305: `function previewEmail(content, escapeHtml) {`
+- L1311: `<div class="content-preview-email">`
+- L1312: `<div class="headline">Email Preview</div>`
+- L1320: `function previewMarketplace(content, escapeHtml) {`
+- L1326: `<div class="content-preview-marketplace">`
+- L1327: `<div class="headline">Marketplace Preview</div>`
+- L1335: `function previewAd(content, escapeHtml) {`
+- L1341: `<div class="content-preview-ad">`
+- L1342: `<div class="headline">Ad Preview</div>`
+- L1350: `function renderPreview(session, selectedItem, escapeHtml) {`
+- L1353: `const content = firstText(selected?.output_content, selectedItem?.draft);`
+- L1355: `let body = previewPost(content, escapeHtml);`
+- L1356: `if (["reel-script", "video-script"].includes(mode)) body = previewScript(content, escapeHtml);`
+- L1357: `if (mode === "blog-draft") body = previewBlog(content, escapeHtml);`
+- L1358: `if (mode === "email") body = previewEmail(content, escapeHtml);`
+- L1359: `if (mode === "marketplace-copy") body = previewMarketplace(content, escapeHtml);`
+- L1360: `if (mode === "ad-copy") body = previewAd(content, escapeHtml);`
+- L1363: `<section class="card content-card" id="contentPreviewPanel">`
+- L1366: `<div class="setup-kicker">Content Preview</div>`
+- L1370: `<span class="card-badge ${statusTone(normalizeStatus(selected?.readiness_status || session.form.status || "draft", "draft"))}">${escapeHtml(titleCase(selected?.readiness_status || session.form.status || "draft"))}</span>`
+- L1373: `${!clean(content) ? \`<div class="content-text-box" style="margin-top:10px;">${escapeHtml("No generated output yet. Draft is in prompt-ready state until content output is produced.")}</div>\` : ""}`
+- L1386: `<div class="setup-kicker">Draft / Versioning</div>`
+- L1404: `<div class="content-data-item"><span>Readiness status</span><strong>${escapeHtml(titleCase(firstText(selected?.readiness_status, "draft")))}</strong></div>`
+- L1405: `<div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>`
+- L1427: `<button class="btn btn-secondary" type="button" data-content-version-action="save-draft">Save Draft</button>`
+- L1441: `<h3>Specialists for fast, reusable draft quality</h3>`
+- L1454: `<button class="btn btn-secondary" type="button" data-content-agent-save="${escapeHtml(agent.id)}">Save Draft</button>`
+- L1517: `firstText(selected?.output_content, selectedItem?.draft, "none")`
+- L1523: `const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");`
+- L1524: `const contentBody = firstText(selected?.output_content, selectedItem?.draft, "");`
+- L1537: `label: firstText(selectedItem?.title, session.form.title, "Content draft")`
+- L1553: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L1569: `const readinessStatus = normalizeStatus(firstText(selected?.readiness_status, session.form.status, selectedItem?.status), "draft");`
+- L1570: `const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");`
+- L1571: `const body = firstText(selected?.output_content, selectedItem?.draft, "");`
+- L1584: `label: firstText(selectedItem?.title, session.form.title, "Content draft")`
+- L1626: `if (mode === "blog-draft") return "blog";`
+- L1630: `return "content_draft";`
+- L1681: `readiness_status: normalizeStatus(selected.readiness_status || "draft", "draft"),`
+- L1682: `approval_status: firstText(selected.approval_status, "draft"),`
+- L1700: `label: firstText(selectedItem?.title, session.form.title, "Content draft")`
+- L1743: `showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Content draft saved to Library.");`
+- L1770: `showMessage?.("Content draft saved to Library (local handoff).");`
+- L1877: `session.draftMessage = "No inbound handoff is available.";`
+- L1893: `status: normalizeStatus(handoff.readinessStatus || "draft", "draft")`
+- L1903: `approvalStatus: firstText(handoff.approvalStatus, "draft"),`
+- L1906: `session.draftMessage = "Handoff loaded into composer.";`
+- L1911: `const generateBtn = document.getElementById("contentGenerateDraftBtn");`
+- L1922: `session.draftMessage = "Draft is prompt-ready.";`
+- L1926: `"Generate draft with AI backend",`
+- L1927: `"This will send the current brief to the AI command backend and create a review draft inside Content Studio."`
+- L1929: `session.draftMessage = "AI draft generation cancelled.";`
+- L1960: `session.draftMessage = "Draft generated and queued for review.";`
+- L1970: `approvalStatus: "draft",`
+- L1973: `session.draftMessage = "No generated output returned. Draft kept as prompt-ready.";`
+- L1984: `approvalStatus: "draft",`
+- L1987: `session.draftMessage = "Generation backend unavailable. Prompt-ready state only.";`
+- L1998: `approvalStatus: "draft",`
+- L2001: `session.draftMessage = "No backend project selected. Draft is prompt-ready.";`
+- L2020: `session.draftMessage = "Brief improved for stronger draft quality.";`
+- L2039: `session.draftMessage = "Translate/adapt prepared in local mode.";`
+- L2048: `session.draftMessage = "Translate/adapt request cancelled.";`
+- L2061: `session.draftMessage = \`Translate/adapt request sent for ${language}.\`;`
+- L2065: `session.draftMessage = "Translate/adapt backend unavailable. Prompt-ready adaptation saved.";`
+- L2071: `const saveBtn = document.getElementById("contentSaveDraftBtn");`
+- L2079: `session.form.status = normalizeStatus(session.form.status || "draft", "draft");`
+- L2091: `const aiDraft = {`
+- L2095: `lastResponseTitle: firstText(selectedItem?.title, session.form.title, "Content Draft"),`
+- L2098: `setSharedAiDraft(projectName || "__default__", aiDraft);`
+- L2110: `draft_context: aiDraft,`
+- L2111: `content: buildContentPayload(session, session.form.status || "draft")`
+- L2188: `session.draftMessage = \`${titleCase(ensureVersioning(session).selectedVersionId)} selected.\`;`
+- L2211: `session.draftMessage = "Selected version approved.";`
+- L2216: `current.readiness_status = "draft";`
+- L2218: `session.form.status = "draft";`
+- L2219: `session.draftMessage = "Selected version returned to draft.";`
+- L2220: `await persistContentRecord({ projectName, state, session, status: "draft", showMessage });`
+- L2233: `approvalStatus: "draft",`
+- L2238: `session.draftMessage = "New prompt-ready version created.";`
+- L2242: `if (action === "save-draft") {`
+- L2243: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });`
+- L2244: `session.draftMessage = "Version saved as draft.";`
+- L2249: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });`
+- L2264: `session.draftMessage = \`${agent.title} prompt added.\`;`
+- L2267: `await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || "draft", "draft"), showMessage });`
+- L2272: `const aiDraft = {`
+- L2279: `setSharedAiDraft(projectName || "__default__", aiDraft);`
+- L2290: `draft_context: aiDraft,`
+- L2291: `content: buildContentPayload(session, session.form.status || "draft")`
+- L2310: `description: "Smart content production hub for draft generation, review, and routing to Media Studio and Publishing."`
+- L2345: `session.items = loadLocalDrafts(projectName).map((item) => normalizeContentItem(item));`
+- L2437: `${renderPreview(session, selectedItem, escapeHtml)}`
+
+## Risky Terms
+- L1: `import {`
+- L2: `createProjectApproval,`
+- L3: `createProjectHandoff,`
+- L4: `createProjectTask,`
+- L5: `decideProjectApproval,`
+- L6: `executeProjectAiCommand,`
+- L8: `listProjectApprovals,`
+- L11: `listProjectHandoffs,`
+- L12: `listProjectTasks,`
+- L13: `saveProjectContentItem`
+- L15: `import { getAssetNextAction, renderAssetDependencyRows } from "../asset-library.js";`
+- L16: `import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from "../shared-context.js";`
+- L20: `const CONTENT_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L47: `"needs_review",`
+- L48: `"approved",`
+- L50: `"sent_to_publishing"`
+- L56: `reviewRole: "compliance_reviewer",`
+- L58: `handoffRole: "publisher"`
+- L67: `suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."`
+- L95: `suggestedPrompt: "Act as Email Writer. Generate subject, preheader, and body with clear structure, benefit-led copy, and CTA clarity."`
+- L114: `purpose: "Validate tone, claims, and compliance before downstream handoffs.",`
+- L115: `bestUse: "Before approval or sending drafts to Media Studio or Publishing.",`
+- L116: `suggestedPrompt: "Act as Brand Guardian. Audit this draft for brand tone, claim risk, and handoff readiness."`
+- L167: `detail || "This action may create or update backend Content Studio records, AI drafts, or handoffs.",`
+- L169: `"Authority: This does not publish, send externally, or approve anything automatically.",`
+- L170: `"Select Cancel to review the draft, evidence, and destination before continuing."`
+- L200: `if (["needs_review", "needs review", "review", "pending_approval"].includes(normalized)) return "needs_review";`
+- L201: `if (["approved", "complete", "completed"].includes(normalized)) return "approved";`
+- L202: `if (["sent_to_media", "sent to media", "media_handoff", "media handoff"].includes(normalized)) return "sent_to_media";`
+- L203: `if (["sent_to_publishing", "sent to publishing", "publishing_handoff", "publishing handoff"].includes(normalized)) return "sent_to_publishing";`
+- L208: `if (["approved", "sent_to_media", "sent_to_publishing"].includes(status)) return "success";`
+- L209: `if (["prompt_ready", "needs_review"].includes(status)) return "warning";`
+- L265: `function saveLocalDraft(projectName, draft) {`
+- L281: `function readContentLibraryMap() {`
+- L284: `const parsed = JSON.parse(window.localStorage?.getItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L291: `function writeContentLibraryMap(map) {`
+- L294: `window.localStorage?.setItem(CONTENT_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));`
+- L298: `function loadLocalLibraryAssets(projectName) {`
+- L299: `const map = readContentLibraryMap();`
+- L303: `function upsertLocalLibraryAsset(projectName, asset) {`
+- L304: `const map = readContentLibraryMap();`
+- L308: `id: asString(asset.id || \`content-library-${Date.now()}\`),`
+- L318: `writeContentLibraryMap(map);`
+- L335: `approvalStatus = "draft",`
+- L337: `libraryAssetRef = null,`
+- L349: `approval_status: asString(approvalStatus || "draft"),`
+- L351: `library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),`
+- L367: `approvalStatus: firstText(raw.approval_status, "draft"),`
+- L369: `libraryAssetRef: raw.library_asset_ref || null,`
+- L384: `approvalStatus: firstText(seed.approvalStatus, "draft"),`
+- L444: `function syncVersionFromForm(session) {`
+- L487: `approvalStatus: firstText(raw.approval_status, "draft")`
+- L508: `approval_status: asString(raw.approval_status || "draft"),`
+- L509: `destination: firstText(raw.destination, raw.publishing_destination),`
+- L511: `linked_tasks: asArray(raw.linked_tasks),`
+- L512: `linked_approvals: asArray(raw.linked_approvals),`
+- L513: `linked_handoffs: asArray(raw.linked_handoffs),`
+- L524: `needs_review: 0,`
+- L525: `approved: 1,`
+- L527: `sent_to_publishing: 3,`
+- L553: `tasks: [],`
+- L554: `approvals: [],`
+- L555: `handoffs: [],`
+- L564: `loadedHandoffId: "",`
+- L577: `function syncFormFromItem(session, item) {`
+- L616: `function syncSessionForm(session, form) {`
+- L622: `syncVersionFromForm(session);`
+- L625: `function validateComposer(session, intent = "save") {`
+- L635: `if (!clean(form.brief) && intent !== "load-handoff") errors.brief = "Main prompt / brief is required.";`
+- L664: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L667: `review_role: CONTENT_ROLE_DEFAULTS.reviewRole,`
+- L678: `approval_status: version.approval_status,`
+- L680: `library_asset_ref: version.library_asset_ref || null,`
+- L687: `function syncItemsWithLocalSave(session, projectName, payload) {`
+- L688: `const saved = saveLocalDraft(projectName, payload);`
+- L689: `const normalized = normalizeContentItem(saved);`
+- L699: `async function persistContentRecord({ projectName, state, session, status, showMessage }) {`
+- L701: `const localItem = syncItemsWithLocalSave(session, projectName, payload);`
+- L704: `showMessage?.("Content draft saved locally.");`
+- L709: `"Save backend content draft",`
+- L710: `\`This will save or update a Content Studio draft for ${projectName}.\``
+- L712: `showMessage?.("Backend content save cancelled.");`
+- L717: `const result = await saveProjectContentItem(projectName, payload);`
+- L725: `showMessage?.("Content draft saved.");`
+- L728: `showMessage?.("Backend content save unavailable; local draft kept.");`
+- L753: `"Output target: product-visible, publishing-safe, and campaign-consistent creative."`
+- L757: `function buildInboundSummary(handoff) {`
+- L758: `const payload = asObject(handoff?.payload);`
+- L762: `id: asString(handoff?.id || payload.id || payload.workflow_id || payload.content_item_id),`
+- L763: `sourcePage: asString(handoff?.source_page || "workflows"),`
+- L776: `approvalStatus: firstText(selectedVersion.approval_status, payload.approval_status, "draft")`
+- L780: `function getInboundHandoff(projectName, session) {`
+- L783: `getSharedHandoff(projectName, "content-studio", operations, "workflows") ||`
+- L784: `getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||`
+- L785: `getSharedHandoff(projectName, "content-studio", operations)`
+- L789: `function applyInboundHandoff(projectName, session) {`
+- L790: `const handoff = getInboundHandoff(projectName, session);`
+- L791: `if (!handoff) return;`
+- L792: `const summary = buildInboundSummary(handoff);`
+- L793: `if (!summary.id || summary.id === session.loadedHandoffId) return;`
+- L794: `session.loadedHandoffId = summary.id;`
+- L797: `async function loadWorkspace(projectName, state, session, rerender) {`
+- L804: `const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([`
+- L806: `listProjectTasks(projectName, 120),`
+- L807: `listProjectApprovals(projectName, 120),`
+- L808: `listProjectHandoffs(projectName, { limit: 120 }),`
+- L816: `session.tasks = asArray(tasks.items);`
+- L817: `session.approvals = asArray(approvals.items);`
+- L818: `session.handoffs = asArray(handoffs.items);`
+- L822: `applyInboundHandoff(projectName, session);`
+- L828: `applyInboundHandoff(projectName, session);`
+- L840: `needsReview: items.filter((item) => item.status === "needs_review").length,`
+- L841: `approved: items.filter((item) => item.status === "approved").length,`
+- L843: `sentPublishing: items.filter((item) => item.status === "sent_to_publishing").length`
+- L851: `why: "A clear first draft unlocks versioning, review, and downstream media/publishing handoffs."`
+- L855: `if (selectedItem.status === "needs_review") {`
+- L857: `action: "Approve or request revision on the selected draft",`
+- L858: `why: "Review decisions reduce production delay and move content into executable lanes."`
+- L862: `if (selectedItem.status === "approved") {`
+- L864: `action: "Send approved content to Media Studio",`
+- L865: `why: "Approved copy can now drive structured media generation with fewer revisions."`
+- L869: `if (metrics.sentMedia + metrics.sentPublishing > 0) {`
+- L877: `action: "Improve brief and generate next version",`
+- L878: `why: "Higher-quality prompt context improves draft quality and handoff readiness."`
+- L912: `.content-preview-grid,`
+- L914: `.content-handoff-grid {`
+- L1039: `.content-preview-social,`
+- L1040: `.content-preview-email,`
+- L1041: `.content-preview-marketplace,`
+- L1042: `.content-preview-ad,`
+- L1043: `.content-preview-script,`
+- L1044: `.content-preview-blog {`
+- L1052: `.content-preview-social .headline,`
+- L1053: `.content-preview-blog .headline,`
+- L1054: `.content-preview-email .headline,`
+- L1055: `.content-preview-marketplace .headline,`
+- L1056: `.content-preview-ad .headline,`
+- L1057: `.content-preview-script .headline {`
+- L1063: `.content-preview-script .scene,`
+- L1064: `.content-preview-marketplace .bullet,`
+- L1065: `.content-preview-blog .section,`
+- L1066: `.content-preview-email .segment,`
+- L1067: `.content-preview-ad .segment {`
+- L1080: `.content-preview-grid,`
+- L1082: `.content-handoff-grid {`
+- L1107: `<div class="content-overview-item"><span>Needs review</span><strong>${escapeHtml(formatCount(metrics.needsReview))}</strong></div>`
+- L1108: `<div class="content-overview-item"><span>Approved content</span><strong>${escapeHtml(formatCount(metrics.approved))}</strong></div>`
+- L1110: `<div class="content-overview-item"><span>Sent to Publishing</span><strong>${escapeHtml(formatCount(metrics.sentPublishing))}</strong></div>`
+- L1119: `["Media handoff", selectedItem?.status === "approved" || selectedItem?.status === "sent_to_media" ? "Ready" : "Prepare"],`
+- L1120: `["Publishing", selectedItem?.status === "sent_to_publishing" ? "Sent" : "Pending"],`
+- L1151: `<h3>Saved content records</h3>`
+- L1154: `<div class="empty-box">No drafts yet. Start from composer and save the first draft.</div>`
+- L1164: `<h3>Saved content records</h3>`
+- L1181: `function renderComposer(session, state, handoff, escapeHtml) {`
+- L1192: `<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>`
+- L1199: `<div class="content-preview-grid">`
+- L1251: `<button id="contentGenerateDraftBtn" class="btn btn-primary" type="button">Generate Draft</button>`
+- L1254: `<button id="contentSaveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>`
+- L1255: `<button id="contentSendMediaBtn" class="btn btn-secondary" type="button">Send Design Brief to Media Studio</button>`
+- L1256: `<button id="contentSendPublishingBtn" class="btn btn-secondary" type="button">Send to Publishing</button>`
+- L1257: `<button id="contentSendAiBtn" class="btn btn-secondary" type="button">Open AI: Send Context to AI Workspace</button>`
+- L1260: `${handoff ? \`<div class="simple-banner" style="margin-top:12px;">Inbound handoff from ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))} is available below.</div>\` : ""}`
+- L1266: `function previewPost(content, escapeHtml) {`
+- L1268: `<div class="content-preview-social">`
+- L1269: `<div class="headline">Social Preview</div>`
+- L1275: `function previewScript(content, escapeHtml) {`
+- L1281: `<div class="content-preview-script">`
+- L1282: `<div class="headline">Script Preview</div>`
+- L1290: `function previewBlog(content, escapeHtml) {`
+- L1296: `<div class="content-preview-blog">`
+- L1297: `<div class="headline">Blog Preview</div>`
+- L1305: `function previewEmail(content, escapeHtml) {`
+- L1311: `<div class="content-preview-email">`
+- L1312: `<div class="headline">Email Preview</div>`
+- L1320: `function previewMarketplace(content, escapeHtml) {`
+- L1326: `<div class="content-preview-marketplace">`
+- L1327: `<div class="headline">Marketplace Preview</div>`
+- L1335: `function previewAd(content, escapeHtml) {`
+- L1341: `<div class="content-preview-ad">`
+- L1342: `<div class="headline">Ad Preview</div>`
+- L1350: `function renderPreview(session, selectedItem, escapeHtml) {`
+- L1355: `let body = previewPost(content, escapeHtml);`
+- L1356: `if (["reel-script", "video-script"].includes(mode)) body = previewScript(content, escapeHtml);`
+- L1357: `if (mode === "blog-draft") body = previewBlog(content, escapeHtml);`
+- L1358: `if (mode === "email") body = previewEmail(content, escapeHtml);`
+- L1359: `if (mode === "marketplace-copy") body = previewMarketplace(content, escapeHtml);`
+- L1360: `if (mode === "ad-copy") body = previewAd(content, escapeHtml);`
+- L1363: `<section class="card content-card" id="contentPreviewPanel">`
+- L1366: `<div class="setup-kicker">Content Preview</div>`
+- L1373: `${!clean(content) ? \`<div class="content-text-box" style="margin-top:10px;">${escapeHtml("No generated output yet. Draft is in prompt-ready state until content output is produced.")}</div>\` : ""}`
+- L1387: `<h3>Version controls and review actions</h3>`
+- L1400: `<div class="content-data-item"><span>Content output</span><strong>${escapeHtml(selected?.output_content ? "Generated" : "Not generated")}</strong></div>`
+- L1405: `<div class="content-data-item"><span>Approval status</span><strong>${escapeHtml(titleCase(firstText(selected?.approval_status, "draft")))}</strong></div>`
+- L1424: `<button class="btn btn-secondary" type="button" data-content-version-action="approve">Approve</button>`
+- L1426: `<button class="btn btn-secondary" type="button" data-content-version-action="regenerate">Regenerate</button>`
+- L1427: `<button class="btn btn-secondary" type="button" data-content-version-action="save-draft">Save Draft</button>`
+- L1428: `<button class="btn btn-secondary" type="button" data-content-version-action="save-library">Save to Library</button>`
+- L1454: `<button class="btn btn-secondary" type="button" data-content-agent-save="${escapeHtml(agent.id)}">Save Draft</button>`
+- L1455: `<button class="btn btn-secondary" type="button" data-content-agent-ai="${escapeHtml(agent.id)}">Send to AI Workspace</button>`
+- L1464: `function renderInboundHandoff(handoff, session, escapeHtml) {`
+- L1465: `if (!handoff) {`
+- L1467: `<section class="card content-card" id="contentHandoffPanel">`
+- L1470: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1471: `<h3>No inbound handoff available</h3>`
+- L1481: `<section class="card content-card" id="contentHandoffPanel">`
+- L1484: `<div class="setup-kicker">Workflow / AI Handoff</div>`
+- L1485: `<h3>${escapeHtml(firstText(handoff.title, "Inbound content context"))}</h3>`
+- L1486: `<p class="content-copy">Source: ${escapeHtml(titleCase(handoff.sourcePage || "workflow"))}</p>`
+- L1490: `<div class="content-handoff-grid">`
+- L1491: `<div class="content-data-item"><span>Project</span><strong>${escapeHtml(firstText(handoff.project, "-"))}</strong></div>`
+- L1492: `<div class="content-data-item"><span>Campaign</span><strong>${escapeHtml(firstText(handoff.campaign, "-"))}</strong></div>`
+- L1493: `<div class="content-data-item"><span>Channel</span><strong>${escapeHtml(firstText(handoff.channel, "-"))}</strong></div>`
+- L1494: `<div class="content-data-item"><span>Type</span><strong>${escapeHtml(modeLabel(firstText(handoff.mode, "social-post")))}</strong></div>`
+- L1496: `<div class="content-text-box" style="margin-top:10px;">${escapeHtml(firstText(handoff.brief, handoff.contentBody, "No handoff brief text."))}</div>`
+- L1498: `<button id="contentLoadHandoffBtn" class="btn btn-secondary" type="button">Load into Composer</button>`
+- L1521: `function buildMediaHandoff(projectName, session, selectedItem) {`
+- L1553: `approval_status: firstText(selected?.approval_status, "draft"),`
+- L1567: `function buildPublishingHandoff(projectName, session, selectedItem) {`
+- L1570: `const approvalStatus = firstText(selected?.approval_status, selectedItem?.approval_status, "draft");`
+- L1575: `destination_page: "publishing",`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing action paths into:
+
+1. Local draft only
+2. Backend content item save
+3. AI command execution
+4. Prompt/content preparation only
+5. Approval creation
+6. Approval decision
+7. Task creation
+8. Library handoff
+9. Publishing handoff
+10. Media/Campaign handoff
+11. AI Command handoff
+12. Navigation only
+13. Unknown / needs deeper inspection
+
+## Decision Rule
+- If AI/backend execution can run without explicit confirmation or access-key guard clarity, create a narrow patch.
+- If approval decision can happen without explicit confirmation, create a narrow patch.
+- If Library/Publishing/Media handoff creates backend records without confirmation, create a narrow patch.
+- If local draft save is browser/session-only, no destructive confirmation is required.
+- Do not redesign Content Studio in this pass.

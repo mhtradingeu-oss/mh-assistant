@@ -2205,6 +2205,12 @@ function bindPage({
       }
 
       if (action === "approve") {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Confirm content approval mark",
+          "This will mark the selected content version as approved/review-ready and may save that readiness state to the backend."
+        );
+        if (!confirmed) return;
+
         current.readiness_status = "approved";
         current.approval_status = "approved";
         session.form.status = "approved";
@@ -2213,6 +2219,12 @@ function bindPage({
       }
 
       if (action === "reject") {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Confirm content revision decision",
+          "This will return the selected content version to draft/revision and may save that readiness state to the backend."
+        );
+        if (!confirmed) return;
+
         current.readiness_status = "draft";
         current.approval_status = "rejected";
         session.form.status = "draft";
@@ -2221,6 +2233,12 @@ function bindPage({
       }
 
       if (action === "regenerate") {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Confirm content version regeneration",
+          "This will create a new prompt-ready version from the selected content version and may save it to the backend."
+        );
+        if (!confirmed) return;
+
         const nextPrompt = `${clean(current.prompt || session.form.brief)}\n\nRegenerate with stronger opening and clearer CTA while preserving tone.`;
         appendVersion(session, {
           mode: current.mode,
@@ -2240,6 +2258,12 @@ function bindPage({
       }
 
       if (action === "save-draft") {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Confirm content draft save",
+          "This will save the selected content version as a draft. If a backend project is selected, it may update the backend content record."
+        );
+        if (!confirmed) return;
+
         await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || current.readiness_status || "draft", "draft"), showMessage });
         session.draftMessage = "Version saved as draft.";
       }
@@ -2264,6 +2288,12 @@ function bindPage({
       session.draftMessage = `${agent.title} prompt added.`;
 
       if (button.hasAttribute("data-content-agent-save")) {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Confirm agent draft save",
+          "This will save the agent-assisted content draft. If a backend project is selected, it may update the backend content record."
+        );
+        if (!confirmed) return;
+
         await persistContentRecord({ projectName, state, session, status: normalizeStatus(session.form.status || "draft", "draft"), showMessage });
       }
 
