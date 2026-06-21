@@ -435,6 +435,21 @@ function applyAiCampaignHandoff(projectName, operations, session) {
   return true;
 }
 
+function confirmCampaignStudioAuthorityAction(action, detail = "") {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+
+  const message = [
+    `Confirm Campaign Studio action: ${action}`,
+    "",
+    detail || "This action may create or update backend campaign records or route handoffs.",
+    "",
+    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+    "Select Cancel to review the campaign plan, evidence, and destination before continuing."
+  ].join("\n");
+
+  return window.confirm(message);
+}
+
 function buildCampaignRecordPayload(projectName, session) {
   const values = asObject(session.values);
   const timeline = [asString(values.startDate), asString(values.endDate)].filter(Boolean).join(" to ");
@@ -489,6 +504,14 @@ function persistCampaignRouteHandoff({ projectName, session, destinationPage, cr
   };
 
   setSharedHandoff(projectName, destinationPage, handoff);
+
+  if (!confirmCampaignStudioAuthorityAction(
+    "Create campaign route handoff",
+    `This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+  )) {
+    return;
+  }
+
   createProjectHandoff?.(projectName, handoff).catch((error) => {
     console.warn("Failed to persist campaign route handoff:", error.message);
   });
@@ -505,17 +528,13 @@ function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) 
     clearTimeout(existing);
   }
 
-  const timer = setTimeout(async () => {
-    try {
-      const result = await saveProjectCampaign(projectName, buildCampaignRecordPayload(projectName, session));
-      const campaign = result?.campaign || null;
-      if (campaign?.id) {
-        session.recordId = campaign.id;
-        setSharedCampaignRecord(projectName, campaign);
-      }
-    } catch (error) {
-      console.warn("Failed to persist campaign draft:", error.message);
-    }
+  const timer = setTimeout(() => {
+    const draft = {
+      ...buildCampaignRecordPayload(projectName, session),
+      local_only: true,
+      autosave_note: "Campaign Studio autosave is local/shared-state only. Use Save campaign draft or Save campaign plan for backend persistence."
+    };
+    setSharedCampaignRecord(projectName, draft);
   }, 250);
 
   campaignSaveTimers.set(key, timer);
@@ -1284,6 +1303,15 @@ function bindCampaignStudio({
   if (saveBtn) {
     saveBtn.onclick = async () => {
       syncCampaignStudioBridge(projectName, session.values);
+
+      if (!confirmCampaignStudioAuthorityAction(
+        "Save backend campaign draft",
+        `This will save or update the Campaign Studio draft for ${projectName}.`
+      )) {
+        showMessage?.("Campaign draft save cancelled.");
+        return;
+      }
+
       try {
         const result = await saveProjectCampaign?.(projectName, buildCampaignRecordPayload(projectName, session));
         if (result?.campaign?.id) {
@@ -1301,6 +1329,15 @@ function bindCampaignStudio({
   if (buildBtn) {
     buildBtn.onclick = async () => {
       syncCampaignStudioBridge(projectName, session.values);
+
+      if (!confirmCampaignStudioAuthorityAction(
+        "Save backend campaign plan",
+        `This will save or update the Campaign Studio plan for ${projectName}.`
+      )) {
+        showMessage?.("Campaign plan save cancelled.");
+        return;
+      }
+
       try {
         const result = await saveProjectCampaign?.(projectName, {
           ...buildCampaignRecordPayload(projectName, session),
@@ -1336,6 +1373,14 @@ function bindCampaignStudio({
         },
         status: "available"
       });
+      if (!confirmCampaignStudioAuthorityAction(
+        "Create AI Command campaign handoff",
+        "This will create a backend handoff from Campaign Studio to AI Command for review and planning support."
+      )) {
+        showMessage?.("AI Command handoff cancelled.");
+        return;
+      }
+
       createProjectHandoff?.(projectName, {
         source_page: "campaign-studio",
         destination_page: "ai-command",
