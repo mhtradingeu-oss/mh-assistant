@@ -1,0 +1,2751 @@
+# T89 — AI Command Core Surface Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/ai-command.js`.
+
+## Why AI Command Is Critical
+AI Command is the central command surface of MH-OS. It may execute AI commands, prepare prompts, route work to teams, create handoffs, create tasks, request approvals, surface governance decisions, and connect multiple operating surfaces.
+
+Because T88 ranked AI Command as the highest remaining open risk, this page must be audited before any further UI improvement or smart-app finalization work.
+
+## File Summary
+- File: `public/control-center/pages/ai-command.js`
+- Lines: 6183
+- Imports: 6
+- Render writes: 1
+- Event bindings: 39
+- AI execution signals: 1298
+- Backend/API signals: 513
+- Command send/submit signals: 345
+- Approval/governance signals: 576
+- Handoff signals: 179
+- Task signals: 150
+- Save/storage/history signals: 399
+- Destructive/execution signals: 283
+- Confirmation signals: 0
+- Access-key/credential signals: 5
+- Navigation signals: 195
+- Disabled/read-only/draft/guard signals: 654
+- Risky terms: 1046
+
+## Initial Risk Notes
+- AI Command contains heavy AI execution signals. Exact command submission paths must classify real backend execution vs prompt preparation.
+- AI Command contains backend API/handoff/task/approval signals. Exact action paths must classify mutations and confirmation coverage.
+- AI Command contains approval/governance signals. Approval creation/decision paths must be guarded.
+- AI Command contains handoff signals. Backend handoff creation must be confirmed or clearly handoff-only.
+- AI Command contains task signals. Backend task creation must be confirmed.
+- No confirmation dialogs found in AI Command. This is high risk unless mutations are delegated to guarded helper modules.
+
+## Imports
+- L1: `import {`
+- L8: `import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";`
+- L10: `import {`
+- L16: `import {`
+- L22: `import {`
+- L26: `import {`
+
+## Render Writes
+- L5296: `root.innerHTML = renderAiCommandChatFirstShell({`
+
+## Event Bindings
+- L2080: `weak ? \`Move ${extractTopMessage(weak)} into a rewrite workflow.\` : "Audit current content for posts not converting attention to clicks.",`
+- L2104: `topQuery ? \`Top query: ${extractTopMessage(topQuery)} with ${formatCompactNumber(topQuery.clicks)} clicks.\` : "No top query data yet.",`
+- L2105: `lowCtr ? \`CTR opportunity: ${extractTopMessage(lowCtr)} has visibility but weak click-through.\` : "No low-CTR list yet.",`
+- L2152: `"Tie paid decisions to conversion and revenue signal — not just clicks."`
+- L3172: `<span style="font-size:11px;color:var(--color-text-2);">${session.history.length} logged · click to restore</span>`
+- L5343: `sessionSelect.onchange = () => {`
+- L5369: `newSessionBtn.onclick = () => {`
+- L5405: `settingsBtn.onclick = () => {`
+- L5412: `btn.onclick = () => {`
+- L5425: `btn.onclick = () => {`
+- L5436: `btn.onclick = () => {`
+- L5461: `btn.onclick = () => {`
+- L5472: `btn.onclick = () => {`
+- L5484: `btn.onclick = () => {`
+- L5509: `input.oninput = () => {`
+- L5515: `input.onkeydown = (event) => {`
+- L5526: `sendBtn.click?.();`
+- L5533: `voiceBtn.onclick = () => {`
+- L5573: `askBtn.onclick = async () => {`
+- L5753: `prepareBtn.onclick = () => {`
+- L5774: `draftTaskBtn.onclick = () => {`
+- L5797: `draftWorkflowBtn.onclick = () => {`
+- L5821: `handoffBtn.onclick = () => {`
+- L5842: `btn.onclick = () => {`
+- L5884: `saveBtn.onclick = () => {`
+- L5895: `clearBtn.onclick = () => {`
+- L5913: `responseContinueBtn.onclick = () => {`
+- L5921: `responseCopyBtn.onclick = async () => {`
+- L5939: `responseUseBtn.onclick = () => {`
+- L5952: `responseSaveBtn.onclick = () => {`
+- L5967: `responseConvertBtn.onclick = () => {`
+- L5998: `responseSendBtn.onclick = () => {`
+- L6033: `responseReadBtn.onclick = () => {`
+- L6049: `previewCopyBtn.onclick = async () => {`
+- L6073: `previewUseBtn.onclick = () => {`
+- L6092: `previewSendBtn.onclick = () => {`
+- L6128: `previewSaveBtn.onclick = () => {`
+- L6143: `previewReadBtn.onclick = () => {`
+- L6162: `previewClearBtn.onclick = () => {`
+
+## AI Execution Signals
+- L2: `bindAiToolDock,`
+- L3: `getAiToolDockTools,`
+- L5: `openAiToolDrawerFromMetadata,`
+- L6: `renderAiToolDrawerShell`
+- L7: `} from "./ai-command/tool-dock.js";`
+- L8: `import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";`
+- L18: `setSharedAiDraft,`
+- L27: `executeProjectAiChat,`
+- L28: `executeProjectAiGuidance`
+- L31: `//  AI TEAM DEFINITIONS`
+- L39: `summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",`
+- L40: `routeHint: "campaign-studio"`
+- L46: `summary: "Captions, hooks, scripts, emails, and landing page copy.",`
+- L74: `summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",`
+- L88: `summary: "Claims review, approvals, safety language, and governance checks.",`
+- L117: `campaign: "strategist",`
+- L137: `//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER`
+- L146: `summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",`
+- L147: `placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",`
+- L148: `canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L150: `destinations: ["Campaign Studio", "Workflows", "AI Command"],`
+- L159: `summary: "Captions, hooks, scripts, emails, and landing page copy.",`
+- L160: `placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L162: `cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],`
+- L163: `destinations: ["Content Studio", "Publishing", "AI Command"],`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L176: `destinations: ["Asset Library", "Content Studio", "AI Command"],`
+- L188: `cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],`
+- L202: `destinations: ["Publishing", "Workflows", "AI Command"],`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L209: `position: "Paid Growth Lead",`
+- L211: `summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L215: `destinations: ["Ads Manager", "Integrations", "Campaign Studio"],`
+- L235: `position: "Claims and Governance Lead",`
+- L237: `summary: "Claims review, approval safety, publishing risk, and governance notes.",`
+- L238: `placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",`
+- L239: `canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L254: `destinations: ["Workflows", "Operations Centers", "AI Command"],`
+- L286: `// Role-specific suggested prompt chips (prefill only, no auto-execute)`
+- L287: `const SPECIALIST_SUGGESTED_PROMPTS = {`
+- L290: `{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },`
+- L292: `{ label: "Suggest the next campaign move", sub: "Based on current project state" }`
+- L295: `{ label: "Draft campaign captions", sub: "For the active campaign" },`
+- L301: `{ label: "Write a creative brief", sub: "For the next campaign visual" },`
+- L303: `{ label: "Map format requirements", sub: "By platform and campaign phase" },`
+- L307: `{ label: "Write a reel script", sub: "For the current campaign" },`
+- L309: `{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },`
+- L319: `{ label: "Draft ad concepts", sub: "For the current campaign" },`
+- L322: `{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }`
+- L331: `{ label: "Check claims for approval", sub: "Review all marketing claims" },`
+- L339: `{ label: "Review execution health", sub: "Check blockers and failed jobs" },`
+- L356: `// Full Team mode suggested prompts`
+- L357: `const TEAM_SUGGESTED_PROMPTS = [`
+- L358: `{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },`
+- L366: `const AI_ROOM_FLOW_STEPS = [`
+- L371: `{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },`
+- L375: `const AI_ROOM_OUTPUT_TABS = [`
+- L383: `const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];`
+- L384: `const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];`
+- L386: `const AI_ROOM_ROLE_INITIALS = {`
+- L400: `const AI_ROOM_BACKEND_ROLE_ALIASES = {`
+- L406: `const AI_ROOM_PLANNED_SPECIALISTS = [`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L441: `{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L465: `{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },`
+- L476: `{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },`
+- L490: `{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },`
+- L491: `{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },`
+- L492: `{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },`
+- L494: `{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L511: `// 4 quick-action prompts shown in the composer`
+- L513: `{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },`
+- L514: `{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },`
+- L515: `{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },`
+- L519: `const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";`
+- L520: `const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";`
+- L525: `{ id: "campaign", label: "Campaign" },`
+- L536: `{ id: "campaign", label: "Campaign" },`
+- L543: `"Campaign",`
+- L549: `const AGENT_CARDS = [`
+- L555: `suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."`
+- L561: `bestUse: "When campaigns need content batches fast.",`
+- L562: `suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."`
+- L569: `suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."`
+- L576: `suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."`
+- L581: `purpose: "Optimize paid opportunities, creative testing, and budget decisions.",`
+- L582: `bestUse: "When preparing or fixing paid performance.",`
+- L583: `suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."`
+- L590: `suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."`
+- L597: `suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."`
+- L601: `name: "Operations Assistant",`
+- L604: `suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."`
+- L608: `const aiSessions = new Map();`
+- L609: `const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";`
+- L610: `const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;`
+- L611: `let aiInboundHandoffCounter = 0;`
+- L613: `let aiCommandBridgeRegistered = false;`
+- L614: `let aiAutoModeUnsubscribe = null;`
+- L615: `const aiAutomationState = {`
+- L628: `function detectSpecialistFromBridgePrompt(prompt) {`
+- L629: `const text = asString(prompt);`
+- L649: `const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");`
+- L652: `id: \`auto-generate-${Date.now()}\`,`
+- L653: `type: "generate_prompt",`
+- L654: `targetPage: "ai-command",`
+- L655: `action: "Generate prompt from AI command",`
+- L657: `prompt: command,`
+- L658: `title: "AI command auto plan"`
+- L666: `action: "Prepare workflow from AI command",`
+- L668: `prompt: command,`
+- L669: `reason: "AI command prepared for workflow execution."`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L682: `prompt: command,`
+- L692: `function detectSpecialistFromBridgePrompt(prompt) {`
+- L693: `const text = asString(prompt);`
+- L743: `const detail = humanizeValue(`
+- L754: `if (title && detail && title !== detail) return \`${title}: ${detail}\`;`
+- L755: `if (title || detail) return title || detail;`
+- L772: `campaign: asString(context.campaign || "active campaign") || "active campaign"`
+- L775: `return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");`
+- L779: `function normalizeAiComposerPrompt(value) {`
+- L788: `"Build a launch campaign for:",`
+- L789: `"Generate content for:",`
+- L801: `// If the composer contains a chain of quick actions, keep only the latest action.`
+- L823: `function setAiComposerValue(session, input, value) {`
+- L824: `const cleanValue = normalizeAiComposerPrompt(value);`
+- L865: `function getWorkspaceLanguagePlan(aiContext = {}) {`
+- L866: `const overview = asObject(aiContext.overview);`
+- L867: `const rawMarket = asString(aiContext.market || overview.market || "").trim();`
+- L926: `return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);`
+- L935: `if (!aiSessions.has(key)) {`
+- L936: `aiSessions.set(key, {`
+- L981: `return aiSessions.get(key);`
+- L987: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";`
+- L998: `window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L1022: `if (localDraft.prompt) {`
+- L1023: `session.draftMessage = asString(localDraft.prompt);`
+- L1030: `if (localDraft.prompt || localDraft.updatedAt) {`
+- L1038: `prompt: session.draftMessage,`
+- L1050: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";`
+- L1061: `window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));`
+- L1082: `function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {`
+- L1083: `if (typeof executeProjectAiGuidanceFn !== "function") {`
+- L1085: `available: false,`
+- L1086: `reason: "AI response guidance bridge is not connected yet (API function unavailable)."`
+- L1091: `available: true,`
+- L1096: `function readAiChatSessionsMap() {`
+- L1099: `const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";`
+- L1107: `function writeAiChatSessionsMap(map) {`
+- L1110: `window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));`
+- L1114: `function getAiChatSessions(projectName) {`
+- L1116: `return asArray(readAiChatSessionsMap()[key]).slice(0, 20);`
+- L1119: `function saveAiChatSession(projectName, session, options = {}) {`
+- L1126: `const map = readAiChatSessionsMap();`
+- L1130: `const titleSeed = asString(options.title || firstUser?.content || responses[0]?.prompt || "AI Team session").trim();`
+- L1134: `title: titleSeed.slice(0, 80) || "AI Team session",`
+- L1146: `writeAiChatSessionsMap(map);`
+- L1154: `function loadAiChatSessionIntoState(projectName, session, sessionId) {`
+- L1155: `const record = getAiChatSessions(projectName).find((item) => asString(item.id) === asString(sessionId));`
+- L1172: `session.chatSessions = getAiChatSessions(projectName);`
+- L1176: `function refreshAiChatSessions(projectName, session) {`
+- L1177: `session.chatSessions = getAiChatSessions(projectName);`
+- L1182: `function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {`
+- L1183: `const cleanPrompt = asString(prompt).trim();`
+- L1186: `const safeMode = asString(modeLabel || "Solo Specialist").trim();`
+- L1207: `\`Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.\`,`
+- L1212: `"Never claim actions were executed.",`
+- L1213: `"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",`
+- L1217: `cleanPrompt`
+- L1221: `function extractGeneratedResponseText(response = {}) {`
+- L1260: `const rawId = getAiRoomRoleId(specialistId || "operations");`
+- L1263: `if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";`
+- L1278: `function resolveAiResponseOutputRoute(session, response = {}) {`
+- L1280: `const specialistId = getAiRoomRoleId(session?.modeId || "operations");`
+- L1289: `response.prompt`
+- L1305: `const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);`
+- L1308: `const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);`
+- L1310: `const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);`
+- L1322: `if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {`
+- L1347: `if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {`
+- L1348: `outputType = "campaign";`
+- L1351: `destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")`
+- L1362: `"campaign-studio": "Campaign Studio",`
+- L1378: `function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {`
+- L1379: `const cleanPrompt = asString(prompt).trim();`
+- L1380: `const promptSnippet = cleanPrompt || \`Project request for ${projectName || "current project"}\`;`
+- L1393: `generatedAt: nowIso(),`
+- L1394: `sourcePrompt: promptSnippet,`
+- L1411: `"Route execution draft to Campaign Studio or Workflows"`
+- L1419: `summary: \`Priority guidance prepared from: ${promptSnippet}\`,`
+- L1431: `title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",`
+- L1436: `"Proof-led hook direction with claims marked for review"`
+- L1444: `"Mehr Details ansehen",`
+- L1449: `"Claims, health, or performance promises need evidence before publishing."`
+- L1455: `"Prepare review notes and claims check",`
+- L1458: `safetyLabel: "Claims require review before publishing. No direct publish action."`
+- L1467: `summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",`
+- L1469: `"Define the hero subject, composition, lighting, and brand guardrails before production.",`
+- L1473: `"Visual direction and brand constraints summarized",`
+- L1474: `"Prompt ideas prepared for image/video planning",`
+- L1477: `safetyLabel: "No media generation executed. Brief and routing only.",`
+- L1493: `safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."`
+- L1504: `"Publishing remains gated until channel, approval, and asset readiness are confirmed."`
+- L1520: `title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",`
+- L1541: `safetyLabel: "No budget updates or ad launches executed."`
+- L1563: `summary: "Risk review checklist prepared with claims and safety review points.",`
+- L1565: `"Review key claims and evidence",`
+- L1571: `safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."`
+- L1579: `summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",`
+- L1580: `mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",`
+- L1587: `"Priority: draft priority pending runtime inbox and SLA confirmation.",`
+- L1611: `mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",`
+- L1624: `"Can I send more details?",`
+- L1628: `"CRM profile and pipeline changes remain outside AI Team.",`
+- L1655: `safetyLabel: "Workflow run is not started. This is a draft preview only."`
+- L1668: `safetyLabel: "No workflow run and no backend task creation executed."`
+- L1675: `function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {`
+- L1692: `prompt,`
+- L1706: `"Compliance and Publisher verify claims, approvals, formatting, and release readiness",`
+- L1711: `"Writer: draft hooks, captions, messages, email, or outreach copy",`
+- L1713: `"Compliance: flag claims, evidence needs, policy risks, and approval gates",`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1745: `\`Source Prompt: ${humanizeValue(output.sourcePrompt)}\`,`
+- L1794: `preview.mainOutput ||`
+- L1796: `preview.generatedOutput ||`
+- L1805: `const mainLines = splitPreviewLines(sourceText || summary, 14)`
+- L1808: `if (mainLines.length) {`
+- L1809: `blocks.push({ label: "Main output", items: mainLines });`
+- L1816: `blocks.push({ label: "Details", items: bullets });`
+- L1836: `function isProviderLikelyConfigured(aiContext) {`
+- L1837: `const records = asObject(aiContext?.controlCenter?.records);`
+- L1841: `const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);`
+- L1843: `return providerMatch && readyState;`
+- L1848: `//  UNIFIED AI CONTEXT`
+- L1851: `function buildUnifiedAiContext(state, intelligence) {`
+- L1902: `campaign: state.context.activeCampaign || "Not selected",`
+- L1945: `paid: asObject(insights.paid),`
+- L1948: `aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),`
+- L1963: `strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],`
+- L1964: `writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],`
+- L1967: `ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],`
+- L1971: `customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],`
+- L2007: `function buildMissingDataNotes(aiContext, lane) {`
+- L2009: `const coverage = aiContext.coverage;`
+- L2020: `if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {`
+- L2021: `notes.push("Paid platform reporting not connected — ROAS guidance is limited.");`
+- L2026: `function buildExecutiveResponse(aiContext) {`
+- L2027: `const topRecommendation = aiContext.recommendations[0];`
+- L2029: `if (aiContext.readinessScore != null) summaryParts.push(\`Readiness is ${aiContext.readinessScore}/100 (${aiContext.readinessStatus || "in progress"}).\`);`
+- L2030: `if (aiContext.criticalGaps.length) summaryParts.push(\`${aiContext.criticalGaps.length} critical gaps are open.\`);`
+
+## Backend / API Signals
+- L4: `getSelectedLibrarySource,`
+- L17: `getSharedHandoff,`
+- L19: `setSharedHandoff`
+- L24: `} from "../asset-library.js";`
+- L27: `executeProjectAiChat,`
+- L28: `executeProjectAiGuidance`
+- L39: `summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",`
+- L40: `routeHint: "campaign-studio"`
+- L50: `id: "media",`
+- L51: `label: "Media Director",`
+- L54: `routeHint: "media-studio"`
+- L61: `routeHint: "media-studio"`
+- L67: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L68: `routeHint: "publishing"`
+- L88: `summary: "Claims review, approvals, safety language, and governance checks.",`
+- L95: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L117: `campaign: "strategist",`
+- L119: `designer: "media",`
+- L120: `media_director: "media",`
+- L121: `media_planner: "media",`
+- L146: `summary: "Campaign concepts, launch plans, channel mix, and offer strategy.",`
+- L147: `placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",`
+- L148: `canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L150: `destinations: ["Campaign Studio", "Workflows", "AI Command"],`
+- L160: `placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L163: `destinations: ["Content Studio", "Publishing", "AI Command"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L168: `id: "media",`
+- L169: `label: "Media Director",`
+- L173: `placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",`
+- L174: `canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L176: `destinations: ["Asset Library", "Content Studio", "AI Command"],`
+- L177: `safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",`
+- L188: `cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],`
+- L189: `destinations: ["Asset Library", "Content Studio", "Media Native"],`
+- L190: `safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",`
+- L196: `position: "Publishing Readiness Lead",`
+- L198: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L199: `placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",`
+- L200: `canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],`
+- L201: `cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],`
+- L202: `destinations: ["Publishing", "Workflows", "AI Command"],`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L215: `destinations: ["Ads Manager", "Integrations", "Campaign Studio"],`
+- L216: `safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",`
+- L237: `summary: "Claims review, approval safety, publishing risk, and governance notes.",`
+- L238: `placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",`
+- L239: `canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],`
+- L240: `cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],`
+- L241: `destinations: ["Workflows", "Publishing", "Governance"],`
+- L242: `safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",`
+- L248: `position: "Execution and Handoff Lead",`
+- L250: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L251: `placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",`
+- L252: `canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L255: `safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L290: `{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },`
+- L292: `{ label: "Suggest the next campaign move", sub: "Based on current project state" }`
+- L295: `{ label: "Draft campaign captions", sub: "For the active campaign" },`
+- L297: `{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },`
+- L300: `media: [`
+- L301: `{ label: "Write a creative brief", sub: "For the next campaign visual" },`
+- L303: `{ label: "Map format requirements", sub: "By platform and campaign phase" },`
+- L304: `{ label: "Prepare a media handoff", sub: "Package direction for the team" }`
+- L307: `{ label: "Write a reel script", sub: "For the current campaign" },`
+- L309: `{ label: "Outline motion direction", sub: "Align visuals with campaign tone" },`
+- L313: `{ label: "Review publishing readiness", sub: "Check what is ready to publish" },`
+- L316: `{ label: "Prepare a handoff package", sub: "For the approver review" }`
+- L319: `{ label: "Draft ad concepts", sub: "For the current campaign" },`
+- L322: `{ label: "Plan paid campaign structure", sub: "Objective, audience, creative, budget" }`
+- L331: `{ label: "Check claims for approval", sub: "Review all marketing claims" },`
+- L332: `{ label: "Flag publishing risks", sub: "Identify blockers before release" },`
+- L334: `{ label: "Review approval requirements", sub: "What needs sign-off" }`
+- L337: `{ label: "Turn this into tasks", sub: "Break down into action items" },`
+- L338: `{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },`
+- L352: `{ label: "Prepare sales handoff", sub: "Route context to operations" }`
+- L360: `{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L377: `{ id: "task", label: "Task", helper: "Task-shaped output" },`
+- L379: `{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },`
+- L383: `const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];`
+- L389: `media: "MD",`
+- L402: `media: "designer",`
+- L411: `summary: "Policy, approvals, roles, and audit controls stay destination-owned."`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L431: `{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },`
+- L432: `{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }`
+- L437: `{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L440: `media: [`
+- L441: `{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },`
+- L443: `{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L452: `{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L459: `{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L471: `{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },`
+- L477: `{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },`
+- L478: `{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L484: `{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L504: `{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },`
+- L506: `{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L513: `{ icon: "🚀", label: "Launch Campaign", sub: "Build a campaign plan", template: "Build a launch campaign for {project}. Map the channels, offer, phases, and required assets." },`
+- L515: `{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },`
+- L525: `{ id: "campaign", label: "Campaign" },`
+- L536: `{ id: "campaign", label: "Campaign" },`
+- L543: `"Campaign",`
+- L555: `suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."`
+- L561: `bestUse: "When campaigns need content batches fast.",`
+- L562: `suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."`
+- L569: `suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."`
+- L572: `id: "media",`
+- L573: `name: "Media Planner",`
+- L574: `purpose: "Align media formats with channels, cadence, and readiness.",`
+- L576: `suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."`
+- L602: `purpose: "Translate intent into executable workflows and handoffs.",`
+- L610: `const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;`
+- L611: `let aiInboundHandoffCounter = 0;`
+- L632: `if (/act as the media director/i.test(text)) return "media";`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L679: `targetPage: "publishing",`
+- L683: `reason: "Requires approval gate before external publishing actions."`
+- L696: `if (/act as the media director/i.test(text)) return "media";`
+- L772: `campaign: asString(context.campaign || "active campaign") || "active campaign"`
+- L775: `return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");`
+- L785: `"Prepare a handoff summary for:",`
+- L787: `"Draft a task plan for:",`
+- L788: `"Build a launch campaign for:",`
+- L870: `overview.publishing_language ||`
+- L926: `return asString(item.label || item.title || item.page || item.query || item.campaign_name || item.name);`
+- L949: `taskMode: "free",`
+- L950: `taskType: "launch",`
+- L951: `taskProduct: "",`
+- L952: `taskChannel: "",`
+- L965: `lastAppliedHandoffId: "",`
+- L968: `inboundHandoff: null,`
+- L1082: `function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {`
+- L1083: `if (typeof executeProjectAiGuidanceFn !== "function") {`
+- L1192: `"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",`
+- L1207: `\`Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.\`,`
+- L1213: `"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",`
+- L1263: `if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";`
+- L1265: `if (id === "media") return "media-studio";`
+- L1266: `if (id === "video_lead") return "media-studio";`
+- L1267: `if (id === "publisher") return "publishing";`
+- L1271: `if (id === "operations") return outputType === "task" ? "task-center" : "workflows";`
+- L1272: `if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";`
+- L1294: `outputType = activeTab === "task"`
+- L1295: `? "task"`
+- L1298: `: activeTab === "handoff"`
+- L1299: `? "handoff"`
+- L1303: `const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);`
+- L1304: `const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);`
+- L1306: `const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);`
+- L1307: `const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);`
+- L1308: `const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);`
+- L1310: `const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);`
+- L1312: `if (outputType === "handoff" || outputType === "task" || looksTaskLike) {`
+- L1313: `outputType = "task";`
+- L1314: `return { outputType, destinationRoute: "task-center" };`
+- L1327: `if (/media|video|visual|asset|creative/.test(outputType) || looksMediaLike) {`
+- L1328: `outputType = "media";`
+- L1329: `return { outputType, destinationRoute: explicitDestination || "media-studio" };`
+- L1332: `if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {`
+- L1333: `outputType = "publishing";`
+- L1334: `return { outputType, destinationRoute: explicitDestination || "publishing" };`
+- L1337: `if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {`
+- L1347: `if (/campaign|strategy|launch/.test(outputType) || looksCampaignLike) {`
+- L1348: `outputType = "campaign";`
+- L1351: `destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")`
+- L1362: `"campaign-studio": "Campaign Studio",`
+- L1364: `"media-studio": "Media Studio",`
+- L1365: `publishing: "Publishing",`
+- L1371: `"task-center": "Task Center",`
+- L1392: `confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",`
+- L1398: `confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."`
+- L1402: `if (outputType === "task") {`
+- L1405: `title: \`Task: Strategic plan for ${projectName || "current project"}\`,`
+- L1406: `summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",`
+- L1411: `"Route execution draft to Campaign Studio or Workflows"`
+- L1413: `nextSafeAction: "Review and refine the task draft before creating durable tasks"`
+- L1431: `title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",`
+- L1435: `"Outcome-led hook direction for a German publishing draft",`
+- L1449: `"Claims, health, or performance promises need evidence before publishing."`
+- L1458: `safetyLabel: "Claims require review before publishing. No direct publish action."`
+- L1462: `if (specialistId === "media") {`
+- L1465: `outputType: outputType === "guidance" ? "media_brief" : outputType,`
+- L1466: `title: "Media Brief: Visual direction draft",`
+- L1467: `summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",`
+- L1470: `"Confirm platform formats before routing to Media Studio."`
+- L1477: `safetyLabel: "No media generation executed. Brief and routing only.",`
+- L1478: `nextSafeAction: "Open Media Studio to review and refine the brief"`
+- L1485: `title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",`
+- L1491: `"Route to Media Studio for production planning"`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1501: `summary: "Publishing checklist and schedule draft prepared.",`
+- L1504: `"Publishing remains gated until channel, approval, and asset readiness are confirmed."`
+- L1509: `"Flag approval dependencies",`
+- L1510: `"Prepare handoff for publishing review"`
+- L1520: `title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",`
+- L1548: `title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",`
+- L1571: `safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."`
+- L1578: `title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",`
+- L1609: `title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",`
+- L1610: `summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",`
+- L1631: `nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",`
+- L1636: `"Route sales handoff without mutating CRM data"`
+- L1653: `"Stage 4: Destination handoff and confirmation"`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1661: `summary: "Operational plan drafted with next tasks, owners, and route.",`
+- L1663: `"Define immediate tasks",`
+- L1665: `"Prepare destination handoff context",`
+- L1668: `safetyLabel: "No workflow run and no backend task creation executed."`
+- L1683: `task: "task",`
+- L1685: `handoff: "handoff"`
+- L1705: `"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",`
+- L1706: `"Compliance and Publisher verify claims, approvals, formatting, and release readiness",`
+- L1712: `"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",`
+- L1713: `"Compliance: flag claims, evidence needs, policy risks, and approval gates",`
+- L1715: `"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1718: `destinationRoute: outputType === "task" ? "task-center" : "workflows",`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1728: `task: "Task",`
+- L1730: `handoff: "Handoff Preview",`
+- L1731: `media_brief: "Media Brief"`
+- L1902: `campaign: state.context.activeCampaign || "Not selected",`
+- L1963: `strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],`
+- L1966: `media: ["media", "design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction", "image", "video", "photo", "asset", "library", "gallery", "footage", "visual assets"],`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L2074: `top ? \`Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.\` : "Sync social insights to identify winning hooks and formats.",`
+- L2085: `routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),`
+- L2130: `const bestCampaign = asArray(paid.best_campaigns)[0];`
+- L2131: `const weakCampaign = asArray(paid.weak_campaigns)[0];`
+- L2136: `? \`Paid media live with ${formatCurrency(paid.summary.spend, aiContext.currency)} tracked spend.\``
+- L2139: `bestCampaign ? \`Best campaign: ${extractTopMessage(bestCampaign)}.\` : "No winning campaign measured yet.",`
+- L2140: `weakCampaign ? \`Weak campaign: ${extractTopMessage(weakCampaign)}.\` : "No weak campaign list yet.",`
+- L2145: `bestCampaign ? \`Scale ${extractTopMessage(bestCampaign)} only after validating strong CTR and ROAS.\` : "Connect paid platforms before making scale decisions.",`
+- L2146: `weakCampaign ? \`Pause or refresh ${extractTopMessage(weakCampaign)} if weak pattern continues.\` : null,`
+- L2151: `weakCampaign ? \`Rebuild hook and CTA for ${extractTopMessage(weakCampaign)}.\` : "Audit campaign naming and creative mapping.",`
+
+## Command Send / Submit Signals
+- L7: `} from "./ai-command/tool-dock.js";`
+- L27: `executeProjectAiChat,`
+- L28: `executeProjectAiGuidance`
+- L137: `//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L150: `destinations: ["Campaign Studio", "Workflows", "AI Command"],`
+- L163: `destinations: ["Content Studio", "Publishing", "AI Command"],`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L176: `destinations: ["Asset Library", "Content Studio", "AI Command"],`
+- L202: `destinations: ["Publishing", "Workflows", "AI Command"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L254: `destinations: ["Workflows", "Operations Centers", "AI Command"],`
+- L266: `cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],`
+- L268: `safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",`
+- L279: `cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],`
+- L281: `safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",`
+- L286: `// Role-specific suggested prompt chips (prefill only, no auto-execute)`
+- L287: `const SPECIALIST_SUGGESTED_PROMPTS = {`
+- L356: `// Full Team mode suggested prompts`
+- L357: `const TEAM_SUGGESTED_PROMPTS = [`
+- L371: `{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L511: `// 4 quick-action prompts shown in the composer`
+- L519: `const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";`
+- L520: `const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";`
+- L522: `const COMMAND_TYPES = [`
+- L555: `suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."`
+- L562: `suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."`
+- L569: `suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."`
+- L576: `suggestedPrompt: "Act as Media Planner and map media needs by platform for this launch cycle."`
+- L583: `suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."`
+- L590: `suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."`
+- L597: `suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."`
+- L604: `suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."`
+- L609: `const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";`
+- L613: `let aiCommandBridgeRegistered = false;`
+- L620: `function buildAutoPlanFromCommand(commandText, session) {`
+- L628: `function detectSpecialistFromBridgePrompt(prompt) {`
+- L629: `const text = asString(prompt);`
+- L649: `const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");`
+- L653: `type: "generate_prompt",`
+- L654: `targetPage: "ai-command",`
+- L655: `action: "Generate prompt from AI command",`
+- L657: `prompt: command,`
+- L658: `title: "AI command auto plan"`
+- L666: `action: "Prepare workflow from AI command",`
+- L668: `prompt: command,`
+- L669: `reason: "AI command prepared for workflow execution."`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L682: `prompt: command,`
+- L692: `function detectSpecialistFromBridgePrompt(prompt) {`
+- L693: `const text = asString(prompt);`
+- L779: `function normalizeAiComposerPrompt(value) {`
+- L784: `const commandPrefixes = [`
+- L795: `for (const prefix of commandPrefixes) {`
+- L802: `const latestMarker = commandPrefixes`
+- L812: `for (const prefix of commandPrefixes) {`
+- L824: `const cleanValue = normalizeAiComposerPrompt(value);`
+- L943: `commandType: "strategy",`
+- L987: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";`
+- L998: `window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L1022: `if (localDraft.prompt) {`
+- L1023: `session.draftMessage = asString(localDraft.prompt);`
+- L1027: `if (localDraft.commandType) session.commandType = asString(localDraft.commandType);`
+- L1030: `if (localDraft.prompt || localDraft.updatedAt) {`
+- L1038: `prompt: session.draftMessage,`
+- L1040: `commandType: session.commandType,`
+- L1050: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";`
+- L1061: `window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));`
+- L1082: `function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {`
+- L1083: `if (typeof executeProjectAiGuidanceFn !== "function") {`
+- L1099: `const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";`
+- L1110: `window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));`
+- L1130: `const titleSeed = asString(options.title || firstUser?.content || responses[0]?.prompt || "AI Team session").trim();`
+- L1182: `function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {`
+- L1183: `const cleanPrompt = asString(prompt).trim();`
+- L1212: `"Never claim actions were executed.",`
+- L1217: `cleanPrompt`
+- L1289: `response.prompt`
+- L1378: `function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {`
+- L1379: `const cleanPrompt = asString(prompt).trim();`
+- L1380: `const promptSnippet = cleanPrompt || \`Project request for ${projectName || "current project"}\`;`
+- L1394: `sourcePrompt: promptSnippet,`
+- L1419: `summary: \`Priority guidance prepared from: ${promptSnippet}\`,`
+- L1451: `nextStep: "Send this package to Content Studio or Publisher after review.",`
+- L1467: `summary: "Media brief prepared with visual direction, prompt ideas, and required assets.",`
+- L1474: `"Prompt ideas prepared for image/video planning",`
+- L1477: `safetyLabel: "No media generation executed. Brief and routing only.",`
+- L1541: `safetyLabel: "No budget updates or ad launches executed."`
+- L1611: `mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",`
+- L1624: `"Can I send more details?",`
+- L1629: `"Outreach and follow-ups require confirmation before sending."`
+- L1668: `safetyLabel: "No workflow run and no backend task creation executed."`
+- L1675: `function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {`
+- L1692: `prompt,`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1745: `\`Source Prompt: ${humanizeValue(output.sourcePrompt)}\`,`
+- L2330: `//  COMMAND SUBMISSION`
+- L2333: `function syncAiWorkflowBridge({ projectName, modeId, command, response }) {`
+- L2337: `lastCommand: asString(command),`
+- L2515: `summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),`
+- L2519: `sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),`
+- L2552: `return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]`
+- L2584: `const prompt = normalizeAiComposerPrompt(firstAiInboundText(`
+- L2585: `payload.prompt,`
+- L2588: `draftContext.prompt,`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2621: `prompt,`
+- L2632: `note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."`
+- L2639: `const handoff = getSharedHandoff(projectName, "ai-command", operations);`
+- L2644: `session.draftMessage = normalized.prompt;`
+- L2645: `session.composerText = normalized.prompt;`
+- L2675: `lastCommand: normalized.prompt,`
+- L2694: `async function submitDurableCommand({`
+- L2698: `command,`
+- L2701: `executeProjectAiCommand,`
+- L2704: `const cleanCommand = asString(command).trim();`
+- L2705: `if (!cleanCommand) return { accepted: false, failed: false };`
+- L2706: `if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");`
+- L2711: `let commandId = "";`
+- L2714: `result = await executeProjectAiCommand(projectName, {`
+- L2715: `command: cleanCommand,`
+- L2726: `const classification = asObject(result?.command?.classification);`
+- L2727: `resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;`
+- L2728: `commandId = asString(result?.command?.id);`
+- L2732: `const payloadCommand = asObject(payload?.command);`
+- L2734: `resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;`
+- L2735: `commandId = asString(payloadCommand?.id);`
+- L2738: `title: "Command failed",`
+- L2755: `content: cleanCommand,`
+- L2764: `createdAt: asString(result?.command?.created_at) || nowIso(),`
+- L2770: `id: commandId || \`history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}\`,`
+- L2772: `command: cleanCommand,`
+- L2775: `responseTitle: response.title || (response.status === "failed" ? "Command failed" : ""),`
+- L2781: `syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });`
+- L2909: `//  RENDER: COMMAND COMPOSER`
+- L2912: `function renderCommandComposer(session, aiContext, escapeHtml) {`
+- L2927: `<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">${escapeHtml(mode.label)} — Command Composer</h3>`
+- L2967: `<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>`
+- L2971: `<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send prompt to ${escapeHtml(mode.label)}</button>`
+- L2975: `<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>`
+- L2982: `//  RENDER: SUGGESTED PROMPTS`
+- L2985: `function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {`
+- L2990: `<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Suggested prompts</h3>`
+- L2991: `<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>`
+- L2994: `<div class="ctrl-prompts-grid">`
+- L2997: `class="ctrl-prompt-btn"`
+- L3002: `<span class="ctrl-prompt-icon">${action.icon}</span>`
+- L3004: `<span class="ctrl-prompt-label">${escapeHtml(action.label)}</span>`
+- L3005: `<span class="ctrl-prompt-sub">${escapeHtml(action.sub)}</span>`
+- L3116: `<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>`
+- L3164: `//  RENDER: RECENT COMMANDS`
+- L3167: `function renderRecentCommands(session, escapeHtml) {`
+- L3171: `<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--color-text-0);">Recent commands</h3>`
+- L3185: `<div class="ctrl-recent-command">${escapeHtml(entry.command)}</div>`
+- L3197: `<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>`
+- L3284: `function buildConversationWorkContext(session, fallbackPrompt = "") {`
+- L3304: `const prompt = asString(`
+- L3305: `fallbackPrompt ||`
+- L3307: `latestResponse?.prompt ||`
+- L3319: `prompt ? \`User request: ${prompt}\` : "",`
+- L3325: `prompt,`
+- L3336: `function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {`
+- L3337: `const context = buildConversationWorkContext(session, fallbackPrompt);`
+- L3345: `const basePrompt = context.summary || context.prompt || \`Prepare a ${typeLabel}.\`;`
+- L3351: `"Keep it review-ready and do not execute backend actions.",`
+- L3353: `basePrompt`
+- L3357: `function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {`
+- L3358: `const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);`
+- L3362: `prompt: workPrompt,`
+- L3366: `const context = buildConversationWorkContext(session, fallbackPrompt);`
+- L3367: `preview.sourcePrompt = context.prompt || workPrompt;`
+- L3378: `preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";`
+- L3388: `function buildCommandEnvelope(session, prompt) {`
+- L3389: `const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";`
+- L3393: `return \`${asString(prompt).trim()}\n\nCommand type: ${commandTypeLabel}\nTarget: ${targetLine}\`;`
+- L3409: `command: \`Review the critical readiness gaps for ${aiContext.projectName || "this project"} and produce a fix plan with owners, order, and dependencies.\`,`
+- L3418: `command: \`Create an asset unblock plan for ${aiContext.projectName || "this project"}. List missing files, priority, and where each is needed.\`,`
+- L3428: `command: \`Build an integration recovery plan for ${aiContext.projectName || "this project"}. Prioritize connectors by business impact and data coverage gain.\`,`
+- L3437: `command: \`Create a campaign operating brief for ${aiContext.projectName || "this project"} with objective, audience, channels, and first execution wave.\`,`
+- L3445: `command: \`Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.\`,`
+- L3453: `//  PHASE 1 RENDER HELPERS — AI TEAM COMMAND CENTER`
+- L3614: `<h1 class="aicmd-room-title mhos-context-title">AI Team Command Center</h1>`
+- L3689: `<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>`
+- L3849: `const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));`
+- L3916: `<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>`
+- L3918: `<span class="aicmd-v2-tools-count">${tools.length} prompt tools</span>`
+- L3948: `${projectName ? \`<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>\` : ""}`
+- L3964: `function renderAiCommandMainSourceIndicator(projectName, escapeHtml) {`
+- L3989: `function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {`
+- L3992: `${renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml })}`
+- L3994: `${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}`
+- L3995: `${renderAiCommandSecondaryTabs({ session, escapeHtml })}`
+- L3996: `${renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml })}`
+- L4003: `function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {`
+- L4014: `<h1>AI Command</h1>`
+- L4015: `<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>`
+- L4017: `<div class="aicmd-chatfirst-header-controls" aria-label="AI Command session controls">`
+- L4036: `function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {`
+- L4038: `<section class="aicmd-chatfirst-window" aria-label="AI Command chat">`
+- L4039: `${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}`
+- L4040: `${renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml })}`
+- L4041: `${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}`
+- L4046: `function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {`
+- L4055: `${renderAiCommandSpecialistSelect({ session, escapeHtml })}`
+- L4072: `function renderAiCommandSpecialistSelect({ session, escapeHtml }) {`
+- L4117: `function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {`
+- L4141: `content: item.prompt || "",`
+- L4194: `<span>Ask for guidance, a draft, source review, task preview, workflow preview, or handoff package. AI Command prepares context only.</span>`
+- L4201: `function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {`
+- L4224: `${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}`
+- L4227: `<span class="aicmd-chatfirst-enter-hint">Enter to send. Shift+Enter for newline.</span>`
+- L4228: `<button id="aicmdV2AskBtn" class="aicmd-chatfirst-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">`
+- L4229: `${isGenerating ? "Sending" : "Send"}`
+- L4237: `<div class="aicmd-chatfirst-composer-safety">Review-ready guidance only. No publish, send, approval, CRM update, workflow run, durable task creation, or backend execution happens from this composer.</div>`
+- L4243: `function renderAiCommandSecondaryTabs({ session, escapeHtml }) {`
+- L4254: `<nav class="aicmd-chatfirst-tabs" role="tablist" aria-label="AI Command secondary tabs">`
+- L4270: `function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {`
+- L4274: `? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })`
+- L4276: `? renderAiCommandOutputTab({ session, aiContext, escapeHtml })`
+- L4277: `: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });`
+- L4286: `function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {`
+- L4337: `function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {`
+- L4347: `<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>`
+- L4349: `<span class="aicmd-chatfirst-pill">${tools.length} prompt tools</span>`
+- L4370: `${projectName ? \`<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>\` : ""}`
+- L4375: `function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {`
+- L4444: `<button id="aicmdV2PreviewSendBtn" class="aicmd-chatfirst-action-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4449: `<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>`
+- L4453: `<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>`
+- L4460: `function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {`
+- L4475: `<div class="aicmd-chatfirst-flow-steps" aria-label="AI Command flow">`
+- L4501: `{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }`
+- L4553: `<span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>`
+- L4554: `<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">`
+- L4563: `${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}`
+- L4566: `<div class="aicmd-v2-composer-hint">Primary workspace: ask, refine, then create a review-ready preview. Suggested prompts prefill only. No publish, send, approval, CRM update, workflow run, or durable task creation happens here.</div>`
+- L4587: `<span>Ask a specialist or send the chat response to preview.</span>`
+- L4613: `<p class="aicmd-v2-preview-subtitle">${escapeHtml(humanizeValue(preview.sourcePrompt, "Review the generated specialist output."))}</p>`
+- L4662: `<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>`
+- L4683: `? "Send Draft to Content Studio"`
+- L4762: `<span>Ask the active specialist or open a Tool Drawer prompt to prepare a draft, task preview, workflow preview, or handoff package.</span>`
+- L4768: `<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4773: `<div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>`
+- L4815: `<li><span>Image prompt generation</span><strong class="${providerConfigured ? "is-available" : "is-planned"}">${escapeHtml(providerConfigured ? "Provider configured" : "Needs provider connection")}</strong></li>`
+- L4816: `<li><span>Video brief / script draft</span><strong class="is-draft-ready">Draft-ready — no generation executed</strong></li>`
+- L4878: `const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);`
+- L4879: `const nextPrompts = session.teamMode === "team"`
+- L4880: `? TEAM_SUGGESTED_PROMPTS`
+- L4881: `: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);`
+- L4882: `const nextAction = asString(nextPrompts[0]?.label || "Prepare guidance");`
+- L4914: `content: item.prompt || "",`
+- L4951: `<small>Prompt bridge; guidance only.</small>`
+- L5004: `<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Open Handoff</button>`
+- L5038: `function renderPhase1SuggestedPrompts(session, escapeHtml) {`
+- L5039: `const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);`
+- L5040: `const prompts = session.teamMode === "team"`
+- L5041: `? TEAM_SUGGESTED_PROMPTS`
+- L5042: `: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);`
+
+## Approval / Governance Signals
+- L67: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L85: `id: "compliance_reviewer",`
+- L86: `label: "Compliance Reviewer",`
+- L88: `summary: "Claims review, approvals, safety language, and governance checks.",`
+- L89: `routeHint: "governance"`
+- L95: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L102: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",`
+- L126: `compliance_reviewer: "compliance_reviewer",`
+- L147: `placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L162: `cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L173: `placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",`
+- L174: `canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L188: `cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],`
+- L190: `safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",`
+- L198: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L199: `placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",`
+- L200: `canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],`
+- L201: `cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L214: `cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],`
+- L216: `safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",`
+- L225: `placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",`
+- L226: `canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],`
+- L233: `id: "compliance_reviewer",`
+- L234: `label: "Compliance Reviewer",`
+- L235: `position: "Claims and Governance Lead",`
+- L237: `summary: "Claims review, approval safety, publishing risk, and governance notes.",`
+- L238: `placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",`
+- L239: `canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],`
+- L240: `cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],`
+- L241: `destinations: ["Workflows", "Publishing", "Governance"],`
+- L242: `safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",`
+- L250: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L252: `canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L263: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",`
+- L264: `placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",`
+- L265: `canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L279: `cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],`
+- L289: `{ label: "What should I do next?", sub: "Review priorities and blockers" },`
+- L291: `{ label: "Review launch readiness", sub: "Identify what is blocking launch" },`
+- L297: `{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },`
+- L302: `{ label: "Review brand consistency", sub: "Flag misaligned assets" },`
+- L313: `{ label: "Review publishing readiness", sub: "Check what is ready to publish" },`
+- L314: `{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },`
+- L315: `{ label: "Check scheduled jobs", sub: "Review the current queue" },`
+- L316: `{ label: "Prepare a handoff package", sub: "For the approver review" }`
+- L320: `{ label: "Review targeting angles", sub: "Map audience and platform fit" },`
+- L325: `{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },`
+- L330: `compliance_reviewer: [`
+- L331: `{ label: "Check claims for approval", sub: "Review all marketing claims" },`
+- L333: `{ label: "Prepare governance notes", sub: "Document compliance status" },`
+- L334: `{ label: "Review approval requirements", sub: "What needs sign-off" }`
+- L339: `{ label: "Review execution health", sub: "Check blockers and failed jobs" },`
+- L344: `{ label: "Draft customer reply", sub: "Safe response for review" },`
+- L350: `{ label: "Draft outreach", sub: "Personalized message for review" },`
+- L358: `{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },`
+- L361: `{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }`
+- L364: `const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];`
+- L369: `{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },`
+- L376: `{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },`
+- L378: `{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },`
+- L379: `{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },`
+- L394: `compliance_reviewer: "CR",`
+- L403: `compliance_reviewer: "compliance_reviewer"`
+- L408: `label: "Admin / Governance",`
+- L411: `summary: "Policy, approvals, roles, and audit controls stay destination-owned."`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L430: `{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },`
+- L431: `{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },`
+- L432: `{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }`
+- L435: `{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },`
+- L436: `{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },`
+- L437: `{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L441: `{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },`
+- L442: `{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },`
+- L443: `{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },`
+- L444: `{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },`
+- L448: `{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },`
+- L449: `{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },`
+- L450: `{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },`
+- L451: `{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },`
+- L452: `{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L457: `{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L462: `{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },`
+- L463: `{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L465: `{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },`
+- L469: `{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },`
+- L470: `{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },`
+- L471: `{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },`
+- L472: `{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },`
+- L475: `compliance_reviewer: [`
+- L476: `{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },`
+- L477: `{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },`
+- L478: `{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L480: `{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }`
+- L483: `{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },`
+- L484: `{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L486: `{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },`
+- L490: `{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },`
+- L491: `{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },`
+- L492: `{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L494: `{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L496: `{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L500: `{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L502: `{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },`
+- L503: `{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },`
+- L504: `{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },`
+- L505: `{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },`
+- L506: `{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L515: `{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },`
+- L637: `if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L683: `reason: "Requires approval gate before external publishing actions."`
+- L701: `if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";`
+- L939: `workspaceTab: "preview",`
+- L970: `outputPreview: null,`
+- L1123: `const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;`
+- L1139: `preview: session.outputPreview || null,`
+- L1162: `session.outputPreview = asObject(record.preview);`
+- L1163: `session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);`
+- L1213: `"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",`
+- L1214: `"Deliver a structured, review-ready answer.",`
+- L1270: `if (id === "compliance_reviewer") return "governance";`
+- L1304: `const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);`
+- L1307: `const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);`
+- L1308: `const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);`
+- L1337: `if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {`
+- L1338: `outputType = "governance";`
+- L1339: `return { outputType, destinationRoute: explicitDestination || "governance" };`
+- L1369: `governance: "Governance",`
+- L1388: `summary: "Guidance prepared for review.",`
+- L1392: `confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",`
+- L1395: `status: "draft_preview",`
+- L1397: `nextSafeAction: \`Review in ${routeLabel(route)}\`,`
+- L1398: `confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."`
+- L1413: `nextSafeAction: "Review and refine the task draft before creating durable tasks"`
+- L1432: `summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",`
+- L1436: `"Proof-led hook direction with claims marked for review"`
+- L1440: `"German caption version should keep the CTA direct and easy to approve."`
+- L1448: `"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",`
+- L1451: `nextStep: "Send this package to Content Studio or Publisher after review.",`
+- L1455: `"Prepare review notes and claims check",`
+- L1458: `safetyLabel: "Claims require review before publishing. No direct publish action."`
+- L1478: `nextSafeAction: "Open Media Studio to review and refine the brief"`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1504: `"Publishing remains gated until channel, approval, and asset readiness are confirmed."`
+- L1509: `"Flag approval dependencies",`
+- L1510: `"Prepare handoff for publishing review"`
+- L1521: `summary: "Ad angle and audience testing draft prepared for review.",`
+- L1548: `title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",`
+- L1559: `if (specialistId === "compliance_reviewer") {`
+- L1562: `title: "Compliance Draft: Risk review checklist",`
+- L1563: `summary: "Risk review checklist prepared with claims and safety review points.",`
+- L1565: `"Review key claims and evidence",`
+- L1567: `"Prepare governance notes",`
+- L1568: `"Route to Governance for formal review"`
+- L1571: `safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."`
+- L1579: `summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",`
+- L1580: `mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",`
+- L1582: `"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",`
+- L1586: `"Issue summary: customer concern or request captured for review.",`
+- L1591: `"Unified Inbox is not duplicated here; this is a draft and routing preview only.",`
+- L1594: `nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",`
+- L1598: `"Create ticket draft fields for review",`
+- L1631: `nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",`
+- L1634: `"Draft outreach for review",`
+- L1652: `"Stage 3: Compliance/review gate",`
+- L1655: `safetyLabel: "Workflow run is not started. This is a draft preview only."`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1666: `"Review before creating durable records"`
+- L1675: `function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {`
+- L1701: `title: outputType === "workflow" ? "Team Workflow" : \`Team ${titleCase(outputType)} Preview\`,`
+- L1702: `summary: \`Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.\`,`
+- L1706: `"Compliance and Publisher verify claims, approvals, formatting, and release readiness",`
+- L1713: `"Compliance: flag claims, evidence needs, policy risks, and approval gates",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1719: `nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1721: `safetyLabel: "Full Team output is a coordinated draft preview only."`
+- L1730: `handoff: "Handoff Preview",`
+- L1736: `function buildPreviewText(output, specialistLabel) {`
+- L1741: `\`Status: ${humanizeValue(output.status, "draft_preview")}\`,`
+- L1760: `function compactPreviewText(value, maxLength = 360) {`
+- L1767: `function splitPreviewLines(value, limit = 6) {`
+- L1791: `function buildStructuredPreviewBlocks(preview = {}) {`
+- L1792: `const summary = humanizeValue(preview.summary, "");`
+- L1794: `preview.mainOutput ||`
+- L1795: `preview.output ||`
+- L1796: `preview.generatedOutput ||`
+- L1797: `preview.result ||`
+- L1802: `const compactSummary = compactPreviewText(sourceText || summary, 420);`
+- L1805: `const mainLines = splitPreviewLines(sourceText || summary, 14)`
+- L1806: `.map((item) => compactPreviewText(item, 360));`
+- L1812: `const bullets = normalizeUniqueDisplayList(preview.bullets, 8)`
+- L1813: `.map((item) => compactPreviewText(item, 300));`
+- L1819: `const steps = normalizeUniqueDisplayList(preview.steps, 8)`
+- L1820: `.map((item) => compactPreviewText(item, 280));`
+- L1824: `} else if (preview.nextStep) {`
+- L1825: `blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });`
+- L1923: `approvedAssets: assetCategories`
+- L1924: `.filter((item) => item.status === "Approved")`
+- L1925: `.flatMap((item) => asArray(item.approved_assets).map((assetId) => ({`
+- L1931: `.filter((item) => item.blocker || ["Missing", "Needs Review"].includes(item.status))`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L2051: `routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")`
+- L2085: `routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),`
+- L2111: `weakPage ? \`Tighten intent match and CTA on ${extractTopMessage(weakPage)}.\` : "Review page titles and meta descriptions on priority pages.",`
+- L2117: `"Review top landing pages for stronger offer clarity and conversion flow."`
+- L2120: `routeSuggestion("Insights", "insights", "Review search and website performance together."),`
+- L2155: `routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),`
+- L2178: `"Review Setup and tighten goals, audience, competitor, and market assumptions.",`
+- L2201: `return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };`
+- L2204: `return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };`
+- L2209: `return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };`
+- L2219: `routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));`
+- L2222: `if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));`
+- L2301: `const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);`
+- L2302: `const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);`
+- L2304: `insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",`
+- L2305: `learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""`
+- L2355: `governance: "Governance",`
+- L2377: `governance: "compliance_reviewer",`
+- L2392: `compliance: "compliance_reviewer",`
+- L2418: `govern: "governance",`
+- L2486: `const reason = firstAiInboundText(record.reason, record.summary, record.description) || \`Return to ${label} after AI Team review.\`;`
+- L2494: `reason: \`Return to ${fallbackLabel} after AI Team review.\``
+- L2498: `function normalizeAiInboundOutputPreview(rawPreview, normalized) {`
+- L2499: `const preview = asObject(rawPreview);`
+- L2500: `if (!Object.keys(preview).length) return null;`
+- L2501: `const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";`
+- L2503: `preview.destinationRoute ||`
+- L2504: `preview.destination_route ||`
+- L2509: `const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);`
+- L2512: `...preview,`
+- L2514: `title: firstAiInboundText(preview.title, normalized.title, \`Inbound handoff from ${normalized.sourceLabel}\`),`
+- L2515: `summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),`
+- L2518: `generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),`
+- L2519: `sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),`
+- L2520: `status: asString(preview.status || "draft_preview"),`
+- L2521: `safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),`
+- L2522: `confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),`
+
+## Handoff Signals
+- L17: `getSharedHandoff,`
+- L19: `setSharedHandoff`
+- L67: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L95: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L174: `canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],`
+- L198: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L199: `placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",`
+- L200: `canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],`
+- L248: `position: "Execution and Handoff Lead",`
+- L250: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L251: `placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",`
+- L252: `canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],`
+- L255: `safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L297: `{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },`
+- L304: `{ label: "Prepare a media handoff", sub: "Package direction for the team" }`
+- L316: `{ label: "Prepare a handoff package", sub: "For the approver review" }`
+- L338: `{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },`
+- L352: `{ label: "Prepare sales handoff", sub: "Route context to operations" }`
+- L360: `{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L379: `{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },`
+- L423: `summary: "Workflow blueprints and trigger maps will route to Workflows before execution."`
+- L431: `{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L478: `{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L484: `{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L506: `{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L602: `purpose: "Translate intent into executable workflows and handoffs.",`
+- L610: `const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;`
+- L611: `let aiInboundHandoffCounter = 0;`
+- L785: `"Prepare a handoff summary for:",`
+- L965: `lastAppliedHandoffId: "",`
+- L968: `inboundHandoff: null,`
+- L1298: `: activeTab === "handoff"`
+- L1299: `? "handoff"`
+- L1303: `const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);`
+- L1312: `if (outputType === "handoff" || outputType === "task" || looksTaskLike) {`
+- L1392: `confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",`
+- L1456: `"Route to Content Studio for refinement"`
+- L1491: `"Route to Media Studio for production planning"`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1510: `"Prepare handoff for publishing review"`
+- L1568: `"Route to Governance for formal review"`
+- L1609: `title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",`
+- L1610: `summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",`
+- L1631: `nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",`
+- L1636: `"Route sales handoff without mutating CRM data"`
+- L1653: `"Stage 4: Destination handoff and confirmation"`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1665: `"Prepare destination handoff context",`
+- L1685: `handoff: "handoff"`
+- L1715: `"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1730: `handoff: "Handoff Preview",`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L2501: `const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";`
+- L2514: `title: firstAiInboundText(preview.title, normalized.title, \`Inbound handoff from ${normalized.sourceLabel}\`),`
+- L2527: `function getAiInboundDurableHandoffId(handoff) {`
+- L2528: `const payload = asObject(handoff?.payload);`
+- L2530: `handoff?.id,`
+- L2531: `handoff?.handoff_id,`
+- L2532: `handoff?.handoffId,`
+- L2533: `payload.handoff_id,`
+- L2534: `payload.handoffId`
+- L2538: `function getAiInboundHandoffId(handoff) {`
+- L2539: `const durableId = getAiInboundDurableHandoffId(handoff);`
+- L2541: `if (!handoff) return "";`
+- L2542: `const payload = asObject(handoff?.payload);`
+- L2543: `const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);`
+- L2545: `if (aiInboundHandoffObjectIds) {`
+- L2546: `if (!aiInboundHandoffObjectIds.has(handoff)) {`
+- L2547: `aiInboundHandoffCounter += 1;`
+- L2548: `aiInboundHandoffObjectIds.set(handoff, \`cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}\`);`
+- L2550: `return aiInboundHandoffObjectIds.get(handoff);`
+- L2552: `return [handoff?.source_page, handoff?.destination_page, payload.prompt, payload.title]`
+- L2555: `.join("::") || \`cached-ai-handoff-${Date.now()}\`;`
+- L2558: `function normalizeAiInboundHandoff(handoff, projectName) {`
+- L2559: `const payload = asObject(handoff?.payload);`
+- L2560: `const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);`
+- L2564: `handoff?.source_page,`
+- L2565: `handoff?.sourcePage,`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2598: `handoff?.title,`
+- L2599: `\`Inbound handoff from ${sourceLabel}\``
+- L2631: `status: asString(handoff?.status || payload.status || "available"),`
+- L2632: `note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."`
+- L2638: `function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {`
+- L2639: `const handoff = getSharedHandoff(projectName, "ai-command", operations);`
+- L2640: `const handoffId = getAiInboundHandoffId(handoff);`
+- L2641: `if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;`
+- L2643: `const normalized = normalizeAiInboundHandoff(handoff, projectName);`
+- L2649: `session.inboundHandoff = {`
+- L2650: `id: handoffId,`
+- L2678: `inboundHandoff: session.inboundHandoff,`
+- L2682: `session.lastAppliedHandoffId = handoffId;`
+- L2683: `persistSessionDraft(projectName, session, \`Inbound handoff loaded from ${normalized.sourceLabel}\`);`
+- L2685: `const durableHandoffId = getAiInboundDurableHandoffId(handoff);`
+- L2686: `if (durableHandoffId) {`
+- L2687: `consumeProjectHandoff?.(projectName, durableHandoffId, { actor: "mh-assistant" }).catch((error) => {`
+- L2688: `console.warn("Failed to consume AI handoff:", error.message);`
+- L2691: `showMessage?.(\`Inbound handoff loaded from ${normalized.sourceLabel}.\`);`
+- L2975: `<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>`
+- L3342: `handoff: "handoff package"`
+- L3507: `if (preview.outputType === "handoff") return 3;`
+- L3521: `handoff: "handoff",`
+- L3531: `if (outputType === "handoff") return "handoff";`
+- L3546: `handoff: "Handoff Preview",`
+- L3569: `if (tool.intent === "handoff") return "Prepare";`
+- L3615: `<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>`
+- L3755: `<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>`
+- L3799: `if (roleId === "operations" || roleId === "customer_ops") return \`${label} is preparing your task handoff...\`;`
+- L3842: `if (/handoff|route|destination_brief/.test(haystack)) return "handoff";`
+- L3916: `<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>`
+- L3941: `<span>Handoff: ${escapeHtml(destination)}</span>`
+- L4015: `<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>`
+- L4155: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action is created here."`
+- L4194: `<span>Ask for guidance, a draft, source review, task preview, workflow preview, or handoff package. AI Command prepares context only.</span>`
+- L4205: `? "Ask the full AI team for a launch plan, content package, risk review, source-based analysis, or handoff sequence..."`
+- L4347: `<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>`
+- L4365: `<small>Handoff: ${escapeHtml(destination)}</small>`
+- L4387: `? "Open Content Studio Handoff"`
+- L4389: `? "Open Publishing Handoff"`
+- L4390: `: \`Open ${destination} Handoff\`;`
+- L4397: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4471: `<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>`
+- L4518: `? "Ask the full AI team for a launch plan, content package, risk review, source-based analysis, or handoff sequence..."`
+- L4581: `<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>`
+- L4600: `? "Open Content Studio Handoff"`
+- L4602: `? "Open Publishing Handoff"`
+- L4603: `: \`Open ${destination} Handoff\`;`
+- L4605: `? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")`
+- L4688: `? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")`
+- L4696: `<h2>Review drafts and handoffs</h2>`
+- L4697: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4762: `<span>Ask the active specialist or open a Tool Drawer prompt to prepare a draft, task preview, workflow preview, or handoff package.</span>`
+- L4863: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."`
+- L4865: `const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";`
+- L4885: `const inbound = asObject(session.inboundHandoff);`
+- L4949: `<span>Home handoff</span>`
+- L5004: `<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Open Handoff</button>`
+- L5102: `{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }`
+- L5146: `<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>`
+- L5202: `description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."`
+- L5216: `consumeProjectHandoff,`
+- L5276: `applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);`
+- L5324: `session.inboundHandoff = null;`
+- L5375: `session.inboundHandoff = null;`
+- L5644: `safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",`
+- L5729: `updateStatus("Specialist reply generated. No workflow/task/handoff was created.");`
+- L5817: `// ── PREPARE HANDOFF (secondary action) ───────────────────────`
+- L5818: `// Phase 1: converts the current conversation into a handoff preview. No backend write.`
+- L5819: `const handoffBtn = $("aicmdV2HandoffBtn");`
+- L5820: `if (handoffBtn) {`
+- L5821: `handoffBtn.onclick = () => {`
+- L5825: `? \`Prepare a handoff summary for: ${value}\``
+- L5826: `: \`Prepare a handoff summary from ${spec.label} for the current project state of ${projectName || "this project"}.\`;`
+- L5829: `intent: "handoff",`
+- L5834: `persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");`
+- L5835: `updateStatus("Handoff preview prepared from conversation context. Review destination before sending.");`
+- L5836: `showMessage?.("Handoff preview prepared from conversation.");`
+- L5899: `session.inboundHandoff = null;`
+- L6011: `setSharedHandoff(projectName || "__default__", destination, {`
+- L6014: `destination_page: destination,`
+- L6100: `const handoffRecord = {`
+- L6103: `destination_page: destination,`
+- L6119: `setSharedAiDraft(projectName || "__default__", handoffRecord.payload.draft_context);`
+- L6120: `setSharedHandoff(projectName || "__default__", destination, handoffRecord);`
+
+## Task Signals
+- L95: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L148: `canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],`
+- L250: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L251: `placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",`
+- L252: `canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L255: `safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L279: `cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],`
+- L337: `{ label: "Turn this into tasks", sub: "Break down into action items" },`
+- L351: `{ label: "Build follow-up sequence", sub: "Multi-step sales cadence" },`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L377: `{ id: "task", label: "Task", helper: "Task-shaped output" },`
+- L432: `{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }`
+- L437: `{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },`
+- L443: `{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },`
+- L452: `{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L471: `{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },`
+- L477: `{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L496: `{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },`
+- L502: `{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },`
+- L504: `{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },`
+- L505: `{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L787: `"Draft a task plan for:",`
+- L949: `taskMode: "free",`
+- L950: `taskType: "launch",`
+- L951: `taskProduct: "",`
+- L952: `taskChannel: "",`
+- L1194: `"Name the specialist owner for each next action and destination."`
+- L1263: `if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";`
+- L1271: `if (id === "operations") return outputType === "task" ? "task-center" : "workflows";`
+- L1272: `if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";`
+- L1294: `outputType = activeTab === "task"`
+- L1295: `? "task"`
+- L1303: `const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);`
+- L1312: `if (outputType === "handoff" || outputType === "task" || looksTaskLike) {`
+- L1313: `outputType = "task";`
+- L1314: `return { outputType, destinationRoute: "task-center" };`
+- L1371: `"task-center": "Task Center",`
+- L1402: `if (outputType === "task") {`
+- L1405: `title: \`Task: Strategic plan for ${projectName || "current project"}\`,`
+- L1406: `summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",`
+- L1413: `nextSafeAction: "Review and refine the task draft before creating durable tasks"`
+- L1431: `title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",`
+- L1485: `title: outputType === "task" ? "Task: Video production plan" : "Video Brief: Hook, script, storyboard",`
+- L1520: `title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",`
+- L1548: `title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",`
+- L1552: `"Coverage gaps mapped for follow-up",`
+- L1578: `title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",`
+- L1610: `summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",`
+- L1618: `"Follow-up 1: clarify value and ask for interest.",`
+- L1619: `"Follow-up 2: add proof or relevant context.",`
+- L1629: `"Outreach and follow-ups require confirmation before sending."`
+- L1635: `"Prepare follow-up sequence",`
+- L1639: `safetyLabel: "No outreach sent, CRM record changed, follow-up scheduled, or pipeline stage advanced."`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1661: `summary: "Operational plan drafted with next tasks, owners, and route.",`
+- L1663: `"Define immediate tasks",`
+- L1668: `safetyLabel: "No workflow run and no backend task creation executed."`
+- L1683: `task: "task",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1718: `destinationRoute: outputType === "task" ? "task-center" : "workflows",`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1728: `task: "Task",`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L1972: `sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]`
+- L2079: `top ? \`Create a follow-up asset using ${extractTopMessage(top)}'s pattern.\` : "Load social insight data before expanding content queue.",`
+- L2195: `function buildOperationsTaskBlock(aiContext, message) {`
+- L2198: `return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };`
+- L2201: `return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };`
+- L2204: `return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };`
+- L2207: `return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };`
+- L2209: `return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };`
+- L2214: `const taskBlock = buildOperationsTaskBlock(aiContext, message);`
+- L2223: `if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));`
+- L2235: `nextActions: taskBlock.steps,`
+- L2237: `taskBlock,`
+- L2357: `"task-center": "Task Center",`
+- L2379: `"task-center": "operations",`
+- L2413: `tasks: "task-center",`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2632: `note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."`
+- L2915: `const isStructured = session.taskMode === "structured";`
+- L2930: `<button class="ctrl-mode-btn${!isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="free">Free text</button>`
+- L2931: `<button class="ctrl-mode-btn${isStructured ? " is-active" : ""}" type="button" data-ctrl-task-toggle="structured">Task builder</button>`
+- L2939: `placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"`
+- L2942: `<div id="ctrlTaskFields" class="ctrl-task-fields${!isStructured ? " is-hidden" : ""}">`
+- L2943: `<div class="ctrl-task-fields-label">Build a structured task</div>`
+- L2944: `<div class="ctrl-task-field">`
+- L2945: `<label for="ctrlTaskType">Task type</label>`
+- L2946: `<select id="ctrlTaskType" class="ctrl-task-select">`
+- L2947: `<option value="launch"${session.taskType === "launch" ? " selected" : ""}>🚀 Launch Campaign</option>`
+- L2948: `<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>`
+- L2949: `<option value="analyze"${session.taskType === "analyze" ? " selected" : ""}>📊 Analyze Performance</option>`
+- L2950: `<option value="fix"${session.taskType === "fix" ? " selected" : ""}>🔧 Fix Readiness</option>`
+- L2953: `<div class="ctrl-task-field">`
+- L2955: `<select id="ctrlProductSelect" class="ctrl-task-select">`
+- L2957: `${productOptions.map((opt) => \`<option value="${escapeHtml(opt)}"${session.taskProduct === opt ? " selected" : ""}>${escapeHtml(opt)}</option>\`).join("")}`
+- L2960: `<div class="ctrl-task-field">`
+- L2962: `<select id="ctrlChannelSelect" class="ctrl-task-select">`
+- L2964: `${channelOptions.map((ch) => \`<option value="${escapeHtml(ch)}"${session.taskChannel === ch ? " selected" : ""}>${escapeHtml(ch)}</option>\`).join("")}`
+- L2967: `<button type="button" id="ctrlBuildTaskBtn" class="ctrl-build-task-btn">Build command from task →</button>`
+- L3034: `const taskBlock = asObject(response.taskBlock);`
+- L3073: `<div class="ctrl-response-section-label">Next actions</div>`
+- L3080: `${taskBlock.title ? \``
+- L3082: `<div class="ctrl-response-section-label">Task block — ${escapeHtml(humanizeValue(taskBlock.owner, "System"))}</div>`
+- L3083: `<div class="ctrl-task-block-name">${escapeHtml(humanizeValue(taskBlock.title))}</div>`
+- L3085: `${normalizeDisplayList(taskBlock.steps, 6).map((step) => \`<div class="ctrl-response-item"><span>${escapeHtml(step)}</span></div>\`).join("")}`
+- L3340: `task: "task plan",`
+- L3508: `if (preview.outputType === "task") return 1;`
+- L3519: `task: "task",`
+- L3529: `if (outputType === "task") return "task";`
+- L3544: `task: "Task Draft",`
+- L3556: `if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";`
+- L3570: `if (tool.intent === "task") return "Draft";`
+- L3799: `if (roleId === "operations" || roleId === "customer_ops") return \`${label} is preparing your task handoff...\`;`
+- L3843: `if (/task|ticket|checklist|owner_map|priority/.test(haystack)) return "task";`
+- L4015: `<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>`
+- L4155: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action is created here."`
+- L4194: `<span>Ask for guidance, a draft, source review, task preview, workflow preview, or handoff package. AI Command prepares context only.</span>`
+- L4237: `<div class="aicmd-chatfirst-composer-safety">Review-ready guidance only. No publish, send, approval, CRM update, workflow run, durable task creation, or backend execution happens from this composer.</div>`
+- L4397: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4449: `<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>`
+- L4566: `<div class="aicmd-v2-composer-hint">Primary workspace: ask, refine, then create a review-ready preview. Suggested prompts prefill only. No publish, send, approval, CRM update, workflow run, or durable task creation happens here.</div>`
+- L4697: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4762: `<span>Ask the active specialist or open a Tool Drawer prompt to prepare a draft, task preview, workflow preview, or handoff package.</span>`
+- L4773: `<div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>`
+- L4863: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."`
+- L5101: `{ label: "Follow-ups", value: "Requires confirmation", present: false, scoped: true },`
+- L5202: `description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."`
+- L5644: `safetyInstruction: "Chat only. No task/workflow/handoff/approval/publish/customer/CRM execution.",`
+- L5729: `updateStatus("Specialist reply generated. No workflow/task/handoff was created.");`
+- L5770: `// ── DRAFT TASK (secondary action) ────────────────────────────`
+- L5771: `// Phase 1: converts the current conversation into a task preview. No backend execution.`
+- L5772: `const draftTaskBtn = $("aicmdV2DraftTaskBtn");`
+- L5773: `if (draftTaskBtn) {`
+- L5774: `draftTaskBtn.onclick = () => {`
+- L5778: `? \`Draft a task plan for: ${value}\``
+- L5779: `: \`Draft a task plan for the next best action for ${projectName || "this project"} with ${spec.label}.\`;`
+- L5782: `intent: "task",`
+- L5787: `persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");`
+- L5788: `updateStatus("Task draft preview prepared from conversation context. Review before creating durable tasks.");`
+- L5789: `showMessage?.("Task draft preview prepared from conversation.");`
+
+## Save / Storage / History Signals
+- L18: `setSharedAiDraft,`
+- L102: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L148: `canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],`
+- L151: `safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",`
+- L160: `placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L263: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",`
+- L264: `placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",`
+- L265: `canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],`
+- L268: `safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L281: `safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",`
+- L290: `{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },`
+- L295: `{ label: "Draft campaign captions", sub: "For the active campaign" },`
+- L319: `{ label: "Draft ad concepts", sub: "For the current campaign" },`
+- L338: `{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },`
+- L344: `{ label: "Draft customer reply", sub: "Safe response for review" },`
+- L350: `{ label: "Draft outreach", sub: "Personalized message for review" },`
+- L364: `const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L376: `{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },`
+- L436: `{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },`
+- L449: `{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L462: `{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },`
+- L472: `{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },`
+- L483: `{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L492: `{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L503: `{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },`
+- L505: `{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L519: `const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";`
+- L649: `const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");`
+- L786: `"Draft a workflow sequence for:",`
+- L787: `"Draft a task plan for:",`
+- L825: `session.draftMessage = cleanValue;`
+- L940: `outputWorkspaceTab: "draft",`
+- L942: `draftMessage: "",`
+- L946: `draftStatus: "",`
+- L948: `localDraftLoaded: false,`
+- L954: `history: [],`
+- L971: `activeOutputTab: "draft",`
+- L972: `responseHistory: [],`
+- L975: `responseHistoryLoaded: false,`
+- L984: `function readLocalDraftMap() {`
+- L987: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";`
+- L995: `function writeLocalDraftMap(map) {`
+- L998: `window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L1002: `function loadLocalDraft(projectName) {`
+- L1004: `return asObject(readLocalDraftMap()[key]);`
+- L1007: `function saveLocalDraft(projectName, draftPayload) {`
+- L1009: `const map = readLocalDraftMap();`
+- L1012: `...asObject(draftPayload),`
+- L1015: `writeLocalDraftMap(map);`
+- L1019: `function hydrateSessionDraft(projectName, session) {`
+- L1020: `if (session.localDraftLoaded) return;`
+- L1021: `const localDraft = loadLocalDraft(projectName);`
+- L1022: `if (localDraft.prompt) {`
+- L1023: `session.draftMessage = asString(localDraft.prompt);`
+- L1024: `session.composerText = session.draftMessage;`
+- L1026: `if (localDraft.modeId) session.modeId = asString(localDraft.modeId);`
+- L1027: `if (localDraft.commandType) session.commandType = asString(localDraft.commandType);`
+- L1028: `if (localDraft.targetType) session.targetType = asString(localDraft.targetType);`
+- L1029: `if (localDraft.targetValue) session.targetValue = asString(localDraft.targetValue);`
+- L1030: `if (localDraft.prompt || localDraft.updatedAt) {`
+- L1031: `session.draftStatus = \`Draft restored ${formatTime(localDraft.updatedAt)}\`;`
+- L1033: `session.localDraftLoaded = true;`
+- L1036: `function persistSessionDraft(projectName, session, hint) {`
+- L1037: `const saved = saveLocalDraft(projectName, {`
+- L1038: `prompt: session.draftMessage,`
+- L1044: `session.draftStatus = hint || \`Saved locally ${formatTime(saved.updatedAt)}\`;`
+- L1050: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";`
+- L1061: `window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));`
+- L1070: `function saveLocalOutput(projectName, outputPayload) {`
+- L1099: `const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";`
+- L1110: `window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));`
+- L1119: `function saveAiChatSession(projectName, session, options = {}) {`
+- L1122: `const responses = asArray(session.responseHistory);`
+- L1161: `session.responseHistory = asArray(record.responses).slice(0, 12);`
+- L1165: `session.draftMessage = "";`
+- L1211: `\`When drafting publishable copy, write it in ${safeOutputLanguage}.\`,`
+- L1322: `if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {`
+- L1387: `title: "Draft output",`
+- L1395: `status: "draft_preview",`
+- L1396: `safetyLabel: "Guidance and draft only. No backend execution.",`
+- L1406: `summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",`
+- L1411: `"Route execution draft to Campaign Studio or Workflows"`
+- L1413: `nextSafeAction: "Review and refine the task draft before creating durable tasks"`
+- L1423: `"Next operating move drafted with destination routing"`
+- L1431: `title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",`
+- L1432: `summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",`
+- L1435: `"Outcome-led hook direction for a German publishing draft",`
+- L1453: `"Draft 3 hook variants",`
+- L1454: `"Draft captions with CTA",`
+- L1466: `title: "Media Brief: Visual direction draft",`
+- L1486: `summary: "Video draft prepared with hook, script structure, and storyboard flow.",`
+- L1488: `"Draft opening hook and audience angle",`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1501: `summary: "Publishing checklist and schedule draft prepared.",`
+- L1508: `"Draft publish schedule by channel",`
+- L1520: `title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",`
+- L1521: `summary: "Ad angle and audience testing draft prepared for review.",`
+- L1537: `"Primary ad angle draft",`
+- L1562: `title: "Compliance Draft: Risk review checklist",`
+- L1578: `title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",`
+- L1579: `summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",`
+- L1580: `mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",`
+- L1581: `replyDraft: [`
+- L1585: `ticketDraft: [`
+- L1587: `"Priority: draft priority pending runtime inbox and SLA confirmation.",`
+- L1591: `"Unified Inbox is not duplicated here; this is a draft and routing preview only.",`
+- L1594: `nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",`
+- L1597: `"Draft a safe customer reply",`
+- L1598: `"Create ticket draft fields for review",`
+- L1609: `title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",`
+- L1610: `summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",`
+- L1611: `mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",`
+- L1612: `outreachDraft: [`
+- L1634: `"Draft outreach for review",`
+- L1648: `summary: "Workflow draft prepared with stage owners and checkpoints.",`
+- L1651: `"Stage 2: Specialist draft production",`
+- L1655: `safetyLabel: "Workflow run is not started. This is a draft preview only."`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1661: `summary: "Operational plan drafted with next tasks, owners, and route.",`
+- L1705: `"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",`
+- L1711: `"Writer: draft hooks, captions, messages, email, or outreach copy",`
+- L1712: `"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",`
+- L1715: `"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1719: `nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",`
+- L1721: `safetyLabel: "Full Team output is a coordinated draft preview only."`
+- L1741: `\`Status: ${humanizeValue(output.status, "draft_preview")}\`,`
+- L1830: `draftText: "",`
+- L2084: `routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),`
+- L2218: `routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));`
+- L2334: `setSharedAiDraft(projectName, {`
+- L2520: `status: asString(preview.status || "draft_preview"),`
+- L2521: `safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),`
+- L2548: `aiInboundHandoffObjectIds.set(handoff, \`cached-ai-handoff-${Date.now()}-${aiInboundHandoffCounter}\`);`
+- L2555: `.join("::") || \`cached-ai-handoff-${Date.now()}\`;`
+- L2560: `const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);`
+- L2566: `draftContext.source_page,`
+- L2567: `draftContext.sourcePage`
+- L2576: `draftContext.specialist ||`
+- L2577: `draftContext.specialist_id ||`
+- L2578: `draftContext.modeId ||`
+- L2579: `draftContext.mode_id ||`
+- L2588: `draftContext.prompt,`
+- L2589: `draftContext.message,`
+- L2590: `draftContext.request,`
+- L2591: `draftContext.summary`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2596: `draftContext.title,`
+- L2597: `draftContext.lastResponseTitle,`
+- L2604: `asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :`
+- L2605: `draftContext.route_suggestions,`
+- L2609: `const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));`
+- L2611: `draftContext.outputPreview,`
+- L2612: `draftContext.output_preview,`
+- L2613: `draftContext.phase2_output_preview,`
+- L2626: `draftContext: {`
+- L2627: `...draftContext,`
+- L2644: `session.draftMessage = normalized.prompt;`
+- L2662: `saveLocalOutput(projectName, {`
+- L2664: `responses: session.responseHistory,`
+- L2670: `setSharedAiDraft(projectName, {`
+- L2671: `...normalized.draftContext,`
+- L2683: `persistSessionDraft(projectName, session, \`Inbound handoff loaded from ${normalized.sourceLabel}\`);`
+- L2769: `session.history.unshift({`
+- L2770: `id: commandId || \`history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}\`,`
+- L2778: `session.history = session.history.slice(0, 14);`
+- L2779: `session.draftMessage = "";`
+- L2940: `>${escapeHtml(session.draftMessage)}</textarea>`
+- L2975: `<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>`
+- L3172: `<span style="font-size:11px;color:var(--color-text-2);">${session.history.length} logged · click to restore</span>`
+- L3175: `${session.history.length ? \``
+- L3177: `${session.history.slice(0, 8).map((entry, index) => {`
+- L3182: `<button class="ctrl-recent-item" type="button" data-ctrl-history="${index}">`
+- L3288: `const latestResponse = asArray(session.responseHistory)[0] || null;`
+- L3308: `session.draftMessage ||`
+- L3339: `guidance: "review-ready draft",`
+- L3343: `}[outputType] || "work draft";`
+- L3378: `preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";`
+- L3510: `if (asArray(session.responseHistory).length) return 2;`
+- L3511: `if (asString(session.draftMessage).trim()) return 0;`
+- L3517: `guidance: "draft",`
+- L3518: `preview: "draft",`
+- L3524: `return map[asString(intent)] || "draft";`
+- L3532: `return "draft";`
+- L3543: `guidance: "Draft",`
+- L3544: `task: "Task Draft",`
+- L3547: `media: "Draft"`
+- L3551: `return firstOutput ? titleCase(asString(firstOutput).replace(/[_-]+/g, " ")) : "Draft";`
+- L3568: `if (tool.intent === "workflow") return "Draft";`
+- L3570: `if (tool.intent === "task") return "Draft";`
+- L3797: `if (roleId === "content_writer") return \`${label} is drafting your content...\`;`
+- L3866: `template: asString(tool.template || "Prepare a review-ready draft for {projectName}.")`
+- L3882: `{ id: "preview", label: "Preview", hint: "Draft output" },`
+- L3885: `{ id: "history", label: "History", hint: "Saved outputs" }`
+- L3916: `<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>`
+- L3948: `${projectName ? \`<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>\` : ""}`
+- L4015: `<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>`
+- L4131: `const selectedResponses = asArray(session.responseHistory).filter((item) => {`
+- L4194: `<span>Ask for guidance, a draft, source review, task preview, workflow preview, or handoff package. AI Command prepares context only.</span>`
+- L4206: `: spec.placeholder || \`Ask ${spec.label} what to review, draft, improve, or hand off next...\`;`
+- L4220: `>${escapeHtml(session.draftMessage)}</textarea>`
+- L4370: `${projectName ? \`<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>\` : ""}`
+- L4397: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4424: `<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>`
+- L4471: `<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>`
+- L4486: `<span><strong>Output</strong>${escapeHtml(preview.outputType ? formatOutputTypeLabel(preview.outputType) : "No draft yet")}</span>`
+- L4519: `: spec.placeholder || \`Ask ${spec.label} what to review, draft, improve, or hand off next...\`;`
+- L4525: `const draftLabel = asString(session.draftMessage).trim() ? "Draft saved" : "Empty draft";`
+- L4536: `<span class="aicmd-v2-draft-state">${escapeHtml(draftLabel)}</span>`
+- L4546: `>${escapeHtml(session.draftMessage)}</textarea>`
+- L4581: `<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>`
+- L4615: `<span class="aicmd-v2-preview-status">${escapeHtml(titleCase(preview.status || "draft_preview"))}</span>`
+- L4627: `<h4 class="aicmd-v2-preview-output-title">${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h4>`
+- L4630: `${structuredPreview.draftText ? \``
+- L4631: `<div class="aicmd-v2-preview-draft">${escapeHtml(structuredPreview.draftText)}</div>`
+- L4662: `<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>`
+- L4663: `<button id="aicmdV2LegacyPreviewSaveBtn" class="aicmd-v2-btn-ghost" type="button">Save</button>`
+- L4675: `const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], draftText: "", compactSummary: "" };`
+- L4683: `? "Send Draft to Content Studio"`
+- L4685: `? "Route Draft to Publishing"`
+- L4686: `: \`Route Draft to ${destination}\`;`
+- L4696: `<h2>Review drafts and handoffs</h2>`
+- L4697: `<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>`
+- L4732: `<h3>${escapeHtml(!humanizeValue(preview.title, "") || humanizeValue(preview.title, "").toLowerCase() === "chat reply" ? \`${outputLabel} result\` : humanizeValue(preview.title, "Draft output"))}</h3>`
+- L4762: `<span>Ask the active specialist or open a Tool Drawer prompt to prepare a draft, task preview, workflow preview, or handoff package.</span>`
+- L4784: `const approval = preview.confirmationRequired ? "Confirmation required" : (preview.outputType ? "Review ready" : "No draft yet");`
+- L4787: `const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";`
+- L4788: `const recent = recentAt ? formatTime(recentAt) : (session.draftStatus || "No recent activity");`
+- L4816: `<li><span>Video brief / script draft</span><strong class="is-draft-ready">Draft-ready — no generation executed</strong></li>`
+- L4818: `<li><span>Voice script preparation</span><strong class="is-draft-ready">Draft-ready — script only, no audio</strong></li>`
+- L4849: `const selectedResponses = asArray(session.responseHistory).filter((item) => {`
+- L4854: `const sharedResponses = asArray(session.responseHistory).filter((item) => {`
+- L4865: `const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";`
+- L4883: `const toolHint = selectedToolHints.length ? selectedToolHints.join(", ") : "Draft and route guidance";`
+- L4934: `<p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>`
+- L5012: `<details class="aicmd-room-shared-history">`
+- L5014: `Shared room history`
+- L5017: `<div class="aicmd-room-shared-history-list">`
+- L5022: `<article class="aicmd-room-shared-history-item" data-role="${escapeHtml(producerId)}">`
+- L5055: `data-aicmdv2-prompt-text="${escapeHtml(p.prompt || \`${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.\`)}"`
+- L5072: `const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "Ready"));`
+- L5091: `{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },`
+- L5100: `{ label: "Outreach", value: "Draft only", present: true, scoped: true },`
+- L5138: `<span>Drafts are not execution — prepared content stays local until you act on it.</span>`
+
+## Destructive / Execution Signals
+- L1: `import {`
+- L8: `import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";`
+- L10: `import {`
+- L16: `import {`
+- L22: `import {`
+- L26: `import {`
+- L27: `executeProjectAiChat,`
+- L28: `executeProjectAiGuidance`
+- L64: `id: "publisher",`
+- L65: `label: "Publisher",`
+- L67: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L68: `routeHint: "publishing"`
+- L125: `publisher: "publisher",`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L162: `cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],`
+- L163: `destinations: ["Content Studio", "Publishing", "AI Command"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L188: `cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],`
+- L194: `id: "publisher",`
+- L195: `label: "Publisher",`
+- L196: `position: "Publishing Readiness Lead",`
+- L198: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L199: `placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",`
+- L200: `canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],`
+- L201: `cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],`
+- L202: `destinations: ["Publishing", "Workflows", "AI Command"],`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L214: `cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],`
+- L227: `cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],`
+- L237: `summary: "Claims review, approval safety, publishing risk, and governance notes.",`
+- L238: `placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",`
+- L239: `canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],`
+- L240: `cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],`
+- L241: `destinations: ["Workflows", "Publishing", "Governance"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L266: `cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],`
+- L268: `safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",`
+- L279: `cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],`
+- L281: `safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",`
+- L286: `// Role-specific suggested prompt chips (prefill only, no auto-execute)`
+- L297: `{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },`
+- L312: `publisher: [`
+- L313: `{ label: "Review publishing readiness", sub: "Check what is ready to publish" },`
+- L314: `{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },`
+- L316: `{ label: "Prepare a handoff package", sub: "For the approver review" }`
+- L332: `{ label: "Flag publishing risks", sub: "Identify blockers before release" },`
+- L359: `{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },`
+- L360: `{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },`
+- L371: `{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },`
+- L383: `const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];`
+- L391: `publisher: "PB",`
+- L423: `summary: "Workflow blueprints and trigger maps will route to Workflows before execution."`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L454: `publisher: [`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L459: `{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L494: `{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L514: `{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },`
+- L562: `suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."`
+- L634: `if (/act as the publisher/i.test(text)) return "publisher";`
+- L652: `id: \`auto-generate-${Date.now()}\`,`
+- L653: `type: "generate_prompt",`
+- L655: `action: "Generate prompt from AI command",`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L678: `type: "publish_now",`
+- L679: `targetPage: "publishing",`
+- L680: `action: "Publish now to external channels",`
+- L683: `reason: "Requires approval gate before external publishing actions."`
+- L698: `if (/act as the publisher/i.test(text)) return "publisher";`
+- L789: `"Generate content for:",`
+- L869: `const configuredPublishLanguage = asString(`
+- L870: `overview.publishing_language ||`
+- L871: `overview.publish_language ||`
+- L876: `const publishLanguage = configuredPublishLanguage || "German";`
+- L886: `publishLanguage,`
+- L1082: `function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {`
+- L1083: `if (typeof executeProjectAiGuidanceFn !== "function") {`
+- L1192: `"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",`
+- L1203: `\`Publishable output language: ${safeOutputLanguage}\`,`
+- L1207: `\`Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.\`,`
+- L1208: `"When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",`
+- L1211: `\`When drafting publishable copy, write it in ${safeOutputLanguage}.\`,`
+- L1212: `"Never claim actions were executed.",`
+- L1213: `"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",`
+- L1221: `function extractGeneratedResponseText(response = {}) {`
+- L1267: `if (id === "publisher") return "publishing";`
+- L1304: `const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);`
+- L1307: `const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);`
+- L1332: `if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {`
+- L1333: `outputType = "publishing";`
+- L1334: `return { outputType, destinationRoute: explicitDestination || "publishing" };`
+- L1365: `publishing: "Publishing",`
+- L1392: `confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",`
+- L1393: `generatedAt: nowIso(),`
+- L1398: `confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."`
+- L1435: `"Outcome-led hook direction for a German publishing draft",`
+- L1440: `"German caption version should keep the CTA direct and easy to approve."`
+- L1448: `"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",`
+- L1449: `"Claims, health, or performance promises need evidence before publishing."`
+- L1451: `nextStep: "Send this package to Content Studio or Publisher after review.",`
+- L1458: `safetyLabel: "Claims require review before publishing. No direct publish action."`
+- L1477: `safetyLabel: "No media generation executed. Brief and routing only.",`
+- L1493: `safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."`
+- L1497: `if (specialistId === "publisher") {`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1501: `summary: "Publishing checklist and schedule draft prepared.",`
+- L1504: `"Publishing remains gated until channel, approval, and asset readiness are confirmed."`
+- L1508: `"Draft publish schedule by channel",`
+- L1510: `"Prepare handoff for publishing review"`
+- L1513: `safetyLabel: "Confirmation required before publish. No publish action performed."`
+- L1541: `safetyLabel: "No budget updates or ad launches executed."`
+- L1587: `"Priority: draft priority pending runtime inbox and SLA confirmation.",`
+- L1602: `safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."`
+- L1611: `mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",`
+- L1624: `"Can I send more details?",`
+- L1629: `"Outreach and follow-ups require confirmation before sending."`
+- L1655: `safetyLabel: "Workflow run is not started. This is a draft preview only."`
+- L1668: `safetyLabel: "No workflow run and no backend task creation executed."`
+- L1706: `"Compliance and Publisher verify claims, approvals, formatting, and release readiness",`
+- L1714: `"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",`
+- L1720: `confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",`
+- L1796: `preview.generatedOutput ||`
+- L1841: `const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);`
+- L1877: `const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);`
+- L1909: `importantGaps,`
+- L1923: `approvedAssets: assetCategories`
+- L1924: `.filter((item) => item.status === "Approved")`
+- L1925: `.flatMap((item) => asArray(item.approved_assets).map((assetId) => ({`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L1987: `const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);`
+- L2015: `notes.push("Sync social feeds to learn from real post performance.");`
+- L2018: `notes.push("Search Console not synced — SEO guidance is limited.");`
+- L2074: `top ? \`Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.\` : "Sync social insights to identify winning hooks and formats.",`
+- L2085: `routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),`
+- L2150: `bestCreative ? \`Reuse the creative pattern behind ${extractTopMessage(bestCreative)}.\` : "Sync paid data before scaling any creative.",`
+- L2198: `return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };`
+- L2201: `return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };`
+- L2204: `return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };`
+- L2207: `return { title: "Integration recovery task block", owner: "Integrations", steps: ["Reconnect critical analytics and performance feeds first.", "Test each integration after reconnect and sync current data.", "Return to Insights to confirm coverage improves."] };`
+- L2219: `routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));`
+- L2221: `if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));`
+- L2268: `async function ensureIntelligenceLoaded({`
+- L2294: `loadingPromise: (async () => {`
+- L2301: `const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);`
+- L2302: `const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);`
+- L2304: `insightsResult.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",`
+- L2305: `learningResult.status === "rejected" && !learningMissing ? learningResult.reason?.message : ""`
+- L2311: `insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),`
+- L2312: `learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),`
+- L2333: `function syncAiWorkflowBridge({ projectName, modeId, command, response }) {`
+- L2348: `publishing: "Publishing",`
+- L2370: `publishing: "publisher",`
+- L2404: `publish: "publishing",`
+- L2405: `publisher: "publishing",`
+- L2518: `generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),`
+- L2522: `confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2632: `note: "Guidance only. No publishing, task creation, CRM updates, customer replies, workflow runs, exports, or backend actions are executed from this handoff."`
+- L2694: `async function submitDurableCommand({`
+- L2701: `executeProjectAiCommand,`
+- L2706: `if (typeof executeProjectAiCommand !== "function") throw new Error("AI command service is unavailable.");`
+- L2714: `result = await executeProjectAiCommand(projectName, {`
+- L2721: `approved_assets: aiContext.approvedAssets,`
+- L2781: `syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });`
+- L2948: `<option value="content"${session.taskType === "content" ? " selected" : ""}>✍️ Generate Content</option>`
+- L2971: `<button id="ctrlSendBtn" class="ctrl-send-btn" type="button">Send prompt to ${escapeHtml(mode.label)}</button>`
+- L2975: `<div class="ctrl-composer-hint">Ctrl / Cmd + Enter to send · Suggested prompts prefill only · Draft stays local until you send to execute</div>`
+- L2991: `<span style="font-size:11px;color:var(--color-text-2);">Prefill only — send prompt for preview</span>`
+- L3115: `<div class="ctrl-empty-title">Start the conversation</div>`
+- L3116: `<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>`
+- L3197: `<div class="ctrl-empty-box">Commands you send appear here. Click any to restore and re-run.</div>`
+- L3351: `"Keep it review-ready and do not execute backend actions.",`
+- L3377: `preview.generatedAt = nowIso();`
+- L3378: `preview.safetyLabel = preview.safetyLabel || "Conversation converted into a review-ready draft. No backend action executed.";`
+- L3436: `reason: "A clear campaign context helps every specialist agent generate more precise outputs.",`
+- L3443: `title: "Generate next content wave from current signals",`
+- L3445: `command: \`Generate the next high-impact content wave for ${aiContext.projectName || "this project"} based on current readiness and campaign context.\`,`
+- L3652: `<strong>${escapeHtml(languagePlan.publishLanguage)}</strong>`
+- L3689: `<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>`
+- L3748: `const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];`
+- L3802: `if (roleId === "publisher") return \`${label} is preparing publishing guidance...\`;`
+- L3814: `? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"`
+- L3841: `if (/workflow|schedule_builder|step_sequence|trigger/.test(haystack)) return "workflow";`
+- L3948: `${projectName ? \`<div class="aicmd-v2-tools-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</div>\` : ""}`
+- L3958: `<span class="aicmd-v2-lang-chip" title="Publishing language">📝 ${escapeHtml(languagePlan.publishLanguage)}</span>`
+- L4015: `<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>`
+- L4142: `createdAt: item.generatedAt || ""`
+- L4149: `createdAt: item.generatedAt || ""`
+- L4155: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action is created here."`
+- L4193: `<strong>Start with ${escapeHtml(selectedLabel)}</strong>`
+- L4227: `<span class="aicmd-chatfirst-enter-hint">Enter to send. Shift+Enter for newline.</span>`
+- L4228: `<button id="aicmdV2AskBtn" class="aicmd-chatfirst-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">`
+- L4229: `${isGenerating ? "Sending" : "Send"}`
+- L4237: `<div class="aicmd-chatfirst-composer-safety">Review-ready guidance only. No publish, send, approval, CRM update, workflow run, durable task creation, or backend execution happens from this composer.</div>`
+- L4295: `<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>`
+- L4370: `${projectName ? \`<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>\` : ""}`
+- L4388: `: destination === "Publishing"`
+- L4389: `? "Open Publishing Handoff"`
+- L4418: `<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>`
+- L4444: `<button id="aicmdV2PreviewSendBtn" class="aicmd-chatfirst-action-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4449: `<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>`
+- L4453: `<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>`
+- L4553: `<span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>`
+- L4554: `<button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">`
+- L4566: `<div class="aicmd-v2-composer-hint">Primary workspace: ask, refine, then create a review-ready preview. Suggested prompts prefill only. No publish, send, approval, CRM update, workflow run, or durable task creation happens here.</div>`
+- L4581: `<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>`
+- L4587: `<span>Ask a specialist or send the chat response to preview.</span>`
+- L4601: `: destination === "Publishing"`
+- L4602: `? "Open Publishing Handoff"`
+- L4613: `<p class="aicmd-v2-preview-subtitle">${escapeHtml(humanizeValue(preview.sourcePrompt, "Review the generated specialist output."))}</p>`
+- L4622: `<span class="aicmd-v2-preview-chip"><strong>Generated:</strong> ${escapeHtml(formatTime(preview.generatedAt))}</span>`
+- L4662: `<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>`
+- L4683: `? "Send Draft to Content Studio"`
+- L4684: `: destination === "Publishing"`
+- L4685: `? "Route Draft to Publishing"`
+- L4720: `<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>`
+- L4768: `<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4773: `<div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>`
+- L4775: `<div class="aicmd-room-planned-note">No preview yet. Start in the composer, then review the output here before opening a destination workspace.</div>`
+- L4787: `const recentAt = asArray(session.responseHistory)[0]?.generatedAt || preview.generatedAt || "";`
+- L4816: `<li><span>Video brief / script draft</span><strong class="is-draft-ready">Draft-ready — no generation executed</strong></li>`
+- L4863: `? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action was created."`
+- L4915: `createdAt: item.generatedAt || ""`
+- L4922: `createdAt: item.generatedAt || ""`
+- L4967: `<small>${escapeHtml(latestSelected ? formatTime(latestSelected.generatedAt) : "No reply yet")}</small>`
+- L4988: `<strong>Start with the selected specialist</strong>`
+- L4998: `<span>${escapeHtml(formatTime(latestSelected.generatedAt))}</span>`
+- L5004: `<button id="aicmdV3ResponseSendBtn" class="aicmd-v2-btn-secondary" type="button">Open Handoff</button>`
+- L5025: `<span>${escapeHtml(formatTime(item.generatedAt))}</span>`
+- L5055: `data-aicmdv2-prompt-text="${escapeHtml(p.prompt || \`${p.label}. ${p.sub}. Prepare this as a review-ready draft only; do not execute anything.\`)}"`
+- L5078: `{ label: "Publishing language", value: languagePlan.publishLanguage, present: true },`
+- L5085: `{ label: "Approved assets", value: aiContext.approvedAssets.length ? \`${aiContext.approvedAssets.length} ready\` : "No approved assets", present: aiContext.approvedAssets.length > 0 },`
+- L5090: `{ label: "Open conversations", value: "Snapshot / requires runtime surface", present: false, scoped: true },`
+- L5142: `<span>Publishing, approval, and workflow runs require your explicit confirmation in the right workspace.</span>`
+- L5161: `time: item.generatedAt`
+- L5167: `time: preview.generatedAt`
+- L5202: `description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."`
+- L5217: `executeProjectAiCommand,`
+- L5281: `const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);`
+- L5325: `session.draftStatus = "New session started";`
+- L5377: `session.draftStatus = "New session started";`
+- L5397: `persistSessionDraft(sessionKey, session, "New session started");`
+- L5398: `showMessage?.("New AI session started. Previous chat saved to Recent chats.");`
+- L5449: `session.draftMessage = \`Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.\`;`
+- L5477: `persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");`
+- L5524: `const sendBtn = $("aicmdV2AskBtn");`
+- L5525: `if (sendBtn && !sendBtn.disabled) {`
+- L5526: `sendBtn.click?.();`
+- L5538: `updateStatus("Voice input trigger is ready. Browser speech recognition is not available in this environment yet.");`
+- L5560: `updateStatus("Voice input could not start. Microphone permission may be blocked.");`
+- L5562: `recognition.start();`
+- L5565: `updateStatus("Voice input could not start in this browser.");`
+
+## Confirmation Signals
+- none
+
+## Access-Key / Credential Signals
+- L766: `function applyTokenTemplate(template, context = {}) {`
+- L767: `const tokenMap = {`
+- L775: `return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");`
+- L1891: `.filter((record) => ["error", "token_expired", "partial"].includes(asString(record?.status)))`
+- L5849: `const preparedPrompt = applyTokenTemplate(tool.template, {`
+
+## Navigation Signals
+- L40: `routeHint: "campaign-studio"`
+- L47: `routeHint: "content-studio"`
+- L54: `routeHint: "media-studio"`
+- L61: `routeHint: "media-studio"`
+- L68: `routeHint: "publishing"`
+- L75: `routeHint: "ads-manager"`
+- L82: `routeHint: "insights"`
+- L89: `routeHint: "governance"`
+- L96: `routeHint: "workflows"`
+- L103: `routeHint: "operations-centers"`
+- L110: `routeHint: "workflows"`
+- L264: `placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",`
+- L346: `{ label: "Prepare escalation", sub: "Route support, sales, or operations" }`
+- L352: `{ label: "Prepare sales handoff", sub: "Route context to operations" }`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L423: `summary: "Workflow blueprints and trigger maps will route to Workflows before execution."`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L459: `{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }`
+- L466: `{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }`
+- L473: `{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }`
+- L480: `{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }`
+- L487: `{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L967: `routeSuggestions: [],`
+- L1259: `function destinationRouteForSpecialist(specialistId, outputType) {`
+- L1278: `function resolveAiResponseOutputRoute(session, response = {}) {`
+- L1281: `const explicitDestination = asString(response.destinationRoute || "").trim();`
+- L1286: `response.destinationRoute,`
+- L1314: `return { outputType, destinationRoute: "task-center" };`
+- L1319: `return { outputType, destinationRoute: explicitDestination || "workflows" };`
+- L1324: `return { outputType, destinationRoute: explicitDestination || "content-studio" };`
+- L1329: `return { outputType, destinationRoute: explicitDestination || "media-studio" };`
+- L1334: `return { outputType, destinationRoute: explicitDestination || "publishing" };`
+- L1339: `return { outputType, destinationRoute: explicitDestination || "governance" };`
+- L1344: `return { outputType, destinationRoute: explicitDestination || "insights" };`
+- L1351: `destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")`
+- L1355: `const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);`
+- L1356: `return { outputType, destinationRoute };`
+- L1360: `function routeLabel(route) {`
+- L1375: `return labels[route] || titleCase(route);`
+- L1382: `const route = destinationRouteForSpecialist(specialistId, outputType);`
+- L1391: `destinationRoute: route,`
+- L1397: `nextSafeAction: \`Review in ${routeLabel(route)}\`,`
+- L1411: `"Route execution draft to Campaign Studio or Workflows"`
+- L1456: `"Route to Content Studio for refinement"`
+- L1491: `"Route to Media Studio for production planning"`
+- L1568: `"Route to Governance for formal review"`
+- L1580: `mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",`
+- L1594: `nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",`
+- L1631: `nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",`
+- L1636: `"Route sales handoff without mutating CRM data"`
+- L1661: `summary: "Operational plan drafted with next tasks, owners, and route.",`
+- L1718: `destinationRoute: outputType === "task" ? "task-center" : "workflows",`
+- L1719: `nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",`
+- L1753: `lines.push(\`Destination: ${routeLabel(output.destinationRoute)}\`);`
+- L1970: `operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],`
+- L1987: `const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);`
+- L1995: `function routeSuggestion(label, route, reason) {`
+- L1996: `return { label, route, reason };`
+- L2048: `routeSuggestions: [`
+- L2049: `routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),`
+- L2050: `routeSuggestion("Integrations", "integrations", "Reconnect data sources and improve intelligence coverage."),`
+- L2051: `routeSuggestion("Insights", "insights", "Review performance signals and the recommendation stack.")`
+- L2083: `routeSuggestions: [`
+- L2084: `routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),`
+- L2085: `routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),`
+- L2086: `routeSuggestion("Insights", "insights", "Compare top and weak content performance.")`
+- L2119: `routeSuggestions: [`
+- L2120: `routeSuggestion("Insights", "insights", "Review search and website performance together."),`
+- L2121: `routeSuggestion("Integrations", "integrations", "Reconnect GA4 or Search Console."),`
+- L2122: `routeSuggestion("Setup", "setup", "Refine positioning if traffic signal is weak or misaligned.")`
+- L2154: `routeSuggestions: [`
+- L2155: `routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),`
+- L2156: `routeSuggestion("Integrations", "integrations", "Connect or reconnect paid reporting platforms."),`
+- L2157: `routeSuggestion("Insights", "insights", "Compare paid vs organic and website results.")`
+- L2182: `routeSuggestions: [`
+- L2183: `routeSuggestion("Setup", "setup", "Strengthen project assumptions, goals, and audience context."),`
+- L2184: `routeSuggestion("Integrations", "integrations", "Increase data coverage and reduce blind spots."),`
+- L2185: `routeSuggestion("Insights", "insights", "See where evidence is strong and where it is thin.")`
+- L2201: `return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };`
+- L2215: `const routeSuggestions = [];`
+- L2216: `if (/campaign/.test(query)) routeSuggestions.push(routeSuggestion("Campaign Studio", "campaign-studio", "Turn this into a structured launch plan."));`
+- L2218: `routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));`
+- L2219: `routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));`
+- L2221: `if (/reconnect|connect|integration|tool|sync/.test(query)) routeSuggestions.push(routeSuggestion("Integrations", "integrations", "Reconnect data sources and restore intelligence coverage."));`
+- L2222: `if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));`
+- L2223: `if (!routeSuggestions.length) routeSuggestions.push(routeSuggestion("Workflows", "workflows", "Use Workflows when the task spans multiple execution areas."));`
+- L2236: `routeSuggestions,`
+- L2339: `routeSuggestions: asArray(response?.routeSuggestions),`
+- L2477: `function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {`
+- L2478: `const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;`
+- L2479: `const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);`
+- L2482: `const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);`
+- L2483: `const stringRoute = rawRoute ? "" : firstAiInboundId(item);`
+- L2484: `const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);`
+- L2485: `const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;`
+- L2487: `return { route, label, reason };`
+- L2488: `}).filter((item) => item.route || item.label);`
+- L2492: `route: fallbackRoute,`
+- L2502: `const destinationRoute = normalizeAiInboundSourcePage(`
+- L2503: `preview.destinationRoute ||`
+- L2504: `preview.destination_route ||`
+- L2505: `asArray(normalized.routeSuggestions)[0]?.route ||`
+- L2516: `destinationRoute,`
+- L2569: `const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2601: `const routeSuggestions = normalizeAiInboundRouteSuggestions(`
+- L2602: `asAiInboundList(payload.routeSuggestions).length ? payload.routeSuggestions :`
+- L2603: `asAiInboundList(payload.route_suggestions).length ? payload.route_suggestions :`
+- L2604: `asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :`
+- L2605: `draftContext.route_suggestions,`
+- L2624: `routeSuggestions,`
+- L2648: `session.routeSuggestions = normalized.routeSuggestions;`
+- L2654: `routeSuggestions: normalized.routeSuggestions`
+- L2677: `routeSuggestions: normalized.routeSuggestions,`
+- L2742: `routeSuggestions: [],`
+- L2939: `placeholder="Ask ${escapeHtml(mode.label)} anything — what to do next, what content is working, which campaign to scale, or where to route the next action…"`
+- L3026: `const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {`
+- L3029: `label: humanizeValue(record.label || record.title || record.route || item),`
+- L3030: `route: asString(record.route || record.destination || record.page),`
+- L3033: `}).filter((item) => item.label || item.route);`
+- L3090: `${routeSuggestions.length ? \``
+- L3093: `<div class="ctrl-route-row">`
+- L3094: `${routeSuggestions.map((item, index) => \``
+- L3095: `<button class="ctrl-route-btn" type="button" data-ctrl-route="${index}" data-ctrl-route-owner="${escapeHtml(ownerId || "")}" title="${escapeHtml(item.reason)}">`
+- L3451: `//  ROUTE EXPORT`
+- L3554: `function getToolDestinationRoute(tool, session) {`
+- L3555: `if (tool.route) return asString(tool.route || "workflows");`
+- L3558: `return destinationRouteForSpecialist(session?.modeId || "operations", outputType);`
+- L3842: `if (/handoff|route|destination_brief/.test(haystack)) return "handoff";`
+- L3847: `function getCanonicalToolRoute(tool = {}, session) {`
+- L3851: `return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));`
+- L3864: `route: getCanonicalToolRoute(tool, session),`
+- L3925: `const destination = routeLabel(getToolDestinationRoute(tool, session));`
+- L4156: `: "Preview-safe. Chat requires the protected AI chat route.";`
+- L4355: `const destination = routeLabel(getToolDestinationRoute(tool, session));`
+- L4381: `const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));`
+- L4386: `const routeActionLabel = destination === "Content Studio"`
+- L4444: `<button id="aicmdV2PreviewSendBtn" class="aicmd-chatfirst-action-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4581: `<p class="aicmd-v2-preview-subtitle">Generated content, draft packages, and routed handoffs appear here.</p>`
+- L4594: `const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));`
+- L4599: `const routeActionLabel = destination === "Content Studio"`
+- L4605: `? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")`
+- L4662: `<button id="aicmdV2LegacyPreviewSendBtn" class="aicmd-v2-btn-secondary" type="button">Route Draft</button>`
+- L4677: `const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));`
+- L4682: `const routeActionLabel = destination === "Content Studio"`
+- L4685: `? "Route Draft to Publishing"`
+- L4686: `: \`Route Draft to ${destination}\`;`
+- L4688: `? (preview.confirmationRequired ? "Confirmation required" : "Review before handoff route")`
+- L4768: `<button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>`
+- L4864: `: "Preview-safe. Chat tools require the protected AI chat route.";`
+- L4883: `const toolHint = selectedToolHints.length ? selectedToolHints.join(", ") : "Draft and route guidance";`
+- L5071: `const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));`
+- L5196: `export const aiCommandRoute = {`
+- L5202: `description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."`
+- L5214: `navigateTo,`
+- L5323: `session.routeSuggestions = [];`
+- L5337: `aiCommandRoute.render(context);`
+- L5363: `aiCommandRoute.render(context);`
+- L5374: `session.routeSuggestions = [];`
+- L5399: `aiCommandRoute.render(context);`
+- L5407: `navigateTo("settings");`
+- L5417: `aiCommandRoute.render(context);`
+- L5430: `aiCommandRoute.render(context);`
+- L5455: `aiCommandRoute.render(context);`
+- L5466: `aiCommandRoute.render(context);`
+- L5570: `// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────`
+- L5586: `aiCommandRoute.render(context);`
+- L5588: `showMessage?.("AI chat route is not connected yet.");`
+- L5622: `aiCommandRoute.render(context);`
+- L5658: `throw new Error("AI chat route returned no response text.");`
+- L5686: `const routeSuggestion = asArray(response.routeSuggestions || result?.routeSuggestions)[0];`
+- L5687: `const responseRoute = resolveAiResponseOutputRoute(session, {`
+- L5693: `destinationRoute: asString(routeSuggestion?.route)`
+- L5709: `outputType: responseRoute.outputType,`
+- L5711: `destinationRoute: responseRoute.destinationRoute`
+- L5728: `aiCommandRoute.render(context);`
+- L5743: `aiCommandRoute.render(context);`
+- L5766: `aiCommandRoute.render(context);`
+- L5790: `aiCommandRoute.render(context);`
+- L5813: `aiCommandRoute.render(context);`
+- L5837: `aiCommandRoute.render(context);`
+- L5858: `destinations: asArray(tool.destinations).length ? tool.destinations : [getToolDestinationRoute(tool, session)],`
+- L5898: `session.routeSuggestions = [];`
+- L5992: `aiCommandRoute.render(context);`
+- L6000: `const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);`
+- L6001: `const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));`
+- L6007: `routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],`
+- L6027: `navigateTo(destination);`
+- L6094: `const destination = asString(output.destinationRoute || "").trim();`
+- L6096: `updateStatus("No destination route is available for this preview.");`
+- L6113: `routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],`
+- L6122: `navigateTo(destination);`
+- L6164: `aiCommandRoute.render(context);`
+- L6178: `rerender: () => aiCommandRoute.render(context)`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L18: `setSharedAiDraft,`
+- L102: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L148: `canHelp: ["Draft campaign plans", "Prioritize next actions", "Map launch sequences", "Advise on offer strategy", "Prepare channel briefs"],`
+- L151: `safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",`
+- L160: `placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L177: `safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",`
+- L190: `safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L255: `safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",`
+- L263: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",`
+- L264: `placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",`
+- L265: `canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],`
+- L268: `safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L281: `safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",`
+- L290: `{ label: "Draft a campaign brief", sub: "Map objective, audience, and channels" },`
+- L295: `{ label: "Draft campaign captions", sub: "For the active campaign" },`
+- L319: `{ label: "Draft ad concepts", sub: "For the current campaign" },`
+- L338: `{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },`
+- L344: `{ label: "Draft customer reply", sub: "Safe response for review" },`
+- L350: `{ label: "Draft outreach", sub: "Personalized message for review" },`
+- L364: `const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L376: `{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },`
+- L378: `{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },`
+- L379: `{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L430: `{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },`
+- L431: `{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },`
+- L432: `{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }`
+- L435: `{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },`
+- L436: `{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },`
+- L437: `{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L441: `{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },`
+- L442: `{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },`
+- L443: `{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },`
+- L444: `{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },`
+- L448: `{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },`
+- L449: `{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },`
+- L450: `{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },`
+- L451: `{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },`
+- L452: `{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L457: `{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L462: `{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },`
+- L463: `{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L465: `{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },`
+- L469: `{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },`
+- L470: `{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },`
+- L471: `{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },`
+- L472: `{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },`
+- L476: `{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },`
+- L477: `{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },`
+- L478: `{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L483: `{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },`
+- L484: `{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L486: `{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },`
+- L490: `{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },`
+- L491: `{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },`
+- L492: `{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L494: `{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L496: `{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L500: `{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L502: `{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },`
+- L503: `{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },`
+- L504: `{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },`
+- L505: `{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },`
+- L506: `{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L519: `const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";`
+- L649: `const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");`
+- L683: `reason: "Requires approval gate before external publishing actions."`
+- L786: `"Draft a workflow sequence for:",`
+- L787: `"Draft a task plan for:",`
+- L825: `session.draftMessage = cleanValue;`
+- L939: `workspaceTab: "preview",`
+- L940: `outputWorkspaceTab: "draft",`
+- L942: `draftMessage: "",`
+- L946: `draftStatus: "",`
+- L948: `localDraftLoaded: false,`
+- L970: `outputPreview: null,`
+- L971: `activeOutputTab: "draft",`
+- L984: `function readLocalDraftMap() {`
+- L987: `const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";`
+- L995: `function writeLocalDraftMap(map) {`
+- L998: `window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));`
+- L1002: `function loadLocalDraft(projectName) {`
+- L1004: `return asObject(readLocalDraftMap()[key]);`
+- L1007: `function saveLocalDraft(projectName, draftPayload) {`
+- L1009: `const map = readLocalDraftMap();`
+- L1012: `...asObject(draftPayload),`
+- L1015: `writeLocalDraftMap(map);`
+- L1019: `function hydrateSessionDraft(projectName, session) {`
+- L1020: `if (session.localDraftLoaded) return;`
+- L1021: `const localDraft = loadLocalDraft(projectName);`
+- L1022: `if (localDraft.prompt) {`
+- L1023: `session.draftMessage = asString(localDraft.prompt);`
+- L1024: `session.composerText = session.draftMessage;`
+- L1026: `if (localDraft.modeId) session.modeId = asString(localDraft.modeId);`
+- L1027: `if (localDraft.commandType) session.commandType = asString(localDraft.commandType);`
+- L1028: `if (localDraft.targetType) session.targetType = asString(localDraft.targetType);`
+- L1029: `if (localDraft.targetValue) session.targetValue = asString(localDraft.targetValue);`
+- L1030: `if (localDraft.prompt || localDraft.updatedAt) {`
+- L1031: `session.draftStatus = \`Draft restored ${formatTime(localDraft.updatedAt)}\`;`
+- L1033: `session.localDraftLoaded = true;`
+- L1036: `function persistSessionDraft(projectName, session, hint) {`
+- L1037: `const saved = saveLocalDraft(projectName, {`
+- L1038: `prompt: session.draftMessage,`
+- L1044: `session.draftStatus = hint || \`Saved locally ${formatTime(saved.updatedAt)}\`;`
+- L1123: `const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;`
+- L1139: `preview: session.outputPreview || null,`
+- L1162: `session.outputPreview = asObject(record.preview);`
+- L1163: `session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);`
+- L1165: `session.draftMessage = "";`
+- L1211: `\`When drafting publishable copy, write it in ${safeOutputLanguage}.\`,`
+- L1322: `if (/content|copy|draft|caption|email|blog|article|script/.test(outputType) || looksContentLike) {`
+- L1387: `title: "Draft output",`
+- L1395: `status: "draft_preview",`
+- L1396: `safetyLabel: "Guidance and draft only. No backend execution.",`
+- L1406: `summary: "Strategic task draft prepared with priorities, blockers, and operating sequence.",`
+- L1411: `"Route execution draft to Campaign Studio or Workflows"`
+- L1413: `nextSafeAction: "Review and refine the task draft before creating durable tasks"`
+- L1423: `"Next operating move drafted with destination routing"`
+- L1431: `title: outputType === "task" ? "Task: Draft campaign copy" : "Content Guidance: Messaging draft",`
+- L1432: `summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",`
+- L1435: `"Outcome-led hook direction for a German publishing draft",`
+- L1453: `"Draft 3 hook variants",`
+- L1454: `"Draft captions with CTA",`
+- L1466: `title: "Media Brief: Visual direction draft",`
+- L1469: `"Define the hero subject, composition, lighting, and brand guardrails before production.",`
+- L1486: `summary: "Video draft prepared with hook, script structure, and storyboard flow.",`
+- L1488: `"Draft opening hook and audience angle",`
+- L1493: `safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."`
+- L1500: `title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",`
+- L1501: `summary: "Publishing checklist and schedule draft prepared.",`
+- L1508: `"Draft publish schedule by channel",`
+- L1520: `title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",`
+- L1521: `summary: "Ad angle and audience testing draft prepared for review.",`
+- L1537: `"Primary ad angle draft",`
+- L1562: `title: "Compliance Draft: Risk review checklist",`
+- L1578: `title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",`
+- L1579: `summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",`
+- L1580: `mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",`
+- L1581: `replyDraft: [`
+- L1585: `ticketDraft: [`
+- L1587: `"Priority: draft priority pending runtime inbox and SLA confirmation.",`
+- L1591: `"Unified Inbox is not duplicated here; this is a draft and routing preview only.",`
+- L1594: `nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",`
+- L1597: `"Draft a safe customer reply",`
+- L1598: `"Create ticket draft fields for review",`
+- L1609: `title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",`
+- L1610: `summary: "Sales and CRM draft prepared with lead qualification, outreach direction, follow-up cadence, and pipeline handoff notes.",`
+- L1611: `mainOutput: "Use this as a sales planning draft. Confirm CRM context and owner before sending outreach or changing pipeline status.",`
+- L1612: `outreachDraft: [`
+- L1634: `"Draft outreach for review",`
+- L1648: `summary: "Workflow draft prepared with stage owners and checkpoints.",`
+- L1651: `"Stage 2: Specialist draft production",`
+- L1655: `safetyLabel: "Workflow run is not started. This is a draft preview only."`
+- L1660: `title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",`
+- L1661: `summary: "Operational plan drafted with next tasks, owners, and route.",`
+- L1675: `function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {`
+- L1701: `title: outputType === "workflow" ? "Team Workflow" : \`Team ${titleCase(outputType)} Preview\`,`
+- L1702: `summary: \`Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.\`,`
+- L1705: `"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",`
+- L1711: `"Writer: draft hooks, captions, messages, email, or outreach copy",`
+- L1712: `"Media / Video: prepare creative direction, asset needs, script, storyboard, or voiceover draft",`
+- L1715: `"Customer Ops / Sales: add reply, ticket, lead, outreach, or CRM handoff drafts when relevant",`
+- L1716: `"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"`
+- L1719: `nextSafeAction: "Review the team draft, confirm owners, then route draft context to the destination workspace",`
+- L1721: `safetyLabel: "Full Team output is a coordinated draft preview only."`
+- L1730: `handoff: "Handoff Preview",`
+- L1736: `function buildPreviewText(output, specialistLabel) {`
+- L1741: `\`Status: ${humanizeValue(output.status, "draft_preview")}\`,`
+- L1760: `function compactPreviewText(value, maxLength = 360) {`
+- L1767: `function splitPreviewLines(value, limit = 6) {`
+- L1791: `function buildStructuredPreviewBlocks(preview = {}) {`
+- L1792: `const summary = humanizeValue(preview.summary, "");`
+- L1794: `preview.mainOutput ||`
+- L1795: `preview.output ||`
+- L1796: `preview.generatedOutput ||`
+- L1797: `preview.result ||`
+- L1802: `const compactSummary = compactPreviewText(sourceText || summary, 420);`
+- L1805: `const mainLines = splitPreviewLines(sourceText || summary, 14)`
+- L1806: `.map((item) => compactPreviewText(item, 360));`
+- L1812: `const bullets = normalizeUniqueDisplayList(preview.bullets, 8)`
+- L1813: `.map((item) => compactPreviewText(item, 300));`
+- L1819: `const steps = normalizeUniqueDisplayList(preview.steps, 8)`
+- L1820: `.map((item) => compactPreviewText(item, 280));`
+- L1824: `} else if (preview.nextStep) {`
+- L1825: `blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });`
+- L1830: `draftText: "",`
+- L2084: `routeSuggestion("Content Studio", "content-studio", "Rewrite weak posts and turn winning patterns into new drafts."),`
+- L2218: `routeSuggestions.push(routeSuggestion("Content Studio", "content-studio", "Draft, rewrite, or prepare the requested content outputs."));`
+- L2334: `setSharedAiDraft(projectName, {`
+- L2498: `function normalizeAiInboundOutputPreview(rawPreview, normalized) {`
+- L2499: `const preview = asObject(rawPreview);`
+- L2500: `if (!Object.keys(preview).length) return null;`
+- L2501: `const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";`
+- L2503: `preview.destinationRoute ||`
+- L2504: `preview.destination_route ||`
+- L2509: `const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);`
+- L2512: `...preview,`
+- L2514: `title: firstAiInboundText(preview.title, normalized.title, \`Inbound handoff from ${normalized.sourceLabel}\`),`
+- L2515: `summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),`
+- L2518: `generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),`
+- L2519: `sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),`
+- L2520: `status: asString(preview.status || "draft_preview"),`
+- L2521: `safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),`
+- L2522: `confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),`
+- L2523: `confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true`
+- L2560: `const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);`
+- L2566: `draftContext.source_page,`
+- L2567: `draftContext.sourcePage`
+- L2576: `draftContext.specialist ||`
+- L2577: `draftContext.specialist_id ||`
+- L2578: `draftContext.modeId ||`
+- L2579: `draftContext.mode_id ||`
+- L2588: `draftContext.prompt,`
+- L2589: `draftContext.message,`
+- L2590: `draftContext.request,`
+- L2591: `draftContext.summary`
+- L2592: `)) || \`Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.\`;`
+- L2596: `draftContext.title,`
+- L2597: `draftContext.lastResponseTitle,`
+- L2604: `asAiInboundList(draftContext.routeSuggestions).length ? draftContext.routeSuggestions :`
+- L2605: `draftContext.route_suggestions,`
+- L2609: `const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));`
+- L2610: `const rawOutputPreview = firstAiInboundObject(`
+- L2611: `draftContext.outputPreview,`
+- L2612: `draftContext.output_preview,`
+- L2613: `draftContext.phase2_output_preview,`
+- L2614: `payload.outputPreview,`
+- L2615: `payload.output_preview`
+- L2625: `outputPreview: null,`
+- L2626: `draftContext: {`
+- L2627: `...draftContext,`
+- L2634: `normalized.outputPreview = normalizeAiInboundOutputPreview(rawOutputPreview, normalized);`
+- L2644: `session.draftMessage = normalized.prompt;`
+- L2658: `if (normalized.outputPreview) {`
+- L2659: `session.outputPreview = normalized.outputPreview;`
+- L2660: `session.outputWorkspaceTab = outputTabFromPreview(normalized.outputPreview);`
+- L2663: `preview: session.outputPreview,`
+
+## Risky Terms
+- L1: `import {`
+- L4: `getSelectedLibrarySource,`
+- L8: `import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";`
+- L10: `import {`
+- L16: `import {`
+- L17: `getSharedHandoff,`
+- L19: `setSharedHandoff`
+- L22: `import {`
+- L24: `} from "../asset-library.js";`
+- L26: `import {`
+- L27: `executeProjectAiChat,`
+- L28: `executeProjectAiGuidance`
+- L64: `id: "publisher",`
+- L65: `label: "Publisher",`
+- L67: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L68: `routeHint: "publishing"`
+- L85: `id: "compliance_reviewer",`
+- L86: `label: "Compliance Reviewer",`
+- L88: `summary: "Claims review, approvals, safety language, and governance checks.",`
+- L89: `routeHint: "governance"`
+- L95: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L102: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",`
+- L109: `summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",`
+- L125: `publisher: "publisher",`
+- L126: `compliance_reviewer: "compliance_reviewer",`
+- L147: `placeholder: "Ask the Strategist to plan a campaign, map launch phases, review channel priorities, or define the offer strategy…",`
+- L149: `cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],`
+- L161: `canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],`
+- L162: `cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],`
+- L163: `destinations: ["Content Studio", "Publishing", "AI Command"],`
+- L164: `safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",`
+- L173: `placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",`
+- L174: `canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],`
+- L175: `cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],`
+- L176: `destinations: ["Asset Library", "Content Studio", "AI Command"],`
+- L188: `cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],`
+- L189: `destinations: ["Asset Library", "Content Studio", "Media Native"],`
+- L190: `safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",`
+- L194: `id: "publisher",`
+- L195: `label: "Publisher",`
+- L196: `position: "Publishing Readiness Lead",`
+- L198: `summary: "Publishing readiness, schedule review, and handoff preparation.",`
+- L199: `placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",`
+- L200: `canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],`
+- L201: `cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],`
+- L202: `destinations: ["Publishing", "Workflows", "AI Command"],`
+- L203: `safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",`
+- L212: `placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",`
+- L213: `canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],`
+- L214: `cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],`
+- L216: `safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",`
+- L225: `placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",`
+- L226: `canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],`
+- L227: `cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],`
+- L233: `id: "compliance_reviewer",`
+- L234: `label: "Compliance Reviewer",`
+- L235: `position: "Claims and Governance Lead",`
+- L237: `summary: "Claims review, approval safety, publishing risk, and governance notes.",`
+- L238: `placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",`
+- L239: `canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],`
+- L240: `cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],`
+- L241: `destinations: ["Workflows", "Publishing", "Governance"],`
+- L242: `safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",`
+- L248: `position: "Execution and Handoff Lead",`
+- L250: `summary: "Tasks, timelines, handoffs, approvals, and execution plans.",`
+- L251: `placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",`
+- L252: `canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],`
+- L253: `cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],`
+- L255: `safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",`
+- L263: `summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",`
+- L264: `placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",`
+- L265: `canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],`
+- L266: `cannotDo: ["Send customer replies", "Create live tickets", "Change SLA policy", "Escalate without confirmation"],`
+- L268: `safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",`
+- L276: `summary: "Lead qualification, outreach drafts, follow-up cadence, CRM profile summaries, and sales handoff notes.",`
+- L277: `placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",`
+- L278: `canHelp: ["Qualify lead context", "Draft outreach", "Plan follow-up sequences", "Summarize CRM profiles", "Prepare sales handoffs"],`
+- L279: `cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],`
+- L281: `safetyNote: "Sales and CRM outputs are guidance and drafts only. CRM mutations and outreach sends require confirmation in the owning surface.",`
+- L286: `// Role-specific suggested prompt chips (prefill only, no auto-execute)`
+- L289: `{ label: "What should I do next?", sub: "Review priorities and blockers" },`
+- L291: `{ label: "Review launch readiness", sub: "Identify what is blocking launch" },`
+- L297: `{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },`
+- L302: `{ label: "Review brand consistency", sub: "Flag misaligned assets" },`
+- L304: `{ label: "Prepare a media handoff", sub: "Package direction for the team" }`
+- L312: `publisher: [`
+- L313: `{ label: "Review publishing readiness", sub: "Check what is ready to publish" },`
+- L314: `{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },`
+- L315: `{ label: "Check scheduled jobs", sub: "Review the current queue" },`
+- L316: `{ label: "Prepare a handoff package", sub: "For the approver review" }`
+- L320: `{ label: "Review targeting angles", sub: "Map audience and platform fit" },`
+- L325: `{ label: "Review SEO signals", sub: "Top queries, CTR gaps, weak pages" },`
+- L330: `compliance_reviewer: [`
+- L331: `{ label: "Check claims for approval", sub: "Review all marketing claims" },`
+- L332: `{ label: "Flag publishing risks", sub: "Identify blockers before release" },`
+- L333: `{ label: "Prepare governance notes", sub: "Document compliance status" },`
+- L334: `{ label: "Review approval requirements", sub: "What needs sign-off" }`
+- L337: `{ label: "Turn this into tasks", sub: "Break down into action items" },`
+- L338: `{ label: "Draft a workflow handoff", sub: "Prepare for the next owner" },`
+- L339: `{ label: "Review execution health", sub: "Check blockers and failed jobs" },`
+- L344: `{ label: "Draft customer reply", sub: "Safe response for review" },`
+- L350: `{ label: "Draft outreach", sub: "Personalized message for review" },`
+- L352: `{ label: "Prepare sales handoff", sub: "Route context to operations" }`
+- L358: `{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },`
+- L359: `{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },`
+- L360: `{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },`
+- L361: `{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }`
+- L364: `const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];`
+- L368: `{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },`
+- L369: `{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },`
+- L370: `{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },`
+- L371: `{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },`
+- L376: `{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },`
+- L377: `{ id: "task", label: "Task", helper: "Task-shaped output" },`
+- L378: `{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },`
+- L379: `{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },`
+- L383: `const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];`
+- L391: `publisher: "PB",`
+- L394: `compliance_reviewer: "CR",`
+- L403: `compliance_reviewer: "compliance_reviewer"`
+- L408: `label: "Admin / Governance",`
+- L411: `summary: "Policy, approvals, roles, and audit controls stay destination-owned."`
+- L417: `summary: "Market, evidence, competitor, and proof research will prepare source packs only."`
+- L429: `{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },`
+- L430: `{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },`
+- L431: `{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },`
+- L432: `{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }`
+- L435: `{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },`
+- L436: `{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },`
+- L437: `{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },`
+- L438: `{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }`
+- L441: `{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },`
+- L442: `{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },`
+- L443: `{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },`
+- L444: `{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },`
+- L445: `{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }`
+- L448: `{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },`
+- L449: `{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },`
+- L450: `{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },`
+- L451: `{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },`
+- L452: `{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }`
+- L454: `publisher: [`
+- L455: `{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },`
+- L456: `{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },`
+- L457: `{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },`
+- L458: `{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },`
+- L459: `{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }`
+- L462: `{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },`
+- L463: `{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },`
+- L464: `{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },`
+- L465: `{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },`
+- L469: `{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },`
+- L470: `{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },`
+- L471: `{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },`
+- L472: `{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },`
+- L475: `compliance_reviewer: [`
+- L476: `{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },`
+- L477: `{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },`
+- L478: `{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },`
+- L479: `{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },`
+- L480: `{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }`
+- L483: `{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },`
+- L484: `{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },`
+- L485: `{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },`
+- L486: `{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },`
+- L490: `{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },`
+- L491: `{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },`
+- L492: `{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },`
+- L493: `{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },`
+- L494: `{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },`
+- L495: `{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },`
+- L496: `{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },`
+- L497: `{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }`
+- L500: `{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },`
+- L501: `{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },`
+- L502: `{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },`
+- L503: `{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },`
+- L504: `{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },`
+- L505: `{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },`
+- L506: `{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },`
+- L507: `{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }`
+- L514: `{ icon: "✍️", label: "Generate Content", sub: "Write hooks, captions & scripts", template: "Generate content for {project}. Create hooks, caption ideas, and a reel script for the next product push." },`
+- L515: `{ icon: "📊", label: "Analyze Performance", sub: "Review what's working", template: "Analyze current performance for {project}. What content, campaigns, and channels are working best right now?" },`
+- L562: `suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."`
+- L602: `purpose: "Translate intent into executable workflows and handoffs.",`
+- L610: `const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;`
+- L611: `let aiInboundHandoffCounter = 0;`
+- L634: `if (/act as the publisher/i.test(text)) return "publisher";`
+- L637: `if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";`
+- L652: `id: \`auto-generate-${Date.now()}\`,`
+- L653: `type: "generate_prompt",`
+- L655: `action: "Generate prompt from AI command",`
+- L675: `if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {`
+- L678: `type: "publish_now",`
+- L679: `targetPage: "publishing",`
+- L680: `action: "Publish now to external channels",`
+- L683: `reason: "Requires approval gate before external publishing actions."`
+- L698: `if (/act as the publisher/i.test(text)) return "publisher";`
+- L701: `if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";`
+- L766: `function applyTokenTemplate(template, context = {}) {`
+- L767: `const tokenMap = {`
+- L775: `return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");`
+- L785: `"Prepare a handoff summary for:",`
+- L787: `"Draft a task plan for:",`
+- L789: `"Generate content for:",`
+- L869: `const configuredPublishLanguage = asString(`
+- L870: `overview.publishing_language ||`
+- L871: `overview.publish_language ||`
+- L876: `const publishLanguage = configuredPublishLanguage || "German";`
+- L886: `publishLanguage,`
+- L939: `workspaceTab: "preview",`
+- L949: `taskMode: "free",`
+- L950: `taskType: "launch",`
+- L951: `taskProduct: "",`
+- L952: `taskChannel: "",`
+- L965: `lastAppliedHandoffId: "",`
+- L968: `inboundHandoff: null,`
+- L970: `outputPreview: null,`
+- L1007: `function saveLocalDraft(projectName, draftPayload) {`
+- L1037: `const saved = saveLocalDraft(projectName, {`
+- L1044: `session.draftStatus = hint || \`Saved locally ${formatTime(saved.updatedAt)}\`;`
+- L1070: `function saveLocalOutput(projectName, outputPayload) {`
+- L1082: `function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {`
+- L1083: `if (typeof executeProjectAiGuidanceFn !== "function") {`
+- L1119: `function saveAiChatSession(projectName, session, options = {}) {`
+- L1123: `const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;`
+- L1139: `preview: session.outputPreview || null,`
+- L1162: `session.outputPreview = asObject(record.preview);`
+- L1163: `session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);`
+- L1192: `"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",`
+- L1203: `\`Publishable output language: ${safeOutputLanguage}\`,`
+- L1207: `\`Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.\`,`
+- L1208: `"When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",`
+- L1211: `\`When drafting publishable copy, write it in ${safeOutputLanguage}.\`,`
+- L1212: `"Never claim actions were executed.",`
+- L1213: `"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",`
+- L1214: `"Deliver a structured, review-ready answer.",`
+- L1221: `function extractGeneratedResponseText(response = {}) {`
+- L1263: `if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";`
+- L1267: `if (id === "publisher") return "publishing";`
+- L1270: `if (id === "compliance_reviewer") return "governance";`
+- L1271: `if (id === "operations") return outputType === "task" ? "task-center" : "workflows";`
+- L1272: `if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";`
+- L1294: `outputType = activeTab === "task"`
+- L1295: `? "task"`
+- L1298: `: activeTab === "handoff"`
+- L1299: `? "handoff"`
+- L1303: `const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);`
+- L1304: `const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);`
+- L1307: `const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);`
+- L1308: `const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);`
+- L1312: `if (outputType === "handoff" || outputType === "task" || looksTaskLike) {`
+- L1313: `outputType = "task";`
+- L1314: `return { outputType, destinationRoute: "task-center" };`
+- L1332: `if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {`
+- L1333: `outputType = "publishing";`
+- L1334: `return { outputType, destinationRoute: explicitDestination || "publishing" };`
+- L1337: `if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {`
+- L1338: `outputType = "governance";`
+- L1339: `return { outputType, destinationRoute: explicitDestination || "governance" };`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing action paths into:
+
+1. Prompt preparation only
+2. AI backend execution
+3. Local command history save
+4. Backend command/history save
+5. Approval request creation
+6. Approval decision
+7. Task creation
+8. Handoff creation
+9. Library/Content/Media/Publishing/Campaign routing
+10. Governance escalation
+11. Navigation only
+12. Unknown / needs deeper inspection
+
+## Decision Rule
+- If AI execution can run without intentional operator action, patch.
+- If backend mutation exists without confirmation or clear command intent, patch.
+- If approval/task/handoff creation lacks confirmation, patch.
+- If AI Command delegates to already-guarded surfaces only, document and close.
+- Do not redesign AI Command in this pass.
