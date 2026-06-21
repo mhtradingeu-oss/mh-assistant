@@ -1671,7 +1671,7 @@ export const setupRoute = {
         <section class="card setup-smart-handoff-panel">
           <div class="card-head">
             <h4>Save, Draft, and Continue</h4>
-            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Focus next field or Save Setup</button>
+            <button id="setupSmartActionBtn" class="btn btn-secondary" type="button">Focus next field / Save Setup if complete</button>
           </div>
           <div class="setup-handoff-note">Continue buttons only open the owning workspace. Library owns assets, Integrations owns connectors, Campaign Studio owns campaign planning, and AI Command owns AI review.</div>
           <div class="setup-smart-handoff-actions setup-smart-handoff-actions-primary">
@@ -1704,7 +1704,7 @@ export const setupRoute = {
             <h4>AI Guidance Panel</h4>
             <span class="card-badge neutral">Assistive only</span>
           </div>
-          <p class="setup-v2-subtitle">AI suggestions update local form guidance or prepare an AI Command prompt. They do not save backend data, approve work, publish, send, connect, or upload.</p>
+          <p class="setup-v2-subtitle">AI suggestions update local form guidance or prepare an AI Command prompt. The smart action may save setup only when required fields are complete; it does not approve work, publish, send, connect, or upload.</p>
           <div class="setup-smart-handoff-actions">
             <button id="setupAiPositioningBtn" class="btn btn-ghost" type="button">Review positioning</button>
             <button id="setupAiAudienceBtn" class="btn btn-ghost" type="button">Find missing launch inputs</button>
@@ -1747,6 +1747,11 @@ export const setupRoute = {
           }
           return;
         }
+
+        const confirmed = window.confirm(
+          `Apply the ${humanizeStatus(selectedType)} setup template to ${projectName || "this project"}?\n\nThis may update project setup defaults and then reload project data. It will not publish, send, approve, connect, or execute anything.`
+        );
+        if (!confirmed) return;
 
         templateApplyBtn.disabled = true;
 
