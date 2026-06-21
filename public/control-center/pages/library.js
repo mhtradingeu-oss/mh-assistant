@@ -2643,8 +2643,17 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
+      const nextSourceTruthState = !asset.source_of_truth;
+      const confirmed = confirm(
+        `Confirm Source of Truth change\n\nAction: ${nextSourceTruthState ? "Set this asset as Source of Truth" : "Remove this asset from Source of Truth"}.\nAsset: ${asset.name || asset.filename || assetId}\nRisk: Source of Truth assets can influence AI context, content claims, publishing readiness, and downstream review decisions.\n\nSelect Cancel to keep the current authority state.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
       try {
-        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, !asset.source_of_truth);
+        await setProjectAssetSourceOfTruth(activeProjectName, asset.asset_id || asset.id, nextSourceTruthState);
         session.selectedAssetId = asset.id;
         await reloadOrRerender();
         showMessage?.(`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.`);
@@ -2677,7 +2686,7 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
-      const confirmed = status === "approved" ? true : confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.`);
+      const confirmed = confirm(`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.`);
       if (!confirmed) {
         return;
       }
@@ -3109,6 +3118,19 @@ viewToggleButtons.forEach((button) => {
         return;
       }
 
+      const uploadSummary = files
+        .slice(0, 8)
+        .map((file) => `- ${file.name}`)
+        .join("\n");
+      const extraFiles = files.length > 8 ? `\n- +${files.length - 8} more file(s)` : "";
+      const confirmed = confirm(
+        `Confirm Library upload\n\nAction: Upload ${files.length} file${files.length === 1 ? "" : "s"} to Library.\nCategory: ${getLibraryUploadTypeLabel(assetType)}\n\n${uploadSummary}${extraFiles}\n\nRisk: Uploaded assets become part of the project Library and may be used as AI/source context after review.\n\nSelect Cancel to review files before uploading.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
       const uploaded = [];
       const failed = [];
       let reloadedFromServer = false;
@@ -3190,6 +3212,14 @@ viewToggleButtons.forEach((button) => {
         showError?.("Select a project before refreshing.");
         return;
       }
+      const confirmed = confirm(
+        `Confirm Library backend refresh\n\nAction: Refresh the backend Library scan for this project.\nRisk: This may rescan project assets and update Library visibility/readiness from backend state. It does not delete, publish, or approve anything.\n\nSelect Cancel to keep the current Library view.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
       refreshBtn.disabled = true;
       try {
         await refreshProjectLibrary(projectName);

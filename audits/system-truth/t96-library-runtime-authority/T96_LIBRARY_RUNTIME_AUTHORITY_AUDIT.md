@@ -1,0 +1,1821 @@
+# T96 — Library Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/library.js`.
+
+## Why Library Is Next
+T88 ranked Library as the next highest remaining open active page after AI Command and Tool Dock were closed.
+
+Library is a high-value authority surface because it can manage assets, source-of-truth materials, previews, selected sources, upload/import flows, and AI Command source return flow.
+
+## File Summary
+- File: `public/control-center/pages/library.js`
+- Lines: 3563
+- Imports: 11
+- Render writes: 26
+- Event bindings: 59
+- Backend/API signals: 1218
+- Library/asset/source signals: 1344
+- Source return flow signals: 26
+- Save/storage signals: 41
+- Upload/import/file signals: 215
+- Destructive signals: 70
+- Handoff signals: 7
+- Approval/governance signals: 242
+- Task signals: 4
+- Confirmation signals: 4
+- Access-key/credential signals: 6
+- Navigation signals: 26
+- Disabled/read-only/draft/guard signals: 206
+- Risky terms: 1330
+
+## Initial Risk Notes
+- Library contains backend/API/library/source/asset signals. Exact paths must separate read-only display, local preview, and durable backend mutation.
+- Library contains upload/import/file-picker signals. Need classify whether files are actually persisted or only selected/previewed.
+- Library contains AI Command source return flow signals. Need confirm this is shared context only unless backend source records are changed.
+- Library contains remove/delete/archive/clear signals. Destructive paths must be confirmed if they mutate backend or durable records.
+- Confirmation dialogs exist and must be mapped to exact authority-sensitive actions.
+
+## Imports
+- L1: `import { renderGuideBox } from "../components/guide-box.js";`
+- L2: `import { getSourceTypeMapping } from "../shared-context.js";`
+- L3: `import {`
+- L30: `import { renderLibraryActionPanel } from "./library/action-panel.js";`
+- L31: `import { renderLibraryAiPanel } from "./library/ai-panel.js";`
+- L32: `import { normalizeLibraryAsset } from "./library/projection-adapter.js";`
+- L33: `import { normalizeLibrarySession } from "./library/session-store.js";`
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L35: `import { mountLibraryListeners } from "./library/listener-lifecycle.js";`
+- L36: `import {`
+- L48: `import {`
+
+## Render Writes
+- L1378: `previewNode.outerHTML = renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1390: `previewNode.outerHTML = \``
+- L1407: `previewNode.innerHTML = \`<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">\`;`
+- L1412: `previewNode.innerHTML = \`<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>\`;`
+- L1417: `previewNode.outerHTML = \``
+- L1432: `previewNode.innerHTML = \`<div class="library-preview-fallback">${escapeHtml(message)}</div>\`;`
+- L1463: `node.innerHTML = fallbackMarkup;`
+- L1466: `node.innerHTML = "";`
+- L1470: `node.innerHTML = fallbackMarkup;`
+- L1803: `explainerBox.innerHTML = \``
+- L1818: `taxonomyBox.innerHTML = \``
+- L1836: `requiredBox.innerHTML = requiredGroups.map((item) => {`
+- L1866: `typeSelect.innerHTML = typeOptions.map((option) => \``
+- L1933: `sourceSelect.innerHTML = sourceOptions.map((option) => \``
+- L2001: `selectedSummary.innerHTML = selectedAsset`
+- L2031: `selectionBar.innerHTML = \``
+- L2045: `gridBody.innerHTML = paginatedAssets.length`
+- L2086: `gridPagination.innerHTML = \``
+- L2130: `previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);`
+- L2146: `previewMeta.innerHTML = selectedAsset`
+- L2208: `actionPanelMount.innerHTML = renderLibraryActionPanel({`
+- L2216: `aiPanelMount.innerHTML = renderLibraryAiPanel({`
+- L2225: `activityBox.innerHTML = recentActivity.length`
+- L2241: `uploadSummary.innerHTML = session.recentUploads.length`
+- L2959: `uploadTypeSelect.innerHTML = catalog.map((item) => {`
+- L3389: `root.innerHTML = \``
+
+## Event Bindings
+- L194: `// receive pointer/click/input events directly from the browser.`
+- L490: `anchor.click();`
+- L1581: `cancelBtn.onclick = () => {`
+- L1586: `submitBtn.onclick = () => {`
+- L1592: `overlay.onclick = (event) => {`
+- L1599: `input.onkeydown = (event) => {`
+- L1602: `submitBtn.click();`
+- L1608: `cancelBtn.click();`
+- L1872: `typeSelect.onchange = (event) => {`
+- L1903: `statusSelect.onchange = (event) => {`
+- L1939: `sourceSelect.onchange = (event) => {`
+- L1970: `sortSelect.onchange = (event) => {`
+- L2179: `useBtn.onclick = () => {`
+- L2257: `button.onclick = () => {`
+- L2335: `uploadInput?.click();`
+- L2368: `button.onclick = (event) => {`
+- L2401: `row.onclick = (event) => {`
+- L2433: `row.onkeydown = (event) => {`
+- L2465: `card.onclick = (event) => {`
+- L2479: `card.onkeydown = (event) => {`
+- L2497: `input.onchange = (event) => {`
+- L2512: `input.onclick = (event) => {`
+- L2519: `selectVisibleButton.onclick = (event) => {`
+- L2540: `clearSelectionButton.onclick = (event) => {`
+- L2551: `button.onclick = () => {`
+- L2574: `button.onclick = () => {`
+- L2598: `toolbarUpload.onclick = () => $("libraryUploadInput")?.click();`
+- L2603: `button.onclick = async () => {`
+- L2631: `button.onclick = async () => {`
+- L2662: `button.onclick = async () => {`
+- L2701: `button.onclick = async () => {`
+- L2767: `button.onclick = async () => {`
+- L2801: `button.onclick = async () => {`
+- L2842: `button.onclick = async () => {`
+- L2878: `button.onclick = (event) => {`
+- L2898: `button.onclick = () => {`
+- L2911: `button.onclick = (event) => {`
+- L2935: `searchInput.oninput = (event) => {`
+- L2965: `uploadTypeSelect.onchange = (event) => {`
+- L3008: `dropZone.onclick = (event) => {`
+- L3013: `dropZone.onkeydown = (event) => {`
+- L3016: `uploadInput.click();`
+- L3019: `uploadInput.onchange = () => {`
+- L3030: `dropZone.addEventListener(eventName, (event) => {`
+- L3037: `dropZone.addEventListener(eventName, (event) => {`
+- L3043: `dropZone.addEventListener("drop", (event) => {`
+- L3061: `picker.onchange = () => {`
+- L3070: `picker.click();`
+- L3075: `chooseFilesBtn.onclick = (event) => {`
+- L3088: `uploadBtn.onclick = async () => {`
+- L3188: `refreshBtn.onclick = async () => {`
+- L3208: `classifyBtn.onclick = () => {`
+- L3218: `missingBtn.onclick = () => {`
+- L3228: `extractSelectedDocBtn.onclick = () => {`
+- L3243: `extractBtn.onclick = () => {`
+- L3258: `sendToAiBtn.onclick = () => {`
+- L3325: `backBtn.onclick = () => {`
+- L3333: `dismissBtn.onclick = () => {`
+- L3427: `<span>Drop files or click to browse</span>`
+
+## Backend / API Signals
+- L2: `import { getSourceTypeMapping } from "../shared-context.js";`
+- L4: `setSharedAiSource,`
+- L5: `getSharedLibrarySourceBridge,`
+- L6: `clearSharedLibrarySourceBridge,`
+- L11: `function buildAiSourcePayloadFromAsset(asset = {}) {`
+- L12: `if (!asset) return null;`
+- L14: `id: asset.id,`
+- L15: `asset_id: asset.asset_id,`
+- L16: `name: asset.name,`
+- L17: `filename: asset.filename,`
+- L18: `file_path: asset.file_path,`
+- L19: `asset_type: asset.asset_type,`
+- L20: `source_label: asset.source_label || asset.name || "Library asset",`
+- L21: `source_of_truth: asset.source_of_truth,`
+- L22: `text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),`
+- L27: `// --- Library Source Bridge Guide Box ---`
+- L30: `import { renderLibraryActionPanel } from "./library/action-panel.js";`
+- L31: `import { renderLibraryAiPanel } from "./library/ai-panel.js";`
+- L32: `import { normalizeLibraryAsset } from "./library/projection-adapter.js";`
+- L33: `import { normalizeLibrarySession } from "./library/session-store.js";`
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L35: `import { mountLibraryListeners } from "./library/listener-lifecycle.js";`
+- L38: `archiveProjectAsset,`
+- L39: `deleteProjectAsset,`
+- L41: `refreshProjectLibrary,`
+- L42: `reclassifyProjectAsset,`
+- L43: `renameProjectAsset,`
+- L44: `setProjectAssetSourceOfTruth,`
+- L45: `updateProjectAssetStatus,`
+- L46: `uploadProjectAsset`
+- L47: `} from "../api.js";`
+- L49: `getAssetCatalog,`
+- L50: `getCanonicalAssetType,`
+- L52: `getMissingAssetLabels,`
+- L53: `getAssetStatusTone`
+- L54: `} from "../asset-library.js";`
+- L56: `const librarySessionStore = new Map();`
+- L57: `let librarySearchRenderTimer = null;`
+- L58: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L59: `const LIBRARY_UPLOAD_TYPE_LABELS = {`
+- L67: `social_assets: "Social Assets",`
+- L68: `campaign_assets: "Campaign Assets",`
+- L75: `function getLibraryUploadTypeLabel(assetType = "") {`
+- L76: `const key = String(assetType || "").trim().toLowerCase();`
+- L77: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || titleCase(key || "asset");`
+- L80: `const libraryProtectedUrlCache = new Map();`
+- L81: `const LIBRARY_PAGE_SIZE = 10;`
+- L82: `const libraryProtectedUrlPromiseCache = new Map();`
+- L83: `let disposeLibraryGlobalListeners = null;`
+- L84: `let _libraryFeedback = null;`
+- L85: `const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;`
+- L86: `const LIBRARY_THUMB_BATCH_LIMIT = 18;`
+- L87: `let libraryThumbLoadsInFlight = 0;`
+- L88: `const libraryThumbLoadQueue = [];`
+- L97: `{ key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }`
+- L100: `const REQUIRED_ASSET_REQUIREMENTS = [`
+- L106: `uploadType: "logo"`
+- L113: `uploadType: "brand_guideline"`
+- L120: `uploadType: "product_csv"`
+- L127: `uploadType: "product_photos"`
+- L133: `why: "Video source assets are required for reels, demos, and cutdowns.",`
+- L134: `uploadType: "product_videos"`
+- L141: `uploadType: "legal_doc"`
+- L148: `uploadType: "partner_docs"`
+- L152: `function getCleanLibraryTypeLabel(type, fallback = "") {`
+- L154: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();`
+- L157: `const LIBRARY_FOLDERS = [`
+- L158: `{ key: "all_assets", label: "All Assets" },`
+- L167: `{ key: "uploaded_session", label: "Uploaded This Session" },`
+- L168: `{ key: "source_of_truth", label: "Source of Truth" },`
+- L185: `function isLibraryInteractiveElement(target) {`
+- L187: `"button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"`
+- L191: `function bindLibraryControlEventShield(scope) {`
+- L193: `// Do not stop events on native controls. Select/input/file controls must`
+- L212: `function readManagedMediaAssetMap() {`
+- L215: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L222: `function loadLocalManagedMediaAssets(projectName) {`
+- L223: `const map = readManagedMediaAssetMap();`
+- L232: `function basename(filePath = "") {`
+- L233: `const value = asString(filePath);`
+- L239: `function getFileExtension(name = "") {`
+- L245: `function shortPath(filePath = "", maxSegments = 4) {`
+- L246: `const value = asString(filePath).trim();`
+- L253: `function assetContextHint(asset) {`
+- L254: `const filePath = asString(asset?.file_path || "").trim();`
+- L255: `if (!filePath) return "Library";`
+- L257: `const parts = filePath.split("/").filter(Boolean);`
+- L258: `if (!parts.length) return "Library";`
+- L261: `return tail || shortPath(filePath);`
+- L264: `function shortAssetId(value = "") {`
+- L284: `function normalizeLibrarySelectionIds(value) {`
+- L311: `function buildPreviewUrl(projectName, asset) {`
+- L313: `const fullPath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L314: `const fileName = basename(fullPath || asset.filename || asset.file_name || asset.name || "");`
+- L315: `const assetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L316: `const assetType = asString(asset.asset_type || asset.type || "asset").trim().toLowerCase();`
+- L317: `if (!fileName || !assetType) return "";`
+- L319: `const base = \`/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}\`;`
+- L326: `if (assetId) {`
+- L327: `params.push(\`assetId=${encodeURIComponent(assetId)}\`);`
+- L333: `function requiresProtectedMediaFetch(fileUrl = "") {`
+- L334: `const value = asString(fileUrl).trim();`
+- L337: `if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;`
+- L338: `return value.includes("/media/file/");`
+- L341: `function getAssetPreviewUrl(asset) {`
+- L342: `if (!asset) return "";`
+- L344: `asset.preview_url`
+- L345: `|| asset.image_url`
+- L346: `|| asset.video_url`
+- L347: `|| asset.audio_url`
+- L352: `function buildProtectedCacheKey(projectName, asset) {`
+- L353: `const resolvedAssetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L354: `const resolvedFilePath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L357: `resolvedAssetId || "no-asset-id",`
+- L358: `resolvedFilePath || "no-file-path",`
+- L359: `getAssetPreviewUrl(asset)`
+- L363: `function revokeLibraryProtectedUrl(key) {`
+- L364: `const entry = libraryProtectedUrlCache.get(key);`
+- L368: `libraryProtectedUrlCache.delete(key);`
+- L371: `function runNextLibraryThumbLoad() {`
+- L372: `if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {`
+- L376: `const nextJob = libraryThumbLoadQueue.shift();`
+- L381: `libraryThumbLoadsInFlight += 1;`
+- L385: `libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);`
+- L386: `runNextLibraryThumbLoad();`
+- L390: `function enqueueLibraryThumbLoad(job) {`
+- L392: `libraryThumbLoadQueue.push(async () => {`
+- L400: `runNextLibraryThumbLoad();`
+- L404: `async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {`
+- L405: `const previewUrl = getAssetPreviewUrl(asset);`
+- L406: `const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");`
+- L412: `fileName,`
+- L417: `const cacheKey = buildProtectedCacheKey(projectName, asset);`
+- L418: `const cached = libraryProtectedUrlCache.get(cacheKey);`
+- L423: `fileName,`
+- L429: `revokeLibraryProtectedUrl(cacheKey);`
+- L432: `const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);`
+- L440: `libraryProtectedUrlCache.set(cacheKey, {`
+- L449: `fileName,`
+- L454: `libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);`
+- L459: `if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {`
+- L460: `libraryProtectedUrlPromiseCache.delete(cacheKey);`
+- L465: `async function openLibraryAsset(projectName, asset) {`
+- L466: `if (!asset) {`
+- L467: `throw new Error("Select an asset before opening.");`
+- L470: `const resolved = await getProtectedAssetObjectUrl(projectName, asset);`
+- L473: `const safeFilename = asString(resolved.fileName || "download");`
+- L479: `/\.(png|jpg|jpeg|webp|gif|svg|avif|mp4|mov|webm|m4v|pdf)$/i.test(safeFilename)`
+- L488: `anchor.download = safeFilename;`
+- L494: `function mountLibraryGlobalListeners() {`
+- L495: `if (disposeLibraryGlobalListeners) {`
+- L499: `disposeLibraryGlobalListeners = mountLibraryListeners({`
+- L502: `Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));`
+- L506: `const button = event.target.closest?.("[data-copy-asset-path]");`
+- L507: `if (!button || !button.closest(".library-workspace")) return;`
+- L511: `const value = button.getAttribute("data-copy-asset-path") || "";`
+- L516: `_libraryFeedback?.("Asset path copied.");`
+- L518: `window.prompt("Copy asset path:", value);`
+- L522: `const link = event.target.closest?.("a.library-link-btn");`
+- L523: `if (!link || !link.closest(".library-workspace")) return;`
+- L525: `const fileUrl = link.getAttribute("href") || "";`
+- L526: `if (!fileUrl.includes("/media/file/")) return;`
+- L530: `const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");`
+- L531: `openLibraryAsset("", {`
+- L532: `preview_url: fileUrl,`
+- L533: `filename: assetName,`
+- L534: `name: assetName`
+- L538: `: \`Could not open file: ${error.message || "Unknown error."}\`;`
+- L543: `const root = event.target?.closest?.(".library-workspace");`
+- L546: `if (event.target?.closest?.(".library-action-menu")) {`
+- L550: `closeAllLibraryActionDropdowns();`
+- L557: `function unmountLibraryGlobalListeners() {`
+- L558: `if (!disposeLibraryGlobalListeners) {`
+- L562: `const dispose = disposeLibraryGlobalListeners;`
+- L563: `disposeLibraryGlobalListeners = null;`
+- L568: `function ensureLibrarySession(projectName) {`
+- L570: `if (!librarySessionStore.has(key)) {`
+- L571: `librarySessionStore.set(key, normalizeLibrarySession({`
+- L573: `selectedAssetId: "",`
+- L574: `selectedAssetIds: [],`
+- L578: `selectedSource: "all",`
+- L580: `folderKey: "all_assets",`
+- L583: `uploadType: "logo",`
+- L584: `uploading: false,`
+- L585: `recentUploads: []`
+- L589: `const current = librarySessionStore.get(key);`
+- L590: `const normalized = normalizeLibrarySession(current);`
+- L592: `librarySessionStore.set(key, normalized);`
+- L594: `return librarySessionStore.get(key);`
+- L597: `function dispatchLibraryCommand(command, payload = {}, handlers = {}) {`
+- L598: `const envelope = createLibraryCommand(command, payload);`
+- L599: `return routeLibraryCommand(envelope, handlers);`
+- L602: `function closeAllLibraryActionDropdowns() {`
+- L603: `Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {`
+- L610: `function getSafeAssetType(value = "") {`
+- L618: `function getUploadAssetType(session, catalog, selectedValue) {`
+- L619: `const normalized = getSafeAssetType(selectedValue || session.uploadType);`
+- L620: `const valid = new Set(asArray(catalog).map((item) => item.asset_type));`
+- L622: `throw new Error("Choose a valid upload category.");`
+- L634: `const key = asString(item.asset_type).trim().toLowerCase();`
+- L642: `if (!normalized) return "uploaded";`
+- L648: `if (normalized === "uploaded") return "uploaded";`
+- L652: `return "uploaded";`
+- L665: `return "Uploaded";`
+- L672: `if (value === "needs_review") return getAssetStatusTone("needs review");`
+- L673: `return getAssetStatusTone(value);`
+- L676: `function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {`
+- L677: `const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));`
+- L679: `const registryItems = asArray(`
+- L680: `legacyRegistry?.assets ||`
+- L681: `legacyRegistry?.items ||`
+- L682: `legacyRegistry?.records`
+- L685: `const assetItems = asArray(assetsData?.assets).length`
+- L686: `? asArray(assetsData.assets)`
+- L687: `: registryItems;`
+- L689: `const registryByPath = new Map();`
+- L690: `const registryByName = new Map();`
+- L691: `const registryById = new Map();`
+- L693: `registryItems.forEach((item) => {`
+- L694: `const localPath = asString(item.local_path || item.file_path || item.path).trim();`
+- L695: `const fileName = basename(localPath || item.file_name || item.filename || item.name || "");`
+- L696: `const assetId = asString(item.asset_id || item.assetId || item.id).trim();`
+- L698: `if (localPath) registryByPath.set(localPath, item);`
+- L699: `if (fileName) registryByName.set(fileName, item);`
+- L700: `if (assetId) registryById.set(assetId, item);`
+- L703: `return assetItems.map((asset, index) => {`
+- L704: `const rawType = asset.asset_type || asset.type || asset.category || asset.assetCategory || "";`
+- L705: `const canonicalType = getCanonicalAssetType(rawType, catalog);`
+- L706: `const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.url || "").trim();`
+- L707: `const fileName = basename(filePath || asset.file_name || asset.filename || asset.name || \`asset-${index + 1}\`);`
+- L708: `const extension = getFileExtension(fileName);`
+- L711: `const rawId = asString(asset.asset_id || asset.assetId || asset.id).trim();`
+- L712: `const registryMatch = registryById.get(rawId) || registryByPath.get(filePath) || registryByName.get(fileName) || {};`
+- L714: `...asset,`
+- L715: `...registryMatch`
+- L721: `merged.approval_status ||`
+- L724: `"uploaded"`
+- L728: `merged.asset_id ||`
+- L729: `merged.assetId ||`
+- L731: `\`${canonicalType || "asset"}-${index}-${fileName}\``
+- L734: `merged.asset_id ||`
+- L735: `merged.assetId ||`
+- L737: `(filePath ? \`path:${filePath}\` : fileName ? \`name:${fileName}\` : id)`
+- L745: `asset_type: canonicalType,`
+- L746: `file_path: filePath,`
+- L747: `filename: fileName`
+- L750: `const projectionAsset = normalizeLibraryAsset({`
+- L753: `source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth)`
+- L757: `...projectionAsset,`
+- L760: `asset_id: id,`
+- L762: `kind: "library_asset",`
+- L763: `name: asString(merged.name || merged.title || fileName || id),`
+- L764: `asset_type: canonicalType || "asset",`
+- L765: `type_label: catalogItem.display_label || catalogItem.label || titleCase(canonicalType || "asset"),`
+- L767: `source_label: asString(merged.source_label || merged.source || merged.scan_source || "Library"),`
+- L768: `source_key: asString(merged.source_key || merged.source || merged.scan_source || "library").toLowerCase(),`
+- L769: `source_of_truth: Boolean(merged.source_of_truth || merged.is_source_of_truth),`
+- L770: `used_in: asArray(merged.used_in || catalogItem.guidance?.used_in || ["Library"]),`
+- L771: `uploaded_at: merged.uploaded_at || merged.updated_at || merged.created_at || merged.registered_at || "",`
+- L773: `file_path: filePath,`
+
+## Library / Asset / Source Signals
+- L2: `import { getSourceTypeMapping } from "../shared-context.js";`
+- L4: `setSharedAiSource,`
+- L5: `getSharedLibrarySourceBridge,`
+- L6: `clearSharedLibrarySourceBridge,`
+- L11: `function buildAiSourcePayloadFromAsset(asset = {}) {`
+- L12: `if (!asset) return null;`
+- L14: `id: asset.id,`
+- L15: `asset_id: asset.asset_id,`
+- L16: `name: asset.name,`
+- L17: `filename: asset.filename,`
+- L18: `file_path: asset.file_path,`
+- L19: `asset_type: asset.asset_type,`
+- L20: `source_label: asset.source_label || asset.name || "Library asset",`
+- L21: `source_of_truth: asset.source_of_truth,`
+- L22: `text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),`
+- L27: `// --- Library Source Bridge Guide Box ---`
+- L30: `import { renderLibraryActionPanel } from "./library/action-panel.js";`
+- L31: `import { renderLibraryAiPanel } from "./library/ai-panel.js";`
+- L32: `import { normalizeLibraryAsset } from "./library/projection-adapter.js";`
+- L33: `import { normalizeLibrarySession } from "./library/session-store.js";`
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L35: `import { mountLibraryListeners } from "./library/listener-lifecycle.js";`
+- L38: `archiveProjectAsset,`
+- L39: `deleteProjectAsset,`
+- L41: `refreshProjectLibrary,`
+- L42: `reclassifyProjectAsset,`
+- L43: `renameProjectAsset,`
+- L44: `setProjectAssetSourceOfTruth,`
+- L45: `updateProjectAssetStatus,`
+- L46: `uploadProjectAsset`
+- L49: `getAssetCatalog,`
+- L50: `getCanonicalAssetType,`
+- L52: `getMissingAssetLabels,`
+- L53: `getAssetStatusTone`
+- L54: `} from "../asset-library.js";`
+- L56: `const librarySessionStore = new Map();`
+- L57: `let librarySearchRenderTimer = null;`
+- L58: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L59: `const LIBRARY_UPLOAD_TYPE_LABELS = {`
+- L61: `brand_guideline: "Brand Guidelines",`
+- L64: `legal_doc: "Legal Documents",`
+- L67: `social_assets: "Social Assets",`
+- L68: `campaign_assets: "Campaign Assets",`
+- L72: `partner_docs: "Partner Documents"`
+- L75: `function getLibraryUploadTypeLabel(assetType = "") {`
+- L76: `const key = String(assetType || "").trim().toLowerCase();`
+- L77: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || titleCase(key || "asset");`
+- L80: `const libraryProtectedUrlCache = new Map();`
+- L81: `const LIBRARY_PAGE_SIZE = 10;`
+- L82: `const libraryProtectedUrlPromiseCache = new Map();`
+- L83: `let disposeLibraryGlobalListeners = null;`
+- L84: `let _libraryFeedback = null;`
+- L85: `const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;`
+- L86: `const LIBRARY_THUMB_BATCH_LIMIT = 18;`
+- L87: `let libraryThumbLoadsInFlight = 0;`
+- L88: `const libraryThumbLoadQueue = [];`
+- L94: `{ key: "documents", label: "Documents", types: ["brand_guideline", "partner_docs", "testimonials_reviews", "certificates"] },`
+- L97: `{ key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }`
+- L100: `const REQUIRED_ASSET_REQUIREMENTS = [`
+- L105: `why: "Logos keep brand identity consistent across setup, media generation, and publishing.",`
+- L106: `uploadType: "logo"`
+- L109: `key: "brand_guidelines",`
+- L110: `label: "Brand Guidelines",`
+- L111: `types: ["brand_guideline"],`
+- L112: `why: "Guidelines prevent off-brand messaging and visual drift in AI outputs.",`
+- L113: `uploadType: "brand_guideline"`
+- L120: `uploadType: "product_csv"`
+- L127: `uploadType: "product_photos"`
+- L133: `why: "Video source assets are required for reels, demos, and cutdowns.",`
+- L134: `uploadType: "product_videos"`
+- L138: `label: "Legal / Pricing Documents",`
+- L140: `why: "Legal and pricing documents prevent non-compliant copy and invented offers.",`
+- L141: `uploadType: "legal_doc"`
+- L144: `key: "research_documents",`
+- L145: `label: "Research Documents",`
+- L147: `why: "Research and proof documents support claims, trust signals, and strategy decisions.",`
+- L148: `uploadType: "partner_docs"`
+- L152: `function getCleanLibraryTypeLabel(type, fallback = "") {`
+- L154: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();`
+- L157: `const LIBRARY_FOLDERS = [`
+- L158: `{ key: "all_assets", label: "All Assets" },`
+- L165: `{ key: "brand_guidelines", label: "Brand Guidelines", types: ["brand_guideline"] },`
+- L167: `{ key: "uploaded_session", label: "Uploaded This Session" },`
+- L168: `{ key: "source_of_truth", label: "Source of Truth" },`
+- L185: `function isLibraryInteractiveElement(target) {`
+- L187: `"button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"`
+- L191: `function bindLibraryControlEventShield(scope) {`
+- L193: `// Do not stop events on native controls. Select/input/file controls must`
+- L212: `function readManagedMediaAssetMap() {`
+- L215: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L222: `function loadLocalManagedMediaAssets(projectName) {`
+- L223: `const map = readManagedMediaAssetMap();`
+- L232: `function basename(filePath = "") {`
+- L233: `const value = asString(filePath);`
+- L239: `function getFileExtension(name = "") {`
+- L245: `function shortPath(filePath = "", maxSegments = 4) {`
+- L246: `const value = asString(filePath).trim();`
+- L253: `function assetContextHint(asset) {`
+- L254: `const filePath = asString(asset?.file_path || "").trim();`
+- L255: `if (!filePath) return "Library";`
+- L257: `const parts = filePath.split("/").filter(Boolean);`
+- L258: `if (!parts.length) return "Library";`
+- L261: `return tail || shortPath(filePath);`
+- L264: `function shortAssetId(value = "") {`
+- L284: `function normalizeLibrarySelectionIds(value) {`
+- L303: `function isOfficePreviewExtension(extension = "") {`
+- L307: `function isTextPreviewExtension(extension = "") {`
+- L311: `function buildPreviewUrl(projectName, asset) {`
+- L313: `const fullPath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L314: `const fileName = basename(fullPath || asset.filename || asset.file_name || asset.name || "");`
+- L315: `const assetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L316: `const assetType = asString(asset.asset_type || asset.type || "asset").trim().toLowerCase();`
+- L317: `if (!fileName || !assetType) return "";`
+- L319: `const base = \`/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}\`;`
+- L326: `if (assetId) {`
+- L327: `params.push(\`assetId=${encodeURIComponent(assetId)}\`);`
+- L333: `function requiresProtectedMediaFetch(fileUrl = "") {`
+- L334: `const value = asString(fileUrl).trim();`
+- L337: `if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;`
+- L338: `return value.includes("/media/file/");`
+- L341: `function getAssetPreviewUrl(asset) {`
+- L342: `if (!asset) return "";`
+- L344: `asset.preview_url`
+- L345: `|| asset.image_url`
+- L346: `|| asset.video_url`
+- L347: `|| asset.audio_url`
+- L352: `function buildProtectedCacheKey(projectName, asset) {`
+- L353: `const resolvedAssetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L354: `const resolvedFilePath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L357: `resolvedAssetId || "no-asset-id",`
+- L358: `resolvedFilePath || "no-file-path",`
+- L359: `getAssetPreviewUrl(asset)`
+- L363: `function revokeLibraryProtectedUrl(key) {`
+- L364: `const entry = libraryProtectedUrlCache.get(key);`
+- L368: `libraryProtectedUrlCache.delete(key);`
+- L371: `function runNextLibraryThumbLoad() {`
+- L372: `if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {`
+- L376: `const nextJob = libraryThumbLoadQueue.shift();`
+- L381: `libraryThumbLoadsInFlight += 1;`
+- L385: `libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);`
+- L386: `runNextLibraryThumbLoad();`
+- L390: `function enqueueLibraryThumbLoad(job) {`
+- L392: `libraryThumbLoadQueue.push(async () => {`
+- L400: `runNextLibraryThumbLoad();`
+- L404: `async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {`
+- L405: `const previewUrl = getAssetPreviewUrl(asset);`
+- L406: `const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");`
+- L408: `if (!requiresProtectedMediaFetch(previewUrl)) {`
+- L410: `objectUrl: previewUrl,`
+- L412: `fileName,`
+- L417: `const cacheKey = buildProtectedCacheKey(projectName, asset);`
+- L418: `const cached = libraryProtectedUrlCache.get(cacheKey);`
+- L423: `fileName,`
+- L429: `revokeLibraryProtectedUrl(cacheKey);`
+- L432: `const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);`
+- L438: `const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);`
+- L440: `libraryProtectedUrlCache.set(cacheKey, {`
+- L449: `fileName,`
+- L454: `libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);`
+- L459: `if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {`
+- L460: `libraryProtectedUrlPromiseCache.delete(cacheKey);`
+- L465: `async function openLibraryAsset(projectName, asset) {`
+- L466: `if (!asset) {`
+- L467: `throw new Error("Select an asset before opening.");`
+- L470: `const resolved = await getProtectedAssetObjectUrl(projectName, asset);`
+- L473: `const safeFilename = asString(resolved.fileName || "download");`
+- L479: `/\.(png|jpg|jpeg|webp|gif|svg|avif|mp4|mov|webm|m4v|pdf)$/i.test(safeFilename)`
+- L486: `const anchor = document.createElement("a");`
+- L488: `anchor.download = safeFilename;`
+- L489: `document.body.appendChild(anchor);`
+- L494: `function mountLibraryGlobalListeners() {`
+- L495: `if (disposeLibraryGlobalListeners) {`
+- L499: `disposeLibraryGlobalListeners = mountLibraryListeners({`
+- L502: `Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));`
+- L504: `onDocumentClickHandlers: [`
+- L506: `const button = event.target.closest?.("[data-copy-asset-path]");`
+- L507: `if (!button || !button.closest(".library-workspace")) return;`
+- L511: `const value = button.getAttribute("data-copy-asset-path") || "";`
+- L516: `_libraryFeedback?.("Asset path copied.");`
+- L518: `window.prompt("Copy asset path:", value);`
+- L522: `const link = event.target.closest?.("a.library-link-btn");`
+- L523: `if (!link || !link.closest(".library-workspace")) return;`
+- L525: `const fileUrl = link.getAttribute("href") || "";`
+- L526: `if (!fileUrl.includes("/media/file/")) return;`
+- L530: `const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");`
+- L531: `openLibraryAsset("", {`
+- L532: `preview_url: fileUrl,`
+- L533: `filename: assetName,`
+- L534: `name: assetName`
+- L538: `: \`Could not open file: ${error.message || "Unknown error."}\`;`
+- L543: `const root = event.target?.closest?.(".library-workspace");`
+- L546: `if (event.target?.closest?.(".library-action-menu")) {`
+- L550: `closeAllLibraryActionDropdowns();`
+- L557: `function unmountLibraryGlobalListeners() {`
+- L558: `if (!disposeLibraryGlobalListeners) {`
+- L562: `const dispose = disposeLibraryGlobalListeners;`
+- L563: `disposeLibraryGlobalListeners = null;`
+- L568: `function ensureLibrarySession(projectName) {`
+- L570: `if (!librarySessionStore.has(key)) {`
+- L571: `librarySessionStore.set(key, normalizeLibrarySession({`
+- L573: `selectedAssetId: "",`
+- L574: `selectedAssetIds: [],`
+- L578: `selectedSource: "all",`
+- L580: `folderKey: "all_assets",`
+- L583: `uploadType: "logo",`
+- L584: `uploading: false,`
+- L585: `recentUploads: []`
+- L589: `const current = librarySessionStore.get(key);`
+- L590: `const normalized = normalizeLibrarySession(current);`
+- L592: `librarySessionStore.set(key, normalized);`
+- L594: `return librarySessionStore.get(key);`
+- L597: `function dispatchLibraryCommand(command, payload = {}, handlers = {}) {`
+- L598: `const envelope = createLibraryCommand(command, payload);`
+- L599: `return routeLibraryCommand(envelope, handlers);`
+- L602: `function closeAllLibraryActionDropdowns() {`
+- L603: `Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {`
+- L610: `function getSafeAssetType(value = "") {`
+- L618: `function getUploadAssetType(session, catalog, selectedValue) {`
+- L619: `const normalized = getSafeAssetType(selectedValue || session.uploadType);`
+- L620: `const valid = new Set(asArray(catalog).map((item) => item.asset_type));`
+- L622: `throw new Error("Choose a valid upload category.");`
+- L634: `const key = asString(item.asset_type).trim().toLowerCase();`
+- L642: `if (!normalized) return "uploaded";`
+- L648: `if (normalized === "uploaded") return "uploaded";`
+- L652: `return "uploaded";`
+- L665: `return "Uploaded";`
+- L672: `if (value === "needs_review") return getAssetStatusTone("needs review");`
+- L673: `return getAssetStatusTone(value);`
+- L676: `function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {`
+- L677: `const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));`
+- L679: `const registryItems = asArray(`
+- L680: `legacyRegistry?.assets ||`
+- L681: `legacyRegistry?.items ||`
+- L682: `legacyRegistry?.records`
+- L685: `const assetItems = asArray(assetsData?.assets).length`
+- L686: `? asArray(assetsData.assets)`
+- L687: `: registryItems;`
+- L689: `const registryByPath = new Map();`
+- L690: `const registryByName = new Map();`
+- L691: `const registryById = new Map();`
+- L693: `registryItems.forEach((item) => {`
+- L694: `const localPath = asString(item.local_path || item.file_path || item.path).trim();`
+- L695: `const fileName = basename(localPath || item.file_name || item.filename || item.name || "");`
+- L696: `const assetId = asString(item.asset_id || item.assetId || item.id).trim();`
+- L698: `if (localPath) registryByPath.set(localPath, item);`
+- L699: `if (fileName) registryByName.set(fileName, item);`
+- L700: `if (assetId) registryById.set(assetId, item);`
+- L703: `return assetItems.map((asset, index) => {`
+- L704: `const rawType = asset.asset_type || asset.type || asset.category || asset.assetCategory || "";`
+- L705: `const canonicalType = getCanonicalAssetType(rawType, catalog);`
+- L706: `const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.url || "").trim();`
+- L707: `const fileName = basename(filePath || asset.file_name || asset.filename || asset.name || \`asset-${index + 1}\`);`
+- L708: `const extension = getFileExtension(fileName);`
+- L710: `const catalogItem = catalogMap.get(canonicalType) || {};`
+- L711: `const rawId = asString(asset.asset_id || asset.assetId || asset.id).trim();`
+- L712: `const registryMatch = registryById.get(rawId) || registryByPath.get(filePath) || registryByName.get(fileName) || {};`
+- L714: `...asset,`
+- L715: `...registryMatch`
+- L724: `"uploaded"`
+- L728: `merged.asset_id ||`
+
+## Source Return Flow Signals
+- L4: `setSharedAiSource,`
+- L5: `getSharedLibrarySourceBridge,`
+- L6: `clearSharedLibrarySourceBridge,`
+- L27: `// --- Library Source Bridge Guide Box ---`
+- L2163: `<div class="library-inspector-ai-source-guide${getSharedLibrarySourceBridge(projectName) ? "" : " is-hidden"}" aria-live="polite">`
+- L2188: `setSharedAiSource(sourceProjectName, payload);`
+- L2189: `setSharedAiSource("__default__", payload);`
+- L2192: `const bridgeReturn = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");`
+- L2198: `clearSharedLibrarySourceBridge(sourceProjectName);`
+- L2199: `clearSharedLibrarySourceBridge("__default__");`
+- L2201: `navigateTo("ai-command");`
+- L2361: `navigateTo("ai-command");`
+- L3211: `navigateTo("ai-command");`
+- L3221: `navigateTo("ai-command");`
+- L3236: `navigateTo("ai-command");`
+- L3250: `navigateTo("ai-command");`
+- L3267: `navigateTo("ai-command");`
+- L3297: `// --- Library Source Bridge Contextual Guide Strip ---`
+- L3299: `const activeSourceBridge = getSharedLibrarySourceBridge(activeProjectName) || getSharedLibrarySourceBridge("__default__");`
+- L3311: `{ id: "back-to-ai-command", label: "Back to Drawer" },`
+- L3322: `const backBtn = guideBox.querySelector('[data-guide-action="back-to-ai-command"]');`
+- L3327: `clearSharedLibrarySourceBridge(guideProjectName);`
+- L3328: `clearSharedLibrarySourceBridge("__default__");`
+- L3329: `navigateTo("ai-command");`
+- L3335: `clearSharedLibrarySourceBridge(guideProjectName);`
+- L3336: `clearSharedLibrarySourceBridge("__default__");`
+
+## Save / Storage Signals
+- L80: `const libraryProtectedUrlCache = new Map();`
+- L82: `const libraryProtectedUrlPromiseCache = new Map();`
+- L215: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L352: `function buildProtectedCacheKey(projectName, asset) {`
+- L364: `const entry = libraryProtectedUrlCache.get(key);`
+- L368: `libraryProtectedUrlCache.delete(key);`
+- L417: `const cacheKey = buildProtectedCacheKey(projectName, asset);`
+- L418: `const cached = libraryProtectedUrlCache.get(cacheKey);`
+- L419: `if (cached?.objectUrl && !options.force) {`
+- L421: `objectUrl: cached.objectUrl,`
+- L422: `contentType: cached.contentType,`
+- L429: `revokeLibraryProtectedUrl(cacheKey);`
+- L432: `const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);`
+- L440: `libraryProtectedUrlCache.set(cacheKey, {`
+- L454: `libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);`
+- L459: `if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {`
+- L460: `libraryProtectedUrlPromiseCache.delete(cacheKey);`
+- L502: `Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));`
+- L515: `await navigator.clipboard.writeText(value);`
+- L537: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L646: `if (normalized.includes("draft")) return "draft";`
+- L660: `if (value === "draft") return "Draft";`
+- L671: `if (value === "draft") return "neutral";`
+- L682: `legacyRegistry?.records`
+- L685: `const assetItems = asArray(assetsData?.assets).length`
+- L703: `return assetItems.map((asset, index) => {`
+- L845: `approval_status: asString(asset.approval_status || "draft"),`
+- L1429: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L1488: `function getWorkspaceAssetItems(assetsData, registry) {`
+- L1492: `assetsData.records,`
+- L1495: `registry.records`
+- L1574: `submitBtn.textContent = "Save";`
+- L1721: `const workspaceAssetItems = getWorkspaceAssetItems(assetsData, registry);`
+- L1724: `assets: workspaceAssetItems`
+- L2622: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2653: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2692: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2757: `showError?.("Reclassify requires a valid Control Center write key.");`
+- L3356: `const registryAssets = asArray(registry.assets || registry.items || registry.records);`
+- L3372: `assets: getWorkspaceAssetItems(assetsData, registry)`
+- L3486: `<option value="draft">Draft</option>`
+
+## Upload / Import / File Signals
+- L1: `import { renderGuideBox } from "../components/guide-box.js";`
+- L2: `import { getSourceTypeMapping } from "../shared-context.js";`
+- L3: `import {`
+- L30: `import { renderLibraryActionPanel } from "./library/action-panel.js";`
+- L31: `import { renderLibraryAiPanel } from "./library/ai-panel.js";`
+- L32: `import { normalizeLibraryAsset } from "./library/projection-adapter.js";`
+- L33: `import { normalizeLibrarySession } from "./library/session-store.js";`
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L35: `import { mountLibraryListeners } from "./library/listener-lifecycle.js";`
+- L36: `import {`
+- L46: `uploadProjectAsset`
+- L48: `import {`
+- L59: `const LIBRARY_UPLOAD_TYPE_LABELS = {`
+- L75: `function getLibraryUploadTypeLabel(assetType = "") {`
+- L77: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || titleCase(key || "asset");`
+- L106: `uploadType: "logo"`
+- L113: `uploadType: "brand_guideline"`
+- L120: `uploadType: "product_csv"`
+- L127: `uploadType: "product_photos"`
+- L134: `uploadType: "product_videos"`
+- L141: `uploadType: "legal_doc"`
+- L148: `uploadType: "partner_docs"`
+- L154: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();`
+- L167: `{ key: "uploaded_session", label: "Uploaded This Session" },`
+- L187: `"button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"`
+- L550: `closeAllLibraryActionDropdowns();`
+- L583: `uploadType: "logo",`
+- L584: `uploading: false,`
+- L585: `recentUploads: []`
+- L602: `function closeAllLibraryActionDropdowns() {`
+- L603: `Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {`
+- L618: `function getUploadAssetType(session, catalog, selectedValue) {`
+- L619: `const normalized = getSafeAssetType(selectedValue || session.uploadType);`
+- L622: `throw new Error("Choose a valid upload category.");`
+- L642: `if (!normalized) return "uploaded";`
+- L648: `if (normalized === "uploaded") return "uploaded";`
+- L652: `return "uploaded";`
+- L665: `return "Uploaded";`
+- L724: `"uploaded"`
+- L771: `uploaded_at: merged.uploaded_at || merged.updated_at || merged.created_at || merged.registered_at || "",`
+- L824: `category_status: "Uploaded",`
+- L829: `uploaded_at: asset.updated_at || asset.created_at || null,`
+- L892: `const existingTs = new Date(existing.uploaded_at || 0).getTime() || 0;`
+- L893: `const candidateTs = new Date(asset.uploaded_at || 0).getTime() || 0;`
+- L904: `const recentlyUploadedByDate = assets.filter((asset) => {`
+- L905: `if (!asset.uploaded_at) return false;`
+- L906: `const ts = new Date(asset.uploaded_at).getTime();`
+- L911: `const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;`
+- L924: `recentlyUploaded: recentlyUploadedByDate,`
+- L926: `? \`${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}\``
+- L944: `} else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {`
+- L971: `} else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {`
+- L984: `action: status === "missing" ? "upload" : status === "needs_review" ? "review" : "classify"`
+- L1003: `const recentUploadedNames = new Set(`
+- L1004: `asArray(session.recentUploads)`
+- L1016: `if (selectedFolderKey === "uploaded_session") {`
+- L1018: `return Boolean(filename && recentUploadedNames.has(filename));`
+- L1061: `if (sortBy === "updated_asc") return toTimestamp(left.uploaded_at) - toTimestamp(right.uploaded_at);`
+- L1063: `return toTimestamp(right.uploaded_at) - toTimestamp(left.uploaded_at);`
+- L1075: `const inRecent = asArray(session.recentUploads).some((entry) => entry?.status === "success" && asString(entry.filename).trim() === filename);`
+- L1080: `if (folder.key === "uploaded_session") return inRecent;`
+- L1512: `return \`For ${project}, find the fastest way to close missing required assets: ${missing}. Give a step-by-step upload priority.\`;`
+- L1771: `.filter((asset) => asset.uploaded_at)`
+- L1772: `.sort((left, right) => new Date(right.uploaded_at || 0).getTime() - new Date(left.uploaded_at || 0).getTime())`
+- L1786: `{ value: "library", label: "Library uploads" },`
+- L1807: `<li>Upload or select an asset.</li>`
+- L1808: `<li>Mark important files as <span class="explainer-chip">Source of Truth</span> when needed.</li>`
+- L1838: `const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";`
+- L1856: `data-library-upload-type="${escapeHtml(item.uploadType)}"`
+- L2078: `: \`<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>\`;`
+- L2231: `<span>${escapeHtml(\`${toStatusLabel(asset.status)} • ${formatDate(asset.uploaded_at)}\`)}</span>`
+- L2236: `: \`<div class="empty-box">Recent uploads and updates will appear here after you add or refresh assets.</div>\`;`
+- L2239: `const uploadSummary = $("libraryUploadSummary");`
+- L2240: `if (uploadSummary) {`
+- L2241: `uploadSummary.innerHTML = session.recentUploads.length`
+- L2244: `${session.recentUploads.slice(0, 5).map((item) => \``
+- L2247: `<span>${escapeHtml(\`${item.asset_type} • ${item.status === "success" ? "Uploaded" : "Failed"}\`)}</span>`
+- L2252: `: \`<div class="empty-box library-upload-empty-state"><strong>No session uploads yet.</strong><span>Choose files, classify them, then upload to add new assets to this Library.</span></div>\`;`
+- L2259: `const uploadType = button.getAttribute("data-library-upload-type") || "logo";`
+- L2262: `// Always set upload type`
+- L2263: `session.uploadType = uploadType;`
+- L2264: `const uploadTypeSelect = $("libraryUploadTypeSelect");`
+- L2265: `if (uploadTypeSelect) uploadTypeSelect.value = uploadType;`
+- L2270: `if (folder.key === requiredKey || (folder.types && folder.types.includes(uploadType))) {`
+- L2279: `session.selectedType = opensFinder ? "all" : uploadType;`
+- L2306: `const uploadLabel = getLibraryUploadTypeLabel(uploadType);`
+- L2318: `showMessage?.(\`Upload category set to ${uploadLabel}. Choose files, then upload them to this asset group.\`);`
+- L2320: `const assetIntake = document.querySelector(".library-actions-card") || document.getElementById("libraryDropZone");`
+- L2321: `const dropZone = document.getElementById("libraryDropZone");`
+- L2323: `if (dropZone && dropZone !== assetIntake) {`
+- L2324: `dropZone.classList.add("is-required-action-target");`
+- L2325: `setTimeout(() => dropZone.classList.remove("is-required-action-target"), 2600);`
+- L2330: `showMessage?.(\`Upload category set to ${getLibraryUploadTypeLabel(uploadType)}. Matching workspace filter is not available yet.\`);`
+- L2333: `if (action === "upload") {`
+- L2334: `const uploadInput = $("libraryUploadInput");`
+- L2335: `uploadInput?.click();`
+- L2596: `const toolbarUpload = $("libraryToolbarUploadBtn");`
+- L2597: `if (toolbarUpload) {`
+- L2598: `toolbarUpload.onclick = () => $("libraryUploadInput")?.click();`
+- L2632: `closeAllLibraryActionDropdowns();`
+- L2663: `closeAllLibraryActionDropdowns();`
+- L2711: `const allowedTypes = Object.keys(LIBRARY_UPLOAD_TYPE_LABELS);`
+- L2725: `showMessage?.(\`Asset is already in ${getLibraryUploadTypeLabel(normalizedType)}.\`);`
+- L2732: `\`Move "${assetLabel}" from ${getLibraryUploadTypeLabel(currentType) || "Unknown"} to ${getLibraryUploadTypeLabel(normalizedType)}?\n\nThis changes the Library group only. It will not move, rename, or edit the physical file.\``
+- L2740: `showMessage?.(\`Moving asset to ${getLibraryUploadTypeLabel(normalizedType)}...\`);`
+- L2753: `showMessage?.(\`Asset moved to ${getLibraryUploadTypeLabel(normalizedType)}.\`);`
+- L2768: `closeAllLibraryActionDropdowns();`
+- L2802: `closeAllLibraryActionDropdowns();`
+- L2843: `closeAllLibraryActionDropdowns();`
+- L2883: `const dropdown = menu?.querySelector(".library-action-dropdown");`
+- L2884: `if (!dropdown) return;`
+- L2886: `const open = dropdown.classList.contains("is-open");`
+- L2887: `closeAllLibraryActionDropdowns();`
+- L2890: `dropdown.classList.add("is-open");`
+- L2891: `dropdown.style.display = "block";`
+- L2896: `const pickUploadTypeButtons = Array.from(document.querySelectorAll("[data-library-upload-type]"));`
+- L2897: `pickUploadTypeButtons.forEach((button) => {`
+- L2899: `const uploadType = button.getAttribute("data-library-upload-type") || "logo";`
+- L2900: `session.uploadType = uploadType;`
+- L2901: `const uploadTypeSelect = $("libraryUploadTypeSelect");`
+- L2902: `if (uploadTypeSelect) {`
+- L2903: `uploadTypeSelect.value = uploadType;`
+- L2905: `showMessage?.(\`Upload category set to ${uploadType}.\`);`
+- L2956: `const uploadTypeSelect = $("libraryUploadTypeSelect");`
+- L2957: `if (uploadTypeSelect) {`
+- L2959: `uploadTypeSelect.innerHTML = catalog.map((item) => {`
+- L2961: `const label = getLibraryUploadTypeLabel(assetType);`
+- L2962: `return \`<option value="${escapeHtml(assetType)}"${session.uploadType === assetType ? " selected" : ""}>${escapeHtml(label)}</option>\`;`
+- L2964: `uploadTypeSelect.value = session.uploadType;`
+- L2965: `uploadTypeSelect.onchange = (event) => {`
+- L2966: `const uploadType = getSafeAssetType(event.target.value || "logo") || "logo";`
+- L2968: `dispatchLibraryCommand("upload-type-change", { uploadType }, {`
+- L2969: `"upload-type-change": ({ uploadType: nextUploadType }) => ({`
+- L2971: `uploadType: nextUploadType`
+- L2975: `session.uploadType = getSafeAssetType(event.target.value || "logo") || "logo";`
+- L2979: `const dropZone = $("libraryDropZone");`
+- L2980: `const uploadInput = $("libraryUploadInput");`
+- L2981: `const uploadBtn = $("libraryUploadBtn");`
+- L2982: `if (dropZone && uploadInput) {`
+- L2983: `const updateUploadUiState = () => {`
+- L2984: `const files = Array.from(uploadInput.files || []);`
+- L2988: `const info = $("libraryDropInfo");`
+- L2991: `if (uploadBtn) {`
+- L2992: `uploadBtn.disabled = session.uploading || files.length === 0;`
+- L2993: `uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";`
+- L2997: `const syncDroppedFilesToInput = (files) => {`
+- L3001: `uploadInput.files = transfer.files;`
+- L3005: `updateUploadUiState();`
+- L3008: `dropZone.onclick = (event) => {`
+- L3013: `dropZone.onkeydown = (event) => {`
+- L3016: `uploadInput.click();`
+- L3019: `uploadInput.onchange = () => {`
+- L3020: `updateUploadUiState();`
+- L3022: `const files = Array.from(uploadInput.files || []);`
+- L3024: `showMessage?.(\`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.\`);`
+- L3028: `if (!dropZone.dataset.libraryDndBound) {`
+- L3030: `dropZone.addEventListener(eventName, (event) => {`
+- L3032: `dropZone.classList.add("is-drag-active");`
+- L3036: `["dragleave", "drop"].forEach((eventName) => {`
+- L3037: `dropZone.addEventListener(eventName, (event) => {`
+- L3039: `dropZone.classList.remove("is-drag-active");`
+- L3043: `dropZone.addEventListener("drop", (event) => {`
+- L3046: `syncDroppedFilesToInput(files);`
+- L3049: `dropZone.dataset.libraryDndBound = "1";`
+- L3064: `syncDroppedFilesToInput(files);`
+- L3065: `showMessage?.(\`${files.length} file${files.length === 1 ? "" : "s"} selected for upload.\`);`
+- L3082: `updateUploadUiState();`
+- L3085: `if (uploadBtn) {`
+- L3086: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3087: `uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";`
+- L3088: `uploadBtn.onclick = async () => {`
+- L3092: `showError?.("Select a project before uploading.");`
+- L3096: `if (session.uploading) return;`
+- L3098: `const files = Array.from($("libraryUploadInput")?.files || []);`
+- L3100: `showError?.("Select at least one file to upload.");`
+- L3106: `assetType = getUploadAssetType(session, catalog, $("libraryUploadTypeSelect")?.value);`
+- L3108: `showError?.(error.message || "Invalid upload category.");`
+- L3112: `const uploaded = [];`
+- L3116: `session.uploading = true;`
+- L3136: `const result = await uploadProjectAsset(activeProjectName, assetType, file);`
+- L3137: `uploaded.push({`
+- L3148: `error: error.message || "Upload failed",`
+- L3154: `session.recentUploads = [...uploaded, ...failed, ...session.recentUploads].slice(0, 20);`
+- L3156: `if (uploaded.length && typeof reloadProjectData === "function") {`
+- L3161: `const input = $("libraryUploadInput");`
+- L3163: `const dropInfo = $("libraryDropInfo");`
+- L3164: `if (dropInfo) dropInfo.textContent = "No files selected";`
+- L3165: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3166: `uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";`
+- L3168: `if (uploaded.length && !failed.length) {`
+- L3169: `showMessage?.(\`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}.\`);`
+- L3170: `} else if (uploaded.length && failed.length) {`
+- L3171: `showError?.(\`Uploaded ${uploaded.length} file${uploaded.length === 1 ? "" : "s"}, ${failed.length} failed.\`);`
+- L3173: `showError?.("Upload failed for all selected files.");`
+- L3176: `session.uploading = false;`
+- L3177: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3178: `uploadBtn.textContent = session.uploading ? "Uploading to Library..." : "Upload asset to Library";`
+- L3416: `<h3>Upload & Classify</h3>`
+- L3417: `<p class="card-subtitle">Upload files, classify them, and prepare trusted assets for AI work.</p>`
+- L3424: `<div class="library-upload-grid">`
+- L3425: `<div id="libraryDropZone" class="library-drop-zone" role="button" tabindex="0">`
+- L3426: `<strong>Upload asset to Library</strong>`
+- L3427: `<span>Drop files or click to browse</span>`
+- L3428: `<small id="libraryDropInfo">No files selected</small>`
+- L3429: `<button id="libraryChooseFilesBtn" class="btn btn-secondary btn-sm" type="button">Choose Files</button>`
+- L3430: `<input id="libraryUploadInput" class="library-file-input" type="file" multiple>`
+- L3432: `<div class="library-upload-controls">`
+- L3433: `<label class="setup-label" for="libraryUploadTypeSelect">Classify upload as</label>`
+- L3434: `<select id="libraryUploadTypeSelect" class="setup-input" aria-label="Upload asset type">`
+- L3436: `<option value="${escapeHtml(item.asset_type)}"${session.uploadType === item.asset_type ? " selected" : ""}>${escapeHtml(getCleanLibraryTypeLabel(item.asset_type, item.display_label || item.label))}</option>`
+- L3439: `<div class="setup-helper">Upload and classify for readiness in one step.</div>`
+- L3440: `<button id="libraryUploadBtn" class="btn btn-primary" type="button">Upload asset to Library</button>`
+- L3443: `<div id="libraryUploadSummary" class="library-upload-summary"></div>`
+- L3471: `<button id="libraryToolbarUploadBtn" class="btn btn-secondary btn-sm" type="button">Quick Upload</button>`
+- L3491: `<option value="uploaded">Uploaded</option>`
+
+## Destructive Signals
+- L6: `clearSharedLibrarySourceBridge,`
+- L38: `archiveProjectAsset,`
+- L39: `deleteProjectAsset,`
+- L169: `{ key: "archived", label: "Archived" }`
+- L368: `libraryProtectedUrlCache.delete(key);`
+- L460: `libraryProtectedUrlPromiseCache.delete(cacheKey);`
+- L491: `anchor.remove();`
+- L604: `item.classList.remove("is-open");`
+- L651: `if (normalized.includes("archiv")) return "archived";`
+- L664: `if (value === "archived") return "Archived";`
+- L971: `} else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {`
+- L995: `const effectiveSelectedStatus = selectedFolderKey === "archived" && selectedStatus === "active"`
+- L996: `? "archived"`
+- L1015: `if (selectedFolderKey === "archived") return statusValue === "archived";`
+- L1030: `const isDeleted = Boolean(asset.deleted || asset.is_deleted);`
+- L1031: `if (isDeleted) return false;`
+- L1038: `? statusValue !== "archived"`
+- L1040: `? statusValue !== "archived"`
+- L1077: `if (folder.key === "all_assets") return !Boolean(asset.deleted || asset.is_deleted);`
+- L1079: `if (folder.key === "archived") return statusValue === "archived";`
+- L1578: `overlay.remove();`
+- L1669: `setTimeout(() => target.classList.remove(highlightClass), 2600);`
+- L1870: `typeSelect.removeAttribute("disabled");`
+- L1871: `typeSelect.removeAttribute("readonly");`
+- L1937: `sourceSelect.removeAttribute("disabled");`
+- L1938: `sourceSelect.removeAttribute("readonly");`
+- L2015: `<small>Change or clear filters to select this asset again. Current actions stay disabled until a visible asset is selected.</small>`
+- L2034: `<span>Local selection only. Batch metadata, archive, delete, and source changes are not enabled here.</span>`
+- L2037: `<button class="btn btn-secondary btn-sm" type="button" data-library-select-visible="${allPageSelected ? "clear-page" : "select-page"}"${paginatedAssets.length ? "" : " disabled"}>${allPageSelected ? "Unselect current page" : "Select current page"}</button>`
+- L2038: `<button class="btn btn-secondary btn-sm" type="button" data-library-clear-selection${session.selectedAssetIds.length ? "" : " disabled"}>Clear selection</button>`
+- L2078: `: \`<div class="empty-box">No assets match this view. Try clearing filters, switching folders, or uploading a required asset.</div>\`;`
+- L2198: `clearSharedLibrarySourceBridge(sourceProjectName);`
+- L2199: `clearSharedLibrarySourceBridge("__default__");`
+- L2325: `setTimeout(() => dropZone.classList.remove("is-required-action-target"), 2600);`
+- L2506: `nextSelection.delete(assetId);`
+- L2526: `if (action === "clear-page") {`
+- L2527: `nextSelection.delete(asset.id);`
+- L2533: `showMessage?.(action === "clear-page" ? "Current page unselected." : "Current page selected locally.");`
+- L2538: `const clearSelectionButton = document.querySelector("[data-library-clear-selection]");`
+- L2539: `if (clearSelectionButton) {`
+- L2540: `clearSelectionButton.onclick = (event) => {`
+- L2544: `showMessage?.("Local selection cleared.");`
+- L2562: `if (value === "archived") {`
+- L2563: `session.selectedStatus = "archived";`
+- L2650: `showMessage?.(\`${asset.name} ${asset.source_of_truth ? "removed from" : "set as"} source of truth.\`);`
+- L2765: `const archiveButtons = Array.from(document.querySelectorAll("[data-library-archive]"));`
+- L2766: `archiveButtons.forEach((button) => {`
+- L2775: `const id = button.getAttribute("data-library-archive") || "";`
+- L2784: `if (!confirm(\`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\n\nSelect Cancel to keep this asset active.\`)) {`
+- L2789: `await archiveProjectAsset(activeProjectName, assetId, "Archived from Control Center Library.");`
+- L2792: `showMessage?.("Asset archived.");`
+- L2794: `showError?.(error.message || "Failed to archive asset.");`
+- L2840: `const deleteButtons = Array.from(document.querySelectorAll("[data-library-delete]"));`
+- L2841: `deleteButtons.forEach((button) => {`
+- L2850: `const id = button.getAttribute("data-library-delete") || "";`
+- L2859: `if (!confirm(\`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.\`)) {`
+- L2864: `await deleteProjectAsset(activeProjectName, assetId, "Soft deleted from Control Center Library.");`
+- L2869: `showMessage?.("Asset deleted (soft delete).");`
+- L2871: `showError?.(error.message || "Failed to delete asset.");`
+- L2947: `window.clearTimeout(librarySearchRenderTimer);`
+- L3039: `dropZone.classList.remove("is-drag-active");`
+- L3067: `picker.remove();`
+- L3327: `clearSharedLibrarySourceBridge(guideProjectName);`
+- L3328: `clearSharedLibrarySourceBridge("__default__");`
+- L3335: `clearSharedLibrarySourceBridge(guideProjectName);`
+- L3336: `clearSharedLibrarySourceBridge("__default__");`
+- L3337: `guideBox.remove();`
+- L3349: `setTimeout(() => assetWorkspace.classList.remove("is-source-target"), 2000);`
+- L3484: `<option value="active">Active (non-archived)</option>`
+- L3493: `<option value="archived">Archived</option>`
+
+## Handoff Signals
+- L800: `const id = asString(asset.handoff_id || asset.id || \`media-managed-${index}\`);`
+- L821: `file_path: asString(asset.handoff_id || asset.media_job_id || ""),`
+- L848: `source_label: sourceKind === "backend" ? "Media Studio (backend handoff)" : "Media Studio (local handoff)"`
+- L866: `const backendHandoffs = asArray(operations?.handoffs?.items)`
+- L867: `.filter((item) => asString(item?.destination_page) === "library" && asString(item?.source_page) === "media-studio")`
+- L874: `handoff_id: item.id,`
+- L885: `[...backendHandoffs, ...local].forEach((asset) => {`
+
+## Approval / Governance Signals
+- L22: `text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),`
+- L70: `testimonials_reviews: "Testimonials & Reviews",`
+- L94: `{ key: "documents", label: "Documents", types: ["brand_guideline", "partner_docs", "testimonials_reviews", "certificates"] },`
+- L126: `why: "Approved product and packaging visuals are required for high-trust creative production.",`
+- L146: `types: ["partner_docs", "testimonials_reviews", "certificates"],`
+- L166: `{ key: "research_certificates", label: "Research / Certificates", types: ["partner_docs", "testimonials_reviews", "certificates"] },`
+- L303: `function isOfficePreviewExtension(extension = "") {`
+- L307: `function isTextPreviewExtension(extension = "") {`
+- L311: `function buildPreviewUrl(projectName, asset) {`
+- L341: `function getAssetPreviewUrl(asset) {`
+- L344: `asset.preview_url`
+- L359: `getAssetPreviewUrl(asset)`
+- L391: `return new Promise((resolve, reject) => {`
+- L396: `reject(error);`
+- L405: `const previewUrl = getAssetPreviewUrl(asset);`
+- L406: `const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");`
+- L408: `if (!requiresProtectedMediaFetch(previewUrl)) {`
+- L410: `objectUrl: previewUrl,`
+- L438: `const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);`
+- L532: `preview_url: fileUrl,`
+- L643: `if (normalized.includes("approved")) return "approved";`
+- L649: `if (normalized.includes("needs_review") || normalized.includes("review")) return "needs_review";`
+- L650: `if (normalized.includes("reject")) return "rejected";`
+- L657: `if (value === "approved") return "Approved";`
+- L661: `if (value === "needs_review") return "Needs Review";`
+- L663: `if (value === "rejected") return "Rejected";`
+- L672: `if (value === "needs_review") return getAssetStatusTone("needs review");`
+- L720: `merged.review_status ||`
+- L721: `merged.approval_status ||`
+- L740: `const previewUrl = merged.preview_url ||`
+- L743: `buildPreviewUrl(projectName, {`
+- L776: `preview_url: previewUrl,`
+- L825: `status: normalizeReadinessStatus(asset.status || asset.readiness_status || "needs_review"),`
+- L830: `preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),`
+- L838: `text_preview: promptText || briefText,`
+- L839: `json_preview: payload,`
+- L845: `approval_status: asString(asset.approval_status || "draft"),`
+- L910: `const approvedAssets = assets.filter((asset) => asset.status === "approved").length;`
+- L911: `const needsReviewAssets = assets.filter((asset) => ["needs_review", "uploaded"].includes(asset.status)).length;`
+- L915: `const nextAction = requiredGroups.find((item) => item.status === "missing") || requiredGroups.find((item) => item.status === "needs_review") || null;`
+- L919: `approvedAssets,`
+- L920: `needsReviewAssets,`
+- L926: `? \`${nextAction.status === "missing" ? "Upload" : "Review"} ${nextAction.label}\``
+- L927: `: "Required assets are covered. Continue with classification and approvals."`
+- L941: `let status = "Needs Review";`
+- L944: `} else if (statuses.some((value) => value === "missing" || value === "needs_review" || value === "uploaded")) {`
+- L945: `status = "Needs Review";`
+- L947: `status = "Approved";`
+- L969: `if (entries.length && statuses.every((value) => value === "approved")) {`
+- L971: `} else if (entries.length && statuses.some((value) => value === "needs_review" || value === "uploaded" || value === "rejected" || value === "archived")) {`
+- L972: `status = "needs_review";`
+- L973: `} else if (entries.length && statuses.some((value) => value === "approved")) {`
+- L974: `status = "needs_review";`
+- L984: `action: status === "missing" ? "upload" : status === "needs_review" ? "review" : "classify"`
+- L1091: `function getPreviewExtensionForAsset(asset = {}) {`
+- L1097: `asset.preview_url ||`
+- L1105: `return value === "pdf" || isOfficePreviewExtension(value) || isTextPreviewExtension(value);`
+- L1108: `function toDocumentPreviewLabel(extension = "") {`
+- L1120: `function canAttemptDocumentPreview(asset = {}) {`
+- L1122: `getAssetPreviewUrl(asset) ||`
+- L1126: `asset.preview_url ||`
+- L1132: `function getPreviewFileName(asset = {}) {`
+- L1133: `return asString(asset.name || asset.filename || asset.file_name || basename(asset.file_path || asset.preview_url || "") || "Selected file");`
+- L1136: `function getPreviewSourceLabel(asset = {}) {`
+- L1141: `function renderPreviewActionButtons(asset = {}, escapeHtml, { openLabel = "Open asset", includeCopy = true } = {}) {`
+- L1143: `const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.preview_url || "").trim();`
+- L1149: `<div class="library-document-preview-actions">`
+- L1152: `<button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${assetId ? "" : " disabled aria-disabled=\"true\""}>Prepare AI review</button>`
+- L1157: `function renderUnsupportedPreviewCard(asset = {}, escapeHtml, options = {}) {`
+- L1158: `const extension = asString(options.extension || getPreviewExtensionForAsset(asset) || "file").toLowerCase();`
+- L1159: `const label = options.label || toDocumentPreviewLabel(extension);`
+- L1160: `const title = options.title || "Preview not available inline";`
+- L1161: `const fileName = getPreviewFileName(asset);`
+- L1162: `const sourceLabel = getPreviewSourceLabel(asset);`
+- L1166: `<div class="library-preview-fallback library-document-preview library-preview-capability-card">`
+- L1167: `<div class="library-preview-extension">${escapeHtml((extension || "file").toUpperCase())}</div>`
+- L1169: `<div class="library-preview-copy">${escapeHtml(options.message || "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.")}</div>`
+- L1170: `<dl class="library-preview-file-facts">`
+- L1176: `${renderPreviewActionButtons(asset, escapeHtml)}`
+- L1181: `function renderPreview(asset, escapeHtml) {`
+- L1183: `return \`<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>\`;`
+- L1186: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1187: `const protectedPreview = requiresProtectedMediaFetch(previewUrl);`
+- L1189: `if (asset.is_image && asString(asset.image_url || previewUrl).trim()) {`
+- L1190: `if (protectedPreview) {`
+- L1192: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1193: `<div class="library-preview-fallback">Loading protected image preview...</div>`
+- L1199: `<div class="library-preview-frame">`
+- L1200: `<img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">`
+- L1205: `if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {`
+- L1206: `if (protectedPreview) {`
+- L1208: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1209: `<div class="library-preview-fallback">Loading protected video preview...</div>`
+- L1215: `<div class="library-preview-frame">`
+- L1216: `<video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>`
+- L1221: `if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {`
+- L1223: `<div class="library-preview-frame">`
+- L1224: `<audio class="library-preview-audio" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>`
+- L1229: `if (asset.is_image && previewUrl) {`
+- L1230: `if (protectedPreview) {`
+- L1232: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1233: `<div class="library-preview-fallback">Loading protected image preview...</div>`
+- L1239: `<div class="library-preview-frame">`
+- L1240: `<img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">`
+- L1245: `if (asset.is_video && previewUrl) {`
+- L1246: `if (protectedPreview) {`
+- L1248: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1249: `<div class="library-preview-fallback">Loading protected video preview...</div>`
+- L1255: `<div class="library-preview-frame">`
+- L1256: `<video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>`
+- L1261: `const previewExtension = getPreviewExtensionForAsset(asset);`
+- L1263: `if (isDocumentExtension(previewExtension)) {`
+- L1264: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1265: `const label = toDocumentPreviewLabel(previewExtension);`
+- L1266: `const isPdf = previewExtension === "pdf";`
+- L1268: `if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {`
+- L1270: `<div class="library-pdf-preview">`
+- L1271: `<iframe src="${escapeHtml(previewUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>`
+- L1276: `if (isPdf && canAttemptDocumentPreview(asset)) {`
+- L1278: `<div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1279: `<div class="library-preview-extension">PDF</div>`
+- L1281: `<div class="library-preview-copy">Loading protected PDF preview...</div>`
+- L1286: `if (isTextPreviewExtension(previewExtension)) {`
+- L1287: `const inlineText = asString(asset.text_preview || "").trim();`
+- L1290: `<div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">`
+- L1291: `<div class="library-preview-copy">Preview shows what the browser can safely render.</div>`
+- L1297: `if (previewUrl && requiresProtectedMediaFetch(previewUrl)) {`
+- L1299: `<div class="library-preview-fallback library-document-preview library-preview-capability-card" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1300: `<div class="library-preview-extension">${escapeHtml(previewExtension.toUpperCase())}</div>`
+- L1302: `<div class="library-preview-copy">Loading protected text preview...</div>`
+- L1307: `return renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1308: `extension: previewExtension,`
+- L1310: `message: "Preview shows what the browser can safely render. Inline text preview is not available for this file source, but the asset can still be opened or sent to AI review context."`
+- L1314: `if (isOfficePreviewExtension(previewExtension)) {`
+- L1315: `return renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1316: `extension: previewExtension,`
+- L1318: `message: "Office files cannot be previewed inline in this browser panel without a document conversion service. Preview shows what the browser can safely render; this asset can still be opened or sent to AI review context."`
+- L1323: `<div class="library-preview-fallback library-document-preview">`
+- L1324: `<div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>`
+- L1326: `<div class="library-preview-copy">Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.</div>`
+- L1327: `${renderPreviewActionButtons(asset, escapeHtml, { openLabel: "Open document" })}`
+- L1333: `if (asset.text_preview) {`
+- L1334: `return \`<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(asset.text_preview)}</div>\`;`
+- L1337: `const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);`
+- L1339: `return \`<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(jsonFallback)}</div>\`;`
+- L1343: `${renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1344: `extension: asset.extension || previewExtension || "file",`
+- L1346: `message: "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context."`
+- L1351: `async function hydrateProtectedAssetPreview({`
+- L1352: `previewNode,`
+- L1358: `if (!previewNode || !asset) {`
+- L1365: `const currentId = previewNode.getAttribute("data-preview-asset-id") || "";`
+- L1370: `const previewExtension = getPreviewExtensionForAsset(asset);`
+- L1371: `if (isTextPreviewExtension(previewExtension)) {`
+- L1372: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1373: `const { blob } = await fetchProtectedMediaBlob(previewUrl, 45000);`
+- L1374: `if (!previewNode.isConnected) {`
+- L1378: `previewNode.outerHTML = renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1379: `extension: previewExtension,`
+- L1380: `label: toDocumentPreviewLabel(previewExtension),`
+- L1381: `message: "Preview shows what the browser can safely render. This text-like file is too large for a safe inline preview, but it can still be opened or sent to AI review context."`
+- L1387: `const previewText = text.length > 12000`
+- L1388: `? \`${text.slice(0, 12000)}\n\n[Preview truncated for safe browser rendering.]\``
+- L1390: `previewNode.outerHTML = \``
+- L1391: `<div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">`
+- L1392: `<div class="library-preview-copy">Preview shows what the browser can safely render.</div>`
+- L1393: `<pre>${escapeHtml(previewText || "This text-like file is empty.")}</pre>`
+- L1402: `if (!previewNode.isConnected) {`
+- L1407: `previewNode.innerHTML = \`<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">\`;`
+- L1412: `previewNode.innerHTML = \`<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>\`;`
+- L1416: `if (getPreviewExtensionForAsset(asset) === "pdf") {`
+- L1417: `previewNode.outerHTML = \``
+- L1418: `<div class="library-pdf-preview">`
+- L1419: `<iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>`
+- L1424: `if (!previewNode.isConnected) {`
+- L1430: `: \`Preview unavailable: ${error.message || "Could not load this file."}\`;`
+- L1432: `previewNode.innerHTML = \`<div class="library-preview-fallback">${escapeHtml(message)}</div>\`;`
+- L1459: `image.alt = alt || asset.name || "Asset preview";`
+- L1479: `showError?.(\`Could not load asset preview: ${rawErrorMessage || "Unknown error."}\`);`
+- L1764: `needsReviewCount: requiredGroups.filter((item) => item.status === "needs_review").length,`
+- L1809: `<li>Use selected assets in AI Team, Content, Media, Publishing, Governance, and Insights.</li>`
+- L1838: `const actionLabel = item.action === "upload" ? "Upload" : item.action === "review" ? "Review" : "Classify";`
+- L1839: `const statusLabel = item.status === "present" ? "Present" : item.status === "missing" ? "Missing" : "Needs Review";`
+- L2008: `<button class="btn btn-secondary btn-sm" type="button" data-library-command="send-to-ai">Prepare AI review</button>`
+- L2017: `<button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>`
+- L2023: `<small>Select one asset to preview it and review available actions.</small>`
+- L2025: `<button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>`
+- L2051: `const assetPreviewUrl = getAssetPreviewUrl(asset);`
+- L2052: `const previewNode = asset.is_image && assetPreviewUrl`
+- L2053: `? requiresProtectedMediaFetch(assetPreviewUrl)`
+- L2055: `: \`<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">\``
+- L2067: `<div class="library-grid-preview">${previewNode}</div>`
+- L2123: `const previewVisual = $("libraryPreviewVisual");`
+- L2124: `if (previewVisual) {`
+- L2125: `previewVisual.classList.add("library-preview-visual-ready");`
+- L2126: `previewVisual.style.display = "grid";`
+- L2127: `previewVisual.style.minHeight = "220px";`
+- L2128: `previewVisual.style.width = "100%";`
+- L2129: `previewVisual.style.overflow = "hidden";`
+- L2130: `previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);`
+- L2132: `const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");`
+- L2133: `if (protectedPreviewNode && selectedAsset) {`
+- L2134: `hydrateProtectedAssetPreview({`
+- L2135: `previewNode: protectedPreviewNode,`
+- L2144: `const previewMeta = $("libraryPreviewMeta");`
+- L2145: `if (previewMeta) {`
+- L2146: `previewMeta.innerHTML = selectedAsset`
+- L2164: `<span class="library-inspector-ai-source-guide-text">Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.</span>`
+- L2167: `: \`<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>\`;`
+- L2169: `let useBtns = Array.from(previewMeta.querySelectorAll("[data-library-use-ai-source]"));`
+- L2258: `const action = button.getAttribute("data-library-required-action") || "review";`
+- L2277: `const opensFinder = action === "review" || action === "classify";`
+- L2339: `if (action === "review") {`
+- L2340: `session.selectedStatus = "needs_review";`
+- L2362: `showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");`
+- L2380: `if (selected?.name) showMessage?.(\`Selected ${selected.name}. Review status and available actions.\`);`
+- L2415: `if (selected?.name) showMessage?.(\`Selected ${selected.name}. Review status and available actions.\`);`
+- L2444: `if (selected?.name) showMessage?.(\`Selected ${selected.name}. Review status and available actions.\`);`
+- L2475: `if (_fbCard?.name) showMessage?.(\`Selected ${_fbCard.name}. Review status and available actions.\`);`
+- L2490: `if (selected?.name) showMessage?.(\`Selected ${selected.name}. Review status and available actions.\`);`
+- L2605: `dispatchLibraryCommand("open-preview", { assetId: id }, {`
+- L2606: `"open-preview": ({ assetId }) => ({`
+- L2670: `const status = button.getAttribute("data-asset-status-action") || "needs_review";`
+- L2680: `const confirmed = status === "approved" ? true : confirm(\`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.\`);`
+- L2859: `if (!confirm(\`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.\`)) {`
+- L3212: `showMessage?.("Classification request prepared. Review AI suggestions before applying changes.");`
+- L3222: `showMessage?.("Missing asset review prepared. The system will focus on required categories that still need attention.");`
+- L3237: `showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");`
+- L3251: `showMessage?.("Document extraction prompt prepared. Review extracted claims before use.");`
+- L3266: `showMessage?.(\`AI context prepared for ${selectedAsset.name}. Open AI Command to review recommendations.\`);`
+- L3307: `"Select one Library item, then send it as review context to AI Command. This does not execute, approve, publish, or run workflows.",`
+- L3397: `${escapeHtml(\`${formatCount(overview.totalAssets || 0)} assets · ${formatCount(overview.sourceOfTruthAssets || 0)} source-of-truth · ${formatCount(overview.needsReviewAssets || 0)} need review · ${formatCount(overview.approvedAssets || 0)} approved · ${String(overview.sourceCoverage || 0)}% source coverage\`)}`
+- L3420: `<button id="libraryAiMissingBtn" class="btn btn-secondary" type="button">Review Missing</button>`
+- L3487: `<option value="approved">Approved</option>`
+- L3488: `<option value="needs_review">Needs review</option>`
+- L3492: `<option value="rejected">Rejected</option>`
+- L3523: `<section class="card library-preview-card library-preview-card-v2">`
+- L3524: `<div class="library-preview-card-head">`
+- L3526: `<p class="card-label">Selected asset preview</p>`
+- L3527: `<h3>Asset Preview</h3>`
+- L3531: `<div id="libraryPreviewVisual" class="library-preview-visual-ready" aria-live="polite"></div>`
+- L3532: `<div id="libraryPreviewMeta" class="library-preview-meta"></div>`
+
+## Task Signals
+- L1108: `function toDocumentPreviewLabel(extension = "") {`
+- L1159: `const label = options.label || toDocumentPreviewLabel(extension);`
+- L1265: `const label = toDocumentPreviewLabel(previewExtension);`
+- L1380: `label: toDocumentPreviewLabel(previewExtension),`
+
+## Confirmation Signals
+- L2680: `const confirmed = status === "approved" ? true : confirm(\`Confirm asset status change\n\nAction: Set asset status to "${status}".\nRisk: This updates Library readiness metadata and may affect downstream review/publishing visibility. It does not publish anything.\n\nSelect Cancel to keep the current status.\`);`
+- L2731: `const confirmed = window.confirm(`
+- L2784: `if (!confirm(\`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\n\nSelect Cancel to keep this asset active.\`)) {`
+- L2859: `if (!confirm(\`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.\`)) {`
+
+## Access-Key / Credential Signals
+- L537: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L1429: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2622: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2653: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2692: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L2757: `showError?.("Reclassify requires a valid Control Center write key.");`
+
+## Navigation Signals
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L599: `return routeLibraryCommand(envelope, handlers);`
+- L1681: `navigateTo,`
+- L1701: `navigateTo,`
+- L1891: `navigateTo,`
+- L1922: `navigateTo,`
+- L1958: `navigateTo,`
+- L1989: `navigateTo,`
+- L2201: `navigateTo("ai-command");`
+- L2299: `navigateTo,`
+- L2350: `navigateTo,`
+- L2361: `navigateTo("ai-command");`
+- L2390: `navigateTo,`
+- L2425: `navigateTo,`
+- L2454: `navigateTo,`
+- L3126: `navigateTo,`
+- L3211: `navigateTo("ai-command");`
+- L3221: `navigateTo("ai-command");`
+- L3236: `navigateTo("ai-command");`
+- L3250: `navigateTo("ai-command");`
+- L3267: `navigateTo("ai-command");`
+- L3272: `export const libraryRoute = {`
+- L3289: `navigateTo,`
+- L3329: `navigateTo("ai-command");`
+- L3449: `<span class="card-badge neutral">Inspect, filter, and route trusted assets</span>`
+- L3551: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L22: `text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),`
+- L303: `function isOfficePreviewExtension(extension = "") {`
+- L307: `function isTextPreviewExtension(extension = "") {`
+- L311: `function buildPreviewUrl(projectName, asset) {`
+- L333: `function requiresProtectedMediaFetch(fileUrl = "") {`
+- L341: `function getAssetPreviewUrl(asset) {`
+- L344: `asset.preview_url`
+- L359: `getAssetPreviewUrl(asset)`
+- L405: `const previewUrl = getAssetPreviewUrl(asset);`
+- L406: `const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");`
+- L408: `if (!requiresProtectedMediaFetch(previewUrl)) {`
+- L410: `objectUrl: previewUrl,`
+- L438: `const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);`
+- L532: `preview_url: fileUrl,`
+- L646: `if (normalized.includes("draft")) return "draft";`
+- L660: `if (value === "draft") return "Draft";`
+- L671: `if (value === "draft") return "neutral";`
+- L740: `const previewUrl = merged.preview_url ||`
+- L743: `buildPreviewUrl(projectName, {`
+- L776: `preview_url: previewUrl,`
+- L830: `preview_url: firstValidUrl(imageUrl, videoUrl, audioUrl),`
+- L838: `text_preview: promptText || briefText,`
+- L839: `json_preview: payload,`
+- L845: `approval_status: asString(asset.approval_status || "draft"),`
+- L1091: `function getPreviewExtensionForAsset(asset = {}) {`
+- L1097: `asset.preview_url ||`
+- L1105: `return value === "pdf" || isOfficePreviewExtension(value) || isTextPreviewExtension(value);`
+- L1108: `function toDocumentPreviewLabel(extension = "") {`
+- L1120: `function canAttemptDocumentPreview(asset = {}) {`
+- L1122: `getAssetPreviewUrl(asset) ||`
+- L1126: `asset.preview_url ||`
+- L1132: `function getPreviewFileName(asset = {}) {`
+- L1133: `return asString(asset.name || asset.filename || asset.file_name || basename(asset.file_path || asset.preview_url || "") || "Selected file");`
+- L1136: `function getPreviewSourceLabel(asset = {}) {`
+- L1141: `function renderPreviewActionButtons(asset = {}, escapeHtml, { openLabel = "Open asset", includeCopy = true } = {}) {`
+- L1143: `const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.preview_url || "").trim();`
+- L1145: `? \`<button class="btn btn-secondary" type="button" data-copy-asset-path="${escapeHtml(filePath)}"${filePath ? "" : " disabled aria-disabled=\"true\""}>Copy path</button>\``
+- L1149: `<div class="library-document-preview-actions">`
+- L1150: `<button class="btn btn-primary" type="button" data-library-open="${assetId}"${assetId ? "" : " disabled aria-disabled=\"true\""}>${escapeHtml(openLabel)}</button>`
+- L1152: `<button class="btn btn-secondary" type="button" data-library-command="send-to-ai"${assetId ? "" : " disabled aria-disabled=\"true\""}>Prepare AI review</button>`
+- L1157: `function renderUnsupportedPreviewCard(asset = {}, escapeHtml, options = {}) {`
+- L1158: `const extension = asString(options.extension || getPreviewExtensionForAsset(asset) || "file").toLowerCase();`
+- L1159: `const label = options.label || toDocumentPreviewLabel(extension);`
+- L1160: `const title = options.title || "Preview not available inline";`
+- L1161: `const fileName = getPreviewFileName(asset);`
+- L1162: `const sourceLabel = getPreviewSourceLabel(asset);`
+- L1166: `<div class="library-preview-fallback library-document-preview library-preview-capability-card">`
+- L1167: `<div class="library-preview-extension">${escapeHtml((extension || "file").toUpperCase())}</div>`
+- L1169: `<div class="library-preview-copy">${escapeHtml(options.message || "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.")}</div>`
+- L1170: `<dl class="library-preview-file-facts">`
+- L1176: `${renderPreviewActionButtons(asset, escapeHtml)}`
+- L1181: `function renderPreview(asset, escapeHtml) {`
+- L1183: `return \`<div class="empty-box">Select an asset to preview details, open files, copy paths, or prepare review actions.</div>\`;`
+- L1186: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1187: `const protectedPreview = requiresProtectedMediaFetch(previewUrl);`
+- L1189: `if (asset.is_image && asString(asset.image_url || previewUrl).trim()) {`
+- L1190: `if (protectedPreview) {`
+- L1192: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1193: `<div class="library-preview-fallback">Loading protected image preview...</div>`
+- L1199: `<div class="library-preview-frame">`
+- L1200: `<img src="${escapeHtml(asString(asset.image_url || previewUrl))}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">`
+- L1205: `if (asset.is_video && asString(asset.video_url || previewUrl).trim()) {`
+- L1206: `if (protectedPreview) {`
+- L1208: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1209: `<div class="library-preview-fallback">Loading protected video preview...</div>`
+- L1215: `<div class="library-preview-frame">`
+- L1216: `<video class="library-preview-video" controls src="${escapeHtml(asString(asset.video_url || previewUrl))}"></video>`
+- L1221: `if (asset.is_audio && asString(asset.audio_url || previewUrl).trim()) {`
+- L1223: `<div class="library-preview-frame">`
+- L1224: `<audio class="library-preview-audio" controls src="${escapeHtml(asString(asset.audio_url || previewUrl))}"></audio>`
+- L1229: `if (asset.is_image && previewUrl) {`
+- L1230: `if (protectedPreview) {`
+- L1232: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1233: `<div class="library-preview-fallback">Loading protected image preview...</div>`
+- L1239: `<div class="library-preview-frame">`
+- L1240: `<img src="${escapeHtml(previewUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image" onerror="this.closest('.library-preview-frame')?.replaceWith(Object.assign(document.createElement('div'), { className: 'library-preview-fallback', textContent: 'Preview unavailable for this image.' }))">`
+- L1245: `if (asset.is_video && previewUrl) {`
+- L1246: `if (protectedPreview) {`
+- L1248: `<div class="library-preview-frame" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1249: `<div class="library-preview-fallback">Loading protected video preview...</div>`
+- L1255: `<div class="library-preview-frame">`
+- L1256: `<video class="library-preview-video" controls src="${escapeHtml(previewUrl)}"></video>`
+- L1261: `const previewExtension = getPreviewExtensionForAsset(asset);`
+- L1263: `if (isDocumentExtension(previewExtension)) {`
+- L1264: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1265: `const label = toDocumentPreviewLabel(previewExtension);`
+- L1266: `const isPdf = previewExtension === "pdf";`
+- L1268: `if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {`
+- L1270: `<div class="library-pdf-preview">`
+- L1271: `<iframe src="${escapeHtml(previewUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>`
+- L1276: `if (isPdf && canAttemptDocumentPreview(asset)) {`
+- L1278: `<div class="library-preview-fallback library-document-preview" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1279: `<div class="library-preview-extension">PDF</div>`
+- L1281: `<div class="library-preview-copy">Loading protected PDF preview...</div>`
+- L1286: `if (isTextPreviewExtension(previewExtension)) {`
+- L1287: `const inlineText = asString(asset.text_preview || "").trim();`
+- L1290: `<div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">`
+- L1291: `<div class="library-preview-copy">Preview shows what the browser can safely render.</div>`
+- L1297: `if (previewUrl && requiresProtectedMediaFetch(previewUrl)) {`
+- L1299: `<div class="library-preview-fallback library-document-preview library-preview-capability-card" data-library-protected-preview data-preview-asset-id="${escapeHtml(asset.id || asset.asset_id || "")}">`
+- L1300: `<div class="library-preview-extension">${escapeHtml(previewExtension.toUpperCase())}</div>`
+- L1302: `<div class="library-preview-copy">Loading protected text preview...</div>`
+- L1307: `return renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1308: `extension: previewExtension,`
+- L1310: `message: "Preview shows what the browser can safely render. Inline text preview is not available for this file source, but the asset can still be opened or sent to AI review context."`
+- L1314: `if (isOfficePreviewExtension(previewExtension)) {`
+- L1315: `return renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1316: `extension: previewExtension,`
+- L1318: `message: "Office files cannot be previewed inline in this browser panel without a document conversion service. Preview shows what the browser can safely render; this asset can still be opened or sent to AI review context."`
+- L1323: `<div class="library-preview-fallback library-document-preview">`
+- L1324: `<div class="library-preview-extension">${escapeHtml((previewExtension || "doc").toUpperCase())}</div>`
+- L1326: `<div class="library-preview-copy">Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context.</div>`
+- L1327: `${renderPreviewActionButtons(asset, escapeHtml, { openLabel: "Open document" })}`
+- L1333: `if (asset.text_preview) {`
+- L1334: `return \`<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(asset.text_preview)}</div>\`;`
+- L1337: `const jsonFallback = JSON.stringify(asset.json_preview || asset.media_payload || {}, null, 2);`
+- L1339: `return \`<div class="library-preview-fallback library-preview-text-fallback">${escapeHtml(jsonFallback)}</div>\`;`
+- L1343: `${renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1344: `extension: asset.extension || previewExtension || "file",`
+- L1346: `message: "Preview shows what the browser can safely render. Unsupported files can still be opened or sent to AI review context."`
+- L1351: `async function hydrateProtectedAssetPreview({`
+- L1352: `previewNode,`
+- L1358: `if (!previewNode || !asset) {`
+- L1365: `const currentId = previewNode.getAttribute("data-preview-asset-id") || "";`
+- L1370: `const previewExtension = getPreviewExtensionForAsset(asset);`
+- L1371: `if (isTextPreviewExtension(previewExtension)) {`
+- L1372: `const previewUrl = getAssetPreviewUrl(asset);`
+- L1373: `const { blob } = await fetchProtectedMediaBlob(previewUrl, 45000);`
+- L1374: `if (!previewNode.isConnected) {`
+- L1378: `previewNode.outerHTML = renderUnsupportedPreviewCard(asset, escapeHtml, {`
+- L1379: `extension: previewExtension,`
+- L1380: `label: toDocumentPreviewLabel(previewExtension),`
+- L1381: `message: "Preview shows what the browser can safely render. This text-like file is too large for a safe inline preview, but it can still be opened or sent to AI review context."`
+- L1387: `const previewText = text.length > 12000`
+- L1388: `? \`${text.slice(0, 12000)}\n\n[Preview truncated for safe browser rendering.]\``
+- L1390: `previewNode.outerHTML = \``
+- L1391: `<div class="library-preview-fallback library-preview-text-fallback library-preview-text-card">`
+- L1392: `<div class="library-preview-copy">Preview shows what the browser can safely render.</div>`
+- L1393: `<pre>${escapeHtml(previewText || "This text-like file is empty.")}</pre>`
+- L1402: `if (!previewNode.isConnected) {`
+- L1407: `previewNode.innerHTML = \`<img src="${escapeHtml(resolved.objectUrl)}" alt="${escapeHtml(asset.name)}" class="library-preview-image">\`;`
+- L1412: `previewNode.innerHTML = \`<video class="library-preview-video" controls src="${escapeHtml(resolved.objectUrl)}"></video>\`;`
+- L1416: `if (getPreviewExtensionForAsset(asset) === "pdf") {`
+- L1417: `previewNode.outerHTML = \``
+- L1418: `<div class="library-pdf-preview">`
+- L1419: `<iframe src="${escapeHtml(resolved.objectUrl)}" title="${escapeHtml(asset.name || "PDF preview")}"></iframe>`
+- L1424: `if (!previewNode.isConnected) {`
+- L1430: `: \`Preview unavailable: ${error.message || "Could not load this file."}\`;`
+- L1432: `previewNode.innerHTML = \`<div class="library-preview-fallback">${escapeHtml(message)}</div>\`;`
+- L1459: `image.alt = alt || asset.name || "Asset preview";`
+- L1479: `showError?.(\`Could not load asset preview: ${rawErrorMessage || "Unknown error."}\`);`
+- L1525: `// Fall through to custom modal when prompt is blocked.`
+- L1870: `typeSelect.removeAttribute("disabled");`
+- L1871: `typeSelect.removeAttribute("readonly");`
+- L1937: `sourceSelect.removeAttribute("disabled");`
+- L1938: `sourceSelect.removeAttribute("readonly");`
+- L2015: `<small>Change or clear filters to select this asset again. Current actions stay disabled until a visible asset is selected.</small>`
+- L2017: `<button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>`
+- L2023: `<small>Select one asset to preview it and review available actions.</small>`
+- L2025: `<button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">Prepare AI review</button>`
+- L2037: `<button class="btn btn-secondary btn-sm" type="button" data-library-select-visible="${allPageSelected ? "clear-page" : "select-page"}"${paginatedAssets.length ? "" : " disabled"}>${allPageSelected ? "Unselect current page" : "Select current page"}</button>`
+- L2038: `<button class="btn btn-secondary btn-sm" type="button" data-library-clear-selection${session.selectedAssetIds.length ? "" : " disabled"}>Clear selection</button>`
+- L2039: `<button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true" title="Batch Library mutations need an explicit backend contract.">Batch actions unavailable</button>`
+- L2051: `const assetPreviewUrl = getAssetPreviewUrl(asset);`
+- L2052: `const previewNode = asset.is_image && assetPreviewUrl`
+- L2053: `? requiresProtectedMediaFetch(assetPreviewUrl)`
+- L2055: `: \`<img class="library-grid-thumb" src="${escapeHtml(assetPreviewUrl)}" alt="${escapeHtml(asset.name)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'library-grid-icon', textContent: '${escapeHtml((asset.extension || "file").toUpperCase())}' }))">\``
+- L2067: `<div class="library-grid-preview">${previewNode}</div>`
+- L2089: `<button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="prev"${session.page <= 1 ? " disabled" : ""}>Previous</button>`
+- L2091: `<button class="btn btn-secondary btn-sm" type="button" data-library-grid-page="next"${session.page >= totalPages ? " disabled" : ""}>Next</button>`
+- L2123: `const previewVisual = $("libraryPreviewVisual");`
+- L2124: `if (previewVisual) {`
+- L2125: `previewVisual.classList.add("library-preview-visual-ready");`
+- L2126: `previewVisual.style.display = "grid";`
+- L2127: `previewVisual.style.minHeight = "220px";`
+- L2128: `previewVisual.style.width = "100%";`
+- L2129: `previewVisual.style.overflow = "hidden";`
+- L2130: `previewVisual.innerHTML = renderPreview(selectedAsset, escapeHtml);`
+- L2132: `const protectedPreviewNode = previewVisual.querySelector("[data-library-protected-preview]");`
+- L2133: `if (protectedPreviewNode && selectedAsset) {`
+- L2134: `hydrateProtectedAssetPreview({`
+- L2135: `previewNode: protectedPreviewNode,`
+- L2144: `const previewMeta = $("libraryPreviewMeta");`
+- L2145: `if (previewMeta) {`
+- L2146: `previewMeta.innerHTML = selectedAsset`
+- L2167: `: \`<div class="empty-box">Select an asset to preview context. Actions become available in the Action Panel.</div>\`;`
+- L2169: `let useBtns = Array.from(previewMeta.querySelectorAll("[data-library-use-ai-source]"));`
+- L2210: `disabled: false`
+- L2219: `disabled: false`
+- L2605: `dispatchLibraryCommand("open-preview", { assetId: id }, {`
+- L2606: `"open-preview": ({ assetId }) => ({`
+- L2757: `showError?.("Reclassify requires a valid Control Center write key.");`
+- L2992: `uploadBtn.disabled = session.uploading || files.length === 0;`
+- L3086: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3165: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3177: `uploadBtn.disabled = session.uploading || !Array.from($("libraryUploadInput")?.files || []).length;`
+- L3193: `refreshBtn.disabled = true;`
+- L3201: `refreshBtn.disabled = false;`
+- L3257: `if (sendToAiBtn.disabled) return;`
+- L3486: `<option value="draft">Draft</option>`
+- L3523: `<section class="card library-preview-card library-preview-card-v2">`
+- L3524: `<div class="library-preview-card-head">`
+- L3526: `<p class="card-label">Selected asset preview</p>`
+- L3527: `<h3>Asset Preview</h3>`
+- L3531: `<div id="libraryPreviewVisual" class="library-preview-visual-ready" aria-live="polite"></div>`
+- L3532: `<div id="libraryPreviewMeta" class="library-preview-meta"></div>`
+
+## Risky Terms
+- L1: `import { renderGuideBox } from "../components/guide-box.js";`
+- L2: `import { getSourceTypeMapping } from "../shared-context.js";`
+- L3: `import {`
+- L4: `setSharedAiSource,`
+- L5: `getSharedLibrarySourceBridge,`
+- L6: `clearSharedLibrarySourceBridge,`
+- L11: `function buildAiSourcePayloadFromAsset(asset = {}) {`
+- L12: `if (!asset) return null;`
+- L14: `id: asset.id,`
+- L15: `asset_id: asset.asset_id,`
+- L16: `name: asset.name,`
+- L17: `filename: asset.filename,`
+- L18: `file_path: asset.file_path,`
+- L19: `asset_type: asset.asset_type,`
+- L20: `source_label: asset.source_label || asset.name || "Library asset",`
+- L21: `source_of_truth: asset.source_of_truth,`
+- L22: `text_preview: (asset.text_preview || asset.notes || "").slice(0, 1200),`
+- L27: `// --- Library Source Bridge Guide Box ---`
+- L30: `import { renderLibraryActionPanel } from "./library/action-panel.js";`
+- L31: `import { renderLibraryAiPanel } from "./library/ai-panel.js";`
+- L32: `import { normalizeLibraryAsset } from "./library/projection-adapter.js";`
+- L33: `import { normalizeLibrarySession } from "./library/session-store.js";`
+- L34: `import { createLibraryCommand, routeLibraryCommand } from "./library/command-router.js";`
+- L35: `import { mountLibraryListeners } from "./library/listener-lifecycle.js";`
+- L36: `import {`
+- L38: `archiveProjectAsset,`
+- L39: `deleteProjectAsset,`
+- L41: `refreshProjectLibrary,`
+- L42: `reclassifyProjectAsset,`
+- L43: `renameProjectAsset,`
+- L44: `setProjectAssetSourceOfTruth,`
+- L45: `updateProjectAssetStatus,`
+- L46: `uploadProjectAsset`
+- L48: `import {`
+- L49: `getAssetCatalog,`
+- L50: `getCanonicalAssetType,`
+- L52: `getMissingAssetLabels,`
+- L53: `getAssetStatusTone`
+- L54: `} from "../asset-library.js";`
+- L56: `const librarySessionStore = new Map();`
+- L57: `let librarySearchRenderTimer = null;`
+- L58: `const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";`
+- L59: `const LIBRARY_UPLOAD_TYPE_LABELS = {`
+- L67: `social_assets: "Social Assets",`
+- L68: `campaign_assets: "Campaign Assets",`
+- L70: `testimonials_reviews: "Testimonials & Reviews",`
+- L75: `function getLibraryUploadTypeLabel(assetType = "") {`
+- L76: `const key = String(assetType || "").trim().toLowerCase();`
+- L77: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || titleCase(key || "asset");`
+- L80: `const libraryProtectedUrlCache = new Map();`
+- L81: `const LIBRARY_PAGE_SIZE = 10;`
+- L82: `const libraryProtectedUrlPromiseCache = new Map();`
+- L83: `let disposeLibraryGlobalListeners = null;`
+- L84: `let _libraryFeedback = null;`
+- L85: `const MAX_CONCURRENT_LIBRARY_THUMB_LOADS = 4;`
+- L86: `const LIBRARY_THUMB_BATCH_LIMIT = 18;`
+- L87: `let libraryThumbLoadsInFlight = 0;`
+- L88: `const libraryThumbLoadQueue = [];`
+- L94: `{ key: "documents", label: "Documents", types: ["brand_guideline", "partner_docs", "testimonials_reviews", "certificates"] },`
+- L97: `{ key: "campaign_materials", label: "Campaign Materials", types: ["social_assets", "campaign_assets"] }`
+- L100: `const REQUIRED_ASSET_REQUIREMENTS = [`
+- L105: `why: "Logos keep brand identity consistent across setup, media generation, and publishing.",`
+- L106: `uploadType: "logo"`
+- L113: `uploadType: "brand_guideline"`
+- L119: `why: "Product data anchors facts, variants, and claims for campaign and publishing.",`
+- L120: `uploadType: "product_csv"`
+- L126: `why: "Approved product and packaging visuals are required for high-trust creative production.",`
+- L127: `uploadType: "product_photos"`
+- L133: `why: "Video source assets are required for reels, demos, and cutdowns.",`
+- L134: `uploadType: "product_videos"`
+- L141: `uploadType: "legal_doc"`
+- L146: `types: ["partner_docs", "testimonials_reviews", "certificates"],`
+- L148: `uploadType: "partner_docs"`
+- L152: `function getCleanLibraryTypeLabel(type, fallback = "") {`
+- L154: `return LIBRARY_UPLOAD_TYPE_LABELS[key] || String(fallback || key || "Asset").trim();`
+- L157: `const LIBRARY_FOLDERS = [`
+- L158: `{ key: "all_assets", label: "All Assets" },`
+- L166: `{ key: "research_certificates", label: "Research / Certificates", types: ["partner_docs", "testimonials_reviews", "certificates"] },`
+- L167: `{ key: "uploaded_session", label: "Uploaded This Session" },`
+- L168: `{ key: "source_of_truth", label: "Source of Truth" },`
+- L169: `{ key: "archived", label: "Archived" }`
+- L185: `function isLibraryInteractiveElement(target) {`
+- L187: `"button, a, input, select, textarea, label, option, [role='button'], .library-action-menu, .library-action-dropdown, .library-drop-zone"`
+- L191: `function bindLibraryControlEventShield(scope) {`
+- L193: `// Do not stop events on native controls. Select/input/file controls must`
+- L212: `function readManagedMediaAssetMap() {`
+- L215: `const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");`
+- L222: `function loadLocalManagedMediaAssets(projectName) {`
+- L223: `const map = readManagedMediaAssetMap();`
+- L232: `function basename(filePath = "") {`
+- L233: `const value = asString(filePath);`
+- L239: `function getFileExtension(name = "") {`
+- L245: `function shortPath(filePath = "", maxSegments = 4) {`
+- L246: `const value = asString(filePath).trim();`
+- L253: `function assetContextHint(asset) {`
+- L254: `const filePath = asString(asset?.file_path || "").trim();`
+- L255: `if (!filePath) return "Library";`
+- L257: `const parts = filePath.split("/").filter(Boolean);`
+- L258: `if (!parts.length) return "Library";`
+- L261: `return tail || shortPath(filePath);`
+- L264: `function shortAssetId(value = "") {`
+- L284: `function normalizeLibrarySelectionIds(value) {`
+- L303: `function isOfficePreviewExtension(extension = "") {`
+- L307: `function isTextPreviewExtension(extension = "") {`
+- L311: `function buildPreviewUrl(projectName, asset) {`
+- L313: `const fullPath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L314: `const fileName = basename(fullPath || asset.filename || asset.file_name || asset.name || "");`
+- L315: `const assetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L316: `const assetType = asString(asset.asset_type || asset.type || "asset").trim().toLowerCase();`
+- L317: `if (!fileName || !assetType) return "";`
+- L319: `const base = \`/media/file/${encodeURIComponent(projectName)}/${encodeURIComponent(assetType)}/${encodeURIComponent(fileName)}\`;`
+- L326: `if (assetId) {`
+- L327: `params.push(\`assetId=${encodeURIComponent(assetId)}\`);`
+- L333: `function requiresProtectedMediaFetch(fileUrl = "") {`
+- L334: `const value = asString(fileUrl).trim();`
+- L337: `if (/^https?:\/\//i.test(value) && !value.includes("/media/file/")) return false;`
+- L338: `return value.includes("/media/file/");`
+- L341: `function getAssetPreviewUrl(asset) {`
+- L342: `if (!asset) return "";`
+- L344: `asset.preview_url`
+- L345: `|| asset.image_url`
+- L346: `|| asset.video_url`
+- L347: `|| asset.audio_url`
+- L352: `function buildProtectedCacheKey(projectName, asset) {`
+- L353: `const resolvedAssetId = asString(asset.asset_id || asset.assetId || asset.id || "").trim();`
+- L354: `const resolvedFilePath = asString(asset.file_path || asset.local_path || asset.path || "").trim();`
+- L357: `resolvedAssetId || "no-asset-id",`
+- L358: `resolvedFilePath || "no-file-path",`
+- L359: `getAssetPreviewUrl(asset)`
+- L363: `function revokeLibraryProtectedUrl(key) {`
+- L364: `const entry = libraryProtectedUrlCache.get(key);`
+- L368: `libraryProtectedUrlCache.delete(key);`
+- L371: `function runNextLibraryThumbLoad() {`
+- L372: `if (libraryThumbLoadsInFlight >= MAX_CONCURRENT_LIBRARY_THUMB_LOADS) {`
+- L376: `const nextJob = libraryThumbLoadQueue.shift();`
+- L381: `libraryThumbLoadsInFlight += 1;`
+- L385: `libraryThumbLoadsInFlight = Math.max(0, libraryThumbLoadsInFlight - 1);`
+- L386: `runNextLibraryThumbLoad();`
+- L390: `function enqueueLibraryThumbLoad(job) {`
+- L392: `libraryThumbLoadQueue.push(async () => {`
+- L400: `runNextLibraryThumbLoad();`
+- L404: `async function getProtectedAssetObjectUrl(projectName, asset, options = {}) {`
+- L405: `const previewUrl = getAssetPreviewUrl(asset);`
+- L406: `const fileName = asString(asset?.filename || asset?.name || basename(previewUrl) || "download");`
+- L408: `if (!requiresProtectedMediaFetch(previewUrl)) {`
+- L410: `objectUrl: previewUrl,`
+- L412: `fileName,`
+- L417: `const cacheKey = buildProtectedCacheKey(projectName, asset);`
+- L418: `const cached = libraryProtectedUrlCache.get(cacheKey);`
+- L423: `fileName,`
+- L429: `revokeLibraryProtectedUrl(cacheKey);`
+- L432: `const inFlight = libraryProtectedUrlPromiseCache.get(cacheKey);`
+- L437: `const loadPromise = (async () => {`
+- L438: `const { blob, contentType } = await fetchProtectedMediaBlob(previewUrl, Number(options.timeoutMs) || undefined);`
+- L440: `libraryProtectedUrlCache.set(cacheKey, {`
+- L449: `fileName,`
+- L454: `libraryProtectedUrlPromiseCache.set(cacheKey, loadPromise);`
+- L459: `if (libraryProtectedUrlPromiseCache.get(cacheKey) === loadPromise) {`
+- L460: `libraryProtectedUrlPromiseCache.delete(cacheKey);`
+- L465: `async function openLibraryAsset(projectName, asset) {`
+- L466: `if (!asset) {`
+- L467: `throw new Error("Select an asset before opening.");`
+- L470: `const resolved = await getProtectedAssetObjectUrl(projectName, asset);`
+- L473: `const safeFilename = asString(resolved.fileName || "download");`
+- L479: `/\.(png|jpg|jpeg|webp|gif|svg|avif|mp4|mov|webm|m4v|pdf)$/i.test(safeFilename)`
+- L488: `anchor.download = safeFilename;`
+- L494: `function mountLibraryGlobalListeners() {`
+- L495: `if (disposeLibraryGlobalListeners) {`
+- L499: `disposeLibraryGlobalListeners = mountLibraryListeners({`
+- L502: `Array.from(libraryProtectedUrlCache.keys()).forEach((key) => revokeLibraryProtectedUrl(key));`
+- L505: `async (event) => {`
+- L506: `const button = event.target.closest?.("[data-copy-asset-path]");`
+- L507: `if (!button || !button.closest(".library-workspace")) return;`
+- L511: `const value = button.getAttribute("data-copy-asset-path") || "";`
+- L516: `_libraryFeedback?.("Asset path copied.");`
+- L518: `window.prompt("Copy asset path:", value);`
+- L522: `const link = event.target.closest?.("a.library-link-btn");`
+- L523: `if (!link || !link.closest(".library-workspace")) return;`
+- L525: `const fileUrl = link.getAttribute("href") || "";`
+- L526: `if (!fileUrl.includes("/media/file/")) return;`
+- L530: `const assetName = link.getAttribute("data-asset-name") || decodeURIComponent(fileUrl.split("/").pop() || "download");`
+- L531: `openLibraryAsset("", {`
+- L532: `preview_url: fileUrl,`
+- L533: `filename: assetName,`
+- L534: `name: assetName`
+- L537: `? "Missing or invalid Control Center access key. Open Control Center Access and save a valid key."`
+- L538: `: \`Could not open file: ${error.message || "Unknown error."}\`;`
+- L543: `const root = event.target?.closest?.(".library-workspace");`
+- L546: `if (event.target?.closest?.(".library-action-menu")) {`
+- L550: `closeAllLibraryActionDropdowns();`
+- L557: `function unmountLibraryGlobalListeners() {`
+- L558: `if (!disposeLibraryGlobalListeners) {`
+- L562: `const dispose = disposeLibraryGlobalListeners;`
+- L563: `disposeLibraryGlobalListeners = null;`
+- L568: `function ensureLibrarySession(projectName) {`
+- L570: `if (!librarySessionStore.has(key)) {`
+- L571: `librarySessionStore.set(key, normalizeLibrarySession({`
+- L573: `selectedAssetId: "",`
+- L574: `selectedAssetIds: [],`
+- L578: `selectedSource: "all",`
+- L580: `folderKey: "all_assets",`
+- L583: `uploadType: "logo",`
+- L584: `uploading: false,`
+- L585: `recentUploads: []`
+- L589: `const current = librarySessionStore.get(key);`
+- L590: `const normalized = normalizeLibrarySession(current);`
+- L592: `librarySessionStore.set(key, normalized);`
+- L594: `return librarySessionStore.get(key);`
+- L597: `function dispatchLibraryCommand(command, payload = {}, handlers = {}) {`
+- L598: `const envelope = createLibraryCommand(command, payload);`
+- L599: `return routeLibraryCommand(envelope, handlers);`
+- L602: `function closeAllLibraryActionDropdowns() {`
+- L603: `Array.from(document.querySelectorAll(".library-action-dropdown.is-open")).forEach((item) => {`
+- L610: `function getSafeAssetType(value = "") {`
+- L618: `function getUploadAssetType(session, catalog, selectedValue) {`
+- L619: `const normalized = getSafeAssetType(selectedValue || session.uploadType);`
+- L620: `const valid = new Set(asArray(catalog).map((item) => item.asset_type));`
+- L622: `throw new Error("Choose a valid upload category.");`
+- L634: `const key = asString(item.asset_type).trim().toLowerCase();`
+- L642: `if (!normalized) return "uploaded";`
+- L643: `if (normalized.includes("approved")) return "approved";`
+- L644: `if (normalized.includes("publishing_ready")) return "publishing_ready";`
+- L645: `if (normalized.includes("sent_to_publishing")) return "sent_to_publishing";`
+- L648: `if (normalized === "uploaded") return "uploaded";`
+- L649: `if (normalized.includes("needs_review") || normalized.includes("review")) return "needs_review";`
+- L651: `if (normalized.includes("archiv")) return "archived";`
+- L652: `return "uploaded";`
+- L657: `if (value === "approved") return "Approved";`
+- L658: `if (value === "publishing_ready") return "Publishing Ready";`
+- L659: `if (value === "sent_to_publishing") return "Sent to Publishing";`
+- L661: `if (value === "needs_review") return "Needs Review";`
+- L664: `if (value === "archived") return "Archived";`
+- L665: `return "Uploaded";`
+- L670: `if (value === "publishing_ready" || value === "sent_to_publishing") return "success";`
+- L672: `if (value === "needs_review") return getAssetStatusTone("needs review");`
+- L673: `return getAssetStatusTone(value);`
+- L676: `function normalizeAssets(projectName, assetsData, legacyRegistry, categoryByType, catalog) {`
+- L677: `const catalogMap = new Map(asArray(catalog).map((item) => [item.asset_type, item]));`
+- L680: `legacyRegistry?.assets ||`
+- L685: `const assetItems = asArray(assetsData?.assets).length`
+- L686: `? asArray(assetsData.assets)`
+- L694: `const localPath = asString(item.local_path || item.file_path || item.path).trim();`
+- L695: `const fileName = basename(localPath || item.file_name || item.filename || item.name || "");`
+- L696: `const assetId = asString(item.asset_id || item.assetId || item.id).trim();`
+- L699: `if (fileName) registryByName.set(fileName, item);`
+- L700: `if (assetId) registryById.set(assetId, item);`
+- L703: `return assetItems.map((asset, index) => {`
+- L704: `const rawType = asset.asset_type || asset.type || asset.category || asset.assetCategory || "";`
+- L705: `const canonicalType = getCanonicalAssetType(rawType, catalog);`
+- L706: `const filePath = asString(asset.file_path || asset.local_path || asset.path || asset.url || "").trim();`
+- L707: `const fileName = basename(filePath || asset.file_name || asset.filename || asset.name || \`asset-${index + 1}\`);`
+- L708: `const extension = getFileExtension(fileName);`
+- L711: `const rawId = asString(asset.asset_id || asset.assetId || asset.id).trim();`
+- L712: `const registryMatch = registryById.get(rawId) || registryByPath.get(filePath) || registryByName.get(fileName) || {};`
+- L714: `...asset,`
+- L720: `merged.review_status ||`
+- L721: `merged.approval_status ||`
+- L724: `"uploaded"`
+- L728: `merged.asset_id ||`
+- L729: `merged.assetId ||`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing Library paths into:
+
+1. Asset/library display only
+2. Asset preview only
+3. Source selection for AI Command only
+4. Upload/import/file picker
+5. Save asset/source record
+6. Edit metadata
+7. Delete/remove/archive/clear asset
+8. Library → AI Command source return
+9. Library → Content/Media/Publishing handoff
+10. Governance/review/approval flags
+11. Local state/cache only
+12. Unknown / needs deeper inspection
+
+## Decision Rule
+- If Library mutates durable asset/source records without confirmation, patch.
+- If upload/import persists files without confirmation, patch.
+- If delete/remove/archive mutates durable records without confirmation, patch.
+- If AI Command source return is shared context only, document and close that path.
+- If Library is mostly projection plus local/source bridge, close or patch narrowly.
+- Do not redesign Library in this pass.
