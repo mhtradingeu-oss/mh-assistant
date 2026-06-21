@@ -3309,6 +3309,12 @@ function bindMediaStudio({
       sync();
       const item = selected();
       const prompt = buildAiPrompt(projectName, session, item);
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm AI Command media handoff",
+        "Action: Send this media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks."
+      );
+      if (!confirmed) return;
+
       const aiDraft = {
         projectName,
         modeId: "media",
@@ -3506,6 +3512,15 @@ function bindMediaStudio({
         showMessage?.(`${specialist.title} draft saved locally.`);
       }
       if (button.hasAttribute("data-media-specialist-ai")) {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm AI Command specialist handoff",
+          `Action: Send ${specialist.title} media context to AI Command for review and planning support.\nRisk: This attaches shared AI handoff context and navigates to AI Command. It does not publish, approve, run provider generation, or create backend tasks.`
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
         const prompt = buildAiPrompt(projectName, session, selected());
         const aiDraft = {
           projectName,
