@@ -1,0 +1,606 @@
+# T68 — Insights Runtime Authority Focused Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/insights.js`.
+
+## Why Insights Is Next
+T61 ranked Insights after Home, Setup, and Customer Center among remaining open frontend files. Insights may include analytics, recommendations, learning signals, refresh actions, AI guidance, reports, and possible export/generate wording. These must be classified before any patch.
+
+## File Summary
+- File: `public/control-center/pages/insights.js`
+- Lines: 1520
+- Imports: 1
+- Render writes: 1
+- Event bindings: 19
+- API/analytics signals: 295
+- Write-like signals: 69
+- Confirmation signals: 0
+- Storage signals: 0
+- Navigation signals: 29
+- AI/handoff signals: 155
+- Disabled/read-only/projection signals: 9
+- Risky terms: 91
+
+## Initial Risk Notes
+- Insights contains write-like terms. They must be classified as read-only analytics, refresh-only, AI handoff, export/download, or backend mutation.
+- No confirmation dialogs found. This is acceptable only if Insights has no publish/send/export/mutation action.
+- No browser storage usage found.
+
+## Imports
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+
+## Render Writes
+- L1130: `root.innerHTML = \``
+
+## Event Bindings
+- L155: `clicks: "Clicks",`
+- L246: `clicks: toNumber(summary.total_clicks ?? summary.clicks),`
+- L290: `summary.clicks,`
+- L316: `clicks: toNumber(item.clicks ?? metrics.clicks ?? summary.clicks),`
+- L334: `normalized.clicks,`
+- L343: `(normalized.clicks || 0) * 2 +`
+- L392: `const totalClicks = sumMetric([...socialSummaries, websiteSummary], "clicks");`
+- L431: `label: "Total clicks",`
+- L480: `: summary.clicks != null || summary.engagement != null`
+- L488: `summary.clicks != null ? \`Clicks ${formatMetricValue("clicks", summary.clicks, currency)}\` :`
+- L531: `clicks: item.clicks,`
+- L548: `item.clicks != null ? \`Clicks ${formatCompact(item.clicks)}\` : "",`
+- L848: `<strong>${escapeHtml(formatCompact(item.clicks))}</strong>`
+- L921: `item.clicks != null ? \`Clicks ${formatCompact(item.clicks)}\` : "",`
+- L949: `button.onclick = () => {`
+- L955: `button.onclick = () => {`
+- L986: `button.onclick = () => {`
+- L1110: `{ label: "Clicks", value: formatCompact(seoIntel.summary.clicks) },`
+- L1423: `root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {`
+
+## API / Analytics Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L9: `emptyTitle: "No Facebook insight feed yet"`
+- L16: `emptyTitle: "No Instagram insight feed yet"`
+- L23: `emptyTitle: "No TikTok insight feed yet"`
+- L30: `emptyTitle: "No YouTube insight feed yet"`
+- L36: `sourceKeys: ["website", "analytics"],`
+- L37: `emptyTitle: "No website analytics feed yet"`
+- L43: `sourceKeys: ["google", "analytics", "website"],`
+- L50: `sourceKeys: ["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"],`
+- L55: `const insightsRefreshState = new Map();`
+- L57: `function getInsightsRefreshState(projectName) {`
+- L59: `if (!insightsRefreshState.has(key)) {`
+- L60: `insightsRefreshState.set(key, {`
+- L65: `return insightsRefreshState.get(key);`
+- L68: `function setInsightsRefreshState(projectName, nextState) {`
+- L70: `const current = getInsightsRefreshState(projectName);`
+- L71: `insightsRefreshState.set(key, {`
+- L138: `function formatMetricValue(metric, value, currency = "USD") {`
+- L140: `if (["revenue", "value", "spend", "cpc", "cpa"].includes(metric)) {`
+- L143: `if (metric === "ctr") return formatPercent(value, 2);`
+- L144: `if (metric === "roas") {`
+- L151: `function metricLabel(metric) {`
+- L168: `return labels[metric] || titleCase(metric);`
+- L225: `function getInsightRoot(state) {`
+- L229: `activity.insights ||`
+- L230: `activity.marketing_insights ||`
+- L231: `activity.performance_insights ||`
+- L232: `overview.insights`
+- L236: `function hasInsightPayload(data) {`
+- L259: `strongestMetric: asString(summary.strongest_metric),`
+- L260: `weakestMetric: asString(summary.weakest_metric),`
+- L261: `trendDirection: asString(summary.trend_direction || summary.trend),`
+- L262: `recommendation: asString(summary.recommendation)`
+- L286: `function hasSummaryMetrics(summary) {`
+- L303: `const metrics = asObject(item.metrics);`
+- L314: `reach: toNumber(item.reach ?? metrics.reach ?? summary.reach),`
+- L315: `engagement: toNumber(item.engagement ?? metrics.engagement ?? summary.engagement),`
+- L316: `clicks: toNumber(item.clicks ?? metrics.clicks ?? summary.clicks),`
+- L317: `conversions: toNumber(item.conversions ?? metrics.conversions ?? summary.conversions),`
+- L318: `revenue: toNumber(item.revenue ?? metrics.revenue ?? summary.revenue),`
+- L320: `whyItWorked: asString(item.why_it_worked || item.reason || item.insight || ""),`
+- L322: `improveNext: asString(item.improve_next || item.recommendation || ""),`
+- L327: `hasMetrics: false,`
+- L331: `normalized.hasMetrics = [`
+- L339: `if (normalized.hasMetrics) {`
+- L385: `const sumMetric = (items, key) => {`
+- L390: `const totalReach = sumMetric(socialSummaries, "reach");`
+- L391: `const totalEngagement = sumMetric(socialSummaries, "engagement");`
+- L392: `const totalClicks = sumMetric([...socialSummaries, websiteSummary], "clicks");`
+- L394: `sumMetric(socialSummaries, "conversions"),`
+- L399: `sumMetric(socialSummaries, "revenue"),`
+- L410: `const publishedCount = contentItems.filter((item) => item.hasMetrics).length;`
+- L414: `: getConnectedValue(["google", "analytics", "website"], connections)`
+- L423: `meta: totalReach == null ? "Awaiting social insight feeds" : \`${publishedCount} measured content items\``
+- L428: `meta: totalEngagement == null ? "Awaiting social insight feeds" : "Cross-platform engagement signal"`
+- L443: `meta: totalRevenue == null ? "Awaiting commerce analytics" : "Revenue / value signal"`
+- L462: `? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."`
+- L471: `const hasData = hasSummaryMetrics(summary);`
+- L485: `const strongestMetric = summary.strongestMetric ||`
+- L486: `(summary.roas != null ? \`ROAS ${formatMetricValue("roas", summary.roas, currency)}\` :`
+- L487: `summary.conversions != null ? \`Conversions ${formatMetricValue("conversions", summary.conversions, currency)}\` :`
+- L488: `summary.clicks != null ? \`Clicks ${formatMetricValue("clicks", summary.clicks, currency)}\` :`
+- L489: `summary.engagement != null ? \`Engagement ${formatMetricValue("engagement", summary.engagement, currency)}\` :`
+- L490: `connected ? "Feed connected, waiting for metrics" : "Connect this source");`
+- L492: `const weakestMetric = summary.weakestMetric ||`
+- L494: `? (summary.ctr != null ? \`CTR ${formatMetricValue("ctr", summary.ctr, currency)}\` : "Need more optimization context")`
+- L495: `: connected ? "No live metric stream yet" : "No insight source");`
+- L497: `const trendDirection = summary.trendDirection ||`
+- L498: `(hasData ? "Trend available when historical snapshots are connected" : "No trend yet");`
+- L500: `const recommendation = summary.recommendation ||`
+- L502: `? "Map real API data into this card to unlock comparison and recommendations."`
+- L510: `strongestMetric,`
+- L511: `weakestMetric,`
+- L512: `trendDirection,`
+- L513: `recommendation,`
+- L521: `.filter((item) => item.hasMetrics)`
+- L533: `why: item.whyItWorked || item.hook || item.topic || "Learning reason will improve once richer post-level insight data is attached."`
+- L539: `.filter((item) => item.hasMetrics)`
+- L545: `weakMetrics: [`
+- L551: `reason: item.likelyReason || item.topic || "The system needs more comparative insight data to explain the weakness precisely.",`
+- L560: `connected: getConnectedValue(["website", "analytics"], connections),`
+- L561: `hasData: hasSummaryMetrics(summary),`
+- L566: `recommendations: asArray(website.recommendations || website.opportunities)`
+- L574: `connected: getConnectedValue(["google", "website", "analytics"], connections),`
+- L575: `hasData: hasSummaryMetrics(summary),`
+- L588: `connected: getConnectedValue(["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"], connections),`
+- L589: `hasData: hasSummaryMetrics(summary),`
+- L604: `function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {`
+- L605: `const measured = contentItems.filter((item) => item.hasMetrics);`
+- L650: `body: measured.length ? bestEntry(topicScores, "No repeated topic signal yet") : "No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning."`
+- L654: `body: measured.length ? bestEntry(formatScores, "No format signal yet") : "Format learning will appear once measured posts or videos are ingested."`
+- L662: `body: measured.length ? bestEntry(postingWindows, "No timing signal yet") : "Posting window insights require timestamped post performance data."`
+- L666: `body: measured.length ? bestEntry(ctaScores, "No CTA signal yet") : "CTA learning will appear once conversion-aware content data is connected."`
+- L676: `systemLessons.push("Connect website analytics so content can be linked to sessions, engaged sessions, and conversions.");`
+- L682: `systemLessons.push("Connect paid performance so creative and audience learnings can improve ad spend efficiency.");`
+- L685: `systemLessons.push("Start ingesting post-level Facebook, Instagram, TikTok, and YouTube insight data so winning patterns can be reused automatically.");`
+- L691: `function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {`
+- L692: `const recommendations = [];`
+- L693: `const projectName = state.context.currentProject || "this project";`
+- L699: `recommendations.push({`
+- L700: `title: "Connect live platform insight feeds",`
+- L701: `meta: \`These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.\`,`
+- L707: `recommendations.push({`
+- L715: `recommendations.push({`
+- L723: `recommendations.push({`
+- L725: `meta: "Website is present, but no sessions, landing-page, or conversion metrics are flowing into Insights yet.",`
+- L731: `recommendations.push({`
+- L739: `recommendations.push({`
+- L746: `if (!recommendations.length) {`
+- L747: `recommendations.push({`
+- L748: `title: "Insight Engine is ready for deeper optimization",`
+- L749: `meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",`
+- L757: `prompt: \`Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.\``
+- L782: `recommendations,`
+- L784: `lessons: learning.systemLessons`
+- L790: `<div class="insights-platform-grid">`
+- L792: `<section class="insights-platform-card">`
+- L793: `<div class="insights-platform-head">`
+- L800: `<div class="insights-platform-metrics">`
+- L802: `<span>Strongest metric</span>`
+- L803: `<strong>${escapeHtml(item.strongestMetric)}</strong>`
+- L806: `<span>Weakest metric</span>`
+- L807: `<strong>${escapeHtml(item.weakestMetric)}</strong>`
+- L810: `<span>Trend</span>`
+- L811: `<strong>${escapeHtml(item.trendDirection || "No trend yet")}</strong>`
+- L814: `<div class="insights-platform-note">${escapeHtml(item.recommendation)}</div>`
+- L827: `<div class="insights-ranked-list">`
+- L829: `<div class="insights-ranked-item">`
+- L830: `<div class="insights-ranked-head">`
+- L831: `<div class="insights-ranked-title">`
+- L832: `${item.rank ? \`<span class="insights-rank">${escapeHtml(String(item.rank))}</span>\` : ""}`
+- L837: `<div class="insights-ranked-grid">`
+- L855: `<div class="insights-ranked-note">${escapeHtml(item.why)}</div>`
+- L868: `<div class="insights-list">`
+- L870: `<div class="insights-list-item">`
+- L871: `<div class="insights-list-head">`
+- L875: `<div class="insights-list-meta">${escapeHtml(item.weakMetrics || "No metric detail yet")}</div>`
+- L876: `<div class="insights-list-note">${escapeHtml(\`Why likely weak: ${item.reason}\`)}</div>`
+- L877: `<div class="insights-list-note">${escapeHtml(\`Improve next: ${item.improve}\`)}</div>`
+- L886: `<div class="insights-empty-state">`
+- L894: `function renderSimpleMetrics(rows, escapeHtml) {`
+- L913: `<div class="insights-mini-list">`
+- L916: `let value = asString(item.value || item.metric || item.meta);`
+- L937: `<div class="insights-mini-item">`
+- L939: `<span>${escapeHtml(value || "No metric detail yet")}</span>`
+- L947: `function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {`
+- L948: `Array.from(document.querySelectorAll("[data-insights-open]")).forEach((button) => {`
+- L954: `Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {`
+- L956: `const route = button.getAttribute("data-insights-route") || "";`
+- L961: `source_page: "insights",`
+- L966: `route: "insights",`
+- L971: `origin: "insights",`
+- L985: `Array.from(document.querySelectorAll("[data-insights-prompt]")).forEach((button) => {`
+- L987: `const index = Number(button.getAttribute("data-insights-prompt"));`
+- L998: `source_page: "insights",`
+- L1003: `route: "insights",`
+- L1009: `origin: "insights",`
+- L1017: `console.warn("Failed to persist Insights handoff:", error.message);`
+- L1022: `showMessage?.("Insight prompt added to AI Command.");`
+- L1027: `export const insightsRoute = {`
+
+## Write-like Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L55: `const insightsRefreshState = new Map();`
+- L57: `function getInsightsRefreshState(projectName) {`
+- L59: `if (!insightsRefreshState.has(key)) {`
+- L60: `insightsRefreshState.set(key, {`
+- L65: `return insightsRefreshState.get(key);`
+- L68: `function setInsightsRefreshState(projectName, nextState) {`
+- L70: `const current = getInsightsRefreshState(projectName);`
+- L71: `insightsRefreshState.set(key, {`
+- L199: `const fields = ["published_at", "executed_at", "scheduled_for", "updated_at", "created_at"];`
+- L307: `"Published content";`
+- L310: `id: asString(item.id || item.post_id || item.content_id || item.job_id || label),`
+- L313: `format: asString(item.format || item.content_type || item.type || preview.format || "Post"),`
+- L319: `publishedAt: asString(item.published_at || item.executed_at || item.updated_at || item.created_at),`
+- L326: `postingWindow: asString(item.posting_window || ""),`
+- L358: `source.top_posts ||`
+- L359: `source.posts ||`
+- L410: `const publishedCount = contentItems.filter((item) => item.hasMetrics).length;`
+- L423: `meta: totalReach == null ? "Awaiting social insight feeds" : \`${publishedCount} measured content items\``
+- L533: `why: item.whyItWorked || item.hook || item.topic || "Learning reason will improve once richer post-level insight data is attached."`
+- L610: `const postingWindows = new Map();`
+- L630: `const hour = item.publishedAt ? new Date(item.publishedAt).getHours() : null;`
+- L633: `add(postingWindows, bucket);`
+- L650: `body: measured.length ? bestEntry(topicScores, "No repeated topic signal yet") : "No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning."`
+- L654: `body: measured.length ? bestEntry(formatScores, "No format signal yet") : "Format learning will appear once measured posts or videos are ingested."`
+- L661: `title: "Best posting windows",`
+- L662: `body: measured.length ? bestEntry(postingWindows, "No timing signal yet") : "Posting window insights require timestamped post performance data."`
+- L685: `systemLessons.push("Start ingesting post-level Facebook, Instagram, TikTok, and YouTube insight data so winning patterns can be reused automatically.");`
+- L701: `meta: \`These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.\`,`
+- L749: `meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",`
+- L757: `prompt: \`Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.\``
+- L764: `label: "Which posts should we repurpose?",`
+- L765: `prompt: \`From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.\``
+- L947: `function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {`
+- L991: `const input = $("quickCommandInput");`
+- L992: `if (input) {`
+- L993: `input.value = item.prompt;`
+- L1016: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L1027: `export const insightsRoute = {`
+- L1031: `eyebrow: "Execute & Grow",`
+- L1049: `createProjectHandoff`
+- L1053: `const refreshState = getInsightsRefreshState(projectName);`
+- L1066: `const refreshLabel = refreshState.loading`
+- L1067: `? "Refreshing..."`
+- L1069: `? "Refresh insights"`
+- L1136: `<button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>`
+- L1140: `${refreshState.error ? \`<div class="empty-box">${escapeHtml(refreshState.error)}</div>\` : ""}`
+- L1188: `<h4 class="insights-subtitle">Strongest published content</h4>`
+- L1194: `"Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.",`
+- L1245: `"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",`
+- L1307: `Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.`
+- L1338: `<p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>`
+- L1349: `<button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>`
+- L1397: `Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.`
+- L1420: `createProjectHandoff`
+- L1423: `root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {`
+- L1426: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+- L1437: `createProjectHandoff`
+- L1443: `const message = "Insights: Live refresh is unavailable in this context.";`
+- L1444: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+- L1455: `createProjectHandoff`
+- L1460: `setInsightsRefreshState(projectName, { loading: true, error: "" });`
+- L1470: `createProjectHandoff`
+- L1487: `setInsightsRefreshState(projectName, { loading: false, error: "" });`
+- L1497: `createProjectHandoff`
+- L1499: `showMessage?.("Insights refreshed.");`
+- L1502: `const message = \`Insights: ${error?.message || "Failed to refresh insights."}\`;`
+- L1503: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+- L1513: `createProjectHandoff`
+
+## Confirmation Signals
+- none
+
+## Storage Signals
+- none
+
+## Navigation Signals
+- L947: `function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {`
+- L950: `navigateTo("ai-command");`
+- L954: `Array.from(document.querySelectorAll("[data-insights-route]")).forEach((button) => {`
+- L956: `const route = button.getAttribute("data-insights-route") || "";`
+- L957: `if (!route) return;`
+- L960: `setSharedHandoff(projectName, route, {`
+- L962: `destination_page: route,`
+- L966: `route: "insights",`
+- L980: `navigateTo(route);`
+- L1003: `route: "insights",`
+- L1021: `navigateTo("ai-command");`
+- L1027: `export const insightsRoute = {`
+- L1045: `navigateTo,`
+- L1307: `Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.`
+- L1346: `<button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>`
+- L1347: `<button class="btn btn-secondary" type="button" data-insights-route="content-studio">Open Content Studio</button>`
+- L1348: `<button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>`
+- L1349: `<button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>`
+- L1416: `navigateTo,`
+- L1428: `insightsRoute.render({`
+- L1433: `navigateTo,`
+- L1446: `insightsRoute.render({`
+- L1451: `navigateTo,`
+- L1461: `insightsRoute.render({`
+- L1466: `navigateTo,`
+- L1488: `insightsRoute.render({`
+- L1493: `navigateTo,`
+- L1504: `insightsRoute.render({`
+- L1509: `navigateTo,`
+
+## AI / Handoff Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L47: `id: "paid",`
+- L48: `label: "Paid Ads",`
+- L49: `type: "paid",`
+- L51: `emptyTitle: "No paid performance feed yet"`
+- L177: `normalized.includes("failed")`
+- L184: `normalized.includes("awaiting")`
+- L262: `recommendation: asString(summary.recommendation)`
+- L276: `return normalizeSummary(asObject(feeds.paid));`
+- L322: `improveNext: asString(item.improve_next || item.recommendation || ""),`
+- L383: `const paidSummary = normalizeSummary(asObject(feeds.paid));`
+- L396: `paidSummary.conversions`
+- L401: `paidSummary.revenue,`
+- L404: `const totalSpend = paidSummary.spend;`
+- L408: `: paidSummary.roas;`
+- L415: `? "Connected, awaiting feed"`
+- L423: `meta: totalReach == null ? "Awaiting social insight feeds" : \`${publishedCount} measured content items\``
+- L428: `meta: totalEngagement == null ? "Awaiting social insight feeds" : "Cross-platform engagement signal"`
+- L433: `meta: totalClicks == null ? "Awaiting social + website feeds" : "Traffic-driving content signal"`
+- L438: `meta: totalConversions.length ? "Attributed conversion signal" : "Awaiting site / paid conversion feed"`
+- L443: `meta: totalRevenue == null ? "Awaiting commerce analytics" : "Revenue / value signal"`
+- L448: `meta: totalSpend == null ? "Awaiting paid feed" : "Paid media spend"`
+- L453: `meta: overallRoas == null ? "Awaiting revenue + spend" : "Cross-platform efficiency"`
+- L462: `? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."`
+- L463: `: "This workspace is blending the currently available social, website, SEO, and paid signals into one optimization layer so the system can learn what to scale, what to fix, and what to reuse."`
+- L474: `if (connected && !hasData) performanceLevel = "Connected, awaiting feed";`
+- L490: `connected ? "Feed connected, waiting for metrics" : "Connect this source");`
+- L498: `(hasData ? "Trend available when historical snapshots are connected" : "No trend yet");`
+- L500: `const recommendation = summary.recommendation ||`
+- L502: `? "Map real API data into this card to unlock comparison and recommendations."`
+- L513: `recommendation,`
+- L551: `reason: item.likelyReason || item.topic || "The system needs more comparative insight data to explain the weakness precisely.",`
+- L566: `recommendations: asArray(website.recommendations || website.opportunities)`
+- L584: `function buildPaidIntelligence(feeds, connections) {`
+- L585: `const paid = asObject(feeds.paid);`
+- L586: `const summary = normalizeSummary(paid);`
+- L591: `bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {`
+- L595: `weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {`
+- L599: `bestCreatives: asArray(paid.best_creatives || paid.top_creatives || paid.creatives).slice(0, 4),`
+- L600: `weakCreatives: asArray(paid.weak_creatives || []).slice(0, 4)`
+- L604: `function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {`
+- L681: `if (!paidIntel.connected) {`
+- L682: `systemLessons.push("Connect paid performance so creative and audience learnings can improve ad spend efficiency.");`
+- L691: `function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {`
+- L692: `const recommendations = [];`
+- L695: `const platformsAwaitingFeed = platformCards`
+- L698: `if (platformsAwaitingFeed.length) {`
+- L699: `recommendations.push({`
+- L701: `meta: \`These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.\`,`
+- L707: `recommendations.push({`
+- L715: `recommendations.push({`
+- L723: `recommendations.push({`
+- L731: `recommendations.push({`
+- L738: `if (paidIntel.connected && !paidIntel.hasData) {`
+- L739: `recommendations.push({`
+- L740: `title: "Activate paid campaign intelligence",`
+- L741: `meta: "Paid connectors are expected, but spend, CTR, CPC, CPA, and ROAS are not available yet.",`
+- L746: `if (!recommendations.length) {`
+- L747: `recommendations.push({`
+- L749: `meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",`
+- L754: `const prompts = [`
+- L757: `prompt: \`Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.\``
+- L761: `prompt: \`Using the connected cross-platform performance signals for ${projectName}, identify the strongest platform, explain why it is strongest, and say what we should scale there.\``
+- L765: `prompt: \`From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.\``
+- L769: `prompt: \`Review the SEO and Search Console signals for ${projectName}. Tell me the most valuable query, page, and CTR opportunities to act on next.\``
+- L773: `prompt: \`Review the weakest measured content for ${projectName} and tell me which items should be rewritten first, why they are weak, and what new angle should replace them.\``
+- L777: `prompt: \`Summarize the strongest reusable pattern in ${projectName}'s current performance data, including hook, format, CTA, platform, and timing.\``
+- L782: `recommendations,`
+- L783: `prompts,`
+- L814: `<div class="insights-platform-note">${escapeHtml(item.recommendation)}</div>`
+- L875: `<div class="insights-list-meta">${escapeHtml(item.weakMetrics || "No metric detail yet")}</div>`
+- L889: `<span class="card-badge ${connected ? "warning" : "danger"}">${escapeHtml(connected ? "Connected, awaiting feed" : "Not connected")}</span>`
+- L939: `<span>${escapeHtml(value || "No metric detail yet")}</span>`
+- L947: `function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {`
+- L950: `navigateTo("ai-command");`
+- L960: `setSharedHandoff(projectName, route, {`
+- L976: `status: "available"`
+- L985: `Array.from(document.querySelectorAll("[data-insights-prompt]")).forEach((button) => {`
+- L987: `const index = Number(button.getAttribute("data-insights-prompt"));`
+- L988: `const item = prompts[index];`
+- L993: `input.value = item.prompt;`
+- L996: `if (projectName && item.prompt) {`
+- L997: `const handoff = {`
+- L999: `destination_page: "ai-command",`
+- L1007: `prompt: item.prompt,`
+- L1011: `promptLabel: item.label`
+- L1015: `setSharedHandoff(projectName, "ai-command", handoff);`
+- L1016: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L1017: `console.warn("Failed to persist Insights handoff:", error.message);`
+- L1021: `navigateTo("ai-command");`
+- L1022: `showMessage?.("Insight prompt added to AI Command.");`
+- L1049: `createProjectHandoff`
+- L1063: `paid: asObject(insightRoot.paid || insightRoot.paid_media || {})`
+- L1079: `const paidIntel = buildPaidIntelligence(feeds, connections);`
+- L1080: `const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);`
+- L1081: `const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);`
+- L1092: `const recommendationItems = optimization.recommendations.slice(0, 4);`
+- L1093: `const promptItems = optimization.prompts.slice(0, 4);`
+- L1094: `const domainSnapshots = [`
+- L1097: `status: websiteIntel.connected ? (websiteIntel.hasData ? "Live analytics" : "Waiting for feed") : "Not connected",`
+- L1103: `note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || "Landing-page and conversion signals will appear here when analytics is available."`
+- L1107: `status: seoIntel.connected ? (seoIntel.hasData ? "Live SEO" : "Waiting for feed") : "Not connected",`
+- L1113: `note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || "Query, page, and CTR opportunity signals will appear here when Search Console data is available."`
+- L1116: `title: "Paid Media",`
+- L1117: `status: paidIntel.connected ? (paidIntel.hasData ? "Live paid data" : "Waiting for feed") : "Not connected",`
+- L1118: `tone: paidIntel.connected ? (paidIntel.hasData ? "success" : "warning") : "danger",`
+- L1120: `{ label: "Spend", value: formatCurrency(paidIntel.summary.spend, currency) },`
+- L1121: `{ label: "ROAS", value: paidIntel.summary.roas == null ? "--" : \`${paidIntel.summary.roas.toFixed(2)}x\` }`
+- L1123: `note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || "Campaign and creative performance signals will appear here when paid reporting is available."`
+- L1135: `<div class="insights-assistant-toolbar">`
+- L1142: `Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance.`
+- L1167: `<strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>`
+- L1171: `<span class="data-label">Paid feed</span>`
+- L1172: `<strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? "Live" : "Waiting") : "Missing")}</strong>`
+- L1173: `<span class="insights-kpi-meta">Paid acquisition signal status.</span>`
+- L1181: `<span class="card-badge neutral">${escapeHtml(topContent.length ? \`${topContent.length} ranked items\` : "Awaiting feed")}</span>`
+- L1245: `"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",`
+- L1275: `<h4 class="insights-subtitle">SEO / paid weak signals</h4>`
+- L1277: `seoIntel.hasData || paidIntel.hasData`
+- L1282: `...paidIntel.weakCampaigns,`
+- L1283: `...paidIntel.weakCreatives`
+- L1287: `) || \`<div class="empty-box">No SEO or paid weakness list yet.</div>\``
+- L1289: `"No SEO or paid weakness feed yet",`
+- L1290: `"Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.",`
+- L1291: `seoIntel.connected || paidIntel.connected,`
+- L1304: `<span class="card-badge neutral">${escapeHtml(\`${recommendationItems.length} priorities\`)}</span>`
+- L1307: `Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.`
+- L1311: `<h4 class="insights-subtitle">Prioritized recommendations</h4>`
+- L1313: `${recommendationItems.map((item) => \``
+- L1338: `<p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>`
+- L1345: `<div class="insights-assistant-toolbar" style="margin-top: 16px;">`
+- L1346: `<button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>`
+- L1359: `Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels.`
+- L1368: `<div class="insights-domain-summary-grid">`
+- L1369: `${domainSnapshots.map((item) => \``
+- L1370: `<div class="insights-domain-summary">`
+- L1375: `<div class="insights-domain-summary-metrics">`
+- L1393: `<h3>AI Intelligence Briefs</h3>`
+- L1394: `<span class="card-badge neutral">${escapeHtml(\`${promptItems.length} prompt starters\`)}</span>`
+- L1397: `Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.`
+- L1399: `<div class="insights-assistant-toolbar">`
+- L1400: `<button class="btn ghost" type="button" data-insights-open>Open AI Workspace Review</button>`
+- L1402: `<div class="insights-prompt-list">`
+- L1403: `${promptItems.map((item, index) => \``
+- L1404: `<button class="quick-action-btn" type="button" data-insights-prompt="${index}">`
+- L1406: `<span class="home-action-meta">${escapeHtml(item.prompt)}</span>`
+- L1418: `prompts: optimization.prompts,`
+- L1420: `createProjectHandoff`
+- L1437: `createProjectHandoff`
+- L1443: `const message = "Insights: Live refresh is unavailable in this context.";`
+- L1455: `createProjectHandoff`
+- L1470: `createProjectHandoff`
+- L1497: `createProjectHandoff`
+- L1502: `const message = \`Insights: ${error?.message || "Failed to refresh insights."}\`;`
+- L1513: `createProjectHandoff`
+
+## Disabled / Read-only / Projection Signals
+- L302: `const preview = asObject(item.preview || item.connector_preview);`
+- L306: `asString(item.title || item.label || item.content_label || preview.title || preview.headline) ||`
+- L311: `platform: platformId || asString(item.platform || item.channel || preview.channel),`
+- L313: `format: asString(item.format || item.content_type || item.type || preview.format || "Post"),`
+- L323: `hook: asString(item.hook || preview.headline || ""),`
+- L324: `topic: asString(item.topic || item.angle || preview.goal || ""),`
+- L325: `cta: asString(item.cta || preview.cta || ""),`
+- L741: `meta: "Paid connectors are expected, but spend, CTR, CPC, CPA, and ROAS are not available yet.",`
+- L1136: `<button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>`
+
+## Risky Terms
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L55: `const insightsRefreshState = new Map();`
+- L57: `function getInsightsRefreshState(projectName) {`
+- L59: `if (!insightsRefreshState.has(key)) {`
+- L60: `insightsRefreshState.set(key, {`
+- L65: `return insightsRefreshState.get(key);`
+- L68: `function setInsightsRefreshState(projectName, nextState) {`
+- L70: `const current = getInsightsRefreshState(projectName);`
+- L71: `insightsRefreshState.set(key, {`
+- L199: `const fields = ["published_at", "executed_at", "scheduled_for", "updated_at", "created_at"];`
+- L262: `recommendation: asString(summary.recommendation)`
+- L307: `"Published content";`
+- L319: `publishedAt: asString(item.published_at || item.executed_at || item.updated_at || item.created_at),`
+- L322: `improveNext: asString(item.improve_next || item.recommendation || ""),`
+- L410: `const publishedCount = contentItems.filter((item) => item.hasMetrics).length;`
+- L423: `meta: totalReach == null ? "Awaiting social insight feeds" : \`${publishedCount} measured content items\``
+- L462: `? "The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning."`
+- L500: `const recommendation = summary.recommendation ||`
+- L502: `? "Map real API data into this card to unlock comparison and recommendations."`
+- L513: `recommendation,`
+- L533: `why: item.whyItWorked || item.hook || item.topic || "Learning reason will improve once richer post-level insight data is attached."`
+- L566: `recommendations: asArray(website.recommendations || website.opportunities)`
+- L591: `bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {`
+- L595: `weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {`
+- L604: `function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {`
+- L630: `const hour = item.publishedAt ? new Date(item.publishedAt).getHours() : null;`
+- L654: `body: measured.length ? bestEntry(formatScores, "No format signal yet") : "Format learning will appear once measured posts or videos are ingested."`
+- L666: `body: measured.length ? bestEntry(ctaScores, "No CTA signal yet") : "CTA learning will appear once conversion-aware content data is connected."`
+- L682: `systemLessons.push("Connect paid performance so creative and audience learnings can improve ad spend efficiency.");`
+- L691: `function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {`
+- L692: `const recommendations = [];`
+- L699: `recommendations.push({`
+- L701: `meta: \`These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(", ")}.\`,`
+- L707: `recommendations.push({`
+- L715: `recommendations.push({`
+- L723: `recommendations.push({`
+- L731: `recommendations.push({`
+- L739: `recommendations.push({`
+- L740: `title: "Activate paid campaign intelligence",`
+- L746: `if (!recommendations.length) {`
+- L747: `recommendations.push({`
+- L749: `meta: "Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.",`
+- L757: `prompt: \`Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.\``
+- L765: `prompt: \`From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.\``
+- L782: `recommendations,`
+- L784: `lessons: learning.systemLessons`
+- L814: `<div class="insights-platform-note">${escapeHtml(item.recommendation)}</div>`
+- L1027: `export const insightsRoute = {`
+- L1031: `eyebrow: "Execute & Grow",`
+- L1053: `const refreshState = getInsightsRefreshState(projectName);`
+- L1066: `const refreshLabel = refreshState.loading`
+- L1067: `? "Refreshing..."`
+- L1069: `? "Refresh insights"`
+- L1080: `const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);`
+- L1081: `const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);`
+- L1091: `const learningHighlights = learning.cards.slice(0, 3);`
+- L1092: `const recommendationItems = optimization.recommendations.slice(0, 4);`
+- L1103: `note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || "Landing-page and conversion signals will appear here when analytics is available."`
+- L1123: `note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || "Campaign and creative performance signals will appear here when paid reporting is available."`
+- L1136: `<button class="btn btn-secondary" type="button" id="insightsRefreshBtn" ${refreshState.loading ? "disabled" : ""}>${escapeHtml(refreshLabel)}</button>`
+- L1140: `${refreshState.error ? \`<div class="empty-box">${escapeHtml(refreshState.error)}</div>\` : ""}`
+- L1188: `<h4 class="insights-subtitle">Strongest published content</h4>`
+- L1194: `"Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.",`
+- L1216: `<div class="insights-learning-grid">`
+- L1217: `${learningHighlights.map((item) => \``
+- L1218: `<div class="insights-learning-card">`
+- L1245: `"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.",`
+- L1282: `...paidIntel.weakCampaigns,`
+- L1290: `"Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.",`
+- L1304: `<span class="card-badge neutral">${escapeHtml(\`${recommendationItems.length} priorities\`)}</span>`
+- L1307: `Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.`
+- L1311: `<h4 class="insights-subtitle">Prioritized recommendations</h4>`
+- L1313: `${recommendationItems.map((item) => \``
+- L1326: `<div class="insights-learning-grid">`
+- L1328: `learning.systemLessons.length`
+- L1329: `? learning.systemLessons.map((item) => \``
+- L1330: `<div class="insights-learning-card">`
+- L1336: `<div class="insights-learning-card">`
+- L1338: `<p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>`
+- L1346: `<button class="btn btn-primary" type="button" data-insights-route="campaign-studio">Open Campaign Studio</button>`
+- L1349: `<button class="btn btn-secondary" type="button" data-insights-route="publishing">Open Publishing Workspace</button>`
+- L1397: `Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff.`
+- L1423: `root.querySelector("#insightsRefreshBtn")?.addEventListener("click", () => {`
+- L1426: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+- L1443: `const message = "Insights: Live refresh is unavailable in this context.";`
+- L1444: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+- L1460: `setInsightsRefreshState(projectName, { loading: true, error: "" });`
+- L1487: `setInsightsRefreshState(projectName, { loading: false, error: "" });`
+- L1499: `showMessage?.("Insights refreshed.");`
+- L1502: `const message = \`Insights: ${error?.message || "Failed to refresh insights."}\`;`
+- L1503: `setInsightsRefreshState(projectName, { loading: false, error: message });`
+
+## Required Manual Classification
+Before any patch, classify Insights actions into:
+
+1. Read-only analytics projection
+2. Refresh/read-only reload
+3. Navigation only
+4. AI context handoff only
+5. Export/download action
+6. Backend analytics mutation
+7. Learning/recommendation write
+8. Unknown / needs deeper inspection
+
+## Decision Rule
+- If Insights is read-only analytics/projection plus AI handoff, close with no patch.
+- If refresh only reloads read-only data, close with no patch or copy-only clarification.
+- If any export/generate/save/sync action mutates backend or creates records without confirmation, create a narrow T69 patch.
+- Do not redesign Insights in this pass.

@@ -1,0 +1,2700 @@
+{
+  "file": "public/control-center/pages/insights.js",
+  "total_lines": 1520,
+  "imports": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    }
+  ],
+  "render_writes": [
+    {
+      "line": 1130,
+      "text": "    root.innerHTML = `"
+    }
+  ],
+  "event_bindings": [
+    {
+      "line": 155,
+      "text": "    clicks: \"Clicks\","
+    },
+    {
+      "line": 246,
+      "text": "    clicks: toNumber(summary.total_clicks ?? summary.clicks),"
+    },
+    {
+      "line": 290,
+      "text": "    summary.clicks,"
+    },
+    {
+      "line": 316,
+      "text": "    clicks: toNumber(item.clicks ?? metrics.clicks ?? summary.clicks),"
+    },
+    {
+      "line": 334,
+      "text": "    normalized.clicks,"
+    },
+    {
+      "line": 343,
+      "text": "      (normalized.clicks || 0) * 2 +"
+    },
+    {
+      "line": 392,
+      "text": "  const totalClicks = sumMetric([...socialSummaries, websiteSummary], \"clicks\");"
+    },
+    {
+      "line": 431,
+      "text": "        label: \"Total clicks\","
+    },
+    {
+      "line": 480,
+      "text": "          : summary.clicks != null || summary.engagement != null"
+    },
+    {
+      "line": 488,
+      "text": "          summary.clicks != null ? `Clicks ${formatMetricValue(\"clicks\", summary.clicks, currency)}` :"
+    },
+    {
+      "line": 531,
+      "text": "      clicks: item.clicks,"
+    },
+    {
+      "line": 548,
+      "text": "        item.clicks != null ? `Clicks ${formatCompact(item.clicks)}` : \"\","
+    },
+    {
+      "line": 848,
+      "text": "              <strong>${escapeHtml(formatCompact(item.clicks))}</strong>"
+    },
+    {
+      "line": 921,
+      "text": "              item.clicks != null ? `Clicks ${formatCompact(item.clicks)}` : \"\","
+    },
+    {
+      "line": 949,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 955,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 986,
+      "text": "    button.onclick = () => {"
+    },
+    {
+      "line": 1110,
+      "text": "          { label: \"Clicks\", value: formatCompact(seoIntel.summary.clicks) },"
+    },
+    {
+      "line": 1423,
+      "text": "    root.querySelector(\"#insightsRefreshBtn\")?.addEventListener(\"click\", () => {"
+    }
+  ],
+  "api_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 9,
+      "text": "    emptyTitle: \"No Facebook insight feed yet\""
+    },
+    {
+      "line": 16,
+      "text": "    emptyTitle: \"No Instagram insight feed yet\""
+    },
+    {
+      "line": 23,
+      "text": "    emptyTitle: \"No TikTok insight feed yet\""
+    },
+    {
+      "line": 30,
+      "text": "    emptyTitle: \"No YouTube insight feed yet\""
+    },
+    {
+      "line": 36,
+      "text": "    sourceKeys: [\"website\", \"analytics\"],"
+    },
+    {
+      "line": 37,
+      "text": "    emptyTitle: \"No website analytics feed yet\""
+    },
+    {
+      "line": 43,
+      "text": "    sourceKeys: [\"google\", \"analytics\", \"website\"],"
+    },
+    {
+      "line": 50,
+      "text": "    sourceKeys: [\"google_ads\", \"facebook\", \"instagram\", \"tiktok\", \"amazon\", \"analytics\"],"
+    },
+    {
+      "line": 55,
+      "text": "const insightsRefreshState = new Map();"
+    },
+    {
+      "line": 57,
+      "text": "function getInsightsRefreshState(projectName) {"
+    },
+    {
+      "line": 59,
+      "text": "  if (!insightsRefreshState.has(key)) {"
+    },
+    {
+      "line": 60,
+      "text": "    insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 65,
+      "text": "  return insightsRefreshState.get(key);"
+    },
+    {
+      "line": 68,
+      "text": "function setInsightsRefreshState(projectName, nextState) {"
+    },
+    {
+      "line": 70,
+      "text": "  const current = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 71,
+      "text": "  insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 138,
+      "text": "function formatMetricValue(metric, value, currency = \"USD\") {"
+    },
+    {
+      "line": 140,
+      "text": "  if ([\"revenue\", \"value\", \"spend\", \"cpc\", \"cpa\"].includes(metric)) {"
+    },
+    {
+      "line": 143,
+      "text": "  if (metric === \"ctr\") return formatPercent(value, 2);"
+    },
+    {
+      "line": 144,
+      "text": "  if (metric === \"roas\") {"
+    },
+    {
+      "line": 151,
+      "text": "function metricLabel(metric) {"
+    },
+    {
+      "line": 168,
+      "text": "  return labels[metric] || titleCase(metric);"
+    },
+    {
+      "line": 225,
+      "text": "function getInsightRoot(state) {"
+    },
+    {
+      "line": 229,
+      "text": "    activity.insights ||"
+    },
+    {
+      "line": 230,
+      "text": "    activity.marketing_insights ||"
+    },
+    {
+      "line": 231,
+      "text": "    activity.performance_insights ||"
+    },
+    {
+      "line": 232,
+      "text": "    overview.insights"
+    },
+    {
+      "line": 236,
+      "text": "function hasInsightPayload(data) {"
+    },
+    {
+      "line": 259,
+      "text": "    strongestMetric: asString(summary.strongest_metric),"
+    },
+    {
+      "line": 260,
+      "text": "    weakestMetric: asString(summary.weakest_metric),"
+    },
+    {
+      "line": 261,
+      "text": "    trendDirection: asString(summary.trend_direction || summary.trend),"
+    },
+    {
+      "line": 262,
+      "text": "    recommendation: asString(summary.recommendation)"
+    },
+    {
+      "line": 286,
+      "text": "function hasSummaryMetrics(summary) {"
+    },
+    {
+      "line": 303,
+      "text": "  const metrics = asObject(item.metrics);"
+    },
+    {
+      "line": 314,
+      "text": "    reach: toNumber(item.reach ?? metrics.reach ?? summary.reach),"
+    },
+    {
+      "line": 315,
+      "text": "    engagement: toNumber(item.engagement ?? metrics.engagement ?? summary.engagement),"
+    },
+    {
+      "line": 316,
+      "text": "    clicks: toNumber(item.clicks ?? metrics.clicks ?? summary.clicks),"
+    },
+    {
+      "line": 317,
+      "text": "    conversions: toNumber(item.conversions ?? metrics.conversions ?? summary.conversions),"
+    },
+    {
+      "line": 318,
+      "text": "    revenue: toNumber(item.revenue ?? metrics.revenue ?? summary.revenue),"
+    },
+    {
+      "line": 320,
+      "text": "    whyItWorked: asString(item.why_it_worked || item.reason || item.insight || \"\"),"
+    },
+    {
+      "line": 322,
+      "text": "    improveNext: asString(item.improve_next || item.recommendation || \"\"),"
+    },
+    {
+      "line": 327,
+      "text": "    hasMetrics: false,"
+    },
+    {
+      "line": 331,
+      "text": "  normalized.hasMetrics = ["
+    },
+    {
+      "line": 339,
+      "text": "  if (normalized.hasMetrics) {"
+    },
+    {
+      "line": 385,
+      "text": "  const sumMetric = (items, key) => {"
+    },
+    {
+      "line": 390,
+      "text": "  const totalReach = sumMetric(socialSummaries, \"reach\");"
+    },
+    {
+      "line": 391,
+      "text": "  const totalEngagement = sumMetric(socialSummaries, \"engagement\");"
+    },
+    {
+      "line": 392,
+      "text": "  const totalClicks = sumMetric([...socialSummaries, websiteSummary], \"clicks\");"
+    },
+    {
+      "line": 394,
+      "text": "    sumMetric(socialSummaries, \"conversions\"),"
+    },
+    {
+      "line": 399,
+      "text": "    sumMetric(socialSummaries, \"revenue\"),"
+    },
+    {
+      "line": 410,
+      "text": "  const publishedCount = contentItems.filter((item) => item.hasMetrics).length;"
+    },
+    {
+      "line": 414,
+      "text": "    : getConnectedValue([\"google\", \"analytics\", \"website\"], connections)"
+    },
+    {
+      "line": 423,
+      "text": "        meta: totalReach == null ? \"Awaiting social insight feeds\" : `${publishedCount} measured content items`"
+    },
+    {
+      "line": 428,
+      "text": "        meta: totalEngagement == null ? \"Awaiting social insight feeds\" : \"Cross-platform engagement signal\""
+    },
+    {
+      "line": 443,
+      "text": "        meta: totalRevenue == null ? \"Awaiting commerce analytics\" : \"Revenue / value signal\""
+    },
+    {
+      "line": 462,
+      "text": "      ? \"The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning.\""
+    },
+    {
+      "line": 471,
+      "text": "    const hasData = hasSummaryMetrics(summary);"
+    },
+    {
+      "line": 485,
+      "text": "    const strongestMetric = summary.strongestMetric ||"
+    },
+    {
+      "line": 486,
+      "text": "      (summary.roas != null ? `ROAS ${formatMetricValue(\"roas\", summary.roas, currency)}` :"
+    },
+    {
+      "line": 487,
+      "text": "        summary.conversions != null ? `Conversions ${formatMetricValue(\"conversions\", summary.conversions, currency)}` :"
+    },
+    {
+      "line": 488,
+      "text": "          summary.clicks != null ? `Clicks ${formatMetricValue(\"clicks\", summary.clicks, currency)}` :"
+    },
+    {
+      "line": 489,
+      "text": "            summary.engagement != null ? `Engagement ${formatMetricValue(\"engagement\", summary.engagement, currency)}` :"
+    },
+    {
+      "line": 490,
+      "text": "              connected ? \"Feed connected, waiting for metrics\" : \"Connect this source\");"
+    },
+    {
+      "line": 492,
+      "text": "    const weakestMetric = summary.weakestMetric ||"
+    },
+    {
+      "line": 494,
+      "text": "        ? (summary.ctr != null ? `CTR ${formatMetricValue(\"ctr\", summary.ctr, currency)}` : \"Need more optimization context\")"
+    },
+    {
+      "line": 495,
+      "text": "        : connected ? \"No live metric stream yet\" : \"No insight source\");"
+    },
+    {
+      "line": 497,
+      "text": "    const trendDirection = summary.trendDirection ||"
+    },
+    {
+      "line": 498,
+      "text": "      (hasData ? \"Trend available when historical snapshots are connected\" : \"No trend yet\");"
+    },
+    {
+      "line": 500,
+      "text": "    const recommendation = summary.recommendation ||"
+    },
+    {
+      "line": 502,
+      "text": "        ? \"Map real API data into this card to unlock comparison and recommendations.\""
+    },
+    {
+      "line": 510,
+      "text": "      strongestMetric,"
+    },
+    {
+      "line": 511,
+      "text": "      weakestMetric,"
+    },
+    {
+      "line": 512,
+      "text": "      trendDirection,"
+    },
+    {
+      "line": 513,
+      "text": "      recommendation,"
+    },
+    {
+      "line": 521,
+      "text": "    .filter((item) => item.hasMetrics)"
+    },
+    {
+      "line": 533,
+      "text": "      why: item.whyItWorked || item.hook || item.topic || \"Learning reason will improve once richer post-level insight data is attached.\""
+    },
+    {
+      "line": 539,
+      "text": "    .filter((item) => item.hasMetrics)"
+    },
+    {
+      "line": 545,
+      "text": "      weakMetrics: ["
+    },
+    {
+      "line": 551,
+      "text": "      reason: item.likelyReason || item.topic || \"The system needs more comparative insight data to explain the weakness precisely.\","
+    },
+    {
+      "line": 560,
+      "text": "    connected: getConnectedValue([\"website\", \"analytics\"], connections),"
+    },
+    {
+      "line": 561,
+      "text": "    hasData: hasSummaryMetrics(summary),"
+    },
+    {
+      "line": 566,
+      "text": "    recommendations: asArray(website.recommendations || website.opportunities)"
+    },
+    {
+      "line": 574,
+      "text": "    connected: getConnectedValue([\"google\", \"website\", \"analytics\"], connections),"
+    },
+    {
+      "line": 575,
+      "text": "    hasData: hasSummaryMetrics(summary),"
+    },
+    {
+      "line": 588,
+      "text": "    connected: getConnectedValue([\"google_ads\", \"facebook\", \"instagram\", \"tiktok\", \"amazon\", \"analytics\"], connections),"
+    },
+    {
+      "line": 589,
+      "text": "    hasData: hasSummaryMetrics(summary),"
+    },
+    {
+      "line": 604,
+      "text": "function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {"
+    },
+    {
+      "line": 605,
+      "text": "  const measured = contentItems.filter((item) => item.hasMetrics);"
+    },
+    {
+      "line": 650,
+      "text": "      body: measured.length ? bestEntry(topicScores, \"No repeated topic signal yet\") : \"No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning.\""
+    },
+    {
+      "line": 654,
+      "text": "      body: measured.length ? bestEntry(formatScores, \"No format signal yet\") : \"Format learning will appear once measured posts or videos are ingested.\""
+    },
+    {
+      "line": 662,
+      "text": "      body: measured.length ? bestEntry(postingWindows, \"No timing signal yet\") : \"Posting window insights require timestamped post performance data.\""
+    },
+    {
+      "line": 666,
+      "text": "      body: measured.length ? bestEntry(ctaScores, \"No CTA signal yet\") : \"CTA learning will appear once conversion-aware content data is connected.\""
+    },
+    {
+      "line": 676,
+      "text": "    systemLessons.push(\"Connect website analytics so content can be linked to sessions, engaged sessions, and conversions.\");"
+    },
+    {
+      "line": 682,
+      "text": "    systemLessons.push(\"Connect paid performance so creative and audience learnings can improve ad spend efficiency.\");"
+    },
+    {
+      "line": 685,
+      "text": "    systemLessons.push(\"Start ingesting post-level Facebook, Instagram, TikTok, and YouTube insight data so winning patterns can be reused automatically.\");"
+    },
+    {
+      "line": 691,
+      "text": "function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {"
+    },
+    {
+      "line": 692,
+      "text": "  const recommendations = [];"
+    },
+    {
+      "line": 693,
+      "text": "  const projectName = state.context.currentProject || \"this project\";"
+    },
+    {
+      "line": 699,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 700,
+      "text": "      title: \"Connect live platform insight feeds\","
+    },
+    {
+      "line": 701,
+      "text": "      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(\", \")}.`,"
+    },
+    {
+      "line": 707,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 715,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 723,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 725,
+      "text": "      meta: \"Website is present, but no sessions, landing-page, or conversion metrics are flowing into Insights yet.\","
+    },
+    {
+      "line": 731,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 739,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 746,
+      "text": "  if (!recommendations.length) {"
+    },
+    {
+      "line": 747,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 748,
+      "text": "      title: \"Insight Engine is ready for deeper optimization\","
+    },
+    {
+      "line": 749,
+      "text": "      meta: \"Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.\","
+    },
+    {
+      "line": 757,
+      "text": "      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`"
+    },
+    {
+      "line": 782,
+      "text": "    recommendations,"
+    },
+    {
+      "line": 784,
+      "text": "    lessons: learning.systemLessons"
+    },
+    {
+      "line": 790,
+      "text": "    <div class=\"insights-platform-grid\">"
+    },
+    {
+      "line": 792,
+      "text": "        <section class=\"insights-platform-card\">"
+    },
+    {
+      "line": 793,
+      "text": "          <div class=\"insights-platform-head\">"
+    },
+    {
+      "line": 800,
+      "text": "          <div class=\"insights-platform-metrics\">"
+    },
+    {
+      "line": 802,
+      "text": "              <span>Strongest metric</span>"
+    },
+    {
+      "line": 803,
+      "text": "              <strong>${escapeHtml(item.strongestMetric)}</strong>"
+    },
+    {
+      "line": 806,
+      "text": "              <span>Weakest metric</span>"
+    },
+    {
+      "line": 807,
+      "text": "              <strong>${escapeHtml(item.weakestMetric)}</strong>"
+    },
+    {
+      "line": 810,
+      "text": "              <span>Trend</span>"
+    },
+    {
+      "line": 811,
+      "text": "              <strong>${escapeHtml(item.trendDirection || \"No trend yet\")}</strong>"
+    },
+    {
+      "line": 814,
+      "text": "          <div class=\"insights-platform-note\">${escapeHtml(item.recommendation)}</div>"
+    },
+    {
+      "line": 827,
+      "text": "    <div class=\"insights-ranked-list\">"
+    },
+    {
+      "line": 829,
+      "text": "        <div class=\"insights-ranked-item\">"
+    },
+    {
+      "line": 830,
+      "text": "          <div class=\"insights-ranked-head\">"
+    },
+    {
+      "line": 831,
+      "text": "            <div class=\"insights-ranked-title\">"
+    },
+    {
+      "line": 832,
+      "text": "              ${item.rank ? `<span class=\"insights-rank\">${escapeHtml(String(item.rank))}</span>` : \"\"}"
+    },
+    {
+      "line": 837,
+      "text": "          <div class=\"insights-ranked-grid\">"
+    },
+    {
+      "line": 855,
+      "text": "          <div class=\"insights-ranked-note\">${escapeHtml(item.why)}</div>"
+    },
+    {
+      "line": 868,
+      "text": "    <div class=\"insights-list\">"
+    },
+    {
+      "line": 870,
+      "text": "        <div class=\"insights-list-item\">"
+    },
+    {
+      "line": 871,
+      "text": "          <div class=\"insights-list-head\">"
+    },
+    {
+      "line": 875,
+      "text": "          <div class=\"insights-list-meta\">${escapeHtml(item.weakMetrics || \"No metric detail yet\")}</div>"
+    },
+    {
+      "line": 876,
+      "text": "          <div class=\"insights-list-note\">${escapeHtml(`Why likely weak: ${item.reason}`)}</div>"
+    },
+    {
+      "line": 877,
+      "text": "          <div class=\"insights-list-note\">${escapeHtml(`Improve next: ${item.improve}`)}</div>"
+    },
+    {
+      "line": 886,
+      "text": "    <div class=\"insights-empty-state\">"
+    },
+    {
+      "line": 894,
+      "text": "function renderSimpleMetrics(rows, escapeHtml) {"
+    },
+    {
+      "line": 913,
+      "text": "    <div class=\"insights-mini-list\">"
+    },
+    {
+      "line": 916,
+      "text": "        let value = asString(item.value || item.metric || item.meta);"
+    },
+    {
+      "line": 937,
+      "text": "          <div class=\"insights-mini-item\">"
+    },
+    {
+      "line": 939,
+      "text": "            <span>${escapeHtml(value || \"No metric detail yet\")}</span>"
+    },
+    {
+      "line": 947,
+      "text": "function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {"
+    },
+    {
+      "line": 948,
+      "text": "  Array.from(document.querySelectorAll(\"[data-insights-open]\")).forEach((button) => {"
+    },
+    {
+      "line": 954,
+      "text": "  Array.from(document.querySelectorAll(\"[data-insights-route]\")).forEach((button) => {"
+    },
+    {
+      "line": 956,
+      "text": "      const route = button.getAttribute(\"data-insights-route\") || \"\";"
+    },
+    {
+      "line": 961,
+      "text": "          source_page: \"insights\","
+    },
+    {
+      "line": 966,
+      "text": "            route: \"insights\","
+    },
+    {
+      "line": 971,
+      "text": "              origin: \"insights\","
+    },
+    {
+      "line": 985,
+      "text": "  Array.from(document.querySelectorAll(\"[data-insights-prompt]\")).forEach((button) => {"
+    },
+    {
+      "line": 987,
+      "text": "      const index = Number(button.getAttribute(\"data-insights-prompt\"));"
+    },
+    {
+      "line": 998,
+      "text": "          source_page: \"insights\","
+    },
+    {
+      "line": 1003,
+      "text": "            route: \"insights\","
+    },
+    {
+      "line": 1009,
+      "text": "              origin: \"insights\","
+    },
+    {
+      "line": 1017,
+      "text": "          console.warn(\"Failed to persist Insights handoff:\", error.message);"
+    },
+    {
+      "line": 1022,
+      "text": "      showMessage?.(\"Insight prompt added to AI Command.\");"
+    },
+    {
+      "line": 1027,
+      "text": "export const insightsRoute = {"
+    },
+    {
+      "line": 1028,
+      "text": "  id: \"insights\","
+    },
+    {
+      "line": 1032,
+      "text": "    title: \"Insights\","
+    },
+    {
+      "line": 1036,
+      "text": "    <section class=\"page is-active\" data-page=\"insights\">"
+    },
+    {
+      "line": 1037,
+      "text": "      <div id=\"insightsRoot\"></div>"
+    },
+    {
+      "line": 1048,
+      "text": "    fetchProjectInsights,"
+    },
+    {
+      "line": 1052,
+      "text": "    const projectName = state.context.currentProject || \"\";"
+    },
+    {
+      "line": 1053,
+      "text": "    const refreshState = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 1057,
+      "text": "    const insightRoot = getInsightRoot(state);"
+    },
+    {
+      "line": 1059,
+      "text": "      social: asObject(insightRoot.social || insightRoot.social_platforms || {}),"
+    },
+    {
+      "line": 1060,
+      "text": "      marketplace: asObject(insightRoot.marketplace || insightRoot.commerce || {}),"
+    },
+    {
+      "line": 1061,
+      "text": "      website: asObject(insightRoot.website || insightRoot.analytics || insightRoot.ga4 || {}),"
+    },
+    {
+      "line": 1062,
+      "text": "      seo: asObject(insightRoot.seo || insightRoot.search_console || {}),"
+    },
+    {
+      "line": 1063,
+      "text": "      paid: asObject(insightRoot.paid || insightRoot.paid_media || {})"
+    },
+    {
+      "line": 1065,
+      "text": "    const hasInsights = hasInsightPayload(insightRoot);"
+    },
+    {
+      "line": 1068,
+      "text": "      : hasInsights"
+    },
+    {
+      "line": 1069,
+      "text": "        ? \"Refresh insights\""
+    },
+    {
+      "line": 1070,
+      "text": "        : \"Retry insights\";"
+    },
+    {
+      "line": 1080,
+      "text": "    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);"
+    },
+    {
+      "line": 1081,
+      "text": "    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);"
+    },
+    {
+      "line": 1083,
+      "text": "    const measuredContentCount = contentItems.filter((item) => item.hasMetrics).length;"
+    },
+    {
+      "line": 1084,
+      "text": "    const connectedInsights = platformCards.filter((item) => item.connected && item.hasData).slice(0, 3);"
+    },
+    {
+      "line": 1091,
+      "text": "    const learningHighlights = learning.cards.slice(0, 3);"
+    },
+    {
+      "line": 1092,
+      "text": "    const recommendationItems = optimization.recommendations.slice(0, 4);"
+    },
+    {
+      "line": 1097,
+      "text": "        status: websiteIntel.connected ? (websiteIntel.hasData ? \"Live analytics\" : \"Waiting for feed\") : \"Not connected\","
+    },
+    {
+      "line": 1099,
+      "text": "        metrics: ["
+    },
+    {
+      "line": 1103,
+      "text": "        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || \"Landing-page and conversion signals will appear here when analytics is available.\""
+    },
+    {
+      "line": 1109,
+      "text": "        metrics: ["
+    },
+    {
+      "line": 1119,
+      "text": "        metrics: ["
+    },
+    {
+      "line": 1123,
+      "text": "        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || \"Campaign and creative performance signals will appear here when paid reporting is available.\""
+    },
+    {
+      "line": 1127,
+      "text": "    const root = $(\"insightsRoot\");"
+    },
+    {
+      "line": 1131,
+      "text": "      <div class=\"insights-wrapper insights-workspace\">"
+    },
+    {
+      "line": 1135,
+      "text": "            <div class=\"insights-assistant-toolbar\">"
+    },
+    {
+      "line": 1136,
+      "text": "              <button class=\"btn btn-secondary\" type=\"button\" id=\"insightsRefreshBtn\" ${refreshState.loading ? \"disabled\" : \"\"}>${escapeHtml(refreshLabel)}</button>"
+    },
+    {
+      "line": 1141,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1144,
+      "text": "          <div class=\"insights-overview-grid\">"
+    },
+    {
+      "line": 1146,
+      "text": "              <div class=\"insights-overview-item\">"
+    },
+    {
+      "line": 1149,
+      "text": "                <span class=\"insights-kpi-meta\">${escapeHtml(item.meta)}</span>"
+    },
+    {
+      "line": 1153,
+      "text": "          <div class=\"insights-section-copy\">${escapeHtml(executive.summary)}</div>"
+    },
+    {
+      "line": 1154,
+      "text": "          <div class=\"insights-overview-grid\">"
+    },
+    {
+      "line": 1155,
+      "text": "            <div class=\"insights-overview-item\">"
+    },
+    {
+      "line": 1158,
+      "text": "              <span class=\"insights-kpi-meta\">Content items with usable performance data.</span>"
+    },
+    {
+      "line": 1160,
+      "text": "            <div class=\"insights-overview-item\">"
+    },
+    {
+      "line": 1163,
+      "text": "              <span class=\"insights-kpi-meta\">Sources that can feed this workspace.</span>"
+    },
+    {
+      "line": 1165,
+      "text": "            <div class=\"insights-overview-item\">"
+    },
+    {
+      "line": 1168,
+      "text": "              <span class=\"insights-kpi-meta\">Search visibility signal status.</span>"
+    },
+    {
+      "line": 1170,
+      "text": "            <div class=\"insights-overview-item\">"
+    },
+    {
+      "line": 1173,
+      "text": "              <span class=\"insights-kpi-meta\">Paid acquisition signal status.</span>"
+    },
+    {
+      "line": 1183,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1186,
+      "text": "          <div class=\"insights-workspace-grid\">"
+    },
+    {
+      "line": 1188,
+      "text": "              <h4 class=\"insights-subtitle\">Strongest published content</h4>"
+    },
+    {
+      "line": 1194,
+      "text": "                      \"Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.\","
+    },
+    {
+      "line": 1200,
+      "text": "            <div class=\"insights-stack\">"
+    },
+    {
+      "line": 1202,
+      "text": "                <h4 class=\"insights-subtitle\">Best performing lanes</h4>"
+    },
+    {
+      "line": 1204,
+      "text": "                  connectedInsights.length"
+    },
+    {
+      "line": 1205,
+      "text": "                    ? renderPlatformCards(connectedInsights, currency, escapeHtml)"
+    },
+    {
+      "line": 1208,
+      "text": "                        \"Cross-platform comparisons appear here as soon as at least one connected source is returning performance metrics.\","
+    },
+    {
+      "line": 1215,
+      "text": "                <h4 class=\"insights-subtitle\">Emerging patterns</h4>"
+    },
+    {
+      "line": 1216,
+      "text": "                <div class=\"insights-learning-grid\">"
+    },
+    {
+      "line": 1217,
+      "text": "                  ${learningHighlights.map((item) => `"
+    },
+    {
+      "line": 1218,
+      "text": "                    <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1234,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1237,
+      "text": "          <div class=\"insights-workspace-grid\">"
+    },
+    {
+      "line": 1239,
+      "text": "              <h4 class=\"insights-subtitle\">Underperforming content</h4>"
+    },
+    {
+      "line": 1245,
+      "text": "                      \"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.\","
+    },
+    {
+      "line": 1251,
+      "text": "            <div class=\"insights-stack\">"
+    },
+    {
+      "line": 1253,
+      "text": "                <h4 class=\"insights-subtitle\">At-risk channels</h4>"
+    },
+    {
+      "line": 1260,
+      "text": "              <div class=\"insights-compact-grid\">"
+    },
+    {
+      "line": 1262,
+      "text": "                  <h4 class=\"insights-subtitle\">Website conversion risk</h4>"
+    },
+    {
+      "line": 1267,
+      "text": "                          \"No website analytics feed yet\","
+    },
+    {
+      "line": 1268,
+      "text": "                          \"Connect GA4 or a website analytics source to surface weak landing pages and conversion risks.\","
+    },
+    {
+      "line": 1275,
+      "text": "                  <h4 class=\"insights-subtitle\">SEO / paid weak signals</h4>"
+    },
+    {
+      "line": 1290,
+      "text": "                          \"Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.\","
+    },
+    {
+      "line": 1304,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${recommendationItems.length} priorities`)}</span>"
+    },
+    {
+      "line": 1306,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1309,
+      "text": "          <div class=\"insights-workspace-grid\">"
+    },
+    {
+      "line": 1311,
+      "text": "              <h4 class=\"insights-subtitle\">Prioritized recommendations</h4>"
+    },
+    {
+      "line": 1312,
+      "text": "              <div class=\"insights-list\">"
+    },
+    {
+      "line": 1313,
+      "text": "                ${recommendationItems.map((item) => `"
+    },
+    {
+      "line": 1314,
+      "text": "                  <div class=\"insights-list-item\">"
+    },
+    {
+      "line": 1315,
+      "text": "                    <div class=\"insights-list-head\">"
+    },
+    {
+      "line": 1319,
+      "text": "                    <div class=\"insights-list-meta\">${escapeHtml(item.meta)}</div>"
+    },
+    {
+      "line": 1325,
+      "text": "              <h4 class=\"insights-subtitle\">Readiness notes</h4>"
+    },
+    {
+      "line": 1326,
+      "text": "              <div class=\"insights-learning-grid\">"
+    },
+    {
+      "line": 1328,
+      "text": "                  learning.systemLessons.length"
+    },
+    {
+      "line": 1329,
+      "text": "                    ? learning.systemLessons.map((item) => `"
+    },
+    {
+      "line": 1330,
+      "text": "                      <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1336,
+      "text": "                      <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1338,
+      "text": "                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>"
+    },
+    {
+      "line": 1345,
+      "text": "          <div class=\"insights-assistant-toolbar\" style=\"margin-top: 16px;\">"
+    },
+    {
+      "line": 1346,
+      "text": "            <button class=\"btn btn-primary\" type=\"button\" data-insights-route=\"campaign-studio\">Open Campaign Studio</button>"
+    },
+    {
+      "line": 1347,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"content-studio\">Open Content Studio</button>"
+    },
+    {
+      "line": 1348,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"ads-manager\">Open Ads Manager</button>"
+    },
+    {
+      "line": 1349,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"publishing\">Open Publishing Workspace</button>"
+    },
+    {
+      "line": 1355,
+      "text": "            <h3>Comparative / Trend View</h3>"
+    },
+    {
+      "line": 1358,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1361,
+      "text": "          <div class=\"insights-workspace-grid\">"
+    },
+    {
+      "line": 1363,
+      "text": "              <h4 class=\"insights-subtitle\">Cross-platform comparison</h4>"
+    },
+    {
+      "line": 1367,
+      "text": "              <h4 class=\"insights-subtitle\">Current trend snapshots</h4>"
+    },
+    {
+      "line": 1368,
+      "text": "              <div class=\"insights-domain-summary-grid\">"
+    },
+    {
+      "line": 1370,
+      "text": "                  <div class=\"insights-domain-summary\">"
+    },
+    {
+      "line": 1371,
+      "text": "                    <div class=\"insights-list-head\">"
+    },
+    {
+      "line": 1375,
+      "text": "                    <div class=\"insights-domain-summary-metrics\">"
+    },
+    {
+      "line": 1376,
+      "text": "                      ${item.metrics.map((metric) => `"
+    },
+    {
+      "line": 1378,
+      "text": "                          <span>${escapeHtml(metric.label)}</span>"
+    },
+    {
+      "line": 1379,
+      "text": "                          <strong>${escapeHtml(metric.value)}</strong>"
+    },
+    {
+      "line": 1383,
+      "text": "                    <div class=\"insights-list-note\">${escapeHtml(item.note)}</div>"
+    },
+    {
+      "line": 1396,
+      "text": "          <p class=\"insights-section-copy\">"
+    },
+    {
+      "line": 1399,
+      "text": "          <div class=\"insights-assistant-toolbar\">"
+    },
+    {
+      "line": 1400,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-insights-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1402,
+      "text": "          <div class=\"insights-prompt-list\">"
+    },
+    {
+      "line": 1404,
+      "text": "              <button class=\"quick-action-btn\" type=\"button\" data-insights-prompt=\"${index}\">"
+    },
+    {
+      "line": 1414,
+      "text": "    bindInsightsActions({"
+    },
+    {
+      "line": 1423,
+      "text": "    root.querySelector(\"#insightsRefreshBtn\")?.addEventListener(\"click\", () => {"
+    },
+    {
+      "line": 1425,
+      "text": "        const message = \"Insights: No active project selected.\";"
+    },
+    {
+      "line": 1426,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1428,
+      "text": "        insightsRoute.render({"
+    },
+    {
+      "line": 1436,
+      "text": "          fetchProjectInsights,"
+    },
+    {
+      "line": 1442,
+      "text": "      if (!fetchProjectInsights) {"
+    },
+    {
+      "line": 1443,
+      "text": "        const message = \"Insights: Live refresh is unavailable in this context.\";"
+    },
+    {
+      "line": 1444,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1446,
+      "text": "        insightsRoute.render({"
+    },
+    {
+      "line": 1454,
+      "text": "          fetchProjectInsights,"
+    },
+    {
+      "line": 1460,
+      "text": "      setInsightsRefreshState(projectName, { loading: true, error: \"\" });"
+    },
+    {
+      "line": 1461,
+      "text": "      insightsRoute.render({"
+    },
+    {
+      "line": 1469,
+      "text": "        fetchProjectInsights,"
+    },
+    {
+      "line": 1473,
+      "text": "      fetchProjectInsights(projectName)"
+    },
+    {
+      "line": 1483,
+      "text": "              insights: asObject(liveData)"
+    },
+    {
+      "line": 1487,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: \"\" });"
+    },
+    {
+      "line": 1488,
+      "text": "          insightsRoute.render({"
+    },
+    {
+      "line": 1496,
+      "text": "            fetchProjectInsights,"
+    },
+    {
+      "line": 1499,
+      "text": "          showMessage?.(\"Insights refreshed.\");"
+    },
+    {
+      "line": 1502,
+      "text": "          const message = `Insights: ${error?.message || \"Failed to refresh insights.\"}`;"
+    },
+    {
+      "line": 1503,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1504,
+      "text": "          insightsRoute.render({"
+    },
+    {
+      "line": 1512,
+      "text": "            fetchProjectInsights,"
+    }
+  ],
+  "write_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 55,
+      "text": "const insightsRefreshState = new Map();"
+    },
+    {
+      "line": 57,
+      "text": "function getInsightsRefreshState(projectName) {"
+    },
+    {
+      "line": 59,
+      "text": "  if (!insightsRefreshState.has(key)) {"
+    },
+    {
+      "line": 60,
+      "text": "    insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 65,
+      "text": "  return insightsRefreshState.get(key);"
+    },
+    {
+      "line": 68,
+      "text": "function setInsightsRefreshState(projectName, nextState) {"
+    },
+    {
+      "line": 70,
+      "text": "  const current = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 71,
+      "text": "  insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 199,
+      "text": "  const fields = [\"published_at\", \"executed_at\", \"scheduled_for\", \"updated_at\", \"created_at\"];"
+    },
+    {
+      "line": 307,
+      "text": "    \"Published content\";"
+    },
+    {
+      "line": 310,
+      "text": "    id: asString(item.id || item.post_id || item.content_id || item.job_id || label),"
+    },
+    {
+      "line": 313,
+      "text": "    format: asString(item.format || item.content_type || item.type || preview.format || \"Post\"),"
+    },
+    {
+      "line": 319,
+      "text": "    publishedAt: asString(item.published_at || item.executed_at || item.updated_at || item.created_at),"
+    },
+    {
+      "line": 326,
+      "text": "    postingWindow: asString(item.posting_window || \"\"),"
+    },
+    {
+      "line": 358,
+      "text": "      source.top_posts ||"
+    },
+    {
+      "line": 359,
+      "text": "      source.posts ||"
+    },
+    {
+      "line": 410,
+      "text": "  const publishedCount = contentItems.filter((item) => item.hasMetrics).length;"
+    },
+    {
+      "line": 423,
+      "text": "        meta: totalReach == null ? \"Awaiting social insight feeds\" : `${publishedCount} measured content items`"
+    },
+    {
+      "line": 533,
+      "text": "      why: item.whyItWorked || item.hook || item.topic || \"Learning reason will improve once richer post-level insight data is attached.\""
+    },
+    {
+      "line": 610,
+      "text": "  const postingWindows = new Map();"
+    },
+    {
+      "line": 630,
+      "text": "    const hour = item.publishedAt ? new Date(item.publishedAt).getHours() : null;"
+    },
+    {
+      "line": 633,
+      "text": "      add(postingWindows, bucket);"
+    },
+    {
+      "line": 650,
+      "text": "      body: measured.length ? bestEntry(topicScores, \"No repeated topic signal yet\") : \"No live post-performance feed yet. Connect social insight APIs to learn what hooks are winning.\""
+    },
+    {
+      "line": 654,
+      "text": "      body: measured.length ? bestEntry(formatScores, \"No format signal yet\") : \"Format learning will appear once measured posts or videos are ingested.\""
+    },
+    {
+      "line": 661,
+      "text": "      title: \"Best posting windows\","
+    },
+    {
+      "line": 662,
+      "text": "      body: measured.length ? bestEntry(postingWindows, \"No timing signal yet\") : \"Posting window insights require timestamped post performance data.\""
+    },
+    {
+      "line": 685,
+      "text": "    systemLessons.push(\"Start ingesting post-level Facebook, Instagram, TikTok, and YouTube insight data so winning patterns can be reused automatically.\");"
+    },
+    {
+      "line": 701,
+      "text": "      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(\", \")}.`,"
+    },
+    {
+      "line": 749,
+      "text": "      meta: \"Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.\","
+    },
+    {
+      "line": 757,
+      "text": "      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`"
+    },
+    {
+      "line": 764,
+      "text": "      label: \"Which posts should we repurpose?\","
+    },
+    {
+      "line": 765,
+      "text": "      prompt: `From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.`"
+    },
+    {
+      "line": 947,
+      "text": "function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {"
+    },
+    {
+      "line": 991,
+      "text": "      const input = $(\"quickCommandInput\");"
+    },
+    {
+      "line": 992,
+      "text": "      if (input) {"
+    },
+    {
+      "line": 993,
+      "text": "        input.value = item.prompt;"
+    },
+    {
+      "line": 1016,
+      "text": "        createProjectHandoff?.(projectName, handoff).catch((error) => {"
+    },
+    {
+      "line": 1027,
+      "text": "export const insightsRoute = {"
+    },
+    {
+      "line": 1031,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1049,
+      "text": "    createProjectHandoff"
+    },
+    {
+      "line": 1053,
+      "text": "    const refreshState = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 1066,
+      "text": "    const refreshLabel = refreshState.loading"
+    },
+    {
+      "line": 1067,
+      "text": "      ? \"Refreshing...\""
+    },
+    {
+      "line": 1069,
+      "text": "        ? \"Refresh insights\""
+    },
+    {
+      "line": 1136,
+      "text": "              <button class=\"btn btn-secondary\" type=\"button\" id=\"insightsRefreshBtn\" ${refreshState.loading ? \"disabled\" : \"\"}>${escapeHtml(refreshLabel)}</button>"
+    },
+    {
+      "line": 1140,
+      "text": "          ${refreshState.error ? `<div class=\"empty-box\">${escapeHtml(refreshState.error)}</div>` : \"\"}"
+    },
+    {
+      "line": 1188,
+      "text": "              <h4 class=\"insights-subtitle\">Strongest published content</h4>"
+    },
+    {
+      "line": 1194,
+      "text": "                      \"Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.\","
+    },
+    {
+      "line": 1245,
+      "text": "                      \"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.\","
+    },
+    {
+      "line": 1307,
+      "text": "            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review."
+    },
+    {
+      "line": 1338,
+      "text": "                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>"
+    },
+    {
+      "line": 1349,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"publishing\">Open Publishing Workspace</button>"
+    },
+    {
+      "line": 1397,
+      "text": "            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff."
+    },
+    {
+      "line": 1420,
+      "text": "      createProjectHandoff"
+    },
+    {
+      "line": 1423,
+      "text": "    root.querySelector(\"#insightsRefreshBtn\")?.addEventListener(\"click\", () => {"
+    },
+    {
+      "line": 1426,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1437,
+      "text": "          createProjectHandoff"
+    },
+    {
+      "line": 1443,
+      "text": "        const message = \"Insights: Live refresh is unavailable in this context.\";"
+    },
+    {
+      "line": 1444,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1455,
+      "text": "          createProjectHandoff"
+    },
+    {
+      "line": 1460,
+      "text": "      setInsightsRefreshState(projectName, { loading: true, error: \"\" });"
+    },
+    {
+      "line": 1470,
+      "text": "        createProjectHandoff"
+    },
+    {
+      "line": 1487,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: \"\" });"
+    },
+    {
+      "line": 1497,
+      "text": "            createProjectHandoff"
+    },
+    {
+      "line": 1499,
+      "text": "          showMessage?.(\"Insights refreshed.\");"
+    },
+    {
+      "line": 1502,
+      "text": "          const message = `Insights: ${error?.message || \"Failed to refresh insights.\"}`;"
+    },
+    {
+      "line": 1503,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1513,
+      "text": "            createProjectHandoff"
+    }
+  ],
+  "confirmation_signals": [],
+  "storage_signals": [],
+  "navigation_signals": [
+    {
+      "line": 947,
+      "text": "function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {"
+    },
+    {
+      "line": 950,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 954,
+      "text": "  Array.from(document.querySelectorAll(\"[data-insights-route]\")).forEach((button) => {"
+    },
+    {
+      "line": 956,
+      "text": "      const route = button.getAttribute(\"data-insights-route\") || \"\";"
+    },
+    {
+      "line": 957,
+      "text": "      if (!route) return;"
+    },
+    {
+      "line": 960,
+      "text": "        setSharedHandoff(projectName, route, {"
+    },
+    {
+      "line": 962,
+      "text": "          destination_page: route,"
+    },
+    {
+      "line": 966,
+      "text": "            route: \"insights\","
+    },
+    {
+      "line": 980,
+      "text": "      navigateTo(route);"
+    },
+    {
+      "line": 1003,
+      "text": "            route: \"insights\","
+    },
+    {
+      "line": 1021,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 1027,
+      "text": "export const insightsRoute = {"
+    },
+    {
+      "line": 1045,
+      "text": "    navigateTo,"
+    },
+    {
+      "line": 1307,
+      "text": "            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review."
+    },
+    {
+      "line": 1346,
+      "text": "            <button class=\"btn btn-primary\" type=\"button\" data-insights-route=\"campaign-studio\">Open Campaign Studio</button>"
+    },
+    {
+      "line": 1347,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"content-studio\">Open Content Studio</button>"
+    },
+    {
+      "line": 1348,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"ads-manager\">Open Ads Manager</button>"
+    },
+    {
+      "line": 1349,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"publishing\">Open Publishing Workspace</button>"
+    },
+    {
+      "line": 1416,
+      "text": "      navigateTo,"
+    },
+    {
+      "line": 1428,
+      "text": "        insightsRoute.render({"
+    },
+    {
+      "line": 1433,
+      "text": "          navigateTo,"
+    },
+    {
+      "line": 1446,
+      "text": "        insightsRoute.render({"
+    },
+    {
+      "line": 1451,
+      "text": "          navigateTo,"
+    },
+    {
+      "line": 1461,
+      "text": "      insightsRoute.render({"
+    },
+    {
+      "line": 1466,
+      "text": "        navigateTo,"
+    },
+    {
+      "line": 1488,
+      "text": "          insightsRoute.render({"
+    },
+    {
+      "line": 1493,
+      "text": "            navigateTo,"
+    },
+    {
+      "line": 1504,
+      "text": "          insightsRoute.render({"
+    },
+    {
+      "line": 1509,
+      "text": "            navigateTo,"
+    }
+  ],
+  "ai_signals": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 47,
+      "text": "    id: \"paid\","
+    },
+    {
+      "line": 48,
+      "text": "    label: \"Paid Ads\","
+    },
+    {
+      "line": 49,
+      "text": "    type: \"paid\","
+    },
+    {
+      "line": 51,
+      "text": "    emptyTitle: \"No paid performance feed yet\""
+    },
+    {
+      "line": 177,
+      "text": "    normalized.includes(\"failed\")"
+    },
+    {
+      "line": 184,
+      "text": "    normalized.includes(\"awaiting\")"
+    },
+    {
+      "line": 262,
+      "text": "    recommendation: asString(summary.recommendation)"
+    },
+    {
+      "line": 276,
+      "text": "  return normalizeSummary(asObject(feeds.paid));"
+    },
+    {
+      "line": 322,
+      "text": "    improveNext: asString(item.improve_next || item.recommendation || \"\"),"
+    },
+    {
+      "line": 383,
+      "text": "  const paidSummary = normalizeSummary(asObject(feeds.paid));"
+    },
+    {
+      "line": 396,
+      "text": "    paidSummary.conversions"
+    },
+    {
+      "line": 401,
+      "text": "    paidSummary.revenue,"
+    },
+    {
+      "line": 404,
+      "text": "  const totalSpend = paidSummary.spend;"
+    },
+    {
+      "line": 408,
+      "text": "    : paidSummary.roas;"
+    },
+    {
+      "line": 415,
+      "text": "      ? \"Connected, awaiting feed\""
+    },
+    {
+      "line": 423,
+      "text": "        meta: totalReach == null ? \"Awaiting social insight feeds\" : `${publishedCount} measured content items`"
+    },
+    {
+      "line": 428,
+      "text": "        meta: totalEngagement == null ? \"Awaiting social insight feeds\" : \"Cross-platform engagement signal\""
+    },
+    {
+      "line": 433,
+      "text": "        meta: totalClicks == null ? \"Awaiting social + website feeds\" : \"Traffic-driving content signal\""
+    },
+    {
+      "line": 438,
+      "text": "        meta: totalConversions.length ? \"Attributed conversion signal\" : \"Awaiting site / paid conversion feed\""
+    },
+    {
+      "line": 443,
+      "text": "        meta: totalRevenue == null ? \"Awaiting commerce analytics\" : \"Revenue / value signal\""
+    },
+    {
+      "line": 448,
+      "text": "        meta: totalSpend == null ? \"Awaiting paid feed\" : \"Paid media spend\""
+    },
+    {
+      "line": 453,
+      "text": "        meta: overallRoas == null ? \"Awaiting revenue + spend\" : \"Cross-platform efficiency\""
+    },
+    {
+      "line": 462,
+      "text": "      ? \"The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning.\""
+    },
+    {
+      "line": 463,
+      "text": "      : \"This workspace is blending the currently available social, website, SEO, and paid signals into one optimization layer so the system can learn what to scale, what to fix, and what to reuse.\""
+    },
+    {
+      "line": 474,
+      "text": "    if (connected && !hasData) performanceLevel = \"Connected, awaiting feed\";"
+    },
+    {
+      "line": 490,
+      "text": "              connected ? \"Feed connected, waiting for metrics\" : \"Connect this source\");"
+    },
+    {
+      "line": 498,
+      "text": "      (hasData ? \"Trend available when historical snapshots are connected\" : \"No trend yet\");"
+    },
+    {
+      "line": 500,
+      "text": "    const recommendation = summary.recommendation ||"
+    },
+    {
+      "line": 502,
+      "text": "        ? \"Map real API data into this card to unlock comparison and recommendations.\""
+    },
+    {
+      "line": 513,
+      "text": "      recommendation,"
+    },
+    {
+      "line": 551,
+      "text": "      reason: item.likelyReason || item.topic || \"The system needs more comparative insight data to explain the weakness precisely.\","
+    },
+    {
+      "line": 566,
+      "text": "    recommendations: asArray(website.recommendations || website.opportunities)"
+    },
+    {
+      "line": 584,
+      "text": "function buildPaidIntelligence(feeds, connections) {"
+    },
+    {
+      "line": 585,
+      "text": "  const paid = asObject(feeds.paid);"
+    },
+    {
+      "line": 586,
+      "text": "  const summary = normalizeSummary(paid);"
+    },
+    {
+      "line": 591,
+      "text": "    bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {"
+    },
+    {
+      "line": 595,
+      "text": "    weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {"
+    },
+    {
+      "line": 599,
+      "text": "    bestCreatives: asArray(paid.best_creatives || paid.top_creatives || paid.creatives).slice(0, 4),"
+    },
+    {
+      "line": 600,
+      "text": "    weakCreatives: asArray(paid.weak_creatives || []).slice(0, 4)"
+    },
+    {
+      "line": 604,
+      "text": "function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {"
+    },
+    {
+      "line": 681,
+      "text": "  if (!paidIntel.connected) {"
+    },
+    {
+      "line": 682,
+      "text": "    systemLessons.push(\"Connect paid performance so creative and audience learnings can improve ad spend efficiency.\");"
+    },
+    {
+      "line": 691,
+      "text": "function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {"
+    },
+    {
+      "line": 692,
+      "text": "  const recommendations = [];"
+    },
+    {
+      "line": 695,
+      "text": "  const platformsAwaitingFeed = platformCards"
+    },
+    {
+      "line": 698,
+      "text": "  if (platformsAwaitingFeed.length) {"
+    },
+    {
+      "line": 699,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 701,
+      "text": "      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(\", \")}.`,"
+    },
+    {
+      "line": 707,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 715,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 723,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 731,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 738,
+      "text": "  if (paidIntel.connected && !paidIntel.hasData) {"
+    },
+    {
+      "line": 739,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 740,
+      "text": "      title: \"Activate paid campaign intelligence\","
+    },
+    {
+      "line": 741,
+      "text": "      meta: \"Paid connectors are expected, but spend, CTR, CPC, CPA, and ROAS are not available yet.\","
+    },
+    {
+      "line": 746,
+      "text": "  if (!recommendations.length) {"
+    },
+    {
+      "line": 747,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 749,
+      "text": "      meta: \"Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.\","
+    },
+    {
+      "line": 754,
+      "text": "  const prompts = ["
+    },
+    {
+      "line": 757,
+      "text": "      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`"
+    },
+    {
+      "line": 761,
+      "text": "      prompt: `Using the connected cross-platform performance signals for ${projectName}, identify the strongest platform, explain why it is strongest, and say what we should scale there.`"
+    },
+    {
+      "line": 765,
+      "text": "      prompt: `From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.`"
+    },
+    {
+      "line": 769,
+      "text": "      prompt: `Review the SEO and Search Console signals for ${projectName}. Tell me the most valuable query, page, and CTR opportunities to act on next.`"
+    },
+    {
+      "line": 773,
+      "text": "      prompt: `Review the weakest measured content for ${projectName} and tell me which items should be rewritten first, why they are weak, and what new angle should replace them.`"
+    },
+    {
+      "line": 777,
+      "text": "      prompt: `Summarize the strongest reusable pattern in ${projectName}'s current performance data, including hook, format, CTA, platform, and timing.`"
+    },
+    {
+      "line": 782,
+      "text": "    recommendations,"
+    },
+    {
+      "line": 783,
+      "text": "    prompts,"
+    },
+    {
+      "line": 814,
+      "text": "          <div class=\"insights-platform-note\">${escapeHtml(item.recommendation)}</div>"
+    },
+    {
+      "line": 875,
+      "text": "          <div class=\"insights-list-meta\">${escapeHtml(item.weakMetrics || \"No metric detail yet\")}</div>"
+    },
+    {
+      "line": 889,
+      "text": "      <span class=\"card-badge ${connected ? \"warning\" : \"danger\"}\">${escapeHtml(connected ? \"Connected, awaiting feed\" : \"Not connected\")}</span>"
+    },
+    {
+      "line": 939,
+      "text": "            <span>${escapeHtml(value || \"No metric detail yet\")}</span>"
+    },
+    {
+      "line": 947,
+      "text": "function bindInsightsActions({ $, navigateTo, showMessage, prompts, projectName, createProjectHandoff }) {"
+    },
+    {
+      "line": 950,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 960,
+      "text": "        setSharedHandoff(projectName, route, {"
+    },
+    {
+      "line": 976,
+      "text": "          status: \"available\""
+    },
+    {
+      "line": 985,
+      "text": "  Array.from(document.querySelectorAll(\"[data-insights-prompt]\")).forEach((button) => {"
+    },
+    {
+      "line": 987,
+      "text": "      const index = Number(button.getAttribute(\"data-insights-prompt\"));"
+    },
+    {
+      "line": 988,
+      "text": "      const item = prompts[index];"
+    },
+    {
+      "line": 993,
+      "text": "        input.value = item.prompt;"
+    },
+    {
+      "line": 996,
+      "text": "      if (projectName && item.prompt) {"
+    },
+    {
+      "line": 997,
+      "text": "        const handoff = {"
+    },
+    {
+      "line": 999,
+      "text": "          destination_page: \"ai-command\","
+    },
+    {
+      "line": 1007,
+      "text": "            prompt: item.prompt,"
+    },
+    {
+      "line": 1011,
+      "text": "              promptLabel: item.label"
+    },
+    {
+      "line": 1015,
+      "text": "        setSharedHandoff(projectName, \"ai-command\", handoff);"
+    },
+    {
+      "line": 1016,
+      "text": "        createProjectHandoff?.(projectName, handoff).catch((error) => {"
+    },
+    {
+      "line": 1017,
+      "text": "          console.warn(\"Failed to persist Insights handoff:\", error.message);"
+    },
+    {
+      "line": 1021,
+      "text": "      navigateTo(\"ai-command\");"
+    },
+    {
+      "line": 1022,
+      "text": "      showMessage?.(\"Insight prompt added to AI Command.\");"
+    },
+    {
+      "line": 1049,
+      "text": "    createProjectHandoff"
+    },
+    {
+      "line": 1063,
+      "text": "      paid: asObject(insightRoot.paid || insightRoot.paid_media || {})"
+    },
+    {
+      "line": 1079,
+      "text": "    const paidIntel = buildPaidIntelligence(feeds, connections);"
+    },
+    {
+      "line": 1080,
+      "text": "    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);"
+    },
+    {
+      "line": 1081,
+      "text": "    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);"
+    },
+    {
+      "line": 1092,
+      "text": "    const recommendationItems = optimization.recommendations.slice(0, 4);"
+    },
+    {
+      "line": 1093,
+      "text": "    const promptItems = optimization.prompts.slice(0, 4);"
+    },
+    {
+      "line": 1094,
+      "text": "    const domainSnapshots = ["
+    },
+    {
+      "line": 1097,
+      "text": "        status: websiteIntel.connected ? (websiteIntel.hasData ? \"Live analytics\" : \"Waiting for feed\") : \"Not connected\","
+    },
+    {
+      "line": 1103,
+      "text": "        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || \"Landing-page and conversion signals will appear here when analytics is available.\""
+    },
+    {
+      "line": 1107,
+      "text": "        status: seoIntel.connected ? (seoIntel.hasData ? \"Live SEO\" : \"Waiting for feed\") : \"Not connected\","
+    },
+    {
+      "line": 1113,
+      "text": "        note: seoIntel.topQueries[0]?.title || seoIntel.ctrOpportunities[0]?.title || \"Query, page, and CTR opportunity signals will appear here when Search Console data is available.\""
+    },
+    {
+      "line": 1116,
+      "text": "        title: \"Paid Media\","
+    },
+    {
+      "line": 1117,
+      "text": "        status: paidIntel.connected ? (paidIntel.hasData ? \"Live paid data\" : \"Waiting for feed\") : \"Not connected\","
+    },
+    {
+      "line": 1118,
+      "text": "        tone: paidIntel.connected ? (paidIntel.hasData ? \"success\" : \"warning\") : \"danger\","
+    },
+    {
+      "line": 1120,
+      "text": "          { label: \"Spend\", value: formatCurrency(paidIntel.summary.spend, currency) },"
+    },
+    {
+      "line": 1121,
+      "text": "          { label: \"ROAS\", value: paidIntel.summary.roas == null ? \"--\" : `${paidIntel.summary.roas.toFixed(2)}x` }"
+    },
+    {
+      "line": 1123,
+      "text": "        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || \"Campaign and creative performance signals will appear here when paid reporting is available.\""
+    },
+    {
+      "line": 1135,
+      "text": "            <div class=\"insights-assistant-toolbar\">"
+    },
+    {
+      "line": 1142,
+      "text": "            Identify what changed, what needs attention, and the next safest action across content, website, SEO, and paid performance."
+    },
+    {
+      "line": 1167,
+      "text": "              <strong>${escapeHtml(seoIntel.connected ? (seoIntel.hasData ? \"Live\" : \"Waiting\") : \"Missing\")}</strong>"
+    },
+    {
+      "line": 1171,
+      "text": "              <span class=\"data-label\">Paid feed</span>"
+    },
+    {
+      "line": 1172,
+      "text": "              <strong>${escapeHtml(paidIntel.connected ? (paidIntel.hasData ? \"Live\" : \"Waiting\") : \"Missing\")}</strong>"
+    },
+    {
+      "line": 1173,
+      "text": "              <span class=\"insights-kpi-meta\">Paid acquisition signal status.</span>"
+    },
+    {
+      "line": 1181,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(topContent.length ? `${topContent.length} ranked items` : \"Awaiting feed\")}</span>"
+    },
+    {
+      "line": 1245,
+      "text": "                      \"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.\","
+    },
+    {
+      "line": 1275,
+      "text": "                  <h4 class=\"insights-subtitle\">SEO / paid weak signals</h4>"
+    },
+    {
+      "line": 1277,
+      "text": "                    seoIntel.hasData || paidIntel.hasData"
+    },
+    {
+      "line": 1282,
+      "text": "                            ...paidIntel.weakCampaigns,"
+    },
+    {
+      "line": 1283,
+      "text": "                            ...paidIntel.weakCreatives"
+    },
+    {
+      "line": 1287,
+      "text": "                        ) || `<div class=\"empty-box\">No SEO or paid weakness list yet.</div>`"
+    },
+    {
+      "line": 1289,
+      "text": "                          \"No SEO or paid weakness feed yet\","
+    },
+    {
+      "line": 1290,
+      "text": "                          \"Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.\","
+    },
+    {
+      "line": 1291,
+      "text": "                          seoIntel.connected || paidIntel.connected,"
+    },
+    {
+      "line": 1304,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${recommendationItems.length} priorities`)}</span>"
+    },
+    {
+      "line": 1307,
+      "text": "            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review."
+    },
+    {
+      "line": 1311,
+      "text": "              <h4 class=\"insights-subtitle\">Prioritized recommendations</h4>"
+    },
+    {
+      "line": 1313,
+      "text": "                ${recommendationItems.map((item) => `"
+    },
+    {
+      "line": 1338,
+      "text": "                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>"
+    },
+    {
+      "line": 1345,
+      "text": "          <div class=\"insights-assistant-toolbar\" style=\"margin-top: 16px;\">"
+    },
+    {
+      "line": 1346,
+      "text": "            <button class=\"btn btn-primary\" type=\"button\" data-insights-route=\"campaign-studio\">Open Campaign Studio</button>"
+    },
+    {
+      "line": 1359,
+      "text": "            Compare the main channels side by side, then review the current website, SEO, and paid signal without opening separate summary panels."
+    },
+    {
+      "line": 1368,
+      "text": "              <div class=\"insights-domain-summary-grid\">"
+    },
+    {
+      "line": 1369,
+      "text": "                ${domainSnapshots.map((item) => `"
+    },
+    {
+      "line": 1370,
+      "text": "                  <div class=\"insights-domain-summary\">"
+    },
+    {
+      "line": 1375,
+      "text": "                    <div class=\"insights-domain-summary-metrics\">"
+    },
+    {
+      "line": 1393,
+      "text": "            <h3>AI Intelligence Briefs</h3>"
+    },
+    {
+      "line": 1394,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${promptItems.length} prompt starters`)}</span>"
+    },
+    {
+      "line": 1397,
+      "text": "            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff."
+    },
+    {
+      "line": 1399,
+      "text": "          <div class=\"insights-assistant-toolbar\">"
+    },
+    {
+      "line": 1400,
+      "text": "            <button class=\"btn ghost\" type=\"button\" data-insights-open>Open AI Workspace Review</button>"
+    },
+    {
+      "line": 1402,
+      "text": "          <div class=\"insights-prompt-list\">"
+    },
+    {
+      "line": 1403,
+      "text": "            ${promptItems.map((item, index) => `"
+    },
+    {
+      "line": 1404,
+      "text": "              <button class=\"quick-action-btn\" type=\"button\" data-insights-prompt=\"${index}\">"
+    },
+    {
+      "line": 1406,
+      "text": "                <span class=\"home-action-meta\">${escapeHtml(item.prompt)}</span>"
+    },
+    {
+      "line": 1418,
+      "text": "      prompts: optimization.prompts,"
+    },
+    {
+      "line": 1420,
+      "text": "      createProjectHandoff"
+    },
+    {
+      "line": 1437,
+      "text": "          createProjectHandoff"
+    },
+    {
+      "line": 1443,
+      "text": "        const message = \"Insights: Live refresh is unavailable in this context.\";"
+    },
+    {
+      "line": 1455,
+      "text": "          createProjectHandoff"
+    },
+    {
+      "line": 1470,
+      "text": "        createProjectHandoff"
+    },
+    {
+      "line": 1497,
+      "text": "            createProjectHandoff"
+    },
+    {
+      "line": 1502,
+      "text": "          const message = `Insights: ${error?.message || \"Failed to refresh insights.\"}`;"
+    },
+    {
+      "line": 1513,
+      "text": "            createProjectHandoff"
+    }
+  ],
+  "disabled_or_readonly_signals": [
+    {
+      "line": 302,
+      "text": "  const preview = asObject(item.preview || item.connector_preview);"
+    },
+    {
+      "line": 306,
+      "text": "    asString(item.title || item.label || item.content_label || preview.title || preview.headline) ||"
+    },
+    {
+      "line": 311,
+      "text": "    platform: platformId || asString(item.platform || item.channel || preview.channel),"
+    },
+    {
+      "line": 313,
+      "text": "    format: asString(item.format || item.content_type || item.type || preview.format || \"Post\"),"
+    },
+    {
+      "line": 323,
+      "text": "    hook: asString(item.hook || preview.headline || \"\"),"
+    },
+    {
+      "line": 324,
+      "text": "    topic: asString(item.topic || item.angle || preview.goal || \"\"),"
+    },
+    {
+      "line": 325,
+      "text": "    cta: asString(item.cta || preview.cta || \"\"),"
+    },
+    {
+      "line": 741,
+      "text": "      meta: \"Paid connectors are expected, but spend, CTR, CPC, CPA, and ROAS are not available yet.\","
+    },
+    {
+      "line": 1136,
+      "text": "              <button class=\"btn btn-secondary\" type=\"button\" id=\"insightsRefreshBtn\" ${refreshState.loading ? \"disabled\" : \"\"}>${escapeHtml(refreshLabel)}</button>"
+    }
+  ],
+  "risky_terms": [
+    {
+      "line": 1,
+      "text": "import { setSharedHandoff } from \"../shared-context.js\";"
+    },
+    {
+      "line": 55,
+      "text": "const insightsRefreshState = new Map();"
+    },
+    {
+      "line": 57,
+      "text": "function getInsightsRefreshState(projectName) {"
+    },
+    {
+      "line": 59,
+      "text": "  if (!insightsRefreshState.has(key)) {"
+    },
+    {
+      "line": 60,
+      "text": "    insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 65,
+      "text": "  return insightsRefreshState.get(key);"
+    },
+    {
+      "line": 68,
+      "text": "function setInsightsRefreshState(projectName, nextState) {"
+    },
+    {
+      "line": 70,
+      "text": "  const current = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 71,
+      "text": "  insightsRefreshState.set(key, {"
+    },
+    {
+      "line": 199,
+      "text": "  const fields = [\"published_at\", \"executed_at\", \"scheduled_for\", \"updated_at\", \"created_at\"];"
+    },
+    {
+      "line": 262,
+      "text": "    recommendation: asString(summary.recommendation)"
+    },
+    {
+      "line": 307,
+      "text": "    \"Published content\";"
+    },
+    {
+      "line": 319,
+      "text": "    publishedAt: asString(item.published_at || item.executed_at || item.updated_at || item.created_at),"
+    },
+    {
+      "line": 322,
+      "text": "    improveNext: asString(item.improve_next || item.recommendation || \"\"),"
+    },
+    {
+      "line": 410,
+      "text": "  const publishedCount = contentItems.filter((item) => item.hasMetrics).length;"
+    },
+    {
+      "line": 423,
+      "text": "        meta: totalReach == null ? \"Awaiting social insight feeds\" : `${publishedCount} measured content items`"
+    },
+    {
+      "line": 462,
+      "text": "      ? \"The Insight Engine is structurally ready, but live performance feeds are still sparse. Connect social insights, website analytics, SEO, and paid platforms to unlock real learning.\""
+    },
+    {
+      "line": 500,
+      "text": "    const recommendation = summary.recommendation ||"
+    },
+    {
+      "line": 502,
+      "text": "        ? \"Map real API data into this card to unlock comparison and recommendations.\""
+    },
+    {
+      "line": 513,
+      "text": "      recommendation,"
+    },
+    {
+      "line": 533,
+      "text": "      why: item.whyItWorked || item.hook || item.topic || \"Learning reason will improve once richer post-level insight data is attached.\""
+    },
+    {
+      "line": 566,
+      "text": "    recommendations: asArray(website.recommendations || website.opportunities)"
+    },
+    {
+      "line": 591,
+      "text": "    bestCampaigns: asArray(paid.best_campaigns || paid.top_campaigns || paid.campaigns).filter((item, index) => {"
+    },
+    {
+      "line": 595,
+      "text": "    weakCampaigns: asArray(paid.weak_campaigns || paid.campaigns).filter((item) => {"
+    },
+    {
+      "line": 604,
+      "text": "function buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections) {"
+    },
+    {
+      "line": 630,
+      "text": "    const hour = item.publishedAt ? new Date(item.publishedAt).getHours() : null;"
+    },
+    {
+      "line": 654,
+      "text": "      body: measured.length ? bestEntry(formatScores, \"No format signal yet\") : \"Format learning will appear once measured posts or videos are ingested.\""
+    },
+    {
+      "line": 666,
+      "text": "      body: measured.length ? bestEntry(ctaScores, \"No CTA signal yet\") : \"CTA learning will appear once conversion-aware content data is connected.\""
+    },
+    {
+      "line": 682,
+      "text": "    systemLessons.push(\"Connect paid performance so creative and audience learnings can improve ad spend efficiency.\");"
+    },
+    {
+      "line": 691,
+      "text": "function buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, measuredTop, weakItems, learning) {"
+    },
+    {
+      "line": 692,
+      "text": "  const recommendations = [];"
+    },
+    {
+      "line": 699,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 701,
+      "text": "      meta: `These sources are connected but still not sending analytics into the Insight Engine: ${platformsAwaitingFeed.join(\", \")}.`,"
+    },
+    {
+      "line": 707,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 715,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 723,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 731,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 739,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 740,
+      "text": "      title: \"Activate paid campaign intelligence\","
+    },
+    {
+      "line": 746,
+      "text": "  if (!recommendations.length) {"
+    },
+    {
+      "line": 747,
+      "text": "    recommendations.push({"
+    },
+    {
+      "line": 749,
+      "text": "      meta: \"Feed more granular post, page, query, and campaign metrics into this page to improve learning accuracy.\","
+    },
+    {
+      "line": 757,
+      "text": "      prompt: `Review all available insights for ${projectName} and tell me the highest-impact improvement to make next across content, publishing, SEO, paid media, and website conversion.`"
+    },
+    {
+      "line": 765,
+      "text": "      prompt: `From the best-performing published content for ${projectName}, identify which posts or videos should be repurposed next and how they should be adapted for other platforms.`"
+    },
+    {
+      "line": 782,
+      "text": "    recommendations,"
+    },
+    {
+      "line": 784,
+      "text": "    lessons: learning.systemLessons"
+    },
+    {
+      "line": 814,
+      "text": "          <div class=\"insights-platform-note\">${escapeHtml(item.recommendation)}</div>"
+    },
+    {
+      "line": 1027,
+      "text": "export const insightsRoute = {"
+    },
+    {
+      "line": 1031,
+      "text": "    eyebrow: \"Execute & Grow\","
+    },
+    {
+      "line": 1053,
+      "text": "    const refreshState = getInsightsRefreshState(projectName);"
+    },
+    {
+      "line": 1066,
+      "text": "    const refreshLabel = refreshState.loading"
+    },
+    {
+      "line": 1067,
+      "text": "      ? \"Refreshing...\""
+    },
+    {
+      "line": 1069,
+      "text": "        ? \"Refresh insights\""
+    },
+    {
+      "line": 1080,
+      "text": "    const learning = buildLearningEngine(contentItems, platformCards, websiteIntel, seoIntel, paidIntel, connections);"
+    },
+    {
+      "line": 1081,
+      "text": "    const optimization = buildOptimizationPanel(state, platformCards, websiteIntel, seoIntel, paidIntel, topContent, weakContent, learning);"
+    },
+    {
+      "line": 1091,
+      "text": "    const learningHighlights = learning.cards.slice(0, 3);"
+    },
+    {
+      "line": 1092,
+      "text": "    const recommendationItems = optimization.recommendations.slice(0, 4);"
+    },
+    {
+      "line": 1103,
+      "text": "        note: websiteIntel.recommendations[0]?.title || websiteIntel.conversionSignals[0]?.label || \"Landing-page and conversion signals will appear here when analytics is available.\""
+    },
+    {
+      "line": 1123,
+      "text": "        note: paidIntel.bestCampaigns[0]?.title || paidIntel.weakCampaigns[0]?.title || \"Campaign and creative performance signals will appear here when paid reporting is available.\""
+    },
+    {
+      "line": 1136,
+      "text": "              <button class=\"btn btn-secondary\" type=\"button\" id=\"insightsRefreshBtn\" ${refreshState.loading ? \"disabled\" : \"\"}>${escapeHtml(refreshLabel)}</button>"
+    },
+    {
+      "line": 1140,
+      "text": "          ${refreshState.error ? `<div class=\"empty-box\">${escapeHtml(refreshState.error)}</div>` : \"\"}"
+    },
+    {
+      "line": 1188,
+      "text": "              <h4 class=\"insights-subtitle\">Strongest published content</h4>"
+    },
+    {
+      "line": 1194,
+      "text": "                      \"Published content can exist, but this section only ranks winners once post-level insight feeds from social or commerce sources are connected.\","
+    },
+    {
+      "line": 1216,
+      "text": "                <div class=\"insights-learning-grid\">"
+    },
+    {
+      "line": 1217,
+      "text": "                  ${learningHighlights.map((item) => `"
+    },
+    {
+      "line": 1218,
+      "text": "                    <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1245,
+      "text": "                      \"This section separates low-performing posts, videos, and campaigns once cross-platform content metrics are connected.\","
+    },
+    {
+      "line": 1282,
+      "text": "                            ...paidIntel.weakCampaigns,"
+    },
+    {
+      "line": 1290,
+      "text": "                          \"Connect Search Console and paid reporting to surface ranking, CTR, campaign, and creative risks here.\","
+    },
+    {
+      "line": 1304,
+      "text": "            <span class=\"card-badge neutral\">${escapeHtml(`${recommendationItems.length} priorities`)}</span>"
+    },
+    {
+      "line": 1307,
+      "text": "            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review."
+    },
+    {
+      "line": 1311,
+      "text": "              <h4 class=\"insights-subtitle\">Prioritized recommendations</h4>"
+    },
+    {
+      "line": 1313,
+      "text": "                ${recommendationItems.map((item) => `"
+    },
+    {
+      "line": 1326,
+      "text": "              <div class=\"insights-learning-grid\">"
+    },
+    {
+      "line": 1328,
+      "text": "                  learning.systemLessons.length"
+    },
+    {
+      "line": 1329,
+      "text": "                    ? learning.systemLessons.map((item) => `"
+    },
+    {
+      "line": 1330,
+      "text": "                      <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1336,
+      "text": "                      <div class=\"insights-learning-card\">"
+    },
+    {
+      "line": 1338,
+      "text": "                        <p>More granular post, page, query, and campaign metrics will make these recommendations more specific.</p>"
+    },
+    {
+      "line": 1346,
+      "text": "            <button class=\"btn btn-primary\" type=\"button\" data-insights-route=\"campaign-studio\">Open Campaign Studio</button>"
+    },
+    {
+      "line": 1349,
+      "text": "            <button class=\"btn btn-secondary\" type=\"button\" data-insights-route=\"publishing\">Open Publishing Workspace</button>"
+    },
+    {
+      "line": 1397,
+      "text": "            Use AI Workspace to turn current signals into a review-ready intelligence brief. Opening AI only navigates; sending a prompt prefills context and creates a handoff."
+    },
+    {
+      "line": 1423,
+      "text": "    root.querySelector(\"#insightsRefreshBtn\")?.addEventListener(\"click\", () => {"
+    },
+    {
+      "line": 1426,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1443,
+      "text": "        const message = \"Insights: Live refresh is unavailable in this context.\";"
+    },
+    {
+      "line": 1444,
+      "text": "        setInsightsRefreshState(projectName, { loading: false, error: message });"
+    },
+    {
+      "line": 1460,
+      "text": "      setInsightsRefreshState(projectName, { loading: true, error: \"\" });"
+    },
+    {
+      "line": 1487,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: \"\" });"
+    },
+    {
+      "line": 1499,
+      "text": "          showMessage?.(\"Insights refreshed.\");"
+    },
+    {
+      "line": 1502,
+      "text": "          const message = `Insights: ${error?.message || \"Failed to refresh insights.\"}`;"
+    },
+    {
+      "line": 1503,
+      "text": "          setInsightsRefreshState(projectName, { loading: false, error: message });"
+    }
+  ]
+}
