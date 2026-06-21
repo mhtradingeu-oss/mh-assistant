@@ -1710,20 +1710,20 @@ async function saveToLibrary({ projectName, session, selectedItem, showMessage, 
     actor: "content-studio"
   };
 
+  if (!confirmContentStudioAuthorityAction(
+    "Create Library handoff",
+    "This will create a Content Studio to Library handoff for review and asset preparation."
+  )) {
+    showMessage?.("Library handoff cancelled.");
+    return;
+  }
+
   setSharedHandoff(projectName || "__default__", "library", handoff);
   if (!clean(projectName) || toKey(projectName) === "workspace") {
     setSharedHandoff("__default__", "library", handoff);
   }
 
   if (projectName) {
-    if (!confirmContentStudioAuthorityAction(
-      "Create Library handoff",
-      "This will create a backend handoff from Content Studio to Library for review and asset preparation."
-    )) {
-      showMessage?.("Library handoff cancelled.");
-      return;
-    }
-
     try {
       const result = await createProjectHandoff(projectName, handoff);
       const saved = asObject(result?.handoff);
@@ -1774,20 +1774,20 @@ async function saveToLibrary({ projectName, session, selectedItem, showMessage, 
 }
 
 async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {
+  if (!confirmContentStudioAuthorityAction(
+    "Create Content Studio handoff",
+    `This will create a Content Studio handoff to ${handoff.destination_page || "the selected workspace"} for review.`
+  )) {
+    showMessage?.("Content Studio handoff cancelled.");
+    return false;
+  }
+
   setSharedHandoff(projectName || "__default__", handoff.destination_page, handoff);
   if (!clean(projectName) || toKey(projectName) === "workspace") {
     setSharedHandoff("__default__", handoff.destination_page, handoff);
   }
 
   if (projectName) {
-    if (!confirmContentStudioAuthorityAction(
-      "Create Content Studio handoff",
-      `This will create a backend handoff to ${handoff.destination_page || "the selected workspace"} for review.`
-    )) {
-      showMessage?.("Content Studio handoff cancelled.");
-      return false;
-    }
-
     try {
       await createProjectHandoff(projectName, handoff);
       showMessage?.(successMessage);
@@ -2088,6 +2088,12 @@ function bindPage({
       sync();
       const selectedItem = selected();
       const prompt = buildAiPrompt(projectName, session, selectedItem);
+      const confirmed = confirmContentStudioAuthorityAction(
+        "Create AI Command content handoff",
+        "This will attach shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks."
+      );
+      if (!confirmed) return;
+
       const aiDraft = {
         projectName,
         modeId: "content",
@@ -2298,6 +2304,15 @@ function bindPage({
       }
 
       if (button.hasAttribute("data-content-agent-ai")) {
+        const confirmed = confirmContentStudioAuthorityAction(
+          "Create AI Command agent handoff",
+          `This will attach ${agent.title} shared AI handoff context and navigate to AI Command for review and planning support. It does not publish, approve, send externally, or create backend tasks.`
+        );
+        if (!confirmed) {
+          rerender();
+          return;
+        }
+
         const prompt = buildAiPrompt(projectName, session, selected());
         const aiDraft = {
           projectName,
