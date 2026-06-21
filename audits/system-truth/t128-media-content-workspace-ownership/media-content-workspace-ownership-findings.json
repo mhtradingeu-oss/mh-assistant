@@ -1,0 +1,1540 @@
+[
+  {
+    "file": "public/control-center/pages/media-studio-workspace.js",
+    "exists": true,
+    "references": [
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 2403,
+        "text": "\"media-studio-workspace\": \"media-studio\","
+      },
+      {
+        "file": "public/control-center/router.js",
+        "line": 7,
+        "text": "import { mediaStudioRoute } from \"./pages/media-studio-workspace.js\";"
+      }
+    ],
+    "signals": {
+      "lines": 3766,
+      "counts": {
+        "imports": 3,
+        "exports": 1,
+        "backend_calls": 184,
+        "mutations": 586,
+        "handoffs": 204,
+        "confirmations": 1,
+        "ai": 716,
+        "rendering": 106,
+        "event_binding": 28,
+        "disabled": 56
+      },
+      "important": [
+        {
+          "line": 1,
+          "text": "import {"
+        },
+        {
+          "line": 3,
+          "text": "createProjectApproval,"
+        },
+        {
+          "line": 4,
+          "text": "createProjectHandoff,"
+        },
+        {
+          "line": 5,
+          "text": "createProjectTask,"
+        },
+        {
+          "line": 7,
+          "text": "fetchProjectOperations,"
+        },
+        {
+          "line": 19,
+          "text": "saveProjectMediaJob,"
+        },
+        {
+          "line": 22,
+          "text": "import {"
+        },
+        {
+          "line": 26,
+          "text": "import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from \"../shared-context.js\";"
+        },
+        {
+          "line": 32,
+          "text": "const MEDIA_STATUSES = [\"draft\", \"prompt_ready\", \"generating\", \"needs_review\", \"approved\", \"publishing_ready\", \"sent_to_publishing\", \"failed\"];"
+        },
+        {
+          "line": 33,
+          "text": "const MEDIA_PREVIEW_STATES = [\"provider_not_configured\", \"generation_error\", \"prompt_ready\", \"generated\", \"saved_to_library\", \"needs_review\", \"approved\", \"publishing_ready\", \"sent_to_publishing\"];"
+        },
+        {
+          "line": 42,
+          "text": "handoffRole: \"publisher\""
+        },
+        {
+          "line": 70,
+          "text": "purpose: \"Protect brand consistency, legal-safe claims, and publishable creative outputs.\","
+        },
+        {
+          "line": 71,
+          "text": "bestUse: \"Before approvals and publishing handoff, especially for regulated or claim-sensitive content.\","
+        },
+        {
+          "line": 82,
+          "text": "id: \"publishing-assistant\","
+        },
+        {
+          "line": 83,
+          "text": "title: \"Publishing Assistant\","
+        },
+        {
+          "line": 84,
+          "text": "purpose: \"Finalize readiness signals and handoff payload quality before publishing.\","
+        },
+        {
+          "line": 85,
+          "text": "bestUse: \"Right before preparing a Publishing package for downstream review.\","
+        },
+        {
+          "line": 86,
+          "text": "suggestedPrompt: \"Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist.\""
+        },
+        {
+          "line": 167,
+          "text": "if ([\"generating\", \"running\", \"processing\", \"in_progress\"].includes(normalized)) return \"generating\";"
+        },
+        {
+          "line": 169,
+          "text": "if ([\"approved\", \"complete\", \"completed\"].includes(normalized)) return \"approved\";"
+        },
+        {
+          "line": 170,
+          "text": "if ([\"publishing_ready\", \"publishing ready\", \"handoff\", \"ready_for_publishing\"].includes(normalized)) return \"publishing_ready\";"
+        },
+        {
+          "line": 171,
+          "text": "if ([\"sent_to_publishing\", \"sent to publishing\", \"sent\"].includes(normalized)) return \"sent_to_publishing\";"
+        },
+        {
+          "line": 177,
+          "text": "if (status === \"approved\" || status === \"publishing_ready\" || status === \"sent_to_publishing\") return \"success\";"
+        },
+        {
+          "line": 279,
+          "text": "objective: firstText(overview.primary_goal, overview.goal, \"Create publishing-ready media\"),"
+        },
+        {
+          "line": 431,
+          "text": "function syncVersionFromForm(session) {"
+        },
+        {
+          "line": 528,
+          "text": "publishing_job_id: asString(raw.publishing_job_id || \"\"),"
+        },
+        {
+          "line": 557,
+          "text": "publishing_ready: 1,"
+        },
+        {
+          "line": 558,
+          "text": "sent_to_publishing: 2,"
+        },
+        {
+          "line": 559,
+          "text": "approved: 3,"
+        },
+        {
+          "line": 571,
+          "text": "async function loadMediaWorkspace(projectName, backendProjectName, state, session, rerender) {"
+        },
+        {
+          "line": 586,
+          "text": "fetchProjectOperations(backendProjectName)"
+        },
+        {
+          "line": 628,
+          "text": "session.error = \"Backend media data is unavailable. Media Studio is running in local draft mode.\";"
+        },
+        {
+          "line": 715,
+          "text": "function syncFormFromItem(session, item) {"
+        },
+        {
+          "line": 736,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 749,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 757,
+          "text": "function syncSessionForm(session, form) {"
+        },
+        {
+          "line": 764,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 792,
+          "text": "`Create ${form.outputPurpose || \"publishing-ready media\"} for ${form.product || overview.project_name || \"the product\"}.`,"
+        },
+        {
+          "line": 797,
+          "text": "\"Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff.\""
+        },
+        {
+          "line": 803,
+          "text": "return `${base}\\n\\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.`;"
+        },
+        {
+          "line": 808,
+          "text": "return `${base}\\n\\nBrand safety guardrails: use approved logo and brand cues only, preserve packaging and product truth, avoid medical or exaggerated claims, keep text legible, and respect platform content policies.`;"
+        },
+        {
+          "line": 818,
+          "text": "return `${base}\\n\\nConvert to video brief:\\n- Duration: 15-30 seconds\\n- Hook in first 2 seconds\\n- Shot list with camera moves\\n- Product visibility in every key shot\\n- Text-safe zones and CTA ending\\n- Channel export notes for reels/shorts`;"
+        },
+        {
+          "line": 839,
+          "text": "`${contextPrompt}\\n\\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.`"
+        },
+        {
+          "line": 941,
+          "text": "if ([\"approved\", \"publishing_ready\", \"sent_to_publishing\"].includes(normalized)) return \"approved\";"
+        },
+        {
+          "line": 957,
+          "text": "if ([\"publishing_ready\", \"sent_to_publishing\", \"approved\"].includes(normalizeStatus(readiness.readinessStatus, \"draft\"))) {"
+        },
+        {
+          "line": 958,
+          "text": "usage.push(\"publishing\");"
+        },
+        {
+          "line": 1020,
+          "text": "async function saveVersionToLibrary({"
+        },
+        {
+          "line": 1079,
+          "text": "setSharedHandoff(projectName || \"__default__\", \"library\", handoffPayload);"
+        },
+        {
+          "line": 1081,
+          "text": "setSharedHandoff(\"__default__\", \"library\", handoffPayload);"
+        },
+        {
+          "line": 1094,
+          "text": "const result = await createProjectHandoff(backendProjectName, handoffPayload);"
+        },
+        {
+          "line": 1135,
+          "text": "version.readiness_status = \"publishing_ready\";"
+        },
+        {
+          "line": 1136,
+          "text": "session.form.status = \"publishing_ready\";"
+        },
+        {
+          "line": 1139,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 1140,
+          "text": "saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || \"publishing_ready\", \"publishing_ready\"));"
+        },
+        {
+          "line": 1143,
+          "text": "function syncOutputsFromVersioning(session) {"
+        },
+        {
+          "line": 1161,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 1179,
+          "text": "readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,"
+        },
+        {
+          "line": 1183,
+          "text": "publishingReady: counts.publishing_ready,"
+        },
+        {
+          "line": 1203,
+          "text": "const ready = selectedItem?.status === \"publishing_ready\" ? selectedItem : null;"
+        },
+        {
+          "line": 1206,
+          "text": "action: \"Prepare Publishing Package\","
+        },
+        {
+          "line": 1207,
+          "text": "why: `${ready.title} is ready for a safe Publishing package handoff.`"
+        },
+        {
+          "line": 1224,
+          "text": "why: \"No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package.\""
+        },
+        {
+          "line": 1241,
+          "text": "const publishingConnected = hasBackend || capabilityFromOperations(operations, [\"publishing\", \"handoff\"]);"
+        },
+        {
+          "line": 1248,
+          "text": "publishing_handoff: publishingConnected,"
+        },
+        {
+          "line": 1261,
+          "text": "return \"Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.\";"
+        },
+        {
+          "line": 1440,
+          "text": ".media-status-pill.is-approved,"
+        },
+        {
+          "line": 1441,
+          "text": ".media-status-pill.is-publishing-ready {"
+        },
+        {
+          "line": 1451,
+          "text": ".media-status-pill.is-sent-to-publishing {"
+        },
+        {
+          "line": 1596,
+          "text": "if (normalized === \"approved\") return \"Review Ready\";"
+        },
+        {
+          "line": 1597,
+          "text": "if (normalized === \"publishing_ready\") return \"Package Ready\";"
+        },
+        {
+          "line": 1598,
+          "text": "if (normalized === \"sent_to_publishing\") return \"Handoff Prepared\";"
+        },
+        {
+          "line": 1668,
+          "text": "const packageReady = [\"publishing_ready\", \"sent_to_publishing\", \"approved\"].includes(readiness.readinessStatus) && hasOutput;"
+        },
+        {
+          "line": 1698,
+          "text": "key: \"publishing\","
+        },
+        {
+          "line": 1699,
+          "text": "label: \"Publishing\","
+        },
+        {
+          "line": 1703,
+          "text": "? \"Selected version can be prepared as a Publishing package.\""
+        },
+        {
+          "line": 1748,
+          "text": "<p class=\"media-section-copy\">Start by choosing Image, Video, Voice, or Campaign Pack. Generate a prompt first, then use Generate Output only when a provider/backend is connected. Save drafts for review, save reusable results to Library, or prepare a Publishing handoff without publishing directly.</p>"
+        },
+        {
+          "line": 1768,
+          "text": "<button id=\"mediaSendToPublishingBtn\" class=\"btn btn-primary\" type=\"button\">Prepare Publishing Package</button>"
+        },
+        {
+          "line": 1769,
+          "text": "<button id=\"mediaSendAiCommandBtn\" class=\"btn btn-secondary\" type=\"button\">Open AI Command Review</button>"
+        },
+        {
+          "line": 1783,
+          "text": "const handoffPrepared = readiness.readinessStatus === \"sent_to_publishing\";"
+        },
+        {
+          "line": 1784,
+          "text": "const packageReady = [\"publishing_ready\", \"approved\", \"sent_to_publishing\"].includes(readiness.readinessStatus) && hasOutput;"
+        },
+        {
+          "line": 1804,
+          "text": "state: [\"approved\", \"publishing_ready\", \"sent_to_publishing\"].includes(readiness.readinessStatus) ? \"ready\" : hasOutput ? \"active\" : \"missing\","
+        },
+        {
+          "line": 1856,
+          "text": "<div class=\"media-overview-item\"><span>Publishing-ready handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>"
+        },
+        {
+          "line": 1868,
+          "text": "[\"Publishing\", metrics.publishingReady ? \"Ready\" : \"Prepare\"],"
+        },
+        {
+          "line": 1893,
+          "text": "<button id=\"mediaSendAiCommandBtn\" class=\"btn btn-secondary\" type=\"button\">Open AI Command Review</button>"
+        },
+        {
+          "line": 1894,
+          "text": "<button id=\"mediaSendToPublishingBtn\" class=\"btn btn-primary\" type=\"button\">Prepare Publishing Package</button>"
+        },
+        {
+          "line": 1974,
+          "text": "<button id=\"mediaRunGenerationBtn\" class=\"btn btn-secondary\" type=\"button\">Generate Output</button>"
+        },
+        {
+          "line": 2094,
+          "text": "<button type=\"button\" data-media-action=\"approve\" data-media-id=\"${escapeHtml(item.id)}\">Mark Review Ready</button>"
+        },
+        {
+          "line": 2096,
+          "text": "<button type=\"button\" data-media-action=\"send-publishing\" data-media-id=\"${escapeHtml(item.id)}\">Prepare Publishing Package</button>"
+        },
+        {
+          "line": 2128,
+          "text": "const publishingReady = [\"publishing_ready\", \"sent_to_publishing\", \"approved\"].includes(readinessStatus) && hasOutput;"
+        },
+        {
+          "line": 2129,
+          "text": "const approvalStatus = [\"approved\", \"publishing_ready\", \"sent_to_publishing\"].includes(readinessStatus) ? \"approved\" : \"pending\";"
+        },
+        {
+          "line": 2135,
+          "text": "[\"package ready\", publishingReady],"
+        },
+        {
+          "line": 2136,
+          "text": "[\"review state\", approvalStatus === \"approved\"]"
+        },
+        {
+          "line": 2156,
+          "text": "if (key === \"publishing-readiness\") return item.status === \"publishing_ready\" || item.status === \"sent_to_publishing\" ? \"Ready\" : \"Prepare\";"
+        },
+        {
+          "line": 2182,
+          "text": "<strong>${escapeHtml(readiness.approvalStatus === \"approved\" ? \"Review Ready\" : \"Pending\")}</strong>"
+        },
+        {
+          "line": 2332,
+          "text": "<div class=\"media-prompt-box media-block-gap\">${escapeHtml(voiceScript || asString(payload.message) || \"No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.\")}</div>"
+        },
+        {
+          "line": 2343,
+          "text": "<div class=\"media-check-item\"><span>Captions/notes</span><strong>${escapeHtml(firstText(campaignPack.channel_notes, campaignPack.publishing_notes, \"Missing\"))}</strong></div>"
+        },
+        {
+          "line": 2454,
+          "text": "<button class=\"btn btn-secondary\" type=\"button\" data-media-version-action=\"approve\">Mark Review Ready</button>"
+        },
+        {
+          "line": 2459,
+          "text": "<button class=\"btn btn-primary\" type=\"button\" data-media-version-action=\"send-publishing\">Prepare Publishing Package</button>"
+        },
+        {
+          "line": 2479,
+          "text": "[\"publishing-readiness\", \"Publishing readiness\"]"
+        },
+        {
+          "line": 2503,
+          "text": "<button id=\"mediaApproveBtn\" class=\"btn btn-secondary\" type=\"button\">Mark Review Ready</button>"
+        },
+        {
+          "line": 2520,
+          "text": "if (mode.includes(\"publish\") || mode.includes(\"handoff\")) return \"publishing-assistant\";"
+        },
+        {
+          "line": 2596,
+          "text": "[\"publishing handoff\", readiness.publishing_handoff],"
+        },
+        {
+          "line": 2616,
+          "text": "${!readiness.image_generation_backend || !readiness.video_generation_backend || !readiness.voice_generation_backend ? `<div class=\"simple-banner media-block-gap\">${escapeHtml(\"Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.\")}</div>` : \"\"}"
+        },
+        {
+          "line": 2636,
+          "text": "function buildPublishingHandoff(projectName, session, selectedItem) {"
+        },
+        {
+          "line": 2637,
+          "text": "const source = selectedItem || normalizeMediaItem(buildMediaPayload(session, \"publishing_ready\"), { context: {} }, \"Local draft\");"
+        },
+        {
+          "line": 2642,
+          "text": "destination_page: \"publishing\","
+        },
+        {
+          "line": 2646,
+          "text": "destination_service_domain: \"publishing\","
+        },
+        {
+          "line": 2689,
+          "text": "async function persistMediaJob({ backendProjectName, projectName, state, session, status, showMessage }) {"
+        },
+        {
+          "line": 2697,
+          "text": "const result = await saveProjectMediaJob(backendProjectName, buildMediaPayload(session, status));"
+        },
+        {
+          "line": 2727,
+          "text": "function sync() {"
+        },
+        {
+          "line": 2728,
+          "text": "syncSessionForm(session, form);"
+        },
+        {
+          "line": 2733,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2740,
+          "text": "return window.confirm(`${title}\\n\\n${detail}\\n\\nAuthority: Media Studio can prepare, save, request review, and hand off media work, but provider generation, approval decisions, task creation, and publishing handoff must be explicitly confirmed by the operator.\\n\\nSelect Cancel to review before continuing.`);"
+        },
+        {
+          "line": 2750,
+          "text": "async function runGenerationAction() {"
+        },
+        {
+          "line": 2751,
+          "text": "sync();"
+        },
+        {
+          "line": 2763,
+          "text": "`Action: Start provider-backed media generation for ${selectedMode}.\\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`"
+        },
+        {
+          "line": 2789,
+          "text": "notes: firstText(response.message, \"Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.\"),"
+        },
+        {
+          "line": 2793,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 2795,
+          "text": "session.draftMessage = response.message || \"Generator backend not connected yet — your prompt/job is ready. Review it, save it as a draft, send it to AI Command, save it to Library, or connect a provider in Integrations before trying real output generation.\";"
+        },
+        {
+          "line": 2811,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 2861,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 2876,
+          "text": "sync();"
+        },
+        {
+          "line": 2885,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 2893,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 2897,
+          "text": "syncFormFromItem(session, item);"
+        },
+        {
+          "line": 2905,
+          "text": "startBtn.onclick = () => {"
+        },
+        {
+          "line": 2915,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 2916,
+          "text": "sync();"
+        },
+        {
+          "line": 2928,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 2929,
+          "text": "sync();"
+        },
+        {
+          "line": 2936,
+          "text": "fromHandoffBtn.onclick = () => {"
+        },
+        {
+          "line": 2955,
+          "text": "improveBtn.onclick = async () => {"
+        },
+        {
+          "line": 2956,
+          "text": "sync();"
+        },
+        {
+          "line": 2964,
+          "text": "\"Action: Improve this prompt using the media prompt service.\\nRisk: This may call a configured AI provider. The result remains review-only and is not published.\""
+        },
+        {
+          "line": 2994,
+          "text": "brandSafeBtn.onclick = async () => {"
+        },
+        {
+          "line": 2995,
+          "text": "sync();"
+        },
+        {
+          "line": 3003,
+          "text": "\"Action: Run media brand-safety review for this prompt.\\nRisk: This may call a configured AI/provider service. The result remains review-only.\""
+        },
+        {
+          "line": 3036,
+          "text": "if (germanBtn) germanBtn.onclick = () => { sync(); applyPrompt(adaptGerman(session.form.prompt), \"Prompt adapted for German usage.\"); };"
+        },
+        {
+          "line": 3039,
+          "text": "if (imageToVideoBtn) imageToVideoBtn.onclick = () => { sync(); applyPrompt(convertImagePromptToVideoBrief(session.form.prompt), \"Image prompt converted to video brief.\"); };"
+        },
+        {
+          "line": 3042,
+          "text": "if (videoToVoiceBtn) videoToVoiceBtn.onclick = () => { sync(); applyPrompt(convertVideoBriefToVoiceover(session.form.prompt), \"Video brief converted to voiceover script.\"); };"
+        },
+        {
+          "line": 3045,
+          "text": "if (allFormatsBtn) allFormatsBtn.onclick = () => { sync(); applyPrompt(generateAllFormats(session, state), \"All format briefs generated.\"); };"
+        },
+        {
+          "line": 3047,
+          "text": "const runGenerationBtn = document.getElementById(\"mediaRunGenerationBtn\");"
+        },
+        {
+          "line": 3048,
+          "text": "if (runGenerationBtn) {"
+        },
+        {
+          "line": 3049,
+          "text": "runGenerationBtn.onclick = async () => {"
+        },
+        {
+          "line": 3050,
+          "text": "await runGenerationAction();"
+        },
+        {
+          "line": 3056,
+          "text": "loadHandoffBtn.onclick = () => {"
+        },
+        {
+          "line": 3080,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 3085,
+          "text": "syncFormFromItem(session, item);"
+        },
+        {
+          "line": 3100,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 3105,
+          "text": "if (action === \"approve\") {"
+        },
+        {
+          "line": 3108,
+          "text": "\"Action: Mark this media job as approved/review-ready locally.\\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff.\""
+        },
+        {
+          "line": 3112,
+          "text": "session.form.status = \"approved\";"
+        },
+        {
+          "line": 3114,
+          "text": "if (currentVersion) currentVersion.readiness_status = \"approved\";"
+        },
+        {
+          "line": 3115,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3116,
+          "text": "saveDraftToSession(projectName, state, session, \"approved\");"
+        },
+        {
+          "line": 3120,
+          "text": "if (action === \"send-publishing\") {"
+        },
+        {
+          "line": 3122,
+          "text": "\"Confirm publishing handoff\","
+        },
+        {
+          "line": 3123,
+          "text": "\"Action: Prepare and send this media package to Publishing.\\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly.\""
+        },
+        {
+          "line": 3127,
+          "text": "session.form.status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3129,
+          "text": "if (currentVersion) currentVersion.readiness_status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3130,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3131,
+          "text": "saveDraftToSession(projectName, state, session, \"sent_to_publishing\");"
+        },
+        {
+          "line": 3132,
+          "text": "sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: item, navigateTo, showMessage, showError });"
+        },
+        {
+          "line": 3139,
+          "text": "const approveBtn = document.getElementById(\"mediaApproveBtn\");"
+        },
+        {
+          "line": 3140,
+          "text": "if (approveBtn) {"
+        },
+        {
+          "line": 3141,
+          "text": "approveBtn.onclick = async () => {"
+        },
+        {
+          "line": 3142,
+          "text": "sync();"
+        },
+        {
+          "line": 3147,
+          "text": "\"Action: Record this media job as approved/review-ready.\\nRisk: If a pending backend approval exists, this may submit an approval decision.\""
+        },
+        {
+          "line": 3151,
+          "text": "session.form.status = \"approved\";"
+        },
+        {
+          "line": 3154,
+          "text": "currentVersion.readiness_status = \"approved\";"
+        },
+        {
+          "line": 3157,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3158,
+          "text": "saveDraftToSession(projectName, state, session, \"approved\");"
+        },
+        {
+          "line": 3169,
+          "text": "decision: \"approved\","
+        },
+        {
+          "line": 3183,
+          "text": "requestApprovalBtn.onclick = async () => {"
+        },
+        {
+          "line": 3184,
+          "text": "sync();"
+        },
+        {
+          "line": 3197,
+          "text": "await createProjectApproval(backendProjectName, {"
+        },
+        {
+          "line": 3201,
+          "text": "summary: session.form.reviewNotes || \"Review media output before publishing handoff.\","
+        },
+        {
+          "line": 3226,
+          "text": "rejectBtn.onclick = async () => {"
+        },
+        {
+          "line": 3227,
+          "text": "sync();"
+        },
+        {
+          "line": 3239,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3265,
+          "text": "createTaskBtn.onclick = async () => {"
+        },
+        {
+          "line": 3266,
+          "text": "sync();"
+        },
+        {
+          "line": 3277,
+          "text": "await createProjectTask(backendProjectName, {"
+        },
+        {
+          "line": 3279,
+          "text": "description: session.form.objective || item.brief || \"Review prompt, outputs, approval, and publishing readiness.\","
+        },
+        {
+          "line": 3306,
+          "text": "const sendAiBtn = document.getElementById(\"mediaSendAiCommandBtn\");"
+        },
+        {
+          "line": 3307,
+          "text": "if (sendAiBtn) {"
+        },
+        {
+          "line": 3308,
+          "text": "sendAiBtn.onclick = () => {"
+        },
+        {
+          "line": 3309,
+          "text": "sync();"
+        },
+        {
+          "line": 3320,
+          "text": "setSharedHandoff(projectName, \"ai-command\", {"
+        },
+        {
+          "line": 3341,
+          "text": "const sendPublishingBtn = document.getElementById(\"mediaSendToPublishingBtn\");"
+        },
+        {
+          "line": 3342,
+          "text": "if (sendPublishingBtn) {"
+        },
+        {
+          "line": 3343,
+          "text": "sendPublishingBtn.onclick = () => {"
+        },
+        {
+          "line": 3344,
+          "text": "sync();"
+        },
+        {
+          "line": 3347,
+          "text": "\"Confirm publishing handoff\","
+        },
+        {
+          "line": 3348,
+          "text": "\"Action: Prepare and send this media package to Publishing.\\nRisk: This creates a downstream publishing handoff. It does not publish directly.\""
+        },
+        {
+          "line": 3352,
+          "text": "session.form.status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3354,
+          "text": "if (currentVersion) currentVersion.readiness_status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3355,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3356,
+          "text": "saveDraftToSession(projectName, state, session, \"sent_to_publishing\");"
+        },
+        {
+          "line": 3357,
+          "text": "sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });"
+        },
+        {
+          "line": 3363,
+          "text": "headerSaveLibraryBtn.onclick = async () => {"
+        },
+        {
+          "line": 3364,
+          "text": "sync();"
+        },
+        {
+          "line": 3368,
+          "text": "\"Action: Save this media version as a Library handoff.\\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly.\""
+        },
+        {
+          "line": 3393,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 3403,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 3404,
+          "text": "sync();"
+        },
+        {
+          "line": 3416,
+          "text": "if (action === \"approve\") {"
+        },
+        {
+          "line": 3419,
+          "text": "\"Action: Mark this media job as approved/review-ready locally.\\nRisk: This does not publish, but it changes readiness status and can influence downstream handoff.\""
+        },
+        {
+          "line": 3423,
+          "text": "session.form.status = \"approved\";"
+        },
+        {
+          "line": 3424,
+          "text": "currentVersion.readiness_status = \"approved\";"
+        },
+        {
+          "line": 3426,
+          "text": "saveDraftToSession(projectName, state, session, \"approved\");"
+        },
+        {
+          "line": 3427,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3434,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3453,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3461,
+          "text": "if (action === \"send-publishing\") {"
+        },
+        {
+          "line": 3463,
+          "text": "\"Confirm publishing handoff\","
+        },
+        {
+          "line": 3464,
+          "text": "\"Action: Prepare and send this media package to Publishing.\\nRisk: This creates a handoff path for downstream publishing review. It does not publish directly.\""
+        },
+        {
+          "line": 3468,
+          "text": "session.form.status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3469,
+          "text": "currentVersion.readiness_status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 3470,
+          "text": "syncOutputsFromVersioning(session);"
+        },
+        {
+          "line": 3471,
+          "text": "saveDraftToSession(projectName, state, session, \"sent_to_publishing\");"
+        },
+        {
+          "line": 3472,
+          "text": "await sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem: selected(), navigateTo, showMessage, showError });"
+        },
+        {
+          "line": 3478,
+          "text": "\"Action: Save this selected version as a Library handoff.\\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly.\""
+        },
+        {
+          "line": 3497,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 3502,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 3518,
+          "text": "setSharedHandoff(projectName, \"ai-command\", {"
+        },
+        {
+          "line": 3541,
+          "text": "async function sendPublishingHandoff({ projectName, backendProjectName, session, selectedItem, navigateTo, showMessage, showError }) {"
+        },
+        {
+          "line": 3542,
+          "text": "const handoff = buildPublishingHandoff(projectName, session, selectedItem);"
+        },
+        {
+          "line": 3548,
+          "text": "setSharedHandoff(scope, \"publishing\", handoff);"
+        },
+        {
+          "line": 3553,
+          "text": "await createProjectHandoff(backendProjectName, handoff);"
+        },
+        {
+          "line": 3554,
+          "text": "showMessage?.(\"Publishing package handoff prepared from Media Studio.\");"
+        },
+        {
+          "line": 3556,
+          "text": "showMessage?.(\"Publishing package handoff kept locally because backend handoff save is unavailable.\");"
+        },
+        {
+          "line": 3559,
+          "text": "showMessage?.(\"Publishing package handoff prepared locally.\");"
+        },
+        {
+          "line": 3563,
+          "text": "navigateTo(\"publishing\");"
+        },
+        {
+          "line": 3565,
+          "text": "showError?.(error.message || \"Failed to open Publishing.\");"
+        },
+        {
+          "line": 3569,
+          "text": "export const mediaStudioRoute = {"
+        },
+        {
+          "line": 3575,
+          "text": "description: \"Run saved image, video, voice, and campaign-pack jobs with prompts, review states, Library saves, and package routing.\""
+        },
+        {
+          "line": 3617,
+          "text": "syncFormFromItem(session, selectedItem);"
+        },
+        {
+          "line": 3633,
+          "text": "<p class=\"media-section-copy\">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>"
+        },
+        {
+          "line": 3674,
+          "text": ".filter((item) => [\"creative\", \"publishing\"].includes(item.key));"
+        }
+      ]
+    }
+  },
+  {
+    "file": "public/control-center/pages/content-studio-workspace.js",
+    "exists": true,
+    "references": [
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 2401,
+        "text": "\"content-studio-workspace\": \"content-studio\","
+      },
+      {
+        "file": "public/control-center/router.js",
+        "line": 6,
+        "text": "import { contentStudioRoute } from \"./pages/content-studio-workspace.js\";"
+      }
+    ],
+    "signals": {
+      "lines": 2491,
+      "counts": {
+        "imports": 3,
+        "exports": 1,
+        "backend_calls": 134,
+        "mutations": 284,
+        "handoffs": 170,
+        "confirmations": 1,
+        "ai": 386,
+        "rendering": 64,
+        "event_binding": 17,
+        "disabled": 51
+      },
+      "important": [
+        {
+          "line": 1,
+          "text": "import {"
+        },
+        {
+          "line": 2,
+          "text": "createProjectApproval,"
+        },
+        {
+          "line": 3,
+          "text": "createProjectHandoff,"
+        },
+        {
+          "line": 4,
+          "text": "createProjectTask,"
+        },
+        {
+          "line": 6,
+          "text": "executeProjectAiCommand,"
+        },
+        {
+          "line": 7,
+          "text": "fetchProjectOperations,"
+        },
+        {
+          "line": 13,
+          "text": "saveProjectContentItem"
+        },
+        {
+          "line": 15,
+          "text": "import { getAssetNextAction, renderAssetDependencyRows } from \"../asset-library.js\";"
+        },
+        {
+          "line": 16,
+          "text": "import { getSharedHandoff, setSharedAiDraft, setSharedHandoff } from \"../shared-context.js\";"
+        },
+        {
+          "line": 48,
+          "text": "\"approved\","
+        },
+        {
+          "line": 50,
+          "text": "\"sent_to_publishing\""
+        },
+        {
+          "line": 58,
+          "text": "handoffRole: \"publisher\""
+        },
+        {
+          "line": 115,
+          "text": "bestUse: \"Before approval or sending drafts to Media Studio or Publishing.\","
+        },
+        {
+          "line": 169,
+          "text": "\"Authority: This does not publish, send externally, or approve anything automatically.\","
+        },
+        {
+          "line": 173,
+          "text": "return window.confirm(message);"
+        },
+        {
+          "line": 201,
+          "text": "if ([\"approved\", \"complete\", \"completed\"].includes(normalized)) return \"approved\";"
+        },
+        {
+          "line": 203,
+          "text": "if ([\"sent_to_publishing\", \"sent to publishing\", \"publishing_handoff\", \"publishing handoff\"].includes(normalized)) return \"sent_to_publishing\";"
+        },
+        {
+          "line": 208,
+          "text": "if ([\"approved\", \"sent_to_media\", \"sent_to_publishing\"].includes(status)) return \"success\";"
+        },
+        {
+          "line": 444,
+          "text": "function syncVersionFromForm(session) {"
+        },
+        {
+          "line": 509,
+          "text": "destination: firstText(raw.destination, raw.publishing_destination),"
+        },
+        {
+          "line": 525,
+          "text": "approved: 1,"
+        },
+        {
+          "line": 527,
+          "text": "sent_to_publishing: 3,"
+        },
+        {
+          "line": 577,
+          "text": "function syncFormFromItem(session, item) {"
+        },
+        {
+          "line": 616,
+          "text": "function syncSessionForm(session, form) {"
+        },
+        {
+          "line": 622,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 687,
+          "text": "function syncItemsWithLocalSave(session, projectName, payload) {"
+        },
+        {
+          "line": 699,
+          "text": "async function persistContentRecord({ projectName, state, session, status, showMessage }) {"
+        },
+        {
+          "line": 701,
+          "text": "const localItem = syncItemsWithLocalSave(session, projectName, payload);"
+        },
+        {
+          "line": 717,
+          "text": "const result = await saveProjectContentItem(projectName, payload);"
+        },
+        {
+          "line": 753,
+          "text": "\"Output target: product-visible, publishing-safe, and campaign-consistent creative.\""
+        },
+        {
+          "line": 797,
+          "text": "async function loadWorkspace(projectName, state, session, rerender) {"
+        },
+        {
+          "line": 810,
+          "text": "fetchProjectOperations(projectName)"
+        },
+        {
+          "line": 825,
+          "text": "session.error = \"Backend content data unavailable. Content Studio is running in local draft mode.\";"
+        },
+        {
+          "line": 841,
+          "text": "approved: items.filter((item) => item.status === \"approved\").length,"
+        },
+        {
+          "line": 843,
+          "text": "sentPublishing: items.filter((item) => item.status === \"sent_to_publishing\").length"
+        },
+        {
+          "line": 851,
+          "text": "why: \"A clear first draft unlocks versioning, review, and downstream media/publishing handoffs.\""
+        },
+        {
+          "line": 857,
+          "text": "action: \"Approve or request revision on the selected draft\","
+        },
+        {
+          "line": 862,
+          "text": "if (selectedItem.status === \"approved\") {"
+        },
+        {
+          "line": 864,
+          "text": "action: \"Send approved content to Media Studio\","
+        },
+        {
+          "line": 865,
+          "text": "why: \"Approved copy can now drive structured media generation with fewer revisions.\""
+        },
+        {
+          "line": 869,
+          "text": "if (metrics.sentMedia + metrics.sentPublishing > 0) {"
+        },
+        {
+          "line": 1108,
+          "text": "<div class=\"content-overview-item\"><span>Approved content</span><strong>${escapeHtml(formatCount(metrics.approved))}</strong></div>"
+        },
+        {
+          "line": 1110,
+          "text": "<div class=\"content-overview-item\"><span>Sent to Publishing</span><strong>${escapeHtml(formatCount(metrics.sentPublishing))}</strong></div>"
+        },
+        {
+          "line": 1119,
+          "text": "[\"Media handoff\", selectedItem?.status === \"approved\" || selectedItem?.status === \"sent_to_media\" ? \"Ready\" : \"Prepare\"],"
+        },
+        {
+          "line": 1120,
+          "text": "[\"Publishing\", selectedItem?.status === \"sent_to_publishing\" ? \"Sent\" : \"Pending\"],"
+        },
+        {
+          "line": 1192,
+          "text": "<h3>Brief -> Draft -> Version -> Review -> Approve -> Send</h3>"
+        },
+        {
+          "line": 1255,
+          "text": "<button id=\"contentSendMediaBtn\" class=\"btn btn-secondary\" type=\"button\">Send Design Brief to Media Studio</button>"
+        },
+        {
+          "line": 1256,
+          "text": "<button id=\"contentSendPublishingBtn\" class=\"btn btn-secondary\" type=\"button\">Send to Publishing</button>"
+        },
+        {
+          "line": 1257,
+          "text": "<button id=\"contentSendAiBtn\" class=\"btn btn-secondary\" type=\"button\">Open AI: Send Context to AI Workspace</button>"
+        },
+        {
+          "line": 1424,
+          "text": "<button class=\"btn btn-secondary\" type=\"button\" data-content-version-action=\"approve\">Approve</button>"
+        },
+        {
+          "line": 1455,
+          "text": "<button class=\"btn btn-secondary\" type=\"button\" data-content-agent-ai=\"${escapeHtml(agent.id)}\">Send to AI Workspace</button>"
+        },
+        {
+          "line": 1475,
+          "text": "<div class=\"empty-box\">Run AI Command or Workflows and route output to Content Studio to prefill the composer.</div>"
+        },
+        {
+          "line": 1567,
+          "text": "function buildPublishingHandoff(projectName, session, selectedItem) {"
+        },
+        {
+          "line": 1575,
+          "text": "destination_page: \"publishing\","
+        },
+        {
+          "line": 1579,
+          "text": "destination_service_domain: \"publishing\","
+        },
+        {
+          "line": 1633,
+          "text": "async function saveToLibrary({ projectName, session, selectedItem, showMessage, rerender }) {"
+        },
+        {
+          "line": 1713,
+          "text": "setSharedHandoff(projectName || \"__default__\", \"library\", handoff);"
+        },
+        {
+          "line": 1715,
+          "text": "setSharedHandoff(\"__default__\", \"library\", handoff);"
+        },
+        {
+          "line": 1728,
+          "text": "const result = await createProjectHandoff(projectName, handoff);"
+        },
+        {
+          "line": 1776,
+          "text": "async function sendHandoff({ projectName, handoff, session, showMessage, failMessage, successMessage, localMessage }) {"
+        },
+        {
+          "line": 1777,
+          "text": "setSharedHandoff(projectName || \"__default__\", handoff.destination_page, handoff);"
+        },
+        {
+          "line": 1779,
+          "text": "setSharedHandoff(\"__default__\", handoff.destination_page, handoff);"
+        },
+        {
+          "line": 1792,
+          "text": "await createProjectHandoff(projectName, handoff);"
+        },
+        {
+          "line": 1840,
+          "text": "function sync() {"
+        },
+        {
+          "line": 1841,
+          "text": "syncSessionForm(session, form);"
+        },
+        {
+          "line": 1850,
+          "text": "sync();"
+        },
+        {
+          "line": 1856,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 1864,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 1868,
+          "text": "syncFormFromItem(session, item);"
+        },
+        {
+          "line": 1875,
+          "text": "loadHandoffBtn.onclick = () => {"
+        },
+        {
+          "line": 1913,
+          "text": "generateBtn.onclick = async () => {"
+        },
+        {
+          "line": 1914,
+          "text": "sync();"
+        },
+        {
+          "line": 1927,
+          "text": "\"This will send the current brief to the AI command backend and create a review draft inside Content Studio.\""
+        },
+        {
+          "line": 1935,
+          "text": "const aiResult = await executeProjectAiCommand(projectName, {"
+        },
+        {
+          "line": 2011,
+          "text": "improveBtn.onclick = () => {"
+        },
+        {
+          "line": 2012,
+          "text": "sync();"
+        },
+        {
+          "line": 2019,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2027,
+          "text": "translateBtn.onclick = async () => {"
+        },
+        {
+          "line": 2028,
+          "text": "sync();"
+        },
+        {
+          "line": 2038,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2046,
+          "text": "`This will send the current Content Studio brief to the AI command backend for ${language} adaptation.`"
+        },
+        {
+          "line": 2054,
+          "text": "await executeProjectAiCommand(projectName, {"
+        },
+        {
+          "line": 2060,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2064,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2073,
+          "text": "saveBtn.onclick = async () => {"
+        },
+        {
+          "line": 2074,
+          "text": "sync();"
+        },
+        {
+          "line": 2085,
+          "text": "const sendAiBtn = document.getElementById(\"contentSendAiBtn\");"
+        },
+        {
+          "line": 2086,
+          "text": "if (sendAiBtn) {"
+        },
+        {
+          "line": 2087,
+          "text": "sendAiBtn.onclick = () => {"
+        },
+        {
+          "line": 2088,
+          "text": "sync();"
+        },
+        {
+          "line": 2099,
+          "text": "setSharedHandoff(projectName || \"__default__\", \"ai-command\", {"
+        },
+        {
+          "line": 2120,
+          "text": "const sendMediaBtn = document.getElementById(\"contentSendMediaBtn\");"
+        },
+        {
+          "line": 2121,
+          "text": "if (sendMediaBtn) {"
+        },
+        {
+          "line": 2122,
+          "text": "sendMediaBtn.onclick = async () => {"
+        },
+        {
+          "line": 2123,
+          "text": "sync();"
+        },
+        {
+          "line": 2130,
+          "text": "const ok = await sendHandoff({"
+        },
+        {
+          "line": 2152,
+          "text": "const sendPublishingBtn = document.getElementById(\"contentSendPublishingBtn\");"
+        },
+        {
+          "line": 2153,
+          "text": "if (sendPublishingBtn) {"
+        },
+        {
+          "line": 2154,
+          "text": "sendPublishingBtn.onclick = async () => {"
+        },
+        {
+          "line": 2155,
+          "text": "sync();"
+        },
+        {
+          "line": 2161,
+          "text": "const handoffPayload = buildPublishingHandoff(projectName, session, selectedItem);"
+        },
+        {
+          "line": 2162,
+          "text": "const ok = await sendHandoff({"
+        },
+        {
+          "line": 2167,
+          "text": "failMessage: \"Publishing handoff kept locally because backend save is unavailable.\","
+        },
+        {
+          "line": 2168,
+          "text": "successMessage: \"Publishing handoff created.\","
+        },
+        {
+          "line": 2169,
+          "text": "localMessage: \"Publishing handoff created locally.\""
+        },
+        {
+          "line": 2174,
+          "text": "selectedVersion.readiness_status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 2176,
+          "text": "session.form.status = \"sent_to_publishing\";"
+        },
+        {
+          "line": 2177,
+          "text": "await persistContentRecord({ projectName, state, session, status: \"sent_to_publishing\", showMessage });"
+        },
+        {
+          "line": 2178,
+          "text": "navigateTo(\"publishing\");"
+        },
+        {
+          "line": 2185,
+          "text": "button.onclick = () => {"
+        },
+        {
+          "line": 2194,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 2195,
+          "text": "sync();"
+        },
+        {
+          "line": 2207,
+          "text": "if (action === \"approve\") {"
+        },
+        {
+          "line": 2210,
+          "text": "\"This will mark the selected content version as approved/review-ready and may save that readiness state to the backend.\""
+        },
+        {
+          "line": 2214,
+          "text": "current.readiness_status = \"approved\";"
+        },
+        {
+          "line": 2215,
+          "text": "current.approval_status = \"approved\";"
+        },
+        {
+          "line": 2216,
+          "text": "session.form.status = \"approved\";"
+        },
+        {
+          "line": 2217,
+          "text": "session.draftMessage = \"Selected version approved.\";"
+        },
+        {
+          "line": 2218,
+          "text": "await persistContentRecord({ projectName, state, session, status: \"approved\", showMessage });"
+        },
+        {
+          "line": 2281,
+          "text": "button.onclick = async () => {"
+        },
+        {
+          "line": 2287,
+          "text": "syncVersionFromForm(session);"
+        },
+        {
+          "line": 2310,
+          "text": "setSharedHandoff(projectName || \"__default__\", \"ai-command\", {"
+        },
+        {
+          "line": 2334,
+          "text": "export const contentStudioRoute = {"
+        },
+        {
+          "line": 2340,
+          "text": "description: \"Smart content production hub for draft generation, review, and routing to Media Studio and Publishing.\""
+        },
+        {
+          "line": 2380,
+          "text": "syncFormFromItem(session, selectedItem);"
+        },
+        {
+          "line": 2433,
+          "text": "</ul><div class=\"content-hint content-readiness-hint\">Review these before routing for publishing or governance.</div></section>`;"
+        },
+        {
+          "line": 2446,
+          "text": "</ul><div class=\"content-hint content-readiness-hint\">Prepare Governance Review before publishing or campaign use.</div></section>`;"
+        },
+        {
+          "line": 2450,
+          "text": "// No direct publish/approve/send labels found in action rows; all routing is review/handoff-based."
+        }
+      ]
+    }
+  }
+]
