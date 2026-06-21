@@ -1799,6 +1799,18 @@ function renderNotificationCenter(context, state, projectName) {
     button.onclick = async () => {
       const notificationId = button.getAttribute("data-mark-read") || "";
       if (!notificationId || !context.markProjectNotification) return;
+
+      const confirmed = window.confirm(
+        "Confirm notification read-state update\n\n" +
+          `Action: Mark notification ${notificationId} as read.\n` +
+          "Risk: This updates durable notification read-state only. It does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute anything.\n\n" +
+          "Select Cancel to keep this notification unread."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
       try {
         await context.markProjectNotification(projectName, notificationId, { status: "read", read: true });
         await context.reloadProjectData?.(projectName);

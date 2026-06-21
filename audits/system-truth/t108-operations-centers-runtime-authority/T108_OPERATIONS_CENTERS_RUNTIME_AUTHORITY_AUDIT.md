@@ -1,0 +1,1401 @@
+# T108 — Operations Centers Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/operations-centers.js`.
+
+## Why Operations Centers Is Next
+After Governance was closed, Operations Centers is the next high-risk active surface from the remaining T88 ranking.
+
+Operations Centers may contain customer operations, notification operations, sessions, workflows, queues, support actions, AI recommendations, and cross-page handoffs.
+
+## File Summary
+- File: `public/control-center/pages/operations-centers.js`
+- Lines: 2268
+- Imports: 1
+- Render writes: 5
+- Event bindings: 26
+- Backend/API signals: 524
+- Operations/customer/notification signals: 567
+- Execution/mutation signals: 118
+- Handoff signals: 37
+- AI signals: 213
+- Confirmation signals: 1
+- Access-key/credential signals: 0
+- Save/storage signals: 10
+- Navigation signals: 72
+- Disabled/read-only/draft/guard signals: 51
+- Risky terms: 571
+
+## Initial Risk Notes
+- Operations Centers contains customer/notification/operation/session signals. Exact runtime actions must be classified.
+- Operations Centers contains backend/API-like signals. Need separate read-only dashboards from durable operations mutations.
+- Operations Centers contains execution/mutation terms. Need verify whether actions only prepare local/session drafts or mutate backend state.
+- Confirmation dialogs exist and must be mapped to authority-sensitive operations.
+
+## Imports
+- L1: `import { getSharedHandoff } from "../shared-context.js";`
+
+## Render Writes
+- L721: `root.innerHTML = renderTaskCenterLayout({`
+- L1063: `root.innerHTML = renderQueueCenterLayout({`
+- L1357: `root.innerHTML = renderJobMonitorLayout({`
+- L1600: `root.innerHTML = \``
+- L2162: `root.innerHTML = \``
+
+## Event Bindings
+- L74: `button.onclick = () => {`
+- L104: `button.onclick = () => {`
+- L112: `button.onclick = () => {`
+- L120: `button.onclick = () => {`
+- L127: `button.onclick = () => {`
+- L758: `root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);`
+- L759: `root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);`
+- L760: `root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L813: `root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {`
+- L818: `root.querySelector(selector)?.addEventListener("change", (event) => {`
+- L1099: `root.querySelector("#queueCenterRefreshBtn")?.addEventListener("click", refreshQueueCenter);`
+- L1100: `root.querySelector("#queueCenterRefreshBtnHeader")?.addEventListener("click", refreshQueueCenter);`
+- L1109: `root.querySelector("#queueCenterSearch")?.addEventListener("input", (event) => {`
+- L1114: `root.querySelector(selector)?.addEventListener("change", (event) => {`
+- L1392: `root.querySelector("#jobMonitorRefreshBtn")?.addEventListener("click", refreshJobMonitor);`
+- L1393: `root.querySelector("#jobMonitorRefreshBtnHeader")?.addEventListener("click", refreshJobMonitor);`
+- L1402: `root.querySelector("#jobMonitorSearch")?.addEventListener("input", (event) => {`
+- L1407: `root.querySelector(selector)?.addEventListener("change", (event) => {`
+- L1780: `root.querySelector("#notificationCenterRefreshBtn")?.addEventListener("click", refreshNotificationCenter);`
+- L1781: `root.querySelector("#notificationCenterRefreshBtnHeader")?.addEventListener("click", refreshNotificationCenter);`
+- L1790: `root.querySelector("#notificationCenterSearch")?.addEventListener("input", (event) => {`
+- L1794: `root.querySelector("#notificationCenterSeverity")?.addEventListener("change", (event) => {`
+- L1799: `button.onclick = async () => {`
+- L1812: `button.onclick = async () => {`
+- L1842: `button.onclick = async () => {`
+
+## Backend / API Signals
+- L1: `import { getSharedHandoff } from "../shared-context.js";`
+- L2: `const taskSessions = new Map();`
+- L3: `const queueSessions = new Map();`
+- L4: `const jobSessions = new Map();`
+- L5: `const notificationSessions = new Map();`
+- L55: `function ensureSession(map, projectName, initialState) {`
+- L86: `item?.task_id ||`
+- L89: `item?.notification_id ||`
+- L133: `context.showMessage?.("Operations prompt added to AI Command.");`
+- L172: `if (pageKey === "task-center") {`
+- L176: `preview: "Review the current task backlog and identify the highest-impact next work.",`
+- L177: `prompt: \`Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.\``
+- L180: `label: "Unblock selected task",`
+- L181: `preview: "Explain how to unblock the current task and who should act next.",`
+- L182: `prompt: \`Review ${itemLabel} in Task Center for ${projectLabel}. Explain what is blocking progress, who should act next, and the fastest unblock path.\``
+- L186: `preview: "Highlight where task load or due-state suggests operational risk.",`
+- L187: `prompt: \`Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.\``
+- L192: `prompt: \`Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.\``
+- L197: `prompt: \`Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.\``
+- L217: `prompt: \`Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.\``
+- L231: `preview: "Explain what the selected job status implies operationally.",`
+- L245: `preview: "Sort current notifications by severity and action urgency.",`
+- L246: `prompt: \`Review Notification Center for ${projectLabel}. Rank current alerts by urgency, explain what matters most, and identify what should be handled first.\``
+- L251: `prompt: \`Review ${itemLabel} in Notification Center for ${projectLabel}. Explain what it means, what risk it creates, and which page or team should act next.\``
+- L254: `label: "Summarize operational signal",`
+- L255: `preview: "Turn the current notification stream into a short operations summary.",`
+- L256: `prompt: \`Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.\``
+- L264: `return asObject(asObject(state.data).operations);`
+- L269: `const taskCenter = asObject(ops.task_center);`
+- L272: `const notificationCenter = asObject(ops.notification_center);`
+- L274: `const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);`
+- L278: `const criticalAlerts = Number(notificationCenter.critical_count || 0);`
+- L279: `const unreadNotifications = Number(notificationCenter.unread_count || 0);`
+- L281: `const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;`
+- L282: `const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;`
+- L283: `const publishAlerts = asArray(notificationCenter.publish_alerts).length;`
+- L284: `const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;`
+- L286: `const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";`
+- L289: `: runningJobs || queueItems || activeTasks`
+- L318: `helper: "Highest priority notifications",`
+- L320: `route: "notification-center"`
+- L323: `label: "Approvals",`
+- L324: `value: formatCount(approvalAlerts),`
+- L325: `helper: "Pending approval signals",`
+- L326: `tone: approvalAlerts ? "warning" : "success",`
+- L327: `route: "notification-center"`
+- L352: `value: formatCount(unreadNotifications),`
+- L353: `helper: "Unread operational notifications",`
+- L354: `tone: unreadNotifications ? "warning" : "success",`
+- L355: `route: "notification-center"`
+- L428: `function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {`
+- L429: `if (!incomingHandoff) return "";`
+- L431: `const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");`
+- L433: `incomingHandoff.title ||`
+- L434: `incomingHandoff.summary ||`
+- L435: `incomingHandoff.payload?.title ||`
+- L436: `incomingHandoff.payload?.summary ||`
+- L437: `"Incoming task handoff"`
+- L440: `incomingHandoff.description ||`
+- L441: `incomingHandoff.payload?.description ||`
+- L442: `incomingHandoff.payload?.handoff_intent ||`
+- L443: `incomingHandoff.payload?.prompt ||`
+- L444: `"Review-only handoff prepared by another MH-OS surface."`
+- L446: `const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");`
+- L449: `<section class="panel ops-incoming-handoff mhos-clean-surface">`
+- L452: `<div class="panel-kicker">Incoming Handoff</div>`
+- L453: `<h3>Incoming Review-Only Task Handoff</h3>`
+- L454: `<p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>`
+- L465: `{ label: "Destination", value: "Task Center" },`
+- L471: `<button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>`
+- L479: `function renderTaskCenterLayout({`
+- L482: `taskCenter,`
+- L483: `session,`
+- L488: `incomingHandoff`
+- L493: `asString(session.search).trim() ||`
+- L494: `session.focus !== "all" ||`
+- L495: `session.priority !== "all" ||`
+- L496: `session.owner !== "all" ||`
+- L497: `session.source !== "all"`
+- L500: `? "No tasks match the current filters."`
+- L501: `: "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";`
+- L505: `selectedItem.title || "Task",`
+- L512: `: "No task is selected.";`
+- L514: `const showLoadingState = Boolean(session.isLoading);`
+- L517: `<section class="page is-active" data-page="task-center">`
+- L522: `<p class="mhos-os-kicker">Operational Task Review</p>`
+- L523: `<h3 class="std-context-title mhos-os-title">Task Center</h3>`
+- L526: `<div class="std-context-metrics mhos-os-chip-row" aria-label="Task Center metrics">`
+- L527: `<span class="std-context-chip mhos-os-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>`
+- L528: `<span class="std-context-chip mhos-os-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>`
+- L529: `<span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>`
+- L530: `<span class="std-context-chip mhos-os-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>`
+- L531: `<span class="std-context-chip mhos-os-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>`
+- L536: `<button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>`
+- L552: `<h3 class="mhos-os-section-title">Operational task backlog</h3>`
+- L553: `<p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>`
+- L559: `{ value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },`
+- L560: `{ value: "open", label: "Open", count: formatCount(taskCenter.open_count) },`
+- L561: `{ value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },`
+- L562: `{ value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },`
+- L563: `{ value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }`
+- L564: `], session.focus, escapeHtml)}`
+- L567: `<input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">`
+- L568: `<select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>`
+- L569: `<select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>`
+- L570: `<select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>`
+- L573: `${session.errorMessage ? \`<div class="error-state" aria-live="assertive">${escapeHtml(session.errorMessage)}</div>\` : ""}`
+- L576: `["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],`
+- L581: `<strong>${escapeHtml(item.title || "Task")}</strong>`
+- L606: `${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}`
+- L610: `<p class="mhos-os-kicker">Selected Task</p>`
+- L611: `<h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a task")}</h3>`
+- L612: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>`
+- L618: `<strong>${escapeHtml(selectedItem.title || "Task")}</strong>`
+- L619: `<p>${escapeHtml(selectedItem.description || "No task description available.")}</p>`
+- L632: `\` : \`<div class="empty-box">No task is selected.</div>\`}`
+- L639: `<h3 class="mhos-os-panel-title">Task review actions</h3>`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L644: `<button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>`
+- L646: `<button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>`
+- L653: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>`
+- L661: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L662: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>`
+- L666: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>`
+- L681: `<textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>`
+- L685: `function renderTaskCenter(context, state, projectName) {`
+- L689: `const ops = asObject(state.data.operations);`
+- L690: `const taskCenter = asObject(ops.task_center);`
+- L691: `const filters = asObject(taskCenter.filters);`
+- L692: `const session = ensureSession(taskSessions, projectName, {`
+- L703: `let items = asArray(taskCenter.items).map((item, index) => ({`
+- L705: `_opsKey: getOpsItemKey(item, index, "task")`
+- L707: `items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);`
+- L708: `if (session.focus === "open") items = items.filter((item) => asString(item.status) === "open");`
+- L709: `if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");`
+- L710: `if (session.focus === "overdue") items = items.filter((item) => asString(item.due_state) === "overdue");`
+- L711: `if (session.focus === "due_soon") items = items.filter((item) => asString(item.due_state) === "due_soon");`
+- L712: `if (session.priority !== "all") items = items.filter((item) => asString(item.priority) === session.priority);`
+- L713: `if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);`
+- L714: `if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);`
+- L715: `const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;`
+- L716: `session.selectedKey = selectedItem?._opsKey || "";`
+- L717: `const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));`
+- L718: `const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);`
+- L721: `root.innerHTML = renderTaskCenterLayout({`
+- L724: `taskCenter,`
+- L725: `session,`
+- L730: `incomingHandoff`
+- L733: `const rerender = () => renderTaskCenter(context, context.getState(), projectName);`
+- L734: `const refreshTaskCenter = () => {`
+- L735: `if (context.fetchProjectTaskCenter && projectName) {`
+- L736: `session.isLoading = true;`
+- L737: `session.errorMessage = "";`
+- L739: `context.fetchProjectTaskCenter(projectName)`
+- L741: `session.isLoading = false;`
+- L743: `const ops = asObject(context.getState().data.operations);`
+- L744: `ops.task_center = liveData;`
+- L745: `renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);`
+- L748: `session.isLoading = false;`
+- L749: `session.errorMessage = \`Task Center: ${error?.message || "Failed to refresh."}\`;`
+- L751: `context.showError?.(session.errorMessage);`
+- L754: `session.errorMessage = "";`
+- L758: `root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);`
+- L759: `root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);`
+- L760: `root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {`
+- L761: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L762: `const text = buffer?.value || "No task is selected.";`
+- L771: `context.showMessage?.("Task summary copied.");`
+- L773: `context.showError?.("Failed to copy task summary.");`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L778: `const text = incomingHandoff`
+- L780: `"Incoming Review-Only Task Handoff",`
+- L781: `\`Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}\`,`
+- L782: `\`Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}\`,`
+- L783: `\`Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}\`,`
+- L786: `: "No incoming task handoff.";`
+- L792: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L800: `context.showMessage?.("Incoming handoff summary copied.");`
+- L802: `context.showError?.("Failed to copy incoming handoff summary.");`
+- L806: `session.focus = focus || "all";`
+- L810: `session.selectedKey = selectedKey;`
+- L813: `root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {`
+- L814: `session.search = event.target.value || "";`
+- L817: `[["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {`
+- L819: `session[key] = event.target.value || "all";`
+- L831: `session,`
+- L840: `asString(session.search).trim() ||`
+- L841: `session.focus !== "all" ||`
+- L842: `session.status !== "all"`
+- L853: `const showLoadingState = Boolean(session.isLoading);`
+- L854: `const showErrorState = Boolean(session.errorMessage);`
+- L862: `<span>${escapeHtml(session.errorMessage)}</span>`
+- L893: `<p class="mhos-os-kicker">Operational Queue Review</p>`
+- L895: `<p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>`
+- L923: `<h3 class="mhos-os-section-title">Queue review operations</h3>`
+- L936: `], session.focus, escapeHtml)}`
+- L939: `<input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">`
+- L940: `<select id="queueCenterStatus" class="sidebar-select">${renderFilterOptions(asObject(queueCenter.filters).statuses, session.status, escapeHtml, "All statuses")}</select>`
+- L944: `<div class="error-state ops-queue-state" aria-live="assertive"><strong>Queue Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L1014: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1041: `const queueCenter = asObject(asObject(state.data.operations).queue_center);`
+- L1042: `const session = ensureSession(queueSessions, projectName, {`
+- L1055: `items = filterBySearch(items, session.search, ["title", "assignee", "queue_type", "status"]);`
+- L1056: `if (session.focus !== "all") items = items.filter((item) => asString(item.queue_type) === session.focus);`
+- L1057: `if (session.status !== "all") items = items.filter((item) => asString(item.status) === session.status);`
+- L1058: `const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;`
+- L1059: `session.selectedKey = selectedItem?._opsKey || "";`
+- L1061: `const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));`
+- L1067: `session,`
+- L1076: `if (context.fetchProjectQueueCenter && projectName) {`
+- L1077: `session.isLoading = true;`
+- L1078: `session.errorMessage = "";`
+- L1080: `context.fetchProjectQueueCenter(projectName)`
+- L1082: `session.isLoading = false;`
+- L1084: `const ops = asObject(context.getState().data.operations);`
+- L1086: `renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);`
+- L1089: `session.isLoading = false;`
+- L1090: `session.errorMessage = \`Queue Center: ${error?.message || "Failed to refresh."}\`;`
+- L1092: `context.showError?.(session.errorMessage);`
+- L1095: `session.errorMessage = "";`
+- L1102: `session.focus = focus || "all";`
+- L1106: `session.selectedKey = selectedKey;`
+- L1110: `session.search = event.target.value || "";`
+- L1115: `session[key] = event.target.value || "all";`
+- L1127: `session,`
+- L1135: `asString(session.search).trim() ||`
+- L1136: `session.focus !== "all" ||`
+- L1137: `session.kind !== "all"`
+- L1143: `const showLoadingState = Boolean(session.isLoading);`
+- L1144: `const showErrorState = Boolean(session.errorMessage);`
+- L1152: `<span>${escapeHtml(session.errorMessage)}</span>`
+- L1224: `], session.focus, escapeHtml)}`
+- L1227: `<input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">`
+- L1229: `${["all", "workflow", "media", "publishing"].map((value) => \`<option value="${escapeHtml(value)}"${value === session.kind ? " selected" : ""}>${escapeHtml(titleCase(value))}</option>\`).join("")}`
+- L1234: `<div class="error-state ops-job-state" aria-live="assertive"><strong>Job Monitor error</strong><span>${escapeHtml(session.errorMessage)}</span></div>`
+- L1277: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>`
+- L1309: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1336: `const jobMonitor = asObject(asObject(state.data.operations).job_monitor);`
+- L1337: `const session = ensureSession(jobSessions, projectName, {`
+- L1350: `items = filterBySearch(items, session.search, ["title", "kind", "status", "owner"]);`
+- L1351: `if (session.focus !== "all") items = items.filter((item) => asString(item.status) === session.focus);`
+- L1352: `if (session.kind !== "all") items = items.filter((item) => asString(item.kind) === session.kind);`
+- L1353: `const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;`
+- L1354: `session.selectedKey = selectedItem?._opsKey || "";`
+- L1355: `const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));`
+- L1361: `session,`
+- L1369: `if (context.fetchProjectJobMonitor && projectName) {`
+- L1370: `session.isLoading = true;`
+- L1371: `session.errorMessage = "";`
+- L1373: `context.fetchProjectJobMonitor(projectName)`
+- L1375: `session.isLoading = false;`
+- L1377: `const ops = asObject(context.getState().data.operations);`
+- L1379: `renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);`
+- L1382: `session.isLoading = false;`
+- L1383: `session.errorMessage = \`Job Monitor: ${error?.message || "Failed to refresh."}\`;`
+- L1385: `context.showError?.(session.errorMessage);`
+- L1388: `session.errorMessage = "";`
+- L1395: `session.focus = focus || "all";`
+- L1399: `session.selectedKey = selectedKey;`
+
+## Operations / Customer / Notification Signals
+- L2: `const taskSessions = new Map();`
+- L3: `const queueSessions = new Map();`
+- L4: `const jobSessions = new Map();`
+- L5: `const notificationSessions = new Map();`
+- L45: `if (["high", "warning", "pending", "queued", "running", "due_soon", "ready"].includes(normalized)) return "warning";`
+- L55: `function ensureSession(map, projectName, initialState) {`
+- L78: `context.showMessage?.(\`Opened ${label}.\`);`
+- L86: `item?.task_id ||`
+- L88: `item?.queue_item_id ||`
+- L89: `item?.notification_id ||`
+- L122: `context.showMessage?.("Opened AI Command.");`
+- L133: `context.showMessage?.("Operations prompt added to AI Command.");`
+- L170: `const itemLabel = asString(selectedItem?.title || selectedItem?.name || selectedItem?.message || "the selected item");`
+- L172: `if (pageKey === "task-center") {`
+- L176: `preview: "Review the current task backlog and identify the highest-impact next work.",`
+- L177: `prompt: \`Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.\``
+- L180: `label: "Unblock selected task",`
+- L181: `preview: "Explain how to unblock the current task and who should act next.",`
+- L182: `prompt: \`Review ${itemLabel} in Task Center for ${projectLabel}. Explain what is blocking progress, who should act next, and the fastest unblock path.\``
+- L186: `preview: "Highlight where task load or due-state suggests operational risk.",`
+- L187: `prompt: \`Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.\``
+- L192: `prompt: \`Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.\``
+- L197: `prompt: \`Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.\``
+- L202: `if (pageKey === "queue-center") {`
+- L205: `label: "Triage queue pressure",`
+- L206: `preview: "Identify which queue needs attention first and why.",`
+- L207: `prompt: \`Review Queue Center for ${projectLabel}. Which queue needs attention first, why, and what should be routed next?\``
+- L210: `label: "Review selected queue item",`
+- L211: `preview: "Explain what the selected queue item likely needs next.",`
+- L212: `prompt: \`Review ${itemLabel} in Queue Center for ${projectLabel}. Explain what it likely needs next and which workspace should own it.\``
+- L216: `preview: "Surface recurring queue patterns slowing execution.",`
+- L217: `prompt: \`Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.\``
+- L231: `preview: "Explain what the selected job status implies operationally.",`
+- L236: `preview: "Assess execution health across workflows, media, and publishing jobs.",`
+- L237: `prompt: \`Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.\``
+- L245: `preview: "Sort current notifications by severity and action urgency.",`
+- L246: `prompt: \`Review Notification Center for ${projectLabel}. Rank current alerts by urgency, explain what matters most, and identify what should be handled first.\``
+- L251: `prompt: \`Review ${itemLabel} in Notification Center for ${projectLabel}. Explain what it means, what risk it creates, and which page or team should act next.\``
+- L254: `label: "Summarize operational signal",`
+- L255: `preview: "Turn the current notification stream into a short operations summary.",`
+- L256: `prompt: \`Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.\``
+- L264: `return asObject(asObject(state.data).operations);`
+- L269: `const taskCenter = asObject(ops.task_center);`
+- L270: `const queueCenter = asObject(ops.queue_center);`
+- L272: `const notificationCenter = asObject(ops.notification_center);`
+- L274: `const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);`
+- L275: `const queueItems = Number(queueCenter.active_count || queueCenter.total_active || asArray(queueCenter.items).length || 0);`
+- L278: `const criticalAlerts = Number(notificationCenter.critical_count || 0);`
+- L279: `const unreadNotifications = Number(notificationCenter.unread_count || 0);`
+- L281: `const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;`
+- L282: `const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;`
+- L283: `const publishAlerts = asArray(notificationCenter.publish_alerts).length;`
+- L284: `const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;`
+- L286: `const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";`
+- L289: `: runningJobs || queueItems || activeTasks`
+- L302: `label: "Queue Pressure",`
+- L303: `value: formatCount(queueItems),`
+- L304: `helper: "Active queue items",`
+- L305: `tone: queueItems ? "warning" : "success",`
+- L306: `route: "queue-center"`
+- L318: `helper: "Highest priority notifications",`
+- L320: `route: "notification-center"`
+- L327: `route: "notification-center"`
+- L351: `label: "Inbox",`
+- L352: `value: formatCount(unreadNotifications),`
+- L353: `helper: "Unread operational notifications",`
+- L354: `tone: unreadNotifications ? "warning" : "success",`
+- L355: `route: "notification-center"`
+- L365: `|| "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";`
+- L428: `function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {`
+- L437: `"Incoming task handoff"`
+- L453: `<h3>Incoming Review-Only Task Handoff</h3>`
+- L454: `<p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>`
+- L465: `{ label: "Destination", value: "Task Center" },`
+- L471: `<button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>`
+- L479: `function renderTaskCenterLayout({`
+- L482: `taskCenter,`
+- L483: `session,`
+- L493: `asString(session.search).trim() ||`
+- L494: `session.focus !== "all" ||`
+- L495: `session.priority !== "all" ||`
+- L496: `session.owner !== "all" ||`
+- L497: `session.source !== "all"`
+- L500: `? "No tasks match the current filters."`
+- L501: `: "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";`
+- L505: `selectedItem.title || "Task",`
+- L512: `: "No task is selected.";`
+- L514: `const showLoadingState = Boolean(session.isLoading);`
+- L517: `<section class="page is-active" data-page="task-center">`
+- L522: `<p class="mhos-os-kicker">Operational Task Review</p>`
+- L523: `<h3 class="std-context-title mhos-os-title">Task Center</h3>`
+- L526: `<div class="std-context-metrics mhos-os-chip-row" aria-label="Task Center metrics">`
+- L527: `<span class="std-context-chip mhos-os-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>`
+- L528: `<span class="std-context-chip mhos-os-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>`
+- L529: `<span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>`
+- L530: `<span class="std-context-chip mhos-os-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>`
+- L531: `<span class="std-context-chip mhos-os-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>`
+- L536: `<button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>`
+- L543: `description: "Supporting cross-center health and risk signal.",`
+- L544: `badge: "Supporting context"`
+- L552: `<h3 class="mhos-os-section-title">Operational task backlog</h3>`
+- L553: `<p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>`
+- L559: `{ value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },`
+- L560: `{ value: "open", label: "Open", count: formatCount(taskCenter.open_count) },`
+- L561: `{ value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },`
+- L562: `{ value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },`
+- L563: `{ value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }`
+- L564: `], session.focus, escapeHtml)}`
+- L567: `<input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">`
+- L568: `<select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>`
+- L569: `<select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>`
+- L570: `<select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>`
+- L573: `${session.errorMessage ? \`<div class="error-state" aria-live="assertive">${escapeHtml(session.errorMessage)}</div>\` : ""}`
+- L576: `["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],`
+- L581: `<strong>${escapeHtml(item.title || "Task")}</strong>`
+- L606: `${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}`
+- L610: `<p class="mhos-os-kicker">Selected Task</p>`
+- L611: `<h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a task")}</h3>`
+- L612: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>`
+- L618: `<strong>${escapeHtml(selectedItem.title || "Task")}</strong>`
+- L619: `<p>${escapeHtml(selectedItem.description || "No task description available.")}</p>`
+- L632: `\` : \`<div class="empty-box">No task is selected.</div>\`}`
+- L639: `<h3 class="mhos-os-panel-title">Task review actions</h3>`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L644: `<button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>`
+- L646: `<button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>`
+- L653: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>`
+- L661: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L662: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>`
+- L666: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>`
+- L681: `<textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>`
+- L685: `function renderTaskCenter(context, state, projectName) {`
+- L689: `const ops = asObject(state.data.operations);`
+- L690: `const taskCenter = asObject(ops.task_center);`
+- L691: `const filters = asObject(taskCenter.filters);`
+- L692: `const session = ensureSession(taskSessions, projectName, {`
+- L700: `errorMessage: ""`
+- L703: `let items = asArray(taskCenter.items).map((item, index) => ({`
+- L705: `_opsKey: getOpsItemKey(item, index, "task")`
+- L707: `items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);`
+- L708: `if (session.focus === "open") items = items.filter((item) => asString(item.status) === "open");`
+- L709: `if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");`
+- L710: `if (session.focus === "overdue") items = items.filter((item) => asString(item.due_state) === "overdue");`
+- L711: `if (session.focus === "due_soon") items = items.filter((item) => asString(item.due_state) === "due_soon");`
+- L712: `if (session.priority !== "all") items = items.filter((item) => asString(item.priority) === session.priority);`
+- L713: `if (session.owner !== "all") items = items.filter((item) => asString(item.owner_role) === session.owner);`
+- L714: `if (session.source !== "all") items = items.filter((item) => asString(item.source_page) === session.source);`
+- L715: `const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;`
+- L716: `session.selectedKey = selectedItem?._opsKey || "";`
+- L717: `const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));`
+- L718: `const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);`
+- L721: `root.innerHTML = renderTaskCenterLayout({`
+- L724: `taskCenter,`
+- L725: `session,`
+- L733: `const rerender = () => renderTaskCenter(context, context.getState(), projectName);`
+- L734: `const refreshTaskCenter = () => {`
+- L735: `if (context.fetchProjectTaskCenter && projectName) {`
+- L736: `session.isLoading = true;`
+- L737: `session.errorMessage = "";`
+- L739: `context.fetchProjectTaskCenter(projectName)`
+- L741: `session.isLoading = false;`
+- L743: `const ops = asObject(context.getState().data.operations);`
+- L744: `ops.task_center = liveData;`
+- L745: `renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);`
+- L748: `session.isLoading = false;`
+- L749: `session.errorMessage = \`Task Center: ${error?.message || "Failed to refresh."}\`;`
+- L751: `context.showError?.(session.errorMessage);`
+- L754: `session.errorMessage = "";`
+- L758: `root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);`
+- L759: `root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);`
+- L760: `root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {`
+- L761: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L762: `const text = buffer?.value || "No task is selected.";`
+- L771: `context.showMessage?.("Task summary copied.");`
+- L773: `context.showError?.("Failed to copy task summary.");`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L780: `"Incoming Review-Only Task Handoff",`
+- L782: `\`Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}\`,`
+- L786: `: "No incoming task handoff.";`
+- L792: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L800: `context.showMessage?.("Incoming handoff summary copied.");`
+- L806: `session.focus = focus || "all";`
+- L810: `session.selectedKey = selectedKey;`
+- L813: `root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {`
+- L814: `session.search = event.target.value || "";`
+- L817: `[["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {`
+- L819: `session[key] = event.target.value || "all";`
+- L827: `function renderQueueCenterLayout({`
+- L830: `queueCenter,`
+- L831: `session,`
+- L834: `queueCounts,`
+- L840: `asString(session.search).trim() ||`
+- L841: `session.focus !== "all" ||`
+- L842: `session.status !== "all"`
+- L845: `? "No queue items match the current filters."`
+- L846: `: "No queue items are available for this project yet. Use Refresh or adjust project context to load current queues.";`
+- L849: `const totalItems = asArray(queueCenter.items).length;`
+- L850: `const totalActive = queueCounts.reduce((sum, item) => sum + Number(item.active || 0), 0);`
+- L851: `const totalQueued = items.filter((item) => asString(item.status) === "queued").length;`
+- L853: `const showLoadingState = Boolean(session.isLoading);`
+- L854: `const showErrorState = Boolean(session.errorMessage);`
+- L860: `<div class="error-state ops-queue-state" aria-live="assertive">`
+- L861: `<strong>Queue Center error</strong>`
+- L862: `<span>${escapeHtml(session.errorMessage)}</span>`
+- L872: `<td><span class="card-badge neutral">${escapeHtml(titleCase(item.queue_type || "queue"))}</span></td>`
+- L875: `<strong>${escapeHtml(item.title || "Queue item")}</strong>`
+- L881: `<td><span class="card-badge ${badgeTone(item.status)}">${escapeHtml(titleCase(item.status || "queued"))}</span></td>`
+- L888: `<section class="page is-active" data-page="queue-center">`
+- L893: `<p class="mhos-os-kicker">Operational Queue Review</p>`
+- L894: `<h3 class="std-context-title mhos-os-title">Queue Center</h3>`
+- L895: `<p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>`
+- L897: `<div class="std-context-metrics mhos-os-chip-row" aria-label="Queue Center metrics">`
+- L901: `<span class="std-context-chip mhos-os-chip is-warning"><span>Queued</span><strong>${escapeHtml(formatCount(totalQueued))}</strong></span>`
+- L907: `<button class="btn btn-secondary std-context-btn" type="button" id="queueCenterRefreshBtnHeader">Refresh</button>`
+- L914: `description: "Supporting cross-center runtime and queue pressure context.",`
+- L915: `badge: "Supporting context"`
+- L923: `<h3 class="mhos-os-section-title">Queue review operations</h3>`
+- L924: `<p class="mhos-os-section-copy">Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>`
+- L930: `{ value: "all", label: "All Queues", count: formatCount(totalItems) },`
+- L931: `...asArray(asObject(queueCenter.filters).queue_types).map((item) => ({`
+- L933: `label: titleCase(item.value || "queue"),`
+- L936: `], session.focus, escapeHtml)}`
+- L939: `<input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">`
+- L940: `<select id="queueCenterStatus" class="sidebar-select">${renderFilterOptions(asObject(queueCenter.filters).statuses, session.status, escapeHtml, "All statuses")}</select>`
+- L944: `<div class="error-state ops-queue-state" aria-live="assertive"><strong>Queue Center error</strong><span>${escapeHtml(session.errorMessage)}</span></div>`
+- L948: `["Queue", "Item", "Assignee", "Priority", "Status", "Updated", "Route"],`
+- L959: `<p class="mhos-os-kicker">Selected Queue Item</p>`
+- L960: `<h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a queue item")}</h3>`
+- L961: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>`
+- L967: `<strong>${escapeHtml(selectedItem.title || "Queue item")}</strong>`
+- L968: `<p>${escapeHtml(selectedItem.details?.summary || selectedItem.entity_type || "No queue summary available.")}</p>`
+- L971: `{ label: "Queue type", value: titleCase(selectedItem.queue_type || "queue") },`
+- L974: `{ label: "Status", value: titleCase(selectedItem.status || "queued") },`
+- L979: `\` : \`<div class="empty-box">No queue item is selected.</div>\`}`
+- L986: `<h3 class="mhos-os-panel-title">Queue review actions</h3>`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L991: `<button class="btn btn-primary" type="button" id="queueCenterRefreshBtn">Refresh Queue Center</button>`
+- L995: `${queueCounts.map((item) => \``
+- L997: `<strong>${escapeHtml(titleCase(item.queue_type || "queue"))}</strong>`
+- L1014: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1019: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>`
+- L1037: `function renderQueueCenter(context, state, projectName) {`
+- L1041: `const queueCenter = asObject(asObject(state.data.operations).queue_center);`
+- L1042: `const session = ensureSession(queueSessions, projectName, {`
+- L1048: `errorMessage: ""`
+- L1051: `let items = asArray(queueCenter.items).map((item, index) => ({`
+- L1053: `_opsKey: getOpsItemKey(item, index, "queue")`
+- L1055: `items = filterBySearch(items, session.search, ["title", "assignee", "queue_type", "status"]);`
+- L1056: `if (session.focus !== "all") items = items.filter((item) => asString(item.queue_type) === session.focus);`
+- L1057: `if (session.status !== "all") items = items.filter((item) => asString(item.status) === session.status);`
+- L1058: `const selectedItem = items.find((item) => item._opsKey === session.selectedKey) || items[0] || null;`
+- L1059: `session.selectedKey = selectedItem?._opsKey || "";`
+- L1060: `const queueCounts = asArray(queueCenter.queue_counts);`
+- L1061: `const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));`
+- L1063: `root.innerHTML = renderQueueCenterLayout({`
+- L1066: `queueCenter,`
+- L1067: `session,`
+- L1070: `queueCounts,`
+- L1074: `const rerender = () => renderQueueCenter(context, context.getState(), projectName);`
+- L1075: `const refreshQueueCenter = () => {`
+
+## Execution / Mutation Signals
+- L1: `import { getSharedHandoff } from "../shared-context.js";`
+- L45: `if (["high", "warning", "pending", "queued", "running", "due_soon", "ready"].includes(normalized)) return "warning";`
+- L46: `if (["success", "approved", "published", "completed", "healthy"].includes(normalized)) return "success";`
+- L197: `prompt: \`Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.\``
+- L227: `prompt: \`Review Job Monitor for ${projectLabel}. Prioritize failures, retry risk, and health issues, then explain what should be inspected first.\``
+- L237: `prompt: \`Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.\``
+- L251: `prompt: \`Review ${itemLabel} in Notification Center for ${projectLabel}. Explain what it means, what risk it creates, and which page or team should act next.\``
+- L267: `function buildExecutiveRuntimeSignals(context) {`
+- L277: `const runningJobs = Number(jobMonitor.running_count || 0);`
+- L286: `const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";`
+- L287: `const runtimeLabel = failedJobs || criticalAlerts`
+- L289: `: runningJobs || queueItems || activeTasks`
+- L295: `label: "Runtime",`
+- L296: `value: runtimeLabel,`
+- L297: `helper: failedJobs || criticalAlerts ? "Failures or critical alerts detected" : "No critical runtime issue detected",`
+- L298: `tone: runtimeTone,`
+- L360: `function renderExecutiveRuntimeStrip(context, options = {}) {`
+- L361: `const signals = buildExecutiveRuntimeSignals(context);`
+- L362: `const kicker = asString(options.kicker) || "System Runtime";`
+- L365: `|| "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";`
+- L378: `<div class="ops-runtime-signal-grid mhos-os-attention-grid">`
+- L380: `<button class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">`
+- L446: `const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");`
+- L454: `<p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>`
+- L467: `{ label: "Created", value: createdAt ? formatDateTime(createdAt) : "Not set" }`
+- L501: `: "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";`
+- L507: `\`Assignee: ${selectedItem.assignee || selectedItem.owner || "-"}\`,`
+- L540: `${renderExecutiveRuntimeStrip(context, {`
+- L541: `kicker: "System Runtime",`
+- L586: `<strong>${escapeHtml(item.assignee || item.owner || "-")}</strong>`
+- L587: `<span>${escapeHtml(titleCase(item.assignee_role || item.owner_role || "-"))}</span>`
+- L622: `{ label: "Assignee", value: selectedItem.assignee || selectedItem.owner || "-" },`
+- L623: `{ label: "Owner role", value: titleCase(selectedItem.assignee_role || selectedItem.owner_role || "-") },`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L649: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>`
+- L650: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>`
+- L652: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>`
+- L653: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>`
+- L662: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>`
+- L707: `items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);`
+- L760: `root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L852: `const totalRunning = items.filter((item) => asString(item.status) === "running").length;`
+- L879: `<td>${escapeHtml(item.assignee || "-")}</td>`
+- L882: `<td>${escapeHtml(formatDateTime(item.updated_at || item.created_at))}</td>`
+- L895: `<p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>`
+- L902: `<span class="std-context-chip mhos-os-chip"><span>Running</span><strong>${escapeHtml(formatCount(totalRunning))}</strong></span>`
+- L911: `${renderExecutiveRuntimeStrip(context, {`
+- L912: `kicker: "System Runtime",`
+- L914: `description: "Supporting cross-center runtime and queue pressure context.",`
+- L939: `<input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">`
+- L948: `["Queue", "Item", "Assignee", "Priority", "Status", "Updated", "Route"],`
+- L972: `{ label: "Assignee", value: selectedItem.assignee || "-" },`
+- L975: `{ label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) },`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L1003: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>`
+- L1004: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (disabled: Governance/Publishing-owned)</button>`
+- L1015: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>`
+- L1055: `items = filterBySearch(items, session.search, ["title", "assignee", "queue_type", "status"]);`
+- L1170: `<td>${escapeHtml(formatCount(item.retry_count))}</td>`
+- L1173: `<td>${escapeHtml(formatDateTime(item.updated_at || item.created_at))}</td>`
+- L1184: `<p class="mhos-os-kicker">Runtime Execution Monitor</p>`
+- L1186: `<p class="std-context-description mhos-os-subtitle">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>`
+- L1190: `<span class="std-context-chip mhos-os-chip is-warning"><span>Running</span><strong>${escapeHtml(formatCount(jobMonitor.running_count))}</strong></span>`
+- L1191: `<span class="std-context-chip mhos-os-chip"><span>Completed</span><strong>${escapeHtml(formatCount(jobMonitor.completed_count))}</strong></span>`
+- L1201: `${renderExecutiveRuntimeStrip(context, {`
+- L1202: `kicker: "System Runtime",`
+- L1204: `description: "Supporting cross-center runtime and execution health context.",`
+- L1221: `{ value: "running", label: "Running", count: formatCount(jobMonitor.running_count) },`
+- L1223: `{ value: "completed", label: "Completed", count: formatCount(jobMonitor.completed_count) }`
+- L1238: `["Kind", "Job", "Owner", "Retries", "Health", "Status", "Updated", "Route"],`
+- L1251: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>`
+- L1263: `{ label: "Retries", value: formatCount(selectedItem.retry_count) },`
+- L1266: `{ label: "Updated", value: formatDateTime(selectedItem.updated_at || selectedItem.created_at) }`
+- L1277: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>`
+- L1295: `\`).join("") : \`<div class="empty-box">Execution logs will appear here as jobs run.</div>\`}`
+- L1298: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>`
+- L1300: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (disabled: backend worker-control safety pass)</button>`
+- L1301: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>`
+- L1310: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>`
+- L1445: `created_at: asString(item.created_at),`
+- L1459: `if (id.startsWith("governance-approval-")) {`
+- L1486: `<button class="btn btn-primary" type="button" data-governance-decision="approved" data-approval-id="${escapeHtml(approvalId)}">Approve</button>`
+- L1487: `<button class="btn btn-secondary" type="button" data-governance-decision="rejected" data-approval-id="${escapeHtml(approvalId)}">Reject</button>`
+- L1516: `created_at: asString(item.created_at),`
+- L1521: `const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: "sync" }));`
+- L1531: `...syncAlerts,`
+- L1595: `<td>${escapeHtml(formatDateTime(item.created_at))}</td>`
+- L1608: `<p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>`
+- L1623: `${renderExecutiveRuntimeStrip(context, {`
+- L1624: `kicker: "System Runtime",`
+- L1626: `description: "Supporting cross-center runtime and urgency signal context.",`
+- L1636: `<p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>`
+- L1661: `["Severity", "Signal", "Source", "Created", "Route"],`
+- L1686: `{ label: "Created", value: formatDateTime(selectedItem.created_at) },`
+- L1698: `<p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>`
+- L1704: `${selectedItem?.notification_id ? \`<button class="btn btn-secondary" type="button" data-mark-read="${escapeHtml(selectedItem.notification_id)}" title="Updates notification read-state only. Does not acknowledge, resolve, dismiss, delete, send, approve, publish, or execute.">Mark Read (read-state only)</button>\` : ""}`
+- L1723: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>`
+- L1725: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>`
+- L1734: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>`
+- L1799: `button.onclick = async () => {`
+- L1807: `context.showError?.(error.message || "Failed to update notification.");`
+- L1812: `button.onclick = async () => {`
+- L1842: `button.onclick = async () => {`
+- L1851: `const confirmed = window.confirm(\`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.\`);`
+- L1881: `context.showError?.(error.message || "Failed to update approval.");`
+- L1976: `description: "Review queue pressure and route workflow, content, media, approval, publishing, and sync items to owning workspaces without silent mutation."`
+- L2024: `description: "Review job health, failures, retry risk, and execution logs across workflows, media, and publishing without silent job mutation."`
+- L2147: `kicker: "Runtime",`
+- L2149: `description: "Monitor job status, failures, completed runs, and runtime signals.",`
+- L2181: `${renderExecutiveRuntimeStrip(context, {`
+- L2184: `description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",`
+- L2199: `<div class="ops-runtime-signal-grid mhos-os-attention-grid">`
+- L2201: `<article class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft">`
+- L2223: `<p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>`
+- L2237: `<p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>`
+- L2241: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>`
+- L2242: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>`
+
+## Handoff Signals
+- L1: `import { getSharedHandoff } from "../shared-context.js";`
+- L402: `const route = asString(item?.route?.route || item?.route || item?.route_target);`
+- L428: `function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {`
+- L429: `if (!incomingHandoff) return "";`
+- L431: `const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");`
+- L433: `incomingHandoff.title ||`
+- L434: `incomingHandoff.summary ||`
+- L435: `incomingHandoff.payload?.title ||`
+- L436: `incomingHandoff.payload?.summary ||`
+- L437: `"Incoming task handoff"`
+- L440: `incomingHandoff.description ||`
+- L441: `incomingHandoff.payload?.description ||`
+- L442: `incomingHandoff.payload?.handoff_intent ||`
+- L443: `incomingHandoff.payload?.prompt ||`
+- L444: `"Review-only handoff prepared by another MH-OS surface."`
+- L446: `const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");`
+- L449: `<section class="panel ops-incoming-handoff mhos-clean-surface">`
+- L452: `<div class="panel-kicker">Incoming Handoff</div>`
+- L453: `<h3>Incoming Review-Only Task Handoff</h3>`
+- L454: `<p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>`
+- L471: `<button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>`
+- L488: `incomingHandoff`
+- L606: `${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}`
+- L718: `const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);`
+- L730: `incomingHandoff`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L778: `const text = incomingHandoff`
+- L780: `"Incoming Review-Only Task Handoff",`
+- L781: `\`Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}\`,`
+- L782: `\`Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}\`,`
+- L783: `\`Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}\`,`
+- L786: `: "No incoming task handoff.";`
+- L800: `context.showMessage?.("Incoming handoff summary copied.");`
+- L802: `context.showError?.("Failed to copy incoming handoff summary.");`
+- L2193: `<p class="mhos-os-kicker">Routing Handoff</p>`
+- L2195: `<p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>`
+- L2222: `<h3 class="mhos-os-panel-title">Operations Lead handoff</h3>`
+
+## AI Signals
+- L44: `if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";`
+- L95: `function savePromptToQuickCommand(context, prompt) {`
+- L98: `input.value = prompt;`
+- L118: `function bindOpsAssistantButtons(root, context, prompts) {`
+- L119: `Array.from(root.querySelectorAll("[data-ops-ai-open]")).forEach((button) => {`
+- L121: `context.navigateTo("ai-command");`
+- L122: `context.showMessage?.("Opened AI Command.");`
+- L126: `Array.from(root.querySelectorAll("[data-ops-ai-prompt]")).forEach((button) => {`
+- L128: `const index = Number(button.getAttribute("data-ops-ai-prompt"));`
+- L129: `const prompt = prompts[index];`
+- L130: `if (!prompt) return;`
+- L131: `savePromptToQuickCommand(context, prompt.prompt);`
+- L132: `context.navigateTo("ai-command");`
+- L133: `context.showMessage?.("Operations prompt added to AI Command.");`
+- L155: `function renderOpsDetailRows(rows, escapeHtml) {`
+- L157: `<div class="ops-detail-grid">`
+- L159: `<div class="ops-detail-card">`
+- L168: `function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel) {`
+- L177: `prompt: \`Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.\``
+- L181: `preview: "Explain how to unblock the current task and who should act next.",`
+- L182: `prompt: \`Review ${itemLabel} in Task Center for ${projectLabel}. Explain what is blocking progress, who should act next, and the fastest unblock path.\``
+- L187: `prompt: \`Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.\``
+- L190: `label: "Explain owner workload",`
+- L191: `preview: "Explain workload concentration by owner and likely bottlenecks.",`
+- L192: `prompt: \`Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.\``
+- L197: `prompt: \`Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.\``
+- L207: `prompt: \`Review Queue Center for ${projectLabel}. Which queue needs attention first, why, and what should be routed next?\``
+- L211: `preview: "Explain what the selected queue item likely needs next.",`
+- L212: `prompt: \`Review ${itemLabel} in Queue Center for ${projectLabel}. Explain what it likely needs next and which workspace should own it.\``
+- L217: `prompt: \`Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.\``
+- L225: `label: "Triage failures",`
+- L226: `preview: "Summarize failure risk and what to inspect first.",`
+- L227: `prompt: \`Review Job Monitor for ${projectLabel}. Prioritize failures, retry risk, and health issues, then explain what should be inspected first.\``
+- L231: `preview: "Explain what the selected job status implies operationally.",`
+- L232: `prompt: \`Review ${itemLabel} in Job Monitor for ${projectLabel}. Explain what the current job state implies, what likely happened, and what should be checked next.\``
+- L237: `prompt: \`Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.\``
+- L246: `prompt: \`Review Notification Center for ${projectLabel}. Rank current alerts by urgency, explain what matters most, and identify what should be handled first.\``
+- L250: `preview: "Explain what the selected alert means and where to go next.",`
+- L251: `prompt: \`Review ${itemLabel} in Notification Center for ${projectLabel}. Explain what it means, what risk it creates, and which page or team should act next.\``
+- L256: `prompt: \`Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.\``
+- L276: `const failedJobs = Number(jobMonitor.failed_count || 0);`
+- L284: `const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;`
+- L286: `const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";`
+- L287: `const runtimeLabel = failedJobs || criticalAlerts`
+- L297: `helper: failedJobs || criticalAlerts ? "Failures or critical alerts detected" : "No critical runtime issue detected",`
+- L309: `label: "Failed Jobs",`
+- L310: `value: formatCount(failedJobs),`
+- L312: `tone: failedJobs ? "danger" : "success",`
+- L344: `label: "Claim Risk",`
+- L345: `value: formatCount(claimAlerts),`
+- L347: `tone: claimAlerts ? "danger" : "success",`
+- L365: `|| "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";`
+- L443: `incomingHandoff.payload?.prompt ||`
+- L446: `const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");`
+- L458: `<div class="ops-detail-stack">`
+- L459: `<div class="ops-detail-summary">`
+- L463: `${renderOpsDetailRows([`
+- L472: `<button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace for Review</button>`
+- L487: `prompts,`
+- L501: `: "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";`
+- L520: `<div class="std-context-main mhos-os-header-main">`
+- L548: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L551: `<p class="mhos-os-kicker">Main View</p>`
+- L567: `<input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">`
+- L582: `<span>${escapeHtml(item.description || item.service_domain || "-")}</span>`
+- L605: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L607: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L612: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>`
+- L616: `<div class="ops-detail-stack">`
+- L617: `<div class="ops-detail-summary">`
+- L619: `<p>${escapeHtml(selectedItem.description || "No task description available.")}</p>`
+- L621: `${renderOpsDetailRows([`
+- L628: `{ label: "Domain", value: titleCase(selectedItem.service_domain || "-") },`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L644: `<button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>`
+- L657: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L660: `<p class="mhos-os-kicker">AI Panel</p>`
+- L661: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L662: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>`
+- L666: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>`
+- L669: `${prompts.map((item, index) => \``
+- L670: `<button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">`
+- L671: `<span class="ops-prompt-title">${escapeHtml(item.label)}</span>`
+- L672: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L707: `items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);`
+- L717: `const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));`
+- L729: `prompts,`
+- L749: `session.errorMessage = \`Task Center: ${error?.message || "Failed to refresh."}\`;`
+- L759: `root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);`
+- L765: `await navigator.clipboard.writeText(text);`
+- L773: `context.showError?.("Failed to copy task summary.");`
+- L783: `\`Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}\`,`
+- L790: `await navigator.clipboard.writeText(text);`
+- L802: `context.showError?.("Failed to copy incoming handoff summary.");`
+- L824: `bindOpsAssistantButtons(root, context, prompts);`
+- L835: `prompts`
+- L846: `: "No queue items are available for this project yet. Use Refresh or adjust project context to load current queues.";`
+- L876: `<span>${escapeHtml(item.details?.summary || item.entity_type || "-")}</span>`
+- L891: `<div class="std-context-main mhos-os-header-main">`
+- L919: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L922: `<p class="mhos-os-kicker">Main View</p>`
+- L955: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L956: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L961: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>`
+- L965: `<div class="ops-detail-stack">`
+- L966: `<div class="ops-detail-summary">`
+- L968: `<p>${escapeHtml(selectedItem.details?.summary || selectedItem.entity_type || "No queue summary available.")}</p>`
+- L970: `${renderOpsDetailRows([`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L1010: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L1013: `<p class="mhos-os-kicker">AI Panel</p>`
+- L1014: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1015: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>`
+- L1019: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>`
+- L1022: `${prompts.map((item, index) => \``
+- L1023: `<button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">`
+- L1024: `<span class="ops-prompt-title">${escapeHtml(item.label)}</span>`
+- L1025: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L1061: `const prompts = buildOpsAssistantPrompts("queue-center", projectName, selectedItem, titleCase(session.focus || "all queues"));`
+- L1071: `prompts`
+- L1090: `session.errorMessage = \`Queue Center: ${error?.message || "Failed to refresh."}\`;`
+- L1120: `bindOpsAssistantButtons(root, context, prompts);`
+- L1130: `prompts`
+- L1141: `: "No jobs are available for this project yet. Use Refresh or adjust project context to load current execution state.";`
+- L1182: `<div class="std-context-main mhos-os-header-main">`
+- L1186: `<p class="std-context-description mhos-os-subtitle">Review running, completed, and failed job state across workflows, media, and publishing for ${escapeHtml(projectLabel)} without triggering workers.</p>`
+- L1192: `<span class="std-context-chip mhos-os-chip is-danger"><span>Failed</span><strong>${escapeHtml(formatCount(jobMonitor.failed_count))}</strong></span>`
+- L1209: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L1212: `<p class="mhos-os-kicker">Main View</p>`
+- L1214: `<p class="mhos-os-section-copy">Filter by job status and kind to review active and failed work without changing lifecycle state.</p>`
+- L1222: `{ value: "failed", label: "Failed", count: formatCount(jobMonitor.failed_count) },`
+- L1245: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L1246: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L1251: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>`
+- L1255: `<div class="ops-detail-stack">`
+- L1256: `<div class="ops-detail-summary">`
+- L1260: `${renderOpsDetailRows([`
+- L1277: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>`
+- L1305: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L1308: `<p class="mhos-os-kicker">AI Panel</p>`
+- L1309: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1310: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No retry, cancel, rerun, delete, worker trigger, approve, publish, Governance bypass, or backend execution is performed.</p>`
+- L1314: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Job Context</button>`
+- L1317: `${prompts.map((item, index) => \``
+- L1318: `<button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">`
+- L1319: `<span class="ops-prompt-title">${escapeHtml(item.label)}</span>`
+- L1320: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L1355: `const prompts = buildOpsAssistantPrompts("job-monitor", projectName, selectedItem, titleCase(session.focus || "all jobs"));`
+- L1364: `prompts`
+- L1383: `session.errorMessage = \`Job Monitor: ${error?.message || "Failed to refresh."}\`;`
+- L1413: `bindOpsAssistantButtons(root, context, prompts);`
+- L1427: `message: "Provider readiness check is currently failing.",`
+- L1521: `const syncAlerts = asArray(notificationCenter.sync_failure_alerts).map((item) => ({ ...item, item_type: "sync" }));`
+- L1528: `const claimAlerts = asArray(notificationCenter.claim_risk_alerts).map((item) => ({ ...item, item_type: "claim" }));`
+- L1535: `...claimAlerts,`
+- L1556: `const prompts = buildOpsAssistantPrompts("notification-center", projectName, selectedItem, titleCase(session.focus || "all"));`
+- L1567: `: "No notifications are available for this project yet. Use Refresh or adjust project context to load current signals.";`
+- L1604: `<div class="std-context-main mhos-os-header-main">`
+- L1608: `<p class="std-context-description mhos-os-subtitle">Review operational alerts, unread inbox state, approvals, sync issues, publishing, claim risk, provider health, and workflow completion for ${escapeHtml(projectLabel)}.</p>`
+- L1631: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L1634: `<p class="mhos-os-kicker">Main View</p>`
+- L1668: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L1669: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L1674: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>`
+- L1678: `<div class="ops-detail-stack">`
+- L1679: `<div class="ops-detail-summary">`
+- L1681: `<p>${escapeHtml(selectedItem.message || selectedItem.body || "No notification detail available.")}</p>`
+- L1683: `${renderOpsDetailRows([`
+- L1698: `<p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>`
+- L1717: `<strong>${escapeHtml("Claim risk")}</strong>`
+- L1718: `<span>${escapeHtml(\`${formatCount(claimAlerts.length)} alerts\`)}</span>`
+- L1729: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L1732: `<p class="mhos-os-kicker">AI Panel</p>`
+- L1733: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1734: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No mark-read, acknowledge, resolve, dismiss, delete, send, approve, publish, Governance bypass, or backend execution is performed.</p>`
+- L1738: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Notification Context</button>`
+- L1741: `${prompts.map((item, index) => \``
+- L1742: `<button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">`
+- L1743: `<span class="ops-prompt-title">${escapeHtml(item.label)}</span>`
+- L1744: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L1771: `session.errorMessage = \`Notification Center: ${error?.message || "Failed to refresh."}\`;`
+- L1803: `await context.markProjectNotification(projectName, notificationId, { status: "read", read: true });`
+- L1804: `await context.reloadProjectData?.(projectName);`
+- L1807: `context.showError?.(error.message || "Failed to update notification.");`
+- L1817: `context.showError?.("Governance refresh is unavailable for this project.");`
+- L1822: `const liveGovernance = await context.fetchProjectGovernance(projectName);`
+- L1837: `context.showError?.(error.message || "Failed to refresh governance approvals.");`
+- L1847: `context.showError?.("Governance decision is unavailable for this notification.");`
+- L1855: `await context.decideProjectApproval(projectName, approvalId, {`
+- L1864: `const liveGovernance = await context.fetchProjectGovernance(projectName);`
+- L1878: `await context.reloadProjectData?.(projectName);`
+- L1881: `context.showError?.(error.message || "Failed to update approval.");`
+- L1886: `bindOpsAssistantButtons(root, context, prompts);`
+- L1962: `context.showError?.(\`Task Center: ${error?.message || "Failed to load live data."}\`);`
+- L2008: `session.errorMessage = \`Queue Center: ${error?.message || "Failed to load live data."}\`;`
+- L2024: `description: "Review job health, failures, retry risk, and execution logs across workflows, media, and publishing without silent job mutation."`
+- L2056: `session.errorMessage = \`Job Monitor: ${error?.message || "Failed to load live data."}\`;`
+- L2072: `description: "Review alerts, unread inbox state, approvals, provider health, publishing, claim risks, and workflow completion signals with Mark Read limited to notification read-state."`
+- L2104: `session.errorMessage = \`Notification Center: ${error?.message || "Failed to load live data."}\`;`
+- L2133: `description: "Review generated tasks, owners, priorities, and execution readiness.",`
+- L2141: `description: "Inspect queued jobs, waiting work, and operational pressure.",`
+- L2149: `description: "Monitor job status, failures, completed runs, and runtime signals.",`
+- L2166: `<div class="mhos-os-header-main">`
+- L2168: `<p class="mhos-os-kicker">AI Operations Execution</p>`
+- L2184: `description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",`
+- L2189: `<div class="ops-main-column mhos-os-main">`
+- L2195: `<p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>`
+- L2217: `<aside class="ops-right-rail mhos-os-rail">`
+- L2218: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L2221: `<p class="mhos-os-kicker">AI Team Connection</p>`
+- L2223: `<p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>`
+- L2227: `<button class="btn btn-secondary" type="button" data-ops-route="ai-command" data-ops-label="AI Team">Open AI Team</button>`
+- L2261: `description: "Routing-only overview for Task Center, Queue Center, Job Monitor, Notifications, AI Team, and Workflows."`
+
+## Confirmation Signals
+- L1851: `const confirmed = window.confirm(\`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.\`);`
+
+## Access-Key / Credential Signals
+- none
+
+## Save / Storage Signals
+- L95: `function savePromptToQuickCommand(context, prompt) {`
+- L131: `savePromptToQuickCommand(context, prompt.prompt);`
+- L764: `if (navigator?.clipboard?.writeText) {`
+- L765: `await navigator.clipboard.writeText(text);`
+- L789: `if (navigator?.clipboard?.writeText) {`
+- L790: `await navigator.clipboard.writeText(text);`
+- L1851: `const confirmed = window.confirm(\`Confirm Governance decision\n\nAction: ${titleCase(decision)} approval ${approvalId}.\nRisk: This updates a durable Governance approval record. It does not publish, send, or execute anything directly.\n\nSelect Cancel to review before deciding.\`);`
+- L2184: `description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",`
+- L2195: `<p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>`
+- L2241: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>`
+
+## Navigation Signals
+- L72: `function bindRouteButtons(root, context) {`
+- L73: `Array.from(root.querySelectorAll("[data-ops-route]")).forEach((button) => {`
+- L75: `const route = button.getAttribute("data-ops-route") || "home";`
+- L77: `context.navigateTo(route);`
+- L121: `context.navigateTo("ai-command");`
+- L132: `context.navigateTo("ai-command");`
+- L207: `prompt: \`Review Queue Center for ${projectLabel}. Which queue needs attention first, why, and what should be routed next?\``
+- L299: `route: "job-monitor"`
+- L306: `route: "queue-center"`
+- L313: `route: "job-monitor"`
+- L320: `route: "notification-center"`
+- L327: `route: "notification-center"`
+- L334: `route: "publishing"`
+- L341: `route: "integrations"`
+- L348: `route: "governance"`
+- L355: `route: "notification-center"`
+- L380: `<button class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">`
+- L401: `function renderRouteAction(item, escapeHtml, label = "Open") {`
+- L402: `const route = asString(item?.route?.route || item?.route || item?.route_target);`
+- L403: `if (!route) return "";`
+- L405: `return \`<button class="btn btn-secondary btn-sm" type="button" data-ops-route="${escapeHtml(route)}" data-ops-label="${escapeHtml(asString(item?.title || item?.name || label))}">${escapeHtml(label)}</button>\`;`
+- L524: `<p class="std-context-description mhos-os-subtitle">Review ownership, due-state, linked entities, and safe route-aware follow-up for ${escapeHtml(projectLabel)}.</p>`
+- L576: `["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],`
+- L597: `<td>${renderRouteAction(item, escapeHtml)}</td>`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L645: `${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}`
+- L823: `bindRouteButtons(root, context);`
+- L883: `<td>${renderRouteAction(item, escapeHtml)}</td>`
+- L924: `<p class="mhos-os-section-copy">Review queue pressure by type and status, then route each item to its owning workspace for controlled action.</p>`
+- L948: `["Queue", "Item", "Assignee", "Priority", "Status", "Updated", "Route"],`
+- L961: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L992: `${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Workspace") : ""}`
+- L1119: `bindRouteButtons(root, context);`
+- L1174: `<td>${renderRouteAction(item, escapeHtml)}</td>`
+- L1238: `["Kind", "Job", "Owner", "Retries", "Health", "Status", "Updated", "Route"],`
+- L1251: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect owner, execution health, retry state, and route context before routing." : "Choose a job from the table to inspect details.")}</p>`
+- L1277: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>`
+- L1282: `${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Job Owning Context") : ""}`
+- L1292: `${renderRouteAction(item, escapeHtml, "Open")}`
+- L1412: `bindRouteButtons(root, context);`
+- L1429: `route: { route: "integrations" }`
+- L1443: `route: "governance",`
+- L1444: `route_label: "governance",`
+- L1518: `route: asObject(item.linked_entity).route || "home",`
+- L1596: `<td>${renderRouteAction(item, escapeHtml)}</td>`
+- L1636: `<p class="mhos-os-section-copy">${escapeHtml(session.focus === "inbox" ? "Review durable inbox history. Mark Read updates read-state only where a backend notification id exists." : "Review route-aware alerts, then inspect the selected signal before routing or follow-up.")}</p>`
+- L1661: `["Severity", "Signal", "Source", "Created", "Route"],`
+- L1674: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review source, severity, timing, and owning route before follow-up." : "Choose an alert or inbox item to inspect details.")}</p>`
+- L1687: `{ label: "Route", value: selectedItem.route?.route || selectedItem.route || "-" }`
+- L1698: `<p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>`
+- L1703: `${selectedItem ? renderRouteAction(selectedItem, escapeHtml, "Open Owning Source Page") : ""}`
+- L1885: `bindRouteButtons(root, context);`
+- L1935: `export const taskCenterRoute = {`
+- L1970: `export const queueCenterRoute = {`
+- L1976: `description: "Review queue pressure and route workflow, content, media, approval, publishing, and sync items to owning workspaces without silent mutation."`
+- L2018: `export const jobMonitorRoute = {`
+- L2066: `export const notificationCenterRoute = {`
+- L2129: `route: "task-center",`
+- L2137: `route: "queue-center",`
+- L2145: `route: "job-monitor",`
+- L2153: `route: "notification-center",`
+- L2170: `<p class="std-context-description mhos-os-subtitle">Route tasks, queues, job health, and notification signals for ${context.escapeHtml(projectName)} into the right operational workspace.</p>`
+- L2185: `badge: "Composite route"`
+- L2195: `<p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>`
+- L2207: `<button class="btn btn-secondary" type="button" data-ops-route="${context.escapeHtml(center.route)}" data-ops-label="${context.escapeHtml(center.title)}">`
+- L2223: `<p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>`
+- L2227: `<button class="btn btn-secondary" type="button" data-ops-route="ai-command" data-ops-label="AI Team">Open AI Team</button>`
+- L2228: `<button class="btn btn-ghost" type="button" data-ops-route="workflows" data-ops-label="Workflows">Open Workflows</button>`
+- L2237: `<p class="mhos-os-panel-copy">This overview does not execute jobs, mutate tasks, send notifications, approve workflows, mark notifications read, publish, or trigger workers. It only routes to the owning workspace.</p>`
+- L2252: `bindRouteButtons(root, context);`
+- L2255: `export const operationsCentersRoute = {`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L44: `if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";`
+- L176: `preview: "Review the current task backlog and identify the highest-impact next work.",`
+- L177: `prompt: \`Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.\``
+- L181: `preview: "Explain how to unblock the current task and who should act next.",`
+- L186: `preview: "Highlight where task load or due-state suggests operational risk.",`
+- L187: `prompt: \`Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.\``
+- L191: `preview: "Explain workload concentration by owner and likely bottlenecks.",`
+- L196: `preview: "Identify highest-risk overdue items and likely downstream impact.",`
+- L206: `preview: "Identify which queue needs attention first and why.",`
+- L211: `preview: "Explain what the selected queue item likely needs next.",`
+- L216: `preview: "Surface recurring queue patterns slowing execution.",`
+- L226: `preview: "Summarize failure risk and what to inspect first.",`
+- L231: `preview: "Explain what the selected job status implies operationally.",`
+- L236: `preview: "Assess execution health across workflows, media, and publishing jobs.",`
+- L245: `preview: "Sort current notifications by severity and action urgency.",`
+- L250: `preview: "Explain what the selected alert means and where to go next.",`
+- L255: `preview: "Turn the current notification stream into a short operations summary.",`
+- L529: `<span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>`
+- L561: `{ value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L649: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update status (disabled: future mutation safety pass)</button>`
+- L650: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Reassign owner (disabled: future mutation safety pass)</button>`
+- L651: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Change priority (disabled: future mutation safety pass)</button>`
+- L652: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Update due date (disabled: future mutation safety pass)</button>`
+- L653: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>`
+- L672: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L709: `if (session.focus === "blocked") items = items.filter((item) => asString(item.status) === "blocked");`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L1003: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>`
+- L1004: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Approve item (disabled: Governance/Publishing-owned)</button>`
+- L1005: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Publish item (disabled: Publishing-owned and Governance-gated)</button>`
+- L1006: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Remove item (disabled: future destructive mutation safety pass)</button>`
+- L1025: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L1277: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Job retry, cancel, rerun, delete, worker execution, publishing, and approval mutations remain disabled or destination-owned.</p>`
+- L1298: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry job (disabled: future mutation safety pass)</button>`
+- L1299: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Cancel job (disabled: future destructive mutation safety pass)</button>`
+- L1300: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Rerun job (disabled: backend worker-control safety pass)</button>`
+- L1301: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>`
+- L1320: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L1437: `message: asString(item.summary) || "Approval requires review.",`
+- L1698: `<p class="mhos-os-panel-copy">Active actions are refresh, route, AI guidance, and Mark Read only where supported. Lifecycle controls remain disabled until backend mutation safety checks are approved.</p>`
+- L1722: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Acknowledge notification (disabled: future lifecycle mutation safety pass)</button>`
+- L1723: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Resolve notification (disabled: future incident-resolution safety pass)</button>`
+- L1724: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Dismiss notification (disabled: future visibility mutation safety pass)</button>`
+- L1725: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>`
+- L1744: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L2184: `description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",`
+- L2195: `<p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>`
+- L2241: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: create task from draft — future task mutation safety pass</button>`
+- L2242: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: execute workflow — future workflow execution safety pass</button>`
+- L2243: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Planned disabled: acknowledge signal — future notification lifecycle mutation safety pass</button>`
+
+## Risky Terms
+- L1: `import { getSharedHandoff } from "../shared-context.js";`
+- L2: `const taskSessions = new Map();`
+- L5: `const notificationSessions = new Map();`
+- L44: `if (["critical", "failed", "blocked", "overdue"].includes(normalized)) return "danger";`
+- L45: `if (["high", "warning", "pending", "queued", "running", "due_soon", "ready"].includes(normalized)) return "warning";`
+- L46: `if (["success", "approved", "published", "completed", "healthy"].includes(normalized)) return "success";`
+- L86: `item?.task_id ||`
+- L89: `item?.notification_id ||`
+- L95: `function savePromptToQuickCommand(context, prompt) {`
+- L98: `input.value = prompt;`
+- L118: `function bindOpsAssistantButtons(root, context, prompts) {`
+- L119: `Array.from(root.querySelectorAll("[data-ops-ai-open]")).forEach((button) => {`
+- L121: `context.navigateTo("ai-command");`
+- L122: `context.showMessage?.("Opened AI Command.");`
+- L126: `Array.from(root.querySelectorAll("[data-ops-ai-prompt]")).forEach((button) => {`
+- L128: `const index = Number(button.getAttribute("data-ops-ai-prompt"));`
+- L129: `const prompt = prompts[index];`
+- L130: `if (!prompt) return;`
+- L131: `savePromptToQuickCommand(context, prompt.prompt);`
+- L132: `context.navigateTo("ai-command");`
+- L133: `context.showMessage?.("Operations prompt added to AI Command.");`
+- L155: `function renderOpsDetailRows(rows, escapeHtml) {`
+- L157: `<div class="ops-detail-grid">`
+- L159: `<div class="ops-detail-card">`
+- L168: `function buildOpsAssistantPrompts(pageKey, projectName, selectedItem, focusLabel) {`
+- L172: `if (pageKey === "task-center") {`
+- L176: `preview: "Review the current task backlog and identify the highest-impact next work.",`
+- L177: `prompt: \`Review the current task backlog for ${projectLabel}. Prioritize the next work based on blocked items, due-state, ownership, and operational impact.\``
+- L180: `label: "Unblock selected task",`
+- L181: `preview: "Explain how to unblock the current task and who should act next.",`
+- L182: `prompt: \`Review ${itemLabel} in Task Center for ${projectLabel}. Explain what is blocking progress, who should act next, and the fastest unblock path.\``
+- L186: `preview: "Highlight where task load or due-state suggests operational risk.",`
+- L187: `prompt: \`Summarize execution risk in Task Center for ${projectLabel}. Focus on overdue, due soon, blocked, and ownership concentration risk.\``
+- L190: `label: "Explain owner workload",`
+- L191: `preview: "Explain workload concentration by owner and likely bottlenecks.",`
+- L192: `prompt: \`Review owner workload in Task Center for ${projectLabel}. Explain concentration risk, likely bottlenecks, and redistribution recommendations for the next cycle.\``
+- L197: `prompt: \`Identify overdue task risk for ${projectLabel}. Rank the most critical overdue items and explain likely downstream execution impact if unresolved.\``
+- L207: `prompt: \`Review Queue Center for ${projectLabel}. Which queue needs attention first, why, and what should be routed next?\``
+- L211: `preview: "Explain what the selected queue item likely needs next.",`
+- L212: `prompt: \`Review ${itemLabel} in Queue Center for ${projectLabel}. Explain what it likely needs next and which workspace should own it.\``
+- L217: `prompt: \`Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.\``
+- L225: `label: "Triage failures",`
+- L226: `preview: "Summarize failure risk and what to inspect first.",`
+- L227: `prompt: \`Review Job Monitor for ${projectLabel}. Prioritize failures, retry risk, and health issues, then explain what should be inspected first.\``
+- L231: `preview: "Explain what the selected job status implies operationally.",`
+- L232: `prompt: \`Review ${itemLabel} in Job Monitor for ${projectLabel}. Explain what the current job state implies, what likely happened, and what should be checked next.\``
+- L236: `preview: "Assess execution health across workflows, media, and publishing jobs.",`
+- L237: `prompt: \`Summarize current execution health for ${projectLabel} across workflows, media, and publishing jobs. Highlight failure clusters, retry patterns, and risk areas.\``
+- L245: `preview: "Sort current notifications by severity and action urgency.",`
+- L246: `prompt: \`Review Notification Center for ${projectLabel}. Rank current alerts by urgency, explain what matters most, and identify what should be handled first.\``
+- L250: `preview: "Explain what the selected alert means and where to go next.",`
+- L251: `prompt: \`Review ${itemLabel} in Notification Center for ${projectLabel}. Explain what it means, what risk it creates, and which page or team should act next.\``
+- L254: `label: "Summarize operational signal",`
+- L255: `preview: "Turn the current notification stream into a short operations summary.",`
+- L256: `prompt: \`Summarize the current operational notification signal for ${projectLabel} with focus on ${focusLabel}. Highlight approvals, provider health, publishing events, and urgent follow-up.\``
+- L264: `return asObject(asObject(state.data).operations);`
+- L267: `function buildExecutiveRuntimeSignals(context) {`
+- L269: `const taskCenter = asObject(ops.task_center);`
+- L272: `const notificationCenter = asObject(ops.notification_center);`
+- L274: `const activeTasks = Number(taskCenter.active_count || taskCenter.open_count || 0);`
+- L276: `const failedJobs = Number(jobMonitor.failed_count || 0);`
+- L277: `const runningJobs = Number(jobMonitor.running_count || 0);`
+- L278: `const criticalAlerts = Number(notificationCenter.critical_count || 0);`
+- L279: `const unreadNotifications = Number(notificationCenter.unread_count || 0);`
+- L281: `const providerAlerts = asArray(notificationCenter.provider_disconnect_alerts).length;`
+- L282: `const approvalAlerts = asArray(notificationCenter.approval_pending_alerts).length;`
+- L283: `const publishAlerts = asArray(notificationCenter.publish_alerts).length;`
+- L284: `const claimAlerts = asArray(notificationCenter.claim_risk_alerts).length;`
+- L286: `const runtimeTone = failedJobs || criticalAlerts ? "danger" : runningJobs || queueItems || activeTasks ? "warning" : "success";`
+- L287: `const runtimeLabel = failedJobs || criticalAlerts`
+- L289: `: runningJobs || queueItems || activeTasks`
+- L295: `label: "Runtime",`
+- L296: `value: runtimeLabel,`
+- L297: `helper: failedJobs || criticalAlerts ? "Failures or critical alerts detected" : "No critical runtime issue detected",`
+- L298: `tone: runtimeTone,`
+- L309: `label: "Failed Jobs",`
+- L310: `value: formatCount(failedJobs),`
+- L312: `tone: failedJobs ? "danger" : "success",`
+- L318: `helper: "Highest priority notifications",`
+- L320: `route: "notification-center"`
+- L323: `label: "Approvals",`
+- L324: `value: formatCount(approvalAlerts),`
+- L325: `helper: "Pending approval signals",`
+- L326: `tone: approvalAlerts ? "warning" : "success",`
+- L327: `route: "notification-center"`
+- L344: `label: "Claim Risk",`
+- L345: `value: formatCount(claimAlerts),`
+- L347: `tone: claimAlerts ? "danger" : "success",`
+- L352: `value: formatCount(unreadNotifications),`
+- L353: `helper: "Unread operational notifications",`
+- L354: `tone: unreadNotifications ? "warning" : "success",`
+- L355: `route: "notification-center"`
+- L360: `function renderExecutiveRuntimeStrip(context, options = {}) {`
+- L361: `const signals = buildExecutiveRuntimeSignals(context);`
+- L362: `const kicker = asString(options.kicker) || "System Runtime";`
+- L365: `|| "Cross-center runtime health, queue pressure, failures, publishing, governance, and provider signals.";`
+- L378: `<div class="ops-runtime-signal-grid mhos-os-attention-grid">`
+- L380: `<button class="ops-runtime-signal mhos-os-attention-card mhos-motion-soft" type="button" data-ops-route="${context.escapeHtml(signal.route)}" data-ops-label="${context.escapeHtml(signal.label)}">`
+- L428: `function renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml) {`
+- L429: `if (!incomingHandoff) return "";`
+- L431: `const source = asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown");`
+- L433: `incomingHandoff.title ||`
+- L434: `incomingHandoff.summary ||`
+- L435: `incomingHandoff.payload?.title ||`
+- L436: `incomingHandoff.payload?.summary ||`
+- L437: `"Incoming task handoff"`
+- L440: `incomingHandoff.description ||`
+- L441: `incomingHandoff.payload?.description ||`
+- L442: `incomingHandoff.payload?.handoff_intent ||`
+- L443: `incomingHandoff.payload?.prompt ||`
+- L444: `"Review-only handoff prepared by another MH-OS surface."`
+- L446: `const createdAt = asString(incomingHandoff.created_at || incomingHandoff.generatedAt || incomingHandoff.timestamp || "");`
+- L449: `<section class="panel ops-incoming-handoff mhos-clean-surface">`
+- L452: `<div class="panel-kicker">Incoming Handoff</div>`
+- L453: `<h3>Incoming Review-Only Task Handoff</h3>`
+- L454: `<p>Review-only context from ${escapeHtml(titleCase(source))}. No durable task is created automatically from this handoff.</p>`
+- L458: `<div class="ops-detail-stack">`
+- L459: `<div class="ops-detail-summary">`
+- L463: `${renderOpsDetailRows([`
+- L465: `{ label: "Destination", value: "Task Center" },`
+- L471: `<button class="btn btn-secondary" type="button" id="taskCenterCopyHandoffBtn">Copy Handoff Summary</button>`
+- L472: `<button class="btn btn-ghost" type="button" data-ops-ai-open>Open AI Workspace for Review</button>`
+- L479: `function renderTaskCenterLayout({`
+- L482: `taskCenter,`
+- L487: `prompts,`
+- L488: `incomingHandoff`
+- L500: `? "No tasks match the current filters."`
+- L501: `: "No tasks are available for this project yet. Use Refresh or adjust project context to load latest assignments.";`
+- L505: `selectedItem.title || "Task",`
+- L512: `: "No task is selected.";`
+- L517: `<section class="page is-active" data-page="task-center">`
+- L520: `<div class="std-context-main mhos-os-header-main">`
+- L522: `<p class="mhos-os-kicker">Operational Task Review</p>`
+- L523: `<h3 class="std-context-title mhos-os-title">Task Center</h3>`
+- L526: `<div class="std-context-metrics mhos-os-chip-row" aria-label="Task Center metrics">`
+- L527: `<span class="std-context-chip mhos-os-chip"><span>Total</span><strong>${escapeHtml(formatCount(taskCenter.total))}</strong></span>`
+- L528: `<span class="std-context-chip mhos-os-chip"><span>Open</span><strong>${escapeHtml(formatCount(taskCenter.open_count))}</strong></span>`
+- L529: `<span class="std-context-chip mhos-os-chip is-warning"><span>Blocked</span><strong>${escapeHtml(formatCount(taskCenter.blocked_count))}</strong></span>`
+- L530: `<span class="std-context-chip mhos-os-chip is-danger"><span>Overdue</span><strong>${escapeHtml(formatCount(taskCenter.overdue_count))}</strong></span>`
+- L531: `<span class="std-context-chip mhos-os-chip is-warning"><span>Due Soon</span><strong>${escapeHtml(formatCount(taskCenter.due_soon_count))}</strong></span>`
+- L536: `<button class="btn btn-secondary std-context-btn" type="button" id="taskCenterRefreshBtn">Refresh</button>`
+- L540: `${renderExecutiveRuntimeStrip(context, {`
+- L541: `kicker: "System Runtime",`
+- L548: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L551: `<p class="mhos-os-kicker">Main View</p>`
+- L552: `<h3 class="mhos-os-section-title">Operational task backlog</h3>`
+- L553: `<p class="mhos-os-section-copy">Filter by focus, owner, source, and priority to review task risk quickly.</p>`
+- L559: `{ value: "all", label: "All Tasks", count: formatCount(taskCenter.total) },`
+- L560: `{ value: "open", label: "Open", count: formatCount(taskCenter.open_count) },`
+- L561: `{ value: "blocked", label: "Blocked", count: formatCount(taskCenter.blocked_count) },`
+- L562: `{ value: "overdue", label: "Overdue", count: formatCount(taskCenter.overdue_count) },`
+- L563: `{ value: "due_soon", label: "Due Soon", count: formatCount(taskCenter.due_soon_count) }`
+- L567: `<input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">`
+- L568: `<select id="taskCenterPriority" class="sidebar-select">${renderFilterOptions(filters.priorities, session.priority, escapeHtml, "All priorities")}</select>`
+- L569: `<select id="taskCenterOwner" class="sidebar-select">${renderFilterOptions(filters.owners, session.owner, escapeHtml, "All owners")}</select>`
+- L570: `<select id="taskCenterSource" class="sidebar-select">${renderFilterOptions(filters.source_pages, session.source, escapeHtml, "All sources")}</select>`
+- L576: `["Task", "Owner", "Due", "Priority", "Source", "Linked", "Status", "Route"],`
+- L581: `<strong>${escapeHtml(item.title || "Task")}</strong>`
+- L582: `<span>${escapeHtml(item.description || item.service_domain || "-")}</span>`
+- L605: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L606: `${renderTaskCenterIncomingHandoff(incomingHandoff, escapeHtml)}`
+- L607: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L610: `<p class="mhos-os-kicker">Selected Task</p>`
+- L611: `<h3 class="mhos-os-panel-title">${escapeHtml(selectedItem?.title || "Select a task")}</h3>`
+- L612: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Review owner, due-state, linked work, and follow-up context." : "Choose a task in the table to inspect details.")}</p>`
+- L616: `<div class="ops-detail-stack">`
+- L617: `<div class="ops-detail-summary">`
+- L618: `<strong>${escapeHtml(selectedItem.title || "Task")}</strong>`
+- L619: `<p>${escapeHtml(selectedItem.description || "No task description available.")}</p>`
+- L621: `${renderOpsDetailRows([`
+- L628: `{ label: "Domain", value: titleCase(selectedItem.service_domain || "-") },`
+- L632: `\` : \`<div class="empty-box">No task is selected.</div>\`}`
+- L639: `<h3 class="mhos-os-panel-title">Task review actions</h3>`
+- L640: `<p class="mhos-os-panel-copy">Active actions are refresh, copy, route, and AI guidance only. Task mutations remain deferred and disabled until backend policy and mutation safety checks are approved.</p>`
+- L644: `<button class="btn btn-primary" type="button" id="taskCenterRefreshBtnRail">Refresh Task Center</button>`
+- L646: `<button class="btn btn-secondary" type="button" id="taskCenterCopySummaryBtn">Copy Selected Task Summary</button>`
+- L653: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>`
+- L657: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L660: `<p class="mhos-os-kicker">AI Panel</p>`
+- L661: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L662: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No task creation, owner assignment, status change, approval, publishing, or backend execution is performed.</p>`
+- L666: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Task Context</button>`
+- L669: `${prompts.map((item, index) => \``
+- L670: `<button class="quick-action-btn" type="button" data-ops-ai-prompt="${index}">`
+- L671: `<span class="ops-prompt-title">${escapeHtml(item.label)}</span>`
+- L672: `<span class="ops-prompt-meta">${escapeHtml(item.preview)}</span>`
+- L681: `<textarea id="taskCenterSummaryBuffer" hidden>${escapeHtml(selectedSummary)}</textarea>`
+- L685: `function renderTaskCenter(context, state, projectName) {`
+- L689: `const ops = asObject(state.data.operations);`
+- L690: `const taskCenter = asObject(ops.task_center);`
+- L691: `const filters = asObject(taskCenter.filters);`
+- L692: `const session = ensureSession(taskSessions, projectName, {`
+- L703: `let items = asArray(taskCenter.items).map((item, index) => ({`
+- L705: `_opsKey: getOpsItemKey(item, index, "task")`
+- L707: `items = filterBySearch(items, session.search, ["title", "description", "owner", "assignee", "service_domain"]);`
+- L717: `const prompts = buildOpsAssistantPrompts("task-center", projectName, selectedItem, titleCase(session.focus || "all"));`
+- L718: `const incomingHandoff = getSharedHandoff(projectName, "task-center", ops);`
+- L721: `root.innerHTML = renderTaskCenterLayout({`
+- L724: `taskCenter,`
+- L729: `prompts,`
+- L730: `incomingHandoff`
+- L733: `const rerender = () => renderTaskCenter(context, context.getState(), projectName);`
+- L734: `const refreshTaskCenter = () => {`
+- L735: `if (context.fetchProjectTaskCenter && projectName) {`
+- L739: `context.fetchProjectTaskCenter(projectName)`
+- L743: `const ops = asObject(context.getState().data.operations);`
+- L744: `ops.task_center = liveData;`
+- L745: `renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);`
+- L749: `session.errorMessage = \`Task Center: ${error?.message || "Failed to refresh."}\`;`
+- L758: `root.querySelector("#taskCenterRefreshBtn")?.addEventListener("click", refreshTaskCenter);`
+- L759: `root.querySelector("#taskCenterRefreshBtnRail")?.addEventListener("click", refreshTaskCenter);`
+- L760: `root.querySelector("#taskCenterCopySummaryBtn")?.addEventListener("click", async () => {`
+- L761: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L762: `const text = buffer?.value || "No task is selected.";`
+- L765: `await navigator.clipboard.writeText(text);`
+- L771: `context.showMessage?.("Task summary copied.");`
+- L773: `context.showError?.("Failed to copy task summary.");`
+- L777: `root.querySelector("#taskCenterCopyHandoffBtn")?.addEventListener("click", async () => {`
+- L778: `const text = incomingHandoff`
+- L780: `"Incoming Review-Only Task Handoff",`
+- L781: `\`Source: ${asString(incomingHandoff.source_page || incomingHandoff.sourcePage || "unknown")}\`,`
+- L782: `\`Title: ${asString(incomingHandoff.title || incomingHandoff.summary || incomingHandoff.payload?.title || incomingHandoff.payload?.summary || "Incoming task handoff")}\`,`
+- L783: `\`Summary: ${asString(incomingHandoff.description || incomingHandoff.payload?.description || incomingHandoff.payload?.handoff_intent || incomingHandoff.payload?.prompt || "Review-only handoff.")}\`,`
+- L786: `: "No incoming task handoff.";`
+- L790: `await navigator.clipboard.writeText(text);`
+- L792: `const buffer = root.querySelector("#taskCenterSummaryBuffer");`
+- L800: `context.showMessage?.("Incoming handoff summary copied.");`
+- L802: `context.showError?.("Failed to copy incoming handoff summary.");`
+- L813: `root.querySelector("#taskCenterSearch")?.addEventListener("input", (event) => {`
+- L817: `[["#taskCenterPriority", "priority"], ["#taskCenterOwner", "owner"], ["#taskCenterSource", "source"]].forEach(([selector, key]) => {`
+- L824: `bindOpsAssistantButtons(root, context, prompts);`
+- L835: `prompts`
+- L846: `: "No queue items are available for this project yet. Use Refresh or adjust project context to load current queues.";`
+- L852: `const totalRunning = items.filter((item) => asString(item.status) === "running").length;`
+- L876: `<span>${escapeHtml(item.details?.summary || item.entity_type || "-")}</span>`
+- L891: `<div class="std-context-main mhos-os-header-main">`
+- L893: `<p class="mhos-os-kicker">Operational Queue Review</p>`
+- L895: `<p class="std-context-description mhos-os-subtitle">Review workflow, content, media, approval, publishing, and sync queue pressure for ${escapeHtml(projectLabel)}.</p>`
+- L902: `<span class="std-context-chip mhos-os-chip"><span>Running</span><strong>${escapeHtml(formatCount(totalRunning))}</strong></span>`
+- L911: `${renderExecutiveRuntimeStrip(context, {`
+- L912: `kicker: "System Runtime",`
+- L914: `description: "Supporting cross-center runtime and queue pressure context.",`
+- L919: `<article class="panel ops-main-column mhos-clean-stack mhos-os-main mhos-os-section">`
+- L922: `<p class="mhos-os-kicker">Main View</p>`
+- L923: `<h3 class="mhos-os-section-title">Queue review operations</h3>`
+- L955: `<aside class="ops-right-rail mhos-clean-stack mhos-os-rail">`
+- L956: `<section class="panel ops-detail-card mhos-clean-surface mhos-os-ai-panel">`
+- L961: `<p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>`
+- L965: `<div class="ops-detail-stack">`
+- L966: `<div class="ops-detail-summary">`
+- L968: `<p>${escapeHtml(selectedItem.details?.summary || selectedItem.entity_type || "No queue summary available.")}</p>`
+- L970: `${renderOpsDetailRows([`
+- L987: `<p class="mhos-os-panel-copy">Active actions are refresh, route, and AI guidance only. Queue, publishing, approval, and removal mutations remain disabled until backend policy and mutation safety checks are approved.</p>`
+- L1003: `<button class="btn btn-ghost ops-deferred-action" type="button" disabled>Retry item (disabled: future mutation safety pass)</button>`
+- L1010: `<section class="panel ops-ai-panel mhos-clean-surface mhos-os-ai-panel">`
+- L1013: `<p class="mhos-os-kicker">AI Panel</p>`
+- L1014: `<h3 class="mhos-os-panel-title">Operations AI Assistant</h3>`
+- L1015: `<p class="mhos-os-panel-copy">Context-only guidance: opens AI with prompt/context only. No approve, publish, retry, remove, Governance bypass, or backend execution is performed.</p>`
+- L1019: `<button class="btn btn-secondary" type="button" data-ops-ai-open>Open AI: Review Queue Context</button>`
+- L1022: `${prompts.map((item, index) => \``
+
+## Required Manual Classification
+Before any patch, classify exact Operations Centers paths into:
+
+1. Dashboard display only
+2. Customer operations session local state
+3. Notification operations local state
+4. Backend customer operation mutation
+5. Backend notification/task/workflow mutation
+6. AI prompt/guidance only
+7. Shared handoff only
+8. Send/execute/sync/import action
+9. Archive/delete/resolve/complete action
+10. Local/session storage only
+11. Unknown / needs deeper inspection
+
+## Decision Rule
+- If send/execute/sync/import/resolve/complete/archive/delete paths mutate backend without confirmation, patch.
+- If actions are local session/draft/shared-context only, document and close.
+- If AI guidance is prompt/navigation only, document and close.
+- If backend authority exists, verify frontend messaging does not overclaim.
+- Do not redesign Operations Centers in this pass.
