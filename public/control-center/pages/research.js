@@ -838,6 +838,19 @@ function renderSectionCard(item, escapeHtml, fields = []) {
   `;
 }
 
+function confirmResearchAuthorityAction(action, detail = "") {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(
+    [
+      action || "Confirm Research action",
+      "",
+      detail || "This action may create a backend Research handoff record for downstream review.",
+      "",
+      "Select Cancel to review the destination and evidence before continuing."
+    ].join("\n")
+  );
+}
+
 function savePromptToQuickCommand($, prompt) {
   const input = $("quickCommandInput");
   if (input) {
@@ -900,6 +913,14 @@ function bindResearchActions({
       const prompt = prompts[Number(button.getAttribute("data-research-ai-prompt"))];
       if (!prompt) return;
       try {
+        if (projectName && !confirmResearchAuthorityAction(
+          "Confirm Research AI handoff",
+          "This will create a backend handoff from Research to AI Command for review. It does not execute the AI command directly."
+        )) {
+          showMessage?.("Research AI handoff cancelled.");
+          return;
+        }
+
         setSharedHandoff(projectName, "ai-command", {
           source_page: "research",
           destination_page: "ai-command",
@@ -960,6 +981,14 @@ function bindResearchActions({
               : target === "ads"
                 ? `Use the current research intelligence for ${projectName || "this project"} to define ad test angles, audiences, and the first creative hypotheses to launch.`
                 : `Save this research intelligence for ${projectName || "this project"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(", ") || "pending"}, risks ${model.risks.map((item) => item.title).join(", ") || "pending"}.`;
+
+      if (projectName && !confirmResearchAuthorityAction(
+        "Confirm Research destination handoff",
+        `This will create a backend handoff from Research to ${action.label} for downstream review. It does not execute the destination workflow directly.`
+      )) {
+        showMessage?.("Research destination handoff cancelled.");
+        return;
+      }
 
       const handoff = {
         source_page: "research",

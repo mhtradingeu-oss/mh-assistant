@@ -1,0 +1,927 @@
+# T84 — Research Runtime Authority Focused Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/research.js`.
+
+## Why Research Is Next
+T71 ranked `research.js` as the next active high-risk page after Media Studio and Content Studio. It must be classified before any patch.
+
+## File Summary
+- File: `public/control-center/pages/research.js`
+- Lines: 1613
+- Imports: 1
+- Render writes: 1
+- Event bindings: 11
+- API/backend/source signals: 299
+- AI signals: 212
+- Save/storage signals: 64
+- Handoff signals: 67
+- Task signals: 0
+- Approval/governance signals: 25
+- Destructive/execution signals: 15
+- Confirmation signals: 0
+- Navigation signals: 47
+- Disabled/read-only/draft/guard signals: 28
+- Risky terms: 149
+
+## Initial Risk Notes
+- Research contains API/backend/source/library/task/handoff signals. Exact action paths must classify whether these are read-only, local, or backend mutations.
+- Research contains AI/recommendation/generation signals. Confirm whether they execute backend AI or only prepare prompts/recommendations.
+- Research contains save/storage signals. Separate local cache/draft from backend persistence.
+- Research contains handoff/navigation signals. Backend handoff creation must be confirmed if present.
+- No confirmation dialogs found. This is acceptable only if the page is read-only/projection/handoff-only.
+
+## Imports
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+
+## Render Writes
+- L1210: `root.innerHTML = \``
+
+## Event Bindings
+- L866: `refreshBtn.onclick = () => {`
+- L893: `button.onclick = () => {`
+- L899: `button.onclick = async () => {`
+- L948: `button.onclick = () => {`
+- L1000: `button.onclick = () => {`
+- L1017: `noteTitle.oninput = (event) => {`
+- L1023: `noteBody.oninput = (event) => {`
+- L1029: `noteTags.oninput = (event) => {`
+- L1036: `saveNoteBtn.onclick = () => {`
+- L1059: `button.onclick = () => {`
+- L1079: `saveRecommendationBtn.onclick = () => {`
+
+## API / Backend / Source Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L3: `const researchSessions = new Map();`
+- L6: `campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },`
+- L7: `content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },`
+- L8: `seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },`
+- L9: `ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },`
+- L12: `const RESEARCH_ROLE_DEFAULTS = {`
+- L13: `serviceDomain: "research",`
+- L76: `function renderResearchTeamOps(state, escapeHtml) {`
+- L78: `const handoffsByRole = asObject(operations.handoffs?.by_role);`
+- L79: `const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);`
+- L83: `<div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.serviceDomain))}</strong></div>`
+- L84: `<div class="data-row"><span>Owner role</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.ownerRole))}</strong></div>`
+- L85: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L87: `<div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>`
+- L88: `<div class="data-row"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>`
+- L125: `function getPath(source, path) {`
+- L126: `if (!source || !path) return undefined;`
+- L127: `return path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);`
+- L130: `function getFirstPath(sources, paths, fallback = null) {`
+- L132: `for (const source of sources) {`
+- L133: `const value = getPath(source, path);`
+- L245: `function buildSourceCoverage(integrations, insights) {`
+- L247: `const sources = asObject(integrations?.sources?.sources);`
+- L257: `const fromIntegrations = Object.keys({ ...sources, ...readinessChecks }).map((id) => {`
+- L258: `const source = asObject(sources[id]);`
+- L259: `const connected = Boolean(readinessChecks[id] || asString(source.value).trim());`
+- L265: `? firstNonEmpty(source.value, "Connected and available for research enrichment.")`
+- L281: `function buildResearchModel(state, session) {`
+- L307: `const sourceCoverage = buildSourceCoverage(integrations, insights);`
+- L308: `const researchSources = [`
+- L311: `asObject(insights.research),`
+- L312: `asObject(learning.research),`
+- L341: `getFirstPath(researchSources, [`
+- L346: `getFirstPath(researchSources, [`
+- L361: `contentStyle: firstNonEmpty(meta.content_style, meta.editorial_style, "Content style not classified"),`
+- L370: `getFirstPath(researchSources, [`
+- L390: `preferences: normalizeStringList(pickFirst(meta.content_preferences, meta.preferences)),`
+- L400: `getFirstPath(researchSources, [`
+- L407: `getFirstPath(researchSources, [`
+- L420: `platform: firstNonEmpty(meta.platform, meta.channel, meta.source)`
+- L424: `const seoSource = asObject(getFirstPath(researchSources, ["seo"], {}));`
+- L427: `seoSource.opportunities,`
+- L428: `seoSource.recommendations,`
+- L429: `seoSource.keywords,`
+- L430: `seoSource.top_queries,`
+- L431: `seoSource.queries,`
+- L432: `getFirstPath(researchSources, ["keyword_research", "seo.keywords"], [])`
+- L450: `seoSource.long_tail_ideas,`
+- L451: `seoSource.long_tail_keywords,`
+- L452: `seoSource.query_expansions`
+- L456: `const contentThemes = normalizeStringList(`
+- L458: `seoSource.content_themes,`
+- L459: `seoSource.themes,`
+- L460: `insights.content_themes,`
+- L461: `learning.content_themes`
+- L467: `seoSource.missing_clusters,`
+- L468: `seoSource.content_gaps,`
+- L469: `learning.content_gaps`
+- L475: `seoSource.top_pages_to_optimize,`
+- L476: `seoSource.pages_to_optimize,`
+- L477: `seoSource.ctr_opportunities,`
+- L478: `seoSource.ranking_opportunities`
+- L484: `getFirstPath(researchSources, [`
+- L489: `"product_research"`
+- L513: `getFirstPath(researchSources, ["opportunities", "opportunity_map"], []),`
+- L521: `type: /buy|best|price|near me|for/i.test(item.keyword) ? "seo" : "content",`
+- L534: `if (type.includes("content")) lane = "content";`
+- L546: `lane === "content" ? ACTION_ROUTES.content :`
+- L547: `ACTION_ROUTES.campaign`
+- L556: `getFirstPath(researchSources, ["updated_at"], ""),`
+- L565: `!keywordRecords.length ? "Keyword and SEO research" : "",`
+- L566: `!productIdeas.length ? "Offer and product positioning research" : "",`
+- L567: `...sourceCoverage.filter((item) => statusTone(item.status) !== "success").slice(0, 4).map((item) => \`${item.label} coverage\`)`
+- L575: `source: "Opportunity map"`
+- L580: `tags: ["risk", "research"],`
+- L581: `source: "Readiness / insight signal"`
+- L587: `source: "SEO intelligence"`
+- L591: `const activeResearchAreas = [`
+- L595: `keywordRecords.length && "SEO and keyword research",`
+- L604: `contentThemes.length * 4 +`
+- L621: `contentThemes,`
+- L626: `sourceCoverage,`
+- L629: `activeResearchAreas,`
+- L642: `if (!researchSessions.has(key)) {`
+- L643: `researchSessions.set(key, {`
+- L662: `return researchSessions.get(key);`
+- L665: `function startResearchHydration({`
+- L668: `fetchProjectInsights,`
+- L669: `fetchProjectLearning,`
+- L680: `fetchProjectInsights(projectName),`
+- L681: `fetchProjectLearning(projectName)`
+- L703: `session.intelligence.error = error?.message || "Research intelligence failed to load.";`
+- L721: `label: "Summarize research",`
+- L722: `modeId: "research",`
+- L724: `prompt: \`Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.\``
+- L728: `modeId: "research",`
+- L734: `modeId: "research",`
+- L741: `preview: "Turn current research into target topics, landing pages, clusters, and low-competition search plays.",`
+- L742: `prompt: \`Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.\``
+- L745: `label: "Suggest content directions",`
+- L746: `modeId: "content",`
+- L748: `prompt: \`Turn the current research for ${projectLabel} into content directions for ${topAudience}. Recommend hero topics, hooks, CTAs, and format ideas tied to search and buying intent.\``
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L754: `prompt: \`Turn the research intelligence for ${projectLabel} into ad test ideas. Use ${topOpportunity} as the lead angle, identify creative hypotheses, audience emphasis, and what to test first.\``
+- L760: `prompt: \`Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.\``
+- L767: `<div class="research-empty-state">`
+- L770: `${chips.length ? \`<div class="research-chip-row">${chips.map((chip) => \`<span class="research-chip">${escapeHtml(chip)}</span>\`).join("")}</div>\` : ""}`
+- L777: `<div class="research-kpi-card">`
+- L780: `<p class="research-kpi-meta research-tone-${escapeHtml(tone)}">${escapeHtml(meta)}</p>`
+- L807: `<article class="research-signal-card">`
+- L808: `<div class="research-signal-head">`
+- L815: `<div class="research-detail-grid">`
+- L817: `<div class="research-detail-item">`
+- L826: `<div class="research-chip-groups">`
+- L827: `${item.channels?.length ? \`<div class="research-chip-row">${item.channels.map((entry) => \`<span class="research-chip">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L828: `${item.strengths?.length ? \`<div class="research-chip-row">${item.strengths.map((entry) => \`<span class="research-chip success">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L829: `${item.weaknesses?.length ? \`<div class="research-chip-row">${item.weaknesses.map((entry) => \`<span class="research-chip danger">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L830: `${item.painPoints?.length ? \`<div class="research-chip-row">${item.painPoints.map((entry) => \`<span class="research-chip danger">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L831: `${item.motivations?.length ? \`<div class="research-chip-row">${item.motivations.map((entry) => \`<span class="research-chip success">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L832: `${item.proof?.length ? \`<div class="research-chip-row">${item.proof.map((entry) => \`<span class="research-chip">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L848: `function bindResearchActions({`
+- L854: `fetchProjectInsights,`
+- L855: `fetchProjectLearning,`
+- L856: `createProjectHandoff,`
+- L864: `const refreshBtn = $("researchRefreshBtn");`
+- L868: `showError?.("Select a project before refreshing research.");`
+- L872: `showMessage?.("Research intelligence is already refreshing.");`
+- L877: `startResearchHydration({`
+- L880: `fetchProjectInsights,`
+- L881: `fetchProjectLearning,`
+- L886: `showMessage?.("Research intelligence refresh started.");`
+- L890: `const aiButtons = Array.from(document.querySelectorAll("[data-research-ai-prompt]"));`
+- L892: `Array.from(document.querySelectorAll("[data-research-open]")).forEach((button) => {`
+- L900: `const prompt = prompts[Number(button.getAttribute("data-research-ai-prompt"))];`
+- L903: `setSharedHandoff(projectName, "ai-command", {`
+- L904: `source_page: "research",`
+- L912: `lastResponseTitle: "Research prompt",`
+- L917: `createProjectHandoff?.(projectName, {`
+- L918: `source_page: "research",`
+- L920: `source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,`
+- L922: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L930: `lastResponseTitle: "Research prompt",`
+- L935: `console.warn("Failed to persist research AI handoff:", error.message);`
+- L939: `showMessage?.("Research brief prompt added to AI Command.");`
+- L941: `showError?.(error?.message || "Failed to hand off the research prompt to AI Command.");`
+- L946: `const routeButtons = Array.from(document.querySelectorAll("[data-research-route]"));`
+- L949: `const target = button.getAttribute("data-research-route") || "";`
+- L954: `target === "campaign"`
+- L955: `? \`Use the current research intelligence for ${projectName || "this project"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || "the strongest opportunity"} and account for ${model.risks[0]?.title || "current research risks"}.\``
+- L956: `: target === "content"`
+- L957: `? \`Turn the current research intelligence for ${projectName || "this project"} into a content plan. Prioritize ${model.keywordRecords[0]?.keyword || "high-intent search topics"} and audience segment ${model.audienceSegments[0]?.title || "the lead segment"}.\``
+- L959: `? \`Build an SEO workflow for ${projectName || "this project"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.\``
+- L961: `? \`Use the current research intelligence for ${projectName || "this project"} to define ad test angles, audiences, and the first creative hypotheses to launch.\``
+- L962: `: \`Save this research intelligence for ${projectName || "this project"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(", ") || "pending"}, risks ${model.risks.map((item) => item.title).join(", ") || "pending"}.\`;`
+- L964: `const handoff = {`
+- L965: `source_page: "research",`
+- L967: `source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,`
+- L969: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L974: `source: "research-route",`
+- L976: `owner_role: RESEARCH_ROLE_DEFAULTS.ownerRole,`
+- L977: `review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,`
+- L978: `service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain`
+- L981: `setSharedHandoff(projectName, action.route, handoff);`
+- L982: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L994: `showMessage?.(\`Research handoff routed to ${action.label}.\`);`
+- L998: `const suggestionButtons = Array.from(document.querySelectorAll("[data-research-opportunity]"));`
+- L1001: `const item = model.opportunityPool[Number(button.getAttribute("data-research-opportunity"))];`
+- L1008: `showMessage?.(\`Opportunity handoff routed to ${item.routeTarget.label}.\`);`
+- L1012: `const noteTitle = $("researchNoteTitle");`
+- L1013: `const noteBody = $("researchNoteBody");`
+- L1014: `const noteTags = $("researchNoteTags");`
+- L1034: `const saveNoteBtn = $("researchSaveFindingBtn");`
+- L1044: `title: session.noteDraft.title.trim() || "Untitled research finding",`
+- L1047: `source: "Manual note",`
+- L1053: `showMessage?.("Research finding saved.");`
+- L1057: `const saveBlockButtons = Array.from(document.querySelectorAll("[data-save-research-block]"));`
+- L1060: `const item = model.autoFindings[Number(button.getAttribute("data-save-research-block"))];`
+- L1067: `source: item.source,`
+- L1070: `session.savedFindings = uniqueBy(session.savedFindings, (entry) => \`${entry.title}:${entry.source}\`);`
+- L1077: `const saveRecommendationBtn = $("researchSaveRecommendationBtn");`
+- L1101: `export const researchRoute = {`
+- L1102: `id: "research",`
+- L1105: `eyebrow: "Execute & Grow",`
+- L1106: `title: "Research",`
+- L1107: `description: "Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs."`
+- L1110: `<section class="page is-active" data-page="research">`
+- L1111: `<div id="researchRoot"></div>`
+- L1122: `fetchProjectInsights,`
+- L1123: `fetchProjectLearning,`
+- L1124: `createProjectHandoff`
+- L1129: `const root = $("researchRoot");`
+- L1140: `fetchProjectInsights,`
+- L1141: `fetchProjectLearning,`
+- L1142: `createProjectHandoff`
+- L1145: `startResearchHydration({`
+- L1148: `fetchProjectInsights,`
+- L1149: `fetchProjectLearning,`
+- L1154: `const model = buildResearchModel(state, session);`
+- L1156: `const projectLabel = projectName ? \`${projectName} Research Intelligence\` : "Research Intelligence";`
+- L1157: `const coveragePreview = model.sourceCoverage.slice(0, 6);`
+- L1211: `<div class="research-lab-wrapper">`
+- L1214: `? \`<div class="simple-banner research-warning-banner">`
+- L1215: `<strong>Research data is partial.</strong> ${escapeHtml(compactText(session.intelligence.error, 28, "Some research feeds did not load, so the page is falling back to project context and any last successful intelligence."))}`
+- L1223: `<h3>Research Evidence Overview</h3>`
+- L1224: `<p class="research-section-copy">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>`
+- L1228: `<div class="research-toolbar">`
+- L1229: `<button id="researchRefreshBtn" class="btn btn-secondary" type="button">Refresh Research</button>`
+- L1231: `<div class="research-overview-grid">`
+- L1236: `meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"`
+- L1261: `meta: compactText(model.audienceSignals[0] || "Audience research not yet structured", 12, "Audience research not yet structured")`
+- L1271: `meta: compactText(model.missingIntelligence[0] || "Core research coverage is healthy", 12, "Core research coverage is healthy")`
+- L1274: `<div class="research-overview-item">`
+- L1277: `<p class="research-kpi-meta">${escapeHtml(item.meta)}</p>`
+- L1287: `<p class="research-section-copy">Evidence about market movement, competitor pressure, positioning gaps, and signals worth validating next.</p>`
+- L1289: `<span class="card-badge ${competitorMarketCards.length ? "warning" : "neutral"}">${escapeHtml(competitorMarketCards.length ? \`${competitorMarketCards.length} signals\` : "Needs research")}</span>`
+- L1291: `<div class="research-workspace-grid">`
+- L1295: `? \`<div class="research-card-grid">`
+- L1297: `<article class="research-signal-card">`
+
+## AI Signals
+- L6: `campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },`
+- L7: `content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },`
+- L8: `seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },`
+- L9: `ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },`
+- L10: `ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }`
+- L13: `serviceDomain: "research",`
+- L67: `if (Number.isNaN(date.getTime())) return "Waiting for update";`
+- L83: `<div class="data-row"><span>Service lane</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.serviceDomain))}</strong></div>`
+- L205: `summary: "",`
+- L226: `summary: firstNonEmpty(`
+- L227: `record.summary,`
+- L230: `record.insight,`
+- L245: `function buildSourceCoverage(integrations, insights) {`
+- L248: `const coverage = asObject(insights?.data_coverage);`
+- L250: `const fromInsights = Object.entries(coverage).map(([id, item]) => ({`
+- L254: `detail: firstNonEmpty(item?.detail, item?.notes, item?.recommendation, "Coverage detail pending")`
+- L264: `detail: connected`
+- L265: `? firstNonEmpty(source.value, "Connected and available for research enrichment.")`
+- L270: `return uniqueBy([...fromInsights, ...fromIntegrations], (item) => item.id);`
+- L287: `const insightsPayload = asObject(session.intelligence.insights);`
+- L290: `const insights = asObject(`
+- L291: `insightsPayload.insights ||`
+- L292: `insightsPayload.data ||`
+- L293: `insightsPayload ||`
+- L294: `activity.insights ||`
+- L295: `activity.marketing_insights ||`
+- L296: `activity.performance_insights ||`
+- L297: `overviewBlock.insights`
+- L307: `const sourceCoverage = buildSourceCoverage(integrations, insights);`
+- L309: `insights,`
+- L311: `asObject(insights.research),`
+- L318: `const recommendations = normalizeRecords(`
+- L320: `learning.recommendations,`
+- L321: `insights.recommendations,`
+- L325: `"recommendation"`
+- L331: `insights.risks,`
+- L356: `positioning: firstNonEmpty(meta.positioning, meta.angle, meta.message, item.summary, "Positioning hypothesis pending"),`
+- L379: `learning.ai_recommendations?.audience,`
+- L380: `learning.ai_recommendations?.audience_emphasis`
+- L388: `painPoints: normalizeStringList(pickFirst(meta.pain_points, meta.problems, meta.frictions)),`
+- L428: `seoSource.recommendations,`
+- L444: `value: firstNonEmpty(meta.value, meta.opportunity, item.summary)`
+- L448: `const longTailIdeas = normalizeStringList(`
+- L450: `seoSource.long_tail_ideas,`
+- L451: `seoSource.long_tail_keywords,`
+- L460: `insights.content_themes,`
+- L491: `recommendations.filter((item) => /offer|position|product|bundle|value/i.test(item.title || item.summary)).map((item) => ({`
+- L493: `summary: item.summary,`
+- L502: `angle: firstNonEmpty(meta.angle, meta.offer_angle, item.summary, "Angle pending"),`
+- L514: `recommendations`
+- L520: `summary: item.value,`
+- L526: `summary: item.angle,`
+- L533: `if (type.includes("ad") || type.includes("paid")) lane = "ads";`
+- L539: `summary: firstNonEmpty(item.summary, "Opportunity detail pending"),`
+- L547: `ACTION_ROUTES.campaign`
+- L552: `const audienceSignals = audienceSegments.slice(0, 3).flatMap((item) => item.motivations[0] || item.painPoints[0] || item.title).filter(Boolean);`
+- L573: `body: item.summary,`
+- L579: `body: firstNonEmpty(item.summary, "Risk surfaced from current project intelligence."),`
+- L581: `source: "Readiness / insight signal"`
+- L597: `recommendations.length && "Action recommendations"`
+- L603: `longTailIdeas.length * 6 +`
+- L612: `insights,`
+- L614: `recommendations,`
+- L620: `longTailIdeas,`
+- L634: `latestUpdate: latestUpdateTimestamps.length ? formatDateTime(Math.max(...latestUpdateTimestamps)) : "Waiting for data",`
+- L635: `hasLiveIntelligence: Boolean(Object.keys(insights).length || Object.keys(learning).length)`
+- L650: `savedRecommendations: [],`
+- L653: `insights: null,`
+- L668: `fetchProjectInsights,`
+- L680: `fetchProjectInsights(projectName),`
+- L683: `.then(([insightsResult, learningResult]) => {`
+- L684: `const insights = insightsResult?.status === "fulfilled" ? insightsResult.value : null;`
+- L687: `insightsResult?.status === "rejected" ? insightsResult.reason?.message : "",`
+- L691: `session.intelligence.status = (insights || learning) ? "loaded" : "error";`
+- L692: `session.intelligence.insights = insights;`
+- L697: `if (errorMessage && !(insights || learning)) {`
+- L703: `session.intelligence.error = error?.message || "Research intelligence failed to load.";`
+- L712: `function buildAiPrompts({ projectName, model }) {`
+- L723: `preview: "Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.",`
+- L724: `prompt: \`Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.\``
+- L730: `prompt: \`Find the strongest market gaps for ${projectLabel}. Use current competitor, audience, trend, and product signals. Prioritize gaps by speed to test, revenue potential, and defensibility.\``
+- L735: `preview: "Build a sharper positioning angle against the current competitor landscape.",`
+- L736: `prompt: \`Create a sharper competitor angle for ${projectLabel}. Use ${topOpportunity} as the lead wedge and explain how we should position against incumbents.\``
+- L742: `prompt: \`Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.\``
+- L748: `prompt: \`Turn the current research for ${projectLabel} into content directions for ${topAudience}. Recommend hero topics, hooks, CTAs, and format ideas tied to search and buying intent.\``
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L754: `prompt: \`Turn the research intelligence for ${projectLabel} into ad test ideas. Use ${topOpportunity} as the lead angle, identify creative hypotheses, audience emphasis, and what to test first.\``
+- L760: `prompt: \`Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.\``
+- L791: `<div class="insights-list">`
+- L793: `<div class="insights-list-item">`
+- L794: `<div class="insights-list-head">`
+- L798: `<div class="insights-list-meta">${escapeHtml(compactText(firstNonEmpty(item.summary, "Detail pending."), 24, "Detail pending."))}</div>`
+- L811: `<p>${escapeHtml(compactText(firstNonEmpty(item.summary, "Signal detail is still being formed from the current project context."), 28, "Signal detail is still being formed from the current project context."))}</p>`
+- L815: `<div class="research-detail-grid">`
+- L817: `<div class="research-detail-item">`
+- L824: `item.channels?.length || item.strengths?.length || item.weaknesses?.length || item.painPoints?.length || item.motivations?.length || item.proof?.length`
+- L830: `${item.painPoints?.length ? \`<div class="research-chip-row">${item.painPoints.map((entry) => \`<span class="research-chip danger">${escapeHtml(entry)}</span>\`).join("")}</div>\` : ""}`
+- L841: `function savePromptToQuickCommand($, prompt) {`
+- L844: `input.value = prompt;`
+- L854: `fetchProjectInsights,`
+- L880: `fetchProjectInsights,`
+- L890: `const aiButtons = Array.from(document.querySelectorAll("[data-research-ai-prompt]"));`
+- L891: `const prompts = buildAiPrompts({ projectName, model });`
+- L894: `navigateTo("ai-command");`
+- L898: `aiButtons.forEach((button) => {`
+- L900: `const prompt = prompts[Number(button.getAttribute("data-research-ai-prompt"))];`
+- L901: `if (!prompt) return;`
+- L903: `setSharedHandoff(projectName, "ai-command", {`
+- L905: `destination_page: "ai-command",`
+- L907: `prompt: prompt.prompt,`
+- L910: `modeId: prompt.modeId,`
+- L911: `lastCommand: prompt.prompt,`
+- L912: `lastResponseTitle: "Research prompt",`
+- L919: `destination_page: "ai-command",`
+- L921: `destination_role: ACTION_ROUTES.ai.destinationRole,`
+- L922: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L923: `destination_service_domain: ACTION_ROUTES.ai.destinationDomain,`
+- L925: `prompt: prompt.prompt,`
+- L928: `modeId: prompt.modeId,`
+- L929: `lastCommand: prompt.prompt,`
+- L930: `lastResponseTitle: "Research prompt",`
+- L935: `console.warn("Failed to persist research AI handoff:", error.message);`
+- L937: `navigateTo("ai-command");`
+- L938: `savePromptToQuickCommand($, prompt.prompt);`
+- L939: `showMessage?.("Research brief prompt added to AI Command.");`
+- L941: `showError?.(error?.message || "Failed to hand off the research prompt to AI Command.");`
+- L953: `const prompt =`
+- L954: `target === "campaign"`
+- L955: `? \`Use the current research intelligence for ${projectName || "this project"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || "the strongest opportunity"} and account for ${model.risks[0]?.title || "current research risks"}.\``
+- L959: `? \`Build an SEO workflow for ${projectName || "this project"} from the current research page. Focus on keyword clusters, missing landing pages, long-tail ideas, and content clusters.\``
+- L962: `: \`Save this research intelligence for ${projectName || "this project"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(", ") || "pending"}, risks ${model.risks.map((item) => item.title).join(", ") || "pending"}.\`;`
+- L969: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L970: `destination_service_domain: action.destinationDomain,`
+- L972: `prompt,`
+- L978: `service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L986: `if (target === "ai") {`
+- L988: `savePromptToQuickCommand($, prompt);`
+- L990: `savePromptToQuickCommand($, prompt);`
+- L1003: `savePromptToQuickCommand(`
+- L1005: `\`Operationalize this opportunity for ${projectName || "this project"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.\``
+- L1045: `body: session.noteDraft.body.trim() || "Observation captured without additional detail.",`
+- L1077: `const saveRecommendationBtn = $("researchSaveRecommendationBtn");`
+- L1078: `if (saveRecommendationBtn) {`
+- L1079: `saveRecommendationBtn.onclick = () => {`
+- L1086: `session.savedRecommendations.unshift({`
+- L1089: `summary: opportunity.summary,`
+- L1093: `session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => \`${item.title}:${item.target}\`);`
+- L1094: `session.savedRecommendations = session.savedRecommendations.slice(0, 12);`
+- L1096: `showMessage?.("Structured recommendation saved.");`
+- L1105: `eyebrow: "Execute & Grow",`
+- L1122: `fetchProjectInsights,`
+- L1140: `fetchProjectInsights,`
+- L1148: `fetchProjectInsights,`
+- L1155: `const aiPrompts = buildAiPrompts({ projectName, model });`
+- L1158: `const topRecommendations = model.recommendations.slice(0, 4);`
+- L1166: `summary: item.opportunityGap || item.positioning || item.summary || "Competitor signal pending.",`
+- L1167: `details: [`
+- L1177: `summary: item.summary || item.momentum || "Market trend detail pending.",`
+- L1178: `details: [`
+- L1190: `summary: item.summary || item.painPoints[0] || item.motivations[0] || "Audience detail pending.",`
+- L1191: `details: [`
+- L1192: `{ label: "Pain points", value: item.painPoints.join(", ") || "Not mapped yet" },`
+- L1201: `summary: item.value || item.summary || "Keyword opportunity detail pending.",`
+- L1202: `details: [`
+- L1236: `meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"`
+- L1301: `<p>${escapeHtml(compactText(item.summary, 28, "Signal detail pending."))}</p>`
+- L1305: `<div class="research-detail-grid">`
+- L1306: `${item.details.map((field) => \``
+- L1307: `<div class="research-detail-item">`
+- L1326: `<h4 class="insights-subtitle">What matters most now</h4>`
+- L1330: `<h4 class="insights-subtitle">Coverage snapshot</h4>`
+- L1341: `: \`<div class="empty-box">No intelligence coverage data is available yet.</div>\``
+- L1359: `<p class="research-section-copy">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>`
+- L1373: `<p>${escapeHtml(compactText(item.summary, 28, "Signal detail pending."))}</p>`
+- L1377: `<div class="research-detail-grid">`
+- L1378: `${item.details.map((field) => \``
+- L1379: `<div class="research-detail-item">`
+- L1391: `["pain points", "intent mapping", "keyword clusters"],`
+- L1398: `<h4 class="insights-subtitle">Long-tail ideas</h4>`
+- L1399: `${model.longTailIdeas.length ? \`<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 12).map((item) => \`<span class="research-chip">${escapeHtml(item)}</span>\`).join("")}</div></div>\` : \`<div class="empty-box">No long-tail ideas saved yet.</div>\`}`
+- L1400: `<h4 class="insights-subtitle" style="margin-top:16px;">Content themes</h4>`
+- L1404: `<h4 class="insights-subtitle">Missing clusters</h4>`
+- L1406: `<h4 class="insights-subtitle" style="margin-top:16px;">Pages to optimize</h4>`
+- L1430: `<h4 class="insights-subtitle">Saved findings</h4>`
+- L1452: `: \`<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>\``
+- L1456: `<h4 class="insights-subtitle">Reusable insight blocks</h4>`
+- L1478: `: \`<div class="empty-box">Reusable blocks will appear as soon as stronger opportunities, risks, or keyword signals are available.</div>\``
+- L1488: `<h3>Recommendations / Next Research Actions</h3>`
+- L1491: `<span class="card-badge neutral">${escapeHtml(\`${session.savedRecommendations.length} saved\`)}</span>`
+- L1496: `<h4 class="insights-subtitle">Recommendations</h4>`
+- L1497: `${renderSignalList(topRecommendations, escapeHtml, "No recommendations surfaced yet.")}`
+- L1500: `<h4 class="insights-subtitle">Risks to explore next</h4>`
+- L1504: `<h4 class="insights-subtitle">Opportunity map</h4>`
+- L1513: `<p>${escapeHtml(item.summary)}</p>`
+- L1528: `"Opportunity map is waiting for ranked inputs",`
+- L1538: `<h4 class="insights-subtitle">Saved recommendation</h4>`
+- L1539: `<button id="researchSaveRecommendationBtn" class="btn btn-primary" type="button">Save Recommendation</button>`
+- L1541: `session.savedRecommendations.length`
+- L1543: `${session.savedRecommendations.slice(0, 4).map((item) => \``
+- L1548: `<p>${escapeHtml(item.summary)}</p>`
+- L1558: `: \`<div class="empty-box" style="margin-top:16px;">Save a structured recommendation to keep the best next move accessible for later routing.</div>\``
+- L1562: `<h4 class="insights-subtitle">Destination handoffs</h4>`
+- L1564: `<button class="quick-action-btn" type="button" data-research-route="campaign">Route to Campaign Studio</button>`
+- L1577: `<h3>Research AI Assistant</h3>`
+- L1578: `<p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>`
+- L1583: `<button class="btn ghost" type="button" data-research-open>Open AI Workspace Review</button>`
+- L1584: `<button class="btn btn-secondary" type="button" data-research-route="ai">Route to AI Workspace</button>`
+- L1587: `${aiPrompts.map((item, index) => \``
+- L1588: `<button class="quick-action-btn" type="button" data-research-ai-prompt="${index}">`
+- L1590: `<span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>`
+- L1604: `fetchProjectInsights,`
+
+## Save / Storage Signals
+- L644: `noteDraft: {`
+- L649: `savedFindings: [],`
+- L650: `savedRecommendations: [],`
+- L841: `function savePromptToQuickCommand($, prompt) {`
+- L908: `draft_context: {`
+- L926: `draft_context: {`
+- L935: `console.warn("Failed to persist research AI handoff:", error.message);`
+- L938: `savePromptToQuickCommand($, prompt.prompt);`
+- L962: `: \`Save this research intelligence for ${projectName || "this project"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(", ") || "pending"}, risks ${model.risks.map((item) => item.title).join(", ") || "pending"}.\`;`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L988: `savePromptToQuickCommand($, prompt);`
+- L990: `savePromptToQuickCommand($, prompt);`
+- L1003: `savePromptToQuickCommand(`
+- L1018: `session.noteDraft.title = event.target.value || "";`
+- L1024: `session.noteDraft.body = event.target.value || "";`
+- L1030: `session.noteDraft.tags = event.target.value || "";`
+- L1034: `const saveNoteBtn = $("researchSaveFindingBtn");`
+- L1035: `if (saveNoteBtn) {`
+- L1036: `saveNoteBtn.onclick = () => {`
+- L1037: `if (!session.noteDraft.title.trim() && !session.noteDraft.body.trim()) {`
+- L1042: `session.savedFindings.unshift({`
+- L1044: `title: session.noteDraft.title.trim() || "Untitled research finding",`
+- L1045: `body: session.noteDraft.body.trim() || "Observation captured without additional detail.",`
+- L1046: `tags: normalizeStringList(session.noteDraft.tags.split(",")),`
+- L1050: `session.savedFindings = session.savedFindings.slice(0, 18);`
+- L1051: `session.noteDraft = { title: "", body: "", tags: "" };`
+- L1053: `showMessage?.("Research finding saved.");`
+- L1057: `const saveBlockButtons = Array.from(document.querySelectorAll("[data-save-research-block]"));`
+- L1058: `saveBlockButtons.forEach((button) => {`
+- L1060: `const item = model.autoFindings[Number(button.getAttribute("data-save-research-block"))];`
+- L1062: `session.savedFindings.unshift({`
+- L1070: `session.savedFindings = uniqueBy(session.savedFindings, (entry) => \`${entry.title}:${entry.source}\`);`
+- L1071: `session.savedFindings = session.savedFindings.slice(0, 18);`
+- L1073: `showMessage?.("Reusable intelligence block saved.");`
+- L1077: `const saveRecommendationBtn = $("researchSaveRecommendationBtn");`
+- L1078: `if (saveRecommendationBtn) {`
+- L1079: `saveRecommendationBtn.onclick = () => {`
+- L1082: `showError?.("No structured opportunity is ready to save yet.");`
+- L1086: `session.savedRecommendations.unshift({`
+- L1093: `session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => \`${item.title}:${item.target}\`);`
+- L1094: `session.savedRecommendations = session.savedRecommendations.slice(0, 12);`
+- L1096: `showMessage?.("Structured recommendation saved.");`
+- L1399: `${model.longTailIdeas.length ? \`<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 12).map((item) => \`<span class="research-chip">${escapeHtml(item)}</span>\`).join("")}</div></div>\` : \`<div class="empty-box">No long-tail ideas saved yet.</div>\`}`
+- L1416: `<h3>Evidence Notes / Saved Findings</h3>`
+- L1419: `<span class="card-badge neutral">${escapeHtml(\`${session.savedFindings.length} saved\`)}</span>`
+- L1423: `<input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />`
+- L1424: `<textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>`
+- L1425: `<input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />`
+- L1426: `<button id="researchSaveFindingBtn" class="btn btn-primary" type="button">Save Finding</button>`
+- L1430: `<h4 class="insights-subtitle">Saved findings</h4>`
+- L1432: `session.savedFindings.length`
+- L1433: `? \`<div class="research-saved-list">`
+- L1434: `${session.savedFindings.slice(0, 6).map((item) => \``
+- L1452: `: \`<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>\``
+- L1459: `? \`<div class="research-saved-list">`
+- L1473: `<button class="quick-action-btn research-inline-action" type="button" data-save-research-block="${index}">Save Block</button>`
+- L1491: `<span class="card-badge neutral">${escapeHtml(\`${session.savedRecommendations.length} saved\`)}</span>`
+- L1538: `<h4 class="insights-subtitle">Saved recommendation</h4>`
+- L1539: `<button id="researchSaveRecommendationBtn" class="btn btn-primary" type="button">Save Recommendation</button>`
+- L1541: `session.savedRecommendations.length`
+- L1542: `? \`<div class="research-saved-list" style="margin-top:16px;">`
+- L1543: `${session.savedRecommendations.slice(0, 4).map((item) => \``
+- L1558: `: \`<div class="empty-box" style="margin-top:16px;">Save a structured recommendation to keep the best next move accessible for later routing.</div>\``
+- L1578: `<p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>`
+
+## Handoff Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L5: `const ACTION_ROUTES = {`
+- L6: `campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },`
+- L7: `content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },`
+- L8: `seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },`
+- L9: `ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },`
+- L10: `ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }`
+- L78: `const handoffsByRole = asObject(operations.handoffs?.by_role);`
+- L86: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(Object.values(ACTION_ROUTES).map((item) => \`${item.label}: ${titleCase(item.destinationRole)}\`).join(" • "))}</strong></div>`
+- L87: `<div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>`
+- L543: `routeTarget:`
+- L544: `lane === "seo" ? ACTION_ROUTES.seo :`
+- L545: `lane === "ads" ? ACTION_ROUTES.ads :`
+- L546: `lane === "content" ? ACTION_ROUTES.content :`
+- L547: `ACTION_ROUTES.campaign`
+- L851: `navigateTo,`
+- L856: `createProjectHandoff,`
+- L894: `navigateTo("ai-command");`
+- L903: `setSharedHandoff(projectName, "ai-command", {`
+- L905: `destination_page: "ai-command",`
+- L913: `routeSuggestions: []`
+- L917: `createProjectHandoff?.(projectName, {`
+- L919: `destination_page: "ai-command",`
+- L921: `destination_role: ACTION_ROUTES.ai.destinationRole,`
+- L923: `destination_service_domain: ACTION_ROUTES.ai.destinationDomain,`
+- L931: `routeSuggestions: []`
+- L935: `console.warn("Failed to persist research AI handoff:", error.message);`
+- L937: `navigateTo("ai-command");`
+- L946: `const routeButtons = Array.from(document.querySelectorAll("[data-research-route]"));`
+- L947: `routeButtons.forEach((button) => {`
+- L949: `const target = button.getAttribute("data-research-route") || "";`
+- L950: `const action = ACTION_ROUTES[target];`
+- L964: `const handoff = {`
+- L966: `destination_page: action.route,`
+- L968: `destination_role: action.destinationRole,`
+- L970: `destination_service_domain: action.destinationDomain,`
+- L974: `source: "research-route",`
+- L975: `route_target: action.route,`
+- L981: `setSharedHandoff(projectName, action.route, handoff);`
+- L982: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L987: `navigateTo(action.route);`
+- L991: `navigateTo(action.route);`
+- L994: `showMessage?.(\`Research handoff routed to ${action.label}.\`);`
+- L1005: `\`Operationalize this opportunity for ${projectName || "this project"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.\``
+- L1007: `navigateTo(item.routeTarget.route);`
+- L1008: `showMessage?.(\`Opportunity handoff routed to ${item.routeTarget.label}.\`);`
+- L1090: `target: opportunity.routeTarget.label,`
+- L1101: `export const researchRoute = {`
+- L1107: `description: "Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs."`
+- L1119: `navigateTo,`
+- L1124: `createProjectHandoff`
+- L1137: `navigateTo,`
+- L1142: `createProjectHandoff`
+- L1224: `<p class="research-section-copy">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>`
+- L1520: `<span>Best route</span>`
+- L1521: `<strong>${escapeHtml(item.routeTarget.label)}</strong>`
+- L1523: `<button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>`
+- L1562: `<h4 class="insights-subtitle">Destination handoffs</h4>`
+- L1564: `<button class="quick-action-btn" type="button" data-research-route="campaign">Route to Campaign Studio</button>`
+- L1565: `<button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>`
+- L1566: `<button class="quick-action-btn" type="button" data-research-route="seo">Route to SEO Workflow</button>`
+- L1567: `<button class="quick-action-btn" type="button" data-research-route="ads">Route to Ads Manager</button>`
+- L1578: `<p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>`
+- L1584: `<button class="btn btn-secondary" type="button" data-research-route="ai">Route to AI Workspace</button>`
+- L1601: `navigateTo,`
+- L1606: `createProjectHandoff,`
+
+## Task Signals
+- none
+
+## Approval / Governance Signals
+- L10: `ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }`
+- L15: `reviewRole: "strategist"`
+- L79: `const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);`
+- L85: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L88: `<div class="data-row"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>`
+- L101: `function joinPreview(values, fallback, maxItems = 3) {`
+- L723: `preview: "Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.",`
+- L724: `prompt: \`Summarize the current research intelligence for ${projectLabel}. Cover competitor signals, audience needs, market momentum, SEO opportunities, product angles, risks, and the next three strategic decisions.\``
+- L729: `preview: "Rank the most attractive market gaps by speed to test, upside, and defensibility.",`
+- L735: `preview: "Build a sharper positioning angle against the current competitor landscape.",`
+- L741: `preview: "Turn current research into target topics, landing pages, clusters, and low-competition search plays.",`
+- L742: `prompt: \`Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.\``
+- L747: `preview: "Translate audience and search intelligence into topics, hooks, formats, and calls to action.",`
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L759: `preview: "Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.",`
+- L760: `prompt: \`Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.\``
+- L977: `review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,`
+- L1157: `const coveragePreview = model.sourceCoverage.slice(0, 6);`
+- L1236: `meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"`
+- L1332: `coveragePreview.length`
+- L1334: `${coveragePreview.map((item) => \``
+- L1359: `<p class="research-section-copy">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>`
+- L1578: `<p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>`
+- L1583: `<button class="btn ghost" type="button" data-research-open>Open AI Workspace Review</button>`
+- L1590: `<span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>`
+
+## Destructive / Execution Signals
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L393: `triggers: normalizeStringList(pickFirst(meta.buying_triggers, meta.triggers)),`
+- L506: `whyNow: firstNonEmpty(meta.why_buy_now, meta.urgency, meta.trigger)`
+- L665: `function startResearchHydration({`
+- L742: `prompt: \`Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.\``
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L760: `prompt: \`Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.\``
+- L877: `startResearchHydration({`
+- L886: `showMessage?.("Research intelligence refresh started.");`
+- L899: `button.onclick = async () => {`
+- L955: `? \`Use the current research intelligence for ${projectName || "this project"} to build a focused campaign direction. Start with ${model.marketOpportunities[0]?.title || "the strongest opportunity"} and account for ${model.risks[0]?.title || "current research risks"}.\``
+- L1105: `eyebrow: "Execute & Grow",`
+- L1145: `startResearchHydration({`
+- L1194: `{ label: "Triggers", value: item.triggers.join(", ") || "Not mapped yet" }`
+- L1523: `<button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>`
+
+## Confirmation Signals
+- none
+
+## Navigation Signals
+- L5: `const ACTION_ROUTES = {`
+- L6: `campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },`
+- L7: `content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },`
+- L8: `seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },`
+- L9: `ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },`
+- L10: `ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }`
+- L86: `<div class="data-row"><span>Route map</span><strong>${escapeHtml(Object.values(ACTION_ROUTES).map((item) => \`${item.label}: ${titleCase(item.destinationRole)}\`).join(" • "))}</strong></div>`
+- L543: `routeTarget:`
+- L544: `lane === "seo" ? ACTION_ROUTES.seo :`
+- L545: `lane === "ads" ? ACTION_ROUTES.ads :`
+- L546: `lane === "content" ? ACTION_ROUTES.content :`
+- L547: `ACTION_ROUTES.campaign`
+- L851: `navigateTo,`
+- L894: `navigateTo("ai-command");`
+- L913: `routeSuggestions: []`
+- L921: `destination_role: ACTION_ROUTES.ai.destinationRole,`
+- L923: `destination_service_domain: ACTION_ROUTES.ai.destinationDomain,`
+- L931: `routeSuggestions: []`
+- L937: `navigateTo("ai-command");`
+- L946: `const routeButtons = Array.from(document.querySelectorAll("[data-research-route]"));`
+- L947: `routeButtons.forEach((button) => {`
+- L949: `const target = button.getAttribute("data-research-route") || "";`
+- L950: `const action = ACTION_ROUTES[target];`
+- L966: `destination_page: action.route,`
+- L974: `source: "research-route",`
+- L975: `route_target: action.route,`
+- L981: `setSharedHandoff(projectName, action.route, handoff);`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L987: `navigateTo(action.route);`
+- L991: `navigateTo(action.route);`
+- L994: `showMessage?.(\`Research handoff routed to ${action.label}.\`);`
+- L1005: `\`Operationalize this opportunity for ${projectName || "this project"}: ${item.title}. Context: ${item.summary}. Build a short action plan for ${item.routeTarget.label}.\``
+- L1007: `navigateTo(item.routeTarget.route);`
+- L1008: `showMessage?.(\`Opportunity handoff routed to ${item.routeTarget.label}.\`);`
+- L1090: `target: opportunity.routeTarget.label,`
+- L1101: `export const researchRoute = {`
+- L1119: `navigateTo,`
+- L1137: `navigateTo,`
+- L1520: `<span>Best route</span>`
+- L1521: `<strong>${escapeHtml(item.routeTarget.label)}</strong>`
+- L1523: `<button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>`
+- L1564: `<button class="quick-action-btn" type="button" data-research-route="campaign">Route to Campaign Studio</button>`
+- L1565: `<button class="quick-action-btn" type="button" data-research-route="content">Route to Content Studio</button>`
+- L1566: `<button class="quick-action-btn" type="button" data-research-route="seo">Route to SEO Workflow</button>`
+- L1567: `<button class="quick-action-btn" type="button" data-research-route="ads">Route to Ads Manager</button>`
+- L1584: `<button class="btn btn-secondary" type="button" data-research-route="ai">Route to AI Workspace</button>`
+- L1601: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L101: `function joinPreview(values, fallback, maxItems = 3) {`
+- L152: `normalized.includes("blocked")`
+- L644: `noteDraft: {`
+- L723: `preview: "Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.",`
+- L729: `preview: "Rank the most attractive market gaps by speed to test, upside, and defensibility.",`
+- L735: `preview: "Build a sharper positioning angle against the current competitor landscape.",`
+- L741: `preview: "Turn current research into target topics, landing pages, clusters, and low-competition search plays.",`
+- L747: `preview: "Translate audience and search intelligence into topics, hooks, formats, and calls to action.",`
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L759: `preview: "Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.",`
+- L908: `draft_context: {`
+- L926: `draft_context: {`
+- L1018: `session.noteDraft.title = event.target.value || "";`
+- L1024: `session.noteDraft.body = event.target.value || "";`
+- L1030: `session.noteDraft.tags = event.target.value || "";`
+- L1037: `if (!session.noteDraft.title.trim() && !session.noteDraft.body.trim()) {`
+- L1044: `title: session.noteDraft.title.trim() || "Untitled research finding",`
+- L1045: `body: session.noteDraft.body.trim() || "Observation captured without additional detail.",`
+- L1046: `tags: normalizeStringList(session.noteDraft.tags.split(",")),`
+- L1051: `session.noteDraft = { title: "", body: "", tags: "" };`
+- L1157: `const coveragePreview = model.sourceCoverage.slice(0, 6);`
+- L1236: `meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"`
+- L1332: `coveragePreview.length`
+- L1334: `${coveragePreview.map((item) => \``
+- L1423: `<input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />`
+- L1424: `<textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>`
+- L1425: `<input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />`
+- L1590: `<span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>`
+
+## Risky Terms
+- L1: `import { setSharedHandoff } from "../shared-context.js";`
+- L15: `reviewRole: "strategist"`
+- L78: `const handoffsByRole = asObject(operations.handoffs?.by_role);`
+- L79: `const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);`
+- L85: `<div class="data-row"><span>Review owner</span><strong>${escapeHtml(titleCase(RESEARCH_ROLE_DEFAULTS.reviewRole))}</strong></div>`
+- L87: `<div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>`
+- L88: `<div class="data-row"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>`
+- L101: `function joinPreview(values, fallback, maxItems = 3) {`
+- L125: `function getPath(source, path) {`
+- L126: `if (!source || !path) return undefined;`
+- L127: `return path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), source);`
+- L130: `function getFirstPath(sources, paths, fallback = null) {`
+- L132: `for (const source of sources) {`
+- L133: `const value = getPath(source, path);`
+- L245: `function buildSourceCoverage(integrations, insights) {`
+- L247: `const sources = asObject(integrations?.sources?.sources);`
+- L257: `const fromIntegrations = Object.keys({ ...sources, ...readinessChecks }).map((id) => {`
+- L258: `const source = asObject(sources[id]);`
+- L259: `const connected = Boolean(readinessChecks[id] || asString(source.value).trim());`
+- L265: `? firstNonEmpty(source.value, "Connected and available for research enrichment.")`
+- L307: `const sourceCoverage = buildSourceCoverage(integrations, insights);`
+- L308: `const researchSources = [`
+- L341: `getFirstPath(researchSources, [`
+- L346: `getFirstPath(researchSources, [`
+- L370: `getFirstPath(researchSources, [`
+- L400: `getFirstPath(researchSources, [`
+- L407: `getFirstPath(researchSources, [`
+- L420: `platform: firstNonEmpty(meta.platform, meta.channel, meta.source)`
+- L424: `const seoSource = asObject(getFirstPath(researchSources, ["seo"], {}));`
+- L427: `seoSource.opportunities,`
+- L428: `seoSource.recommendations,`
+- L429: `seoSource.keywords,`
+- L430: `seoSource.top_queries,`
+- L431: `seoSource.queries,`
+- L432: `getFirstPath(researchSources, ["keyword_research", "seo.keywords"], [])`
+- L450: `seoSource.long_tail_ideas,`
+- L451: `seoSource.long_tail_keywords,`
+- L452: `seoSource.query_expansions`
+- L458: `seoSource.content_themes,`
+- L459: `seoSource.themes,`
+- L467: `seoSource.missing_clusters,`
+- L468: `seoSource.content_gaps,`
+- L475: `seoSource.top_pages_to_optimize,`
+- L476: `seoSource.pages_to_optimize,`
+- L477: `seoSource.ctr_opportunities,`
+- L478: `seoSource.ranking_opportunities`
+- L484: `getFirstPath(researchSources, [`
+- L513: `getFirstPath(researchSources, ["opportunities", "opportunity_map"], []),`
+- L556: `getFirstPath(researchSources, ["updated_at"], ""),`
+- L567: `...sourceCoverage.filter((item) => statusTone(item.status) !== "success").slice(0, 4).map((item) => \`${item.label} coverage\`)`
+- L575: `source: "Opportunity map"`
+- L581: `source: "Readiness / insight signal"`
+- L587: `source: "SEO intelligence"`
+- L626: `sourceCoverage,`
+- L649: `savedFindings: [],`
+- L650: `savedRecommendations: [],`
+- L723: `preview: "Executive summary across competitors, audience, market, SEO, offers, risks, and next strategic decisions.",`
+- L729: `preview: "Rank the most attractive market gaps by speed to test, upside, and defensibility.",`
+- L735: `preview: "Build a sharper positioning angle against the current competitor landscape.",`
+- L741: `preview: "Turn current research into target topics, landing pages, clusters, and low-competition search plays.",`
+- L742: `prompt: \`Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.\``
+- L747: `preview: "Translate audience and search intelligence into topics, hooks, formats, and calls to action.",`
+- L753: `preview: "Generate ad hypotheses, audience emphasis, and first creative tests from the research base.",`
+- L759: `preview: "Stress-test the launch plan and highlight missing intelligence, mitigation steps, and ownership.",`
+- L760: `prompt: \`Review ${projectLabel} research and identify the key risks before launch. Start with ${topRisk}. Include mitigation steps, missing intelligence, and which teams should act next.\``
+- L841: `function savePromptToQuickCommand($, prompt) {`
+- L856: `createProjectHandoff,`
+- L899: `button.onclick = async () => {`
+- L903: `setSharedHandoff(projectName, "ai-command", {`
+- L904: `source_page: "research",`
+- L917: `createProjectHandoff?.(projectName, {`
+- L918: `source_page: "research",`
+- L920: `source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,`
+- L922: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L935: `console.warn("Failed to persist research AI handoff:", error.message);`
+- L938: `savePromptToQuickCommand($, prompt.prompt);`
+- L962: `: \`Save this research intelligence for ${projectName || "this project"} and convert it into structured recommendations: opportunities ${model.marketOpportunities.map((item) => item.title).join(", ") || "pending"}, risks ${model.risks.map((item) => item.title).join(", ") || "pending"}.\`;`
+- L964: `const handoff = {`
+- L965: `source_page: "research",`
+- L967: `source_role: RESEARCH_ROLE_DEFAULTS.ownerRole,`
+- L969: `source_service_domain: RESEARCH_ROLE_DEFAULTS.serviceDomain,`
+- L974: `source: "research-route",`
+- L977: `review_role: RESEARCH_ROLE_DEFAULTS.reviewRole,`
+- L981: `setSharedHandoff(projectName, action.route, handoff);`
+- L982: `createProjectHandoff?.(projectName, handoff).catch((error) => {`
+- L983: `console.warn("Failed to persist research route handoff:", error.message);`
+- L988: `savePromptToQuickCommand($, prompt);`
+- L990: `savePromptToQuickCommand($, prompt);`
+- L994: `showMessage?.(\`Research handoff routed to ${action.label}.\`);`
+- L1003: `savePromptToQuickCommand(`
+- L1008: `showMessage?.(\`Opportunity handoff routed to ${item.routeTarget.label}.\`);`
+- L1034: `const saveNoteBtn = $("researchSaveFindingBtn");`
+- L1035: `if (saveNoteBtn) {`
+- L1036: `saveNoteBtn.onclick = () => {`
+- L1042: `session.savedFindings.unshift({`
+- L1047: `source: "Manual note",`
+- L1050: `session.savedFindings = session.savedFindings.slice(0, 18);`
+- L1053: `showMessage?.("Research finding saved.");`
+- L1057: `const saveBlockButtons = Array.from(document.querySelectorAll("[data-save-research-block]"));`
+- L1058: `saveBlockButtons.forEach((button) => {`
+- L1060: `const item = model.autoFindings[Number(button.getAttribute("data-save-research-block"))];`
+- L1062: `session.savedFindings.unshift({`
+- L1067: `source: item.source,`
+- L1070: `session.savedFindings = uniqueBy(session.savedFindings, (entry) => \`${entry.title}:${entry.source}\`);`
+- L1071: `session.savedFindings = session.savedFindings.slice(0, 18);`
+- L1073: `showMessage?.("Reusable intelligence block saved.");`
+- L1077: `const saveRecommendationBtn = $("researchSaveRecommendationBtn");`
+- L1078: `if (saveRecommendationBtn) {`
+- L1079: `saveRecommendationBtn.onclick = () => {`
+- L1082: `showError?.("No structured opportunity is ready to save yet.");`
+- L1086: `session.savedRecommendations.unshift({`
+- L1093: `session.savedRecommendations = uniqueBy(session.savedRecommendations, (item) => \`${item.title}:${item.target}\`);`
+- L1094: `session.savedRecommendations = session.savedRecommendations.slice(0, 12);`
+- L1096: `showMessage?.("Structured recommendation saved.");`
+- L1105: `eyebrow: "Execute & Grow",`
+- L1107: `description: "Evidence-backed market intelligence for opportunities, risks, and destination-ready handoffs."`
+- L1124: `createProjectHandoff`
+- L1142: `createProjectHandoff`
+- L1157: `const coveragePreview = model.sourceCoverage.slice(0, 6);`
+- L1224: `<p class="research-section-copy">Keep this workspace focused on what evidence exists, what is missing, and which destination should receive the next research handoff.</p>`
+- L1236: `meta: model.activeResearchAreas.length ? joinPreview(model.activeResearchAreas, "Waiting for structured inputs", 4) : "Waiting for structured inputs"`
+- L1332: `coveragePreview.length`
+- L1334: `${coveragePreview.map((item) => \``
+- L1399: `${model.longTailIdeas.length ? \`<div class="research-chip-groups"><div class="research-chip-row">${model.longTailIdeas.slice(0, 12).map((item) => \`<span class="research-chip">${escapeHtml(item)}</span>\`).join("")}</div></div>\` : \`<div class="empty-box">No long-tail ideas saved yet.</div>\`}`
+- L1416: `<h3>Evidence Notes / Saved Findings</h3>`
+- L1419: `<span class="card-badge neutral">${escapeHtml(\`${session.savedFindings.length} saved\`)}</span>`
+- L1426: `<button id="researchSaveFindingBtn" class="btn btn-primary" type="button">Save Finding</button>`
+- L1430: `<h4 class="insights-subtitle">Saved findings</h4>`
+- L1432: `session.savedFindings.length`
+- L1433: `? \`<div class="research-saved-list">`
+- L1434: `${session.savedFindings.slice(0, 6).map((item) => \``
+- L1441: `<span class="card-badge neutral">${escapeHtml(item.source)}</span>`
+- L1452: `: \`<div class="empty-box">No saved findings yet. Use the composer or save one of the reusable insight blocks below.</div>\``
+- L1459: `? \`<div class="research-saved-list">`
+- L1467: `<span class="card-badge neutral">${escapeHtml(item.source)}</span>`
+- L1473: `<button class="quick-action-btn research-inline-action" type="button" data-save-research-block="${index}">Save Block</button>`
+- L1491: `<span class="card-badge neutral">${escapeHtml(\`${session.savedRecommendations.length} saved\`)}</span>`
+- L1523: `<button class="quick-action-btn" type="button" data-research-opportunity="${index}">Send to ${escapeHtml(item.routeTarget.label)}</button>`
+- L1538: `<h4 class="insights-subtitle">Saved recommendation</h4>`
+- L1539: `<button id="researchSaveRecommendationBtn" class="btn btn-primary" type="button">Save Recommendation</button>`
+- L1541: `session.savedRecommendations.length`
+- L1542: `? \`<div class="research-saved-list" style="margin-top:16px;">`
+- L1543: `${session.savedRecommendations.slice(0, 4).map((item) => \``
+- L1558: `: \`<div class="empty-box" style="margin-top:16px;">Save a structured recommendation to keep the best next move accessible for later routing.</div>\``
+- L1562: `<h4 class="insights-subtitle">Destination handoffs</h4>`
+- L1578: `<p class="research-section-copy">Use AI to turn current evidence into a review-ready research brief. AI should deepen the analysis, not replace saved findings or destination handoffs.</p>`
+- L1583: `<button class="btn ghost" type="button" data-research-open>Open AI Workspace Review</button>`
+- L1590: `<span class="home-action-meta" title="${escapeHtml(item.prompt)}">${escapeHtml(item.preview || compactText(item.prompt, 18, ""))}</span>`
+- L1606: `createProjectHandoff,`
+
+## Required Manual Classification
+Before any patch, classify exact user-facing action paths into:
+
+1. Read-only research projection
+2. Local filter/view state only
+3. Local draft/cache only
+4. Backend source/library/content persistence
+5. Backend research or AI execution
+6. Task creation
+7. Approval/governance creation
+8. Library handoff
+9. Content/Campaign/AI Command handoff
+10. Navigation only
+11. Unknown / needs deeper inspection
+
+## Decision Rule
+- If Research is read-only/projection/handoff-only, close with no patch.
+- If backend mutation exists without confirmation, create a narrow patch.
+- If AI/backend execution exists without confirmation, create a narrow patch.
+- If handoff creates backend records without confirmation, create a narrow patch.
+- Do not redesign Research in this pass.
