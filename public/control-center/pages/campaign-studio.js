@@ -503,18 +503,20 @@ function persistCampaignRouteHandoff({ projectName, session, destinationPage, cr
     }
   };
 
-  setSharedHandoff(projectName, destinationPage, handoff);
-
   if (!confirmCampaignStudioAuthorityAction(
     "Create campaign route handoff",
-    `This will create a backend handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
+    `This will create a campaign handoff from Campaign Studio to ${destinationPage} for review and execution preparation.`
   )) {
-    return;
+    return false;
   }
+
+  setSharedHandoff(projectName, destinationPage, handoff);
 
   createProjectHandoff?.(projectName, handoff).catch((error) => {
     console.warn("Failed to persist campaign route handoff:", error.message);
   });
+
+  return true;
 }
 
 function scheduleCampaignPersistence(projectName, session, saveProjectCampaign) {
@@ -1362,6 +1364,14 @@ function bindCampaignStudio({
       if (input) {
         input.value = prompt;
       }
+      if (!confirmCampaignStudioAuthorityAction(
+        "Create AI Command campaign handoff",
+        "This will create a campaign handoff from Campaign Studio to AI Command for review and planning support."
+      )) {
+        showMessage?.("AI Command handoff cancelled.");
+        return;
+      }
+
       setSharedHandoff(projectName, "ai-command", {
         source_page: "campaign-studio",
         destination_page: "ai-command",
@@ -1373,13 +1383,6 @@ function bindCampaignStudio({
         },
         status: "available"
       });
-      if (!confirmCampaignStudioAuthorityAction(
-        "Create AI Command campaign handoff",
-        "This will create a backend handoff from Campaign Studio to AI Command for review and planning support."
-      )) {
-        showMessage?.("AI Command handoff cancelled.");
-        return;
-      }
 
       createProjectHandoff?.(projectName, {
         source_page: "campaign-studio",
@@ -1412,8 +1415,8 @@ function bindCampaignStudio({
   const publishingBtn = $("campaignOpenPublishingBtn");
   if (publishingBtn) {
     publishingBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
-      navigateTo("publishing");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+      if (accepted) navigateTo("publishing");
     };
   }
 
@@ -1425,24 +1428,24 @@ function bindCampaignStudio({
   const contentBtn = $("campaignOpenContentStudioBtn");
   if (contentBtn) {
     contentBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
-      navigateTo("content-studio");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+      if (accepted) navigateTo("content-studio");
     };
   }
 
   const mediaBtn = $("campaignOpenMediaStudioBtn");
   if (mediaBtn) {
     mediaBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
-      navigateTo("media-studio");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+      if (accepted) navigateTo("media-studio");
     };
   }
 
   const adsBtn = $("campaignOpenAdsManagerBtn");
   if (adsBtn) {
     adsBtn.onclick = () => {
-      persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
-      navigateTo("ads-manager");
+      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+      if (accepted) navigateTo("ads-manager");
     };
   }
 
