@@ -3362,6 +3362,13 @@ function bindMediaStudio({
   if (headerSaveLibraryBtn) {
     headerSaveLibraryBtn.onclick = async () => {
       sync();
+
+      const confirmed = confirmMediaAuthorityAction(
+        "Confirm Library save",
+        "Action: Save this media version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+      );
+      if (!confirmed) return;
+
       await saveVersionToLibrary({
         projectName,
         backendProjectName,
@@ -3466,6 +3473,12 @@ function bindMediaStudio({
         return;
       }
       if (action === "save-library") {
+        const confirmed = confirmMediaAuthorityAction(
+          "Confirm Library save",
+          "Action: Save this selected version as a Library handoff.\nRisk: This may create a durable Library handoff record for review and reuse. It does not publish directly."
+        );
+        if (!confirmed) return;
+
         await saveVersionToLibrary({
           projectName,
           backendProjectName,
