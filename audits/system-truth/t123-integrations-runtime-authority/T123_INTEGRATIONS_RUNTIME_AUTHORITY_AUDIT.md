@@ -1,0 +1,1788 @@
+# T123 — Integrations Runtime Authority Audit
+
+## Status
+Audit-only. No production files changed.
+
+## Scope
+Focused runtime authority review of `public/control-center/pages/integrations.js`.
+
+## Why Integrations Is Next
+After Campaign Studio was closed, Integrations is the next high-risk active surface from the remaining T88 ranking.
+
+Integrations may contain provider credentials, connector reconnect/disconnect, sync/import actions, webhooks, approval-required flows, and provider execution gates.
+
+## File Summary
+- File: `public/control-center/pages/integrations.js`
+- Lines: 1992
+- Imports: 4
+- Render writes: 1
+- Event bindings: 15
+- Backend/API signals: 503
+- Integration mutation signals: 451
+- Credential signals: 101
+- Governance/approval signals: 112
+- Provider execution signals: 255
+- Handoff signals: 5
+- AI signals: 176
+- Confirmation signals: 2
+- Local/session storage signals: 22
+- Navigation signals: 9
+- Disabled/read-only/draft/guard signals: 34
+- Risky terms: 798
+
+## Initial Risk Notes
+- Integrations contains connector mutation signals. Exact connect/disconnect/reconnect/sync/import paths must be classified.
+- Integrations contains credential/token/API-key signals. Need verify credentials are never exposed or silently changed.
+- Integrations contains Governance/approval signals. Need verify protected connector actions route through approval lifecycle.
+- Confirmation dialogs exist and must be mapped to authority-sensitive connector actions.
+
+## Imports
+- L1: `import {`
+- L19: `import { renderIntegrationDrawer } from "./integrations/drawer.js";`
+- L21: `import {`
+- L26: `import {`
+
+## Render Writes
+- L1770: `root.innerHTML = \``
+
+## Event Bindings
+- L147: `whyItMatters: "Facebook insights help the system understand what posts drive reach, clicks, and downstream action.",`
+- L311: `purpose: "Search performance, queries, clicks, CTR, impressions, and SEO opportunity intelligence.",`
+- L313: `enables: "Queries, clicks, CTR, positions, top pages, and SEO opportunity analysis.",`
+- L1276: `button.onclick = () => {`
+- L1286: `button.onclick = async () => {`
+- L1308: `input.oninput = (event) => {`
+- L1347: `select.onchange = (event) => {`
+- L1354: `select.onchange = (event) => {`
+- L1361: `input.oninput = (event) => {`
+- L1368: `button.onclick = () => {`
+- L1377: `button.onclick = () => {`
+- L1631: `button.onclick = async () => {`
+- L1653: `button.onclick = () => {`
+- L1666: `document.removeEventListener("keydown", integrationDrawerEscapeHandler);`
+- L1675: `document.addEventListener("keydown", integrationDrawerEscapeHandler);`
+
+## Backend / API Signals
+- L1: `import {`
+- L3: `buildConnectorWorkspaceGroups,`
+- L7: `buildIntegrationActivityFeed,`
+- L8: `buildIntegrationCardModel,`
+- L9: `buildIntegrationOverviewSummary,`
+- L15: `CONNECTOR_WORKSPACE_CATEGORIES,`
+- L16: `getConnectorWorkspaceStatus`
+- L17: `} from "./integrations/builders.js";`
+- L19: `import { renderIntegrationDrawer } from "./integrations/drawer.js";`
+- L21: `import {`
+- L22: `renderConnectorGroup,`
+- L23: `renderSelectedConnectorSummary`
+- L24: `} from "./integrations/cards.js";`
+- L26: `import {`
+- L28: `renderIntegrationActivityFeed,`
+- L29: `renderIntegrationCoverageMap,`
+- L30: `renderIntegrationCriticalMissing,`
+- L31: `renderIntegrationDiagnosticsList,`
+- L32: `renderIntegrationRecommendationsList`
+- L33: `} from "./integrations/render.js";`
+- L35: `const integrationSessions = new Map();`
+- L36: `let integrationDrawerEscapeHandler = null;`
+- L37: `const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);`
+- L39: `const INTEGRATION_DOMAINS = [`
+- L44: `integrations: [`
+- L59: `{ key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },`
+- L68: `purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",`
+- L70: `enables: "Product sync, order sync, sales signals, and commerce intelligence.",`
+- L72: `permissionScope: "Store URL + API consumer key/secret",`
+- L86: `purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",`
+- L88: `enables: "Product sync, order sync, customer sync, and sales reporting.",`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L107: `enables: "Listing sync, sales signals, performance by product, and marketplace learning.",`
+- L109: `permissionScope: "Merchant ID + SP-API credentials",`
+- L122: `purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",`
+- L124: `enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",`
+- L140: `integrations: [`
+- L164: `purpose: "Post, reel, and profile insight sync for Instagram business performance.",`
+- L168: `permissionScope: "Business account ID + Graph API token",`
+- L182: `purpose: "Video and post insight sync for TikTok creative and audience performance.",`
+- L200: `purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",`
+- L236: `integrations: [`
+- L329: `purpose: "Future-ready import endpoint for internal or custom analytics feeds.",`
+- L331: `enables: "Custom event ingest, proprietary reporting, and historical import.",`
+- L336: `{ key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },`
+- L338: `{ key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }`
+- L346: `description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",`
+- L347: `integrations: [`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L364: `{ key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L373: `label: "Mailer Integration",`
+- L375: `purpose: "Provider-specific email platform integration for campaigns and audience workflows.",`
+- L376: `whyItMatters: "A mailer integration improves sending reliability, segmentation, and performance tracking.",`
+- L377: `enables: "Campaign sends, audience sync, templates, and performance reporting.",`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L380: `primaryField: "providerName",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L383: `{ key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L394: `enables: "Audience sync, campaigns, lists, and newsletter reporting.",`
+- L396: `permissionScope: "Audience ID + API key",`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L409: `label: "CRM Integration",`
+- L411: `purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",`
+- L413: `enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",`
+- L415: `permissionScope: "CRM account ID + API token",`
+- L419: `{ key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },`
+- L428: `description: "Paid campaign accounts, spend import, creative performance, and optimization signals.",`
+- L429: `integrations: [`
+- L437: `enables: "Spend sync, campaign import, creative performance, and paid optimization.",`
+- L455: `enables: "Spend sync, campaign import, keyword performance, and paid optimization.",`
+- L473: `enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",`
+- L489: `integrations: [`
+- L495: `purpose: "File sync and shared asset operations through Google Drive.",`
+- L497: `enables: "Asset sync, doc sync, shared files, and automation inputs.",`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L514: `enables: "Alerts, approvals, sync notifications, and workflow coordination.",`
+- L548: `enables: "Docs sync, planning sync, task context, and knowledge reuse.",`
+- L550: `permissionScope: "Workspace + integration token",`
+- L555: `{ key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }`
+- L559: `id: "zapier-make",`
+- L561: `label: "Zapier / Make",`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L565: `enables: "Workflow automation, triggers, sync jobs, and handoffs.",`
+- L566: `dataScope: ["Automations", "Triggers", "Sync jobs"],`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L580: `purpose: "Internal system-to-system webhook integration for custom workflows and events.",`
+- L582: `enables: "Custom events, syncs, notifications, and system handoffs.",`
+- L583: `dataScope: ["Custom events", "Payloads", "Sync triggers"],`
+- L588: `{ key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },`
+- L633: `function getAllIntegrations() {`
+- L634: `return INTEGRATION_DOMAINS.flatMap((domain) =>`
+- L635: `domain.integrations.map((integration) => ({`
+- L636: `...integration,`
+- L643: `function getIntegrationById(integrationId) {`
+- L644: `return getAllIntegrations().find((item) => item.id === integrationId) || null;`
+- L649: `if (!integrationSessions.has(key)) {`
+- L650: `integrationSessions.set(key, {`
+- L652: `selectedIntegrationId: "",`
+- L656: `activeDrawerIntegrationId: "",`
+- L658: `drawerOriginIntegrationId: "",`
+- L660: `restoreFocusIntegrationId: "",`
+- L662: `validationIntegrationId: "",`
+- L667: `return integrationSessions.get(key);`
+- L694: `function getIntegrationsScrollTarget() {`
+- L699: `const page = document.querySelector('[data-page="integrations"]');`
+- L714: `function captureIntegrationsScrollState() {`
+- L715: `const target = getIntegrationsScrollTarget();`
+- L730: `function restoreIntegrationsScrollState(scrollState) {`
+- L734: `const target = getIntegrationsScrollTarget();`
+- L749: `function openIntegrationDrawer(session, integrationId) {`
+- L750: `session.selectedIntegrationId = integrationId || "";`
+- L751: `session.activeDrawerIntegrationId = integrationId || "";`
+- L752: `session.drawerOpen = Boolean(integrationId);`
+- L753: `session.drawerOriginIntegrationId = integrationId || "";`
+- L754: `session.drawerOriginScrollState = captureIntegrationsScrollState();`
+- L757: `function closeIntegrationDrawer(session) {`
+- L758: `const closedIntegrationId = session.activeDrawerIntegrationId || session.selectedIntegrationId || "";`
+- L761: `session.activeDrawerIntegrationId = "";`
+- L762: `session.selectedIntegrationId = closedIntegrationId || session.selectedIntegrationId;`
+- L763: `session.restoreFocusIntegrationId = closedIntegrationId;`
+- L764: `session.restoreScrollState = session.drawerOriginScrollState || captureIntegrationsScrollState();`
+- L766: `session.validationIntegrationId = "";`
+- L771: `function restoreConnectorContext(session) {`
+- L776: `const targetIntegrationId = asString(session.restoreFocusIntegrationId || session.selectedIntegrationId);`
+- L779: `if (!targetIntegrationId && !restoreState) {`
+- L783: `session.restoreFocusIntegrationId = "";`
+- L787: `restoreIntegrationsScrollState(restoreState);`
+- L789: `if (!targetIntegrationId) return;`
+- L791: `const selector = \`[data-integration-select="${targetIntegrationId}"]\`;`
+- L798: `const row = trigger.closest(".integration-control-row");`
+- L806: `function setIntegrationValidation(session, integrationId, fieldKey, message) {`
+- L807: `session.validationIntegrationId = integrationId || "";`
+- L812: `function clearIntegrationValidation(session, integrationId, fieldKey) {`
+- L813: `const sameIntegration = !integrationId || session.validationIntegrationId === integrationId;`
+- L815: `if (!sameIntegration || !sameField) return;`
+- L816: `session.validationIntegrationId = "";`
+- L842: `function getSuggestedFieldValue(state, integration, field) {`
+- L849: `if (integration.id === "website" && field.key === "url") {`
+- L852: `if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {`
+- L859: `if (integration.id === "woocommerce" && field.key === "storeUrl") {`
+- L862: `if (integration.id === "search-console" && field.key === "propertyUrl") {`
+- L865: `if (integration.id === "search-console" && field.key === "siteDomain" && hostname) {`
+- L868: `if (integration.id === "mailer" && field.key === "senderDomain") {`
+- L875: `function getResolvedFieldValue(state, session, integration, field, record, sourceValue) {`
+- L876: `const draft = ensureDraft(session, integration.id);`
+- L879: `const suggested = getSuggestedFieldValue(state, integration, field);`
+- L880: `if (field.key === integration.primaryField) {`
+- L886: `function getQuickConnectLabel(integration) {`
+- L887: `if (["ga4", "gtm", "search-console", "youtube", "google-ads", "google-drive"].includes(integration.id)) {`
+- L890: `if (["facebook", "instagram", "meta-pixel", "meta-ads"].includes(integration.id)) {`
+- L893: `if (integration.id === "shopify") {`
+- L900: `if (card.backendSupported === false) return "Open connector setup";`
+- L903: `if (card.statusLabel === "Token expired") return "Reconnect integration";`
+- L904: `if (card.statusLabel === "Error") return "Repair integration connection";`
+- L908: `function hasSavedCredentialState(card) {`
+- L910: `const credentialState = asObject(card.credential_state);`
+- L913: `return authFields.every((field) => Boolean(asObject(credentialState[field]).is_set));`
+- L916: `function shouldUseReconnectAction(card) {`
+- L919: `return hasSavedCredentialState(card);`
+- L924: `return { action: "select", label: "Open connector setup" };`
+- L927: `return { action: "sync", label: "Run backend sync" };`
+- L929: `if (shouldUseReconnectAction(card)) {`
+- L930: `return { action: "reconnect", label: getSmartConnectLabel(card) };`
+- L935: `function ensureDraft(session, integrationId) {`
+- L936: `if (!session.drafts[integrationId]) {`
+- L937: `session.drafts[integrationId] = {};`
+- L939: `return session.drafts[integrationId];`
+- L942: `function clearDraft(session, integrationId) {`
+- L943: `delete session.drafts[integrationId];`
+- L946: `function setFieldValue(session, integrationId, fieldKey, value) {`
+- L947: `const draft = ensureDraft(session, integrationId);`
+- L955: `function requiresCredential(integration) {`
+- L956: `if (!integration?.fields?.some(isSecretField)) {`
+- L960: `return !["website"].includes(integration.id);`
+- L963: `function shouldSyncLegacySource(integration) {`
+- L980: `].includes(integration.id);`
+- L984: `return asObject(asObject(state.data?.integrations).control_center);`
+- L992: `return asObject(asObject(asObject(state.data?.integrations).sources).sources);`
+- L995: `function getLegacySourceValue(integration, sources) {`
+- L996: `const source = asObject(sources[integration.sourceKey]);`
+- L1000: `function inferScopeKeys(integration) {`
+- L1002: `integration.label,`
+- L1003: `integration.purpose,`
+- L1004: `integration.enables,`
+- L1005: `...asArray(integration.dataScope)`
+- L1023: `function getIntegrationAccessModel(integration) {`
+- L1024: `const scopeKeys = inferScopeKeys(integration);`
+- L1026: `if (integration.domainId === "social") {`
+- L1033: `if (integration.domainId === "website-commerce") {`
+- L1034: `if (integration.id === "website") {`
+- L1043: `write: ["catalog sync", "commerce updates"]`
+- L1047: `if (integration.domainId === "analytics") {`
+- L1054: `if (integration.domainId === "email-crm") {`
+- L1057: `write: ["campaign sends", "audience sync"]`
+- L1061: `if (integration.domainId === "ads") {`
+- L1074: `function getServerRecord(state, integration) {`
+- L1075: `const record = asObject(getControlCenterRecords(state)[integration.id]);`
+- L1076: `if (record.integration_id) {`
+- L1080: `return buildLegacyFallbackRecord(integration, state, {`
+- L1081: `shouldSyncLegacySource,`
+- L1084: `getIntegrationAccessModel,`
+- L1091: `function getFieldValue(session, integration, field, record, sourceValue, suggestedValue = "") {`
+- L1092: `const draft = ensureDraft(session, integration.id);`
+- L1095: `if (field.key === integration.primaryField) {`
+- L1101: `function hasSavedServerCredential(record, fieldKey) {`
+- L1102: `return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);`
+- L1105: `function hasSavedServerRequiredField(record, integration, field) {`
+- L1109: `return hasSavedServerCredential(record, field.key);`
+- L1117: `if (field.key === integration.primaryField) {`
+- L1124: `function getTestPreflightIssue(integration, record) {`
+- L1125: `if (!integration || !record) {`
+- L1129: `if (integration.id === "woocommerce") {`
+- L1135: `"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."`
+- L1140: `const missingRequired = integration.fields`
+- L1142: `.filter((field) => !hasSavedServerRequiredField(record, integration, field));`
+- L1151: `"Save or repair this integration before running a connection test. The test uses the saved server-side configuration."`
+- L1155: `function getLocalFillCount(session, integration, record, sourceValue, state) {`
+- L1156: `return integration.fields.filter((field) => {`
+- L1157: `const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();`
+- L1158: `return Boolean(value) || (isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1162: `function getRequiredMissing(session, integration, record, sourceValue, state) {`
+- L1163: `return integration.fields`
+- L1166: `const value = asString(getFieldValue(session, integration, field, record, sourceValue, getSuggestedFieldValue(state, integration, field))).trim();`
+- L1167: `return !value && !(isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1185: `function getHealthSummary(statusLabel, record, integration) {`
+- L1186: `if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {`
+- L1187: `return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";`
+- L1195: `return \`${integration.label} is connected and ready for provider-level sync actions.\`;`
+- L1201: `return "Reconnect the saved token before importing or syncing new data.";`
+- L1206: `return "This integration has not been configured yet.";`
+- L1209: `function getConnectorWorkspaceAction(card) {`
+- L1210: `const statusKey = getConnectorWorkspaceStatus(card);`
+- L1213: `return { label: "Open connector setup", action: "select" };`
+- L1218: `label: "Run backend sync",`
+- L1219: `action: "sync"`
+- L1225: `label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",`
+- L1226: `action: shouldUseReconnectAction(card) ? "reconnect" : "connect"`
+- L1247: `const input = document.querySelector(\`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]\`);`
+- L1258: `function bindIntegrationActions({`
+- L1265: `connectProjectIntegration,`
+- L1266: `reconnectProjectIntegration,`
+- L1267: `testProjectIntegration,`
+- L1268: `syncProjectIntegration,`
+- L1269: `importProjectIntegrationHistory,`
+- L1270: `disconnectProjectIntegration,`
+- L1275: `Array.from(document.querySelectorAll("[data-integration-select]")).forEach((button) => {`
+- L1277: `const integrationId = button.getAttribute("data-integration-select") || "";`
+- L1278: `const integration = getIntegrationById(integrationId);`
+- L1279: `openIntegrationDrawer(session, integrationId);`
+- L1280: `showMessage?.(\`Setup drawer opened for ${integration?.label || "connector"}.\`);`
+- L1285: `Array.from(document.querySelectorAll("[data-integration-primary]")).forEach((button) => {`
+- L1286: `button.onclick = async () => {`
+- L1287: `const action = button.getAttribute("data-integration-primary") || "";`
+- L1288: `const integrationId = button.getAttribute("data-integration-id") || "";`
+- L1289: `const integration = getIntegrationById(integrationId);`
+- L1290: `openIntegrationDrawer(session, integrationId);`
+- L1291: `showMessage?.(\`Setup drawer opened for ${integration?.label || "connector"}.\`);`
+- L1307: `Array.from(document.querySelectorAll("[data-integration-field]")).forEach((input) => {`
+- L1309: `const integrationId = input.getAttribute("data-integration-field") || "";`
+- L1312: `setFieldValue(session, integrationId, fieldKey, nextValue);`
+- L1314: `clearIntegrationValidation(session, integrationId, fieldKey);`
+- L1319: `Array.from(document.querySelectorAll("[data-integration-field-helper]")).forEach((helper) => {`
+- L1320: `const [integrationId, fieldKey] = asString(helper.getAttribute("data-integration-field-helper")).split(":");`
+- L1321: `const integration = getIntegrationById(integrationId);`
+- L1323: `const record = integration ? getServerRecord(state, integration) : {};`
+- L1324: `const field = integration?.fields?.find((item) => item.key === fieldKey);`
+- L1331: `if (isSecretField(field) && hasSavedServerCredential(record, field.key)) {`
+- L1336: `if (session.validationIntegrationId === integrationId && session.validationFieldKey === fieldKey && session.validationMessage) {`
+- L1346: `Array.from(document.querySelectorAll("[data-integration-category-filter]")).forEach((select) => {`
+- L1353: `Array.from(document.querySelectorAll("[data-integration-status-filter]")).forEach((select) => {`
+- L1360: `Array.from(document.querySelectorAll("[data-integration-search]")).forEach((input) => {`
+- L1367: `Array.from(document.querySelectorAll("[data-integration-drawer-close]")).forEach((button) => {`
+- L1369: `const closedIntegration = getIntegrationById(session.activeDrawerIntegrationId || session.selectedIntegrationId);`
+- L1370: `closeIntegrationDrawer(session);`
+- L1371: `showMessage?.(\`Setup drawer closed for ${closedIntegration?.label || "connector"}.\`);`
+- L1376: `Array.from(document.querySelectorAll("[data-integration-diagnostics]")).forEach((button) => {`
+- L1380: `domains: INTEGRATION_DOMAINS,`
+- L1381: `buildIntegrationCardModel: (integration, localSession, localState) => buildIntegrationCardModel(`
+- L1382: `integration,`
+- L1389: `unsupportedIntegrationIds: UNSUPPORTED_INTEGRATION_IDS,`
+- L1393: `getIntegrationAccessModel,`
+- L1412: `function buildConnectionPayload(integrationId) {`
+- L1413: `const integration = getIntegrationById(integrationId);`
+- L1414: `if (!integration) return null;`
+- L1417: `const record = getServerRecord(state, integration);`
+- L1418: `const draft = ensureDraft(session, integration.id);`
+- L1420: `const credentials = {};`
+- L1422: `integration.fields.forEach((field) => {`
+- L1423: `const resolvedValue = asString(getResolvedFieldValue(state, session, integration, field, record, getLegacySourceValue(integration, getLegacySources(state)))).trim();`
+- L1425: `if (field.key === integration.primaryField) {`
+- L1432: `credentials[field.key] = draftValue;`
+- L1445: `integration,`
+- L1446: `integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0],`
+- L1448: `getLegacySourceValue(integration, getLegacySources(state))`
+- L1451: `const accessModel = getIntegrationAccessModel(integration);`
+- L1454: `source_key: integration.sourceKey,`
+- L1455: `primary_field: integration.primaryField,`
+- L1458: `credentials,`
+- L1459: `auth_fields: integration.fields.filter(isSecretField).map((field) => field.key),`
+- L1460: `required_fields: integration.fields.filter((field) => field.required).map((field) => field.key),`
+- L1461: `requires_credentials: requiresCredential(integration),`
+- L1462: `data_scopes: inferScopeKeys(integration),`
+- L1465: `connection_method: integration.fields.some(isSecretField) ? "oauth_or_key" : "direct_config",`
+- L1466: `permission_scope: integration.permissionScope,`
+- L1467: `enables: integration.enables,`
+- L1468: `sync_source_registry: shouldSyncLegacySource(integration)`
+- L1472: `async function persistPrimary(integrationId, reconnect = false) {`
+- L1473: `const integration = getIntegrationById(integrationId);`
+- L1474: `if (!integration) return;`
+- L1475: `if (integration.backendSupported === false || UNSUPPORTED_INTEGRATION_IDS.has(integration.id)) {`
+- L1476: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1479: `const payload = buildConnectionPayload(integrationId);`
+- L1480: `const primaryField = integration.fields.find((field) => field.key === integration.primaryField) || integration.fields[0];`
+- L1484: `setIntegrationValidation(`
+- L1486: `integrationId,`
+- L1490: `openIntegrationDrawer(session, integrationId);`
+- L1492: `showError?.(\`Enter ${primaryField.label.toLowerCase()} before connecting ${integration.label}.\`);`
+
+## Integration Mutation Signals
+- L1: `import {`
+- L3: `buildConnectorWorkspaceGroups,`
+- L15: `CONNECTOR_WORKSPACE_CATEGORIES,`
+- L16: `getConnectorWorkspaceStatus`
+- L19: `import { renderIntegrationDrawer } from "./integrations/drawer.js";`
+- L21: `import {`
+- L22: `renderConnectorGroup,`
+- L23: `renderSelectedConnectorSummary`
+- L26: `import {`
+- L47: `sourceKey: "website",`
+- L50: `purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",`
+- L51: `whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",`
+- L58: `{ key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },`
+- L59: `{ key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },`
+- L60: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }`
+- L65: `sourceKey: "ecommerce",`
+- L68: `purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",`
+- L70: `enables: "Product sync, order sync, sales signals, and commerce intelligence.",`
+- L72: `permissionScope: "Store URL + API consumer key/secret",`
+- L76: `{ key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },`
+- L77: `{ key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },`
+- L78: `{ key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }`
+- L83: `sourceKey: "shopify",`
+- L88: `enables: "Product sync, order sync, customer sync, and sales reporting.",`
+- L90: `permissionScope: "Store domain + admin access token",`
+- L93: `{ key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },`
+- L94: `{ key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },`
+- L95: `{ key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }`
+- L100: `sourceKey: "amazon",`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L107: `enables: "Listing sync, sales signals, performance by product, and marketplace learning.",`
+- L109: `permissionScope: "Merchant ID + SP-API credentials",`
+- L112: `{ key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },`
+- L113: `{ key: "sellerUrl", label: "Store URL", placeholder: "https://amazon.com/shops/brand" },`
+- L114: `{ key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }`
+- L119: `sourceKey: "ebay",`
+- L122: `purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",`
+- L124: `enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",`
+- L126: `permissionScope: "Seller account + OAuth access token",`
+- L129: `{ key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },`
+- L130: `{ key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },`
+- L131: `{ key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }`
+- L143: `sourceKey: "facebook",`
+- L150: `permissionScope: "Page ID + business access token",`
+- L154: `{ key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },`
+- L155: `{ key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },`
+- L156: `{ key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }`
+- L161: `sourceKey: "instagram",`
+- L164: `purpose: "Post, reel, and profile insight sync for Instagram business performance.",`
+- L168: `permissionScope: "Business account ID + Graph API token",`
+- L172: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },`
+- L173: `{ key: "businessAccountId", label: "Business account ID", placeholder: "Instagram business account ID" },`
+- L174: `{ key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }`
+- L179: `sourceKey: "tiktok",`
+- L182: `purpose: "Video and post insight sync for TikTok creative and audience performance.",`
+- L186: `permissionScope: "Business account ID + access token",`
+- L190: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },`
+- L191: `{ key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },`
+- L192: `{ key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }`
+- L197: `sourceKey: "youtube",`
+- L200: `purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",`
+- L204: `permissionScope: "Channel ID + OAuth token",`
+- L208: `{ key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },`
+- L209: `{ key: "channelId", label: "Channel ID", placeholder: "YouTube channel ID" },`
+- L210: `{ key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }`
+- L215: `sourceKey: "linkedin",`
+- L218: `purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",`
+- L222: `permissionScope: "Company page ID + OAuth token",`
+- L225: `{ key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },`
+- L226: `{ key: "companyId", label: "Company ID", placeholder: "LinkedIn company ID" },`
+- L227: `{ key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }`
+- L239: `sourceKey: "analytics",`
+- L246: `permissionScope: "Property ID + service account or OAuth token",`
+- L250: `{ key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },`
+- L251: `{ key: "measurementId", label: "Measurement ID", placeholder: "G-XXXXXXXXXX" },`
+- L252: `{ key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }`
+- L257: `sourceKey: "google",`
+- L267: `{ key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },`
+- L268: `{ key: "workspaceId", label: "Workspace ID", placeholder: "GTM workspace ID" },`
+- L269: `{ key: "accessToken", label: "Access token", placeholder: "GTM access token", type: "password" }`
+- L274: `sourceKey: "facebook",`
+- L281: `permissionScope: "Pixel ID + business token",`
+- L284: `{ key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },`
+- L285: `{ key: "adAccountId", label: "Ad account ID", placeholder: "act_123..." },`
+- L286: `{ key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }`
+- L291: `sourceKey: "tiktok",`
+- L298: `permissionScope: "Pixel ID + business token",`
+- L301: `{ key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },`
+- L302: `{ key: "accountId", label: "Account ID", placeholder: "TikTok Ads account ID" },`
+- L303: `{ key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }`
+- L308: `sourceKey: "google",`
+- L319: `{ key: "propertyUrl", label: "Property URL", placeholder: "https://brand.com", required: true },`
+- L320: `{ key: "siteDomain", label: "Domain property", placeholder: "sc-domain:brand.com" },`
+- L321: `{ key: "accessToken", label: "Access token", placeholder: "Search Console token", type: "password" }`
+- L326: `sourceKey: "analytics",`
+- L329: `purpose: "Future-ready import endpoint for internal or custom analytics feeds.",`
+- L331: `enables: "Custom event ingest, proprietary reporting, and historical import.",`
+- L333: `permissionScope: "Endpoint URL + auth token",`
+- L336: `{ key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },`
+- L337: `{ key: "clientId", label: "Client ID", placeholder: "Analytics client ID" },`
+- L338: `{ key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }`
+- L346: `description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",`
+- L350: `sourceKey: "email",`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L363: `{ key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },`
+- L364: `{ key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },`
+- L365: `{ key: "smtpPort", label: "SMTP port", placeholder: "587" }`
+- L370: `sourceKey: "email",`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L375: `purpose: "Provider-specific email platform integration for campaigns and audience workflows.",`
+- L377: `enables: "Campaign sends, audience sync, templates, and performance reporting.",`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L380: `primaryField: "providerName",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L383: `{ key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },`
+- L384: `{ key: "senderDomain", label: "Sender domain", placeholder: "brand.com" }`
+- L389: `sourceKey: "email",`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L394: `enables: "Audience sync, campaigns, lists, and newsletter reporting.",`
+- L396: `permissionScope: "Audience ID + API key",`
+- L399: `{ key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L401: `{ key: "serverPrefix", label: "Server prefix", placeholder: "us1" }`
+- L406: `sourceKey: "analytics",`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L411: `purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",`
+- L412: `whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",`
+- L413: `enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",`
+- L415: `permissionScope: "CRM account ID + API token",`
+- L418: `{ key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },`
+- L419: `{ key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },`
+- L420: `{ key: "pipelineId", label: "Pipeline ID", placeholder: "Primary pipeline ID" }`
+- L428: `description: "Paid campaign accounts, spend import, creative performance, and optimization signals.",`
+- L432: `sourceKey: "facebook",`
+- L437: `enables: "Spend sync, campaign import, creative performance, and paid optimization.",`
+- L439: `permissionScope: "Ad account ID + access token",`
+- L443: `{ key: "adAccountId", label: "Ad account ID", placeholder: "act_123456789", required: true },`
+- L444: `{ key: "businessId", label: "Business ID", placeholder: "Meta business ID" },`
+- L445: `{ key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }`
+- L450: `sourceKey: "google_ads",`
+- L453: `purpose: "Campaign, keyword, spend, CTR, CPC, CPA, and ROAS intelligence from Google Ads.",`
+- L455: `enables: "Spend sync, campaign import, keyword performance, and paid optimization.",`
+- L457: `permissionScope: "Customer ID + OAuth token",`
+- L461: `{ key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },`
+- L462: `{ key: "managerId", label: "Manager / MCC ID", placeholder: "Google Ads MCC ID" },`
+- L463: `{ key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }`
+- L468: `sourceKey: "tiktok",`
+- L472: `whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",`
+- L473: `enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",`
+- L475: `permissionScope: "Advertiser ID + access token",`
+- L478: `{ key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },`
+- L479: `{ key: "accountScope", label: "Account scope", placeholder: "Region / business scope" },`
+- L480: `{ key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }`
+- L492: `sourceKey: "google",`
+- L495: `purpose: "File sync and shared asset operations through Google Drive.",`
+- L497: `enables: "Asset sync, doc sync, shared files, and automation inputs.",`
+- L499: `permissionScope: "Drive folder ID + OAuth token",`
+- L502: `{ key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },`
+- L503: `{ key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },`
+- L504: `{ key: "accessToken", label: "Access token", placeholder: "Drive OAuth token", type: "password" }`
+- L509: `sourceKey: "analytics",`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L514: `enables: "Alerts, approvals, sync notifications, and workflow coordination.",`
+- L516: `permissionScope: "Workspace ID + bot token",`
+- L519: `{ key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },`
+- L520: `{ key: "channelId", label: "Channel ID", placeholder: "Channel ID for alerts" },`
+- L521: `{ key: "botToken", label: "Bot token", placeholder: "xoxb-...", type: "password" }`
+- L526: `sourceKey: "analytics",`
+- L533: `permissionScope: "Bot token + chat ID",`
+- L536: `{ key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },`
+- L537: `{ key: "chatId", label: "Chat ID", placeholder: "Telegram chat ID" },`
+- L538: `{ key: "botToken", label: "Bot token", placeholder: "Telegram bot token", type: "password" }`
+- L543: `sourceKey: "analytics",`
+- L548: `enables: "Docs sync, planning sync, task context, and knowledge reuse.",`
+- L550: `permissionScope: "Workspace + integration token",`
+- L553: `{ key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },`
+- L554: `{ key: "databaseId", label: "Database ID", placeholder: "Primary Notion database ID" },`
+- L555: `{ key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }`
+- L560: `sourceKey: "analytics",`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L565: `enables: "Workflow automation, triggers, sync jobs, and handoffs.",`
+- L566: `dataScope: ["Automations", "Triggers", "Sync jobs"],`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L571: `{ key: "workspaceId", label: "Workspace / scenario ID", placeholder: "Zap / Make scenario ID" },`
+- L572: `{ key: "secretKey", label: "Secret key", placeholder: "Automation secret", type: "password" }`
+- L577: `sourceKey: "analytics",`
+- L582: `enables: "Custom events, syncs, notifications, and system handoffs.",`
+- L583: `dataScope: ["Custom events", "Payloads", "Sync triggers"],`
+- L584: `permissionScope: "Webhook URL + auth secret",`
+- L587: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },`
+- L588: `{ key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },`
+- L589: `{ key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }`
+- L648: `const key = projectName || "__default__";`
+- L649: `if (!integrationSessions.has(key)) {`
+- L650: `integrationSessions.set(key, {`
+- L663: `validationFieldKey: "",`
+- L667: `return integrationSessions.get(key);`
+- L767: `session.validationFieldKey = "";`
+- L771: `function restoreConnectorContext(session) {`
+- L792: `const trigger = document.querySelector(selector);`
+- L794: `if (trigger instanceof HTMLElement) {`
+- L795: `trigger.focus({ preventScroll: true });`
+- L796: `trigger.scrollIntoView({ block: "nearest", inline: "nearest" });`
+- L798: `const row = trigger.closest(".integration-control-row");`
+- L806: `function setIntegrationValidation(session, integrationId, fieldKey, message) {`
+- L808: `session.validationFieldKey = fieldKey || "";`
+- L812: `function clearIntegrationValidation(session, integrationId, fieldKey) {`
+- L814: `const sameField = !fieldKey || session.validationFieldKey === fieldKey;`
+- L817: `session.validationFieldKey = "";`
+- L849: `if (integration.id === "website" && field.key === "url") {`
+- L852: `if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {`
+- L859: `if (integration.id === "woocommerce" && field.key === "storeUrl") {`
+- L862: `if (integration.id === "search-console" && field.key === "propertyUrl") {`
+- L865: `if (integration.id === "search-console" && field.key === "siteDomain" && hostname) {`
+- L868: `if (integration.id === "mailer" && field.key === "senderDomain") {`
+- L877: `if (draft[field.key] != null) return draft[field.key];`
+- L878: `if (isSecretField(field)) return "";`
+- L880: `if (field.key === integration.primaryField) {`
+- L881: `return asString(record.primary_value || sourceValue || record.config?.[field.key] || suggested);`
+- L883: `return asString(record.config?.[field.key] || suggested);`
+- L886: `function getQuickConnectLabel(integration) {`
+- L888: `return "Connect with Google";`
+- L891: `return "Connect with Meta";`
+- L894: `return "Connect with Shopify";`
+- L899: `function getSmartConnectLabel(card) {`
+- L900: `if (card.backendSupported === false) return "Open connector setup";`
+- L901: `if (card.statusLabel === "Connected") return "Manage";`
+- L903: `if (card.statusLabel === "Token expired") return "Reconnect integration";`
+- L904: `if (card.statusLabel === "Error") return "Repair integration connection";`
+- L905: `return getQuickConnectLabel(card) || "Connect";`
+- L908: `function hasSavedCredentialState(card) {`
+- L910: `const credentialState = asObject(card.credential_state);`
+- L913: `return authFields.every((field) => Boolean(asObject(credentialState[field]).is_set));`
+- L916: `function shouldUseReconnectAction(card) {`
+- L917: `if (card.statusLabel === "Token expired") return true;`
+- L919: `return hasSavedCredentialState(card);`
+- L924: `return { action: "select", label: "Open connector setup" };`
+- L926: `if (card.statusLabel === "Connected") {`
+- L927: `return { action: "sync", label: "Run backend sync" };`
+- L929: `if (shouldUseReconnectAction(card)) {`
+- L930: `return { action: "reconnect", label: getSmartConnectLabel(card) };`
+- L932: `return { action: "connect", label: getSmartConnectLabel(card) };`
+- L943: `delete session.drafts[integrationId];`
+- L946: `function setFieldValue(session, integrationId, fieldKey, value) {`
+- L948: `draft[fieldKey] = value;`
+- L951: `function isSecretField(field) {`
+- L955: `function requiresCredential(integration) {`
+- L956: `if (!integration?.fields?.some(isSecretField)) {`
+- L963: `function shouldSyncLegacySource(integration) {`
+- L996: `const source = asObject(sources[integration.sourceKey]);`
+- L1000: `function inferScopeKeys(integration) {`
+- L1011: `{ key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },`
+- L1012: `{ key: "insights", pattern: /insight|engagement|watch|audience|query|ctr|position|seo|analytics|performance/ },`
+- L1013: `{ key: "ads", pattern: /ads?|campaign|creative|spend|cpc|cpa|roas|pixel/ },`
+- L1014: `{ key: "traffic", pattern: /traffic|session|landing|page|event|tag|attribution|website/ },`
+- L1015: `{ key: "orders", pattern: /order|sale|revenue|product|listing|merchant|customer|contact|lead/ }`
+- L1020: `.map((rule) => rule.key);`
+- L1024: `const scopeKeys = inferScopeKeys(integration);`
+- L1028: `read: [...new Set(["posts", "insights", ...scopeKeys])],`
+- L1029: `write: ["publishing", "audience updates"]`
+- L1036: `read: [...new Set(["traffic", "landing pages", "conversion paths", ...scopeKeys])],`
+- L1037: `write: ["webhooks", "site updates"]`
+- L1042: `read: [...new Set(["products", "orders", "sales", ...scopeKeys])],`
+- L1043: `write: ["catalog sync", "commerce updates"]`
+- L1049: `read: [...new Set(["traffic", "events", "conversions", "seo", ...scopeKeys])],`
+- L1050: `write: ["tracking updates"]`
+- L1056: `read: [...new Set(["contacts", "campaign performance", ...scopeKeys])],`
+- L1057: `write: ["campaign sends", "audience sync"]`
+- L1063: `read: [...new Set(["ads", "spend", "campaigns", "creative performance", ...scopeKeys])],`
+- L1064: `write: ["budget changes", "campaign updates"]`
+- L1069: `read: [...new Set(["workflow events", "shared files", ...scopeKeys])],`
+- L1070: `write: ["automation triggers", "notifications"]`
+- L1081: `shouldSyncLegacySource,`
+- L1085: `inferScopeKeys,`
+- L1093: `if (draft[field.key] != null) return draft[field.key];`
+- L1094: `if (isSecretField(field)) return "";`
+- L1095: `if (field.key === integration.primaryField) {`
+- L1096: `return asString(record.primary_value || sourceValue || record.config?.[field.key] || suggestedValue);`
+- L1098: `return asString(record.config?.[field.key] || suggestedValue);`
+- L1101: `function hasSavedServerCredential(record, fieldKey) {`
+- L1102: `return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);`
+- L1105: `function hasSavedServerRequiredField(record, integration, field) {`
+- L1108: `if (isSecretField(field)) {`
+- L1109: `return hasSavedServerCredential(record, field.key);`
+- L1112: `const configValue = asString(asObject(record.config)[field.key]).trim();`
+- L1117: `if (field.key === integration.primaryField) {`
+- L1130: `const savedStoreUrl = asString(asObject(record.config).storeUrl).trim();`
+- L1131: `if (!savedStoreUrl) {`
+- L1133: `fieldKey: "storeUrl",`
+- L1135: `"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."`
+- L1142: `.filter((field) => !hasSavedServerRequiredField(record, integration, field));`
+- L1149: `fieldKey: missingRequired[0].key,`
+- L1151: `"Save or repair this integration before running a connection test. The test uses the saved server-side configuration."`
+- L1158: `return Boolean(value) || (isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1167: `return !value && !(isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1172: `function normalizeStatusLabel(statusLabel, fallback = "Not Connected") {`
+- L1176: `if (normalized === "connected") return "Connected";`
+- L1179: `if (normalized === "token expired" || normalized === "token_expired") return "Token expired";`
+- L1180: `if (normalized === "not connected" || normalized === "not_connected") return "Not Connected";`
+- L1187: `return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";`
+- L1194: `if (statusLabel === "Connected") {`
+- L1195: `return \`${integration.label} is connected and ready for provider-level sync actions.\`;`
+- L1198: `return "Some required connection details are still missing.";`
+- L1200: `if (statusLabel === "Token expired") {`
+- L1201: `return "Reconnect the saved token before importing or syncing new data.";`
+- L1204: `return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";`
+- L1209: `function getConnectorWorkspaceAction(card) {`
+- L1210: `const statusKey = getConnectorWorkspaceStatus(card);`
+- L1213: `return { label: "Open connector setup", action: "select" };`
+- L1216: `if (statusKey === "connected") {`
+- L1218: `label: "Run backend sync",`
+- L1219: `action: "sync"`
+- L1223: `if (statusKey === "failed") {`
+- L1225: `label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",`
+- L1226: `action: shouldUseReconnectAction(card) ? "reconnect" : "connect"`
+- L1230: `if (statusKey === "needs_setup") {`
+- L1234: `return { label: "Connect", action: "connect" };`
+- L1243: `const fieldKey = session.validationFieldKey || requiredEmptyField?.key || card.fields[0]?.key;`
+- L1244: `if (!fieldKey) return;`
+- L1247: `const input = document.querySelector(\`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]\`);`
+
+## Credential Signals
+- L59: `{ key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },`
+- L60: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }`
+- L72: `permissionScope: "Store URL + API consumer key/secret",`
+- L78: `{ key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }`
+- L90: `permissionScope: "Store domain + admin access token",`
+- L94: `{ key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },`
+- L109: `permissionScope: "Merchant ID + SP-API credentials",`
+- L114: `{ key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }`
+- L126: `permissionScope: "Seller account + OAuth access token",`
+- L131: `{ key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }`
+- L150: `permissionScope: "Page ID + business access token",`
+- L156: `{ key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }`
+- L168: `permissionScope: "Business account ID + Graph API token",`
+- L174: `{ key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }`
+- L186: `permissionScope: "Business account ID + access token",`
+- L192: `{ key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }`
+- L204: `permissionScope: "Channel ID + OAuth token",`
+- L210: `{ key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }`
+- L222: `permissionScope: "Company page ID + OAuth token",`
+- L227: `{ key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }`
+- L246: `permissionScope: "Property ID + service account or OAuth token",`
+- L252: `{ key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }`
+- L269: `{ key: "accessToken", label: "Access token", placeholder: "GTM access token", type: "password" }`
+- L281: `permissionScope: "Pixel ID + business token",`
+- L286: `{ key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }`
+- L298: `permissionScope: "Pixel ID + business token",`
+- L303: `{ key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }`
+- L315: `permissionScope: "Property URL + Search Console auth",`
+- L321: `{ key: "accessToken", label: "Access token", placeholder: "Search Console token", type: "password" }`
+- L333: `permissionScope: "Endpoint URL + auth token",`
+- L337: `{ key: "clientId", label: "Client ID", placeholder: "Analytics client ID" },`
+- L338: `{ key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }`
+- L359: `permissionScope: "SMTP host + port + sender + auth",`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L383: `{ key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },`
+- L396: `permissionScope: "Audience ID + API key",`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L415: `permissionScope: "CRM account ID + API token",`
+- L419: `{ key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },`
+- L439: `permissionScope: "Ad account ID + access token",`
+- L445: `{ key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }`
+- L457: `permissionScope: "Customer ID + OAuth token",`
+- L463: `{ key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }`
+- L475: `permissionScope: "Advertiser ID + access token",`
+- L480: `{ key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }`
+- L488: `description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",`
+- L499: `permissionScope: "Drive folder ID + OAuth token",`
+- L504: `{ key: "accessToken", label: "Access token", placeholder: "Drive OAuth token", type: "password" }`
+- L516: `permissionScope: "Workspace ID + bot token",`
+- L521: `{ key: "botToken", label: "Bot token", placeholder: "xoxb-...", type: "password" }`
+- L533: `permissionScope: "Bot token + chat ID",`
+- L538: `{ key: "botToken", label: "Bot token", placeholder: "Telegram bot token", type: "password" }`
+- L550: `permissionScope: "Workspace + integration token",`
+- L555: `{ key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }`
+- L567: `permissionScope: "Webhook or scenario endpoint",`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L572: `{ key: "secretKey", label: "Secret key", placeholder: "Automation secret", type: "password" }`
+- L576: `id: "webhook",`
+- L578: `label: "Internal Webhook",`
+- L580: `purpose: "Internal system-to-system webhook integration for custom workflows and events.",`
+- L581: `whyItMatters: "Internal webhooks let MH Assistant plug into custom business systems without a new UI redesign.",`
+- L584: `permissionScope: "Webhook URL + auth secret",`
+- L585: `primaryField: "webhookUrl",`
+- L587: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },`
+- L589: `{ key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }`
+- L852: `if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {`
+- L854: `return \`${new URL(websiteUrl).origin}/webhooks/mh\`;`
+- L878: `if (isSecretField(field)) return "";`
+- L903: `if (card.statusLabel === "Token expired") return "Reconnect integration";`
+- L908: `function hasSavedCredentialState(card) {`
+- L909: `const authFields = asArray(card.auth_fields);`
+- L910: `const credentialState = asObject(card.credential_state);`
+- L911: `if (!authFields.length) return true;`
+- L913: `return authFields.every((field) => Boolean(asObject(credentialState[field]).is_set));`
+- L917: `if (card.statusLabel === "Token expired") return true;`
+- L919: `return hasSavedCredentialState(card);`
+- L951: `function isSecretField(field) {`
+- L955: `function requiresCredential(integration) {`
+- L956: `if (!integration?.fields?.some(isSecretField)) {`
+- L1037: `write: ["webhooks", "site updates"]`
+- L1094: `if (isSecretField(field)) return "";`
+- L1101: `function hasSavedServerCredential(record, fieldKey) {`
+- L1102: `return Boolean(asObject(record.credential_state)[fieldKey]?.is_set);`
+- L1108: `if (isSecretField(field)) {`
+- L1109: `return hasSavedServerCredential(record, field.key);`
+- L1158: `return Boolean(value) || (isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1167: `return !value && !(isSecretField(field) && hasSavedServerCredential(record, field.key));`
+- L1179: `if (normalized === "token expired" || normalized === "token_expired") return "Token expired";`
+- L1200: `if (statusLabel === "Token expired") {`
+- L1201: `return "Reconnect the saved token before importing or syncing new data.";`
+- L1331: `if (isSecretField(field) && hasSavedServerCredential(record, field.key)) {`
+- L1332: `helper.textContent = "Saved securely on server. Leave blank to keep the current secret.";`
+- L1420: `const credentials = {};`
+- L1429: `if (isSecretField(field)) {`
+- L1432: `credentials[field.key] = draftValue;`
+- L1458: `credentials,`
+- L1459: `auth_fields: integration.fields.filter(isSecretField).map((field) => field.key),`
+- L1461: `requires_credentials: requiresCredential(integration),`
+- L1465: `connection_method: integration.fields.some(isSecretField) ? "oauth_or_key" : "direct_config",`
+- L1538: `const confirmed = window.confirm(\`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.\`);`
+- L1580: `const confirmed = window.confirm(\`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.\`);`
+
+## Governance / Approval Signals
+- L54: `permissionScope: "Website endpoint or root domain access",`
+- L58: `{ key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },`
+- L60: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }`
+- L72: `permissionScope: "Store URL + API consumer key/secret",`
+- L76: `{ key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },`
+- L90: `permissionScope: "Store domain + admin access token",`
+- L93: `{ key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },`
+- L109: `permissionScope: "Merchant ID + SP-API credentials",`
+- L112: `{ key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },`
+- L126: `permissionScope: "Seller account + OAuth access token",`
+- L129: `{ key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },`
+- L150: `permissionScope: "Page ID + business access token",`
+- L154: `{ key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },`
+- L155: `{ key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },`
+- L168: `permissionScope: "Business account ID + Graph API token",`
+- L172: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },`
+- L186: `permissionScope: "Business account ID + access token",`
+- L190: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },`
+- L204: `permissionScope: "Channel ID + OAuth token",`
+- L208: `{ key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },`
+- L222: `permissionScope: "Company page ID + OAuth token",`
+- L225: `{ key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },`
+- L246: `permissionScope: "Property ID + service account or OAuth token",`
+- L250: `{ key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },`
+- L264: `permissionScope: "Container ID + workspace access",`
+- L267: `{ key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },`
+- L281: `permissionScope: "Pixel ID + business token",`
+- L284: `{ key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },`
+- L298: `permissionScope: "Pixel ID + business token",`
+- L301: `{ key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },`
+- L315: `permissionScope: "Property URL + Search Console auth",`
+- L319: `{ key: "propertyUrl", label: "Property URL", placeholder: "https://brand.com", required: true },`
+- L333: `permissionScope: "Endpoint URL + auth token",`
+- L336: `{ key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },`
+- L359: `permissionScope: "SMTP host + port + sender + auth",`
+- L363: `{ key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },`
+- L364: `{ key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L396: `permissionScope: "Audience ID + API key",`
+- L399: `{ key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },`
+- L415: `permissionScope: "CRM account ID + API token",`
+- L418: `{ key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },`
+- L439: `permissionScope: "Ad account ID + access token",`
+- L443: `{ key: "adAccountId", label: "Ad account ID", placeholder: "act_123456789", required: true },`
+- L457: `permissionScope: "Customer ID + OAuth token",`
+- L461: `{ key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },`
+- L475: `permissionScope: "Advertiser ID + access token",`
+- L478: `{ key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },`
+- L499: `permissionScope: "Drive folder ID + OAuth token",`
+- L502: `{ key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L514: `enables: "Alerts, approvals, sync notifications, and workflow coordination.",`
+- L515: `dataScope: ["Notifications", "Approvals", "Ops alerts"],`
+- L516: `permissionScope: "Workspace ID + bot token",`
+- L519: `{ key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },`
+- L529: `purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",`
+- L530: `whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",`
+- L531: `enables: "Alerts, commands, approval handoff, and ops notifications.",`
+- L532: `dataScope: ["Alerts", "Commands", "Approvals"],`
+- L533: `permissionScope: "Bot token + chat ID",`
+- L536: `{ key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },`
+- L550: `permissionScope: "Workspace + integration token",`
+- L553: `{ key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L567: `permissionScope: "Webhook or scenario endpoint",`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L584: `permissionScope: "Webhook URL + auth secret",`
+- L587: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },`
+- L588: `{ key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },`
+- L1105: `function hasSavedServerRequiredField(record, integration, field) {`
+- L1135: `"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."`
+- L1140: `const missingRequired = integration.fields`
+- L1141: `.filter((field) => field.required)`
+- L1142: `.filter((field) => !hasSavedServerRequiredField(record, integration, field));`
+- L1144: `if (!missingRequired.length) {`
+- L1149: `fieldKey: missingRequired[0].key,`
+- L1162: `function getRequiredMissing(session, integration, record, sourceValue, state) {`
+- L1164: `.filter((field) => field.required)`
+- L1198: `return "Some required connection details are still missing.";`
+- L1240: `const requiredEmptyField = card.fields.find((field) =>`
+- L1241: `field.required && card.missingRequired.includes(field.label)`
+- L1243: `const fieldKey = session.validationFieldKey || requiredEmptyField?.key || card.fields[0]?.key;`
+- L1261: `navigateTo,`
+- L1341: `helper.textContent = field.required`
+- L1342: `? "Required for a complete connection."`
+- L1392: `getRequiredMissing,`
+- L1460: `required_fields: integration.fields.filter((field) => field.required).map((field) => field.key),`
+- L1466: `permission_scope: integration.permissionScope,`
+- L1508: `const governanceCode = String(`
+- L1515: `if (reconnect && governanceCode === "governance_approval_required") {`
+- L1516: `const approvalId = asString(error?.payload?.approval?.approval_id);`
+- L1517: `showMessage?.(\`Governance approval requested for ${integration.label}${approvalId ? \` (${approvalId})\` : ""}. Review and decide it in Governance before reconnecting.\`);`
+- L1521: `navigateTo("governance");`
+- L1538: `const confirmed = window.confirm(\`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.\`);`
+- L1580: `const confirmed = window.confirm(\`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.\`);`
+- L1607: `const governanceCode = String(`
+- L1615: `if (governanceCode === "governance_approval_required") {`
+- L1616: `const approvalId = asString(error?.payload?.approval?.approval_id);`
+- L1617: `showMessage?.(\`Governance approval requested for ${integration.label}${approvalId ? \` (${approvalId})\` : ""}. Review and decide it in Governance before continuing.\`);`
+- L1621: `navigateTo("governance");`
+- L1659: `navigateTo("ai-command");`
+- L1697: `navigateTo,`
+- L1724: `getRequiredMissing,`
+- L1792: `<strong>${escapeHtml(String(overview.missingRequired))}</strong>`
+- L1823: `<p><strong>Risk if missing:</strong> ${escapeHtml(aiRec.reasonLabel)} remains unresolved.</p>`
+- L1840: `<div class="setup-kicker">Required Operating Connectors</div>`
+- L1890: `<p class="home-section-copy" style="margin:6px 0 0;">Scan blockers, warnings, and required fixes before launch.</p>`
+- L1904: `${renderIntegrationDiagnosticsList(diagnostics.mustFix, "No integration fixes are required before the next operating step.")}`
+- L1931: `<p class="home-section-copy" style="margin:6px 0 0;">Review critical gaps, next moves, and coverage status to close launch risk.</p>`
+- L1958: `navigateTo,`
+- L1975: `navigateTo,`
+
+## Provider Execution Signals
+- L1: `import {`
+- L3: `buildConnectorWorkspaceGroups,`
+- L15: `CONNECTOR_WORKSPACE_CATEGORIES,`
+- L16: `getConnectorWorkspaceStatus`
+- L19: `import { renderIntegrationDrawer } from "./integrations/drawer.js";`
+- L21: `import {`
+- L22: `renderConnectorGroup,`
+- L23: `renderSelectedConnectorSummary`
+- L26: `import {`
+- L60: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }`
+- L64: `id: "woocommerce",`
+- L66: `label: "WooCommerce",`
+- L68: `purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",`
+- L70: `enables: "Product sync, order sync, sales signals, and commerce intelligence.",`
+- L82: `id: "shopify",`
+- L83: `sourceKey: "shopify",`
+- L84: `label: "Shopify",`
+- L86: `purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",`
+- L87: `whyItMatters: "Shopify unlocks product catalogs, order flow, and conversion insights for commerce-first projects.",`
+- L88: `enables: "Product sync, order sync, customer sync, and sales reporting.",`
+- L93: `{ key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },`
+- L95: `{ key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L107: `enables: "Listing sync, sales signals, performance by product, and marketplace learning.",`
+- L122: `purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",`
+- L124: `enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",`
+- L142: `id: "facebook",`
+- L143: `sourceKey: "facebook",`
+- L144: `label: "Facebook",`
+- L147: `whyItMatters: "Facebook insights help the system understand what posts drive reach, clicks, and downstream action.",`
+- L154: `{ key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },`
+- L155: `{ key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },`
+- L156: `{ key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }`
+- L164: `purpose: "Post, reel, and profile insight sync for Instagram business performance.",`
+- L178: `id: "tiktok",`
+- L179: `sourceKey: "tiktok",`
+- L180: `label: "TikTok",`
+- L182: `purpose: "Video and post insight sync for TikTok creative and audience performance.",`
+- L183: `whyItMatters: "TikTok data helps the system learn what hooks, timing, and short-form video patterns actually win.",`
+- L190: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },`
+- L191: `{ key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },`
+- L192: `{ key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }`
+- L200: `purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",`
+- L240: `label: "Google Analytics / GA4",`
+- L257: `sourceKey: "google",`
+- L258: `label: "Google Tag Manager",`
+- L273: `id: "meta-pixel",`
+- L274: `sourceKey: "facebook",`
+- L275: `label: "Meta Pixel",`
+- L277: `purpose: "Meta tracking layer for conversions, events, and paid attribution support.",`
+- L278: `whyItMatters: "Meta Pixel improves ad attribution, conversion feedback, and optimization quality.",`
+- L284: `{ key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },`
+- L286: `{ key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }`
+- L290: `id: "tiktok-pixel",`
+- L291: `sourceKey: "tiktok",`
+- L292: `label: "TikTok Pixel",`
+- L294: `purpose: "TikTok conversion tracking layer for paid and organic destination analysis.",`
+- L295: `whyItMatters: "TikTok Pixel improves measurement of short-form content and paid traffic impact.",`
+- L301: `{ key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },`
+- L302: `{ key: "accountId", label: "Account ID", placeholder: "TikTok Ads account ID" },`
+- L303: `{ key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }`
+- L308: `sourceKey: "google",`
+- L329: `purpose: "Future-ready import endpoint for internal or custom analytics feeds.",`
+- L331: `enables: "Custom event ingest, proprietary reporting, and historical import.",`
+- L346: `description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L364: `{ key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L375: `purpose: "Provider-specific email platform integration for campaigns and audience workflows.",`
+- L377: `enables: "Campaign sends, audience sync, templates, and performance reporting.",`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L380: `primaryField: "providerName",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L388: `id: "mailchimp",`
+- L390: `label: "Mailchimp",`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L393: `whyItMatters: "Mailchimp can expand owned audience growth and newsletter performance feedback.",`
+- L394: `enables: "Audience sync, campaigns, lists, and newsletter reporting.",`
+- L399: `{ key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L411: `purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",`
+- L413: `enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",`
+- L428: `description: "Paid campaign accounts, spend import, creative performance, and optimization signals.",`
+- L431: `id: "meta-ads",`
+- L432: `sourceKey: "facebook",`
+- L433: `label: "Meta Ads",`
+- L435: `purpose: "Campaign, ad set, creative, spend, CTR, CPC, CPA, and ROAS intelligence from Meta Ads.",`
+- L436: `whyItMatters: "Meta Ads data helps the system learn what paid campaigns and creatives deserve scaling or pausing.",`
+- L437: `enables: "Spend sync, campaign import, creative performance, and paid optimization.",`
+- L444: `{ key: "businessId", label: "Business ID", placeholder: "Meta business ID" },`
+- L445: `{ key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }`
+- L449: `id: "google-ads",`
+- L450: `sourceKey: "google_ads",`
+- L451: `label: "Google Ads",`
+- L453: `purpose: "Campaign, keyword, spend, CTR, CPC, CPA, and ROAS intelligence from Google Ads.",`
+- L454: `whyItMatters: "Google Ads data shows which search or demand-capture campaigns actually generate efficient traffic and revenue.",`
+- L455: `enables: "Spend sync, campaign import, keyword performance, and paid optimization.",`
+- L462: `{ key: "managerId", label: "Manager / MCC ID", placeholder: "Google Ads MCC ID" },`
+- L463: `{ key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }`
+- L467: `id: "tiktok-ads",`
+- L468: `sourceKey: "tiktok",`
+- L469: `label: "TikTok Ads",`
+- L471: `purpose: "Campaign, creative, spend, and performance intelligence from TikTok Ads.",`
+- L472: `whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",`
+- L473: `enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",`
+- L478: `{ key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },`
+- L480: `{ key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }`
+- L488: `description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",`
+- L491: `id: "google-drive",`
+- L492: `sourceKey: "google",`
+- L493: `label: "Google Drive",`
+- L495: `purpose: "File sync and shared asset operations through Google Drive.",`
+- L497: `enables: "Asset sync, doc sync, shared files, and automation inputs.",`
+- L502: `{ key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L514: `enables: "Alerts, approvals, sync notifications, and workflow coordination.",`
+- L548: `enables: "Docs sync, planning sync, task context, and knowledge reuse.",`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L565: `enables: "Workflow automation, triggers, sync jobs, and handoffs.",`
+- L566: `dataScope: ["Automations", "Triggers", "Sync jobs"],`
+- L567: `permissionScope: "Webhook or scenario endpoint",`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L576: `id: "webhook",`
+- L578: `label: "Internal Webhook",`
+- L580: `purpose: "Internal system-to-system webhook integration for custom workflows and events.",`
+- L581: `whyItMatters: "Internal webhooks let MH Assistant plug into custom business systems without a new UI redesign.",`
+- L582: `enables: "Custom events, syncs, notifications, and system handoffs.",`
+- L583: `dataScope: ["Custom events", "Payloads", "Sync triggers"],`
+- L584: `permissionScope: "Webhook URL + auth secret",`
+- L585: `primaryField: "webhookUrl",`
+- L587: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },`
+- L588: `{ key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },`
+- L589: `{ key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }`
+- L771: `function restoreConnectorContext(session) {`
+- L852: `if (integration.id === "website" && field.key === "webhookUrl" && websiteUrl) {`
+- L854: `return \`${new URL(websiteUrl).origin}/webhooks/mh\`;`
+- L859: `if (integration.id === "woocommerce" && field.key === "storeUrl") {`
+- L887: `if (["ga4", "gtm", "search-console", "youtube", "google-ads", "google-drive"].includes(integration.id)) {`
+- L888: `return "Connect with Google";`
+- L890: `if (["facebook", "instagram", "meta-pixel", "meta-ads"].includes(integration.id)) {`
+- L891: `return "Connect with Meta";`
+- L893: `if (integration.id === "shopify") {`
+- L894: `return "Connect with Shopify";`
+- L900: `if (card.backendSupported === false) return "Open connector setup";`
+- L903: `if (card.statusLabel === "Token expired") return "Reconnect integration";`
+- L916: `function shouldUseReconnectAction(card) {`
+- L924: `return { action: "select", label: "Open connector setup" };`
+- L927: `return { action: "sync", label: "Run backend sync" };`
+- L929: `if (shouldUseReconnectAction(card)) {`
+- L930: `return { action: "reconnect", label: getSmartConnectLabel(card) };`
+- L963: `function shouldSyncLegacySource(integration) {`
+- L966: `"woocommerce",`
+- L967: `"shopify",`
+- L970: `"facebook",`
+- L972: `"tiktok",`
+- L979: `"google-ads"`
+- L1037: `write: ["webhooks", "site updates"]`
+- L1043: `write: ["catalog sync", "commerce updates"]`
+- L1057: `write: ["campaign sends", "audience sync"]`
+- L1081: `shouldSyncLegacySource,`
+- L1129: `if (integration.id === "woocommerce") {`
+- L1135: `"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."`
+- L1187: `return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";`
+- L1195: `return \`${integration.label} is connected and ready for provider-level sync actions.\`;`
+- L1201: `return "Reconnect the saved token before importing or syncing new data.";`
+- L1209: `function getConnectorWorkspaceAction(card) {`
+- L1210: `const statusKey = getConnectorWorkspaceStatus(card);`
+- L1213: `return { label: "Open connector setup", action: "select" };`
+- L1218: `label: "Run backend sync",`
+- L1219: `action: "sync"`
+- L1225: `label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",`
+- L1226: `action: shouldUseReconnectAction(card) ? "reconnect" : "connect"`
+- L1266: `reconnectProjectIntegration,`
+- L1268: `syncProjectIntegration,`
+- L1269: `importProjectIntegrationHistory,`
+- L1270: `disconnectProjectIntegration,`
+- L1280: `showMessage?.(\`Setup drawer opened for ${integration?.label || "connector"}.\`);`
+- L1286: `button.onclick = async () => {`
+- L1291: `showMessage?.(\`Setup drawer opened for ${integration?.label || "connector"}.\`);`
+- L1371: `showMessage?.(\`Setup drawer closed for ${closedIntegration?.label || "connector"}.\`);`
+- L1468: `sync_source_registry: shouldSyncLegacySource(integration)`
+- L1472: `async function persistPrimary(integrationId, reconnect = false) {`
+- L1476: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1497: `if (reconnect) {`
+- L1498: `await reconnectProjectIntegration(projectName, integrationId, payload);`
+- L1504: `showMessage?.(reconnect ? \`${integration.label} integration reconnected.\` : \`${integration.label} connected.\`);`
+- L1515: `if (reconnect && governanceCode === "governance_approval_required") {`
+- L1517: `showMessage?.(\`Governance approval requested for ${integration.label}${approvalId ? \` (${approvalId})\` : ""}. Review and decide it in Governance before reconnecting.\`);`
+- L1530: `async function disconnect(integrationId) {`
+- L1534: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1538: `const confirmed = window.confirm(\`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.\`);`
+- L1544: `await disconnectProjectIntegration(projectName, integrationId, {`
+- L1545: `notes: \`${integration.label} disconnected from the Control Center.\``
+- L1548: `showMessage?.(\`${integration.label} disconnected.\`);`
+- L1552: `showError?.(error.message || \`Failed to disconnect ${integration.label}.\`);`
+- L1556: `async function runServerAction(integrationId, type) {`
+- L1560: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1578: `if (type === "sync" || type === "import") {`
+- L1579: `const actionLabel = type === "sync" ? "backend sync" : "historical import";`
+- L1580: `const confirmed = window.confirm(\`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.\`);`
+- L1592: `} else if (type === "sync") {`
+- L1593: `await syncProjectIntegration(projectName, integrationId, {`
+- L1594: `notes: \`${integration.label} sync triggered from the Control Center.\``
+- L1596: `showMessage?.(\`${integration.label} backend sync started.\`);`
+- L1597: `} else if (type === "import") {`
+- L1598: `await importProjectIntegrationHistory(projectName, integrationId, {`
+- L1599: `notes: \`${integration.label} historical import triggered from the Control Center.\``
+- L1601: `showMessage?.(\`${integration.label} historical import started.\`);`
+- L1631: `button.onclick = async () => {`
+- L1639: `if (action === "reconnect") {`
+- L1643: `if (action === "disconnect") {`
+- L1644: `await disconnect(integrationId);`
+- L1672: `showMessage?.(\`Setup drawer closed for ${closedIntegration?.label || "connector"}.\`);`
+- L1682: `meta: {`
+- L1685: `description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."`
+- L1702: `reconnectProjectIntegration,`
+- L1704: `syncProjectIntegration,`
+- L1705: `importProjectIntegrationHistory,`
+- L1706: `disconnectProjectIntegration`
+- L1749: `const connectorGroups = buildConnectorWorkspaceGroups(allCards, session);`
+- L1750: `const filteredCards = connectorGroups.flatMap((group) => group.cards);`
+- L1753: `const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;`
+- L1756: `const connectedTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "connected").length;`
+- L1757: `const partialTotal = allCards.filter((card) => getConnectorWorkspaceStatus(card) === "needs_setup").length;`
+- L1760: `const lastGlobalSync =`
+- L1761: `asString(controlCenter.summary?.last_global_sync) ||`
+- L1763: `.map((card) => card.lastSync)`
+- L1777: `<p class="home-section-copy integration-system-purpose">Connect business platforms so MH-OS can sync performance, route safe backend actions, and learn from live operating data.</p>`
+- L1796: `<strong>${escapeHtml(String(overview.failedOrDisconnected))}</strong>`
+- L1811: `<div class="integration-next-action-connector">`
+- L1812: `<div class="integration-next-action-connector-icon" data-integration-initials="${escapeHtml(aiRec.card.icon)}">${escapeHtml(aiRec.card.icon)}</div>`
+- L1813: `<div class="integration-next-action-connector-info">`
+- L1826: `<button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open connector setup</button>`
+- L1840: `<div class="setup-kicker">Required Operating Connectors</div>`
+- L1841: `<h3>Connector Control Center</h3>`
+- L1842: `<p class="home-section-copy" style="margin:6px 0 0;">Filter by category or status, search providers, and open setup quickly.</p>`
+- L1851: `${Object.entries(CONNECTOR_WORKSPACE_CATEGORIES).map(([id, meta]) => \`<option value="${escapeHtml(id)}" ${session.categoryFilter === id ? "selected" : ""}>${escapeHtml(meta.label)}</option>\`).join("")}`
+- L1869: `placeholder="Search connector, provider, or source"`
+- L1877: `${connectorGroups.length`
+- L1878: `? connectorGroups.map((group) => renderConnectorGroup(group, session)).join("")`
+- L1879: `: \`<div class="empty-box">No connectors match the current filters. Clear one filter to restore the launch connector list.</div>\`}`
+- L1884: `${selectedCard ? renderSelectedConnectorSummary(selectedCard) : \`<div class="empty-box">Select a connector to review setup, sync health, and safe backend actions.</div>\`}`
+- L1900: `${renderIntegrationDiagnosticsList(diagnostics.warnings, "No connector reliability warnings are currently active.")}`
+- L1917: `<h3>Sync & Activity Health</h3>`
+- L1918: `<p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>`
+- L1963: `reconnectProjectIntegration,`
+- L1965: `syncProjectIntegration,`
+- L1966: `importProjectIntegrationHistory,`
+- L1967: `disconnectProjectIntegration,`
+- L1980: `reconnectProjectIntegration,`
+- L1982: `syncProjectIntegration,`
+- L1983: `importProjectIntegrationHistory,`
+- L1984: `disconnectProjectIntegration`
+- L1989: `restoreConnectorContext(session);`
+
+## Handoff Signals
+- L512: `purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",`
+- L531: `enables: "Alerts, commands, approval handoff, and ops notifications.",`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L565: `enables: "Workflow automation, triggers, sync jobs, and handoffs.",`
+- L582: `enables: "Custom events, syncs, notifications, and system handoffs.",`
+
+## AI Signals
+- L2: `buildAISmartRecommendation,`
+- L6: `buildDomainModels,`
+- L12: `buildRecommendations,`
+- L27: `renderAISmartRecommendation as renderAISmartRecommendationModule,`
+- L32: `renderIntegrationRecommendationsList`
+- L37: `const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);`
+- L39: `const INTEGRATION_DOMAINS = [`
+- L51: `whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",`
+- L54: `permissionScope: "Website endpoint or root domain access",`
+- L69: `whyItMatters: "Commerce data lets the system learn what content, campaigns, and pages actually influence sales.",`
+- L90: `permissionScope: "Store domain + admin access token",`
+- L91: `primaryField: "storeDomain",`
+- L93: `{ key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L106: `whyItMatters: "Amazon data gives MH Assistant direct product demand and marketplace sales feedback.",`
+- L260: `purpose: "Tracking container management for tags, events, and analytics instrumentation.",`
+- L261: `whyItMatters: "GTM makes data collection more reliable and keeps tracking flexible as MH Assistant grows.",`
+- L264: `permissionScope: "Container ID + workspace access",`
+- L265: `primaryField: "containerId",`
+- L267: `{ key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },`
+- L277: `purpose: "Meta tracking layer for conversions, events, and paid attribution support.",`
+- L279: `enables: "Event tracking, conversion reporting, paid attribution, and audience learning.",`
+- L294: `purpose: "TikTok conversion tracking layer for paid and organic destination analysis.",`
+- L295: `whyItMatters: "TikTok Pixel improves measurement of short-form content and paid traffic impact.",`
+- L296: `enables: "Events, conversion tracking, attribution, and paid optimization support.",`
+- L320: `{ key: "siteDomain", label: "Domain property", placeholder: "sc-domain:brand.com" },`
+- L344: `id: "email-crm",`
+- L345: `title: "Email & CRM",`
+- L346: `description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",`
+- L350: `sourceKey: "email",`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L353: `label: "SMTP / Email Sending",`
+- L355: `purpose: "Transactional and campaign email sending through SMTP or relay infrastructure.",`
+- L356: `whyItMatters: "Email is critical for lifecycle recovery, conversion support, and owned audience communication.",`
+- L357: `enables: "Campaign sending, lifecycle messages, and email workflow execution.",`
+- L358: `dataScope: ["Sending", "Delivery", "Campaign email", "Lifecycle email"],`
+- L361: `primaryField: "senderEmail",`
+- L363: `{ key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },`
+- L369: `id: "mailer",`
+- L370: `sourceKey: "email",`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L373: `label: "Mailer Integration",`
+- L375: `purpose: "Provider-specific email platform integration for campaigns and audience workflows.",`
+- L376: `whyItMatters: "A mailer integration improves sending reliability, segmentation, and performance tracking.",`
+- L377: `enables: "Campaign sends, audience sync, templates, and performance reporting.",`
+- L378: `dataScope: ["Campaigns", "Audiences", "Templates", "Performance"],`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L383: `{ key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },`
+- L384: `{ key: "senderDomain", label: "Sender domain", placeholder: "brand.com" }`
+- L388: `id: "mailchimp",`
+- L389: `sourceKey: "email",`
+- L390: `label: "Mailchimp",`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L393: `whyItMatters: "Mailchimp can expand owned audience growth and newsletter performance feedback.",`
+- L394: `enables: "Audience sync, campaigns, lists, and newsletter reporting.",`
+- L395: `dataScope: ["Contacts", "Campaigns", "Segments", "Performance"],`
+- L399: `{ key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L412: `whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",`
+- L428: `description: "Paid campaign accounts, spend import, creative performance, and optimization signals.",`
+- L435: `purpose: "Campaign, ad set, creative, spend, CTR, CPC, CPA, and ROAS intelligence from Meta Ads.",`
+- L436: `whyItMatters: "Meta Ads data helps the system learn what paid campaigns and creatives deserve scaling or pausing.",`
+- L437: `enables: "Spend sync, campaign import, creative performance, and paid optimization.",`
+- L438: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L453: `purpose: "Campaign, keyword, spend, CTR, CPC, CPA, and ROAS intelligence from Google Ads.",`
+- L454: `whyItMatters: "Google Ads data shows which search or demand-capture campaigns actually generate efficient traffic and revenue.",`
+- L455: `enables: "Spend sync, campaign import, keyword performance, and paid optimization.",`
+- L456: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L471: `purpose: "Campaign, creative, spend, and performance intelligence from TikTok Ads.",`
+- L472: `whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",`
+- L473: `enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",`
+- L474: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L487: `title: "AI / Automation / Ops Tools",`
+- L496: `whyItMatters: "Drive helps centralize asset references, shared documents, and working files for campaigns and analysis.",`
+- L503: `{ key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L530: `whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",`
+- L536: `{ key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },`
+- L546: `purpose: "Knowledge, briefs, campaign docs, and structured planning data inside Notion.",`
+- L547: `whyItMatters: "Notion can hold reusable knowledge the system references for campaigns, SEO, and content execution.",`
+- L581: `whyItMatters: "Internal webhooks let MH Assistant plug into custom business systems without a new UI redesign.",`
+- L634: `return INTEGRATION_DOMAINS.flatMap((domain) =>`
+- L635: `domain.integrations.map((integration) => ({`
+- L637: `domainId: domain.id,`
+- L638: `domainTitle: domain.title`
+- L700: `const ancestorContainer = findScrollableAncestor(page);`
+- L702: `if (ancestorContainer) {`
+- L703: `return { mode: "element", element: ancestorContainer };`
+- L865: `if (integration.id === "search-console" && field.key === "siteDomain" && hostname) {`
+- L866: `return \`sc-domain:${hostname}\`;`
+- L868: `if (integration.id === "mailer" && field.key === "senderDomain") {`
+- L904: `if (card.statusLabel === "Error") return "Repair integration connection";`
+- L1013: `{ key: "ads", pattern: /ads?|campaign|creative|spend|cpc|cpa|roas|pixel/ },`
+- L1026: `if (integration.domainId === "social") {`
+- L1033: `if (integration.domainId === "website-commerce") {`
+- L1047: `if (integration.domainId === "analytics") {`
+- L1054: `if (integration.domainId === "email-crm") {`
+- L1056: `read: [...new Set(["contacts", "campaign performance", ...scopeKeys])],`
+- L1057: `write: ["campaign sends", "audience sync"]`
+- L1061: `if (integration.domainId === "ads") {`
+- L1063: `read: [...new Set(["ads", "spend", "campaigns", "creative performance", ...scopeKeys])],`
+- L1064: `write: ["budget changes", "campaign updates"]`
+- L1135: `"WooCommerce Store URL is not saved yet. Run Repair integration connection after governance approval, then test the connection."`
+- L1151: `"Save or repair this integration before running a connection test. The test uses the saved server-side configuration."`
+- L1175: `if (normalized === "unavailable") return "Unavailable";`
+- L1187: `return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";`
+- L1198: `return "Some required connection details are still missing.";`
+- L1204: `return asString(record.last_error) || "The last action failed. Review the connection inputs and try again.";`
+- L1223: `if (statusKey === "failed") {`
+- L1225: `label: card.statusLabel === "Error" ? "Repair integration connection" : "Reconnect integration",`
+- L1298: `if (action === "unavailable") {`
+- L1379: `const domainModels = buildDomainModels(state, session, {`
+- L1380: `domains: INTEGRATION_DOMAINS,`
+- L1405: `const allCards = domainModels.flatMap((domain) => domain.cards);`
+- L1476: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1498: `await reconnectProjectIntegration(projectName, integrationId, payload);`
+- L1500: `await connectProjectIntegration(projectName, integrationId, payload);`
+- L1505: `await reloadProjectData(projectName);`
+- L1519: `await reloadProjectData(projectName);`
+- L1526: `showError?.(error.message || \`Failed to connect ${integration.label}.\`);`
+- L1534: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1544: `await disconnectProjectIntegration(projectName, integrationId, {`
+- L1549: `await reloadProjectData(projectName);`
+- L1552: `showError?.(error.message || \`Failed to disconnect ${integration.label}.\`);`
+- L1560: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1580: `const confirmed = window.confirm(\`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.\`);`
+- L1588: `await testProjectIntegration(projectName, integrationId, {`
+- L1593: `await syncProjectIntegration(projectName, integrationId, {`
+- L1598: `await importProjectIntegrationHistory(projectName, integrationId, {`
+- L1604: `await reloadProjectData(projectName);`
+- L1619: `await reloadProjectData(projectName);`
+- L1626: `showError?.(error.message || \`Failed to ${type} ${integration.label}.\`);`
+- L1636: `await persistPrimary(integrationId, false);`
+- L1640: `await persistPrimary(integrationId, true);`
+- L1644: `await disconnect(integrationId);`
+- L1648: `await runServerAction(integrationId, action);`
+- L1652: `Array.from(document.querySelectorAll("[data-integration-prompt]")).forEach((button) => {`
+- L1654: `const prompt = button.getAttribute("data-integration-prompt-text") || "";`
+- L1657: `input.value = prompt;`
+- L1659: `navigateTo("ai-command");`
+- L1660: `showMessage?.("Diagnostics prompt added to AI Command.");`
+- L1685: `description: "Connect, test, sync, import, reconnect, and control the external platforms that power MH Assistant OS."`
+- L1711: `const domainModels = buildDomainModels(state, session, {`
+- L1712: `domains: INTEGRATION_DOMAINS,`
+- L1737: `const sectionGroups = buildSectionGroups(domainModels);`
+- L1738: `const allCards = domainModels.flatMap((domain) => domain.cards);`
+- L1742: `const coverageMap = buildCoverageMap(domainModels);`
+- L1743: `const criticalMissing = buildCriticalMissing(domainModels);`
+- L1744: `const recommendations = buildRecommendations(domainModels, coverageMap);`
+- L1745: `const aiRec = buildAISmartRecommendation(domainModels);`
+- L1747: `const overview = buildIntegrationOverviewSummary(allCards, recommendations);`
+- L1753: `const attentionTotal = allCards.filter((card) => ["needs_setup", "failed"].includes(getConnectorWorkspaceStatus(card))).length;`
+- L1795: `<span class="data-label">Failed</span>`
+- L1796: `<strong>${escapeHtml(String(overview.failedOrDisconnected))}</strong>`
+- L1804: `${aiRec.card ? \``
+- L1808: `<span class="card-badge ${escapeHtml(aiRec.priorityTone)}">${escapeHtml(aiRec.priorityLabel)}</span>`
+- L1812: `<div class="integration-next-action-connector-icon" data-integration-initials="${escapeHtml(aiRec.card.icon)}">${escapeHtml(aiRec.card.icon)}</div>`
+- L1814: `<strong>${escapeHtml(aiRec.card.label)}</strong>`
+- L1815: `<span>${escapeHtml(aiRec.card.domainTitle)}</span>`
+- L1818: `<details class="integration-next-action-details">`
+- L1821: `<p><strong>Unlocks:</strong> ${escapeHtml(aiRec.card.enables)}</p>`
+- L1822: `<p><strong>Decision confidence:</strong> ${escapeHtml(aiRec.card.whyItMatters)}</p>`
+- L1823: `<p><strong>Risk if missing:</strong> ${escapeHtml(aiRec.reasonLabel)} remains unresolved.</p>`
+- L1825: `</details>`
+- L1826: `<button class="btn btn-primary" type="button" data-integration-select="${escapeHtml(aiRec.card.id)}">Open connector setup</button>`
+- L1831: `${aiRec.card ? "" : renderAISmartRecommendationModule(aiRec)}`
+- L1836: `<div class="integration-system-workspace-main">`
+- L1860: `<option value="failed" ${session.statusFilter === "failed" ? "selected" : ""}>Failed</option>`
+- L1906: `<div class="integration-system-prompt-row">`
+- L1908: `${recommendations.prompts.slice(0, 2).map((item) => \``
+- L1909: `<button class="btn btn-secondary" type="button" data-integration-prompt="prompt" data-integration-prompt-text="${escapeHtml(item.prompt)}">${escapeHtml(item.label)}</button>`
+- L1918: `<p class="home-section-copy" style="margin:6px 0 0;">Shows live integration events when available, otherwise derived connector checkpoints.</p>`
+- L1935: `<div class="integration-ai-grid">`
+- L1942: `${renderIntegrationRecommendationsList(recommendations.recommendations)}`
+
+## Confirmation Signals
+- L1538: `const confirmed = window.confirm(\`Confirm integration disconnect\n\nAction: Disconnect ${integration.label} from the current project.\nRisk: This can stop data sync, attribution, learning signals, and automation inputs for this connector.\nAuthority: This is a backend-governed integration state update.\n\nSelect Cancel to keep the integration connected.\`);`
+- L1580: `const confirmed = window.confirm(\`Confirm integration ${actionLabel}\n\nAction: Run ${actionLabel} for ${integration.label}.\nRisk: This may start backend jobs, provider reads, imports, or data refresh operations for this connector.\nAuthority: This action remains backend-governed and may require Governance approval.\n\nSelect Cancel to stop this action.\`);`
+
+## Local / Session Storage Signals
+- L651: `drafts: {},`
+- L876: `const draft = ensureDraft(session, integration.id);`
+- L877: `if (draft[field.key] != null) return draft[field.key];`
+- L935: `function ensureDraft(session, integrationId) {`
+- L936: `if (!session.drafts[integrationId]) {`
+- L937: `session.drafts[integrationId] = {};`
+- L939: `return session.drafts[integrationId];`
+- L942: `function clearDraft(session, integrationId) {`
+- L943: `delete session.drafts[integrationId];`
+- L947: `const draft = ensureDraft(session, integrationId);`
+- L948: `draft[fieldKey] = value;`
+- L1092: `const draft = ensureDraft(session, integration.id);`
+- L1093: `if (draft[field.key] != null) return draft[field.key];`
+- L1418: `const draft = ensureDraft(session, integration.id);`
+- L1430: `const draftValue = asString(draft[field.key]).trim();`
+- L1431: `if (draftValue) {`
+- L1432: `credentials[field.key] = draftValue;`
+- L1472: `async function persistPrimary(integrationId, reconnect = false) {`
+- L1502: `clearDraft(session, integrationId);`
+- L1547: `clearDraft(session, integrationId);`
+- L1636: `await persistPrimary(integrationId, false);`
+- L1640: `await persistPrimary(integrationId, true);`
+
+## Navigation Signals
+- L1261: `navigateTo,`
+- L1521: `navigateTo("governance");`
+- L1621: `navigateTo("governance");`
+- L1659: `navigateTo("ai-command");`
+- L1679: `export const integrationsRoute = {`
+- L1697: `navigateTo,`
+- L1777: `<p class="home-section-copy integration-system-purpose">Connect business platforms so MH-OS can sync performance, route safe backend actions, and learn from live operating data.</p>`
+- L1958: `navigateTo,`
+- L1975: `navigateTo,`
+
+## Disabled / Read-only / Draft / Guard Signals
+- L86: `purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L184: `enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",`
+- L218: `purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",`
+- L329: `purpose: "Future-ready import endpoint for internal or custom analytics feeds.",`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L651: `drafts: {},`
+- L876: `const draft = ensureDraft(session, integration.id);`
+- L877: `if (draft[field.key] != null) return draft[field.key];`
+- L935: `function ensureDraft(session, integrationId) {`
+- L936: `if (!session.drafts[integrationId]) {`
+- L937: `session.drafts[integrationId] = {};`
+- L939: `return session.drafts[integrationId];`
+- L942: `function clearDraft(session, integrationId) {`
+- L943: `delete session.drafts[integrationId];`
+- L947: `const draft = ensureDraft(session, integrationId);`
+- L948: `draft[fieldKey] = value;`
+- L955: `function requiresCredential(integration) {`
+- L1092: `const draft = ensureDraft(session, integration.id);`
+- L1093: `if (draft[field.key] != null) return draft[field.key];`
+- L1187: `return asString(integration.unavailableReason) || "This integration is unavailable because backend provider support is not configured yet.";`
+- L1418: `const draft = ensureDraft(session, integration.id);`
+- L1430: `const draftValue = asString(draft[field.key]).trim();`
+- L1431: `if (draftValue) {`
+- L1432: `credentials[field.key] = draftValue;`
+- L1461: `requires_credentials: requiresCredential(integration),`
+- L1476: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1502: `clearDraft(session, integrationId);`
+- L1534: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+- L1547: `clearDraft(session, integrationId);`
+- L1560: `showError?.(integration.unavailableReason || "This integration is unavailable because backend provider support is not configured yet.");`
+
+## Risky Terms
+- L1: `import {`
+- L2: `buildAISmartRecommendation,`
+- L3: `buildConnectorWorkspaceGroups,`
+- L6: `buildDomainModels,`
+- L7: `buildIntegrationActivityFeed,`
+- L8: `buildIntegrationCardModel,`
+- L9: `buildIntegrationOverviewSummary,`
+- L15: `CONNECTOR_WORKSPACE_CATEGORIES,`
+- L16: `getConnectorWorkspaceStatus`
+- L17: `} from "./integrations/builders.js";`
+- L19: `import { renderIntegrationDrawer } from "./integrations/drawer.js";`
+- L21: `import {`
+- L22: `renderConnectorGroup,`
+- L23: `renderSelectedConnectorSummary`
+- L24: `} from "./integrations/cards.js";`
+- L26: `import {`
+- L27: `renderAISmartRecommendation as renderAISmartRecommendationModule,`
+- L28: `renderIntegrationActivityFeed,`
+- L29: `renderIntegrationCoverageMap,`
+- L30: `renderIntegrationCriticalMissing,`
+- L31: `renderIntegrationDiagnosticsList,`
+- L32: `renderIntegrationRecommendationsList`
+- L33: `} from "./integrations/render.js";`
+- L35: `const integrationSessions = new Map();`
+- L36: `let integrationDrawerEscapeHandler = null;`
+- L37: `const UNSUPPORTED_INTEGRATION_IDS = new Set(["amazon", "smtp", "mailer", "crm"]);`
+- L39: `const INTEGRATION_DOMAINS = [`
+- L44: `integrations: [`
+- L47: `sourceKey: "website",`
+- L50: `purpose: "Primary site connection for landing pages, traffic mapping, attribution, and conversion context.",`
+- L51: `whyItMatters: "Without the website source, MH Assistant cannot connect content and campaign activity to real destination performance.",`
+- L54: `permissionScope: "Website endpoint or root domain access",`
+- L58: `{ key: "url", label: "Website URL", placeholder: "https://brand.com", required: true },`
+- L59: `{ key: "apiKey", label: "API key", placeholder: "Website API key", type: "password" },`
+- L60: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://brand.com/webhooks/mh", required: false }`
+- L65: `sourceKey: "ecommerce",`
+- L68: `purpose: "Store, product, order, and sales sync for WooCommerce-driven projects.",`
+- L69: `whyItMatters: "Commerce data lets the system learn what content, campaigns, and pages actually influence sales.",`
+- L70: `enables: "Product sync, order sync, sales signals, and commerce intelligence.",`
+- L72: `permissionScope: "Store URL + API consumer key/secret",`
+- L76: `{ key: "storeUrl", label: "Store URL", placeholder: "https://brand.com", required: true },`
+- L77: `{ key: "consumerKey", label: "Consumer key", placeholder: "ck_...", type: "password" },`
+- L78: `{ key: "consumerSecret", label: "Consumer secret", placeholder: "cs_...", type: "password" }`
+- L83: `sourceKey: "shopify",`
+- L86: `purpose: "Future-ready Shopify storefront integration for products, orders, and sales intelligence.",`
+- L88: `enables: "Product sync, order sync, customer sync, and sales reporting.",`
+- L90: `permissionScope: "Store domain + admin access token",`
+- L91: `primaryField: "storeDomain",`
+- L93: `{ key: "storeDomain", label: "Store domain", placeholder: "brand.myshopify.com", required: true },`
+- L94: `{ key: "adminToken", label: "Admin token", placeholder: "shpat_...", type: "password" },`
+- L95: `{ key: "storeId", label: "Store ID", placeholder: "Shopify store ID" }`
+- L100: `sourceKey: "amazon",`
+- L102: `unavailableReason: "Backend provider support is not configured yet.",`
+- L107: `enables: "Listing sync, sales signals, performance by product, and marketplace learning.",`
+- L109: `permissionScope: "Merchant ID + SP-API credentials",`
+- L112: `{ key: "merchantId", label: "Merchant ID", placeholder: "Amazon merchant ID", required: true },`
+- L113: `{ key: "sellerUrl", label: "Store URL", placeholder: "https://amazon.com/shops/brand" },`
+- L114: `{ key: "accessToken", label: "Access token", placeholder: "Amazon access token", type: "password" }`
+- L119: `sourceKey: "ebay",`
+- L122: `purpose: "Marketplace listing and commerce signal sync for eBay surfaces.",`
+- L124: `enables: "Listing sync, order sync, product demand signals, and marketplace coverage.",`
+- L126: `permissionScope: "Seller account + OAuth access token",`
+- L129: `{ key: "sellerId", label: "Seller ID", placeholder: "eBay seller ID", required: true },`
+- L130: `{ key: "storeUrl", label: "Store URL", placeholder: "https://ebay.com/usr/brand" },`
+- L131: `{ key: "accessToken", label: "Access token", placeholder: "eBay access token", type: "password" }`
+- L140: `integrations: [`
+- L143: `sourceKey: "facebook",`
+- L150: `permissionScope: "Page ID + business access token",`
+- L154: `{ key: "pageUrl", label: "Page URL", placeholder: "https://facebook.com/brand", required: true },`
+- L155: `{ key: "pageId", label: "Page ID", placeholder: "Facebook page ID", required: false },`
+- L156: `{ key: "accessToken", label: "Access token", placeholder: "Facebook access token", type: "password" }`
+- L161: `sourceKey: "instagram",`
+- L164: `purpose: "Post, reel, and profile insight sync for Instagram business performance.",`
+- L168: `permissionScope: "Business account ID + Graph API token",`
+- L172: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://instagram.com/brand", required: true },`
+- L173: `{ key: "businessAccountId", label: "Business account ID", placeholder: "Instagram business account ID" },`
+- L174: `{ key: "accessToken", label: "Access token", placeholder: "Instagram access token", type: "password" }`
+- L179: `sourceKey: "tiktok",`
+- L182: `purpose: "Video and post insight sync for TikTok creative and audience performance.",`
+- L186: `permissionScope: "Business account ID + access token",`
+- L190: `{ key: "profileUrl", label: "Profile URL", placeholder: "https://tiktok.com/@brand", required: true },`
+- L191: `{ key: "accountId", label: "Account ID", placeholder: "TikTok business account ID" },`
+- L192: `{ key: "accessToken", label: "Access token", placeholder: "TikTok access token", type: "password" }`
+- L197: `sourceKey: "youtube",`
+- L200: `purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",`
+- L204: `permissionScope: "Channel ID + OAuth token",`
+- L208: `{ key: "channelUrl", label: "Channel URL", placeholder: "https://youtube.com/@brand", required: true },`
+- L209: `{ key: "channelId", label: "Channel ID", placeholder: "YouTube channel ID" },`
+- L210: `{ key: "accessToken", label: "Access token", placeholder: "YouTube OAuth token", type: "password" }`
+- L215: `sourceKey: "linkedin",`
+- L218: `purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",`
+- L222: `permissionScope: "Company page ID + OAuth token",`
+- L225: `{ key: "companyUrl", label: "Company URL", placeholder: "https://linkedin.com/company/brand", required: true },`
+- L226: `{ key: "companyId", label: "Company ID", placeholder: "LinkedIn company ID" },`
+- L227: `{ key: "accessToken", label: "Access token", placeholder: "LinkedIn OAuth token", type: "password" }`
+- L236: `integrations: [`
+- L239: `sourceKey: "analytics",`
+- L246: `permissionScope: "Property ID + service account or OAuth token",`
+- L250: `{ key: "propertyId", label: "GA4 property ID", placeholder: "GA4 property ID", required: true },`
+- L251: `{ key: "measurementId", label: "Measurement ID", placeholder: "G-XXXXXXXXXX" },`
+- L252: `{ key: "accessToken", label: "Access token", placeholder: "GA4 access token", type: "password" }`
+- L257: `sourceKey: "google",`
+- L260: `purpose: "Tracking container management for tags, events, and analytics instrumentation.",`
+- L264: `permissionScope: "Container ID + workspace access",`
+- L265: `primaryField: "containerId",`
+- L267: `{ key: "containerId", label: "Container ID", placeholder: "GTM-XXXXXXX", required: true },`
+- L268: `{ key: "workspaceId", label: "Workspace ID", placeholder: "GTM workspace ID" },`
+- L269: `{ key: "accessToken", label: "Access token", placeholder: "GTM access token", type: "password" }`
+- L274: `sourceKey: "facebook",`
+- L277: `purpose: "Meta tracking layer for conversions, events, and paid attribution support.",`
+- L279: `enables: "Event tracking, conversion reporting, paid attribution, and audience learning.",`
+- L281: `permissionScope: "Pixel ID + business token",`
+- L284: `{ key: "pixelId", label: "Pixel ID", placeholder: "Meta pixel ID", required: true },`
+- L285: `{ key: "adAccountId", label: "Ad account ID", placeholder: "act_123..." },`
+- L286: `{ key: "accessToken", label: "Access token", placeholder: "Meta access token", type: "password" }`
+- L291: `sourceKey: "tiktok",`
+- L294: `purpose: "TikTok conversion tracking layer for paid and organic destination analysis.",`
+- L295: `whyItMatters: "TikTok Pixel improves measurement of short-form content and paid traffic impact.",`
+- L296: `enables: "Events, conversion tracking, attribution, and paid optimization support.",`
+- L298: `permissionScope: "Pixel ID + business token",`
+- L301: `{ key: "pixelId", label: "Pixel ID", placeholder: "TikTok pixel ID", required: true },`
+- L302: `{ key: "accountId", label: "Account ID", placeholder: "TikTok Ads account ID" },`
+- L303: `{ key: "accessToken", label: "Access token", placeholder: "TikTok token", type: "password" }`
+- L308: `sourceKey: "google",`
+- L315: `permissionScope: "Property URL + Search Console auth",`
+- L319: `{ key: "propertyUrl", label: "Property URL", placeholder: "https://brand.com", required: true },`
+- L320: `{ key: "siteDomain", label: "Domain property", placeholder: "sc-domain:brand.com" },`
+- L321: `{ key: "accessToken", label: "Access token", placeholder: "Search Console token", type: "password" }`
+- L326: `sourceKey: "analytics",`
+- L329: `purpose: "Future-ready import endpoint for internal or custom analytics feeds.",`
+- L331: `enables: "Custom event ingest, proprietary reporting, and historical import.",`
+- L333: `permissionScope: "Endpoint URL + auth token",`
+- L336: `{ key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },`
+- L337: `{ key: "clientId", label: "Client ID", placeholder: "Analytics client ID" },`
+- L338: `{ key: "accessToken", label: "Access token", placeholder: "API token", type: "password" }`
+- L344: `id: "email-crm",`
+- L345: `title: "Email & CRM",`
+- L346: `description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",`
+- L347: `integrations: [`
+- L350: `sourceKey: "email",`
+- L352: `unavailableReason: "Backend provider support is not configured yet.",`
+- L353: `label: "SMTP / Email Sending",`
+- L355: `purpose: "Transactional and campaign email sending through SMTP or relay infrastructure.",`
+- L356: `whyItMatters: "Email is critical for lifecycle recovery, conversion support, and owned audience communication.",`
+- L357: `enables: "Campaign sending, lifecycle messages, and email workflow execution.",`
+- L358: `dataScope: ["Sending", "Delivery", "Campaign email", "Lifecycle email"],`
+- L359: `permissionScope: "SMTP host + port + sender + auth",`
+- L361: `primaryField: "senderEmail",`
+- L363: `{ key: "senderEmail", label: "Sender email", placeholder: "support@brand.com", required: true },`
+- L364: `{ key: "smtpHost", label: "SMTP host", placeholder: "smtp.provider.com", required: true },`
+- L365: `{ key: "smtpPort", label: "SMTP port", placeholder: "587" }`
+- L369: `id: "mailer",`
+- L370: `sourceKey: "email",`
+- L372: `unavailableReason: "Backend provider support is not configured yet.",`
+- L373: `label: "Mailer Integration",`
+- L375: `purpose: "Provider-specific email platform integration for campaigns and audience workflows.",`
+- L376: `whyItMatters: "A mailer integration improves sending reliability, segmentation, and performance tracking.",`
+- L377: `enables: "Campaign sends, audience sync, templates, and performance reporting.",`
+- L378: `dataScope: ["Campaigns", "Audiences", "Templates", "Performance"],`
+- L379: `permissionScope: "Provider API key + sender domain",`
+- L380: `primaryField: "providerName",`
+- L382: `{ key: "providerName", label: "Provider name", placeholder: "SendGrid / Mailgun / Resend", required: true },`
+- L383: `{ key: "apiKey", label: "API key", placeholder: "Mailer API key", type: "password" },`
+- L384: `{ key: "senderDomain", label: "Sender domain", placeholder: "brand.com" }`
+- L388: `id: "mailchimp",`
+- L389: `sourceKey: "email",`
+- L390: `label: "Mailchimp",`
+- L392: `purpose: "Future-ready newsletter, audience, and campaign sync through Mailchimp.",`
+- L393: `whyItMatters: "Mailchimp can expand owned audience growth and newsletter performance feedback.",`
+- L394: `enables: "Audience sync, campaigns, lists, and newsletter reporting.",`
+- L395: `dataScope: ["Contacts", "Campaigns", "Segments", "Performance"],`
+- L396: `permissionScope: "Audience ID + API key",`
+- L399: `{ key: "audienceId", label: "Audience ID", placeholder: "Mailchimp audience ID", required: true },`
+- L400: `{ key: "apiKey", label: "API key", placeholder: "Mailchimp API key", type: "password" },`
+- L401: `{ key: "serverPrefix", label: "Server prefix", placeholder: "us1" }`
+- L406: `sourceKey: "analytics",`
+- L408: `unavailableReason: "Backend provider support is not configured yet.",`
+- L409: `label: "CRM Integration",`
+- L411: `purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",`
+- L412: `whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",`
+- L413: `enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",`
+- L415: `permissionScope: "CRM account ID + API token",`
+- L418: `{ key: "workspaceId", label: "Workspace / account ID", placeholder: "CRM workspace ID", required: true },`
+- L419: `{ key: "apiKey", label: "API key", placeholder: "CRM API key", type: "password" },`
+- L420: `{ key: "pipelineId", label: "Pipeline ID", placeholder: "Primary pipeline ID" }`
+- L428: `description: "Paid campaign accounts, spend import, creative performance, and optimization signals.",`
+- L429: `integrations: [`
+- L432: `sourceKey: "facebook",`
+- L435: `purpose: "Campaign, ad set, creative, spend, CTR, CPC, CPA, and ROAS intelligence from Meta Ads.",`
+- L436: `whyItMatters: "Meta Ads data helps the system learn what paid campaigns and creatives deserve scaling or pausing.",`
+- L437: `enables: "Spend sync, campaign import, creative performance, and paid optimization.",`
+- L438: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L439: `permissionScope: "Ad account ID + access token",`
+- L443: `{ key: "adAccountId", label: "Ad account ID", placeholder: "act_123456789", required: true },`
+- L444: `{ key: "businessId", label: "Business ID", placeholder: "Meta business ID" },`
+- L445: `{ key: "accessToken", label: "Access token", placeholder: "Meta ads token", type: "password" }`
+- L450: `sourceKey: "google_ads",`
+- L453: `purpose: "Campaign, keyword, spend, CTR, CPC, CPA, and ROAS intelligence from Google Ads.",`
+- L454: `whyItMatters: "Google Ads data shows which search or demand-capture campaigns actually generate efficient traffic and revenue.",`
+- L455: `enables: "Spend sync, campaign import, keyword performance, and paid optimization.",`
+- L456: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L457: `permissionScope: "Customer ID + OAuth token",`
+- L461: `{ key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },`
+- L462: `{ key: "managerId", label: "Manager / MCC ID", placeholder: "Google Ads MCC ID" },`
+- L463: `{ key: "refreshToken", label: "Refresh token", placeholder: "Google Ads refresh token", type: "password" }`
+- L468: `sourceKey: "tiktok",`
+- L471: `purpose: "Campaign, creative, spend, and performance intelligence from TikTok Ads.",`
+- L472: `whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",`
+- L473: `enables: "Spend sync, campaign import, creative performance, and short-form paid optimization.",`
+- L474: `dataScope: ["Spend", "CTR", "CPC", "CPA", "ROAS", "Campaigns", "Creatives"],`
+- L475: `permissionScope: "Advertiser ID + access token",`
+- L478: `{ key: "advertiserId", label: "Advertiser ID", placeholder: "TikTok advertiser ID", required: true },`
+- L479: `{ key: "accountScope", label: "Account scope", placeholder: "Region / business scope" },`
+- L480: `{ key: "accessToken", label: "Access token", placeholder: "TikTok ads token", type: "password" }`
+- L487: `title: "AI / Automation / Ops Tools",`
+- L488: `description: "Workspace, automation, webhook, and operations tools that keep workflows moving.",`
+- L489: `integrations: [`
+- L492: `sourceKey: "google",`
+- L495: `purpose: "File sync and shared asset operations through Google Drive.",`
+- L496: `whyItMatters: "Drive helps centralize asset references, shared documents, and working files for campaigns and analysis.",`
+- L497: `enables: "Asset sync, doc sync, shared files, and automation inputs.",`
+- L499: `permissionScope: "Drive folder ID + OAuth token",`
+- L502: `{ key: "folderId", label: "Folder ID", placeholder: "Google Drive folder ID", required: true },`
+- L503: `{ key: "workspaceEmail", label: "Workspace email", placeholder: "ops@brand.com" },`
+- L504: `{ key: "accessToken", label: "Access token", placeholder: "Drive OAuth token", type: "password" }`
+- L509: `sourceKey: "analytics",`
+- L512: `purpose: "Operational alerting, workflow notifications, and team collaboration handoff.",`
+- L513: `whyItMatters: "Slack can surface sync failures, content approvals, and campaign alerts where the team already works.",`
+- L514: `enables: "Alerts, approvals, sync notifications, and workflow coordination.",`
+- L515: `dataScope: ["Notifications", "Approvals", "Ops alerts"],`
+- L516: `permissionScope: "Workspace ID + bot token",`
+- L519: `{ key: "workspaceId", label: "Workspace ID", placeholder: "Slack workspace ID", required: true },`
+- L520: `{ key: "channelId", label: "Channel ID", placeholder: "Channel ID for alerts" },`
+- L521: `{ key: "botToken", label: "Bot token", placeholder: "xoxb-...", type: "password" }`
+- L526: `sourceKey: "analytics",`
+- L529: `purpose: "Bot-based operational alerts, approvals, and lightweight workflow execution.",`
+- L530: `whyItMatters: "Telegram can keep MH Assistant responsive when quick approvals or notifications are needed.",`
+- L531: `enables: "Alerts, commands, approval handoff, and ops notifications.",`
+- L532: `dataScope: ["Alerts", "Commands", "Approvals"],`
+- L533: `permissionScope: "Bot token + chat ID",`
+- L536: `{ key: "botName", label: "Bot / workspace name", placeholder: "MH Assistant Ops Bot", required: true },`
+- L537: `{ key: "chatId", label: "Chat ID", placeholder: "Telegram chat ID" },`
+- L538: `{ key: "botToken", label: "Bot token", placeholder: "Telegram bot token", type: "password" }`
+- L543: `sourceKey: "analytics",`
+- L546: `purpose: "Knowledge, briefs, campaign docs, and structured planning data inside Notion.",`
+- L547: `whyItMatters: "Notion can hold reusable knowledge the system references for campaigns, SEO, and content execution.",`
+- L548: `enables: "Docs sync, planning sync, task context, and knowledge reuse.",`
+- L550: `permissionScope: "Workspace + integration token",`
+- L553: `{ key: "workspaceName", label: "Workspace name", placeholder: "Brand Ops Workspace", required: true },`
+- L554: `{ key: "databaseId", label: "Database ID", placeholder: "Primary Notion database ID" },`
+- L555: `{ key: "accessToken", label: "Integration token", placeholder: "Notion token", type: "password" }`
+- L560: `sourceKey: "analytics",`
+- L563: `purpose: "Automation routing for triggers, syncs, approvals, and external workflow handoffs.",`
+- L565: `enables: "Workflow automation, triggers, sync jobs, and handoffs.",`
+- L566: `dataScope: ["Automations", "Triggers", "Sync jobs"],`
+- L567: `permissionScope: "Webhook or scenario endpoint",`
+- L570: `{ key: "endpointUrl", label: "Webhook / scenario URL", placeholder: "https://hooks.zapier.com/...", required: true },`
+- L571: `{ key: "workspaceId", label: "Workspace / scenario ID", placeholder: "Zap / Make scenario ID" },`
+- L572: `{ key: "secretKey", label: "Secret key", placeholder: "Automation secret", type: "password" }`
+- L576: `id: "webhook",`
+- L577: `sourceKey: "analytics",`
+- L578: `label: "Internal Webhook",`
+- L580: `purpose: "Internal system-to-system webhook integration for custom workflows and events.",`
+- L581: `whyItMatters: "Internal webhooks let MH Assistant plug into custom business systems without a new UI redesign.",`
+- L582: `enables: "Custom events, syncs, notifications, and system handoffs.",`
+- L583: `dataScope: ["Custom events", "Payloads", "Sync triggers"],`
+- L584: `permissionScope: "Webhook URL + auth secret",`
+- L585: `primaryField: "webhookUrl",`
+- L587: `{ key: "webhookUrl", label: "Webhook URL", placeholder: "https://ops.brand.com/webhook", required: true },`
+- L588: `{ key: "eventScope", label: "Event scope", placeholder: "events, approvals, syncs" },`
+- L589: `{ key: "secretKey", label: "Secret key", placeholder: "Webhook secret", type: "password" }`
+- L633: `function getAllIntegrations() {`
+- L634: `return INTEGRATION_DOMAINS.flatMap((domain) =>`
+- L635: `domain.integrations.map((integration) => ({`
+- L636: `...integration,`
+- L637: `domainId: domain.id,`
+- L638: `domainTitle: domain.title`
+- L643: `function getIntegrationById(integrationId) {`
+- L644: `return getAllIntegrations().find((item) => item.id === integrationId) || null;`
+- L648: `const key = projectName || "__default__";`
+- L649: `if (!integrationSessions.has(key)) {`
+- L650: `integrationSessions.set(key, {`
+- L652: `selectedIntegrationId: "",`
+- L656: `activeDrawerIntegrationId: "",`
+- L658: `drawerOriginIntegrationId: "",`
+- L660: `restoreFocusIntegrationId: "",`
+- L662: `validationIntegrationId: "",`
+- L663: `validationFieldKey: "",`
+- L667: `return integrationSessions.get(key);`
+- L694: `function getIntegrationsScrollTarget() {`
+- L699: `const page = document.querySelector('[data-page="integrations"]');`
+- L700: `const ancestorContainer = findScrollableAncestor(page);`
+- L702: `if (ancestorContainer) {`
+- L703: `return { mode: "element", element: ancestorContainer };`
+- L714: `function captureIntegrationsScrollState() {`
+- L715: `const target = getIntegrationsScrollTarget();`
+- L730: `function restoreIntegrationsScrollState(scrollState) {`
+- L734: `const target = getIntegrationsScrollTarget();`
+- L749: `function openIntegrationDrawer(session, integrationId) {`
+- L750: `session.selectedIntegrationId = integrationId || "";`
+- L751: `session.activeDrawerIntegrationId = integrationId || "";`
+- L752: `session.drawerOpen = Boolean(integrationId);`
+- L753: `session.drawerOriginIntegrationId = integrationId || "";`
+- L754: `session.drawerOriginScrollState = captureIntegrationsScrollState();`
+- L757: `function closeIntegrationDrawer(session) {`
+- L758: `const closedIntegrationId = session.activeDrawerIntegrationId || session.selectedIntegrationId || "";`
+- L761: `session.activeDrawerIntegrationId = "";`
+- L762: `session.selectedIntegrationId = closedIntegrationId || session.selectedIntegrationId;`
+- L763: `session.restoreFocusIntegrationId = closedIntegrationId;`
+- L764: `session.restoreScrollState = session.drawerOriginScrollState || captureIntegrationsScrollState();`
+- L766: `session.validationIntegrationId = "";`
+- L767: `session.validationFieldKey = "";`
+- L771: `function restoreConnectorContext(session) {`
+- L776: `const targetIntegrationId = asString(session.restoreFocusIntegrationId || session.selectedIntegrationId);`
+- L779: `if (!targetIntegrationId && !restoreState) {`
+- L783: `session.restoreFocusIntegrationId = "";`
+- L787: `restoreIntegrationsScrollState(restoreState);`
+- L789: `if (!targetIntegrationId) return;`
+- L791: `const selector = \`[data-integration-select="${targetIntegrationId}"]\`;`
+- L798: `const row = trigger.closest(".integration-control-row");`
+
+## Required Manual Classification
+Before any patch, classify exact Integrations paths into:
+
+1. Integration display/read-only
+2. Credential display / masked only
+3. Credential save/update
+4. Provider connect/reconnect
+5. Provider disconnect
+6. Provider sync/refresh/import
+7. Webhook/test action
+8. Approval-required connector action
+9. AI prompt/guidance only
+10. Shared handoff only
+11. Disabled future action
+12. Unknown / needs deeper inspection
+
+## Decision Rule
+- If credential save/update exists without confirmation, patch.
+- If reconnect/disconnect/sync/import exists without confirmation or approval gate, patch.
+- If protected provider actions bypass Governance approval lifecycle, patch.
+- If credentials/tokens are exposed in UI or logs, patch.
+- If AI guidance is prompt/navigation only, document and close.
+- If actions are read-only/local/shared-context only, document and close.
+- Do not redesign Integrations in this pass.

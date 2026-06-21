@@ -1493,6 +1493,20 @@ function bindIntegrationActions({
       return;
     }
 
+    const actionLabel = reconnect ? "reconnect / repair" : "connect";
+    const confirmed = window.confirm(
+      `Confirm integration ${actionLabel}\n\n` +
+        `Action: ${reconnect ? "Reconnect or repair" : "Connect"} ${integration.label} for the current project.\n` +
+        "Risk: This may save or update provider credentials, enable backend sync, and activate provider-level reads for this connector.\n" +
+        "Authority: This is a backend-governed integration credential and connection update. It may require Governance approval.\n\n" +
+        "Select Cancel to review the connector setup before continuing."
+    );
+
+    if (!confirmed) {
+      showMessage?.(`${integration.label} ${actionLabel} cancelled.`);
+      return;
+    }
+
     try {
       if (reconnect) {
         await reconnectProjectIntegration(projectName, integrationId, payload);
