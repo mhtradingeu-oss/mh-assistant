@@ -1060,6 +1060,22 @@ function bindSetupActions({
       const payload = buildSetupPersistencePayload(values);
       const previousLabel = saveBackendBtn.textContent;
 
+      const confirmed = typeof window === "undefined" || typeof window.confirm !== "function"
+        ? true
+        : window.confirm(
+            [
+              `Save Setup foundation for ${draftKeyName}?`,
+              "This will persist backend project foundation data.",
+              "It does not publish, approve, create handoffs, or execute AI automatically.",
+              "Continue?"
+            ].join("\n\n")
+          );
+
+      if (!confirmed) {
+        showMessage?.("Setup backend save cancelled.");
+        return;
+      }
+
       saveBackendBtn.disabled = true;
       saveBackendBtn.textContent = "Saving Setup...";
       showMessage?.(`Saving backend setup foundation for ${draftKeyName}...`);
