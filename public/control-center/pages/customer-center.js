@@ -368,6 +368,21 @@ function renderCustomerCenter(context) {
   `;
 }
 
+function confirmCustomerCenterHandoff(action, detail = "") {
+  const message = [
+    `Customer Center action: ${action}`,
+    detail,
+    "This prepares review context only. It does not send customer messages, update CRM, change tickets, contact providers, or execute AI automatically.",
+    "Continue?"
+  ].filter(Boolean).join("\n\n");
+
+  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+    return true;
+  }
+
+  return window.confirm(message);
+}
+
 function attachCustomerCenterHandlers(context) {
   const root = document.querySelector('[data-page="customer-center"]');
   if (!root) return;
@@ -384,6 +399,12 @@ function attachCustomerCenterHandlers(context) {
     }
 
     if (action === "ai-handoff") {
+      const confirmed = confirmCustomerCenterHandoff(
+        "Prepare AI Command customer support prompt",
+        "This will attach a read-only Customer Center prompt and open AI Command for review."
+      );
+      if (!confirmed) return;
+
       context.setSharedAiDraft?.({
         source: "customer-center",
         title: "Customer Center support prompt",
@@ -395,6 +416,12 @@ function attachCustomerCenterHandlers(context) {
     }
 
     if (action === "task-handoff") {
+      const confirmed = confirmCustomerCenterHandoff(
+        "Prepare Task Center customer follow-up handoff",
+        "This will attach Customer Center context and open Task Center for human follow-up planning."
+      );
+      if (!confirmed) return;
+
       context.setSharedHandoff?.("task-center", {
         source: "customer-center",
         title: "Customer follow-up task preview",
@@ -406,6 +433,12 @@ function attachCustomerCenterHandlers(context) {
     }
 
     if (action === "governance-handoff") {
+      const confirmed = confirmCustomerCenterHandoff(
+        "Prepare Governance customer communication review",
+        "This will attach Customer Center context and open Governance for review before any external response."
+      );
+      if (!confirmed) return;
+
       context.setSharedHandoff?.("governance", {
         source: "customer-center",
         title: "Customer communication governance review",
