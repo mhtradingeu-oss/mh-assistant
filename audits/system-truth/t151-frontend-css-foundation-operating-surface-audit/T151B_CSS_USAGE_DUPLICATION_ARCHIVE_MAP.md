@@ -1,0 +1,548 @@
+# T151B — CSS Usage, Duplication, and Archive Candidate Map
+
+## Status
+Audit only.
+
+## Baseline
+- a036f3d Close Operations Centers runtime authority audit
+
+## Purpose
+Map CSS usage, duplication, and archive candidates before any merge/delete/refactor work.
+
+## CSS Files
+
+- `public/control-center/styles/00-tokens.css` — 179 lines
+- `public/control-center/styles/01-reset.css` — 40 lines
+- `public/control-center/styles/02-layer-system.css` — 257 lines
+- `public/control-center/styles/03-app-shell.css` — 103 lines
+- `public/control-center/styles/04-command-layer.css` — 147 lines
+- `public/control-center/styles/05-ai-layer.css` — 196 lines
+- `public/control-center/styles/07-sidebar.css` — 193 lines
+- `public/control-center/styles/08-components-foundation.css` — 1670 lines
+- `public/control-center/styles/09-operations-centers.css` — 1693 lines
+- `public/control-center/styles/10-topbar-canonical.css` — 169 lines
+- `public/control-center/styles/12-pages.css` — 10215 lines
+- `public/control-center/styles/13-home-executive.css` — 1245 lines
+- `public/control-center/styles/14-page-standard.css` — 2945 lines
+- `public/control-center/styles/15-clean-operating-layer.css` — 1165 lines
+- `public/control-center/styles/integrations/cards.css` — 0 lines
+- `public/control-center/styles/integrations/drawer.css` — 0 lines
+- `public/control-center/styles/integrations/forms.css` — 0 lines
+- `public/control-center/styles/integrations/grid.css` — 0 lines
+- `public/control-center/styles/integrations/layout.css` — 0 lines
+- `public/control-center/styles/integrations/responsive.css` — 0 lines
+- `public/control-center/styles/mhos-action-primitives.css` — 113 lines
+- `public/control-center/styles/mhos-context-primitives.css` — 103 lines
+- `public/control-center/styles/mhos-executive-surface-primitives.css` — 479 lines
+- `public/control-center/styles/mhos-workflow-primitives.css` — 146 lines
+
+## Classes Defined In Multiple CSS Files
+
+- `.action-card` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.ai-dock-panel` in `public/control-center/styles/05-ai-layer.css`, `public/control-center/styles/14-page-standard.css`
+- `.app-shell` in `public/control-center/styles/03-app-shell.css`, `public/control-center/styles/04-command-layer.css`
+- `.badge` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.btn` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-danger` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-ghost` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-primary` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-secondary` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-sm` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.btn-warning` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.card` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.card-badge` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.card-head` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.card-label` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.command-backdrop` in `public/control-center/styles/04-command-layer.css`, `public/control-center/styles/14-page-standard.css`
+- `.command-input` in `public/control-center/styles/04-command-layer.css`, `public/control-center/styles/09-operations-centers.css`
+- `.css` in `public/control-center/styles/mhos-action-primitives.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.danger` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.data-card` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.data-label` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.data-row` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.data-stack` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.empty-box` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`
+- `.home-action-meta` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-ai-prompt-grid` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/14-page-standard.css`
+- `.home-ai-team-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-ai-team-grid` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-blocker-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-blocker-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-command-center` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-compact-list` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-decision-quick-actions` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.home-section-copy` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.home-status-board-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-status-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`
+- `.home-two-column-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.is-active` in `public/control-center/styles/03-app-shell.css`, `public/control-center/styles/07-sidebar.css`, `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-blocked` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-complete` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.is-completed` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-current` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.is-danger` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`, `public/control-center/styles/mhos-context-primitives.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.is-empty` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-error` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-failed` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-ghost` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-hidden` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.is-info` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-loading` in `public/control-center/styles/02-layer-system.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-neutral` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/mhos-context-primitives.css`
+- `.is-open` in `public/control-center/styles/05-ai-layer.css`, `public/control-center/styles/07-sidebar.css`, `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.is-pending` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-ready` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-running` in `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-selected` in `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.is-success` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`, `public/control-center/styles/mhos-context-primitives.css`
+- `.is-visible` in `public/control-center/styles/02-layer-system.css`, `public/control-center/styles/07-sidebar.css`, `public/control-center/styles/08-components-foundation.css`
+- `.is-warning` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`, `public/control-center/styles/mhos-context-primitives.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.library-action-toolbar` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-danger-action` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-document-preview` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-document-preview-actions` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-drop-zone` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-filter-bar` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-filter-field` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-finder-toolbar` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-finder-topbar` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-folder-list` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-grid-body` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-grid-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-grid-meta` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-grid-preview` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-grid-title` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-inspector-ai-source-guide` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.library-inspector-ai-source-guide-text` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.library-inspector-more` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-inspector-path` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-overview-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-action-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-choice-btn` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-choice-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-current-chip` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-current-group` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-hero` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-metric` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-metrics` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-move-control` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-move-head` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-move-title` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-panel-section` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-pdf-preview` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-preview-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-preview-fallback` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.library-preview-image` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-preview-meta` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-preview-video` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-required-card` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-required-card-head` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-required-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-side-stack` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-smart-shell` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-upload-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-workspace-grid` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-workspace-main` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.library-workspace-side` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.loading-overlay` in `public/control-center/styles/02-layer-system.css`, `public/control-center/styles/14-page-standard.css`
+- `.mhos-ai-guidance` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-ai-guidance-copy` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-ai-guidance-reason` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-ai-guidance-title` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-clean-stack` in `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-destination-copy` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-destination-item` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-destination-map` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-destination-meta` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-destination-title` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-escalation-item` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-escalation-lane` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-executive-metric-label` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.mhos-executive-metric-value` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.mhos-executive-summary-item` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.mhos-next-action` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-flow` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-impact` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-reason` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-title` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-title-row` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-next-action-urgency` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-orchestration-pressure` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-os-panel-copy` in `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/mhos-executive-surface-primitives.css`
+- `.mhos-specialist-row` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-specialist-state` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-specialist-summary` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.mhos-stepper-marker` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-stepper-meta` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-stepper-step` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-stepper-title` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.mhos-workflow-active` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-workflow-chain` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-workflow-step` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/mhos-workflow-primitives.css`
+- `.mhos-workforce-room` in `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.neutral` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`
+- `.ops-table` in `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`
+- `.ops-table-wrap` in `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`
+- `.page` in `public/control-center/styles/03-app-shell.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.panel` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/15-clean-operating-layer.css`
+- `.panel-header` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`
+- `.quick-action-btn` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/13-home-executive.css`, `public/control-center/styles/14-page-standard.css`, `public/control-center/styles/mhos-action-primitives.css`
+- `.quick-actions` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`, `public/control-center/styles/12-pages.css`
+- `.setup-helper` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.setup-input` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.setup-kicker` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.setup-label` in `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.setup-textarea` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`, `public/control-center/styles/14-page-standard.css`
+- `.sidebar-backdrop` in `public/control-center/styles/07-sidebar.css`, `public/control-center/styles/14-page-standard.css`
+- `.sidebar-select` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/09-operations-centers.css`
+- `.simple-banner` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/12-pages.css`
+- `.status-card` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/14-page-standard.css`
+- `.std-action-btn` in `public/control-center/styles/08-components-foundation.css`, `public/control-center/styles/mhos-action-primitives.css`
+
+## High Repeat Selectors / Classes
+
+- `.btn` appears 73 times in CSS definitions/selectors
+- `.home-command-center` appears 62 times in CSS definitions/selectors
+- `.is-active` appears 50 times in CSS definitions/selectors
+- `.home-ai-guidance-panel` appears 30 times in CSS definitions/selectors
+- `.std-action-row` appears 29 times in CSS definitions/selectors
+- `.std-context-actions` appears 29 times in CSS definitions/selectors
+- `.ops-detail-card` appears 28 times in CSS definitions/selectors
+- `.quick-action-btn` appears 28 times in CSS definitions/selectors
+- `.std-quick-actions` appears 28 times in CSS definitions/selectors
+- `.panel-header` appears 27 times in CSS definitions/selectors
+- `.ops-executive-strip` appears 24 times in CSS definitions/selectors
+- `.ops-focus-tab` appears 24 times in CSS definitions/selectors
+- `.ops-table` appears 24 times in CSS definitions/selectors
+- `.std-action-panel` appears 24 times in CSS definitions/selectors
+- `.std-detail-card` appears 24 times in CSS definitions/selectors
+- `.card-badge` appears 22 times in CSS definitions/selectors
+- `.ops-toolbar` appears 22 times in CSS definitions/selectors
+- `.governance-policy-block` appears 21 times in CSS definitions/selectors
+- `.is-warning` appears 21 times in CSS definitions/selectors
+- `.aicmd-room-composer` appears 20 times in CSS definitions/selectors
+- `.aicmd-room-team-panel` appears 19 times in CSS definitions/selectors
+- `.aicmd-v2-textarea` appears 19 times in CSS definitions/selectors
+- `.card` appears 19 times in CSS definitions/selectors
+- `.card-head` appears 18 times in CSS definitions/selectors
+- `.aicmd-v2-spec-btn` appears 17 times in CSS definitions/selectors
+- `.is-selected` appears 17 times in CSS definitions/selectors
+- `.settings-actions-buttons` appears 17 times in CSS definitions/selectors
+- `.settings-toolbar` appears 17 times in CSS definitions/selectors
+- `.std-main-column` appears 17 times in CSS definitions/selectors
+- `.ops-runtime-signal` appears 16 times in CSS definitions/selectors
+- `.std-context-chip` appears 16 times in CSS definitions/selectors
+- `.governance-workspace-grid` appears 15 times in CSS definitions/selectors
+- `.mhos-clean-state` appears 15 times in CSS definitions/selectors
+- `.ops-main-column` appears 15 times in CSS definitions/selectors
+- `.ops-right-rail` appears 15 times in CSS definitions/selectors
+- `.page` appears 15 times in CSS definitions/selectors
+- `.setup-wizard-step` appears 15 times in CSS definitions/selectors
+- `.std-state-card` appears 15 times in CSS definitions/selectors
+- `.aicmd-room-flow-step` appears 14 times in CSS definitions/selectors
+- `.aicmd-v2-btn-ghost` appears 14 times in CSS definitions/selectors
+- `.aicmd-v2-btn-secondary` appears 14 times in CSS definitions/selectors
+- `.library-smart-shell` appears 14 times in CSS definitions/selectors
+- `.mhos-clean-btn` appears 14 times in CSS definitions/selectors
+- `.btn-secondary` appears 13 times in CSS definitions/selectors
+- `.empty-box` appears 13 times in CSS definitions/selectors
+- `.governance-policy-summary-grid` appears 13 times in CSS definitions/selectors
+- `.is-danger` appears 13 times in CSS definitions/selectors
+- `.std-ai-panel` appears 13 times in CSS definitions/selectors
+- `.std-right-rail` appears 13 times in CSS definitions/selectors
+- `.aicmd-room-output` appears 12 times in CSS definitions/selectors
+- `.aicmd-v2-action-row` appears 12 times in CSS definitions/selectors
+- `.aicmd-v2-composer` appears 12 times in CSS definitions/selectors
+- `.aicmd-v2-media-status-list` appears 12 times in CSS definitions/selectors
+- `.btn-primary` appears 12 times in CSS definitions/selectors
+- `.governance-operating-header` appears 12 times in CSS definitions/selectors
+- `.governance-rule-item` appears 12 times in CSS definitions/selectors
+- `.library-grid-card` appears 12 times in CSS definitions/selectors
+- `.library-required-card` appears 12 times in CSS definitions/selectors
+- `.std-ai-btn` appears 12 times in CSS definitions/selectors
+- `.aicmd-v2-btn-primary` appears 11 times in CSS definitions/selectors
+- `.aicmd-v2-tab-btn` appears 11 times in CSS definitions/selectors
+- `.btn-ghost` appears 11 times in CSS definitions/selectors
+- `.is-success` appears 11 times in CSS definitions/selectors
+- `.mhos-workflow-step` appears 11 times in CSS definitions/selectors
+- `.ai-dock-panel` appears 10 times in CSS definitions/selectors
+- `.aicmd-room-member` appears 10 times in CSS definitions/selectors
+- `.aicmd-room-output-workspace` appears 10 times in CSS definitions/selectors
+- `.aicmd-room-tools` appears 10 times in CSS definitions/selectors
+- `.aicmd-v2-chat-empty` appears 10 times in CSS definitions/selectors
+- `.aicmd-v2-meta-chip` appears 10 times in CSS definitions/selectors
+- `.is-missing` appears 10 times in CSS definitions/selectors
+- `.library-filter-bar` appears 10 times in CSS definitions/selectors
+- `.loading-overlay` appears 10 times in CSS definitions/selectors
+- `.mhos-clean-pill` appears 10 times in CSS definitions/selectors
+- `.panel` appears 10 times in CSS definitions/selectors
+- `.quick-actions` appears 10 times in CSS definitions/selectors
+- `.settings-choice-card` appears 10 times in CSS definitions/selectors
+- `.settings-control` appears 10 times in CSS definitions/selectors
+- `.setup-business-template-panel` appears 10 times in CSS definitions/selectors
+- `.aicmd-room-chat` appears 9 times in CSS definitions/selectors
+- `.aicmd-room-status-strip` appears 9 times in CSS definitions/selectors
+- `.badge` appears 9 times in CSS definitions/selectors
+- `.is-ready` appears 9 times in CSS definitions/selectors
+- `.library-preview-meta` appears 9 times in CSS definitions/selectors
+- `.library-workspace-side` appears 9 times in CSS definitions/selectors
+- `.mhos-specialist-summary` appears 9 times in CSS definitions/selectors
+- `.ops-layout-grid` appears 9 times in CSS definitions/selectors
+- `.settings-ai-assistant` appears 9 times in CSS definitions/selectors
+- `.settings-toggle-pill` appears 9 times in CSS definitions/selectors
+- `.aicmd-chatfirst-flow-step` appears 8 times in CSS definitions/selectors
+- `.aicmd-chatgpt-textarea` appears 8 times in CSS definitions/selectors
+- `.aicmd-room-center` appears 8 times in CSS definitions/selectors
+- `.aicmd-v2-chat-card` appears 8 times in CSS definitions/selectors
+- `.aicmd-v2-context-item` appears 8 times in CSS definitions/selectors
+- `.aicmd-v2-preview-section` appears 8 times in CSS definitions/selectors
+- `.app-shell` appears 8 times in CSS definitions/selectors
+- `.btn-danger` appears 8 times in CSS definitions/selectors
+- `.command-backdrop` appears 8 times in CSS definitions/selectors
+- `.governance-executive-summary-grid` appears 8 times in CSS definitions/selectors
+- `.governance-rule-list` appears 8 times in CSS definitions/selectors
+- `.library-panel-choice-btn` appears 8 times in CSS definitions/selectors
+- `.library-workspace-grid` appears 8 times in CSS definitions/selectors
+- `.media-compact-row` appears 8 times in CSS definitions/selectors
+- `.media-readiness-chip` appears 8 times in CSS definitions/selectors
+- `.mhos-clean-surface` appears 8 times in CSS definitions/selectors
+- `.mhos-tool-drawer-actions` appears 8 times in CSS definitions/selectors
+- `.ops-detail-grid` appears 8 times in CSS definitions/selectors
+- `.ops-select-link` appears 8 times in CSS definitions/selectors
+- `.settings-choice-card-body` appears 8 times in CSS definitions/selectors
+- `.settings-group-head` appears 8 times in CSS definitions/selectors
+- `.settings-right-rail` appears 8 times in CSS definitions/selectors
+
+## Unused Class Candidates
+These are simple-scan candidates only. Do not delete without manual confirmation because classes may be generated dynamically.
+- `.access-key-status--error`
+- `.access-key-status--success`
+- `.access-key-status--warn`
+- `.ai-agent-card`
+- `.ai-command-card`
+- `.ai-role-card`
+- `.ai-specialist-card`
+- `.aicmd-chatgpt-action-row`
+- `.aicmd-chatgpt-pill-btn`
+- `.aicmd-operating-strip`
+- `.aicmd-room-bubble`
+- `.aicmd-room-center`
+- `.aicmd-room-chain-role`
+- `.aicmd-room-composer-tools`
+- `.aicmd-room-context-note`
+- `.aicmd-room-grid`
+- `.aicmd-room-mini-btn`
+- `.aicmd-room-output-section`
+- `.aicmd-room-planned-list`
+- `.aicmd-room-response-body`
+- `.aicmd-room-shell`
+- `.aicmd-room-specialist-conversation`
+- `.aicmd-room-turn`
+- `.aicmd-room-turns`
+- `.aicmd-room-user-message`
+- `.aicmd-shell`
+- `.aicmd-unified-chat-surface`
+- `.aicmd-v2-action-row`
+- `.aicmd-v2-body`
+- `.aicmd-v2-chat-composer-note`
+- `.aicmd-v2-chat-label`
+- `.aicmd-v2-chat-panel`
+- `.aicmd-v2-chat-response`
+- `.aicmd-v2-chat-user`
+- `.aicmd-v2-chip`
+- `.aicmd-v2-composer-input`
+- `.aicmd-v2-composer-primary-note`
+- `.aicmd-v2-context-hint`
+- `.aicmd-v2-context-list`
+- `.aicmd-v2-dest-chip`
+- `.aicmd-v2-dest-row`
+- `.aicmd-v2-eyebrow`
+- `.aicmd-v2-main`
+- `.aicmd-v2-mode-toggle`
+- `.aicmd-v2-planned-chip`
+- `.aicmd-v2-planned-list`
+- `.aicmd-v2-planned-row`
+- `.aicmd-v2-preview-grid`
+- `.aicmd-v2-preview-note`
+- `.aicmd-v2-profile-col`
+- `.aicmd-v2-profile-denied`
+- `.aicmd-v2-profile-destinations`
+- `.aicmd-v2-profile-details`
+- `.aicmd-v2-profile-grid`
+- `.aicmd-v2-profile-item`
+- `.aicmd-v2-profile-label`
+- `.aicmd-v2-profile-list`
+- `.aicmd-v2-profile-safety`
+- `.aicmd-v2-profile-safety-icon`
+- `.aicmd-v2-prompt-card`
+- `.aicmd-v2-quick-actions`
+- `.aicmd-v2-quick-btn`
+- `.aicmd-v2-rail-head`
+- `.aicmd-v2-response-actions`
+- `.aicmd-v2-safe-chip`
+- `.aicmd-v2-shell`
+- `.aicmd-v2-spec-icon`
+- `.aicmd-v2-spec-info`
+- `.aicmd-v2-spec-status`
+- `.aicmd-v2-subtitle`
+- `.aicmd-v2-tab-panel`
+- `.aicmd-v2-team-mission`
+- `.aicmd-v2-team-mission-label`
+- `.aicmd-v2-team-mission-text`
+- `.aicmd-v2-title`
+- `.aicmd-v2-tool-card`
+- `.aicmd-v2-tool-chip`
+- `.aicmd-v2-tool-grid`
+- `.aicmd-v2-toolbar`
+- `.asset-badges`
+- `.badge-danger`
+- `.badge-neutral`
+- `.btn-ai`
+- `.card-badge-row`
+- `.code-block`
+- `.dashboard-main`
+- `.data-grid`
+- `.executive-signal-card`
+- `.executive-signal-detail`
+- `.executive-signal-grid`
+- `.executive-signal-label`
+- `.executive-signal-value`
+- `.governance-secondary-panel`
+- `.governance-summary-ai-boundary-note`
+- `.home-action-buttons`
+- `.home-action-destination`
+- `.home-action-explanation`
+- `.home-action-group`
+- `.home-action-group-title`
+- `.home-action-panel`
+- `.home-action-panel-head`
+- `.home-activity-kind`
+- `.home-activity-panel`
+- `.home-ai-agent-card`
+- `.home-ai-agent-head`
+- `.home-ai-guidance-panel`
+- `.home-ai-prompt-grid`
+- `.home-ai-team-area`
+- `.home-campaign-info`
+- `.home-campaign-row`
+- `.home-comm-readiness-badge`
+- `.home-customer-ops-badge`
+- `.home-customer-ops-body`
+- `.home-customer-ops-panel`
+- `.home-decision-next`
+- `.home-decision-quick-actions`
+- `.home-empty-state`
+- `.home-exception-clear`
+- `.home-exception-section`
+- `.home-exec-header`
+- `.home-exec-hero-content`
+- `.home-header-eyebrow`
+- `.home-header-left`
+- `.home-header-score`
+- `.home-header-score-label`
+- `.home-header-status`
+- `.home-header-subtitle`
+- `.home-header-title`
+- `.home-info-label`
+- `.home-inline-actions`
+- `.home-kicker`
+- `.home-list`
+- `.home-list-item`
+- `.home-list-item-head`
+- `.home-main-grid`
+- `.home-main-left`
+- `.home-main-right`
+- `.home-next-action-panel`
+- `.home-overview-item`
+- `.home-panel-head`
+- `.home-section-grid`
+- `.home-section-head`
+- `.home-snapshot-card`
+- `.home-snapshot-detail`
+- `.home-snapshot-grid`
+- `.home-snapshot-value`
+- `.home-two-column-grid`
+- `.home-workspace-grid`
+- `.home-workspace-main`
+- `.home-workspace-section`
+- `.info-grid`
+- `.integration-drawer-action-block`
+- `.integration-item`
+- `.integration-list`
+- `.integration-platform-card`
+- `.integration-row`
+- `.integration-side-panel--drawer-details`
+- `.integration-source-card`
+- `.is-ai`
+- `.is-blocked`
+- `.is-chat`
+- `.is-compact`
+- `.is-completed`
+- `.is-context`
+- `.is-disabled`
+- `.is-error`
+- `.is-interactive`
+- `.is-latest`
+- `.is-neutral`
+- `.is-pending`
+- `.is-primary`
+- `.is-raised`
+- `.is-running`
+- `.is-secondary`
+- `.is-selected-producer`
+- `.kpi-value`
+- `.library-action-panel-header`
+- `.library-ai-guidance-card`
+- `.library-ai-hint-item`
+- `.library-ai-hints`
+- `.library-asset-card`
+- `.library-category-group-head`
+- `.library-category-groups`
+- `.library-grid-item`
+- `.library-grid-subtitle`
+- `.library-guidance-card`
+- `.library-header-`
+- `.library-inspector-more`
+- `.library-operating-surface-head`
+- `.library-overview-next-action`
+- `.library-panel-selected-title`
+- `.library-preview-actions`
+- `.library-preview-path`
+- `.library-required-section`
+- `.loading-panel`
+- `.loading-state`
+- `.media-brand-checklist`
+- `.media-readiness-checklist`
+- `.mhos-action-panel-copy`
+- `.mhos-action-panel-danger`
+- `.mhos-action-panel-row`
+- `.mhos-action-panel-section`
+- `.mhos-ai-team-handoff-row`
+- `.mhos-campaign-state--neutral`
+- `.mhos-campaign-state--success`
+- `.mhos-campaign-state--warning`
+- `.mhos-campaign-summary-item--danger`
+- `.mhos-campaign-summary-item--neutral`
+- `.mhos-campaign-summary-item--success`
+- `.mhos-campaign-summary-item--warning`
+- `.mhos-clean-action-row`
+- `.mhos-clean-actions`
+- `.mhos-clean-ai-panel`
+- `.mhos-clean-blocker`
+- `.mhos-clean-blockers-list`
+- `.mhos-clean-btn`
+- `.mhos-clean-context-panel`
+- `.mhos-clean-copy`
+- `.mhos-clean-eyebrow`
+- `.mhos-clean-grid`
+
+## Preliminary Archive/Merge Direction
+
+- Treat `12-pages.css` as legacy/page override zone and do not expand.
+- Treat `14-page-standard.css` as compatibility/page standard layer and avoid broad new selectors.
+- Prefer MHOS primitives for future operating-surface standardization.
+- Use page-specific CSS files only for page-specific layout.
+- No CSS deletion is approved from this scan alone.
+
+## Required Next Step
+T151C should convert these findings into a formal Keep / Merge / Archive / Delete Candidate decision table.
