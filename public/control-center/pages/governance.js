@@ -222,8 +222,7 @@ function confirmGovernanceApprovalRequest({ title, entityType, risk }) {
       "Authority: This creates a durable Governance queue item for review. It does not approve, reject, publish, send, or execute directly.",
       "",
       "Select Cancel to review evidence and ownership before continuing."
-    ].join("
-")
+    ].join("\n")
   );
 }
 
