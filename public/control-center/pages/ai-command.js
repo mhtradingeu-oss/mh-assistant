@@ -4105,7 +4105,7 @@ function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, esca
 			<div class="aicmd-chatfirst-header-controls" aria-label="AI Command session controls">
 				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 				<span class="aicmd-chatfirst-active">${escapeHtml(activeSpecialist)}</span>
-				<select id="aicmdV2SessionSelect" class="aicmd-chatfirst-control" title="Recent AI chat sessions">
+				<select id="aicmdV2SessionSelectChatFirst" class="aicmd-chatfirst-control" title="Recent AI chat sessions">
 					<option value="">Recent</option>
 					${asArray(session.chatSessions).slice(0, 8).map((item) => `
 						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
@@ -4113,8 +4113,8 @@ function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, esca
 						</option>
 					`).join("")}
 				</select>
-				<button id="aicmdV2NewSessionBtn" class="aicmd-chatfirst-control" type="button">New</button>
-				<button id="aicmdV2SettingsBtn" class="aicmd-chatfirst-control" type="button" title="Settings">Settings</button>
+				<button id="aicmdV2NewSessionBtnChatFirst" class="aicmd-chatfirst-control" type="button">New</button>
+				<button id="aicmdV2SettingsBtnChatFirst" class="aicmd-chatfirst-control" type="button" title="Settings">Settings</button>
 				<span class="aicmd-chatfirst-project">${escapeHtml(projectName || "No project selected")}</span>
 			</div>
 		</header>
@@ -4149,7 +4149,7 @@ function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStat
 			<div class="aicmd-chatfirst-topbar-actions">
 				<span class="aicmd-chatfirst-pill">${escapeHtml(modeLabel)}</span>
 				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
-				<button id="aicmdV2SourceBtn" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "Choose source through Tool Drawer / Library")}">
+				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "Choose source through Tool Drawer / Library")}">
 					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
 				</button>
 			</div>
@@ -4376,7 +4376,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                         <button id="aicmdV2SourceBtn" class="aicmd-final-icon-btn" type="button" data-aicmd-chatfirst-source title="Choose source">${getAiCommandUiIcon("source")}</button>
                                         <button id="aicmdV2VoiceLangBtn" class="aicmd-final-pill-btn aicmd-final-voice-lang-btn" type="button" title="Voice language">Mic: ${escapeHtml(voiceLanguageLabel)}</button>
                                         <button id="aicmdV2VoiceBtn" class="aicmd-final-icon-btn" type="button" title="Start voice input">${getAiCommandUiIcon("mic")}</button>
-                                        <button class="aicmd-final-voice-btn" type="button" disabled title="Voice conversation planned">${getAiCommandUiIcon("voice")}</button>
+                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap">${getAiCommandUiIcon("voice")}</button>
                                         <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
                                                 ${isGenerating ? "..." : "Send"}
                                         </button>
@@ -4704,7 +4704,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 
 				<div class="aicmd-chatgpt-input-shell">
 					<textarea
-						id="aicmdV2Input"
+						id="aicmdV2InputLegacy"
 						class="aicmd-v2-textarea aicmd-chatgpt-textarea"
 						rows="3"
 						placeholder="${escapeHtml(placeholder)}"
@@ -4717,7 +4717,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 						</div>
 						<div class="aicmd-chatgpt-tools-right">
 							<span class="aicmd-chatgpt-enter-hint">Enter to send · Shift+Enter newline</span>
-                                                <button id="aicmdV2AskBtn" class="aicmd-chatgpt-send-btn data-primary="true"" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+                                                <button id="aicmdV2AskBtnLegacy" class="aicmd-chatgpt-send-btn" data-primary="true" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
 								${isGenerating ? "…" : "➤"}
 							</button>
 						</div>
@@ -4730,7 +4730,7 @@ function renderPhase1Composer(session, aiContext, escapeHtml) {
 				</div>
 
 				<div class="aicmd-v2-composer-hint">Primary workspace: ask, refine, then create a review-ready preview. Suggested prompts prefill only. No publish, send, approval, CRM update, workflow run, or durable task creation happens here.</div>
-                                <div id="aicmdV2Status" class="aicmd-v2-composer-hint"></div>
+                                <div id="aicmdV2StatusLegacy" class="aicmd-v2-composer-hint"></div>
 			</div>
 		`;
 }
@@ -4931,10 +4931,10 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
 
                         ${hasPreview ? `
                                 <div class="aicmd-room-output-actions">
-                                        <button id="aicmdV2PreviewSendBtn" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>
-                                        <button id="aicmdV2PreviewCopyBtn" class="aicmd-v2-btn-secondary" type="button">Copy</button>
-                                        <button id="aicmdV2PreviewUseBtn" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
-                                        <button id="aicmdV2PreviewClearBtn" class="aicmd-v2-btn-ghost" type="button">Clear</button>
+                                        <button id="aicmdV2PreviewSendBtnLegacy" class="aicmd-v2-btn-primary" type="button">${escapeHtml(routeActionLabel)}</button>
+                                        <button id="aicmdV2PreviewCopyBtnLegacy" class="aicmd-v2-btn-secondary" type="button">Copy</button>
+                                        <button id="aicmdV2PreviewUseBtnLegacy" class="aicmd-v2-btn-secondary" type="button">Use in Composer</button>
+                                        <button id="aicmdV2PreviewClearBtnLegacy" class="aicmd-v2-btn-ghost" type="button">Clear</button>
                                 </div>
                                 <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>
                         ` : `
@@ -5656,6 +5656,69 @@ export const aiCommandRoute = {
 				input?.focus?.();
 			};
 		});
+
+                const openAiCommandToolDrawer = (reason = "Tool Drawer") => {
+                        const toolButtons = Array.from(document.querySelectorAll("[data-aicmdv2-tool]"));
+                        const preferredTool = toolButtons.find((btn) => {
+                                const text = asString(btn.textContent || btn.title || "").toLowerCase();
+                                return text.includes("source") || text.includes("review") || text.includes("brief") || text.includes("campaign");
+                        }) || toolButtons[0];
+
+                        if (!preferredTool) {
+                                updateStatus("Tool Drawer is not available on this surface yet.");
+                                return false;
+                        }
+
+                        preferredTool.click?.();
+                        updateStatus(`${reason} opened. Choose a tool or source-aware action.`);
+                        return true;
+                };
+
+                Array.from(document.querySelectorAll("[data-aicmd-open-plus]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                openAiCommandToolDrawer("AI tools");
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-chatfirst-source]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                openAiCommandToolDrawer("Source picker");
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const selector = document.querySelector(".aicmd-chatfirst-specialist-select");
+                                if (!selector) {
+                                        updateStatus("Specialist selector is not available yet.");
+                                        return;
+                                }
+
+                                selector.open = true;
+                                selector.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+                                updateStatus("Specialist selector opened. Choose a specialist or Full Team.");
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-final-status]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const drawer = document.querySelector(".aicmd-chatgpt-context-drawer");
+                                if (!drawer) {
+                                        updateStatus("AI Team context is not available yet.");
+                                        return;
+                                }
+
+                                drawer.open = !drawer.open;
+                                updateStatus(drawer.open ? "AI Team context opened." : "AI Team context closed.");
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-final-voice-conversation]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+                                showMessage?.("Voice dictation is ready. Full voice conversation will be implemented as the next provider-backed voice mode.");
+                        };
+                });
 
                 bindAiToolDock({
                         root: document,
