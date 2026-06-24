@@ -1,0 +1,984 @@
+===== 4) AI COMMAND CORE FUNCTION MAP =====
+
+## AI Command core render functions
+3990:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4065:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4080:function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+4113:function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4123:function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4278:function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
+4363:function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {
+4452:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+4537:function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+
+## AI Team definitions and mode maps
+34:const MODE_DEFS = [
+140:const SPECIALIST_DEFS = [
+366:const AI_ROOM_FLOW_STEPS = [
+623:		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+624:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+625:			SPECIALIST_DEFS[0];
+922:	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
+1259:function destinationRouteForSpecialist(specialistId, outputType) {
+1355:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1360:function routeLabel(route) {
+1382:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1397:		nextSafeAction: `Review in ${routeLabel(route)}`,
+1679:		: getPhase1SpecialistById(session.modeId);
+1753:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+1980:	const scores = MODE_DEFS.map((mode) => ({
+2469:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+2479:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+2485:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+2569:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+2891:				${MODE_DEFS.map((agent) => `
+3291:                : getPhase1SpecialistById(session.modeId);
+3457:function getPhase1SpecialistById(value) {
+3466:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+3503:function getAiRoomFlowIndex(session) {
+3558:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3605:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3607:	const activeFlowIndex = getAiRoomFlowIndex(session);
+3661:				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+3713:				${SPECIALIST_DEFS.map((spec) => {
+3765:	const spec = getPhase1SpecialistById(session.modeId);
+3790:                : getPhase1SpecialistById(session.modeId);
+3809:	const spec = getPhase1SpecialistById(session.modeId);
+3851:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3908:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3925:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+3996:                : getPhase1SpecialistById(session.modeId);
+3999:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4000:        const destinationLabel = routeLabel(destinationRoute);
+4012:                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+4018:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4031:                                                <small>${escapeHtml(stateLabel)} · ${escapeHtml(routeLabel(route))}</small>
+4084:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4151:	const activeSpec = getPhase1SpecialistById(session.modeId);
+4160:				${SPECIALIST_DEFS.map((spec) => {
+4197:	const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4279:	const spec = getPhase1SpecialistById(session.modeId);
+4381:				${SPECIALIST_DEFS.map((spec) => {
+4416:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4432:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+4458:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4461:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+4538:	const activeFlowIndex = getAiRoomFlowIndex(session);
+4553:				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+4593:		const spec = getPhase1SpecialistById(session.modeId);
+4671:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4674:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+4754:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4757:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+4908:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5147:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5148:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5333:				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+5524:                                const spec = getPhase1SpecialistById(specId);
+5578:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+5671:		                        : getPhase1SpecialistById(session.modeId);
+5840:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+5853:                                const spec = getPhase1SpecialistById(session.modeId);
+5876:                                const spec = getPhase1SpecialistById(session.modeId);
+5900:                                const spec = getPhase1SpecialistById(session.modeId);
+5928:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6078:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6084:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+6131:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+6155:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+6190:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+
+## AI Command mounted shell
+3990:function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4065:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4069:                        ${renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+5373:		root.innerHTML = renderAiCommandChatFirstShell({
+
+## AI Command tabs
+3290:                ? { id: "team", label: "Full Team" }
+3995:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+4072:				${renderAiCommandSecondaryTabs({ session, escapeHtml })}
+4073:				${renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+4197:	const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4320:function renderAiCommandSecondaryTabs({ session, escapeHtml }) {
+4323:		{ id: "output", label: "Output" },
+4324:		{ id: "flow", label: "Flow" }
+4347:function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4460:		? { id: "team", label: "Full Team" }
+4673:		? { id: "team", label: "Full Team" }
+4756:		? { id: "team", label: "Full Team" }
+4908:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5670:		                        ? { id: "team", label: "Full Team" }
+
+## Tool Dock authority
+354:    template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."
+379:      actionType: "guided",
+382:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+383:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+384:      outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
+392:      actionType: "guided",
+395:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+396:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+397:      outputTypes: ["launch_plan", "readiness_plan", "timeline", "dependency_map"],
+405:      actionType: "guided",
+408:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+409:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+410:      outputTypes: ["audience_map", "segment_notes", "objection_map", "message_angles"],
+418:      actionType: "guided",
+421:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+422:      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+423:      outputTypes: ["offer_brief", "value_proposition", "proof_points", "cta_options"],
+431:      actionType: "guided",
+434:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+435:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+436:      outputTypes: ["funnel_map", "content_needs", "handoff_points", "retention_notes"],
+437:      template: "Map a funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points."
+444:      actionType: "preview",
+447:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+448:      sourceTypes: ["current_chat", "operations_snapshot", "readiness_gaps", "campaign_notes", "manual_input"],
+449:      outputTypes: ["next_best_action", "priority_list", "blocker_map", "action_sequence"],
+460:      actionType: "guided",
+463:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+464:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+465:      outputTypes: ["company_profile", "product_copy", "email", "blog_article", "landing_page", "contract_draft", "presentation_outline", "speech", "faq", "proposal", "social_post", "ad_copy"],
+473:      actionType: "guided",
+476:      destinations: ["composer", "content-studio"],
+477:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+478:      outputTypes: ["professional_rewrite", "shorter_rewrite", "simpler_rewrite", "persuasive_rewrite", "premium_rewrite", "platform_specific_rewrite"],
+479:      template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
+486:      actionType: "guided",
+489:      destinations: ["composer", "content-studio"],
+490:      sourceTypes: ["composer_text", "selected_text", "current_chat"],
+491:      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
+499:      actionType: "guided",
+502:      destinations: ["composer", "content-studio"],
+503:      sourceTypes: ["composer_text", "selected_text", "last_response", "current_chat"],
+504:      outputTypes: ["clarity_improvement", "structure_improvement", "cta_improvement", "readability_improvement", "conversion_improvement"],
+512:      actionType: "preview",
+515:      destinations: ["preview", "content-studio", "compliance"],
+516:      sourceTypes: ["composer_text", "selected_text", "content_draft", "current_chat"],
+517:      outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],
+525:      actionType: "source_required",
+528:      destinations: ["library", "ai-command", "content-studio"],
+529:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+530:      outputTypes: ["source_bundle", "fact_extraction", "proof_summary", "context_brief"],
+538:      actionType: "guided",
+541:      destinations: ["content-studio", "insights", "library"],
+542:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+543:      outputTypes: ["seo_brief", "keyword_clusters", "search_intent_map", "blog_outline", "meta_pack", "faq_ideas", "internal_link_plan", "content_gap_notes"],
+551:      actionType: "guided",
+554:      destinations: ["chat-preview", "content-studio", "publishing"],
+555:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+556:      outputTypes: ["blog_to_social", "profile_to_pitch", "product_to_ad_copy", "transcript_to_article", "notes_to_presentation", "long_text_to_email_sequence"],
+564:      actionType: "route",
+565:      safetyLevel: "confirmation_required",
+567:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+568:      sourceTypes: ["current_draft", "preview", "current_chat"],
+569:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+570:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+579:      actionType: "guided",
+582:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+583:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+584:      outputTypes: ["visual_brief", "creative_direction", "format_brief", "asset_requirements"],
+592:      actionType: "guided",
+595:      destinations: ["chat-preview", "media-studio", "library"],
+596:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+597:      outputTypes: ["moodboard_direction", "style_notes", "reference_list", "brand_alignment_notes"],
+605:      actionType: "guided",
+608:      destinations: ["chat-preview", "media-studio", "library"],
+609:      sourceTypes: ["current_chat", "visual_brief", "brand_guidelines", "product_data", "reference_asset", "manual_input"],
+610:      outputTypes: ["image_prompt", "prompt_variants", "negative_prompt", "style_prompt"],
+618:      actionType: "source_required",
+621:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+622:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+623:      outputTypes: ["asset_checklist", "missing_assets", "asset_request_brief", "production_requirements"],
+631:      actionType: "guided",
+634:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+635:      sourceTypes: ["current_chat", "content_draft", "visual_brief", "brand_guidelines", "reference_asset", "manual_input"],
+636:      outputTypes: ["layout_plan", "section_hierarchy", "responsive_notes", "cta_placement"],
+644:      actionType: "source_required",
+647:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+648:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+649:      outputTypes: ["brand_check_report", "style_risks", "missing_assets", "improvement_actions"],
+660:      actionType: "guided",
+663:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+664:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+665:      outputTypes: ["reel_script", "short_video_script", "hook_variants", "overlay_copy"],
+673:      actionType: "guided",
+676:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+677:      sourceTypes: ["current_chat", "script_draft", "visual_brief", "reference_asset", "product_images", "manual_input"],
+678:      outputTypes: ["storyboard", "scene_plan", "caption_plan", "asset_requirements"],
+686:      actionType: "guided",
+689:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+690:      sourceTypes: ["current_chat", "storyboard", "visual_brief", "product_data", "production_notes", "manual_input"],
+691:      outputTypes: ["shot_list", "b_roll_list", "prop_list", "production_checklist"],
+699:      actionType: "guided",
+702:      destinations: ["chat-preview", "media-studio", "content-studio"],
+703:      sourceTypes: ["current_chat", "script_draft", "campaign_brief", "brand_voice", "manual_input"],
+704:      outputTypes: ["voiceover_script", "audio_direction", "pacing_notes", "tone_variants"],
+712:      actionType: "guided",
+715:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+716:      sourceTypes: ["current_chat", "campaign_brief", "offer_data", "video_script", "manual_input"],
+717:      outputTypes: ["video_cta_options", "soft_cta", "direct_cta", "urgency_cta", "brand_cta"],
+728:      actionType: "preview",
+731:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+732:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+733:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+734:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+741:      actionType: "guided",
+744:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+745:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+746:      outputTypes: ["channel_pack", "caption_pack", "format_notes", "approval_checklist"],
+754:      actionType: "guided",
+755:      safetyLevel: "confirmation_required",
+757:      destinations: ["chat-preview", "publishing", "workflows"],
+758:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+759:      outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],
+767:      actionType: "guided",
+770:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+771:      sourceTypes: ["content_draft", "topic", "market", "channel_notes", "seo_brief", "manual_input"],
+772:      outputTypes: ["hashtag_pack", "discoverability_tags", "platform_tag_groups", "market_tags"],
+780:      actionType: "source_required",
+781:      safetyLevel: "confirmation_required",
+782:      frontendOwnerPage: "governance",
+783:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+784:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+785:      outputTypes: ["approval_pack", "risk_summary", "asset_checklist", "confirmation_list"],
+786:      template: "Prepare an approval package for {projectName}. Include final copy summary, risk notes, assets checklist, and required confirmations."
+796:      actionType: "guided",
+799:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+800:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+801:      outputTypes: ["ad_angle", "angle_variants", "pain_benefit_map", "compliance_risks"],
+809:      actionType: "guided",
+812:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+813:      sourceTypes: ["ad_angle", "campaign_brief", "landing_page_copy", "product_data", "manual_input"],
+814:      outputTypes: ["ad_copy", "headline_variants", "primary_text_variants", "cta_variants"],
+822:      actionType: "guided",
+825:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+826:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+827:      outputTypes: ["audience_map", "targeting_ideas", "exclusions", "funnel_stage_map"],
+835:      actionType: "guided",
+838:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+839:      sourceTypes: ["creative_assets", "campaign_brief", "ad_copy", "performance_notes", "manual_input"],
+840:      outputTypes: ["ab_test_plan", "creative_test_matrix", "hypotheses", "success_signals"],
+848:      actionType: "source_required",
+851:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+852:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+853:      outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],
+864:      actionType: "guided",
+867:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+868:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+869:      outputTypes: ["seo_brief", "search_intent_map", "content_structure", "meta_ideas", "internal_links"],
+877:      actionType: "source_required",
+880:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+881:      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+882:      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
+890:      actionType: "guided",
+893:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+894:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+895:      outputTypes: ["keyword_groups", "commercial_keywords", "informational_keywords", "branded_keywords", "local_keywords"],
+903:      actionType: "source_required",
+906:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+907:      sourceTypes: ["analytics_summary", "performance_notes", "campaign_results", "content_inventory", "manual_input"],
+908:      outputTypes: ["performance_review", "wins", "risks", "experiment_recommendations"],
+916:      actionType: "guided",
+919:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+920:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+921:      outputTypes: ["content_gap_report", "missing_topics", "missing_pages", "priority_actions"],
+932:      actionType: "source_required",
+934:      frontendOwnerPage: "governance",
+935:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+936:      sourceTypes: ["content_draft", "claim_list", "proof_doc", "product_data", "legal_doc", "manual_input"],
+937:      outputTypes: ["claims_check", "risk_flags", "proof_requirements", "safe_wording_notes"],
+945:      actionType: "guided",
+947:      frontendOwnerPage: "governance",
+948:      destinations: ["chat-preview", "governance", "content-studio"],
+949:      sourceTypes: ["content_draft", "claims_check", "legal_doc", "proof_doc", "manual_input"],
+950:      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
+958:      actionType: "source_required",
+960:      frontendOwnerPage: "governance",
+961:      destinations: ["chat-preview", "governance", "library", "workflows"],
+962:      sourceTypes: ["content_draft", "claim_list", "product_data", "legal_doc", "research_proof_docs", "manual_input"],
+963:      outputTypes: ["evidence_needed", "required_proof", "recommended_proof", "optional_proof"],
+971:      actionType: "source_required",
+973:      frontendOwnerPage: "governance",
+974:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+975:      sourceTypes: ["workflow_draft", "privacy_policy", "tracking_plan", "data_use_notes", "manual_input"],
+976:      outputTypes: ["gdpr_review", "consent_risks", "tracking_notes", "disclosure_requirements"],
+984:      actionType: "source_required",
+985:      safetyLevel: "confirmation_required",
+986:      frontendOwnerPage: "governance",
+987:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+988:      sourceTypes: ["final_copy", "claims_check", "approval_context", "asset_checklist", "manual_input"],
+989:      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
+1000:      actionType: "guided",
+1003:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+1004:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+1005:      outputTypes: ["task_plan", "owner_map", "priority_list", "dependency_notes"],
+1013:      actionType: "guided",
+1014:      safetyLevel: "confirmation_required",
+1016:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+1017:      sourceTypes: ["current_chat", "handoff_summary", "operations_snapshot", "approval_notes", "manual_input"],
+1018:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+1022:      id: "handoff",
+1026:      actionType: "guided",
+1027:      safetyLevel: "confirmation_required",
+1029:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+1030:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+1031:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+1032:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+1039:      actionType: "guided",
+1042:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+1043:      sourceTypes: ["current_chat", "project_plan", "campaign_timeline", "dependency_notes", "manual_input"],
+1044:      outputTypes: ["timeline", "milestones", "blockers", "safe_sequence"],
+
+## Shared context / handoff functions
+114:export function setSharedAiSource(projectName, source) {
+119:export function getSharedAiSource(projectName) {
+175:export function setSharedAiDraft(projectName, draft) {
+180:export function getSharedAiDraft(projectName, operations) {
+192:export function setSharedHandoff(projectName, destinationPage, handoff) {
+197:export function getSharedHandoff(projectName, destinationPage, operations, sourcePage = "") {
+
+## Router / app route references
+public/control-center/router.js:4:import { aiCommandRoute } from "./pages/ai-command.js";
+public/control-center/app.js:3041:    "AI Command": "ai-command",
+public/control-center/app.js:3064:    "open-ai-command": "ai-command",
+public/control-center/app.js:3067:    "send-ai-command": "ai-command"
+public/control-center/app.js:3094:    if (actionName === "send-ai-command") {
+public/control-center/app.js:3098:        navigateTo("ai-command");
+public/control-center/app.js:3099:        showMessage("AI Command opened.");
+public/control-center/app.js:3135:      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+public/control-center/app.js:3137:      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+public/control-center/app.js:3602:  navigateTo("ai-command");
+public/control-center/app.js:3604:  window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
+public/control-center/app.js:3652:    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+public/control-center/app.js:3708:    runBtn.setAttribute("data-action", "send-ai-command");
+public/control-center/app.js:4022:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4069:      navigateTo("ai-command");
+public/control-center/app.js:4079:    openAiBtn.setAttribute("data-action", "open-ai-command");
+
+## CSS class availability
+9388:[data-page="ai-command"] .aicmd-chatfirst-shell {
+9397:[data-page="ai-command"] .aicmd-chatfirst-main {
+9445:[data-page="ai-command"] .aicmd-chatfirst-topbar-actions,
+9446:[data-page="ai-command"] .aicmd-chatfirst-composer-toolbar,
+9447:[data-page="ai-command"] .aicmd-chatfirst-composer-left,
+9448:[data-page="ai-command"] .aicmd-chatfirst-composer-right,
+9492:[data-page="ai-command"] .aicmd-chatfirst-team-card:hover,
+9533:[data-page="ai-command"] .aicmd-chatfirst-window {
+9544:[data-page="ai-command"] .aicmd-chatfirst-topbar {
+9554:[data-page="ai-command"] .aicmd-chatfirst-topbar-main {
+9624:[data-page="ai-command"] .aicmd-chatfirst-team-card,
+9641:[data-page="ai-command"] .aicmd-chatfirst-team-card strong,
+9655:[data-page="ai-command"] .aicmd-chatfirst-team-card small,
+9669:[data-page="ai-command"] .aicmd-chatfirst-team-card.is-active,
+9676:[data-page="ai-command"] .aicmd-chatfirst-team-card.is-planned {
+9739:[data-page="ai-command"] .aicmd-chatfirst-composer-safety,
+9835:[data-page="ai-command"] .aicmd-chatfirst-composer {
+9869:[data-page="ai-command"] .aicmd-chatfirst-composer-toolbar {
+9893:[data-page="ai-command"] .aicmd-chatfirst-composer-context {
+9925:[data-page="ai-command"] .aicmd-chatfirst-flow-tab {
+9953:[data-page="ai-command"] .aicmd-chatfirst-specialist-grid,
+9967:[data-page="ai-command"] .aicmd-chatfirst-flow-steps,
+10067:[data-page="ai-command"] .aicmd-chatfirst-flow-step {
+10079:[data-page="ai-command"] .aicmd-chatfirst-flow-step span {
+10092:[data-page="ai-command"] .aicmd-chatfirst-flow-step strong,
+10093:[data-page="ai-command"] .aicmd-chatfirst-flow-step small {
+10100:[data-page="ai-command"] .aicmd-chatfirst-flow-step strong {
+10105:[data-page="ai-command"] .aicmd-chatfirst-flow-step small {
+10110:[data-page="ai-command"] .aicmd-chatfirst-flow-step.is-active {
+10115:[data-page="ai-command"] .aicmd-chatfirst-flow-step.is-complete {
+10120:  [data-page="ai-command"] .aicmd-chatfirst-shell {
+10125:  [data-page="ai-command"] .aicmd-chatfirst-topbar,
+10131:  [data-page="ai-command"] .aicmd-chatfirst-topbar-actions {
+10136:  [data-page="ai-command"] .aicmd-chatfirst-window {
+10145:  [data-page="ai-command"] .aicmd-chatfirst-specialist-grid,
+10148:  [data-page="ai-command"] .aicmd-chatfirst-flow-steps,
+10156:  [data-page="ai-command"] .aicmd-chatfirst-shell {
+10165:  [data-page="ai-command"] .aicmd-chatfirst-topbar-main,
+10166:  [data-page="ai-command"] .aicmd-chatfirst-topbar-actions,
+10167:  [data-page="ai-command"] .aicmd-chatfirst-composer-toolbar,
+10168:  [data-page="ai-command"] .aicmd-chatfirst-composer-left,
+10169:  [data-page="ai-command"] .aicmd-chatfirst-composer-right {
+10198:  [data-page="ai-command"] .aicmd-chatfirst-specialist-grid,
+10201:  [data-page="ai-command"] .aicmd-chatfirst-flow-steps,
+===== 5) SOURCE EXCERPTS =====
+
+## Intelligence Layer excerpt
+	return `
+		<div class="aicmd-main-source-indicator" title="${escapeHtml(name)}">
+			<span>Trusted AI context</span>
+			<strong>${escapeHtml(name)}</strong>
+			${meta ? `<small>${escapeHtml(meta)}</small>` : ""}
+		</div>
+	`;
+}
+
+
+function renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+        const safeBridgeStatus = bridgeStatus || { available: false };
+        const preview = asObject(session.outputPreview);
+        const isTeam = session.teamMode === "team";
+        const activeSpec = isTeam
+                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+                : getPhase1SpecialistById(session.modeId);
+        const outputType = asString(preview.outputType || "guidance");
+        const outputLabel = preview.outputType ? formatOutputTypeLabel(outputType) : "Guidance";
+        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+        const destinationLabel = routeLabel(destinationRoute);
+        const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+        const sourceLabel = source
+                ? asString(source.name || source.filename || source.fileName || "Trusted source")
+                : "No Library source selected";
+        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+        const riskLabel = governanceRequired ? "Review required" : "Low";
+        const governanceLabel = governanceRequired ? "Governance route" : "Not required";
+        const executionLabel = "Locked in AI Command";
+        const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+        const teamCards = teamIds
+                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+                .filter(Boolean)
+                .map((spec) => {
+                        const active = !isTeam && spec.id === session.modeId;
+                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+                        const teamActive = isTeam;
+                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+                        const stateLabel = active
+                                ? "Active"
+                                : complianceWatching
+                                        ? "Watching"
+                                        : teamActive
+                                                ? "Team lane"
+                                                : "Ready";
+                        return `
+                                <div class="aicmd-chatfirst-team-card${active ? " is-active" : ""}${teamActive ? " is-team-active" : ""}" data-role="${escapeHtml(getAiRoomRoleId(spec.id))}">
+                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+                                        <span>
+                                                <strong>${escapeHtml(spec.label)}</strong>
+                                                <small>${escapeHtml(stateLabel)} · ${escapeHtml(routeLabel(route))}</small>
+                                        </span>
+                                </div>
+                        `;
+                })
+                .join("");
+
+        return `
+                <section class="aicmd-chatfirst-flow-tab aicmd-intelligence-layer" aria-label="AI Command intelligence state">
+                        <div class="aicmd-chatfirst-tab-head">
+                                <div>
+                                        <h2>AI Team Control Room</h2>
+                                        <p>Live visibility for specialist, mode, source grounding, output intent, destination, risk, governance, and execution lock. This layer is display-only.</p>
+                                </div>
+                                <span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeLabel)}</span>
+                        </div>
+                        <div class="aicmd-chatfirst-flow-summary" aria-label="AI Command state summary">
+                                <span><strong>Specialist</strong>${escapeHtml(activeSpec?.label || "Specialist")}</span>
+                                <span><strong>Mode</strong>${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")}</span>
+                                <span><strong>Output</strong>${escapeHtml(outputLabel)}</span>
+                                <span><strong>Destination</strong>${escapeHtml(destinationLabel)}</span>
+                                <span><strong>Risk</strong>${escapeHtml(riskLabel)}</span>
+                                <span><strong>Governance</strong>${escapeHtml(governanceLabel)}</span>
+                                <span><strong>Source</strong>${escapeHtml(sourceLabel)}</span>
+                                <span><strong>Execution</strong>${escapeHtml(executionLabel)}</span>
+                        </div>
+                        <div class="aicmd-chatfirst-specialist-grid" aria-label="Live AI team lanes">
+                                ${teamCards}
+                        </div>
+                        <p class="aicmd-chatfirst-tab-note">AI Command prepares guidance, drafts, previews, and handoff context only. Publishing, approvals, CRM updates, workflow runs, customer sends, provider execution, and durable task creation remain confirmation-gated in the owning workspace.</p>
+                </section>
+        `;
+}
+
+function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	return `
+		<div class="aicmd-chatfirst-shell">
+			${renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml })}
+                        ${renderAiCommandIntelligenceLayer({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+			<main class="aicmd-chatfirst-main">
+				${renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+				${renderAiCommandSecondaryTabs({ session, escapeHtml })}
+				${renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+			</main>
+			${renderAiToolDrawerShell({ escapeHtml })}
+		</div>
+	`;
+}
+
+## Chat window / topbar / composer excerpt
+}
+
+function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const activeSpecialist = session.teamMode === "team"
+		? "Full AI Team"
+		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+	const bridgeLabel = safeBridgeStatus.available ? "Chat connected" : "Preview guarded";
+
+	return `
+		<header class="aicmd-chatfirst-header">
+			<div class="aicmd-chatfirst-header-copy">
+				<span class="aicmd-chatfirst-kicker">AI Workspace</span>
+				<h1>AI Command</h1>
+				<p>Chat, draft, review, and prepare handoff context only. Publishing, approvals, CRM updates, workflow runs, external sends, and durable task creation stay confirmation-gated in the owning workspace.</p>
+			</div>
+			<div class="aicmd-chatfirst-header-controls" aria-label="AI Command session controls">
+				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
+				<span class="aicmd-chatfirst-active">${escapeHtml(activeSpecialist)}</span>
+				<select id="aicmdV2SessionSelect" class="aicmd-chatfirst-control" title="Recent AI chat sessions">
+					<option value="">Recent</option>
+					${asArray(session.chatSessions).slice(0, 8).map((item) => `
+						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
+							${escapeHtml(asString(item.title || "AI Team session").slice(0, 48))}
+						</option>
+					`).join("")}
+				</select>
+				<button id="aicmdV2NewSessionBtn" class="aicmd-chatfirst-control" type="button">New</button>
+				<button id="aicmdV2SettingsBtn" class="aicmd-chatfirst-control" type="button" title="Settings">Settings</button>
+				<span class="aicmd-chatfirst-project">${escapeHtml(projectName || "No project selected")}</span>
+			</div>
+		</header>
+	`;
+}
+
+function renderAiCommandChatWindow({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	return `
+		<section class="aicmd-chatfirst-window" aria-label="AI Command chat">
+			${renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml })}
+			${renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml })}
+			${renderAiCommandChatComposer({ session, aiContext, escapeHtml })}
+		</section>
+	`;
+}
+
+function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const source = getSelectedLibrarySource(projectName || aiContext?.projectName || "");
+	const sourceLabel = source?.name || source?.filename || source?.fileName || "";
+	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+
+	return `
+		<div class="aicmd-chatfirst-topbar">
+			<div class="aicmd-chatfirst-topbar-main">
+				${renderAiCommandSpecialistSelect({ session, escapeHtml })}
+				<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+				</div>
+			</div>
+			<div class="aicmd-chatfirst-topbar-actions">
+				<span class="aicmd-chatfirst-pill">${escapeHtml(modeLabel)}</span>
+				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
+				<button id="aicmdV2SourceBtn" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "Choose source through Tool Drawer / Library")}">
+					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
+				</button>
+			</div>
+		</div>
+	`;
+}
+
+function renderAiCommandSpecialistSelect({ session, escapeHtml }) {
+	const isTeam = session.teamMode === "team";
+	const activeSpec = getPhase1SpecialistById(session.modeId);
+
+	return `
+		<details class="aicmd-chatfirst-specialist-select">
+			<summary>
+				<span>Specialist</span>
+				<strong>${escapeHtml(isTeam ? "Full AI Team" : activeSpec?.label || "Specialist")}</strong>
+			</summary>
+			<div class="aicmd-chatfirst-specialist-menu" role="list">
+				${SPECIALIST_DEFS.map((spec) => {
+					const isActive = !isTeam && spec.id === session.modeId;
+					return `
+						<button
+							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+							title="${escapeHtml(spec.summary)}"
+						>
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span>
+								<strong>${escapeHtml(spec.label)}</strong>
+								<small>${escapeHtml(spec.position || spec.summary || "Ready specialist")}</small>
+							</span>
+						</button>
+					`;
+				}).join("")}
+				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+							<span>
+								<strong>${escapeHtml(item.label)}</strong>
+								<small>${escapeHtml(item.status)} - destination-owned authority</small>
+							</span>
+						</div>
+					`).join("")}
+				</div>
+			</div>
+		</details>
+	`;
+}
+
+function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false, reason: "" };
+	const isTeam = session.teamMode === "team";
+	const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+	const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
+	const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+	const allMessages = asArray(session.messages);
+	const selectedMessages = allMessages.filter((message) => {
+		const role = asString(message.role || "");
+		const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+		if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+		if (role === "assistant") return isTeam ? messageRoleId === "team" : messageRoleId === selectedRoleId;
+		return false;
+	});
+	const selectedResponses = asArray(session.responseHistory).filter((item) => {
+		const producerId = getAiRoomRoleId(item.specialistId || "");
+		return isTeam ? producerId === "team" : producerId === selectedRoleId;
+	});
+	const fallbackMessages = !selectedMessages.length && selectedResponses.length
+		? selectedResponses.slice(0, 2).flatMap((item) => ([
+			{
+				role: "user",
+				specialistId: item.specialistId || selectedRoleId,
+				specialistLabel: "You",
+				content: item.prompt || "",
+				createdAt: item.generatedAt || ""
+			},
+			{
+				role: "assistant",
+				specialistId: item.specialistId || selectedRoleId,
+				specialistLabel: item.specialistLabel || selectedLabel,
+				content: item.responseText || "",
+				createdAt: item.generatedAt || ""
+			}
+		]))
+		: [];
+	const conversationMessages = selectedMessages.length ? selectedMessages : fallbackMessages;
+	const safetyLine = safeBridgeStatus.available
+		? "Chat only. No workflow run, durable task, external handoff action, approval, publishing action, CRM update, or customer action is created here."
+		: "Preview-safe. Chat requires the protected AI chat route.";
+
+	const renderMessage = (message) => {
+		const role = asString(message.role || "");
+		const isUser = role === "user";
+		const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+		const createdAt = asString(message.createdAt || "");
+		const content = asString(message.content || message.text || message.responseText || "");
+		return `
+			<div class="aicmd-chatfirst-message ${isUser ? "is-user" : "is-assistant"}">
+				<div class="aicmd-chatfirst-message-bubble">
+					<div class="aicmd-chatfirst-message-meta">
+						<strong>${escapeHtml(label)}</strong>
+
+## Secondary tabs excerpt
+						<button id="aicmdV2VoiceBtn" class="aicmd-chatfirst-icon-control is-planned" type="button" disabled title="Voice input coming soon">Voice planned</button>
+						${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}
+					</div>
+					<div class="aicmd-chatfirst-composer-right">
+						<span class="aicmd-chatfirst-enter-hint">Enter to send. Shift+Enter for newline.</span>
+						<button id="aicmdV2AskBtn" class="aicmd-chatfirst-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
+							${isGenerating ? "Sending" : "Send"}
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="aicmd-chatfirst-composer-context">
+				${renderLanguageMarketStrip(aiContext, escapeHtml)}
+			</div>
+			<div class="aicmd-chatfirst-composer-safety">Review-ready guidance only. No publish, send, approval, CRM update, workflow run, durable task creation, or backend execution happens from this composer.</div>
+			<div id="aicmdV2Status" class="aicmd-chatfirst-status-line"></div>
+		</div>
+	`;
+}
+
+function renderAiCommandSecondaryTabs({ session, escapeHtml }) {
+	const tabs = [
+		{ id: "tools", label: "Tools" },
+		{ id: "output", label: "Output" },
+		{ id: "flow", label: "Flow" }
+	];
+	const activeTab = tabs.some((tab) => tab.id === session.chatFirstTab)
+		? session.chatFirstTab
+		: "tools";
+
+	return `
+		<nav class="aicmd-chatfirst-tabs" role="tablist" aria-label="AI Command secondary tabs">
+			${tabs.map((tab) => `
+				<button
+					class="aicmd-chatfirst-tab${activeTab === tab.id ? " is-active" : ""}"
+					type="button"
+					data-aicmd-chatfirst-tab="${escapeHtml(tab.id)}"
+					role="tab"
+					aria-selected="${activeTab === tab.id ? "true" : "false"}"
+				>
+					${escapeHtml(tab.label)}
+				</button>
+			`).join("")}
+		</nav>
+	`;
+}
+
+function renderAiCommandSecondaryTabPanel({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+	const validTabs = ["tools", "output", "flow"];
+	const activeTab = validTabs.includes(session.chatFirstTab) ? session.chatFirstTab : "tools";
+	const panel = activeTab === "tools"
+		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+		: activeTab === "output"
+			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+			: renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml });
+
+	return `
+		<section class="aicmd-chatfirst-tab-panel" data-aicmd-chatfirst-active-tab="${escapeHtml(activeTab)}">
+			${panel}
+		</section>
+	`;
+}
+
+function renderAiCommandTeamTab({ session, bridgeStatus, escapeHtml }) {
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const teamActive = session.teamMode === "team";
+
+	return `
+		<div class="aicmd-chatfirst-team-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Team</h2>
+					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Chat ready" : "Preview guarded")}</span>
+			</div>
+
+## Team tab excerpt
+			</div>
+			<div class="aicmd-chatfirst-mode-toggle" role="group" aria-label="AI team mode">
+				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+			</div>
+			<div class="aicmd-chatfirst-specialist-grid">
+				${SPECIALIST_DEFS.map((spec) => {
+					const isActive = !teamActive && spec.id === session.modeId;
+					return `
+						<button
+							class="aicmd-chatfirst-team-card${isActive ? " is-active" : ""}${teamActive ? " is-team-active" : ""}"
+							type="button"
+							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+						>
+							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+							<span>
+								<strong>${escapeHtml(spec.label)}</strong>
+								<small>${escapeHtml(spec.summary)}</small>
+							</span>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+					<div class="aicmd-chatfirst-team-card is-planned" aria-disabled="true">
+						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+						<span>
+							<strong>${escapeHtml(item.label)}</strong>
+							<small>${escapeHtml(item.status)} - ${escapeHtml(item.summary)}</small>
+						</span>
+					</div>
+				`).join("")}
+			</div>
+		</div>
+	`;
+}
+
+function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+	const tools = getPhase35ToolSet(session);
+	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+
+	return `
+		<div class="aicmd-chatfirst-tools-tab" data-role="${escapeHtml(roleId)}">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${tools.length} prompt tools</span>
+			</div>
+			<div class="aicmd-chatfirst-tools-grid">
+				${tools.map((tool) => {
+					const outputLabel = getToolOutputTypeLabel(tool);
+					const actionLabel = getToolSafeActionLabel(tool);
+					const destination = routeLabel(getToolDestinationRoute(tool, session));
+					return `
+						<button
+							type="button"
+							class="aicmd-chatfirst-tool-card"
+							data-aicmdv2-tool="${escapeHtml(tool.id)}"
+							data-output-type="${escapeHtml(outputLabel.toLowerCase())}"
+						>
+							<strong>${escapeHtml(tool.label)}</strong>
+							<span>${escapeHtml(actionLabel)} · ${escapeHtml(outputLabel)}</span>
+							<small>Handoff: ${escapeHtml(destination)}</small>
+						</button>
+					`;
+				}).join("")}
+			</div>
+			${projectName ? `<p class="aicmd-chatfirst-tab-note">Project context: ${escapeHtml(projectName)}. Tools do not execute, publish, send, approve, save, or mutate records.</p>` : ""}
+		</div>
+	`;
+}
+
+function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+	const preview = asObject(session.outputPreview);
+	const hasPreview = Boolean(preview.outputType && preview.title);
+	const activeTab = getOutputWorkspaceTab(session);
+	const structuredPreview = hasPreview ? buildStructuredPreviewBlocks(preview) : { blocks: [], compactSummary: "" };
+	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+	const specialist = session.teamMode === "team"
+		? { id: "team", label: "Full Team" }
+		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+	const outputLabel = hasPreview ? formatOutputTypeLabel(preview.outputType) : "Output";
+	const routeActionLabel = destination === "Content Studio"
+		? "Open Content Studio Handoff"
+		: destination === "Publishing"
+
+## Output tab excerpt
+		: destination === "Publishing"
+			? "Open Publishing Handoff"
+			: `Open ${destination} Handoff`;
+
+	return `
+		<div class="aicmd-chatfirst-output-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Output</h2>
+					<p>${hasPreview ? "Review the result, then open the destination workspace with draft context." : "Drafts, task previews, workflow previews, and handoff packages appear here after a response or tool setup."}</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${escapeHtml(hasPreview ? "Review ready" : "Waiting")}</span>
+			</div>
+			${hasPreview ? `
+				<div class="aicmd-chatfirst-output-tabs" role="tablist" aria-label="Output workspace tabs">
+					${AI_ROOM_OUTPUT_TABS.map((tab) => `
+						<button
+							type="button"
+							class="aicmd-chatfirst-output-tab-btn${activeTab === tab.id ? " is-active" : ""}"
+							data-aicmdv2-output-tab="${escapeHtml(tab.id)}"
+							role="tab"
+							aria-selected="${activeTab === tab.id ? "true" : "false"}"
+						>
+							<strong>${escapeHtml(tab.label)}</strong>
+							<span>${escapeHtml(tab.helper)}</span>
+						</button>
+					`).join("")}
+				</div>
+				<div class="aicmd-chatfirst-output-meta">
+					<span><strong>Market</strong>${escapeHtml(languagePlan.market)}</span>
+					<span><strong>Language</strong>${escapeHtml(languagePlan.publishLanguage)}</span>
+					<span><strong>Destination</strong>${escapeHtml(destination)}</span>
+					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+				</div>
+				<article class="aicmd-chatfirst-output-card">
+					<span>${escapeHtml(outputLabel)}</span>
+					<h3>${escapeHtml(humanizeValue(preview.title, "Draft output"))}</h3>
+					<p>${escapeHtml(structuredPreview.compactSummary || humanizeValue(preview.summary, "Guidance preview prepared."))}</p>
+					${structuredPreview.blocks.length ? `
+						<div class="aicmd-chatfirst-output-blocks">
+							${structuredPreview.blocks.map((block) => `
+								<section>
+									<strong>${escapeHtml(block.label)}</strong>
+									<${block.ordered ? "ol" : "ul"}>
+										${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+									</${block.ordered ? "ol" : "ul"}>
+								</section>
+							`).join("")}
+						</div>
+					` : ""}
+					<div class="aicmd-chatfirst-output-safety">
+						<strong>${escapeHtml(humanizeValue(preview.safetyLabel, "Guidance only. No backend execution."))}</strong>
+						<span>${escapeHtml(humanizeValue(preview.confirmationNote, "Execution requires explicit confirmation in the destination workspace."))}</span>
+					</div>
+				</article>
+				<div class="aicmd-chatfirst-output-actions">
+					<button id="aicmdV2PreviewSendBtn" class="aicmd-chatfirst-action-primary" type="button">${escapeHtml(routeActionLabel)}</button>
+					<button id="aicmdV2PreviewCopyBtn" class="aicmd-chatfirst-action" type="button">Copy</button>
+					<button id="aicmdV2PreviewUseBtn" class="aicmd-chatfirst-action" type="button">Use in Composer</button>
+					<button id="aicmdV2PreviewClearBtn" class="aicmd-chatfirst-action" type="button">Clear</button>
+				</div>
+				<p class="aicmd-chatfirst-tab-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</p>
+			` : `
+				<div class="aicmd-chatfirst-empty">
+					<strong>No review output yet</strong>
+					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+				</div>
+			`}
+		</div>
+	`;
+}
+
+## Flow tab excerpt
+}
+
+function renderAiCommandFlowTab({ session, aiContext, bridgeStatus, escapeHtml }) {
+	const activeFlowIndex = getAiRoomFlowIndex(session);
+	const safeBridgeStatus = bridgeStatus || { available: false };
+	const preview = asObject(session.outputPreview);
+	const readiness = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "No score";
+
+	return `
+		<div class="aicmd-chatfirst-flow-tab">
+			<div class="aicmd-chatfirst-tab-head">
+				<div>
+					<h2>Flow</h2>
+					<p>Read-only operating path for chat, draft preparation, review, and destination handoff. Confirmation stays in the owning workspace.</p>
+				</div>
+				<span class="aicmd-chatfirst-pill">${escapeHtml(safeBridgeStatus.available ? "Chat connected" : "Preview guarded")}</span>
+			</div>
+			<div class="aicmd-chatfirst-flow-steps" aria-label="AI Command flow">
+				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+					<div class="aicmd-chatfirst-flow-step${index === activeFlowIndex ? " is-active" : ""}${index < activeFlowIndex ? " is-complete" : ""}">
+						<span>${index + 1}</span>
+						<strong>${escapeHtml(step.title)}</strong>
+						<small>${escapeHtml(step.description)}</small>
+					</div>
+				`).join("")}
+			</div>
+			<div class="aicmd-chatfirst-flow-summary">
+				<span><strong>Readiness</strong>${escapeHtml(readiness)}</span>
+				<span><strong>Output</strong>${escapeHtml(preview.outputType ? formatOutputTypeLabel(preview.outputType) : "No draft yet")}</span>
+				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+			</div>
+		</div>
+	`;
+}
+
+function renderPhase35ReadinessStrip(aiContext, bridgeStatus, escapeHtml) {
+	const providerConfigured = isProviderLikelyConfigured(aiContext);
+	const readinessItems = [
+		{ label: "Read preview", value: "Ready", className: "is-available" },
+		{ label: "Voice input", value: "Coming", className: "is-planned" },
+		{ label: "Team chat", value: bridgeStatus.available ? "Ready" : "Coming", className: bridgeStatus.available ? "is-available" : "is-planned" },
+		{ label: "Media gen", value: "Coming", className: "is-planned" },
+		{ label: "GPU video", value: "Coming", className: "is-planned" },
+		{ label: "Image prompt generation", value: providerConfigured ? "Provider may be ready" : "Provider dependent", className: providerConfigured ? "is-available" : "is-planned" }
+	];
+
+	return `
+		<section class="aicmd-v2-readiness-strip">
+			${readinessItems.map((item) => `
+				<span class="aicmd-v2-readiness-chip ${item.className}">
+					<strong>${escapeHtml(item.label)}</strong> ${escapeHtml(item.value)}
+				</span>
+			`).join("")}
+		</section>
+	`;
+}
+
+function renderPhase1Composer(session, aiContext, escapeHtml) {
+		const spec = getPhase1SpecialistById(session.modeId);
+		const placeholder = session.teamMode === "team"
+			? "Ask the full AI team for a launch plan, content package, risk review, source-based analysis, or handoff sequence..."
