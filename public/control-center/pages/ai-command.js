@@ -796,8 +796,8 @@ function normalizeAiComposerPrompt(value) {
 
 function setAiComposerValue(session, input, value) {
   const cleanValue = normalizeAiComposerPrompt(value);
-  session.draftMessage = cleanValue;
-  session.composerText = cleanValue;
+  /* INPUT_WRITE */ StateKernel.write(session, cleanValue, "input");
+  /* composerText_FROZEN */ cleanValue;
   if (input) {
     input.value = cleanValue;
     input.focus?.();
@@ -993,8 +993,8 @@ function hydrateSessionDraft(projectName, session) {
 	if (session.localDraftLoaded) return;
 	const localDraft = loadLocalDraft(projectName);
 	if (localDraft.prompt) {
-		session.draftMessage = asString(localDraft.prompt);
-		session.composerText = session.draftMessage;
+		StateKernel.write(session, asString(localDraft.prompt), "input");
+		/* composerText_FROZEN */ session.draftMessage;
 	}
 	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
 	if (localDraft.commandType) session.commandType = asString(localDraft.commandType);
@@ -1135,8 +1135,8 @@ function loadAiChatSessionIntoState(projectName, session, sessionId) {
         session.outputPreview = asObject(record.preview);
         session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
         session.activeOutputTab = session.outputWorkspaceTab;
-        session.draftMessage = "";
-        session.composerText = "";
+        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+        /* composerText_FROZEN */ '';
         session.responseError = "";
         session.responseLoading = false;
         session.activeChatSessionId = asString(record.id);
@@ -2607,8 +2607,8 @@ function applyDurableAiHandoff(projectName, operations, session, consumeProjectH
 	if (!handoffId || handoffId === asString(session.lastAppliedHandoffId)) return;
 
 	const normalized = normalizeAiInboundHandoff(handoff, projectName);
-	session.draftMessage = normalized.prompt;
-	session.composerText = normalized.prompt;
+	/* AI_WRITE */ StateKernel.write(session, normalized.prompt, "ai");
+	/* composerText_FROZEN */ normalized.prompt;
 	session.modeId = normalized.suggestedSpecialist;
 	session.teamMode = normalized.teamMode || "solo";
 	session.routeSuggestions = normalized.routeSuggestions;
@@ -2742,7 +2742,7 @@ async function submitDurableCommand({
 		failed: asString(response.status).toLowerCase() === "failed"
 	});
 	session.history = session.history.slice(0, 14);
-	session.draftMessage = "";
+	/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
 
 	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
 	await reloadProjectData?.(projectName);
@@ -5429,7 +5429,7 @@ export const aiCommandRoute = {
 			} else {
 				session.bridgeContext = null;
 			}
-			session.draftMessage = normalizeAiComposerPrompt(bridgeValue);
+			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
 			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
 			if (globalInput) globalInput.value = "";
 		}
@@ -5482,8 +5482,8 @@ export const aiCommandRoute = {
 				return null;
 			}
 
-			session.draftMessage = value;
-			session.composerText = session.draftMessage;
+			StateKernel.write(session, value, "input");
+			/* composerText_FROZEN */ session.draftMessage;
 			session.modeId = normalizedSessionModeId;
 			session.teamMode = "solo";
 			session.routeSuggestions = [];
@@ -5535,8 +5535,8 @@ export const aiCommandRoute = {
 		        newSessionBtn.onclick = () => {
 		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
 
-		                session.draftMessage = "";
-		                session.composerText = "";
+		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+		                /* composerText_FROZEN */ '';
 		                session.routeSuggestions = [];
 		                session.inboundHandoff = null;
 		                session.bridgeContext = null;
@@ -5611,9 +5611,9 @@ export const aiCommandRoute = {
 
                                 const spec = getPhase1SpecialistById(specId);
                                 if (shouldReplaceRoleDraft) {
-                                        session.draftMessage = `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`;
+                                        StateKernel.write(session, `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`, "ai");
                                 } else if (!session.draftMessage) {
-                                        session.draftMessage = "";
+                                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
                                 }
 
                                 persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
@@ -5637,7 +5637,7 @@ export const aiCommandRoute = {
 			btn.onclick = () => {
 				const text = asString(btn.getAttribute("data-aicmdv2-prompt-text") || "");
 				if (!text) return;
-				session.draftMessage = text;
+				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
 				if (input) input.value = text;
 				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
 				updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
@@ -5649,7 +5649,7 @@ export const aiCommandRoute = {
 			btn.onclick = () => {
 				const text = asString(btn.getAttribute("data-aicmdv2-quick-template") || "");
 				if (!text) return;
-				session.draftMessage = text;
+				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
 				if (input) input.value = text;
 				persistSessionDraft(sessionKey, session, "Quick action loaded");
 				updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
@@ -5735,8 +5735,8 @@ export const aiCommandRoute = {
 		// ── INPUT HANDLING ───────────────────────────────────────────
 		if (input) {
 			input.oninput = () => {
-				session.draftMessage = input.value || "";
-				session.composerText = session.draftMessage;
+				InputController.write(session, input.value, "textarea") || "";
+				/* composerText_FROZEN */ session.draftMessage;
 				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
 			};
 
@@ -5867,6 +5867,10 @@ export const aiCommandRoute = {
 		                }
 
 		                session.responseError = "";
+                                // PHASE 3 SAFE AI ACTIVATION: run decision engine only on explicit Ask.
+                                if (typeof __AI_RUNTIME_TICK === "function") {
+                                        __AI_RUNTIME_TICK(session, aiContext);
+                                }
 
 		                if (!bridgeStatus.available) {
 		                        session.responseLoading = false;
@@ -5895,8 +5899,8 @@ export const aiCommandRoute = {
 
 		                session.messages.push(userChatMessage);
 		                session.messages = session.messages.slice(-40);
-		                session.draftMessage = "";
-		                session.composerText = "";
+		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+		                /* composerText_FROZEN */ '';
 		                session.responseLoading = true;
 
 		                saveLocalOutput(sessionKey, {
@@ -6170,7 +6174,7 @@ export const aiCommandRoute = {
 		const saveBtn = $("aicmdV2SaveBtn");
 		if (saveBtn) {
 			saveBtn.onclick = () => {
-				session.draftMessage = asString(input?.value || session.draftMessage || "");
+				/* INPUT_FALLBACK */ StateKernel.write(session, input?.value, "input");
 				persistSessionDraft(sessionKey, session, "Draft saved locally");
 				updateStatus("Composer draft saved locally.");
 				showMessage?.("Composer draft saved locally.");
@@ -6181,8 +6185,8 @@ export const aiCommandRoute = {
 		const clearBtn = $("aicmdV2ClearBtn");
 		if (clearBtn) {
 			clearBtn.onclick = () => {
-				session.draftMessage = "";
-				session.composerText = "";
+				/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+				/* composerText_FROZEN */ '';
 				session.routeSuggestions = [];
 				session.inboundHandoff = null;
 				session.bridgeContext = null;
@@ -6365,7 +6369,7 @@ export const aiCommandRoute = {
 					? "Full Team"
 					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
 				const text = buildPreviewText(output, specialistLabel);
-				session.draftMessage = text;
+				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
 				if (input) {
 					input.value = text;
 					input.focus();
@@ -6984,3 +6988,264 @@ function getAiAdaptiveBehavior(session) {
         adaptive: true
     };
 }
+
+
+
+// =====================================
+// INPUT GOVERNOR LAYER (PHASE 1.3 STEP 2)
+// SINGLE SOURCE OF INPUT AUTHORITY
+// =====================================
+
+const InputController = {
+  write(session, value, source = "unknown") {
+    const clean = String(value || "").trim();
+
+    // ONLY ONE TRUE SOURCE
+    StateKernel.write(session, clean, "input");
+
+    // log for debugging only
+    session._lastInputSource = source;
+    session._lastInputAt = Date.now();
+
+    return clean;
+  },
+
+  clear(session) {
+    /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+    session._lastInputSource = "clear";
+  },
+
+  read(session) {
+    return StateKernel.read(session);
+  }
+};
+
+
+
+// ===============================
+// PHASE 1.2 — STATE CONTROLLER CORE
+// ===============================
+
+const StateKernel = {
+  write(session, value, source = "unknown") {
+    if (!session) return "";
+
+    const clean = String(value || "").trim();
+
+    // StateKernel is the ONLY direct writer to draftMessage.
+    session.draftMessage = source === "system" ? "" : clean;
+    session._stateSource = String(source || "unknown").toUpperCase();
+    session._lastWriteAt = Date.now();
+
+    return session.draftMessage;
+  },
+
+  read(session) {
+    return session?.draftMessage || "";
+  },
+
+  source(session) {
+    return session?._stateSource || "UNKNOWN";
+  }
+};
+
+
+
+// ===============================
+// STATE READER LAYER (PHASE 1.2 STEP 6)
+// ===============================
+const StateReader = {
+  read(session) {
+    return StateKernel.read(session);
+  },
+
+  readDraft(session) {
+    return StateKernel.read(session);
+  }
+};
+
+
+// ===============================
+// UI STATE ABSTRACTION LAYER (PHASE 1.2 FINAL)
+// ===============================
+const UIState = {
+  getDraft(session) {
+    return StateReader.read(session);
+  },
+
+  getText(session) {
+    return StateReader.read(session);
+  }
+};
+
+
+// =====================================
+// PHASE 2 — AI COMMAND INTELLIGENCE CORE
+// =====================================
+
+const AiCommandBrain = {
+
+  analyze(session, aiContext) {
+
+    const draft = (UIState?.getDraft?.(session) || "").toLowerCase();
+
+    const intent = {
+      hasText: draft.length > 0,
+      isEmpty: draft.length === 0,
+      isCommand: draft.startsWith("/"),
+      isQuestion: draft.includes("?"),
+      isActionRequest: /create|build|generate|fix|update|deploy/.test(draft),
+      isAnalysisRequest: /analyze|review|audit|check/.test(draft),
+    };
+
+    return intent;
+  },
+
+  decide(session, aiContext) {
+
+    const intent = this.analyze(session, aiContext);
+
+    if (intent.isEmpty) {
+      return {
+        route: "idle",
+        action: "show_suggestions"
+      };
+    }
+
+    if (intent.isCommand) {
+      return {
+        route: "command",
+        action: "execute_command_flow"
+      };
+    }
+
+    if (intent.isActionRequest) {
+      return {
+        route: "action",
+        action: "ai_task_pipeline"
+      };
+    }
+
+    if (intent.isAnalysisRequest) {
+      return {
+        route: "analysis",
+        action: "ai_analysis_pipeline"
+      };
+    }
+
+    return {
+      route: "chat",
+      action: "standard_ai_response"
+    };
+  }
+};
+
+
+// =====================================
+// PHASE 2 — AI COMMAND ROUTER (BRIDGE LAYER)
+// =====================================
+
+const AiCommandRouter = {
+
+  execute(session, aiContext) {
+
+    const decision = AiCommandBrain.decide(session, aiContext);
+
+    // attach decision to session (UI bridge)
+    session.aiRoute = decision.route;
+    session.aiAction = decision.action;
+
+    // map to UI system
+    if (decision.route === "analysis") {
+      session.taskType = "analyze";
+    }
+
+    if (decision.route === "action") {
+      session.taskType = "launch";
+    }
+
+    if (decision.route === "command") {
+      session.taskType = "fix";
+    }
+
+    if (decision.route === "chat") {
+      session.taskType = "content";
+    }
+
+    if (decision.route === "idle") {
+      session.routeSuggestions = ["Ask me anything", "Run analysis", "Generate plan"];
+    }
+
+    session._lastRouteAt = Date.now();
+
+    return decision;
+  }
+};
+
+
+// =====================================
+// PHASE 2 — EXECUTION ACTIVATION LAYER
+// =====================================
+
+// AUTO TRIGGER AI ROUTER ON STATE WRITE
+function triggerAiRouter(session, aiContext = {}) {
+  try {
+    if (typeof AiCommandBrain === "undefined") return;
+    if (typeof AiCommandRouter === "undefined") return;
+
+    const decision = AiCommandRouter.execute(session, aiContext);
+
+    session._lastAiDecision = decision;
+    session._aiActiveRoute = decision.route;
+    return decision;
+
+  } catch (err) {
+    console.warn("AI Router failed safely:", err);
+  }
+}
+
+
+
+// =====================================
+// PHASE 2 — AUTO AI ACTIVATION PATCH
+// =====================================
+
+// SAFE AUTO TRIGGER WRAPPER
+function safeTriggerAi(session, aiContext = {}) {
+  if (typeof triggerAiRouter !== "function") return;
+
+  try {
+    return triggerAiRouter(session, aiContext);
+  } catch (e) {
+    console.warn("AI trigger failed safely:", e);
+  }
+}
+
+
+
+
+
+// =====================================
+// PHASE 3 — LIVE AI SYSTEM ACTIVATION
+// =====================================
+
+// CORE AUTO AI INJECTION POINT
+function __AI_RUNTIME_TICK(session, aiContext = {}) {
+
+  // SAFE GUARDS
+  if (typeof safeTriggerAi !== "function") return;
+  if (!session) return;
+
+  // EXECUTE AI DECISION ENGINE ONCE
+  const decision = safeTriggerAi(session, aiContext);
+
+  if (decision) {
+    session._liveAiRoute = decision.route;
+    session._liveAiAction = decision.action;
+  }
+
+  // MARK LIVE STATE
+  session._aiLive = true;
+  session._aiLastTick = Date.now();
+}
+
