@@ -11384,3 +11384,169 @@
   font-size: 11px !important;
   letter-spacing: -0.01em !important;
 }
+
+/* T185B — AI Command Final Composer Authority
+   Scope: active ChatFirst/final composer only.
+   Purpose: clean ChatGPT-like composer density without changing backend/routes.
+*/
+[data-page="ai-command"] .aicmd-final-composer {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto 18px;
+}
+
+[data-page="ai-command"] .aicmd-final-input-shell {
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.86);
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+[data-page="ai-command"] .aicmd-final-input-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+[data-page="ai-command"] .aicmd-final-textarea {
+  min-height: 44px;
+  max-height: 160px;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f8fafc;
+  font-size: 15px;
+  line-height: 1.45;
+  padding: 11px 4px;
+}
+
+[data-page="ai-command"] .aicmd-final-textarea::placeholder {
+  color: rgba(226, 232, 240, 0.5);
+}
+
+[data-page="ai-command"] .aicmd-final-round-btn,
+[data-page="ai-command"] .aicmd-final-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.62);
+  color: #e2e8f0;
+}
+
+[data-page="ai-command"] .aicmd-final-pill-btn {
+  min-height: 38px;
+  border-radius: 999px;
+  padding: 0 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.58);
+  color: rgba(241, 245, 249, 0.86);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+[data-page="ai-command"] .aicmd-final-voice-lang-btn[hidden],
+[data-page="ai-command"] .aicmd-final-voice-btn[hidden] {
+  display: none !important;
+}
+
+[data-page="ai-command"] .aicmd-final-send {
+  min-width: 72px;
+  height: 42px;
+  border-radius: 999px;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+[data-page="ai-command"] .aicmd-final-quick-row {
+  width: min(1040px, calc(100% - 32px));
+  margin: 10px auto 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 4px 4px;
+}
+
+[data-page="ai-command"] .aicmd-final-tool-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.52);
+  color: rgba(226, 232, 240, 0.84);
+  padding: 7px 11px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+[data-page="ai-command"] .aicmd-final-context-row {
+  width: min(1040px, calc(100% - 32px));
+  margin: 8px auto 0;
+  opacity: 0.78;
+}
+
+@media (max-width: 820px) {
+  [data-page="ai-command"] .aicmd-final-input-row {
+    grid-template-columns: 40px minmax(0, 1fr) 40px 40px 64px;
+    gap: 8px;
+  }
+
+  [data-page="ai-command"] .aicmd-final-pill-btn[data-aicmd-final-specialist],
+  [data-page="ai-command"] .aicmd-final-pill-btn[data-aicmd-final-status] {
+    display: none;
+  }
+}
+
+/* T185B.1 — AI Command Compact Source Menu Authority
+   Scope: active final composer. Replaces plus/source drawer opening with compact context choices.
+*/
+[data-page="ai-command"] .aicmd-final-source-menu {
+  width: min(1040px, calc(100% - 32px));
+  margin: 10px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+[data-page="ai-command"] .aicmd-final-source-menu[hidden] {
+  display: none !important;
+}
+
+[data-page="ai-command"] .aicmd-final-source-option {
+  text-align: left;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(241, 245, 249, 0.92);
+  padding: 13px 14px;
+  min-height: 78px;
+  box-shadow: 0 14px 40px rgba(2, 6, 23, 0.18);
+}
+
+[data-page="ai-command"] .aicmd-final-source-option strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+[data-page="ai-command"] .aicmd-final-source-option span {
+  display: block;
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+[data-page="ai-command"] .aicmd-final-source-option:hover {
+  border-color: rgba(45, 212, 191, 0.42);
+  background: rgba(20, 184, 166, 0.14);
+}
+
+@media (max-width: 820px) {
+  [data-page="ai-command"] .aicmd-final-source-menu {
+    grid-template-columns: 1fr;
+  }
+}

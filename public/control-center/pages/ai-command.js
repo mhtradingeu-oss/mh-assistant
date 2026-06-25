@@ -4374,14 +4374,30 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                                 ${escapeHtml(stateLabel)}
                                         </button>
                                         <button id="aicmdV2SourceBtn" class="aicmd-final-icon-btn" type="button" data-aicmd-chatfirst-source title="Choose source">${getAiCommandUiIcon("source")}</button>
-                                        <button id="aicmdV2VoiceLangBtn" class="aicmd-final-pill-btn aicmd-final-voice-lang-btn" type="button" title="Voice language">Mic: ${escapeHtml(voiceLanguageLabel)}</button>
+                                        <button id="aicmdV2VoiceLangBtn" class="aicmd-final-pill-btn aicmd-final-voice-lang-btn" type="button" title="Voice language" hidden aria-hidden="true">Mic: ${escapeHtml(voiceLanguageLabel)}</button>
                                         <button id="aicmdV2VoiceBtn" class="aicmd-final-icon-btn" type="button" title="Start voice input">${getAiCommandUiIcon("mic")}</button>
-                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap">${getAiCommandUiIcon("voice")}</button>
+                                        <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap" hidden aria-hidden="true">${getAiCommandUiIcon("voice")}</button>
                                         <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
                                                 ${isGenerating ? "..." : "Send"}
                                         </button>
                                 </div>
                         </div>
+
+                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu hidden aria-hidden="true">
+                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
+                                        <strong>Upload file</strong>
+                                        <span>Add files or project material for AI context.</span>
+                                </button>
+                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
+                                        <strong>Choose from Library</strong>
+                                        <span>Select a trusted source already saved in the workspace.</span>
+                                </button>
+                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
+                                        <strong>Project context</strong>
+                                        <span>Use the current project profile, readiness, and workspace context.</span>
+                                </button>
+                        </div>
+
 
                         <div class="aicmd-final-quick-row" aria-label="Quick AI actions">
                                 ${quickTools.map((tool) => `
@@ -5674,15 +5690,50 @@ export const aiCommandRoute = {
                         return true;
                 };
 
+                const finalSourceMenu = document.querySelector("[data-aicmd-final-source-menu]");
+                const setFinalSourceMenuOpen = (open, reason = "Source menu") => {
+                        if (!finalSourceMenu) {
+                                updateStatus("Source menu is not available yet.");
+                                return false;
+                        }
+
+                        finalSourceMenu.hidden = !open;
+                        finalSourceMenu.setAttribute("aria-hidden", open ? "false" : "true");
+                        finalSourceMenu.classList.toggle("is-open", Boolean(open));
+                        updateStatus(open ? `${reason} opened. Choose upload, Library, or project context.` : `${reason} closed.`);
+                        return true;
+                };
+
                 Array.from(document.querySelectorAll("[data-aicmd-open-plus]")).forEach((btn) => {
                         btn.onclick = () => {
-                                openAiCommandToolDrawer("AI tools");
+                                const nextOpen = finalSourceMenu ? finalSourceMenu.hidden : true;
+                                setFinalSourceMenuOpen(nextOpen, "AI context menu");
                         };
                 });
 
                 Array.from(document.querySelectorAll("[data-aicmd-chatfirst-source]")).forEach((btn) => {
                         btn.onclick = () => {
-                                openAiCommandToolDrawer("Source picker");
+                                const nextOpen = finalSourceMenu ? finalSourceMenu.hidden : true;
+                                setFinalSourceMenuOpen(nextOpen, "Source picker");
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-final-source-option]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
+
+                                if (option === "library") {
+                                        updateStatus("Library source selection is ready through the next Source Panel step.");
+                                        showMessage?.("Next step: connect this compact source menu to Library source selection.");
+                                } else if (option === "upload") {
+                                        updateStatus("Upload context is planned for the next file/source phase.");
+                                        showMessage?.("Upload will be connected in the dedicated source/upload phase.");
+                                } else {
+                                        updateStatus("Current project context selected for AI guidance.");
+                                        showMessage?.("AI Command will use the current project context.");
+                                }
+
+                                setFinalSourceMenuOpen(false, "Source menu");
                         };
                 });
 
