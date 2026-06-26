@@ -4478,7 +4478,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                         <div class="aicmd-chatfirst-input-shell aicmd-final-input-shell">
                                 ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
                                 <div class="aicmd-final-input-row">
-                                        <button class="aicmd-final-round-btn" type="button" data-aicmd-open-plus aria-label="Open tools">${getAiCommandUiIcon("attach")}</button>
+                                        <button class="aicmd-final-round-btn" type="button" data-aicmd-open-plus aria-label="Attach files or choose context">${getAiCommandUiIcon("attach")}</button>
                                         <textarea
                                                 id="aicmdV2Input"
                                                 class="aicmd-chatfirst-textarea aicmd-final-textarea"
@@ -4492,9 +4492,8 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                         <button class="aicmd-final-pill-btn" type="button" data-aicmd-final-status title="AI status">
                                                 ${escapeHtml(stateLabel)}
                                         </button>
-                                        <button id="aicmdV2SourceBtn" class="aicmd-final-icon-btn" type="button" data-aicmd-chatfirst-source title="Choose source">${getAiCommandUiIcon("source")}</button>
                                         <button id="aicmdV2VoiceLangBtn" class="aicmd-final-pill-btn aicmd-final-voice-lang-btn" type="button" title="Voice language" hidden aria-hidden="true">Mic: ${escapeHtml(voiceLanguageLabel)}</button>
-                                        <button id="aicmdV2VoiceBtn" class="aicmd-final-icon-btn" type="button" title="Start voice input">${getAiCommandUiIcon("mic")}</button>
+                                        <button id="aicmdV2VoiceBtn" class="aicmd-final-icon-btn" type="button" title="Start voice dictation">${getAiCommandUiIcon("mic")}</button>
                                         <button class="aicmd-final-voice-btn" type="button" data-aicmd-final-voice-conversation title="Voice conversation roadmap" hidden aria-hidden="true">${getAiCommandUiIcon("voice")}</button>
                                         <button id="aicmdV2AskBtn" class="aicmd-chatfirst-send aicmd-final-send" type="button" ${isGenerating ? "disabled" : ""} title="Ask AI Team">
                                                 ${isGenerating ? "..." : "Send"}
@@ -6055,8 +6054,8 @@ export const aiCommandRoute = {
 					? (window.SpeechRecognition || window.webkitSpeechRecognition)
 					: null;
 				if (!SpeechRecognitionCtor) {
-					updateStatus("Voice input trigger is ready. Browser speech recognition is not available in this environment yet.");
-					showMessage?.("Voice input readiness is staged for compatible browsers.");
+					updateStatus("Voice dictation is ready, but browser speech recognition is not available in this environment yet.");
+					showMessage?.("Voice dictation works in compatible browsers with microphone permission.");
 					return;
 				}
 
@@ -6084,7 +6083,7 @@ export const aiCommandRoute = {
 					recognition.maxAlternatives = 1;
 					let voiceTranscriptCaptured = false;
 					recognition.onstart = () => {
-						updateStatus("Voice input started. Speak now.");
+						updateStatus("Voice dictation started. Speak now.");
 					};
 					recognition.onspeechstart = () => {
 						updateStatus("Speech detected. Listening...");
@@ -6108,22 +6107,22 @@ export const aiCommandRoute = {
 							input.focus();
 						}
 						persistSessionDraft(sessionKey, session, "Voice input captured");
-						updateStatus("Voice input captured in composer.");
+						updateStatus("Voice dictation captured in composer.");
 					};
                                         recognition.onerror = (event) => {
                                                 console.warn("[AI_COMMAND_VOICE_ERROR]", event);
                                                 const errorName = asString(event?.error || event?.name || "unknown");
-                                                updateStatus(`Voice input stopped: ${errorName}. Try again or check microphone input.`.trim());
+                                                updateStatus(`Voice dictation stopped: ${errorName}. Try again or check microphone input.`.trim());
                                         };
                                         recognition.onend = () => {
                                                 if (!voiceTranscriptCaptured) {
-                                                        updateStatus("Voice input ended. If no text appeared, try again and speak clearly after pressing the microphone.");
+                                                        updateStatus("Voice dictation ended. If no text appeared, try again and speak clearly after pressing the microphone.");
                                                 }
                                         };
                                         recognition.start();
-                                        updateStatus(`Listening for voice input (${voiceLanguage}).`);
+                                        updateStatus(`Listening for voice dictation (${voiceLanguage}).`);
 				} catch (_) {
-					updateStatus("Voice input could not start in this browser.");
+					updateStatus("Voice dictation could not start in this browser.");
 				}
 			};
 		}
