@@ -4383,18 +4383,24 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                 </div>
                         </div>
 
-                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu hidden aria-hidden="true">
+                        <div class="aicmd-final-source-menu" data-aicmd-final-source-menu data-aicmd-final-dropzone hidden aria-hidden="true">
+                                <input id="aicmdFinalUploadInput" type="file" multiple hidden aria-hidden="true" />
+
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
                                         <strong>Upload file</strong>
-                                        <span>Add files or project material for AI context.</span>
+                                        <span>Add a file, image, PDF, note, or workspace material.</span>
                                 </button>
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
                                         <strong>Choose from Library</strong>
-                                        <span>Select a trusted source already saved in the workspace.</span>
+                                        <span>Select a trusted saved source.</span>
+                                </button>
+                                <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="product">
+                                        <strong>Choose product</strong>
+                                        <span>Use a product, offer, or SKU as context.</span>
                                 </button>
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
                                         <strong>Project context</strong>
-                                        <span>Use the current project profile, readiness, and workspace context.</span>
+                                        <span>Use the current workspace context.</span>
                                 </button>
                         </div>
 
@@ -5722,12 +5728,15 @@ export const aiCommandRoute = {
                         btn.onclick = () => {
                                 const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
 
-                                if (option === "library") {
-                                        updateStatus("Library source selection is ready through the next Source Panel step.");
-                                        showMessage?.("Next step: connect this compact source menu to Library source selection.");
-                                } else if (option === "upload") {
-                                        updateStatus("Upload context is planned for the next file/source phase.");
-                                        showMessage?.("Upload will be connected in the dedicated source/upload phase.");
+                                if (option === "upload") {
+                                        document.getElementById("aicmdFinalUploadInput")?.click?.();
+                                        updateStatus("Choose a file to stage as AI context.");
+                                } else if (option === "library") {
+                                        updateStatus("Library source selection will open from the dedicated Library source flow.");
+                                        showMessage?.("Next step: connect this menu to Library source selection.");
+                                } else if (option === "product") {
+                                        updateStatus("Product source selection will be connected to product/project data.");
+                                        showMessage?.("Next step: connect product/SKU source selection.");
                                 } else {
                                         updateStatus("Current project context selected for AI guidance.");
                                         showMessage?.("AI Command will use the current project context.");
@@ -5736,6 +5745,39 @@ export const aiCommandRoute = {
                                 setFinalSourceMenuOpen(false, "Source menu");
                         };
                 });
+
+                const announceFinalStagedFiles = (files, label = "File context") => {
+                        const names = Array.from(files || []).map((file) => file?.name).filter(Boolean);
+                        if (!names.length) {
+                                updateStatus("No file selected.");
+                                return;
+                        }
+
+                        updateStatus(`${label} staged: ${names.slice(0, 3).join(", ")}${names.length > 3 ? "..." : ""}`);
+                        showMessage?.(`${label} staged locally: ${names.join(", ")}. Persistent upload/source storage will be connected in the dedicated source phase.`);
+                };
+
+                const finalUploadInput = document.getElementById("aicmdFinalUploadInput");
+                if (finalUploadInput) {
+                        finalUploadInput.onchange = () => announceFinalStagedFiles(finalUploadInput.files, "File context");
+                }
+
+                const finalDropzone = document.querySelector("[data-aicmd-final-dropzone]");
+                if (finalDropzone) {
+                        finalDropzone.ondragover = (event) => {
+                                event.preventDefault();
+                                finalDropzone.classList.add("is-dragging");
+                                updateStatus("Drop files to stage them as AI context.");
+                        };
+                        finalDropzone.ondragleave = () => {
+                                finalDropzone.classList.remove("is-dragging");
+                        };
+                        finalDropzone.ondrop = (event) => {
+                                event.preventDefault();
+                                finalDropzone.classList.remove("is-dragging");
+                                announceFinalStagedFiles(event.dataTransfer?.files || [], "Dropped file context");
+                        };
+                }
 
                 Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
                         btn.onclick = () => {
