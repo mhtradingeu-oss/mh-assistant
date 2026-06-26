@@ -4335,6 +4335,149 @@ function getAiCommandUiIcon(name) {
         return icons[name] || "";
 }
 
+function getAiCommandSmartActions() {
+        return [
+                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+        ];
+}
+
+function renderAiCommandSmartActionCenter({ escapeHtml }) {
+        const actions = getAiCommandSmartActions();
+        return `
+                <section class="aicmd-smart-actions" aria-label="Start with AI Team">
+                        <div class="aicmd-smart-actions-head">
+                                <strong>Start with AI Team</strong>
+                                <span>Choose a guided workflow. The team prepares a preview first.</span>
+                        </div>
+                        <div class="aicmd-smart-actions-grid">
+                                ${actions.map((action) => `
+                                        <button
+                                                class="aicmd-smart-action${action.enabled ? "" : " is-planned"}"
+                                                type="button"
+                                                data-aicmd-smart-action="${escapeHtml(action.id)}"
+                                                ${action.enabled ? "" : "disabled"}
+                                                title="${escapeHtml(action.summary)}"
+                                        >
+                                                <strong>${escapeHtml(action.label)}</strong>
+                                                <span>${escapeHtml(action.enabled ? "Open wizard" : "Planned")}</span>
+                                        </button>
+                                `).join("")}
+                        </div>
+                </section>
+        `;
+}
+
+function getAiCommandSmartWizard(session) {
+        return asObject(session.smartActionWizard);
+}
+
+function renderAiCommandCampaignWizard({ session, escapeHtml }) {
+        const wizard = getAiCommandSmartWizard(session);
+        if (wizard.type !== "campaign" || !wizard.open) return "";
+
+        const source = asString(wizard.source || "project");
+        const goal = asString(wizard.goal || "sales");
+        const channel = asString(wizard.channel || "social");
+        const preview = asObject(wizard.preview);
+
+        const sourceOptions = [["project", "Project context"], ["product", "Product"], ["library", "Library source"], ["upload", "Uploaded source"]];
+        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+
+        const optionButton = (group, value, label, activeValue) => `
+                <button
+                        class="aicmd-smart-wizard-choice${value === activeValue ? " is-active" : ""}"
+                        type="button"
+                        data-aicmd-smart-wizard-choice="${escapeHtml(group)}"
+                        data-aicmd-smart-wizard-value="${escapeHtml(value)}"
+                >
+                        ${escapeHtml(label)}
+                </button>
+        `;
+
+        return `
+                <div class="aicmd-smart-wizard-backdrop" data-aicmd-smart-wizard-backdrop>
+                        <section class="aicmd-smart-wizard" role="dialog" aria-modal="true" aria-label="Campaign Builder">
+                                <header class="aicmd-smart-wizard-header">
+                                        <div>
+                                                <span>AI Team Wizard</span>
+                                                <h2>Campaign Builder</h2>
+                                                <p>Prepare a review-ready campaign package before any handoff, approval, or publishing action.</p>
+                                        </div>
+                                        <button class="aicmd-smart-wizard-close" type="button" data-aicmd-smart-wizard-close aria-label="Close">×</button>
+                                </header>
+
+                                <div class="aicmd-smart-wizard-steps" aria-label="Campaign builder steps">
+                                        <span class="is-active">1 Source</span>
+                                        <span class="is-active">2 Goal</span>
+                                        <span class="is-active">3 Channel</span>
+                                        <span class="${preview.title ? "is-active" : ""}">4 Preview</span>
+                                </div>
+
+                                <div class="aicmd-smart-wizard-body">
+                                        <div class="aicmd-smart-wizard-section">
+                                                <strong>Choose source</strong>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${sourceOptions.map(([value, label]) => optionButton("source", value, label, source)).join("")}
+                                                </div>
+                                        </div>
+
+                                        <div class="aicmd-smart-wizard-section">
+                                                <strong>Campaign goal</strong>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${goalOptions.map(([value, label]) => optionButton("goal", value, label, goal)).join("")}
+                                                </div>
+                                        </div>
+
+                                        <div class="aicmd-smart-wizard-section">
+                                                <strong>Primary channel</strong>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${channelOptions.map(([value, label]) => optionButton("channel", value, label, channel)).join("")}
+                                                </div>
+                                        </div>
+
+                                        ${preview.title ? `
+                                                <article class="aicmd-smart-preview">
+                                                        <div class="aicmd-smart-preview-head">
+                                                                <span>Preview ready</span>
+                                                                <strong>${escapeHtml(preview.title)}</strong>
+                                                        </div>
+                                                        <div class="aicmd-smart-preview-grid">
+                                                                <section><strong>Strategy</strong><p>${escapeHtml(preview.strategy)}</p></section>
+                                                                <section><strong>Offer angle</strong><p>${escapeHtml(preview.offer)}</p></section>
+                                                                <section><strong>Copy package</strong><p>${escapeHtml(preview.copy)}</p></section>
+                                                                <section><strong>Media brief</strong><p>${escapeHtml(preview.media)}</p></section>
+                                                                <section><strong>Compliance risks</strong><p>${escapeHtml(preview.compliance)}</p></section>
+                                                                <section><strong>Operations follow-up</strong><p>${escapeHtml(preview.operations)}</p></section>
+                                                        </div>
+                                                </article>
+                                        ` : `
+                                                <div class="aicmd-smart-wizard-empty">
+                                                        <strong>No preview yet</strong>
+                                                        <span>Choose the source, goal, and channel, then generate a review-ready campaign package.</span>
+                                                </div>
+                                        `}
+                                </div>
+
+                                <footer class="aicmd-smart-wizard-footer">
+                                        <span>Review-first: no publishing, sending, CRM update, provider execution, or workflow mutation happens here.</span>
+                                        <div>
+                                                <button class="aicmd-smart-wizard-secondary" type="button" data-aicmd-smart-wizard-close>Cancel</button>
+                                                <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
+                                                        ${preview.title ? "Regenerate Preview" : "Generate Preview"}
+                                                </button>
+                                        </div>
+                                </footer>
+                        </section>
+                </div>
+        `;
+}
+
 function renderAiCommandComposerSessionControls({ session, escapeHtml }) {
         const recent = asArray(session.chatSessions).slice(0, 8);
         return `
@@ -4475,6 +4618,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
         return `
                 <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
                         ${renderAiCommandComposerSessionControls({ session, escapeHtml })}
+                        ${renderAiCommandSmartActionCenter({ escapeHtml })}
                         <div class="aicmd-chatfirst-input-shell aicmd-final-input-shell">
                                 ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
                                 <div class="aicmd-final-input-row">
@@ -4542,6 +4686,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                         </div>
 
                         <div id="aicmdV2Status" class="aicmd-chatfirst-status-line"></div>
+                        ${renderAiCommandCampaignWizard({ session, escapeHtml })}
                 </div>
         `;
 }
@@ -6005,7 +6150,122 @@ export const aiCommandRoute = {
                 });
 
 		// ── INPUT HANDLING ───────────────────────────────────────────
-		if (input) {
+		
+                const openSmartActionWizard = (type) => {
+                        if (type !== "campaign") {
+                                updateStatus("This Smart Action is planned. Campaign Builder is available first.");
+                                return;
+                        }
+
+                        const currentWizard = asObject(session.smartActionWizard);
+                        session.smartActionWizard = {
+                                type: "campaign",
+                                open: true,
+                                source: asString(currentWizard.source || "project"),
+                                goal: asString(currentWizard.goal || "sales"),
+                                channel: asString(currentWizard.channel || "social"),
+                                preview: asObject(currentWizard.preview)
+                        };
+                        persistSessionDraft(sessionKey, session, "Campaign Builder wizard opened");
+                        updateStatus("Campaign Builder opened. Choose source, goal, and channel.");
+                        aiCommandRoute.render(context);
+                };
+
+                const closeSmartActionWizard = () => {
+                        session.smartActionWizard = {
+                                ...asObject(session.smartActionWizard),
+                                open: false
+                        };
+                        persistSessionDraft(sessionKey, session, "Smart Action wizard closed");
+                        aiCommandRoute.render(context);
+                };
+
+                const buildCampaignWizardPreview = () => {
+                        const wizard = getAiCommandSmartWizard(session);
+                        const source = asString(wizard.source || "project");
+                        const goal = asString(wizard.goal || "sales");
+                        const channel = asString(wizard.channel || "social");
+                        const projectLabel = projectName || "this project";
+                        const goalLabel = titleCase(goal);
+                        const channelLabel = titleCase(channel);
+                        const sourceLabel = titleCase(source);
+
+                        return {
+                                title: `${goalLabel} campaign for ${projectLabel}`,
+                                strategy: `Use ${sourceLabel} as the trusted input. Build a ${goalLabel.toLowerCase()} campaign with a clear audience, promise, proof points, and review gate before handoff.`,
+                                offer: `Shape the offer around the selected ${sourceLabel.toLowerCase()} and prepare a safe angle for ${channelLabel}. Missing prices, claims, or competitor evidence must be flagged before approval.`,
+                                copy: `Prepare customer-facing copy variants for ${channelLabel}: hook, short caption, CTA, email/landing adaptation, and notes for the Writer specialist.`,
+                                media: `Prepare Media Studio direction: visual concept, shot list, asset needs, format notes, and voiceover/storyboard direction where relevant.`,
+                                compliance: `Compliance must review claims, evidence, pricing promises, before/after language, and publishing readiness before live use.`,
+                                operations: `Operations should track approval status, destination handoff, publishing readiness, follow-up checks, and improvement notes after review.`
+                        };
+                };
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-action]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const type = asString(btn.getAttribute("data-aicmd-smart-action") || "");
+                                openSmartActionWizard(type);
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-close]")).forEach((btn) => {
+                        btn.onclick = closeSmartActionWizard;
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-backdrop]")).forEach((backdrop) => {
+                        backdrop.onclick = (event) => {
+                                if (event.target === backdrop) closeSmartActionWizard();
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-wizard-choice]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const group = asString(btn.getAttribute("data-aicmd-smart-wizard-choice") || "");
+                                const value = asString(btn.getAttribute("data-aicmd-smart-wizard-value") || "");
+                                if (!group || !value) return;
+
+                                session.smartActionWizard = {
+                                        ...asObject(session.smartActionWizard),
+                                        [group]: value,
+                                        preview: {}
+                                };
+                                persistSessionDraft(sessionKey, session, `Campaign Builder ${group} selected`);
+                                aiCommandRoute.render(context);
+                        };
+                });
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const preview = buildCampaignWizardPreview();
+                                session.smartActionWizard = {
+                                        ...asObject(session.smartActionWizard),
+                                        type: "campaign",
+                                        open: true,
+                                        preview
+                                };
+
+                                session.outputPreview = {
+                                        type: "smart_campaign_preview",
+                                        title: preview.title,
+                                        sections: [
+                                                { label: "Strategy", body: preview.strategy },
+                                                { label: "Offer angle", body: preview.offer },
+                                                { label: "Copy package", body: preview.copy },
+                                                { label: "Media brief", body: preview.media },
+                                                { label: "Compliance risks", body: preview.compliance },
+                                                { label: "Operations follow-up", body: preview.operations }
+                                        ],
+                                        safety: "Preview only. No publish, send, CRM mutation, provider execution, or workflow mutation."
+                                };
+                                session.chatFirstTab = "output";
+                                persistSessionDraft(sessionKey, session, "Campaign Builder preview prepared");
+                                updateStatus("Campaign preview prepared. Review before any handoff or approval.");
+                                showMessage?.("Campaign Builder preview is ready for review.");
+                                aiCommandRoute.render(context);
+                        };
+                });
+
+if (input) {
 			input.oninput = () => {
 				InputController.write(session, input.value, "textarea") || "";
 				/* composerText_FROZEN */ session.draftMessage;
