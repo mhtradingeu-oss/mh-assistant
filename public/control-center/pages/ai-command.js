@@ -3,6 +3,7 @@ import {
         getAiToolDockTools,
         getSelectedLibrarySource,
         openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
         renderAiToolDrawerShell
 } from "./ai-command/tool-dock.js";
 import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
@@ -4334,6 +4335,53 @@ function getAiCommandUiIcon(name) {
         return icons[name] || "";
 }
 
+function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
+        const projectName = aiContext?.projectName || "";
+        const source = getSelectedLibrarySource(projectName);
+        const stagedFiles = asArray(session.finalStagedFiles);
+        const chips = [];
+
+        stagedFiles.slice(0, 6).forEach((name) => {
+                const label = asString(name || "").trim();
+                if (!label) return;
+                chips.push(`
+                        <span class="aicmd-final-attachment-chip" title="${escapeHtml(label)}">
+                                <strong>File</strong>
+                                ${escapeHtml(label)}
+                        </span>
+                `);
+        });
+
+        if (stagedFiles.length > 6) {
+                chips.push(`
+                        <span class="aicmd-final-attachment-chip is-more">
+                                <strong>Files</strong>
+                                +${escapeHtml(String(stagedFiles.length - 6))} more
+                        </span>
+                `);
+        }
+
+        if (source?.name || source?.filename || source?.fileName) {
+                const name = source.name || source.filename || source.fileName || "Library source";
+                const type = source.asset_type || source.type || source.source_type || "Library";
+                chips.push(`
+                        <span class="aicmd-final-attachment-chip is-library" title="${escapeHtml(name)}">
+                                <strong>Library</strong>
+                                ${escapeHtml(name)}
+                                <small>${escapeHtml(type)}</small>
+                        </span>
+                `);
+        }
+
+        if (!chips.length) return "";
+
+        return `
+                <div class="aicmd-final-attachment-row" aria-label="Attached AI context">
+                        ${chips.join("")}
+                </div>
+        `;
+}
+
 function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
         const spec = getPhase1SpecialistById(session.modeId);
         const isTeam = session.teamMode === "team";
@@ -4358,6 +4406,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
         return `
                 <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
                         <div class="aicmd-chatfirst-input-shell aicmd-final-input-shell">
+                                ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
                                 <div class="aicmd-final-input-row">
                                         <button class="aicmd-final-round-btn" type="button" data-aicmd-open-plus aria-label="Open tools">${getAiCommandUiIcon("attach")}</button>
                                         <textarea
@@ -4420,7 +4469,6 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
 
                         <div class="aicmd-chatfirst-composer-context aicmd-final-context-row">
                                 ${renderLanguageMarketStrip(aiContext, escapeHtml)}
-                                ${renderAiCommandMainSourceIndicator(aiContext.projectName || "", escapeHtml)}
                         </div>
 
                         <div id="aicmdV2Status" class="aicmd-chatfirst-status-line"></div>
@@ -5729,11 +5777,20 @@ export const aiCommandRoute = {
                                 const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
 
                                 if (option === "upload") {
-                                        document.getElementById("aicmdFinalUploadInput")?.click?.();
+                                        const uploadInput = document.getElementById("aicmdFinalUploadInput");
+                                        if (uploadInput) uploadInput.value = "";
+                                        uploadInput?.click?.();
                                         updateStatus("Choose a file to stage as AI context.");
                                 } else if (option === "library") {
-                                        updateStatus("Library source selection will open from the dedicated Library source flow.");
-                                        showMessage?.("Next step: connect this menu to Library source selection.");
+                                        openLibrarySourcePickerFromAiCommand({
+                                                projectName,
+                                                sourceType: "auto",
+                                                teamMode: session.teamMode,
+                                                specialistId: session.modeId,
+                                                modeId: session.modeId,
+                                                outputType: asString(session.outputPreview?.outputType || "guidance"),
+                                                updateStatus
+                                        });
                                 } else if (option === "product") {
                                         updateStatus("Product source selection will be connected to product/project data.");
                                         showMessage?.("Next step: connect product/SKU source selection.");
@@ -5753,13 +5810,20 @@ export const aiCommandRoute = {
                                 return;
                         }
 
-                        updateStatus(`${label} staged: ${names.slice(0, 3).join(", ")}${names.length > 3 ? "..." : ""}`);
-                        showMessage?.(`${label} staged locally: ${names.join(", ")}. Persistent upload/source storage will be connected in the dedicated source phase.`);
+                        const existingNames = asArray(session.finalStagedFiles).map((item) => asString(item || "").trim()).filter(Boolean);
+                        session.finalStagedFiles = Array.from(new Set([...existingNames, ...names]));
+                        updateStatus(`${label} attached: ${names.slice(0, 3).join(", ")}${names.length > 3 ? "..." : ""}`);
+                        showMessage?.(`${label} attached to AI Command: ${names.join(", ")}. Persistent upload/source storage will be connected in the dedicated source phase.`);
+                        persistSessionDraft(sessionKey, session, `${label} attached`);
+                        aiCommandRoute.render(context);
                 };
 
                 const finalUploadInput = document.getElementById("aicmdFinalUploadInput");
                 if (finalUploadInput) {
-                        finalUploadInput.onchange = () => announceFinalStagedFiles(finalUploadInput.files, "File context");
+                        finalUploadInput.onchange = () => {
+                                announceFinalStagedFiles(finalUploadInput.files, "File context");
+                                finalUploadInput.value = "";
+                        };
                 }
 
                 const finalDropzone = document.querySelector("[data-aicmd-final-dropzone]");

@@ -183,6 +183,55 @@ function handleOpenLibraryFromDrawer({
   // ...existing bridge logic...
 }
 
+export function openLibrarySourcePickerFromAiCommand({
+  projectName = "",
+  sourceType = "auto",
+  teamMode = "solo",
+  specialistId = "",
+  modeId = "",
+  outputType = "",
+  updateStatus
+} = {}) {
+  const project = projectName || "__default__";
+  const mapping = getSourceTypeMapping(sourceType || "auto");
+  const drawerReturnContext = buildAiDrawerReturnContext({
+    projectName: project,
+    origin: "ai-command",
+    drawerOpen: false,
+    specialistId,
+    modeId,
+    toolId: "",
+    teamMode,
+    sourceType,
+    outputType
+  });
+
+  const payload = {
+    type: "library_source_selection",
+    origin: "ai-command",
+    returnTarget: "ai-command",
+    sourceType,
+    libraryFilter: mapping.libraryFilter,
+    targetSection: "asset-workspace",
+    drawerReturnContext,
+    created_at: new Date().toISOString()
+  };
+
+  setSharedLibrarySourceBridge(project, payload);
+  setSharedLibrarySourceBridge("__default__", payload);
+
+  setSharedAiDrawerReturn(project, drawerReturnContext);
+  setSharedAiDrawerReturn("__default__", drawerReturnContext);
+
+  updateStatus?.("Library opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+
+  if (typeof window !== "undefined") {
+    window.location.hash = "#library";
+  }
+
+  return true;
+}
+
 function formatSharedAiSource(source = {}) {
   if (!source || !source.name) return null;
   const name = source.name || "(no name)";
