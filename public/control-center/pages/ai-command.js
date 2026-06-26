@@ -5546,7 +5546,7 @@ export const aiCommandRoute = {
 		        };
 		}
 
-		const newSessionBtn = $("aicmdV2NewSessionBtn");
+		const newSessionBtn = $("aicmdV2NewSessionBtn") || $("aicmdV2NewSessionBtnChatFirst");
 		if (newSessionBtn) {
 		        newSessionBtn.onclick = () => {
 		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
