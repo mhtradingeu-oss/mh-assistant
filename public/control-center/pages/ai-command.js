@@ -3581,7 +3581,7 @@ function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escap
 				<span class="aicmd-v2-chat-bridge ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">
 					${escapeHtml(safeBridgeStatus.available ? "Guidance connected" : "Preview guarded")}
 				</span>
-				<select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Recent AI chat sessions">
+				<select id="aicmdV2SessionSelect" class="aicmd-room-session-select" title="Load recent AI chat session">
 					<option value="">Recent chats</option>
 					${asArray(session.chatSessions).slice(0, 8).map((item) => `
 						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
@@ -4106,7 +4106,7 @@ function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, esca
 			<div class="aicmd-chatfirst-header-controls" aria-label="AI Command session controls">
 				<span class="aicmd-chatfirst-status ${safeBridgeStatus.available ? "is-available" : "is-unavailable"}">${escapeHtml(bridgeLabel)}</span>
 				<span class="aicmd-chatfirst-active">${escapeHtml(activeSpecialist)}</span>
-				<select id="aicmdV2SessionSelectChatFirst" class="aicmd-chatfirst-control" title="Recent AI chat sessions">
+				<select id="aicmdV2SessionSelectChatFirst" class="aicmd-chatfirst-control" title="Load recent AI chat session">
 					<option value="">Recent</option>
 					${asArray(session.chatSessions).slice(0, 8).map((item) => `
 						<option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
@@ -4243,7 +4243,7 @@ function renderAiCommandChatMessages({ session, bridgeStatus, escapeHtml }) {
                         }
                 ]))
                 : [];
-        const conversationMessages = selectedMessages.length ? selectedMessages : fallbackMessages;
+        const conversationMessages = session.isFreshAiChatSession ? [] : (selectedMessages.length ? selectedMessages : fallbackMessages);
         const preview = asObject(session.outputPreview);
 
         const renderSmartActions = (message) => {
@@ -4335,6 +4335,25 @@ function getAiCommandUiIcon(name) {
         return icons[name] || "";
 }
 
+function renderAiCommandComposerSessionControls({ session, escapeHtml }) {
+        const recent = asArray(session.chatSessions).slice(0, 8);
+        return `
+                <div class="aicmd-final-session-controls" aria-label="AI chat session controls">
+                        <select class="aicmd-final-session-select" data-aicmd-final-recent-select title="Load recent AI chat session">
+                                <option value="">History</option>
+                                ${recent.map((item) => `
+                                        <option value="${escapeHtml(item.id)}"${asString(item.id) === asString(session.activeChatSessionId) ? " selected" : ""}>
+                                                ${escapeHtml(asString(item.title || "AI Team session").slice(0, 42))}
+                                        </option>
+                                `).join("")}
+                        </select>
+                        <button class="aicmd-final-session-new" type="button" data-aicmd-final-new-chat title="Start a clean AI chat">
+                                New chat
+                        </button>
+                </div>
+        `;
+}
+
 function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) {
         const projectName = aiContext?.projectName || "";
         const source = getSelectedLibrarySource(projectName);
@@ -4382,6 +4401,56 @@ function renderAiCommandComposerAttachments({ session, aiContext, escapeHtml }) 
         `;
 }
 
+function renderAiCommandComposerTeamSelector({ session, escapeHtml }) {
+        const isTeam = session.teamMode === "team";
+
+        return `
+                <div class="aicmd-final-team-menu" data-aicmd-final-team-menu hidden aria-hidden="true">
+                        <div class="aicmd-final-team-menu-head">
+                                <strong>Choose AI Team</strong>
+                                <span>Select the specialist or route the request to the full coordinated business AI team.</span>
+                        </div>
+
+                        <button
+                                type="button"
+                                class="aicmd-final-team-option${isTeam ? " is-active" : ""}"
+                                data-aicmdv2-team-mode="team"
+                        >
+                                <span class="aicmd-final-team-avatar">AI</span>
+                                <span>
+                                        <strong>Full AI Team</strong>
+                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+                                </span>
+                        </button>
+
+                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+                                ${SPECIALIST_DEFS.map((spec) => {
+                                        const isActive = !isTeam && spec.id === session.modeId;
+                                        return `
+                                                <button
+                                                        type="button"
+                                                        class="aicmd-final-team-option${isActive ? " is-active" : ""}"
+                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+                                                        data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+                                                >
+                                                        <span class="aicmd-final-team-avatar">${escapeHtml(getAiRoomInitials(spec))}</span>
+                                                        <span>
+                                                                <strong>${escapeHtml(spec.label)}</strong>
+                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+                                                        </span>
+                                                </button>
+                                        `;
+                                }).join("")}
+                        </div>
+
+                        <div class="aicmd-final-team-readiness">
+                                <strong>Guarded connected context</strong>
+                                <span>Library, campaigns, content, customers, governance, integrations and provider readiness are connected as guarded planning context. Execution stays confirmation-gated.</span>
+                        </div>
+                </div>
+        `;
+}
+
 function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
         const spec = getPhase1SpecialistById(session.modeId);
         const isTeam = session.teamMode === "team";
@@ -4405,6 +4474,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
 
         return `
                 <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
+                        ${renderAiCommandComposerSessionControls({ session, escapeHtml })}
                         <div class="aicmd-chatfirst-input-shell aicmd-final-input-shell">
                                 ${renderAiCommandComposerAttachments({ session, aiContext, escapeHtml })}
                                 <div class="aicmd-final-input-row">
@@ -4431,6 +4501,7 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                         </button>
                                 </div>
                         </div>
+                        ${renderAiCommandComposerTeamSelector({ session, escapeHtml })}
 
                         <div class="aicmd-final-source-menu" data-aicmd-final-source-menu data-aicmd-final-dropzone hidden aria-hidden="true">
                                 <input id="aicmdFinalUploadInput" type="file" multiple hidden aria-hidden="true" />
@@ -5465,20 +5536,24 @@ export const aiCommandRoute = {
 		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
 		refreshAiChatSessions(sessionKey, session);
            const savedOutput = asObject(loadLocalOutput(sessionKey));
-           if (asArray(savedOutput.messages).length && !asArray(session.messages).length) {
+           if (
+                   asArray(savedOutput.messages).length &&
+                   !asArray(session.messages).length &&
+                   !session.isFreshAiChatSession
+           ) {
                    session.messages = asArray(savedOutput.messages).slice(-40);
            }
-		if (!session.outputPreview) {
-			const preview = asObject(savedOutput.preview);
+		if (!session.outputPreview && !session.isFreshAiChatSession) {
+                        const preview = asObject(savedOutput.preview);
 			if (preview.outputType) {
 				session.outputPreview = preview;
 				session.outputWorkspaceTab = outputTabFromPreview(preview);
 			}
 		}
-		if (!session.responseHistoryLoaded) {
-			session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
-			session.responseHistoryLoaded = true;
-		}
+		if (!session.responseHistoryLoaded && !session.isFreshAiChatSession) {
+                        session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+                        session.responseHistoryLoaded = true;
+                }
 
 		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
 		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
@@ -5574,69 +5649,85 @@ export const aiCommandRoute = {
 			return session.outputPreview;
 		};
 
-		const sessionSelect = $("aicmdV2SessionSelect");
-		if (sessionSelect) {
-		        sessionSelect.onchange = () => {
-		                const selectedSessionId = asString(sessionSelect.value || "");
-		                if (!selectedSessionId) return;
+		const loadRecentAiChatSession = (selectEl) => {
+                        const selectedSessionId = asString(selectEl?.value || "");
+                        if (!selectedSessionId) return;
 
-		                const loaded = loadAiChatSessionIntoState(sessionKey, session, selectedSessionId);
-		                if (!loaded) {
-		                        updateStatus("Selected chat session could not be loaded.");
-		                        return;
-		                }
+                        const loaded = loadAiChatSessionIntoState(sessionKey, session, selectedSessionId);
+                        if (!loaded) {
+                                updateStatus("Selected chat session could not be loaded.");
+                                return;
+                        }
 
-		                saveLocalOutput(sessionKey, {
-		                        preview: session.outputPreview,
-		                        messages: session.messages,
-		                        responses: session.responseHistory,
-		                        modeId: session.modeId,
-		                        teamMode: session.teamMode
-		                });
+                        session.isFreshAiChatSession = false;
+                        session.responseHistoryLoaded = true;
 
-		                persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
-		                showMessage?.("AI chat session loaded.");
-		                aiCommandRoute.render(context);
-		        };
-		}
+                        saveLocalOutput(sessionKey, {
+                                preview: session.outputPreview,
+                                messages: session.messages,
+                                responses: session.responseHistory,
+                                modeId: session.modeId,
+                                teamMode: session.teamMode
+                        });
 
-		const newSessionBtn = $("aicmdV2NewSessionBtn") || $("aicmdV2NewSessionBtnChatFirst");
-		if (newSessionBtn) {
-		        newSessionBtn.onclick = () => {
-		                saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
+                        persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+                        showMessage?.("AI chat session loaded from Recent chats.");
+                        aiCommandRoute.render(context);
+                };
 
-		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
-		                /* composerText_FROZEN */ '';
-		                session.routeSuggestions = [];
-		                session.inboundHandoff = null;
-		                session.bridgeContext = null;
-		                session.draftStatus = "New session started";
-		                session.outputPreview = null;
-		                session.responseHistory = [];
-		                session.messages = [];
-		                session.responseError = "";
-		                session.responseLoading = false;
-		                session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
-		                session.outputWorkspaceTab = "draft";
-		                session.activeChatSessionId = "";
-		                session.activeChatSessionCreatedAt = "";
-		                refreshAiChatSessions(sessionKey, session);
+                [
+                        $("aicmdV2SessionSelect"),
+                        $("aicmdV2SessionSelectChatFirst"),
+                        ...Array.from(document.querySelectorAll("[data-aicmd-final-recent-select]"))
+                ].filter(Boolean).forEach((selectEl) => {
+                        selectEl.onchange = () => loadRecentAiChatSession(selectEl);
+                });
 
-		                saveLocalOutput(sessionKey, {
-		                        preview: null,
-		                        messages: [],
-		                        responses: [],
-		                        modeId: session.modeId,
-		                        teamMode: session.teamMode
-		                });
+                const startCleanAiCommandSession = () => {
+                        saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
 
-		                persistSessionDraft(sessionKey, session, "New session started");
-		                showMessage?.("New AI session started. Previous chat saved to Recent chats.");
-		                aiCommandRoute.render(context);
-		        };
-		}
+                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+                        /* composerText_FROZEN */ "";
+                        session.routeSuggestions = [];
+                        session.inboundHandoff = null;
+                        session.bridgeContext = null;
+                        session.draftStatus = "New session started";
+                        session.outputPreview = null;
+                        session.responseHistory = [];
+                        session.responseHistoryLoaded = true;
+                        session.messages = [];
+                        session.finalStagedFiles = [];
+                        session.responseError = "";
+                        session.responseLoading = false;
+                        session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+                        session.outputWorkspaceTab = "draft";
+                        session.activeChatSessionId = "chat-session-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+                        session.activeChatSessionCreatedAt = nowIso();
+                        session.isFreshAiChatSession = true;
+                        refreshAiChatSessions(sessionKey, session);
 
-		const settingsBtn = $("aicmdV2SettingsBtn");
+                        saveLocalOutput(sessionKey, {
+                                preview: null,
+                                messages: [],
+                                responses: [],
+                                modeId: session.modeId,
+                                teamMode: session.teamMode
+                        });
+
+                        persistSessionDraft(sessionKey, session, "New session started");
+                        showMessage?.("New AI session started. Previous chat saved to Recent chats.");
+                        aiCommandRoute.render(context);
+                };
+
+                [
+                        $("aicmdV2NewSessionBtn"),
+                        $("aicmdV2NewSessionBtnChatFirst"),
+                        ...Array.from(document.querySelectorAll("[data-aicmd-final-new-chat]"))
+                ].filter(Boolean).forEach((btn) => {
+                        btn.onclick = startCleanAiCommandSession;
+                });
+
+                const settingsBtn = $("aicmdV2SettingsBtn");
 		if (settingsBtn) {
 			settingsBtn.onclick = () => {
 				showMessage?.("Opening Settings.");
@@ -5776,6 +5867,8 @@ export const aiCommandRoute = {
                         btn.onclick = () => {
                                 const option = asString(btn.getAttribute("data-aicmd-final-source-option") || "").trim();
 
+                                setFinalTeamMenuOpen(false, "AI Team selector");
+
                                 if (option === "upload") {
                                         const uploadInput = document.getElementById("aicmdFinalUploadInput");
                                         if (uploadInput) uploadInput.value = "";
@@ -5843,18 +5936,41 @@ export const aiCommandRoute = {
                         };
                 }
 
+                const setFinalTeamMenuOpen = (open, reason = "AI Team selector") => {
+                        const menu = document.querySelector("[data-aicmd-final-team-menu]");
+                        if (!menu) {
+                                updateStatus("AI Team selector is not available yet.");
+                                return;
+                        }
+
+                        menu.hidden = !open;
+                        menu.setAttribute("aria-hidden", open ? "false" : "true");
+                        updateStatus(open ? `${reason} opened.` : `${reason} closed.`);
+                };
+
                 Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
                         btn.onclick = () => {
-                                const selector = document.querySelector(".aicmd-chatfirst-specialist-select");
-                                if (!selector) {
-                                        updateStatus("Specialist selector is not available yet.");
-                                        return;
-                                }
-
-                                selector.open = true;
-                                selector.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-                                updateStatus("Specialist selector opened. Choose a specialist or Full Team.");
+                                const menu = document.querySelector("[data-aicmd-final-team-menu]");
+                                const isOpen = Boolean(menu && !menu.hidden);
+                                setFinalSourceMenuOpen(false, "Source menu");
+                                setFinalTeamMenuOpen(!isOpen, "AI Team selector");
                         };
+                });
+
+                document.addEventListener("click", (event) => {
+                        const target = event.target;
+                        if (!target?.closest) return;
+                        if (
+                                target.closest("[data-aicmd-final-specialist]") ||
+                                target.closest("[data-aicmd-final-team-menu]")
+                        ) {
+                                return;
+                        }
+
+                        const menu = document.querySelector("[data-aicmd-final-team-menu]");
+                        if (menu && !menu.hidden) {
+                                setFinalTeamMenuOpen(false, "AI Team selector");
+                        }
                 });
 
                 Array.from(document.querySelectorAll("[data-aicmd-final-status]")).forEach((btn) => {
