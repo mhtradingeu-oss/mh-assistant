@@ -1603,6 +1603,18 @@ export async function executeProjectAiChat(projectName, payload = {}) {
 }
 
 
+
+export async function generateAiCommandCampaignPreview(projectName, payload = {}) {
+  const encodedProject = encodeURIComponent(String(projectName || "").trim() || "default");
+  return sendRawJson(
+    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+    "POST",
+    payload,
+    "Failed to generate AI Command campaign preview",
+    AI_GUIDANCE_REQUEST_TIMEOUT_MS
+  );
+}
+
 export async function executeProjectAiGuidance(projectName, payload = {}) {
   if (!projectName) {
     throw new Error("Missing project name");

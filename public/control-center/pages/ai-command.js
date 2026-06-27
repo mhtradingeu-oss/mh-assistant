@@ -26,7 +26,8 @@ import {
 
 import {
         executeProjectAiChat,
-        executeProjectAiGuidance
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
 } from "../api.js";
 
 //  AI TEAM DEFINITIONS
@@ -6321,9 +6322,80 @@ export const aiCommandRoute = {
                         };
                 });
 
+
+                function normalizeBackendCampaignPreview(payload = {}, fallbackPreview = {}) {
+                        const body = asObject(payload);
+                        const campaignPackage = asObject(body.campaignPackage || body.campaign_package);
+                        const packageSections = [
+                                campaignPackage.concept ? { label: "Campaign concept", body: asString(campaignPackage.concept) } : null,
+                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+                                campaignPackage.offer ? { label: "Offer", body: asString(campaignPackage.offer) } : null,
+                                asArray(campaignPackage.launchPhases).length ? { label: "Launch phases", items: asArray(campaignPackage.launchPhases) } : null,
+                                asArray(campaignPackage.contentAngles).length ? { label: "Content angles", items: asArray(campaignPackage.contentAngles) } : null,
+                                asArray(campaignPackage.adAngles).length ? { label: "Ad angles", items: asArray(campaignPackage.adAngles) } : null,
+                                asArray(campaignPackage.requiredAssets).length ? { label: "Required assets", items: asArray(campaignPackage.requiredAssets) } : null,
+                                asArray(campaignPackage.missingBlockers).length ? { label: "Review blockers", items: asArray(campaignPackage.missingBlockers) } : null,
+                                asArray(campaignPackage.nextActions).length ? { label: "Next actions", items: asArray(campaignPackage.nextActions) } : null
+                        ].filter(Boolean);
+
+                        return {
+                                ...asObject(fallbackPreview),
+                                title: asString(body.title || fallbackPreview.title || "AI Team campaign preview"),
+                                summary: asString(body.summary || fallbackPreview.summary || ""),
+                                source: asString(body.source_type || body.source || fallbackPreview.source || ""),
+                                sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
+                                goal: asString(body.goal || fallbackPreview.goal || ""),
+                                channel: asString(body.channel || fallbackPreview.channel || ""),
+                                campaignPackage,
+                                sections: asArray(body.sections).length ? asArray(body.sections) : packageSections,
+                                safety: asObject(body.safety).preview_only
+                                        ? "Backend preview only. No publish, send, CRM mutation, provider execution, workflow mutation, Governance approval, task creation, or durable handoff was performed."
+                                        : asString(fallbackPreview.safety || "Preview only."),
+                                backendPreview: true,
+                                backendSource: asString(body.source || "backend_ai_team")
+                        };
+                }
+
+                async function buildCampaignWizardPreviewWithBackendFallback() {
+                        const localPreview = buildCampaignWizardPreview();
+                        const wizard = getAiCommandSmartWizard(session);
+
+                        try {
+                                const backendPayload = await generateAiCommandCampaignPreview(projectName || "default", {
+                                        source_type: asString(wizard.source || localPreview.source || "project"),
+                                        source_label: asString(localPreview.sourceLabel || wizard.source || "Project"),
+                                        goal: asString(wizard.goal || localPreview.goal || "sales"),
+                                        channel: asString(wizard.channel || localPreview.channel || "social"),
+                                        title: asString(localPreview.title || ""),
+                                        audience: asString(wizard.audience || ""),
+                                        offer: asString(wizard.offer || "")
+                                });
+
+                                if (asObject(backendPayload).ok === false) {
+                                        throw new Error(asString(backendPayload.message || "Backend preview failed"));
+                                }
+
+                                const safety = asObject(backendPayload.safety);
+                                if (!safety.preview_only || !safety.no_backend_mutation_performed || !safety.no_provider_execution_performed) {
+                                        throw new Error("Backend preview response did not confirm preview-only safety.");
+                                }
+
+                                return normalizeBackendCampaignPreview(backendPayload, localPreview);
+                        } catch (error) {
+                                console.warn("AI Command backend campaign preview fallback", error);
+                                return {
+                                        ...localPreview,
+                                        backendPreview: false,
+                                        backendFallbackReason: asString(error?.message || "Backend preview unavailable")
+                                };
+                        }
+                }
+
+
                 Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-preview]")).forEach((btn) => {
-                        btn.onclick = () => {
-                                const preview = buildCampaignWizardPreview();
+                        btn.onclick = async () => {
+                                updateStatus("Preparing AI Team campaign preview...");
+                                const preview = await buildCampaignWizardPreviewWithBackendFallback();
                                 session.smartActionWizard = {
                                         ...asObject(session.smartActionWizard),
                                         type: "campaign",
@@ -6335,15 +6407,20 @@ export const aiCommandRoute = {
                                         title: preview.title,
                                         summary: preview.summary,
                                         source: preview.source,
+                                        sourceLabel: asString(preview.sourceLabel || ""),
                                         goal: preview.goal,
                                         channel: preview.channel,
+                                        campaignPackage: asObject(preview.campaignPackage),
                                         sections: preview.sections,
-                                        safety: preview.safety
+                                        safety: preview.safety,
+                                        backendPreview: Boolean(preview.backendPreview),
+                                        backendSource: asString(preview.backendSource || ""),
+                                        backendFallbackReason: asString(preview.backendFallbackReason || "")
                                 };
                                 session.chatFirstTab = "output";
-                                persistSessionDraft(sessionKey, session, "Campaign Builder preview prepared");
-                                updateStatus("Campaign preview prepared. Review before any handoff or approval.");
-                                showMessage?.("Campaign Builder preview is ready for review.");
+                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+                                updateStatus(preview.backendPreview ? "Backend AI Team preview prepared. Review before any handoff or approval." : "Local campaign preview prepared because backend preview is unavailable.");
+                                showMessage?.(preview.backendPreview ? "Backend AI Team campaign preview is ready for review." : "Campaign preview is ready using the local fallback.");
                                 aiCommandRoute.render(context);
                         };
                 });
