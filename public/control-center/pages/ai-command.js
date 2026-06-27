@@ -6348,6 +6348,48 @@ export const aiCommandRoute = {
                         };
                 });
 
+                const buildCampaignReviewHandoff = (action, preview) => {
+                        const destinationRoutes = {
+                                media: "media-studio",
+                                publishing: "publishing"
+                        };
+                        const destinationLabels = {
+                                media: "Media Studio",
+                                publishing: "Publishing"
+                        };
+                        const route = destinationRoutes[action] || "";
+                        const destination = destinationLabels[action] || "Review destination";
+                        return {
+                                id: `campaign_handoff_${Date.now()}`,
+                                type: "ai_command_campaign_handoff",
+                                source: "ai-command",
+                                source_label: "AI Command Campaign Builder",
+                                action,
+                                destination,
+                                destination_route: route,
+                                title: asString(preview.title || "Campaign handoff"),
+                                summary: asString(preview.summary || ""),
+                                source_type: asString(preview.source || ""),
+                                goal: asString(preview.goal || ""),
+                                channel: asString(preview.channel || ""),
+                                sections: asArray(preview.sections),
+                                safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
+                                created_at: new Date().toISOString()
+                        };
+                };
+
+                const storeCampaignReviewHandoff = (handoff) => {
+                        try {
+                                const payload = JSON.stringify(handoff);
+                                window.localStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+                                window.localStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+                                window.sessionStorage?.setItem?.("mh_ai_command_campaign_handoff", payload);
+                                window.sessionStorage?.setItem?.(`mh_ai_command_handoff_${handoff.destination_route}`, payload);
+                        } catch (error) {
+                                console.warn("Unable to store AI Command campaign handoff", error);
+                        }
+                };
+
                 const stageCampaignReviewAction = (action) => {
                         const wizard = getAiCommandSmartWizard(session);
                         const preview = asObject(wizard.preview);
@@ -6364,16 +6406,47 @@ export const aiCommandRoute = {
                                 operations: "Create Operations Follow-up"
                         };
                         const label = actionLabels[action] || "Review action";
+                        const safeRouteActions = ["media", "publishing"];
+
+                        if (safeRouteActions.includes(action)) {
+                                const handoff = buildCampaignReviewHandoff(action, preview);
+                                storeCampaignReviewHandoff(handoff);
+
+                                session.outputPreview = {
+                                        ...asObject(session.outputPreview),
+                                        stagedAction: action,
+                                        stagedActionLabel: label,
+                                        handoff,
+                                        safety: handoff.safety
+                                };
+
+                                persistSessionDraft(sessionKey, session, `${label} prepared from Campaign Builder`);
+                                updateStatus(`${label} prepared. Opening ${handoff.destination} for review.`);
+                                showMessage?.(`${label} prepared. No external action was executed.`);
+
+                                if (typeof navigateTo === "function" && handoff.destination_route) {
+                                        navigateTo(handoff.destination_route);
+                                        return;
+                                }
+
+                                if (typeof context?.navigateTo === "function" && handoff.destination_route) {
+                                        context.navigateTo(handoff.destination_route);
+                                        return;
+                                }
+
+                                aiCommandRoute.render(context);
+                                return;
+                        }
 
                         session.outputPreview = {
                                 ...asObject(session.outputPreview),
                                 stagedAction: action,
                                 stagedActionLabel: label,
-                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, or workflow mutation was performed."
+                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed."
                         };
 
                         persistSessionDraft(sessionKey, session, `${label} staged from Campaign Builder`);
-                        updateStatus(`${label} staged. Destination handoff will be connected in the next safe phase.`);
+                        updateStatus(`${label} staged. Backend authority contract must be verified before this action is connected.`);
                         showMessage?.(`${label} staged for review. No external action was executed.`);
                         aiCommandRoute.render(context);
                 };
