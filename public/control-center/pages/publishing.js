@@ -935,20 +935,28 @@ function summarizeText(value, fallback = "No content payload available yet.") {
 }
 
 function extractHandoffSummary(handoff) {
+  const direct = asObject(handoff);
   const payload = asObject(handoff?.payload);
   const output = asObject(payload.output);
   const draftContext = asObject(payload.draft_context);
+  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+  const sections = asArray(direct.sections || payload.sections || output.sections);
+  const goal = asString(direct.goal || payload.goal);
+  const channel = asString(direct.channel || payload.channel);
+  const sourceType = asString(direct.source_type || payload.source_type || direct.source);
+
   return {
-    id: asString(handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
-    sourcePage: asString(handoff?.source_page || "workflows"),
-    workflowId: asString(payload.workflow_id),
-    title: firstText(output.title, payload.workflow_title, draftContext.lastResponseTitle, "Workflow output"),
-    project: firstText(draftContext.projectName, payload.project_name, output.project),
-    campaign: firstText(payload.campaign_name, output.campaign, output.campaignName),
-    channel: firstText(output.channel, payload.channel),
-    contentItem: firstText(output.content_item, output.contentItem, output.summary, payload.prompt),
-    summary: firstText(output.summary, output.description, payload.prompt, draftContext.lastCommand),
-    output
+    id: asString(direct.id || handoff?.id || payload.workflow_id || payload.prompt || payload.workflow_title),
+    sourcePage: asString(handoff?.source_page || direct.source || "workflows"),
+    workflowId: asString(payload.workflow_id || direct.id),
+    title: firstText(direct.title, output.title, payload.workflow_title, draftContext.lastResponseTitle, isAiCampaign ? "AI Team Campaign Handoff" : "Workflow output"),
+    summary: firstText(direct.summary, output.summary, payload.summary, draftContext.lastResponseSummary, payload.prompt, isAiCampaign ? "AI Team campaign package is available for publishing preparation." : "Workflow output is available for publishing preparation."),
+    isAiCampaign,
+    sections,
+    goal,
+    channel,
+    sourceType,
+    packageLabel: isAiCampaign ? "AI Team Campaign Handoff" : "Workflow Handoff"
   };
 }
 
@@ -996,9 +1004,12 @@ function buildRecommendation({ queue, counts, assetBlockers, checks, handoff, gl
     };
   }
   if (handoff) {
+    const handoffSummary = extractHandoffSummary(handoff);
     return {
-      action: "Load workflow output into a draft",
-      why: "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
+      action: handoffSummary.isAiCampaign ? "Load campaign package into a draft" : "Load workflow output into a draft",
+      why: handoffSummary.isAiCampaign
+        ? "An AI Team campaign package is available. Loading it creates a local publishing draft without publishing externally."
+        : "A workflow handoff is available. Loading it keeps execution moving without inventing backend data.",
       focusId: "",
       externalBlockers
     };
@@ -1286,20 +1297,20 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
     <section class="card publishing-card" id="publishingHandoffPanel">
       <div class="card-head">
         <div>
-          <div class="setup-kicker">Workflow Handoff</div>
+          <div class="setup-kicker">${escapeHtml(summary.packageLabel || "Workflow Handoff")}</div>
           <h3>${escapeHtml(summary.title)}</h3>
-          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, "Workflow output is available for draft loading."))}</p>
+          <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, summary.isAiCampaign ? "AI Team campaign package is available for draft loading." : "Workflow output is available for draft loading."))}</p>
         </div>
         <span class="card-badge ${isLoaded ? "success" : "neutral"}">${escapeHtml(isLoaded ? "Loaded" : "Available")}</span>
       </div>
       <div class="data-stack">
-        <div class="data-row"><span>Source</span><strong>${escapeHtml(titleCase(summary.sourcePage))}</strong></div>
-        <div class="data-row"><span>Workflow</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
-        <div class="data-row"><span>Campaign</span><strong>${escapeHtml(summary.campaign || "Not specified")}</strong></div>
-        <div class="data-row"><span>Channel</span><strong>${escapeHtml(summary.channel || "Not specified")}</strong></div>
+        <div class="data-row"><span>Source</span><strong>${escapeHtml(summary.sourceType ? titleCase(summary.sourceType) : titleCase(summary.sourcePage))}</strong></div>
+        <div class="data-row"><span>${escapeHtml(summary.isAiCampaign ? "Campaign" : "Workflow")}</span><strong>${escapeHtml(summary.workflowId || "Not specified")}</strong></div>
+        <div class="data-row"><span>Goal</span><strong>${escapeHtml(summary.goal ? titleCase(summary.goal) : "Not specified")}</strong></div>
+        <div class="data-row"><span>Channel</span><strong>${escapeHtml(summary.channel ? titleCase(summary.channel) : "Not specified")}</strong></div>
       </div>
       <div class="publishing-action-row">
-        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">Load Workflow Output</button>
+        <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(summary.isAiCampaign ? "Load Campaign Package" : "Load Workflow Output")}</button>
       </div>
     </section>
   `;

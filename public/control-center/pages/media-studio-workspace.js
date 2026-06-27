@@ -655,52 +655,55 @@ function getInboundHandoff(projectName, session) {
 }
 
 function extractHandoffSummary(handoff) {
+  const direct = asObject(handoff);
   const payload = asObject(handoff?.payload);
   const output = asObject(payload.output);
   const draftContext = asObject(payload.draft_context);
-  const contentVersion = asObject(payload.selected_content_version);
-  const sourcePage = asString(handoff?.source_page || "workflows");
-  const contentType = firstText(payload.content_type, contentVersion.mode, output.content_type);
-  const contentBody = firstText(
-    contentVersion.content_output,
-    payload.script_caption_copy,
-    payload.copy,
-    payload.content,
-    payload.draft
+  const isAiCampaign = asString(direct.type || payload.type) === "ai_command_campaign_handoff";
+  const contentType = asString(payload.content_type || output.content_type || draftContext.outputType || direct.type);
+  const sourcePage = asString(handoff?.source_page || direct.source || "workflows");
+  const title = firstText(
+    direct.title,
+    output.title,
+    payload.workflow_title,
+    draftContext.lastResponseTitle,
+    isAiCampaign ? "AI Team Campaign Brief" : "",
+    contentType ? `${titleCase(contentType)} design brief` : "Inbound media brief"
   );
+  const summary = firstText(
+    direct.summary,
+    output.summary,
+    payload.summary,
+    draftContext.lastResponseSummary,
+    payload.prompt,
+    isAiCampaign ? "AI Team campaign package is available for creative preparation." : "",
+    "Workflow handoff is available for media preparation."
+  );
+  const sections = asArray(direct.sections || payload.sections || output.sections);
+  const goal = asString(direct.goal || payload.goal);
+  const channel = asString(direct.channel || payload.channel);
+  const sourceType = asString(direct.source_type || payload.source_type || direct.source);
 
   return {
     id: asString(
+      direct.id ||
       handoff?.id ||
       payload.workflow_id ||
-      payload.media_job_id ||
       payload.prompt ||
       payload.workflow_title ||
-      contentVersion.version_id ||
-      payload.content_item_id
+      title
     ),
     sourcePage,
-    title: firstText(
-      output.title,
-      payload.workflow_title,
-      payload.title,
-      contentVersion.title,
-      draftContext.lastResponseTitle,
-      contentType ? `${titleCase(contentType)} design brief` : "Inbound media brief"
-    ),
-    project: firstText(draftContext.projectName, payload.project, payload.project_name, output.project),
-    campaign: firstText(payload.campaign_name, payload.campaign, output.campaign, output.campaignName),
-    product: firstText(output.product, payload.product, output.productName),
-    channel: firstText(output.channel, payload.channel, contentVersion.channel),
-    objective: firstText(output.goal, output.objective, payload.goal, payload.suggested_media_brief, payload.prompt, contentVersion.prompt),
-    prompt: firstText(output.prompt, output.media_prompt, payload.suggested_media_brief, payload.prompt, contentVersion.prompt, draftContext.lastCommand),
-    brief: firstText(payload.suggested_media_brief, output.summary, output.brief, payload.brief, contentBody),
-    copy: contentBody,
+    workflowId: asString(payload.workflow_id || direct.id),
     contentType,
-    language: firstText(payload.language, contentVersion.language),
-    tone: firstText(payload.tone, contentVersion.tone),
-    readinessStatus: firstText(payload.readiness_status, contentVersion.readiness_status),
-    output
+    title,
+    summary,
+    isAiCampaign,
+    goal,
+    channel,
+    sourceType,
+    sections,
+    packageLabel: isAiCampaign ? "AI Team Campaign Brief" : "Workflow Handoff"
   };
 }
 
@@ -1209,8 +1212,8 @@ function buildRecommendation(metrics, handoff, selectedItem) {
   }
   if (handoff) {
     return {
-      action: "Load workflow media brief",
-      why: "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
+      action: handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team campaign brief" : "Load workflow media brief",
+      why: handoff && extractHandoffSummary(handoff).isAiCampaign ? "An AI Team campaign package is available. Load it as the creative brief before preparing media assets." : "A workflow handoff is available. Load it into the generator to continue the Workflows -> Media Studio -> package handoff flow."
     };
   }
   if (metrics.draftJobs) {
@@ -1991,7 +1994,7 @@ function renderPromptBuilder(session, handoff, escapeHtml) {
       </div>
       <div class="media-action-row">
         <button id="mediaPromptFromContextBtn" class="btn btn-secondary" type="button">Generate from project setup</button>
-        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">Generate from workflow handoff</button>
+        <button id="mediaPromptFromHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(handoff && extractHandoffSummary(handoff).isAiCampaign ? "Load AI Team Campaign Brief" : "Generate from workflow handoff")}</button>
         <button id="mediaImprovePromptBtn" class="btn btn-secondary" type="button">Improve prompt</button>
         <button id="mediaBrandSafePromptBtn" class="btn btn-secondary" type="button">Make brand-safe</button>
         <button id="mediaGermanPromptBtn" class="btn btn-secondary" type="button">Adapt to German market</button>
@@ -2023,11 +2026,13 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
   const summary = extractHandoffSummary(handoff);
   const loaded = summary.id && summary.id === session.loadedHandoffId;
   const isContentBrief = summary.sourcePage === "content-studio";
-  const kicker = isContentBrief ? "Inbound Content Brief" : "Inbound Media Brief";
-  const buttonLabel = isContentBrief ? "Load Content Design Brief" : "Load Media Brief";
-  const fallbackCopy = isContentBrief
-    ? "Content Studio output is ready to become a design brief."
-    : "Handoff output is ready to become a media brief.";
+  const kicker = summary.isAiCampaign ? "AI Team Campaign Brief" : isContentBrief ? "Inbound Content Brief" : "Inbound Media Brief";
+  const buttonLabel = summary.isAiCampaign ? "Load AI Team Campaign Brief" : isContentBrief ? "Load Content Design Brief" : "Load Media Brief";
+  const fallbackCopy = summary.isAiCampaign
+    ? "AI Team campaign package is ready to become a creative media brief."
+    : isContentBrief
+      ? "Content Studio output is ready to become a design brief."
+      : "Handoff output is ready to become a media brief.";
 
   return `
     <section class="card media-card" id="mediaWorkflowHandoff">
