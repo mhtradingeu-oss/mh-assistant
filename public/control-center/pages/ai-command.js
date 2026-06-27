@@ -4150,7 +4150,7 @@ function renderAiCommandChatTopbar({ session, projectName, aiContext, bridgeStat
 			<div class="aicmd-chatfirst-topbar-actions">
 				<span class="aicmd-chatfirst-pill">${escapeHtml(modeLabel)}</span>
 				<span class="aicmd-chatfirst-pill ${safeBridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(safeBridgeStatus.available ? "Connected" : "Guarded")}</span>
-				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "Choose source through Tool Drawer / Library")}">
+				<button id="aicmdV2SourceBtnTopbar" class="aicmd-chatfirst-icon-control" type="button" data-aicmd-chatfirst-source title="${escapeHtml(sourceLabel ? `Trusted source: ${sourceLabel}` : "1. Choose source through Tool Drawer / Library")}">
 					Source${sourceLabel ? `: ${escapeHtml(asString(sourceLabel).slice(0, 36))}` : ""}
 				</button>
 			</div>
@@ -4402,12 +4402,12 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
 
         return `
                 <div class="aicmd-smart-wizard-backdrop" data-aicmd-smart-wizard-backdrop>
-                        <section class="aicmd-smart-wizard" role="dialog" aria-modal="true" aria-label="Campaign Builder">
+                        <section class="aicmd-smart-wizard aicmd-smart-wizard-premium" role="dialog" aria-modal="true" aria-label="Campaign Builder">
                                 <header class="aicmd-smart-wizard-header">
                                         <div>
                                                 <span>AI Team Wizard</span>
                                                 <h2>Campaign Builder</h2>
-                                                <p>Prepare a review-ready campaign package before any handoff, approval, or publishing action.</p>
+                                                <p>Guide the AI Team from source to preview. Backend workflow execution and destination handoff stay approval-gated.</p>
                                         </div>
                                         <button class="aicmd-smart-wizard-close" type="button" data-aicmd-smart-wizard-close aria-label="Close">×</button>
                                 </header>
@@ -4421,55 +4421,71 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
 
                                 <div class="aicmd-smart-wizard-body">
                                         <div class="aicmd-smart-wizard-section">
-                                                <strong>Choose source</strong>
+                                                <strong>1. Choose source</strong>
                                                 <div class="aicmd-smart-wizard-options">
                                                         ${sourceOptions.map(([value, label]) => optionButton("source", value, label, source)).join("")}
                                                 </div>
                                         </div>
 
                                         <div class="aicmd-smart-wizard-section">
-                                                <strong>Campaign goal</strong>
+                                                <strong>2. Campaign goal</strong>
                                                 <div class="aicmd-smart-wizard-options">
                                                         ${goalOptions.map(([value, label]) => optionButton("goal", value, label, goal)).join("")}
                                                 </div>
                                         </div>
 
                                         <div class="aicmd-smart-wizard-section">
-                                                <strong>Primary channel</strong>
+                                                <strong>3. Primary channel</strong>
                                                 <div class="aicmd-smart-wizard-options">
                                                         ${channelOptions.map(([value, label]) => optionButton("channel", value, label, channel)).join("")}
                                                 </div>
                                         </div>
-
                                         ${preview.title ? `
                                                 <article class="aicmd-smart-preview">
                                                         <div class="aicmd-smart-preview-head">
-                                                                <span>Preview ready</span>
+                                                                <span>AI Team package</span>
                                                                 <strong>${escapeHtml(preview.title)}</strong>
+                                                                <p>${escapeHtml(preview.summary)}</p>
                                                         </div>
+
+                                                        <div class="aicmd-smart-preview-meta">
+                                                                <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
+                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel)}</span>
+                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel)}</span>
+                                                                <span><strong>Status</strong>Preview only</span>
+                                                        </div>
+
                                                         <div class="aicmd-smart-preview-grid">
-                                                                <section><strong>Strategy</strong><p>${escapeHtml(preview.strategy)}</p></section>
-                                                                <section><strong>Offer angle</strong><p>${escapeHtml(preview.offer)}</p></section>
-                                                                <section><strong>Copy package</strong><p>${escapeHtml(preview.copy)}</p></section>
-                                                                <section><strong>Media brief</strong><p>${escapeHtml(preview.media)}</p></section>
-                                                                <section><strong>Compliance risks</strong><p>${escapeHtml(preview.compliance)}</p></section>
-                                                                <section><strong>Operations follow-up</strong><p>${escapeHtml(preview.operations)}</p></section>
+                                                                ${asArray(preview.sections).map((section) => `
+                                                                        <section>
+                                                                                <strong>${escapeHtml(section.label)}</strong>
+                                                                                <p>${escapeHtml(section.body)}</p>
+                                                                        </section>
+                                                                `).join("")}
+                                                        </div>
+
+                                                        <div class="aicmd-smart-preview-actions" aria-label="Campaign review actions">
+                                                                <button type="button" data-aicmd-smart-campaign-action="library">Save to Library</button>
+                                                                <button type="button" data-aicmd-smart-campaign-action="media">Send to Media Studio</button>
+                                                                <button type="button" data-aicmd-smart-campaign-action="governance">Request Governance Review</button>
+                                                                <button type="button" data-aicmd-smart-campaign-action="publishing">Prepare Publishing Handoff</button>
+                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
                                                         </div>
                                                 </article>
                                         ` : `
                                                 <div class="aicmd-smart-wizard-empty">
-                                                        <strong>No preview yet</strong>
-                                                        <span>Choose the source, goal, and channel, then generate a review-ready campaign package.</span>
+                                                        <strong>Ready to generate</strong>
+                                                        <span>1. Choose source, goal, and channel. The AI Team will prepare the preview package before any approval or handoff.</span>
                                                 </div>
                                         `}
                                 </div>
 
                                 <footer class="aicmd-smart-wizard-footer">
-                                        <span>Review-first: no publishing, sending, CRM update, provider execution, or workflow mutation happens here.</span>
+                                        <span>Review-first flow: generate preview, approve, then hand off to the owning surface. No publish, send, CRM update, provider execution, or workflow mutation happens here.</span>
                                         <div>
                                                 <button class="aicmd-smart-wizard-secondary" type="button" data-aicmd-smart-wizard-close>Cancel</button>
                                                 <button class="aicmd-smart-wizard-primary" type="button" data-aicmd-smart-campaign-preview>
-                                                        ${preview.title ? "Regenerate Preview" : "Generate Preview"}
+                                                        ${preview.title ? "Regenerate AI Team Preview" : "Generate AI Team Preview"}
                                                 </button>
                                         </div>
                                 </footer>
@@ -5034,7 +5050,7 @@ function renderPhase2PreviewPanel(session, escapeHtml) {
 					<span class="aicmd-v2-preview-status aicmd-v2-preview-status-empty">Waiting</span>
 				</div>
 				<div class="aicmd-v2-preview-empty-state">
-					<strong>No preview yet</strong>
+					<strong>Ready to generate</strong>
 					<span>Ask a specialist or send the chat response to preview.</span>
 				</div>
 			</section>
@@ -5223,7 +5239,7 @@ function renderAiRoomOutputWorkspace(session, aiContext, escapeHtml) {
                                 </div>
                                 <div class="aicmd-room-planned-note">This is a review-ready preview. Execution, publishing, approvals, CRM updates, external sends, durable task creation, and workflow runs happen only in the owning destination workspace after confirmation.</div>
                         ` : `
-                                <div class="aicmd-room-planned-note">No preview yet. Start in the composer, then review the output here before opening a destination workspace.</div>
+                                <div class="aicmd-room-planned-note">Ready to generate. Start in the composer, then review the output here before opening a destination workspace.</div>
                         `}
 		</section>
 	`;
@@ -5520,7 +5536,7 @@ function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
 	const languagePlan = getWorkspaceLanguagePlan(aiContext);
 	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
 	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
-	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "Preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
 	const contextItems = [
 		{ label: "Project", value: projectName || "Not selected", present: Boolean(projectName) },
 		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
@@ -6167,7 +6183,7 @@ export const aiCommandRoute = {
                                 preview: asObject(currentWizard.preview)
                         };
                         persistSessionDraft(sessionKey, session, "Campaign Builder wizard opened");
-                        updateStatus("Campaign Builder opened. Choose source, goal, and channel.");
+                        updateStatus("Campaign Builder opened. 1. Choose source, goal, and channel.");
                         aiCommandRoute.render(context);
                 };
 
@@ -6190,14 +6206,85 @@ export const aiCommandRoute = {
                         const channelLabel = titleCase(channel);
                         const sourceLabel = titleCase(source);
 
+                        const sourceMeaning = {
+                                project: "current project context, language plan, brand state, and existing workspace signals",
+                                product: "selected product details, offer notes, pricing evidence, and product readiness",
+                                library: "trusted Library source, approved assets, saved briefs, or validated knowledge",
+                                upload: "uploaded source material after user review and attachment"
+                        }[source] || "selected source context";
+
+                        const teamChain = [
+                                {
+                                        label: "Strategist",
+                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+                                },
+                                {
+                                        label: "Writer",
+                                        body: `Prepare ${channelLabel.toLowerCase()} copy variants: hook, short caption, primary CTA, email or landing adaptation, and review notes.`
+                                },
+                                {
+                                        label: "Media / Video",
+                                        body: "Prepare creative direction, image/video brief, shot list, format requirements, storyboard/voiceover notes, and asset gaps."
+                                },
+                                {
+                                        label: "Compliance",
+                                        body: "Flag unsupported claims, pricing promises, before/after language, evidence gaps, restricted wording, and approval requirements."
+                                },
+                                {
+                                        label: "Publisher",
+                                        body: `Prepare publishing readiness for ${channelLabel}: channel checklist, schedule draft, missing approvals, and handoff requirements.`
+                                },
+                                {
+                                        label: "Operations",
+                                        body: "Track approval status, destination handoff, follow-up checks, improvement notes, and post-review action ownership."
+                                }
+                        ];
+
                         return {
                                 title: `${goalLabel} campaign for ${projectLabel}`,
-                                strategy: `Use ${sourceLabel} as the trusted input. Build a ${goalLabel.toLowerCase()} campaign with a clear audience, promise, proof points, and review gate before handoff.`,
-                                offer: `Shape the offer around the selected ${sourceLabel.toLowerCase()} and prepare a safe angle for ${channelLabel}. Missing prices, claims, or competitor evidence must be flagged before approval.`,
-                                copy: `Prepare customer-facing copy variants for ${channelLabel}: hook, short caption, CTA, email/landing adaptation, and notes for the Writer specialist.`,
-                                media: `Prepare Media Studio direction: visual concept, shot list, asset needs, format notes, and voiceover/storyboard direction where relevant.`,
-                                compliance: `Compliance must review claims, evidence, pricing promises, before/after language, and publishing readiness before live use.`,
-                                operations: `Operations should track approval status, destination handoff, publishing readiness, follow-up checks, and improvement notes after review.`
+                                summary: `AI Team preview for a ${goalLabel.toLowerCase()} campaign using ${sourceLabel.toLowerCase()} and optimized for ${channelLabel}.`,
+                                source,
+                                goal,
+                                channel,
+                                sourceLabel,
+                                goalLabel,
+                                channelLabel,
+                                sections: [
+                                        {
+                                                label: "Campaign summary",
+                                                body: `Use ${sourceMeaning}. Produce a review-ready campaign package before any handoff, approval, publishing, sending, CRM update, provider execution, or workflow mutation.`
+                                        },
+                                        {
+                                                label: "Audience and objective",
+                                                body: `Primary objective: ${goalLabel}. Define the audience, buying trigger, objection, proof point, and conversion path for ${projectLabel}.`
+                                        },
+                                        {
+                                                label: "Offer angle",
+                                                body: `Shape the offer around verified ${sourceLabel.toLowerCase()} information. If pricing, discount, stock, competitor, or claim evidence is missing, mark it as a review blocker.`
+                                        },
+                                        {
+                                                label: "Copy package",
+                                                body: "Create a hook, short social caption, long caption/email variant, CTA, landing-page angle, and reusable message notes in the configured publishing language."
+                                        },
+                                        {
+                                                label: "Media brief",
+                                                body: "Define hero visual, product framing, scene list, required assets, image/video format, voiceover direction, and Media Studio handoff notes."
+                                        },
+                                        {
+                                                label: "Compliance risks",
+                                                body: "Review claims, proof, pricing language, guarantees, sensitive wording, platform policy risk, and required Governance approval before external use."
+                                        },
+                                        {
+                                                label: "Publishing checklist",
+                                                body: `Prepare ${channelLabel} readiness: asset status, copy status, approval status, schedule suggestion, channel dependencies, and final reviewer.`
+                                        },
+                                        {
+                                                label: "Operations follow-up",
+                                                body: "Create a follow-up plan for review status, owner, destination handoff, performance check, improvement loop, and next campaign iteration."
+                                        },
+                                        ...teamChain
+                                ],
+                                safety: "Preview only. No publish, send, CRM mutation, provider execution, workflow mutation, or Governance approval is performed here."
                         };
                 };
 
@@ -6243,25 +6330,58 @@ export const aiCommandRoute = {
                                         open: true,
                                         preview
                                 };
-
                                 session.outputPreview = {
                                         type: "smart_campaign_preview",
                                         title: preview.title,
-                                        sections: [
-                                                { label: "Strategy", body: preview.strategy },
-                                                { label: "Offer angle", body: preview.offer },
-                                                { label: "Copy package", body: preview.copy },
-                                                { label: "Media brief", body: preview.media },
-                                                { label: "Compliance risks", body: preview.compliance },
-                                                { label: "Operations follow-up", body: preview.operations }
-                                        ],
-                                        safety: "Preview only. No publish, send, CRM mutation, provider execution, or workflow mutation."
+                                        summary: preview.summary,
+                                        source: preview.source,
+                                        goal: preview.goal,
+                                        channel: preview.channel,
+                                        sections: preview.sections,
+                                        safety: preview.safety
                                 };
                                 session.chatFirstTab = "output";
                                 persistSessionDraft(sessionKey, session, "Campaign Builder preview prepared");
                                 updateStatus("Campaign preview prepared. Review before any handoff or approval.");
                                 showMessage?.("Campaign Builder preview is ready for review.");
                                 aiCommandRoute.render(context);
+                        };
+                });
+
+                const stageCampaignReviewAction = (action) => {
+                        const wizard = getAiCommandSmartWizard(session);
+                        const preview = asObject(wizard.preview);
+                        if (!preview.title) {
+                                updateStatus("Generate a campaign preview before choosing a review action.");
+                                return;
+                        }
+
+                        const actionLabels = {
+                                library: "Save to Library",
+                                media: "Send to Media Studio",
+                                governance: "Request Governance Review",
+                                publishing: "Prepare Publishing Handoff",
+                                operations: "Create Operations Follow-up"
+                        };
+                        const label = actionLabels[action] || "Review action";
+
+                        session.outputPreview = {
+                                ...asObject(session.outputPreview),
+                                stagedAction: action,
+                                stagedActionLabel: label,
+                                safety: "Staged review action only. No backend write, publish, send, CRM mutation, provider execution, or workflow mutation was performed."
+                        };
+
+                        persistSessionDraft(sessionKey, session, `${label} staged from Campaign Builder`);
+                        updateStatus(`${label} staged. Destination handoff will be connected in the next safe phase.`);
+                        showMessage?.(`${label} staged for review. No external action was executed.`);
+                        aiCommandRoute.render(context);
+                };
+
+                Array.from(document.querySelectorAll("[data-aicmd-smart-campaign-action]")).forEach((btn) => {
+                        btn.onclick = () => {
+                                const action = asString(btn.getAttribute("data-aicmd-smart-campaign-action") || "");
+                                stageCampaignReviewAction(action);
                         };
                 });
 
