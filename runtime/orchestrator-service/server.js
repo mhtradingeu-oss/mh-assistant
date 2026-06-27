@@ -11146,6 +11146,185 @@ app.post('/public/media-manager/project/:project/setup', (req, res) => {
   }
 });
 
+
+function normalizeAiCommandPreviewInput(value, fallback = '') {
+  return String(value || fallback || '').trim();
+}
+
+function normalizeAiCommandPreviewList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeAiCommandPreviewInput(item)).filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((item) => normalizeAiCommandPreviewInput(item))
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
+  const project = normalizeAiCommandPreviewInput(projectName, 'default');
+  const sourceType = normalizeAiCommandPreviewInput(input.source_type || input.sourceType, 'Project source');
+  const sourceLabel = normalizeAiCommandPreviewInput(input.source_label || input.sourceLabel, sourceType);
+  const goal = normalizeAiCommandPreviewInput(input.goal, 'Campaign launch');
+  const channel = normalizeAiCommandPreviewInput(input.channel, 'Multi-channel');
+  const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
+  const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+  const productNames = normalizeAiCommandPreviewList(input.products || input.product_names || input.productNames);
+  const now = new Date().toISOString();
+
+  const title = normalizeAiCommandPreviewInput(
+    input.title,
+    `${goal} campaign for ${sourceLabel}`
+  );
+
+  const products = productNames.length ? productNames : [
+    normalizeAiCommandPreviewInput(input.product || input.product_name || input.productName, 'Selected product or service')
+  ];
+
+  const campaignPackage = {
+    concept: `${goal} campaign built from ${sourceLabel}.`,
+    targetAudience: audience,
+    offer,
+    products,
+    channels: [channel],
+    launchPhases: [
+      'Prepare campaign message and proof points.',
+      'Create media and publishing assets.',
+      'Review compliance and approval requirements.',
+      'Hand off to destination owner for execution.'
+    ],
+    contentAngles: [
+      `Position ${sourceLabel} around the ${goal.toLowerCase()} objective.`,
+      `Use customer pain points and product proof before publishing.`,
+      `Keep claims review-ready before external distribution.`
+    ],
+    adAngles: [
+      `Lead with ${offer}.`,
+      `Retarget engaged visitors with proof-led creative.`,
+      `Use destination-specific copy variations for ${channel}.`
+    ],
+    requiredAssets: [
+      'Approved product visuals',
+      'Offer details',
+      'Channel copy',
+      'Compliance-safe proof points'
+    ],
+    missingBlockers: [
+      'Final approval is required before publishing.',
+      'Destination owner must confirm execution readiness.'
+    ],
+    nextActions: [
+      'Review the AI Team preview.',
+      'Send the package to Media Studio or Publishing.',
+      'Request Governance review before release if claims or publishing risk exists.'
+    ],
+    suggestedHandoffs: [
+      {
+        destination: 'media-studio',
+        label: 'Send to Media Studio',
+        reason: 'Prepare creative and media assets from the campaign package.'
+      },
+      {
+        destination: 'publishing',
+        label: 'Prepare Publishing Handoff',
+        reason: 'Turn the campaign package into a publishing draft.'
+      }
+    ]
+  };
+
+  const sections = [
+    {
+      id: 'campaign_summary',
+      title: 'Campaign summary',
+      body: `${title}. Source: ${sourceLabel}. Goal: ${goal}. Channel: ${channel}.`
+    },
+    {
+      id: 'audience_offer',
+      title: 'Audience and offer',
+      body: `Audience: ${audience}. Offer: ${offer}.`
+    },
+    {
+      id: 'copy_package',
+      title: 'Copy package',
+      items: [
+        `Hook: ${offer}`,
+        `CTA: Review and prepare the ${goal.toLowerCase()} package.`,
+        `Caption direction: connect ${sourceLabel} to customer need and proof.`
+      ]
+    },
+    {
+      id: 'media_brief',
+      title: 'Media brief',
+      items: campaignPackage.requiredAssets
+    },
+    {
+      id: 'compliance_risks',
+      title: 'Compliance risks',
+      items: campaignPackage.missingBlockers
+    },
+    {
+      id: 'publishing_checklist',
+      title: 'Publishing checklist',
+      items: campaignPackage.nextActions
+    }
+  ];
+
+  return {
+    type: 'smart_campaign_preview',
+    source: 'backend_ai_team',
+    preview_only: true,
+    project,
+    title,
+    summary: `Backend preview-only AI Team campaign package for ${goal} using ${sourceLabel}.`,
+    source_type: sourceType,
+    source_label: sourceLabel,
+    goal,
+    channel,
+    campaignPackage,
+    sections,
+    generated_at: now,
+    safety: {
+      preview_only: true,
+      requires_approval_before_publish: true,
+      no_backend_mutation_performed: true,
+      no_provider_execution_performed: true,
+      no_task_created: true,
+      no_approval_created: true,
+      no_handoff_created: true,
+      no_workflow_run_created: true
+    }
+  };
+}
+
+function handleAiCommandCampaignPreviewOnly(req, res) {
+  try {
+    const preview = buildAiCommandCampaignPreviewOnly(req.params.project, req.body || {});
+    return res.json({
+      ok: true,
+      ...preview
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      code: 'AI_COMMAND_CAMPAIGN_PREVIEW_FAILED',
+      message: error.message || 'Failed to build AI Command campaign preview.',
+      safety: {
+        preview_only: true,
+        no_backend_mutation_performed: true,
+        no_provider_execution_performed: true
+      }
+    });
+  }
+}
+
+app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+
+
 function handleGetProjectOperations(req, res) {
   try {
     return res.json(buildProjectOperationsPayload(req.params.project));
