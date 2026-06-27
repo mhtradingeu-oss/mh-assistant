@@ -960,7 +960,55 @@ function extractHandoffSummary(handoff) {
   };
 }
 
+
+function getAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
+
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        const parsed = JSON.parse(storage?.getItem?.(key) || "null");
+        if (!parsed || typeof parsed !== "object") continue;
+
+        const type = asString(parsed.type);
+        const route = asString(parsed.destination_route);
+        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+          return parsed;
+        }
+      } catch (error) {
+        console.warn("Unable to read AI Command campaign handoff", error);
+      }
+    }
+  }
+
+  return null;
+}
+
+function clearAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
+
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        storage?.removeItem?.(key);
+      } catch (error) {
+        console.warn("Unable to clear AI Command campaign handoff", error);
+      }
+    }
+  }
+}
+
+
 function getPublishingHandoff(projectName, operations) {
+  const aiCommandLocalHandoff = getAiCommandLocalCampaignHandoff("publishing");
+  if (aiCommandLocalHandoff) return aiCommandLocalHandoff;
+
   return (
     getSharedHandoff(projectName, "publishing", operations, "workflows") ||
     getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
@@ -1301,7 +1349,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
           <h3>${escapeHtml(summary.title)}</h3>
           <p class="publishing-section-copy">${escapeHtml(summarizeText(summary.summary, summary.isAiCampaign ? "AI Team campaign package is available for draft loading." : "Workflow output is available for draft loading."))}</p>
         </div>
-        <span class="card-badge ${isLoaded ? "success" : "neutral"}">${escapeHtml(isLoaded ? "Loaded" : "Available")}</span>
+        <span class="card-badge ${isLoaded ? "success" : summary.isAiCampaign ? "warning" : "neutral"}">${escapeHtml(isLoaded ? "Loaded" : summary.isAiCampaign ? "From AI Command" : "Available")}</span>
       </div>
       <div class="data-stack">
         <div class="data-row"><span>Source</span><strong>${escapeHtml(summary.sourceType ? titleCase(summary.sourceType) : titleCase(summary.sourcePage))}</strong></div>
@@ -1311,6 +1359,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
       </div>
       <div class="publishing-action-row">
         <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(summary.isAiCampaign ? "Load Campaign Package" : "Load Workflow Output")}</button>
+        ${summary.isAiCampaign ? `<button id="publishingClearAiCommandHandoffBtn" class="btn btn-secondary" type="button">Clear AI Command Handoff</button>` : ""}
       </div>
     </section>
   `;
@@ -1790,6 +1839,17 @@ function bindPublishingWorkspace({
         { projectName, reloadProjectData, showMessage, showError, successMessage: "Publishing item marked as failed." }
       );
       rerender();
+    };
+  }
+
+  const clearAiCommandHandoffBtn = $("publishingClearAiCommandHandoffBtn");
+  if (clearAiCommandHandoffBtn) {
+    clearAiCommandHandoffBtn.onclick = () => {
+      clearAiCommandLocalCampaignHandoff("publishing");
+      session.loadedHandoffId = "";
+      session.draftMessage = "AI Command campaign handoff cleared locally.";
+      saveDraftLocally("AI Command campaign handoff cleared locally.");
+      publishingRoute.render(context);
     };
   }
 

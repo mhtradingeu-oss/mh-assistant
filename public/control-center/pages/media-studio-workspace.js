@@ -644,7 +644,55 @@ function getLinkedRecords(items, ids) {
   return items.filter((item) => set.has(asString(item.id)));
 }
 
+
+function getAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
+
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        const parsed = JSON.parse(storage?.getItem?.(key) || "null");
+        if (!parsed || typeof parsed !== "object") continue;
+
+        const type = asString(parsed.type);
+        const route = asString(parsed.destination_route);
+        if (type === "ai_command_campaign_handoff" && (!route || route === destinationRoute)) {
+          return parsed;
+        }
+      } catch (error) {
+        console.warn("Unable to read AI Command campaign handoff", error);
+      }
+    }
+  }
+
+  return null;
+}
+
+function clearAiCommandLocalCampaignHandoff(destinationRoute) {
+  const keys = [
+    `mh_ai_command_handoff_${destinationRoute}`,
+    "mh_ai_command_campaign_handoff"
+  ];
+
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    for (const key of keys) {
+      try {
+        storage?.removeItem?.(key);
+      } catch (error) {
+        console.warn("Unable to clear AI Command campaign handoff", error);
+      }
+    }
+  }
+}
+
+
 function getInboundHandoff(projectName, session) {
+  const aiCommandLocalHandoff = getAiCommandLocalCampaignHandoff("media-studio");
+  if (aiCommandLocalHandoff) return aiCommandLocalHandoff;
+
   const operations = session.operations || {};
   return (
     getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
@@ -2042,7 +2090,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
           <h3>${escapeHtml(summary.title)}</h3>
           <p class="media-section-copy">${escapeHtml(summary.brief || summary.prompt || fallbackCopy)}</p>
         </div>
-        <span class="card-badge ${loaded ? "success" : "neutral"}">${escapeHtml(loaded ? "Loaded" : "Available")}</span>
+        <span class="card-badge ${loaded ? "success" : summary.isAiCampaign ? "warning" : "neutral"}">${escapeHtml(loaded ? "Loaded" : summary.isAiCampaign ? "From AI Command" : "Available")}</span>
       </div>
       <div class="data-stack">
         <div class="data-row"><span>Source</span><strong>${escapeHtml(titleCase(summary.sourcePage))}</strong></div>
@@ -2055,6 +2103,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
       </div>
       <div class="media-action-row">
         <button id="mediaLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(buttonLabel)}</button>
+        ${summary.isAiCampaign ? `<button id="mediaClearAiCommandHandoffBtn" class="btn btn-secondary" type="button">Clear AI Command Brief</button>` : ""}
       </div>
     </section>
   `;
@@ -3053,6 +3102,17 @@ function bindMediaStudio({
   if (runGenerationBtn) {
     runGenerationBtn.onclick = async () => {
       await runGenerationAction();
+    };
+  }
+
+  const clearAiCommandHandoffBtn = document.getElementById("mediaClearAiCommandHandoffBtn");
+  if (clearAiCommandHandoffBtn) {
+    clearAiCommandHandoffBtn.onclick = () => {
+      clearAiCommandLocalCampaignHandoff("media-studio");
+      session.loadedHandoffId = "";
+      session.draftMessage = "AI Command campaign brief cleared locally.";
+      saveDraftLocally("AI Command campaign brief cleared locally.");
+      navigateTo("media-studio");
     };
   }
 
