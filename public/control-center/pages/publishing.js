@@ -1326,6 +1326,34 @@ function renderBuilder(session, channels, checks, escapeHtml) {
   `;
 }
 
+
+function renderCampaignPackageSummaryRows(summary, escapeHtml) {
+  const campaignPackage = asObject(summary.campaignPackage);
+  const rows = [
+    ["Concept", asString(campaignPackage.concept)],
+    ["Audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+    ["Offer", asString(campaignPackage.offer)]
+  ].filter(([, value]) => value);
+
+  const groups = [
+    ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+    ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+    ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+    ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+  ].filter(([, items]) => items.length);
+
+  if (!rows.length && !groups.length) return "";
+
+  return `
+    <div class="data-stack">
+      ${rows.map(([label, value]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}
+      ${groups.map(([label, items]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(items.slice(0, 3).map((item) => asString(item)).join(" · "))}</strong></div>`).join("")}
+      ${summary.backendPreview ? `<div class="data-row"><span>AI source</span><strong>${escapeHtml(summary.backendSource || "Backend preview")}</strong></div>` : ""}
+    </div>
+  `;
+}
+
+
 function renderWorkflowHandoff(handoff, session, escapeHtml) {
   if (!handoff) {
     return `
@@ -1360,6 +1388,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
         <div class="data-row"><span>Goal</span><strong>${escapeHtml(summary.goal ? titleCase(summary.goal) : "Not specified")}</strong></div>
         <div class="data-row"><span>Channel</span><strong>${escapeHtml(summary.channel ? titleCase(summary.channel) : "Not specified")}</strong></div>
       </div>
+      ${summary.isAiCampaign ? renderCampaignPackageSummaryRows(summary, escapeHtml) : ""}
       <div class="publishing-action-row">
         <button id="publishingLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(summary.isAiCampaign ? "Load Campaign Package" : "Load Workflow Output")}</button>
         ${summary.isAiCampaign ? `<button id="publishingClearAiCommandHandoffBtn" class="btn btn-secondary" type="button">Clear AI Command Handoff</button>` : ""}

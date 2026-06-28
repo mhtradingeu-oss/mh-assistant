@@ -2058,6 +2058,33 @@ function renderPromptBuilder(session, handoff, escapeHtml) {
   `;
 }
 
+
+function renderCampaignPackageSummaryRows(summary, escapeHtml) {
+  const campaignPackage = asObject(summary.campaignPackage);
+  const rows = [
+    ["Concept", asString(campaignPackage.concept)],
+    ["Audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+    ["Offer", asString(campaignPackage.offer)]
+  ].filter(([, value]) => value);
+
+  const groups = [
+    ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+    ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+    ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+  ].filter(([, items]) => items.length);
+
+  if (!rows.length && !groups.length) return "";
+
+  return `
+    <div class="data-stack">
+      ${rows.map(([label, value]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}
+      ${groups.map(([label, items]) => `<div class="data-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(items.slice(0, 3).map((item) => asString(item)).join(" · "))}</strong></div>`).join("")}
+      ${summary.backendPreview ? `<div class="data-row"><span>AI source</span><strong>${escapeHtml(summary.backendSource || "Backend preview")}</strong></div>` : ""}
+    </div>
+  `;
+}
+
+
 function renderWorkflowHandoff(handoff, session, escapeHtml) {
   if (!handoff) {
     return `
@@ -2104,6 +2131,7 @@ function renderWorkflowHandoff(handoff, session, escapeHtml) {
         ${summary.language ? `<div class="data-row"><span>Language</span><strong>${escapeHtml(summary.language)}</strong></div>` : ""}
         ${summary.tone ? `<div class="data-row"><span>Tone</span><strong>${escapeHtml(summary.tone)}</strong></div>` : ""}
       </div>
+      ${summary.isAiCampaign ? renderCampaignPackageSummaryRows(summary, escapeHtml) : ""}
       <div class="media-action-row">
         <button id="mediaLoadHandoffBtn" class="btn btn-secondary" type="button">${escapeHtml(buttonLabel)}</button>
         ${summary.isAiCampaign ? `<button id="mediaClearAiCommandHandoffBtn" class="btn btn-secondary" type="button">Clear AI Command Brief</button>` : ""}

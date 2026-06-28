@@ -4377,6 +4377,47 @@ function getAiCommandSmartWizard(session) {
         return asObject(session.smartActionWizard);
 }
 
+
+function renderCampaignPackageMiniPanel(packageInput, escapeHtml) {
+        const campaignPackage = asObject(packageInput);
+        const rows = [
+                ["Concept", asString(campaignPackage.concept)],
+                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+                ["Offer", asString(campaignPackage.offer)]
+        ].filter(([, value]) => value);
+
+        const listGroups = [
+                ["Launch phases", asArray(campaignPackage.launchPhases || campaignPackage.launch_phases)],
+                ["Content angles", asArray(campaignPackage.contentAngles || campaignPackage.content_angles)],
+                ["Ad angles", asArray(campaignPackage.adAngles || campaignPackage.ad_angles)],
+                ["Required assets", asArray(campaignPackage.requiredAssets || campaignPackage.required_assets)],
+                ["Review blockers", asArray(campaignPackage.missingBlockers || campaignPackage.missing_blockers)],
+                ["Next actions", asArray(campaignPackage.nextActions || campaignPackage.next_actions)]
+        ].filter(([, items]) => items.length);
+
+        if (!rows.length && !listGroups.length) return "";
+
+        return `
+                <div class="aicmd-smart-preview-grid aicmd-smart-campaign-package-grid">
+                        ${rows.map(([label, value]) => `
+                                <section>
+                                        <strong>${escapeHtml(label)}</strong>
+                                        <p>${escapeHtml(value)}</p>
+                                </section>
+                        `).join("")}
+                        ${listGroups.map(([label, items]) => `
+                                <section>
+                                        <strong>${escapeHtml(label)}</strong>
+                                        <ul>
+                                                ${items.slice(0, 5).map((item) => `<li>${escapeHtml(asString(item))}</li>`).join("")}
+                                        </ul>
+                                </section>
+                        `).join("")}
+                </div>
+        `;
+}
+
+
 function renderAiCommandCampaignWizard({ session, escapeHtml }) {
         const wizard = getAiCommandSmartWizard(session);
         if (wizard.type !== "campaign" || !wizard.open) return "";
@@ -4451,10 +4492,12 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
 
                                                         <div class="aicmd-smart-preview-meta">
                                                                 <span><strong>Source</strong>${escapeHtml(preview.sourceLabel)}</span>
-                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel)}</span>
-                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel)}</span>
-                                                                <span><strong>Status</strong>Preview only</span>
+                                                                <span><strong>Goal</strong>${escapeHtml(preview.goalLabel || titleCase(preview.goal))}</span>
+                                                                <span><strong>Channel</strong>${escapeHtml(preview.channelLabel || titleCase(preview.channel))}</span>
+                                                                <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
                                                         </div>
+
+                                                        ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
 
                                                         <div class="aicmd-smart-preview-grid">
                                                                 ${asArray(preview.sections).map((section) => `
@@ -6404,6 +6447,8 @@ export const aiCommandRoute = {
                                 };
                                 session.outputPreview = {
                                         type: "smart_campaign_preview",
+                                        outputType: "campaign_package",
+                                        destinationRoute: "publishing",
                                         title: preview.title,
                                         summary: preview.summary,
                                         source: preview.source,
@@ -6413,6 +6458,10 @@ export const aiCommandRoute = {
                                         campaignPackage: asObject(preview.campaignPackage),
                                         sections: preview.sections,
                                         safety: preview.safety,
+                                        safetyLabel: preview.safety,
+                                        confirmationRequired: true,
+                                        confirmationNote: "Review and route this campaign package through the owning destination workspace before any publishing, sending, approval, task creation, provider execution, or workflow mutation.",
+                                        nextSafeAction: "Review the campaign package, then send it to Media Studio or Publishing.",
                                         backendPreview: Boolean(preview.backendPreview),
                                         backendSource: asString(preview.backendSource || ""),
                                         backendFallbackReason: asString(preview.backendFallbackReason || "")
