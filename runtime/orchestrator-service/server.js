@@ -11174,6 +11174,12 @@ function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
   const channel = normalizeAiCommandPreviewInput(input.channel, 'Multi-channel');
   const audience = normalizeAiCommandPreviewInput(input.audience || input.target_audience || input.targetAudience, 'Primary customer segment');
   const offer = normalizeAiCommandPreviewInput(input.offer, 'Review-ready offer angle');
+  const market = normalizeAiCommandPreviewInput(input.market || input.region, 'Germany');
+  const language = normalizeAiCommandPreviewInput(input.language || input.output_language, 'German');
+  const format = normalizeAiCommandPreviewInput(input.format || input.asset_format || input.creative_format, 'Mixed package');
+  const deadline = normalizeAiCommandPreviewInput(input.deadline || input.priority || input.timeline, 'Standard');
+  const productFocus = normalizeAiCommandPreviewInput(input.product_focus || input.productFocus, 'Selected product or service');
+  const complianceSensitivity = normalizeAiCommandPreviewInput(input.compliance_sensitivity || input.complianceSensitivity, 'Standard review');
   const productNames = normalizeAiCommandPreviewList(input.products || input.product_names || input.productNames);
   const now = new Date().toISOString();
 
@@ -11190,6 +11196,12 @@ function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
     concept: `${goal} campaign built from ${sourceLabel}.`,
     targetAudience: audience,
     offer,
+    market,
+    language,
+    format,
+    deadline,
+    productFocus,
+    complianceSensitivity,
     products,
     channels: [channel],
     launchPhases: [
@@ -11246,7 +11258,7 @@ function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
     {
       id: 'audience_offer',
       title: 'Audience and offer',
-      body: `Audience: ${audience}. Offer: ${offer}.`
+      body: `Audience: ${audience}. Offer: ${offer}. Market: ${market}. Language: ${language}. Format: ${format}. Deadline: ${deadline}. Product focus: ${productFocus}. Compliance: ${complianceSensitivity}.`
     },
     {
       id: 'copy_package',
@@ -11285,6 +11297,14 @@ function buildAiCommandCampaignPreviewOnly(projectName, input = {}) {
     source_label: sourceLabel,
     goal,
     channel,
+    market,
+    language,
+    format,
+    deadline,
+    audience,
+    offer,
+    product_focus: productFocus,
+    compliance_sensitivity: complianceSensitivity,
     campaignPackage,
     sections,
     generated_at: now,

@@ -4425,11 +4425,27 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
         const source = asString(wizard.source || "project");
         const goal = asString(wizard.goal || "sales");
         const channel = asString(wizard.channel || "social");
+        const market = asString(wizard.market || "germany");
+        const language = asString(wizard.language || "german");
+        const format = asString(wizard.format || "mixed");
+        const deadline = asString(wizard.deadline || "standard");
+        const audience = asString(wizard.audience || "target-customers");
+        const offer = asString(wizard.offer || "review-ready-offer");
+        const productFocus = asString(wizard.productFocus || "selected-product");
+        const complianceSensitivity = asString(wizard.complianceSensitivity || "standard-review");
         const preview = asObject(wizard.preview);
 
         const sourceOptions = [["project", "Project context"], ["product", "Product"], ["library", "Library source"], ["upload", "Uploaded source"]];
         const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
         const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+        const marketOptions = [["germany", "Germany"], ["eu", "EU"], ["mena", "MENA"], ["global", "Global"]];
+        const languageOptions = [["german", "German"], ["english", "English"], ["arabic", "Arabic"], ["multi", "Multi-language"]];
+        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+        const deadlineOptions = [["standard", "Standard"], ["urgent", "Urgent"], ["launch-week", "Launch week"], ["evergreen", "Evergreen"]];
+        const audienceOptions = [["target-customers", "Target customers"], ["new-buyers", "New buyers"], ["returning-customers", "Returning customers"], ["b2b", "B2B"], ["local", "Local audience"]];
+        const offerOptions = [["review-ready-offer", "Review-ready offer"], ["discount", "Discount"], ["bundle", "Bundle"], ["premium-value", "Premium value"], ["lead-magnet", "Lead magnet"]];
+        const productFocusOptions = [["selected-product", "Selected product"], ["hero-product", "Hero product"], ["bundle", "Bundle"], ["service", "Service"], ["brand", "Brand"]];
+        const complianceOptions = [["standard-review", "Standard review"], ["claims-sensitive", "Claims sensitive"], ["pricing-sensitive", "Pricing sensitive"], ["regulated", "Regulated"], ["low-risk", "Low risk"]];
 
         const optionButton = (group, value, label, activeValue) => `
                 <button
@@ -4458,7 +4474,8 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
                                         <span class="is-active">1 Source</span>
                                         <span class="is-active">2 Goal</span>
                                         <span class="is-active">3 Channel</span>
-                                        <span class="${preview.title ? "is-active" : ""}">4 Preview</span>
+                                        <span class="is-active">4 Brief</span>
+                                        <span class="${preview.title ? "is-active" : ""}">5 Preview</span>
                                 </div>
 
                                 <div class="aicmd-smart-wizard-body">
@@ -4482,6 +4499,34 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
                                                         ${channelOptions.map(([value, label]) => optionButton("channel", value, label, channel)).join("")}
                                                 </div>
                                         </div>
+
+                                        <div class="aicmd-smart-wizard-section">
+                                                <strong>4. Premium campaign brief</strong>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${marketOptions.map(([value, label]) => optionButton("market", value, label, market)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${languageOptions.map(([value, label]) => optionButton("language", value, label, language)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${formatOptions.map(([value, label]) => optionButton("format", value, label, format)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${deadlineOptions.map(([value, label]) => optionButton("deadline", value, label, deadline)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${audienceOptions.map(([value, label]) => optionButton("audience", value, label, audience)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${offerOptions.map(([value, label]) => optionButton("offer", value, label, offer)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${productFocusOptions.map(([value, label]) => optionButton("productFocus", value, label, productFocus)).join("")}
+                                                </div>
+                                                <div class="aicmd-smart-wizard-options">
+                                                        ${complianceOptions.map(([value, label]) => optionButton("complianceSensitivity", value, label, complianceSensitivity)).join("")}
+                                                </div>
+                                        </div>
                                         ${preview.title ? `
                                                 <article class="aicmd-smart-preview">
                                                         <div class="aicmd-smart-preview-head">
@@ -4495,6 +4540,10 @@ function renderAiCommandCampaignWizard({ session, escapeHtml }) {
                                                                 <span><strong>Goal</strong>${escapeHtml(preview.goalLabel || titleCase(preview.goal))}</span>
                                                                 <span><strong>Channel</strong>${escapeHtml(preview.channelLabel || titleCase(preview.channel))}</span>
                                                                 <span><strong>Status</strong>${escapeHtml(preview.backendPreview ? "Backend preview" : "Local fallback")}</span>
+                                                                <span><strong>Market</strong>${escapeHtml(titleCase(preview.market || market))}</span>
+                                                                <span><strong>Language</strong>${escapeHtml(titleCase(preview.language || language))}</span>
+                                                                <span><strong>Format</strong>${escapeHtml(titleCase(preview.format || format))}</span>
+                                                                <span><strong>Deadline</strong>${escapeHtml(titleCase(preview.deadline || deadline))}</span>
                                                         </div>
 
                                                         ${renderCampaignPackageMiniPanel(preview.campaignPackage, escapeHtml)}
@@ -6290,6 +6339,14 @@ export const aiCommandRoute = {
                                 source,
                                 goal,
                                 channel,
+                                market: asString(wizard.market || "germany"),
+                                language: asString(wizard.language || "german"),
+                                format: asString(wizard.format || "mixed"),
+                                deadline: asString(wizard.deadline || "standard"),
+                                audience: asString(wizard.audience || "target-customers"),
+                                offer: asString(wizard.offer || "review-ready-offer"),
+                                productFocus: asString(wizard.productFocus || "selected-product"),
+                                complianceSensitivity: asString(wizard.complianceSensitivity || "standard-review"),
                                 sourceLabel,
                                 goalLabel,
                                 channelLabel,
@@ -6389,6 +6446,14 @@ export const aiCommandRoute = {
                                 sourceLabel: asString(body.source_label || fallbackPreview.sourceLabel || fallbackPreview.source || ""),
                                 goal: asString(body.goal || fallbackPreview.goal || ""),
                                 channel: asString(body.channel || fallbackPreview.channel || ""),
+                                market: asString(body.market || fallbackPreview.market || ""),
+                                language: asString(body.language || fallbackPreview.language || ""),
+                                format: asString(body.format || fallbackPreview.format || ""),
+                                deadline: asString(body.deadline || fallbackPreview.deadline || ""),
+                                audience: asString(body.audience || campaignPackage.targetAudience || fallbackPreview.audience || ""),
+                                offer: asString(body.offer || campaignPackage.offer || fallbackPreview.offer || ""),
+                                productFocus: asString(body.product_focus || body.productFocus || fallbackPreview.productFocus || ""),
+                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
                                 campaignPackage,
                                 sections: asArray(body.sections).length ? asArray(body.sections) : packageSections,
                                 safety: asObject(body.safety).preview_only
@@ -6410,8 +6475,14 @@ export const aiCommandRoute = {
                                         goal: asString(wizard.goal || localPreview.goal || "sales"),
                                         channel: asString(wizard.channel || localPreview.channel || "social"),
                                         title: asString(localPreview.title || ""),
-                                        audience: asString(wizard.audience || ""),
-                                        offer: asString(wizard.offer || "")
+                                        audience: asString(wizard.audience || localPreview.audience || ""),
+                                        offer: asString(wizard.offer || localPreview.offer || ""),
+                                        market: asString(wizard.market || localPreview.market || ""),
+                                        language: asString(wizard.language || localPreview.language || ""),
+                                        format: asString(wizard.format || localPreview.format || ""),
+                                        deadline: asString(wizard.deadline || localPreview.deadline || ""),
+                                        product_focus: asString(wizard.productFocus || localPreview.productFocus || ""),
+                                        compliance_sensitivity: asString(wizard.complianceSensitivity || localPreview.complianceSensitivity || "")
                                 });
 
                                 if (asObject(backendPayload).ok === false) {
@@ -6455,6 +6526,14 @@ export const aiCommandRoute = {
                                         sourceLabel: asString(preview.sourceLabel || ""),
                                         goal: preview.goal,
                                         channel: preview.channel,
+                                        market: asString(preview.market || ""),
+                                        language: asString(preview.language || ""),
+                                        format: asString(preview.format || ""),
+                                        deadline: asString(preview.deadline || ""),
+                                        audience: asString(preview.audience || ""),
+                                        offer: asString(preview.offer || ""),
+                                        productFocus: asString(preview.productFocus || ""),
+                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
                                         campaignPackage: asObject(preview.campaignPackage),
                                         sections: preview.sections,
                                         safety: preview.safety,
@@ -6499,6 +6578,14 @@ export const aiCommandRoute = {
                                 source_label: asString(preview.sourceLabel || preview.source || ""),
                                 goal: asString(preview.goal || ""),
                                 channel: asString(preview.channel || ""),
+                                market: asString(preview.market || ""),
+                                language: asString(preview.language || ""),
+                                format: asString(preview.format || ""),
+                                deadline: asString(preview.deadline || ""),
+                                audience: asString(preview.audience || ""),
+                                offer: asString(preview.offer || ""),
+                                product_focus: asString(preview.productFocus || ""),
+                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
                                 campaignPackage: asObject(preview.campaignPackage),
                                 sections: asArray(preview.sections),
                                 backend_preview: Boolean(preview.backendPreview),
