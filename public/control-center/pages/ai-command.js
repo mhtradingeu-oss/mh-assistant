@@ -1091,6 +1091,72 @@ function getAiChatSessions(projectName) {
         return asArray(readAiChatSessionsMap()[key]).slice(0, 20);
 }
 
+
+function getAiCommandSessionSpecialistLabel(session = {}) {
+        if (session.teamMode === "team") return "Full AI Team";
+        const spec = getPhase1SpecialistById(session.modeId);
+        return spec?.label || "AI Team";
+}
+
+function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+        const text = asString(value || "")
+                .replace(/\s+/g, " ")
+                .replace(/[`*_#>\[\]{}]/g, "")
+                .trim();
+
+        if (!text) return fallback;
+
+        const compact = text
+                .replace(/^(please|can you|could you|i need|help me|let'?s|lets)\s+/i, "")
+                .replace(/\b(public|private|review-only|preview-only)\b/gi, "")
+                .trim();
+
+        const source = compact || text;
+        return source.length > 38 ? `${source.slice(0, 35).trim()}...` : source;
+}
+
+function formatAiCommandSessionTime(value) {
+        const date = value ? new Date(value) : new Date();
+        if (Number.isNaN(date.getTime())) return "Recent";
+
+        const now = new Date();
+        const sameDay = date.toDateString() === now.toDateString();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+
+        const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        if (sameDay) return time;
+        if (date.toDateString() === yesterday.toDateString()) return `Yesterday ${time}`;
+
+        return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+function buildAiCommandHistoryTitle(session = {}, options = {}) {
+        const specialist = getAiCommandSessionSpecialistLabel(session);
+        const messages = asArray(session.messages);
+        const responses = asArray(session.responseHistory);
+        const latestResponse = responses[0] || {};
+        const latestUser = messages.slice().reverse().find((message) => asString(message.role) === "user");
+        const preview = asObject(session.outputPreview);
+        const explicit = asString(options.title || "").trim();
+
+        const intent = summarizeAiCommandSessionIntent(
+                explicit ||
+                preview.title ||
+                latestResponse.responseTitle ||
+                latestResponse.title ||
+                latestResponse.prompt ||
+                latestUser?.content ||
+                session.draftMessage ||
+                "",
+                preview.outputType ? `${formatOutputTypeLabel(preview.outputType)} preview` : "Session"
+        );
+
+        const time = formatAiCommandSessionTime(options.updatedAt || session.updatedAt || nowIso());
+        return `${specialist} · ${intent} · ${time}`.slice(0, 80);
+}
+
+
 function saveAiChatSession(projectName, session, options = {}) {
         const key = projectName || "__default__";
         const messages = asArray(session.messages);
@@ -1101,12 +1167,11 @@ function saveAiChatSession(projectName, session, options = {}) {
         const map = readAiChatSessionsMap();
         const sessions = asArray(map[key]);
         const now = nowIso();
-        const firstUser = messages.find((message) => asString(message.role) === "user");
-        const titleSeed = asString(options.title || firstUser?.content || responses[0]?.prompt || "AI Team session").trim();
         const sessionId = asString(options.sessionId || session.activeChatSessionId || `chat-session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+        const titleSeed = buildAiCommandHistoryTitle(session, { ...options, updatedAt: now });
         const record = {
                 id: sessionId,
-                title: titleSeed.slice(0, 80) || "AI Team session",
+                title: titleSeed || "AI Team · Session · Recent",
                 modeId: session.modeId,
                 teamMode: session.teamMode,
                 messages: messages.slice(-40),
@@ -5575,7 +5640,7 @@ export const aiCommandRoute = {
                 });
 
                 const startCleanAiCommandSession = () => {
-                        saveAiChatSession(sessionKey, session, { title: "Previous AI Team session" });
+                        saveAiChatSession(sessionKey, session, { title: buildAiCommandHistoryTitle(session) });
 
                         /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
                         /* composerText_FROZEN */ "";
