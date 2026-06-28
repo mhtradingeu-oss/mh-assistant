@@ -4755,20 +4755,20 @@ function renderAiCommandChatComposer({ session, aiContext, escapeHtml }) {
                                 <input id="aicmdFinalUploadInput" type="file" multiple hidden aria-hidden="true" />
 
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="upload">
-                                        <strong>Upload file</strong>
-                                        <span>Add a file, image, PDF, note, or workspace material.</span>
+                                        <strong>Stage file for this chat</strong>
+                                        <span>Add file names as temporary AI context. Files are not uploaded or persisted from AI Command.</span>
                                 </button>
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="library">
-                                        <strong>Choose from Library</strong>
-                                        <span>Select a trusted saved source.</span>
+                                        <strong>Choose trusted Library source</strong>
+                                        <span>Open Library, select a saved source, then return it as guarded AI context.</span>
                                 </button>
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="product">
-                                        <strong>Choose product</strong>
-                                        <span>Use a product, offer, or SKU as context.</span>
+                                        <strong>Product / SKU context</strong>
+                                        <span>Planned direct selector. For now, use Library source or paste product details.</span>
                                 </button>
                                 <button type="button" class="aicmd-final-source-option" data-aicmd-final-source-option="project">
-                                        <strong>Project context</strong>
-                                        <span>Use the current workspace context.</span>
+                                        <strong>Current project context</strong>
+                                        <span>Use the loaded workspace context for planning only. No records are changed.</span>
                                 </button>
                         </div>
 
@@ -5801,7 +5801,7 @@ export const aiCommandRoute = {
                         finalSourceMenu.hidden = !open;
                         finalSourceMenu.setAttribute("aria-hidden", open ? "false" : "true");
                         finalSourceMenu.classList.toggle("is-open", Boolean(open));
-                        updateStatus(open ? `${reason} opened. Choose upload, Library, or project context.` : `${reason} closed.`);
+                        updateStatus(open ? `${reason} opened. Choose temporary file context, trusted Library source, planned product context, or current project context.` : `${reason} closed.`);
                         return true;
                 };
 
@@ -5829,7 +5829,7 @@ export const aiCommandRoute = {
                                         const uploadInput = document.getElementById("aicmdFinalUploadInput");
                                         if (uploadInput) uploadInput.value = "";
                                         uploadInput?.click?.();
-                                        updateStatus("Choose a file to stage as AI context.");
+                                        updateStatus("Choose files to stage as temporary chat context. AI Command does not upload or persist file content here.");
                                 } else if (option === "library") {
                                         openLibrarySourcePickerFromAiCommand({
                                                 projectName,
@@ -5841,11 +5841,11 @@ export const aiCommandRoute = {
                                                 updateStatus
                                         });
                                 } else if (option === "product") {
-                                        updateStatus("Product source selection will be connected to product/project data.");
-                                        showMessage?.("Next step: connect product/SKU source selection.");
+                                        updateStatus("Direct product/SKU source selection is planned. Use a trusted Library source or paste product details for now.");
+                                        showMessage?.("Product/SKU selector is planned. Current safe options: Library source, uploaded filename context, project context, or manual product details.");
                                 } else {
-                                        updateStatus("Current project context selected for AI guidance.");
-                                        showMessage?.("AI Command will use the current project context.");
+                                        updateStatus("Current loaded project context selected for AI planning. No records are changed.");
+                                        showMessage?.("AI Command will use current workspace context as planning input only.");
                                 }
 
                                 setFinalSourceMenuOpen(false, "Source menu");
