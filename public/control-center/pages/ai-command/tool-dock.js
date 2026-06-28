@@ -1310,15 +1310,15 @@ function renderSmartToolDrawerShell(safe) {
           <div class="mhos-tool-drawer-title-block">
             <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
             <div>
-              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Prompt tool</p>
-              <h3 data-aicmd-tool-drawer-title>Prompt setup</h3>
+              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Quick AI tool</p>
+              <h3 data-aicmd-tool-drawer-title>Quick AI Tool Setup</h3>
             </div>
           </div>
           <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
         </div>
 
         <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
-          Choose the output, trusted context, and destination workspace before preparing a review-only composer prompt.
+          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
         </p>
 
         <div class="mhos-tool-drawer-grid">
@@ -1393,11 +1393,11 @@ function renderSmartToolDrawerShell(safe) {
 
         <div class="mhos-tool-drawer-summary">
           <span>Setup summary</span>
-          <p data-aicmd-tool-drawer-summary>Choose output, source context, destination handoff, language, and tone.</p>
+          <p data-aicmd-tool-drawer-summary>Choose output, trusted source, destination handoff, language, and tone.</p>
         </div>
 
         <div class="mhos-tool-drawer-note">
-          Preparation-only: this drawer creates a composer-ready instruction. Destination choices open or frame handoff context only; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
         </div>
 
         <div class="mhos-tool-drawer-actions">
@@ -1428,7 +1428,7 @@ export function renderAiToolDock({ projectName = "", specialistId = "", teamMode
     <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
       <div class="mhos-tool-dock-head">
         <span class="mhos-tool-dock-kicker">${safe(label)}</span>
-        <span class="mhos-tool-dock-copy">Guided setup · output, source, destination, then use in composer</span>
+        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
       </div>
       <div class="mhos-tool-dock-list">
         ${tools.map((tool) => `
@@ -1679,7 +1679,7 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
   setDrawerText(
     drawer,
     "[data-aicmd-tool-drawer-description]",
-    `Prepare a structured prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted context, destination handoff, language, and tone before loading it into the composer.`
+    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
   );
   setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
 
@@ -1724,7 +1724,7 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
   drawer.hidden = false;
   drawer.setAttribute("aria-hidden", "false");
   drawer.classList.add("is-open");
-  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Prompt tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
   return true;
 }
 
