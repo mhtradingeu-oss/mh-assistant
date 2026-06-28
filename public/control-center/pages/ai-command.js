@@ -6447,9 +6447,14 @@ export const aiCommandRoute = {
                                 title: asString(preview.title || "Campaign handoff"),
                                 summary: asString(preview.summary || ""),
                                 source_type: asString(preview.source || ""),
+                                source_label: asString(preview.sourceLabel || preview.source || ""),
                                 goal: asString(preview.goal || ""),
                                 channel: asString(preview.channel || ""),
+                                campaignPackage: asObject(preview.campaignPackage),
                                 sections: asArray(preview.sections),
+                                backend_preview: Boolean(preview.backendPreview),
+                                backend_source: asString(preview.backendSource || ""),
+                                backend_fallback_reason: asString(preview.backendFallbackReason || ""),
                                 safety: "Prepared handoff only. No backend write, publish, send, CRM mutation, provider execution, approval creation, task creation, or workflow mutation was performed.",
                                 created_at: new Date().toISOString()
                         };

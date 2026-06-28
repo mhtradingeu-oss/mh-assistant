@@ -750,6 +750,9 @@ function extractHandoffSummary(handoff) {
     goal,
     channel,
     sourceType,
+    campaignPackage: asObject(direct.campaignPackage || payload.campaignPackage || output.campaignPackage),
+    backendPreview: Boolean(direct.backend_preview || direct.backendPreview || payload.backendPreview || output.backendPreview),
+    backendSource: asString(direct.backend_source || direct.backendSource || payload.backendSource || output.backendSource || ""),
     sections,
     packageLabel: isAiCampaign ? "AI Team Campaign Brief" : "Workflow Handoff"
   };
