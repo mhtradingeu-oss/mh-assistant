@@ -5358,7 +5358,7 @@ function renderAiRoomStatusStrip(aiContext, session, bridgeStatus, escapeHtml) {
 	`;
 }
 
-function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
+function renderPhase2MediaStatusPanel(aiContext, escapeHtml, bridgeStatus = {}) {
 	const providerConfigured = isProviderLikelyConfigured(aiContext);
 	const providerStatus = providerConfigured
 		? "Configured in integrations"
@@ -5378,7 +5378,7 @@ function renderPhase2MediaStatusPanel(aiContext, escapeHtml) {
 				<li><span>Voice script preparation</span><strong class="is-draft-ready">Draft-ready — script only, no audio</strong></li>
 				<li><span>Read preview aloud (browser)</span><strong class="${speechSynthAvailable ? "is-available" : "is-planned"}">${speechSynthAvailable ? "Available in this browser" : "Not supported in this browser"}</strong></li>
 				<li><span>Voice input (microphone)</span><strong class="is-planned">Planned — SpeechRecognition not enabled</strong></li>
-				<li><span>Team chat execution bridge</span><strong class="is-planned">Planned — requires backend bridge</strong></li>
+				<li><span>Protected chat bridge</span><strong class="${bridgeStatus.available ? "is-available" : "is-planned"}">${escapeHtml(bridgeStatus.available ? "Connected — guarded chat only" : "Guarded — backend unavailable")}</strong></li>
 				<li><span>Realtime voice chat</span><strong class="is-planned">Future — needs provider + bridge</strong></li>
 			</ul>
 		</section>
