@@ -4095,11 +4095,9 @@ function bindGlobalButtons() {
 
 /* =========================
    INIT
+========================= */
 installMhRuntimeGlobals();
 
-  console.debug('[MH-OS OBSERVER]', event);
-};
-// ===== END OBSERVER =====
 
 async function init() {
   try {
