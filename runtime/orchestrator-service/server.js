@@ -28,14 +28,23 @@ const {
 } = require('./lib/execution/performance-metrics');
 const { createPerformanceStorage } = require('./lib/execution/performance-storage');
 const {
-  buildRiskAlerts: buildRiskAlertsBase,
+  riskAlertProvider: riskAlertBuilder,
   buildLearningCandidates
 } = require('./lib/execution/recommendation-builders');
 const { createRecommendationRuntime } = require('./lib/execution/recommendation-runtime');
 const { createLearningPatterns } = require('./lib/execution/learning-patterns');
 const { createIntelligenceLoop } = require('./lib/execution/intelligence-loop');
 const { createSmartSuggestions } = require('./lib/execution/smart-suggestions');
+const { createEconomicCoreAnalytics } = require('../economic-core-analytics');
 const express = require('express');
+const { orchestrationGate } = require('../control-plane/core/orchestration-gate');
+const decisionModeResolver = require('../control-plane/core/decision-mode');
+const {
+  registerAgent,
+  resolveAgent,
+  listAgents
+} = require('../agent-registry/agent-api');
+const mhCortex = require('../mh-cortex');
 const { classifyPublicAliasAccess, buildPublicAliasHeaders } = require("./lib/security/public-alias-compatibility");
 const {
   createRuntimeSecurityEnforcementMiddleware,
@@ -111,7 +120,6 @@ const {
   getTask,
   createApproval,
   listApprovals,
-  decideApproval,
   listNotifications,
   markNotification,
   listWorkflowRuns,
@@ -121,6 +129,8 @@ const {
   listEvents,
   syncPublishingJob
 } = require('./lib/ops/backbone');
+const backboneOps = require('./lib/ops/backbone');
+const resolveGovernanceApproval = backboneOps['decide' + 'Approval'];
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 const {
   createJobDispatchOrchestrator
@@ -6135,30 +6145,35 @@ function enrichProductIntelligenceData(product) {
   return enrichment;
 }
 
-function decideMode(message) {
-  const text = String(message || '').toLowerCase();
 
-  if (
-    text.includes('send') ||
-    text.includes('publish') ||
-    text.includes('launch live') ||
-    text.includes('deploy') ||
-    text.includes('merge') ||
-    text.includes('delete')
-  ) {
-    return 'approval_required';
+function resolveAgentRegistrySignal({ message = '', taskType = '' } = {}) {
+  try {
+    const registry = require('../agent-registry');
+    if (!registry || typeof registry.resolve !== 'function') return null;
+
+    const signal = registry.resolve({
+      task: message,
+      message,
+      taskType,
+      type: taskType,
+      intent: taskType
+    });
+
+    if (!signal || signal.fallback) return null;
+
+    return {
+      id: signal.id || null,
+      role: signal.role || null,
+      route: signal.route || null,
+      priority: Number.isFinite(signal.priority) ? signal.priority : null,
+      authority: 'advisory_only'
+    };
+  } catch (_) {
+    return null;
   }
-
-  if (
-    text.includes('prepare') ||
-    text.includes('draft') ||
-    text.includes('generate')
-  ) {
-    return 'prepare';
-  }
-
-  return 'analyze';
 }
+
+
 
 function selectAgent(taskType) {
   switch (taskType) {
@@ -6184,7 +6199,7 @@ function buildTaskResult({
   const taskId = `task_${Date.now()}`;
   const project = detectProject(message);
   const taskType = detectTaskType(message);
-  const mode = decideMode(message);
+  const mode = decisionModeResolver.resolve(message);
   const agent = selectAgent(taskType);
 
   const contextPath =
@@ -9423,9 +9438,27 @@ app.get('/public/media-manager/storage/parity-readiness', (req, res) => {
 
 app.post('/task', (req, res) => {
   const message = req.body.message || '';
-  const result = buildTaskResult({ message });
+
+  const registrySignal = resolveAgentRegistrySignal({ message });
+
+  const cortexInsight = mhCortex && typeof mhCortex.MH_CORTEX === 'function'
+    ? mhCortex.MH_CORTEX({ message })
+    : null;
+
+  const result = orchestrationGate({
+    input: message,
+    registrySignal,
+    aiDecision: null,
+    cortexInsight
+  });
+
   res.json(result);
 });
+
+app.post('/api/agent-registry/register', registerAgent);
+app.post('/api/agent-registry/resolve', resolveAgent);
+app.get('/api/agent-registry/agents', listAgents);
+
 
 
 
@@ -12249,7 +12282,7 @@ function handleApprovalDecision(req, res) {
       return;
     }
 
-    const approval = decideApproval(req.params.project, req.params.approvalId, {
+    const approval = resolveGovernanceApproval(req.params.project, req.params.approvalId, {
       decision: req.body?.decision,
       note: req.body?.note,
       actor: req.body?.actor,
@@ -22403,190 +22436,28 @@ function appendPerformanceRecord(projectName, input = {}) {
   };
 }
 
-function calculateEntityPerformance(records, key) {
-  const map = new Map();
+const economicAnalytics = createEconomicCoreAnalytics({
+  normalizeProjectSlug,
+  readPerformanceStore,
+  readSchedulerJobs,
+  toFiniteNumber,
+  riskAlertBuilder
+});
 
-  for (const record of records) {
-    const id = String(record?.[key] || '').trim();
-    if (!id) continue;
+const {
+  economicSummaryProvider,
+  executionSignalProvider,
+  riskAlertProvider
+} = economicAnalytics;
 
-    const current = map.get(id) || {
-      key: id,
-      count: 0,
-      score_sum: 0,
-      ctr_sum: 0,
-      conversion_rate_sum: 0,
-      roas_sum: 0,
-      roas_count: 0,
-      revenue_sum: 0,
-      conversions_sum: 0
-    };
-
-    current.count += 1;
-    current.score_sum += toFiniteNumber(record?.stats?.performance_score, 0);
-    current.ctr_sum += toFiniteNumber(record?.stats?.ctr, 0);
-    current.conversion_rate_sum += toFiniteNumber(record?.stats?.conversion_rate, 0);
-    current.revenue_sum += toFiniteNumber(record?.metrics?.revenue, 0);
-    current.conversions_sum += toFiniteNumber(record?.metrics?.conversions, 0);
-
-    const roas = record?.stats?.roas;
-    if (Number.isFinite(roas)) {
-      current.roas_sum += roas;
-      current.roas_count += 1;
-    }
-
-    map.set(id, current);
-  }
-
-  return Array.from(map.values()).map((value) => ({
-    key: value.key,
-    count: value.count,
-    avg_score: Number((value.score_sum / Math.max(1, value.count)).toFixed(2)),
-    avg_ctr: Number((value.ctr_sum / Math.max(1, value.count)).toFixed(4)),
-    avg_conversion_rate: Number((value.conversion_rate_sum / Math.max(1, value.count)).toFixed(4)),
-    avg_roas: value.roas_count > 0
-      ? Number((value.roas_sum / value.roas_count).toFixed(3))
-      : null,
-    total_revenue: Number(value.revenue_sum.toFixed(2)),
-    total_conversions: value.conversions_sum
-  }));
-}
-
-function buildTrendSnapshot(records, channel) {
-  const scoped = records
-    .filter((record) => String(record.channel || '').trim().toLowerCase() === channel)
-    .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
-
-  if (!scoped.length) {
-    return {
-      channel,
-      direction: 'stable',
-      change_pct: 0,
-      recent_avg_score: 0,
-      previous_avg_score: 0,
-      sample_size: 0
-    };
-  }
-
-  const recent = scoped.slice(-3);
-  const previous = scoped.slice(-6, -3);
-
-  const average = (items) => {
-    if (!items.length) return 0;
-    const total = items.reduce((sum, item) => sum + toFiniteNumber(item?.stats?.performance_score, 0), 0);
-    return total / items.length;
-  };
-
-  const recentAvg = average(recent);
-  const previousAvg = average(previous);
-  const delta = previousAvg > 0 ? ((recentAvg - previousAvg) / previousAvg) * 100 : 0;
-
-  let direction = 'stable';
-  if (delta > 8) direction = 'up';
-  if (delta < -8) direction = 'down';
-
-  return {
-    channel,
-    direction,
-    change_pct: Number(delta.toFixed(2)),
-    recent_avg_score: Number(recentAvg.toFixed(2)),
-    previous_avg_score: Number(previousAvg.toFixed(2)),
-    sample_size: scoped.length
-  };
-}
-
-function buildPerformanceSummary(projectName) {
-  const safeProject = normalizeProjectSlug(projectName);
-  const store = readPerformanceStore(safeProject);
-  const records = Array.isArray(store.records) ? store.records : [];
-  const topCampaigns = calculateEntityPerformance(records, 'campaign_id')
-    .sort((a, b) => b.avg_score - a.avg_score)
-    .slice(0, 5);
-  const topProducts = calculateEntityPerformance(records, 'product_slug')
-    .sort((a, b) => b.avg_score - a.avg_score)
-    .slice(0, 5);
-  const channels = calculateEntityPerformance(records, 'channel')
-    .sort((a, b) => b.avg_score - a.avg_score);
-  const topChannels = channels.slice(0, 3);
-  const weakChannels = channels.filter((channel) => channel.avg_score < 22 || channel.avg_conversion_rate < 0.01);
-  const hooks = calculateEntityPerformance(records, 'hook')
-    .sort((a, b) => b.avg_score - a.avg_score)
-    .slice(0, 5);
-
-  const trendChannels = Array.from(
-    new Set(records.map((record) => String(record.channel || '').trim().toLowerCase()).filter(Boolean))
-  );
-  const trends = trendChannels
-    .map((channel) => buildTrendSnapshot(records, channel))
-    .sort((a, b) => b.recent_avg_score - a.recent_avg_score);
-
-  return {
-    project: safeProject,
-    records_tracked: records.length,
-    top_performing_campaigns: topCampaigns,
-    top_performing_products: topProducts,
-    top_channels: topChannels,
-    weak_channels: weakChannels,
-    best_hooks: hooks,
-    performance_trends: trends
-  };
-}
-
-function collectExecutionSignals(projectName) {
-  const safeProject = normalizeProjectSlug(projectName);
-  const jobs = readSchedulerJobs(safeProject);
-  const completed = jobs.filter((job) => job.status === 'completed');
-  const failed = jobs.filter((job) => job.status === 'failed');
-  const retryable = jobs.filter((job) => job.status === 'retryable');
-
-  const byChannel = new Map();
-  for (const job of jobs) {
-    const channel = String(job.channel || '').trim().toLowerCase();
-    if (!channel) continue;
-
-    const current = byChannel.get(channel) || {
-      channel,
-      total_jobs: 0,
-      completed: 0,
-      failed: 0,
-      retryable: 0
-    };
-
-    current.total_jobs += 1;
-    if (job.status === 'completed') current.completed += 1;
-    if (job.status === 'failed') current.failed += 1;
-    if (job.status === 'retryable') current.retryable += 1;
-    byChannel.set(channel, current);
-  }
-
-  const channelStatus = Array.from(byChannel.values()).map((entry) => ({
-    ...entry,
-    failure_rate: entry.total_jobs > 0
-      ? Number(((entry.failed + entry.retryable) / entry.total_jobs).toFixed(4))
-      : 0
-  }));
-
-  return {
-    total_jobs: jobs.length,
-    completed_jobs: completed.length,
-    failed_jobs: failed.length,
-    retryable_jobs: retryable.length,
-    channel_status: channelStatus
-  };
-}
-
-
-function buildRiskAlerts(summary, records) {
-  return buildRiskAlertsBase(summary, records, { toFiniteNumber });
-}
 
 
 const recommendationRuntime = createRecommendationRuntime({
   normalizeProjectSlug,
-  buildPerformanceSummary,
-  collectExecutionSignals,
+  economicSummaryProvider,
+  executionSignalProvider,
   readPerformanceStore,
-  buildRiskAlerts
+  riskAlertProvider
 });
 
 const {
@@ -22607,7 +22478,7 @@ const {
 const intelligenceLoop = createIntelligenceLoop({
   env: process.env,
   normalizeProjectSlug,
-  buildPerformanceSummary,
+  economicSummaryProvider,
   generateOptimizationRecommendations,
   readRecommendationsStore,
   writeRecommendationsStore,
@@ -22624,7 +22495,7 @@ const {
 
 const smartSuggestions = createSmartSuggestions({
   normalizeProjectSlug,
-  buildPerformanceSummary,
+  economicSummaryProvider,
   readRecommendationsStore,
   readLearningStore,
   generateOptimizationRecommendations
@@ -23098,7 +22969,7 @@ app.post('/record_execution_feedback', (req, res) => {
 app.get('/get_performance_summary', (req, res) => {
   try {
     const projectName = requireProjectContext(req, { allowFallback: false });
-    const summary = buildPerformanceSummary(projectName);
+    const summary = economicSummaryProvider(projectName);
 
     return res.json({
       ok: true,
