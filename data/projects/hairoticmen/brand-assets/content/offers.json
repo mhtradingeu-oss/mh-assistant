@@ -1,0 +1,61 @@
+{
+  "system": "HAIROTICMEN PRICING ENGINE",
+  "currency": "EUR",
+  "vat_rate_germany": 0.19,
+  "strict_rule": "AI MUST NEVER INVENT PRICES. If a price is missing, return NEEDS_PRICING_REVIEW.",
+  "source_files": {
+    "product_csv_current_upload": "hairoticmen_product1.csv",
+    "pricing_master_csv": "hairoticmen_pricing_master.csv"
+  },
+  "b2c_end_user": {
+    "price_type": "brutto",
+    "display_rule": "All customer-facing retail prices include German VAT. Display price is the final amount the customer pays.",
+    "fields": [
+      "Retail Price Brutto EUR",
+      "Retail Price Netto EUR"
+    ]
+  },
+  "b2b_dealer_wholesale": {
+    "price_type": "netto",
+    "invoice_rule": "Dealer/wholesale prices exclude VAT. VAT is added on the invoice.",
+    "tiers": [
+      {
+        "name": "Dealer Basic",
+        "threshold_eur": 500,
+        "field": "Dealer Basic Netto EUR"
+      },
+      {
+        "name": "Dealer Plus",
+        "threshold_eur": 1500,
+        "field": "Dealer Plus Netto EUR"
+      },
+      {
+        "name": "Authorizer",
+        "threshold_eur": 3000,
+        "field": "Authorizer Netto EUR"
+      }
+    ]
+  },
+  "commission": {
+    "eligible_roles": [
+      "stand_partner",
+      "affiliate",
+      "sales_rep"
+    ],
+    "rate": 0.25,
+    "base": "NETTO selling price",
+    "rule": "Commission is calculated from the netto selling price, never from brutto VAT-inclusive retail price."
+  },
+  "validation_rules": [
+    "Every active product must have Product ID, SKU, Product Name, and at least one valid retail or dealer price.",
+    "Retail Price Brutto EUR must equal Retail Price Netto EUR * 1.19 within rounding tolerance when both are present.",
+    "B2B prices must be treated as netto only.",
+    "Do not auto-generate offers, discounts, coupons, bundles, or margins unless they exist in an approved pricing/offers file.",
+    "Products with Status = Needs Review must be shown as review-required before production publishing."
+  ],
+  "required_system_category": {
+    "asset_type": "pricing_doc",
+    "target_folder": "content",
+    "suggested_folder": "/opt/mh-assistant/data/brand-assets/hairoticmen/content/pricing/"
+  }
+}
