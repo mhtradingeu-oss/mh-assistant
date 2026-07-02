@@ -78,6 +78,7 @@ import {
 } from "./constants.js";
 import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
 import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
 
 /* =========================
    CONFIG
@@ -4094,7 +4095,11 @@ function bindGlobalButtons() {
 
 /* =========================
    INIT
-========================= */
+installMhRuntimeGlobals();
+
+  console.debug('[MH-OS OBSERVER]', event);
+};
+// ===== END OBSERVER =====
 
 async function init() {
   try {

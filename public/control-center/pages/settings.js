@@ -2054,3 +2054,72 @@ export const settingsRoute = {
     }
   }
 };
+
+/**
+ * ⚡ AI CONTROL CENTER CONNECTION LAYER
+ */
+
+async function loadAIControlCenter() {
+
+  const res = await fetch("/api/ai-control/dashboard");
+  const data = await res.json();
+
+  console.log("🧠 AI CONTROL CENTER DATA:", data);
+
+  return data;
+}
+
+async function updateAIControl(payload) {
+
+  const res = await fetch("/api/ai-control/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return res.json();
+}
+
+// Example hooks for UI
+window.__AI_CONTROL_CENTER__ = {
+  load: loadAIControlCenter,
+  update: updateAIControl
+};
+
+/**
+ * ⚖️ GOVERNANCE UI INTEGRATION LAYER
+ */
+
+async function loadGovernanceState() {
+
+  const res = await fetch("/api/governance/audit");
+  return await res.json();
+}
+
+async function processGovernanceAction(action) {
+
+  const res = await fetch("/api/governance/process", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(action)
+  });
+
+  return await res.json();
+}
+
+async function loadGovernanceLiveState() {
+
+  const res = await fetch("/api/governance/state");
+  return await res.json();
+}
+
+// 🌐 GLOBAL GOVERNANCE UI HOOKS
+window.__GOVERNANCE_CENTER__ = {
+  loadAudit: loadGovernanceState,
+  process: processGovernanceAction,
+  live: loadGovernanceLiveState
+};
