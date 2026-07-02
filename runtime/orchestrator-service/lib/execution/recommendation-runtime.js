@@ -9,13 +9,7 @@ function createRecommendationRuntime(deps = {}) {
     buildRiskAlerts
   } = deps;
 
-  function generateOptimizationRecommendations(projectName) {
-    const safeProject = normalizeProjectSlug(projectName);
-    const summary = buildPerformanceSummary(safeProject);
-    const executionSignals = collectExecutionSignals(safeProject);
-    const records = readPerformanceStore(safeProject).records;
-    const alerts = buildRiskAlerts(summary, records);
-
+  function buildRecommendationsFromData(safeProject, summary, executionSignals, alerts) {
     const stop = [];
     const scale = [];
     const improve = [];
@@ -84,7 +78,34 @@ function createRecommendationRuntime(deps = {}) {
     };
   }
 
+  function buildDecisionSnapshot(projectName) {
+    const safeProject = normalizeProjectSlug(projectName);
+    const summary = buildPerformanceSummary(safeProject);
+    const executionSignals = collectExecutionSignals(safeProject);
+    const records = readPerformanceStore(safeProject).records;
+    const alerts = buildRiskAlerts(summary, records);
+
+    return {
+      project: safeProject,
+      summary,
+      executionSignals,
+      records,
+      alerts
+    };
+  }
+
+  function generateOptimizationRecommendations(projectName) {
+    const snapshot = buildDecisionSnapshot(projectName);
+    return buildRecommendationsFromData(
+      snapshot.project,
+      snapshot.summary,
+      snapshot.executionSignals,
+      snapshot.alerts
+    );
+  }
+
   return {
+    buildDecisionSnapshot,
     generateOptimizationRecommendations
   };
 }

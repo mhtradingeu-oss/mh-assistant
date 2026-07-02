@@ -5,6 +5,7 @@ function createIntelligenceLoop(deps = {}) {
     env,
     normalizeProjectSlug,
     buildPerformanceSummary,
+    buildDecisionSnapshot,
     generateOptimizationRecommendations,
     readRecommendationsStore,
     writeRecommendationsStore,
@@ -16,8 +17,30 @@ function createIntelligenceLoop(deps = {}) {
 
   function updateIntelligenceLoop(projectName, context = {}) {
     const safeProject = normalizeProjectSlug(projectName);
-    const summary = buildPerformanceSummary(safeProject);
-    const recommendations = generateOptimizationRecommendations(safeProject);
+    const snapshot = typeof buildDecisionSnapshot === 'function'
+      ? buildDecisionSnapshot(safeProject)
+      : {
+        summary: buildPerformanceSummary(safeProject),
+        project: safeProject
+      };
+    const summary = snapshot.summary;
+    const recommendations = typeof generateOptimizationRecommendations === 'function'
+      ? generateOptimizationRecommendations(safeProject)
+      : {
+        generated_at: new Date().toISOString(),
+        project: safeProject,
+        based_on: {
+          records_tracked: summary.records_tracked || 0,
+          scheduler_jobs_tracked: 0,
+          completed_jobs: 0
+        },
+        stop: [],
+        scale: [],
+        improve: [],
+        new_angles_to_test: [],
+        alerts: [],
+        summary
+      };
     const allowLocalDryRun = String(env.ALLOW_LOCAL_DRY_RUN || '').trim() === '1';
     const allowLearningUpdates = String(env.ALLOW_LEARNING_UPDATES || '').trim() === '1';
 

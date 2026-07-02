@@ -4,6 +4,7 @@ function createSmartSuggestions(deps = {}) {
   const {
     normalizeProjectSlug,
     buildPerformanceSummary,
+    buildDecisionSnapshot,
     readRecommendationsStore,
     readLearningStore,
     generateOptimizationRecommendations
@@ -11,10 +12,15 @@ function createSmartSuggestions(deps = {}) {
 
   function buildSmartSuggestions(projectName) {
     const safeProject = normalizeProjectSlug(projectName);
-    const summary = buildPerformanceSummary(safeProject);
+    const snapshot = typeof buildDecisionSnapshot === 'function'
+      ? buildDecisionSnapshot(safeProject)
+      : { summary: buildPerformanceSummary(safeProject) };
+    const summary = snapshot.summary;
     const recommendationStore = readRecommendationsStore(safeProject);
     const learningStore = readLearningStore(safeProject);
-    const latest = recommendationStore.latest || generateOptimizationRecommendations(safeProject);
+    const latest = recommendationStore.latest
+      || (snapshot.recommendations || null)
+      || generateOptimizationRecommendations(safeProject);
 
     const topChannel = summary.top_channels?.[0]?.key || null;
     const topProduct = summary.top_performing_products?.[0]?.key || null;
